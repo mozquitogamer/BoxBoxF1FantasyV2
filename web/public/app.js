@@ -61,9 +61,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     render();
 });
 
+function cacheBust(url) {
+    return url + (url.includes('?') ? '&' : '?') + '_=' + Date.now();
+}
+
 async function loadData() {
     try {
-        const resp = await fetch('data/predictions.json');
+        const resp = await fetch(cacheBust('data/predictions.json'));
         data = await resp.json();
     } catch (e) {
         document.querySelector('.main').innerHTML = `
@@ -99,12 +103,12 @@ async function loadData() {
 
 async function loadSeasonData() {
     try {
-        const resp = await fetch('data/season_summary.json');
+        const resp = await fetch(cacheBust('data/season_summary.json'));
         seasonSummary = await resp.json();
     } catch(e) { /* no season data yet */ }
 
     try {
-        const resp = await fetch('data/fp_analysis.json');
+        const resp = await fetch(cacheBust('data/fp_analysis.json'));
         fpAnalysis = await resp.json();
     } catch(e) { /* no fp analysis yet */ }
 }
@@ -112,7 +116,7 @@ async function loadSeasonData() {
 async function loadPostRaceData(roundNum) {
     if (postRaceCache[roundNum]) return postRaceCache[roundNum];
     try {
-        const resp = await fetch(`data/post_race_round${roundNum}.json`);
+        const resp = await fetch(cacheBust(`data/post_race_round${roundNum}.json`));
         const data = await resp.json();
         postRaceCache[roundNum] = data;
         return data;

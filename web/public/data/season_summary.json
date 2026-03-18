@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-03-18T11:15:35.913396+00:00",
+  "generated_at": "2026-03-18T19:08:14.892056+00:00",
   "rounds": [
     {
       "round": 1,
@@ -8,7 +8,7 @@
       "circuit": "Melbourne",
       "date": "2026-03-08",
       "has_predictions": true,
-      "has_post_race": false
+      "has_post_race": true
     },
     {
       "round": 2,
@@ -16,7 +16,7 @@
       "circuit": "Shanghai",
       "date": "2026-03-15",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": true
     },
     {
       "round": 3,
