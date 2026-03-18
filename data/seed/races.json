@@ -1,0 +1,31 @@
+{
+  "season": 2026,
+  "total_rounds": 24,
+  "active_rounds": 22,
+  "races": [
+    {"round": 1, "name": "Australian Grand Prix", "circuit": "Melbourne", "date": "2026-03-08", "sprint": false, "cancelled": false},
+    {"round": 2, "name": "Chinese Grand Prix", "circuit": "Shanghai", "date": "2026-03-15", "sprint": true, "cancelled": false},
+    {"round": 3, "name": "Japanese Grand Prix", "circuit": "Suzuka", "date": "2026-03-29", "sprint": false, "cancelled": false},
+    {"round": 4, "name": "Bahrain Grand Prix", "circuit": "Sakhir", "date": "2026-04-12", "sprint": false, "cancelled": true},
+    {"round": 5, "name": "Saudi Arabian Grand Prix", "circuit": "Jeddah", "date": "2026-04-19", "sprint": false, "cancelled": true},
+    {"round": 6, "name": "Miami Grand Prix", "circuit": "Miami", "date": "2026-05-03", "sprint": true, "cancelled": false},
+    {"round": 7, "name": "Canadian Grand Prix", "circuit": "Montreal", "date": "2026-05-24", "sprint": true, "cancelled": false},
+    {"round": 8, "name": "Monaco Grand Prix", "circuit": "Monaco", "date": "2026-06-07", "sprint": false, "cancelled": false},
+    {"round": 9, "name": "Spanish Grand Prix", "circuit": "Barcelona", "date": "2026-06-14", "sprint": false, "cancelled": false},
+    {"round": 10, "name": "Austrian Grand Prix", "circuit": "Spielberg", "date": "2026-06-28", "sprint": false, "cancelled": false},
+    {"round": 11, "name": "British Grand Prix", "circuit": "Silverstone", "date": "2026-07-05", "sprint": true, "cancelled": false},
+    {"round": 12, "name": "Belgian Grand Prix", "circuit": "Spa-Francorchamps", "date": "2026-07-19", "sprint": false, "cancelled": false},
+    {"round": 13, "name": "Hungarian Grand Prix", "circuit": "Budapest", "date": "2026-07-26", "sprint": false, "cancelled": false},
+    {"round": 14, "name": "Dutch Grand Prix", "circuit": "Zandvoort", "date": "2026-08-23", "sprint": true, "cancelled": false},
+    {"round": 15, "name": "Italian Grand Prix", "circuit": "Monza", "date": "2026-09-06", "sprint": false, "cancelled": false},
+    {"round": 16, "name": "Spanish Grand Prix (Madrid)", "circuit": "Madrid", "date": "2026-09-13", "sprint": false, "cancelled": false},
+    {"round": 17, "name": "Azerbaijan Grand Prix", "circuit": "Baku", "date": "2026-09-26", "sprint": false, "cancelled": false},
+    {"round": 18, "name": "Singapore Grand Prix", "circuit": "Singapore", "date": "2026-10-11", "sprint": true, "cancelled": false},
+    {"round": 19, "name": "United States Grand Prix", "circuit": "Austin", "date": "2026-10-25", "sprint": false, "cancelled": false},
+    {"round": 20, "name": "Mexican Grand Prix", "circuit": "Mexico City", "date": "2026-11-01", "sprint": false, "cancelled": false},
+    {"round": 21, "name": "Brazilian Grand Prix", "circuit": "São Paulo", "date": "2026-11-08", "sprint": false, "cancelled": false},
+    {"round": 22, "name": "Las Vegas Grand Prix", "circuit": "Las Vegas", "date": "2026-11-21", "sprint": false, "cancelled": false},
+    {"round": 23, "name": "Qatar Grand Prix", "circuit": "Lusail", "date": "2026-11-29", "sprint": false, "cancelled": false},
+    {"round": 24, "name": "Abu Dhabi Grand Prix", "circuit": "Yas Marina", "date": "2026-12-06", "sprint": false, "cancelled": false}
+  ]
+}

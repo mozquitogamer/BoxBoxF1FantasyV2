@@ -1,0 +1,184 @@
+# ============================================================================
+# F1 TRACK CLASSIFICATIONS (2020-2026)
+# ============================================================================
+# Manual expert classification of all F1 circuits
+# Scale: 1-10 where applicable, or 0/1 for binary features
+# Uses exact circuit_id names from Jolpica/Ergast data
+
+TRACK_DATABASE = {
+    # === STREET CIRCUITS ===
+    'monaco': {
+        'is_street': 1, 'overtaking_difficulty': 10, 'avg_corner_speed': 2,
+        'straight_line_importance': 1, 'downforce_level': 9, 'turn1_incident_risk': 8,
+        'safety_car_probability': 8, 'track_evolution': 9, 'grip_level': 7,
+    },
+    'marina_bay': {
+        'is_street': 1, 'overtaking_difficulty': 8, 'avg_corner_speed': 3,
+        'straight_line_importance': 2, 'downforce_level': 9, 'turn1_incident_risk': 7,
+        'safety_car_probability': 7, 'track_evolution': 8, 'grip_level': 6,
+    },
+    'baku': {
+        'is_street': 1, 'overtaking_difficulty': 4, 'avg_corner_speed': 4,
+        'straight_line_importance': 8, 'downforce_level': 6, 'turn1_incident_risk': 9,
+        'safety_car_probability': 9, 'track_evolution': 8, 'grip_level': 5,
+    },
+    'jeddah': {
+        'is_street': 1, 'overtaking_difficulty': 5, 'avg_corner_speed': 7,
+        'straight_line_importance': 6, 'downforce_level': 7, 'turn1_incident_risk': 8,
+        'safety_car_probability': 7, 'track_evolution': 7, 'grip_level': 6,
+    },
+    'miami': {
+        'is_street': 1, 'overtaking_difficulty': 6, 'avg_corner_speed': 5,
+        'straight_line_importance': 5, 'downforce_level': 6, 'turn1_incident_risk': 7,
+        'safety_car_probability': 6, 'track_evolution': 7, 'grip_level': 6,
+    },
+    'vegas': {
+        'is_street': 1, 'overtaking_difficulty': 4, 'avg_corner_speed': 6,
+        'straight_line_importance': 8, 'downforce_level': 4, 'turn1_incident_risk': 6,
+        'safety_car_probability': 6, 'track_evolution': 7, 'grip_level': 5,
+    },
+    # === HIGH-SPEED CIRCUITS ===
+    'monza': {
+        'is_street': 0, 'overtaking_difficulty': 3, 'avg_corner_speed': 8,
+        'straight_line_importance': 10, 'downforce_level': 2, 'turn1_incident_risk': 9,
+        'safety_car_probability': 5, 'track_evolution': 4, 'grip_level': 8,
+    },
+    'spa': {
+        'is_street': 0, 'overtaking_difficulty': 4, 'avg_corner_speed': 8,
+        'straight_line_importance': 8, 'downforce_level': 5, 'turn1_incident_risk': 7,
+        'safety_car_probability': 6, 'track_evolution': 5, 'grip_level': 7,
+    },
+    'silverstone': {
+        'is_street': 0, 'overtaking_difficulty': 5, 'avg_corner_speed': 8,
+        'straight_line_importance': 6, 'downforce_level': 7, 'turn1_incident_risk': 8,
+        'safety_car_probability': 5, 'track_evolution': 5, 'grip_level': 8,
+    },
+    'suzuka': {
+        'is_street': 0, 'overtaking_difficulty': 6, 'avg_corner_speed': 8,
+        'straight_line_importance': 5, 'downforce_level': 8, 'turn1_incident_risk': 7,
+        'safety_car_probability': 5, 'track_evolution': 5, 'grip_level': 8,
+    },
+    'red_bull_ring': {
+        'is_street': 0, 'overtaking_difficulty': 4, 'avg_corner_speed': 7,
+        'straight_line_importance': 7, 'downforce_level': 6, 'turn1_incident_risk': 8,
+        'safety_car_probability': 5, 'track_evolution': 4, 'grip_level': 7,
+    },
+    # === TECHNICAL/BALANCED CIRCUITS ===
+    'catalunya': {
+        'is_street': 0, 'overtaking_difficulty': 7, 'avg_corner_speed': 6,
+        'straight_line_importance': 4, 'downforce_level': 7, 'turn1_incident_risk': 6,
+        'safety_car_probability': 4, 'track_evolution': 5, 'grip_level': 8,
+    },
+    'hungaroring': {
+        'is_street': 0, 'overtaking_difficulty': 9, 'avg_corner_speed': 4,
+        'straight_line_importance': 2, 'downforce_level': 9, 'turn1_incident_risk': 8,
+        'safety_car_probability': 5, 'track_evolution': 6, 'grip_level': 6,
+    },
+    'imola': {
+        'is_street': 0, 'overtaking_difficulty': 7, 'avg_corner_speed': 6,
+        'straight_line_importance': 4, 'downforce_level': 7, 'turn1_incident_risk': 7,
+        'safety_car_probability': 6, 'track_evolution': 5, 'grip_level': 7,
+    },
+    'zandvoort': {
+        'is_street': 0, 'overtaking_difficulty': 8, 'avg_corner_speed': 5,
+        'straight_line_importance': 3, 'downforce_level': 8, 'turn1_incident_risk': 7,
+        'safety_car_probability': 5, 'track_evolution': 6, 'grip_level': 7,
+    },
+    # === MEDIUM-SPEED CIRCUITS ===
+    'bahrain': {
+        'is_street': 0, 'overtaking_difficulty': 4, 'avg_corner_speed': 6,
+        'straight_line_importance': 6, 'downforce_level': 6, 'turn1_incident_risk': 7,
+        'safety_car_probability': 5, 'track_evolution': 5, 'grip_level': 6,
+    },
+    'albert_park': {
+        'is_street': 0, 'overtaking_difficulty': 5, 'avg_corner_speed': 6,
+        'straight_line_importance': 5, 'downforce_level': 6, 'turn1_incident_risk': 7,
+        'safety_car_probability': 6, 'track_evolution': 6, 'grip_level': 7,
+    },
+    'villeneuve': {
+        'is_street': 0, 'overtaking_difficulty': 4, 'avg_corner_speed': 6,
+        'straight_line_importance': 7, 'downforce_level': 5, 'turn1_incident_risk': 6,
+        'safety_car_probability': 7, 'track_evolution': 6, 'grip_level': 6,
+    },
+    'americas': {
+        'is_street': 0, 'overtaking_difficulty': 5, 'avg_corner_speed': 7,
+        'straight_line_importance': 6, 'downforce_level': 7, 'turn1_incident_risk': 7,
+        'safety_car_probability': 5, 'track_evolution': 5, 'grip_level': 7,
+    },
+    'rodriguez': {
+        'is_street': 0, 'overtaking_difficulty': 4, 'avg_corner_speed': 5,
+        'straight_line_importance': 7, 'downforce_level': 8, 'turn1_incident_risk': 8,
+        'safety_car_probability': 5, 'track_evolution': 5, 'grip_level': 5,
+    },
+    'interlagos': {
+        'is_street': 0, 'overtaking_difficulty': 5, 'avg_corner_speed': 6,
+        'straight_line_importance': 5, 'downforce_level': 6, 'turn1_incident_risk': 7,
+        'safety_car_probability': 6, 'track_evolution': 5, 'grip_level': 6,
+    },
+    'losail': {
+        'is_street': 0, 'overtaking_difficulty': 5, 'avg_corner_speed': 7,
+        'straight_line_importance': 5, 'downforce_level': 7, 'turn1_incident_risk': 6,
+        'safety_car_probability': 4, 'track_evolution': 4, 'grip_level': 7,
+    },
+    'shanghai': {
+        'is_street': 0, 'overtaking_difficulty': 5, 'avg_corner_speed': 6,
+        'straight_line_importance': 7, 'downforce_level': 6, 'turn1_incident_risk': 7,
+        'safety_car_probability': 5, 'track_evolution': 5, 'grip_level': 6,
+    },
+    'yas_marina': {
+        'is_street': 0, 'overtaking_difficulty': 6, 'avg_corner_speed': 5,
+        'straight_line_importance': 6, 'downforce_level': 6, 'turn1_incident_risk': 6,
+        'safety_car_probability': 5, 'track_evolution': 5, 'grip_level': 7,
+    },
+    # === HISTORIC/ONE-OFF CIRCUITS (2020-2021) ===
+    'mugello': {
+        'is_street': 0, 'overtaking_difficulty': 6, 'avg_corner_speed': 7,
+        'straight_line_importance': 6, 'downforce_level': 7, 'turn1_incident_risk': 8,
+        'safety_car_probability': 6, 'track_evolution': 5, 'grip_level': 7,
+    },
+    'sochi': {
+        'is_street': 1, 'overtaking_difficulty': 6, 'avg_corner_speed': 5,
+        'straight_line_importance': 7, 'downforce_level': 6, 'turn1_incident_risk': 6,
+        'safety_car_probability': 6, 'track_evolution': 6, 'grip_level': 6,
+    },
+    'nurburgring': {
+        'is_street': 0, 'overtaking_difficulty': 5, 'avg_corner_speed': 6,
+        'straight_line_importance': 6, 'downforce_level': 6, 'turn1_incident_risk': 7,
+        'safety_car_probability': 5, 'track_evolution': 5, 'grip_level': 7,
+    },
+    'portimao': {
+        'is_street': 0, 'overtaking_difficulty': 5, 'avg_corner_speed': 6,
+        'straight_line_importance': 6, 'downforce_level': 6, 'turn1_incident_risk': 7,
+        'safety_car_probability': 5, 'track_evolution': 6, 'grip_level': 6,
+    },
+    'istanbul': {
+        'is_street': 0, 'overtaking_difficulty': 5, 'avg_corner_speed': 7,
+        'straight_line_importance': 5, 'downforce_level': 7, 'turn1_incident_risk': 7,
+        'safety_car_probability': 5, 'track_evolution': 6, 'grip_level': 6,
+    },
+    'ricard': {
+        'is_street': 0, 'overtaking_difficulty': 4, 'avg_corner_speed': 7,
+        'straight_line_importance': 7, 'downforce_level': 6, 'turn1_incident_risk': 6,
+        'safety_car_probability': 4, 'track_evolution': 4, 'grip_level': 8,
+    },
+}
+
+
+TRACK_FEATURE_NAMES = [
+    'is_street', 'overtaking_difficulty', 'avg_corner_speed',
+    'straight_line_importance', 'downforce_level', 'turn1_incident_risk',
+    'safety_car_probability', 'track_evolution', 'grip_level',
+]
+
+
+def get_track_features(circuit_id: str) -> dict:
+    """Get track characteristics for a given circuit_id."""
+    circuit_id = circuit_id.lower().replace(' ', '_')
+    if circuit_id in TRACK_DATABASE:
+        return TRACK_DATABASE[circuit_id]
+    # Default values for unknown circuits
+    return {
+        'is_street': 0, 'overtaking_difficulty': 5, 'avg_corner_speed': 5,
+        'straight_line_importance': 5, 'downforce_level': 6, 'turn1_incident_risk': 6,
+        'safety_car_probability': 5, 'track_evolution': 5, 'grip_level': 6,
+    }

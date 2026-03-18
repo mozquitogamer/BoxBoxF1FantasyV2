@@ -1,0 +1,16 @@
+{
+  "season": 2026,
+  "constructors": [
+    {"constructor_id": "mercedes", "name": "Mercedes", "full_name": "Mercedes-AMG Petronas F1 Team"},
+    {"constructor_id": "red_bull", "name": "Red Bull", "full_name": "Oracle Red Bull Racing"},
+    {"constructor_id": "mclaren", "name": "McLaren", "full_name": "McLaren F1 Team"},
+    {"constructor_id": "ferrari", "name": "Ferrari", "full_name": "Scuderia Ferrari HP"},
+    {"constructor_id": "alpine", "name": "Alpine", "full_name": "BWT Alpine F1 Team"},
+    {"constructor_id": "williams", "name": "Williams", "full_name": "Williams Racing"},
+    {"constructor_id": "aston_martin", "name": "Aston Martin", "full_name": "Aston Martin Aramco F1 Team"},
+    {"constructor_id": "haas", "name": "Haas", "full_name": "MoneyGram Haas F1 Team"},
+    {"constructor_id": "racing_bulls", "name": "Racing Bulls", "full_name": "Visa Cash App Racing Bulls"},
+    {"constructor_id": "audi", "name": "Audi", "full_name": "Audi F1 Team"},
+    {"constructor_id": "cadillac", "name": "Cadillac", "full_name": "Cadillac F1 Team"}
+  ]
+}

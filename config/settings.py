@@ -1,0 +1,103 @@
+"""
+BoxBoxF1Fantasy — Global configuration settings.
+
+All paths, constants, and feature/target column definitions live here.
+"""
+
+import os
+from pathlib import Path
+
+# -- Project root --------------------------------------------------------------
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# -- Season --------------------------------------------------------------------
+CURRENT_SEASON: int = 2026
+HISTORICAL_SEASONS: list[int] = [2020, 2021, 2022, 2023, 2024, 2025]
+
+# 2026 has new regulations — weight recent data more heavily during training
+REGULATION_CHANGE_YEAR: int = 2026
+REGULATION_WEIGHT_MULTIPLIER: float = 2.5  # 2026 samples count 2.5× in training
+
+# -- Data paths ----------------------------------------------------------------
+DATA_DIR          = PROJECT_ROOT / "data"
+RAW_DIR           = DATA_DIR / "raw"
+FASTF1_RAW_DIR    = RAW_DIR / "fastf1"
+JOLPICA_RAW_DIR   = RAW_DIR / "jolpica"
+PROCESSED_DIR     = DATA_DIR / "processed"
+LAPS_DIR          = PROCESSED_DIR / "laps"
+FEATURES_DIR      = PROCESSED_DIR / "features"
+MODEL_INPUTS_DIR  = PROCESSED_DIR / "model_inputs"
+PREDICTIONS_DIR   = DATA_DIR / "predictions"
+SEED_DIR          = DATA_DIR / "seed"
+
+# -- Jolpica processed paths ---------------------------------------------------
+JOLPICA_NORMALIZED_DIR = PROCESSED_DIR / "jolpica" / "normalized"
+JOLPICA_MODEL_ROWS_DIR = PROCESSED_DIR / "jolpica" / "model_rows"
+
+MODELS_DIR        = PROJECT_ROOT / "models"
+TRAINED_DIR       = MODELS_DIR / "trained"
+TRAINING_DATA_DIR = MODELS_DIR / "training_data"
+
+WEB_DATA_DIR      = PROJECT_ROOT / "web" / "public" / "data"
+
+# FastF1 cache (speeds up repeated downloads)
+FASTF1_CACHE_DIR  = FASTF1_RAW_DIR / "cache"
+
+# -- Jolpica API ---------------------------------------------------------------
+JOLPICA_BASE_URL: str = "https://api.jolpi.ca/ergast/f1"
+
+# -- Model settings ------------------------------------------------------------
+MODEL_RANDOM_STATE: int = 42
+MIN_LONG_RUN_LAPS: int = 5
+
+# -- Sessions ------------------------------------------------------------------
+ALL_SESSIONS: list[str] = ["FP1", "FP2", "FP3", "Qualifying", "Race", "Sprint"]
+FP_SESSIONS: list[str] = ["FP1", "FP2", "FP3"]
+SPRINT_FP_SESSIONS: list[str] = ["FP1"]  # Sprint weekends only have FP1
+
+# -- Feature columns (produced by 03_extract_features.py) ----------------------
+FEATURE_COLUMNS: list[str] = [
+    # Pace metrics
+    "avg_lap_time",
+    "best_lap_time",
+    "median_lap_time",
+    "pace_rank",
+    "best_3_lap_avg",
+    "best_5_lap_avg",
+    "best_10_lap_avg",
+    "p50_to_p95_avg",
+    # Consistency
+    "lap_time_std",
+    "lap_time_variance",
+    # Degradation
+    "degradation_rate",
+    # Long run
+    "long_run_avg",
+    "long_run_rank",
+    # Short run
+    "short_run_best",
+    # Sector pace
+    "avg_sector_1",
+    "avg_sector_2",
+    "avg_sector_3",
+    "best_sector_1",
+    "best_sector_2",
+    "best_sector_3",
+]
+
+# -- Target columns (used by 04 & 05) -----------------------------------------
+TARGET_COLUMNS: list[str] = [
+    "qualifying_position",
+    "race_finish_position",
+    "fantasy_points",
+]
+
+# -- Sprint weekends for 2026 --------------------------------------------------
+SPRINT_ROUNDS_2026: list[int] = [2, 6, 7, 11, 14, 18]
+
+# -- Cancelled rounds for 2026 ------------------------------------------------
+CANCELLED_ROUNDS_2026: list[int] = [4, 5]
+
+# -- Number of grid positions (11 teams × 2 drivers) --------------------------
+GRID_SIZE: int = 22
+NUM_CONSTRUCTORS: int = 11

@@ -1,0 +1,27 @@
+{
+  "season": 2026,
+  "drivers": [
+    {"driver_id": "RUS", "first_name": "George", "last_name": "Russell", "constructor_id": "mercedes", "number": 63},
+    {"driver_id": "VER", "first_name": "Max", "last_name": "Verstappen", "constructor_id": "red_bull", "number": 1},
+    {"driver_id": "NOR", "first_name": "Lando", "last_name": "Norris", "constructor_id": "mclaren", "number": 4},
+    {"driver_id": "PIA", "first_name": "Oscar", "last_name": "Piastri", "constructor_id": "mclaren", "number": 81},
+    {"driver_id": "ANT", "first_name": "Kimi", "last_name": "Antonelli", "constructor_id": "mercedes", "number": 12},
+    {"driver_id": "LEC", "first_name": "Charles", "last_name": "Leclerc", "constructor_id": "ferrari", "number": 16},
+    {"driver_id": "HAM", "first_name": "Lewis", "last_name": "Hamilton", "constructor_id": "ferrari", "number": 44},
+    {"driver_id": "HAD", "first_name": "Isack", "last_name": "Hadjar", "constructor_id": "red_bull", "number": 6},
+    {"driver_id": "GAS", "first_name": "Pierre", "last_name": "Gasly", "constructor_id": "alpine", "number": 10},
+    {"driver_id": "SAI", "first_name": "Carlos", "last_name": "Sainz", "constructor_id": "williams", "number": 55},
+    {"driver_id": "ALB", "first_name": "Alex", "last_name": "Albon", "constructor_id": "williams", "number": 23},
+    {"driver_id": "ALO", "first_name": "Fernando", "last_name": "Alonso", "constructor_id": "aston_martin", "number": 14},
+    {"driver_id": "BEA", "first_name": "Oliver", "last_name": "Bearman", "constructor_id": "haas", "number": 87},
+    {"driver_id": "OCO", "first_name": "Esteban", "last_name": "Ocon", "constructor_id": "haas", "number": 31},
+    {"driver_id": "LIN", "first_name": "Arvid", "last_name": "Lindblad", "constructor_id": "racing_bulls", "number": 40},
+    {"driver_id": "COL", "first_name": "Franco", "last_name": "Colapinto", "constructor_id": "alpine", "number": 43},
+    {"driver_id": "LAW", "first_name": "Liam", "last_name": "Lawson", "constructor_id": "racing_bulls", "number": 30},
+    {"driver_id": "STR", "first_name": "Lance", "last_name": "Stroll", "constructor_id": "aston_martin", "number": 18},
+    {"driver_id": "BOR", "first_name": "Gabriel", "last_name": "Bortoleto", "constructor_id": "audi", "number": 5},
+    {"driver_id": "PER", "first_name": "Sergio", "last_name": "Perez", "constructor_id": "cadillac", "number": 11},
+    {"driver_id": "HUL", "first_name": "Nico", "last_name": "Hulkenberg", "constructor_id": "audi", "number": 27},
+    {"driver_id": "BOT", "first_name": "Valtteri", "last_name": "Bottas", "constructor_id": "cadillac", "number": 77}
+  ]
+}

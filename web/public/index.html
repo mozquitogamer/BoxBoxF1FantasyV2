@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoxBoxF1Fantasy — F1 Fantasy Predictions</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🏎️</span>
+                    <div>
+                        <h1 class="logo-text">BoxBox<span class="accent">F1</span>Fantasy</h1>
+                        <p class="logo-sub">Data-driven F1 Fantasy predictions</p>
+                    </div>
+                </div>
+                <div class="race-badge" id="raceBadge">
+                    <span class="race-flag" id="raceFlag"></span>
+                    <div>
+                        <div class="race-name" id="raceName">Loading...</div>
+                        <div class="race-meta" id="raceMeta"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation tabs -->
+    <nav class="tabs">
+        <div class="container">
+            <div class="tab-list">
+                <button class="tab active" data-tab="drivers">Drivers</button>
+                <button class="tab" data-tab="constructors">Constructors</button>
+                <button class="tab" data-tab="optimizer">Lineup Optimizer</button>
+                <button class="tab" data-tab="analysis">Analysis</button>
+                <button class="tab" data-tab="season">Season</button>
+                <button class="tab" data-tab="about">About</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="main">
+        <div class="container">
+
+            <!-- Drivers Tab -->
+            <section class="tab-content active" id="tab-drivers">
+                <!-- Sort/Filter controls -->
+                <div class="controls">
+                    <div class="control-group">
+                        <label>Sort by</label>
+                        <select id="driverSort">
+                            <option value="expected_points">Expected Points</option>
+                            <option value="predicted_quali">Predicted Quali</option>
+                            <option value="predicted_finish">Predicted Finish</option>
+                            <option value="value_score">Value Score</option>
+                            <option value="points_per_million">Points / $M</option>
+                            <option value="confidence">Confidence</option>
+                            <option value="current_price">Price</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Filter team</label>
+                        <select id="teamFilter">
+                            <option value="all">All Teams</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>View</label>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="cards" title="Card view">▦</button>
+                            <button class="view-btn" data-view="table" title="Table view">☰</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cards view -->
+                <div class="driver-grid" id="driverCards"></div>
+
+                <!-- Table view -->
+                <div class="table-wrapper hidden" id="driverTable">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Driver</th>
+                                <th>Team</th>
+                                <th class="num">Pts</th>
+                                <th class="num">Quali</th>
+                                <th class="num">Race</th>
+                                <th class="num">Conf</th>
+                                <th class="num">Risk</th>
+                                <th class="num">OT</th>
+                                <th class="num">Price</th>
+                                <th class="num">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="driverTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Constructors Tab -->
+            <section class="tab-content" id="tab-constructors">
+                <div class="controls">
+                    <div class="control-group">
+                        <label>Sort by</label>
+                        <select id="constructorSort">
+                            <option value="expected_points">Expected Points</option>
+                            <option value="value_score">Value Score</option>
+                            <option value="current_price">Price</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="constructor-grid" id="constructorCards"></div>
+            </section>
+
+            <!-- Optimizer Tab -->
+            <section class="tab-content" id="tab-optimizer">
+                <div class="optimizer-header">
+                    <h2>Lineup Optimizer</h2>
+                    <p>Find the best F1 Fantasy lineup within your budget.</p>
+                </div>
+
+                <div class="optimizer-controls">
+                    <div class="control-group">
+                        <label>Budget ($M)</label>
+                        <input type="number" id="budget" value="100.0" step="0.1" min="0">
+                    </div>
+                    <div class="control-group">
+                        <label>Strategy</label>
+                        <select id="strategy">
+                            <option value="max_points">Max Expected Points</option>
+                            <option value="max_value">Max Value (Points/$M)</option>
+                            <option value="balanced">Balanced</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" id="runOptimizer">Find Best Lineup</button>
+                </div>
+
+                <div class="optimizer-constraints">
+                    <h3>Locked Picks <span class="hint">(optional — force specific drivers/constructors into lineup)</span></h3>
+                    <div class="lock-grid" id="lockGrid"></div>
+                </div>
+
+                <div class="optimizer-result hidden" id="optimizerResult">
+                    <h3>Recommended Lineup</h3>
+                    <div class="lineup-summary" id="lineupSummary"></div>
+                    <div class="lineup-cards" id="lineupCards"></div>
+                </div>
+            </section>
+
+            <!-- Analysis Tab -->
+            <section class="tab-content" id="tab-analysis">
+                <div class="analysis-header">
+                    <h2>Data Analysis</h2>
+                    <div class="analysis-toggle">
+                        <button class="analysis-btn active" data-panel="fp">Free Practice</button>
+                        <button class="analysis-btn" data-panel="postrace">Post-Race</button>
+                    </div>
+                </div>
+
+                <!-- FP Analysis Panel -->
+                <div class="analysis-panel active" id="panel-fp">
+                    <div id="fpAnalysisContent">
+                        <p class="no-data">No FP analysis data available. Run pipeline/10_fp_analysis.py first.</p>
+                    </div>
+                </div>
+
+                <!-- Post-Race Panel -->
+                <div class="analysis-panel" id="panel-postrace">
+                    <div class="controls">
+                        <div class="control-group">
+                            <label>Round</label>
+                            <select id="postRaceRound"></select>
+                        </div>
+                    </div>
+                    <div id="postRaceContent">
+                        <p class="no-data">No post-race analysis data available.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Season Tab -->
+            <section class="tab-content" id="tab-season">
+                <div class="season-header">
+                    <h2>2026 Season</h2>
+                </div>
+
+                <div class="season-sections">
+                    <!-- Calendar/Results -->
+                    <div class="season-section">
+                        <h3>Race Calendar & Results</h3>
+                        <div id="seasonCalendar"></div>
+                    </div>
+
+                    <!-- Price Tracker -->
+                    <div class="season-section">
+                        <h3>Driver Price Tracker</h3>
+                        <div id="priceTracker"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Tab -->
+            <section class="tab-content" id="tab-about">
+                <div class="about-content">
+                    <h2>How It Works</h2>
+                    <div class="about-grid">
+                        <div class="about-card">
+                            <div class="about-icon">📊</div>
+                            <h3>1. Data Collection</h3>
+                            <p>We collect free practice session data using FastF1 — lap times, sector times, tyre compounds, weather, and more.</p>
+                        </div>
+                        <div class="about-card">
+                            <div class="about-icon">⚙️</div>
+                            <h3>2. Feature Engineering</h3>
+                            <p>Raw lap data is processed into 27+ features per driver: pace metrics, consistency, tyre degradation, long-run performance, and more.</p>
+                        </div>
+                        <div class="about-card">
+                            <div class="about-icon">🤖</div>
+                            <h3>3. ML Predictions</h3>
+                            <p>XGBoost models trained on 2020-2026 historical data (2,600+ rows) combined with free practice telemetry — 136 features with walk-forward validation.</p>
+                        </div>
+                        <div class="about-card">
+                            <div class="about-icon">🏆</div>
+                            <h3>4. Fantasy Points</h3>
+                            <p>Predicted positions are converted into expected F1 Official Fantasy points, including overtakes, DNF risk, and fastest lap probability.</p>
+                        </div>
+                    </div>
+
+                    <div class="about-section">
+                        <h3>Model Details</h3>
+                        <ul>
+                            <li><strong>Qualifying model:</strong> XGBoost (1200 trees, lr=0.025, depth=3) predicting from historical priors + FP telemetry</li>
+                            <li><strong>Race model:</strong> XGBoost (650 trees, lr=0.03, depth=5) with predicted quali as input</li>
+                            <li><strong>Two-layer features:</strong> Layer 1 = Jolpica historical priors (always available), Layer 2 = FP telemetry (when available)</li>
+                            <li><strong>Confidence:</strong> 0-100 based on data completeness and model agreement</li>
+                            <li><strong>Risk:</strong> Rolling 5-race DNF probability</li>
+                        </ul>
+                    </div>
+
+                    <div class="about-section">
+                        <h3>Disclaimer</h3>
+                        <p>These predictions are for entertainment purposes only. F1 races are inherently unpredictable — weather, crashes, strategy calls, and reliability can dramatically alter outcomes. Use these predictions as one input for your fantasy decisions, not the only one.</p>
+                    </div>
+
+                    <div class="about-footer">
+                        <p>Built with Python, XGBoost, FastF1 & Jolpica API</p>
+                        <p class="generated-at" id="generatedAt"></p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

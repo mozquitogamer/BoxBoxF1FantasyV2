@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data (too large for git — stored locally/OneDrive)
+data/raw/
+data/processed/
+data/predictions/
+
+# Models (regenerated via training pipeline)
+models/trained/
+models/training_data/
+
+# FastF1 cache
+data/raw/fastf1/cache/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Claude Code
+.claude/
+
+# Secrets
+.env
+*.env
+credentials.json
