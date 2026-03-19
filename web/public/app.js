@@ -163,6 +163,7 @@ function setupTabs() {
 function setupControls() {
     document.getElementById('driverSort').addEventListener('change', renderDrivers);
     document.getElementById('teamFilter').addEventListener('change', renderDrivers);
+    document.getElementById('driverSearch').addEventListener('input', renderDrivers);
     document.getElementById('constructorSort').addEventListener('change', renderConstructors);
 
     // View toggle
@@ -203,6 +204,34 @@ function setupControls() {
     });
 }
 
+// -- Price change helper --
+function getDriverPriceChange(driver) {
+    if (!seasonSummary || !seasonSummary.driver_prices) return null;
+    // Match by driver abbreviation or name
+    const prices = seasonSummary.driver_prices;
+    // Try to find by driver_id (abbreviation)
+    for (const [abbrev, info] of Object.entries(prices)) {
+        if (abbrev === driver.driver_id || (info.name && info.name === driver.name)) {
+            return {
+                starting_price: info.starting_price,
+                price_change: info.price_change,
+            };
+        }
+    }
+    return null;
+}
+
+function computeDriverPriceFields(driver) {
+    const info = getDriverPriceChange(driver);
+    if (info) {
+        driver._starting_price = info.starting_price;
+        driver._price_change = info.price_change;
+    } else {
+        driver._starting_price = driver.current_price;
+        driver._price_change = 0;
+    }
+}
+
 // -- Table header sorting --
 const TABLE_COLUMNS = [
     { key: null, label: '#' },
@@ -215,6 +244,7 @@ const TABLE_COLUMNS = [
     { key: 'risk', label: 'Risk' },
     { key: 'expected_overtakes', label: 'OT' },
     { key: 'current_price', label: 'Price' },
+    { key: 'price_change', label: 'Change' },
     { key: 'value_score', label: 'Value' },
 ];
 
@@ -233,7 +263,7 @@ function setupTableSorting() {
             } else {
                 tableSortColumn = col.key;
                 // Default direction: ascending for position-like columns, descending for others
-                tableSortAsc = ['predicted_quali', 'predicted_finish', 'current_price', 'name', 'constructor'].includes(col.key);
+                tableSortAsc = ['predicted_quali', 'predicted_finish', 'current_price', 'starting_price', 'name', 'constructor'].includes(col.key);
             }
             renderDrivers();
             updateSortIndicators();
@@ -278,16 +308,28 @@ function renderDrivers() {
 
     const sortKey = document.getElementById('driverSort').value;
     const teamFilter = document.getElementById('teamFilter').value;
+    const searchQuery = (document.getElementById('driverSearch').value || '').trim().toLowerCase();
 
     let drivers = [...data.drivers];
+
+    // Compute price change fields
+    drivers.forEach(d => computeDriverPriceFields(d));
 
     if (teamFilter !== 'all') {
         drivers = drivers.filter(d => d.constructor === teamFilter);
     }
 
-    // Sort
-    const ascending = ['predicted_quali', 'predicted_finish', 'current_price'].includes(sortKey);
-    drivers.sort((a, b) => ascending ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey]);
+    if (searchQuery) {
+        drivers = drivers.filter(d => d.name.toLowerCase().includes(searchQuery));
+    }
+
+    // Sort — map virtual sort keys to computed fields
+    let effectiveSortKey = sortKey;
+    if (sortKey === 'price_change') effectiveSortKey = '_price_change';
+    if (sortKey === 'starting_price') effectiveSortKey = '_starting_price';
+
+    const ascending = ['predicted_quali', 'predicted_finish', 'current_price', 'starting_price'].includes(sortKey);
+    drivers.sort((a, b) => ascending ? a[effectiveSortKey] - b[effectiveSortKey] : b[effectiveSortKey] - a[effectiveSortKey]);
 
     // Cards
     const cardsEl = document.getElementById('driverCards');
@@ -298,7 +340,10 @@ function renderDrivers() {
     if (tableSortColumn) {
         const riskOrder = { 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3, 'VERY HIGH': 4 };
         tableDrivers.sort((a, b) => {
-            let va = a[tableSortColumn], vb = b[tableSortColumn];
+            let col = tableSortColumn;
+            // Map virtual column keys
+            if (col === 'price_change') col = '_price_change';
+            let va = a[col], vb = b[col];
             if (tableSortColumn === 'risk') {
                 va = riskOrder[a.risk] || 0;
                 vb = riskOrder[b.risk] || 0;
@@ -403,6 +448,10 @@ function driverRow(d, i) {
     const riskClass = d.risk === 'LOW' ? 'risk-low' :
                       d.risk === 'MEDIUM' ? 'risk-medium' : 'risk-high';
 
+    const pc = d._price_change || 0;
+    const pcColor = pc > 0 ? 'color:var(--green)' : pc < 0 ? 'color:var(--red, #ef4444)' : '';
+    const pcText = pc > 0 ? `+${pc.toFixed(1)}` : pc < 0 ? pc.toFixed(1) : '0.0';
+
     return `
     <tr>
         <td>${i + 1}</td>
@@ -415,6 +464,7 @@ function driverRow(d, i) {
         <td class="num"><span class="risk-badge ${riskClass}">${d.risk}</span></td>
         <td class="num">${d.expected_overtakes}</td>
         <td class="num">$${d.current_price.toFixed(1)}M</td>
+        <td class="num" style="${pcColor}">${pcText}</td>
         <td class="num">${d.value_score.toFixed(2)}x</td>
     </tr>`;
 }
@@ -652,11 +702,20 @@ function runOptimizer() {
     }
 
     if (!bestLineup) {
-        alert('No valid lineup found within budget. Try increasing the budget.');
+        const resultEl = document.getElementById('optimizerResult');
+        resultEl.classList.remove('hidden');
+        document.getElementById('lineupSummary').innerHTML = '';
+        document.getElementById('lineupCards').innerHTML = `
+            <div class="optimizer-warning" style="background:var(--card);border:2px solid var(--orange, #f59e0b);border-radius:10px;padding:20px;text-align:center;">
+                <h3 style="color:var(--orange, #f59e0b);margin-bottom:8px;">No Valid Lineup Found</h3>
+                <p style="color:var(--text-secondary);">Could not find a lineup of 5 drivers + 2 constructors within your $${budget.toFixed(1)}M budget${lockedDrivers.size || lockedConstructors.size ? ' with the current locked picks' : ''}.</p>
+                <p style="color:var(--text-secondary);margin-top:8px;">Try increasing the budget or unlocking some picks.</p>
+            </div>`;
+        resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
     }
 
-    displayLineup(bestLineup);
+    displayLineup(bestLineup, strategy);
 }
 
 function combinations(arr, k) {
@@ -676,9 +735,11 @@ function combinations(arr, k) {
     return result;
 }
 
-function displayLineup(lineup) {
+function displayLineup(lineup, strategy) {
     const resultEl = document.getElementById('optimizerResult');
     resultEl.classList.remove('hidden');
+
+    const budget = parseFloat(document.getElementById('budget').value);
 
     // Summary
     document.getElementById('lineupSummary').innerHTML = `
@@ -691,36 +752,48 @@ function displayLineup(lineup) {
             <div class="label">Total Cost</div>
         </div>
         <div class="lineup-stat">
-            <div class="big-num">$${(parseFloat(document.getElementById('budget').value) - lineup.totalCost).toFixed(1)}M</div>
+            <div class="big-num">$${(budget - lineup.totalCost).toFixed(1)}M</div>
             <div class="label">Remaining</div>
         </div>
     `;
 
-    // Cards
+    // Cards with reasoning
     let html = '';
+
+    const strategyLabel = strategy === 'max_points' ? 'Pts' : strategy === 'max_value' ? 'Value' : 'Score';
 
     lineup.drivers.sort((a, b) => b.expected_points - a.expected_points);
     lineup.drivers.forEach((d, i) => {
-        const team = TEAMS[d.constructor] || { color: '#666' };
+        const team = TEAMS[d.constructor] || { color: '#666', name: d.constructor };
         const locked = lockedDrivers.has(d.driver_id);
+        const valueScore = d.value_score != null ? d.value_score.toFixed(2) : (d.expected_points / d.current_price).toFixed(2);
         html += `
         <div class="lineup-pick" style="--team-color:${team.color}">
             <div class="pick-type">Driver ${i + 1} ${locked ? '🔒' : ''}</div>
             <div class="pick-name">${d.name}</div>
-            <div class="pick-points">${d.expected_points.toFixed(1)} pts</div>
-            <div class="pick-price">$${d.current_price.toFixed(1)}M</div>
+            <div class="pick-details" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:0.8rem;color:var(--text-secondary);margin-top:6px;">
+                <span>Exp Pts: <strong style="color:var(--text)">${d.expected_points.toFixed(1)}</strong></span>
+                <span>Price: <strong style="color:var(--text)">$${d.current_price.toFixed(1)}M</strong></span>
+                <span>Value: <strong style="color:var(--text)">${valueScore}x</strong></span>
+                <span>P${d.predicted_quali} → P${d.predicted_finish}</span>
+            </div>
         </div>`;
     });
 
     lineup.constructors.forEach((c, i) => {
-        const team = TEAMS[c.constructor_id] || { color: '#666' };
+        const team = TEAMS[c.constructor_id] || { color: '#666', name: c.name };
         const locked = lockedConstructors.has(c.constructor_id);
+        const valueScore = c.value_score != null ? c.value_score.toFixed(2) : (c.expected_points / c.current_price).toFixed(2);
         html += `
         <div class="lineup-pick" style="--team-color:${team.color}">
             <div class="pick-type">Constructor ${i + 1} ${locked ? '🔒' : ''}</div>
             <div class="pick-name">${c.full_name || c.name}</div>
-            <div class="pick-points">${c.expected_points.toFixed(1)} pts</div>
-            <div class="pick-price">$${c.current_price.toFixed(1)}M</div>
+            <div class="pick-details" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:0.8rem;color:var(--text-secondary);margin-top:6px;">
+                <span>Exp Pts: <strong style="color:var(--text)">${c.expected_points.toFixed(1)}</strong></span>
+                <span>Price: <strong style="color:var(--text)">$${c.current_price.toFixed(1)}M</strong></span>
+                <span>Value: <strong style="color:var(--text)">${valueScore}x</strong></span>
+                <span>${c.driver_1} & ${c.driver_2}</span>
+            </div>
         </div>`;
     });
 
@@ -1308,24 +1381,18 @@ function renderSeason() {
         priceEl.innerHTML = html;
     }
 
-    // Populate post-race round selector
+    // Populate post-race round selector — show all rounds that have any data
     const selector = document.getElementById('postRaceRound');
     if (seasonSummary && seasonSummary.rounds) {
         selector.innerHTML = '<option value="">Select a round...</option>';
-        seasonSummary.rounds.filter(r => r.has_post_race).forEach(r => {
-            const opt = document.createElement('option');
-            opt.value = r.round;
-            opt.textContent = `Round ${r.round}: ${r.name}`;
-            selector.appendChild(opt);
-        });
-        // If no completed rounds, add any round with predictions
-        if (selector.options.length === 1) {
-            seasonSummary.rounds.filter(r => r.has_predictions).forEach(r => {
+        seasonSummary.rounds
+            .filter(r => r.has_post_race || r.has_predictions || r.round <= (data ? data.round : 0))
+            .forEach(r => {
                 const opt = document.createElement('option');
                 opt.value = r.round;
-                opt.textContent = `Round ${r.round}: ${r.name}`;
+                const label = r.has_post_race ? ' (Complete)' : r.has_predictions ? ' (Predicted)' : '';
+                opt.textContent = `Round ${r.round}: ${r.name}${label}`;
                 selector.appendChild(opt);
             });
-        }
     }
 }

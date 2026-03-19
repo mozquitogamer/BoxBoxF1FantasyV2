@@ -64,6 +64,8 @@
                             <option value="points_per_million">Points / $M</option>
                             <option value="confidence">Confidence</option>
                             <option value="current_price">Price</option>
+                            <option value="starting_price">Starting Price</option>
+                            <option value="price_change">Price Change</option>
                         </select>
                     </div>
                     <div class="control-group">
@@ -71,6 +73,10 @@
                         <select id="teamFilter">
                             <option value="all">All Teams</option>
                         </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Search</label>
+                        <input type="text" id="driverSearch" placeholder="Search driver..." style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:0.85rem;width:140px;">
                     </div>
                     <div class="control-group">
                         <label>View</label>
@@ -99,6 +105,7 @@
                                 <th class="num">Risk</th>
                                 <th class="num">OT</th>
                                 <th class="num">Price</th>
+                                <th class="num">Change</th>
                                 <th class="num">Value</th>
                             </tr>
                         </thead>
@@ -261,6 +268,6 @@
         </div>
     </main>
 
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=4"></script>
 </body>
 </html>

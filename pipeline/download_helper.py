@@ -60,6 +60,21 @@ def main():
             for rnd in range(1, total + 1):
                 dl.download_fastf1_round(year, rnd)
 
+    elif args.mode == "fastf1_missing":
+        # Only download rounds that don't already have FP data
+        from config.settings import FASTF1_RAW_DIR
+        for year in range(args.start, args.end + 1):
+            total = dl.get_total_rounds_for_year(year)
+            print(f"Year {year}: {total} rounds total")
+            for rnd in range(1, total + 1):
+                round_dir = FASTF1_RAW_DIR / f"year{year}" / f"round{rnd}"
+                fp_files = list(round_dir.glob("fp*.parquet")) if round_dir.exists() else []
+                if len(fp_files) >= 2:  # At least FP1+FP2
+                    print(f"  Skipping {year} R{rnd} — already have {len(fp_files)} FP files")
+                    continue
+                print(f"  Downloading {year} R{rnd}...")
+                dl.download_fastf1_round(year, rnd)
+
 
 if __name__ == "__main__":
     main()
