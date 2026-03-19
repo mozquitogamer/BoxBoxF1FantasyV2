@@ -395,6 +395,348 @@ def analyze_session_evolution(df: pd.DataFrame) -> dict | None:
     return result if result else None
 
 
+def analyze_speed_trap(df: pd.DataFrame) -> dict | None:
+    """
+    Analyze top speed / speed trap data if available in the telemetry.
+    Returns per-driver top speed stats.
+    """
+    if df is None or df.empty:
+        return None
+
+    speed_col = None
+    for candidate in ["speed_trap", "top_speed", "SpeedST", "SpeedI1", "SpeedI2", "SpeedFL"]:
+        if candidate in df.columns:
+            speed_col = candidate
+            break
+
+    if speed_col is None:
+        return None
+
+    clean = df[df[speed_col].notna() & (df[speed_col] > 0)].copy()
+    if len(clean) < 10:
+        return None
+
+    result = {}
+    for driver_id, group in clean.groupby("driver_id"):
+        speeds = group[speed_col].values
+        if len(speeds) < 2:
+            continue
+        result[driver_id] = {
+            "top_speed": round(float(np.max(speeds)), 1),
+            "avg_speed": round(float(np.mean(speeds)), 1),
+            "median_speed": round(float(np.median(speeds)), 1),
+            "speed_col_used": speed_col,
+        }
+
+    if result:
+        best_top = max(d["top_speed"] for d in result.values())
+        for d in result.values():
+            d["gap_to_fastest"] = round(d["top_speed"] - best_top, 1)
+
+    return result if result else None
+
+
+def analyze_temperature_pace(df: pd.DataFrame) -> dict | None:
+    """
+    Analyze how each driver's pace changes with temperature.
+    Groups laps by temperature ranges and shows avg pace per range.
+    """
+    if df is None or df.empty:
+        return None
+
+    temp_col = None
+    for candidate in ["track_temperature", "air_temperature", "TrackTemp", "AirTemp"]:
+        if candidate in df.columns:
+            temp_col = candidate
+            break
+
+    if temp_col is None:
+        return None
+
+    clean = df[
+        df["lap_time"].notna() & (df["lap_time"] > 0) & df[temp_col].notna()
+    ].copy()
+    if len(clean) < 20:
+        return None
+
+    # Define temperature bins
+    temp_min = clean[temp_col].min()
+    temp_max = clean[temp_col].max()
+    temp_range = temp_max - temp_min
+
+    if temp_range < 3:
+        return None  # Not enough temperature variation
+
+    # Create 3-4 bins dynamically
+    n_bins = min(4, max(2, int(temp_range / 5)))
+    bins = np.linspace(temp_min, temp_max + 0.1, n_bins + 1)
+    labels = [f"{bins[i]:.0f}-{bins[i+1]:.0f}" for i in range(len(bins) - 1)]
+    clean["temp_bin"] = pd.cut(clean[temp_col], bins=bins, labels=labels, include_lowest=True)
+
+    result = {}
+    for driver_id, group in clean.groupby("driver_id"):
+        if len(group) < 10:
+            continue
+
+        temp_paces = {}
+        for temp_bin, bin_group in group.groupby("temp_bin", observed=True):
+            if len(bin_group) >= 3:
+                times = bin_group["lap_time"].values
+                # Remove outliers
+                median = np.median(times)
+                times = times[times < median * 1.05]
+                if len(times) >= 2:
+                    temp_paces[str(temp_bin)] = {
+                        "avg_pace": round(float(np.mean(times)), 3),
+                        "laps": len(times),
+                    }
+
+        if len(temp_paces) >= 2:
+            result[driver_id] = {
+                "temp_type": temp_col,
+                "pace_by_temp_range": temp_paces,
+            }
+
+    return result if result else None
+
+
+def analyze_stint_breakdown(df: pd.DataFrame) -> dict:
+    """
+    Show each driver's stints with: compound, lap count, first-lap pace,
+    last-lap pace, degradation rate, avg pace.
+    Helps identify who manages tyres better on long runs.
+    """
+    if df is None or df.empty:
+        return {}
+
+    required = ["driver_id", "lap_time", "stint"]
+    if not all(c in df.columns for c in required):
+        return {}
+
+    clean = df[df["lap_time"].notna() & (df["lap_time"] > 0)].copy()
+
+    result = {}
+    for driver_id, driver_group in clean.groupby("driver_id"):
+        stints = []
+        for stint, stint_group in driver_group.groupby("stint"):
+            if len(stint_group) < 3:
+                continue
+
+            if "lap_number" in stint_group.columns:
+                stint_sorted = stint_group.sort_values("lap_number")
+            else:
+                stint_sorted = stint_group
+
+            times = stint_sorted["lap_time"].values
+            compound = str(stint_sorted["compound"].iloc[0]) if "compound" in stint_sorted.columns else "UNKNOWN"
+            session = str(stint_sorted["session"].iloc[0]) if "session" in stint_sorted.columns else "?"
+
+            # Remove first lap (out lap / cold tyres) for pace analysis
+            pace_times = times[1:] if len(times) > 1 else times
+            # Remove extreme outliers for calculations
+            if len(pace_times) > 2:
+                median = np.median(pace_times)
+                pace_clean = pace_times[pace_times < median * 1.08]
+            else:
+                pace_clean = pace_times
+
+            if len(pace_clean) < 2:
+                continue
+
+            # Degradation: linear fit
+            x = np.arange(len(pace_clean))
+            slope = float(np.polyfit(x, pace_clean, 1)[0]) if len(pace_clean) >= 3 else 0.0
+
+            stints.append({
+                "stint": int(stint),
+                "session": session,
+                "compound": compound,
+                "total_laps": len(times),
+                "first_lap_pace": round(float(times[0]), 3),
+                "last_lap_pace": round(float(times[-1]), 3),
+                "avg_pace": round(float(np.mean(pace_clean)), 3),
+                "best_pace": round(float(np.min(pace_clean)), 3),
+                "degradation_rate": round(slope, 4),
+            })
+
+        if stints:
+            result[driver_id] = {
+                "stints": stints,
+                "total_stints": len(stints),
+                "avg_degradation": round(float(np.mean([s["degradation_rate"] for s in stints])), 4),
+            }
+
+    return result
+
+
+def analyze_sector_rankings(df: pd.DataFrame) -> dict | None:
+    """
+    Show which driver was fastest in each sector (S1, S2, S3)
+    with gaps to the leader.
+    """
+    if df is None or df.empty:
+        return None
+
+    sector_cols = [c for c in ["sector_1", "sector_2", "sector_3"] if c in df.columns]
+    if not sector_cols:
+        return None
+
+    clean = df.copy()
+    result = {}
+
+    for sector in sector_cols:
+        valid = clean[clean[sector].notna() & (clean[sector] > 0)]
+        if valid.empty:
+            continue
+
+        sector_best = {}
+        for driver_id, group in valid.groupby("driver_id"):
+            times = group[sector].values
+            best = float(np.min(times))
+            avg_best3 = float(np.mean(np.sort(times)[:3])) if len(times) >= 3 else best
+            sector_best[driver_id] = {
+                "best": round(best, 3),
+                "avg_best_3": round(avg_best3, 3),
+            }
+
+        if sector_best:
+            fastest = min(d["best"] for d in sector_best.values())
+            ranking = []
+            for driver_id, d in sector_best.items():
+                gap = round(d["best"] - fastest, 3)
+                ranking.append({
+                    "driver_id": driver_id,
+                    "best": d["best"],
+                    "avg_best_3": d["avg_best_3"],
+                    "gap": gap,
+                })
+            ranking.sort(key=lambda x: x["best"])
+            result[sector] = ranking
+
+    return result if result else None
+
+
+def analyze_fuel_corrected_pace(df: pd.DataFrame, fuel_effect: float = 0.05) -> dict:
+    """
+    Estimate fuel-corrected pace.
+    In FP, cars run different fuel loads. Early laps tend to be heavier.
+    Apply a simple fuel correction of ~0.05s/lap of fuel burn to estimate true race pace.
+
+    For each stint, we assume the first lap is the heaviest and apply
+    a progressive correction.
+    """
+    if df is None or df.empty:
+        return {}
+
+    required = ["driver_id", "lap_time", "stint"]
+    if not all(c in df.columns for c in required):
+        return {}
+
+    clean = df[df["lap_time"].notna() & (df["lap_time"] > 0)].copy()
+
+    result = {}
+    for driver_id, driver_group in clean.groupby("driver_id"):
+        corrected_times = []
+        for stint, stint_group in driver_group.groupby("stint"):
+            if len(stint_group) < 3:
+                continue
+
+            if "lap_number" in stint_group.columns:
+                stint_sorted = stint_group.sort_values("lap_number")
+            else:
+                stint_sorted = stint_group
+
+            times = stint_sorted["lap_time"].values[1:]  # Skip first lap (out/cold)
+            if len(times) < 2:
+                continue
+
+            # Apply fuel correction: earlier laps in stint are heavier
+            # We subtract fuel_effect * (laps remaining in stint) from each lap time
+            n = len(times)
+            corrections = np.array([fuel_effect * (n - 1 - i) for i in range(n)])
+            corrected = times - corrections
+
+            # Remove outliers
+            median = np.median(corrected)
+            corrected = corrected[corrected < median * 1.05]
+            corrected_times.extend(corrected.tolist())
+
+        if corrected_times:
+            arr = np.array(corrected_times)
+            result[driver_id] = {
+                "fuel_corrected_avg": round(float(np.mean(arr)), 3),
+                "fuel_corrected_best": round(float(np.min(arr)), 3),
+                "fuel_corrected_median": round(float(np.median(arr)), 3),
+                "laps_used": len(corrected_times),
+                "fuel_correction_per_lap": fuel_effect,
+            }
+
+    if result:
+        best_pace = min(d["fuel_corrected_avg"] for d in result.values())
+        for d in result.values():
+            d["gap_to_fastest"] = round(d["fuel_corrected_avg"] - best_pace, 3)
+
+    return result
+
+
+def analyze_improvement_trajectory(df: pd.DataFrame) -> dict | None:
+    """
+    How much each driver improved from their first run to their last run
+    in each session. Shows who found setup improvements.
+    """
+    if df is None or df.empty or "session" not in df.columns:
+        return None
+
+    required = ["driver_id", "lap_time", "stint", "session"]
+    if not all(c in df.columns for c in required):
+        return None
+
+    clean = df[df["lap_time"].notna() & (df["lap_time"] > 0)].copy()
+
+    result = {}
+    for driver_id, driver_group in clean.groupby("driver_id"):
+        session_trajectories = {}
+        for session, sess_group in driver_group.groupby("session"):
+            stints = sorted(sess_group["stint"].unique())
+            if len(stints) < 2:
+                continue
+
+            # First run: average of first stint
+            first_stint = sess_group[sess_group["stint"] == stints[0]]
+            if "lap_number" in first_stint.columns:
+                first_stint = first_stint.sort_values("lap_number")
+            first_times = first_stint["lap_time"].values
+            if len(first_times) > 1:
+                first_times = first_times[1:]  # Skip out lap
+            first_avg = float(np.mean(np.sort(first_times)[:3])) if len(first_times) >= 3 else float(np.mean(first_times))
+
+            # Last run: average of last stint
+            last_stint = sess_group[sess_group["stint"] == stints[-1]]
+            if "lap_number" in last_stint.columns:
+                last_stint = last_stint.sort_values("lap_number")
+            last_times = last_stint["lap_time"].values
+            if len(last_times) > 1:
+                last_times = last_times[1:]  # Skip out lap
+            last_avg = float(np.mean(np.sort(last_times)[:3])) if len(last_times) >= 3 else float(np.mean(last_times))
+
+            session_trajectories[session] = {
+                "first_run_avg": round(first_avg, 3),
+                "last_run_avg": round(last_avg, 3),
+                "improvement": round(first_avg - last_avg, 3),
+                "improved": first_avg > last_avg,
+            }
+
+        if session_trajectories:
+            total_improvement = sum(s["improvement"] for s in session_trajectories.values())
+            result[driver_id] = {
+                "sessions": session_trajectories,
+                "total_improvement": round(total_improvement, 3),
+                "avg_improvement_per_session": round(total_improvement / len(session_trajectories), 3),
+            }
+
+    return result if result else None
+
+
 # -- Main ---------------------------------------------------------------------
 
 def run_fp_analysis(round_num: int, year: int = CURRENT_SEASON) -> dict:
@@ -470,6 +812,52 @@ def run_fp_analysis(round_num: int, year: int = CURRENT_SEASON) -> dict:
         print(f"  {len(evolution)} drivers")
     else:
         print("  Not enough sessions")
+
+    # 8. Speed trap / top speed analysis
+    print("[8] Analyzing speed trap data...")
+    speed_data = analyze_speed_trap(laps_df)
+    if speed_data:
+        output["speed_trap"] = speed_data
+        print(f"  {len(speed_data)} drivers")
+    else:
+        print("  No speed trap data available")
+
+    # 9. Temperature-pace relationship (by temp ranges)
+    print("[9] Analyzing temperature-pace relationship...")
+    temp_pace = analyze_temperature_pace(laps_df)
+    if temp_pace:
+        output["temperature_pace"] = temp_pace
+        print(f"  {len(temp_pace)} drivers")
+    else:
+        print("  Insufficient temperature variation")
+
+    # 10. Stint-by-stint breakdown
+    print("[10] Analyzing stint-by-stint breakdown...")
+    output["stint_breakdown"] = analyze_stint_breakdown(laps_df)
+    print(f"  {len(output['stint_breakdown'])} drivers")
+
+    # 11. Sector-by-sector rankings
+    print("[11] Analyzing sector rankings...")
+    sector_rankings = analyze_sector_rankings(laps_df)
+    if sector_rankings:
+        output["sector_rankings"] = sector_rankings
+        print(f"  {len(sector_rankings)} sectors analyzed")
+    else:
+        print("  No sector data available")
+
+    # 12. Fuel-corrected pace estimate
+    print("[12] Estimating fuel-corrected pace...")
+    output["fuel_corrected_pace"] = analyze_fuel_corrected_pace(laps_df)
+    print(f"  {len(output['fuel_corrected_pace'])} drivers")
+
+    # 13. Improvement trajectory
+    print("[13] Analyzing improvement trajectory...")
+    trajectory = analyze_improvement_trajectory(laps_df)
+    if trajectory:
+        output["improvement_trajectory"] = trajectory
+        print(f"  {len(trajectory)} drivers")
+    else:
+        print("  Not enough data for trajectory analysis")
 
     # Save
     output_dir = PREDICTIONS_DIR / f"round{round_num}"

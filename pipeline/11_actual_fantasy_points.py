@@ -1,0 +1,1003 @@
+"""
+Script 11 — Calculate Actual Fantasy Points from Real Race Results
+
+Calculates ACTUAL fantasy points scored from real race data (not predictions).
+Uses Jolpica raw JSON files (results, qualifying, pitstops, sprint) as primary
+source, with post_race_analysis.json as fallback for pitstop data.
+
+Produces:
+- Per-driver: actual qualifying pts, race pts, position change pts, overtake pts,
+  fastest lap bonus, DNF penalty, sprint pts
+- Per-constructor: combined driver pts + quali bonus + pitstop pts
+
+Usage:
+    python pipeline/11_actual_fantasy_points.py --round 1
+    python pipeline/11_actual_fantasy_points.py --round 2
+    python pipeline/11_actual_fantasy_points.py --all
+
+Output:
+    data/predictions/round{N}/actual_fantasy_points.json
+    web/public/data/actual_round{N}.json
+"""
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from typing import Optional
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from config.settings import (
+    CURRENT_SEASON,
+    JOLPICA_RAW_DIR,
+    PREDICTIONS_DIR,
+    SEED_DIR,
+    WEB_DATA_DIR,
+    SPRINT_ROUNDS_2026,
+    CANCELLED_ROUNDS_2026,
+)
+from config.fantasy_scoring import (
+    calc_qualifying_points_driver,
+    calc_constructor_quali_bonus,
+    calc_race_points_driver,
+    calc_sprint_points_driver,
+    calc_pitstop_points_constructor,
+    calc_fastest_pitstop_bonus,
+    calc_world_record_pitstop_bonus,
+    RACE_DNF_DSQ_PENALTY,
+    RACE_POSITION_POINTS,
+    RACE_FASTEST_LAP_BONUS,
+    RACE_POSITIONS_GAINED_PER_POS,
+    QUALIFYING_NC_DSQ_PENALTY,
+)
+
+
+# ==============================================================================
+# Data loading helpers
+# ==============================================================================
+
+def load_id_maps() -> tuple[dict, dict, dict]:
+    """Load driver and constructor ID mappings.
+
+    Returns:
+        (jolpica_to_abbrev, abbrev_to_info, jolpica_constructor_map)
+    """
+    with open(SEED_DIR / "driver_ids.json") as f:
+        data = json.load(f)
+
+    jolpica_to_abbrev = {}
+    for m in data["mappings"]:
+        jolpica_to_abbrev[m["jolpica"]] = m["abbrev"]
+
+    # Constructor mapping: jolpica ID -> our internal ID
+    jolpica_constructor_map = {}
+    for cm in data["constructor_mappings"]:
+        jolpica_constructor_map[cm["jolpica"]] = cm["id"]
+        for alt in cm.get("ergast_alt", []):
+            jolpica_constructor_map[alt] = cm["id"]
+
+    return jolpica_to_abbrev, data, jolpica_constructor_map
+
+
+def load_drivers_info() -> dict:
+    """Load driver seed data keyed by abbreviation."""
+    with open(SEED_DIR / "drivers.json") as f:
+        data = json.load(f)
+    return {d["driver_id"]: d for d in data["drivers"]}
+
+
+def load_constructors_info() -> dict:
+    """Load constructor seed data keyed by constructor_id."""
+    with open(SEED_DIR / "constructors.json") as f:
+        data = json.load(f)
+    return {c["constructor_id"]: c for c in data["constructors"]}
+
+
+def load_fantasy_prices() -> tuple[dict, dict]:
+    """Load current fantasy prices."""
+    prices_path = SEED_DIR / "fantasy_prices.json"
+    if not prices_path.exists():
+        return {}, {}
+    with open(prices_path) as f:
+        data = json.load(f)
+    driver_prices = {k: v["current_price"] for k, v in data.get("drivers", {}).items()}
+    constructor_prices = {k: v["current_price"] for k, v in data.get("constructors", {}).items()}
+    return driver_prices, constructor_prices
+
+
+def load_jolpica_json(year: int, round_num: int, filename: str) -> Optional[dict]:
+    """Load a Jolpica raw JSON file. Returns None if not found."""
+    path = JOLPICA_RAW_DIR / f"year{year}" / f"round{round_num}" / filename
+    if not path.exists():
+        return None
+    with open(path) as f:
+        return json.load(f)
+
+
+def load_post_race_analysis(round_num: int) -> Optional[dict]:
+    """Load post_race_analysis.json as fallback data source."""
+    path = PREDICTIONS_DIR / f"round{round_num}" / "post_race_analysis.json"
+    if not path.exists():
+        return None
+    with open(path) as f:
+        return json.load(f)
+
+
+# ==============================================================================
+# Jolpica data parsers
+# ==============================================================================
+
+def parse_race_results(data: dict) -> tuple[list[dict], str]:
+    """Parse Jolpica results.json into a flat list of driver results.
+
+    Returns:
+        (results_list, race_name)
+    """
+    races = data.get("MRData", {}).get("RaceTable", {}).get("Races", [])
+    if not races:
+        return [], "Unknown"
+
+    race = races[0]
+    race_name = race.get("raceName", "Unknown")
+    results = []
+
+    for r in race.get("Results", []):
+        driver_id = r["Driver"]["driverId"]
+        position = int(r["position"])
+        grid = int(r["grid"])
+        status = r.get("status", "")
+        position_text = r.get("positionText", "")
+        laps = int(r.get("laps", 0))
+
+        # Determine DNF/DSQ/DNS
+        is_dnf = status in ("Retired", "Accident", "Collision", "Engine", "Gearbox",
+                            "Hydraulics", "Brakes", "Suspension", "Electrical",
+                            "Mechanical", "Overheating", "Power Unit", "Spun off",
+                            "Wheel", "Puncture", "Oil leak", "Fuel pressure",
+                            "Water leak", "Transmission")
+        # Also catch generic retirement via positionText
+        if position_text == "R" and not is_dnf:
+            is_dnf = True
+        # Lapped drivers are classified finishers (they have a Time entry)
+        if status == "Lapped" or status == "+1 Lap" or status == "+2 Laps":
+            is_dnf = False
+
+        is_dsq = status == "Disqualified" or position_text == "D"
+        is_dns = status == "Did not start" or position_text == "W" or laps == 0
+
+        # Fastest lap: rank "1" in FastestLap
+        fastest_lap = r.get("FastestLap", {})
+        is_fastest_lap = fastest_lap.get("rank") == "1"
+
+        results.append({
+            "jolpica_driver_id": driver_id,
+            "code": r["Driver"].get("code", ""),
+            "jolpica_constructor_id": r["Constructor"]["constructorId"],
+            "position": position,
+            "grid": grid,
+            "status": status,
+            "position_text": position_text,
+            "laps": laps,
+            "is_dnf": is_dnf,
+            "is_dsq": is_dsq,
+            "is_dns": is_dns,
+            "is_fastest_lap": is_fastest_lap,
+            "given_name": r["Driver"].get("givenName", ""),
+            "family_name": r["Driver"].get("familyName", ""),
+        })
+
+    return results, race_name
+
+
+def parse_qualifying(data: dict) -> dict:
+    """Parse Jolpica qualifying.json.
+
+    Returns:
+        dict mapping jolpica_driver_id -> {position, best_session, q1, q2, q3}
+    """
+    races = data.get("MRData", {}).get("RaceTable", {}).get("Races", [])
+    if not races:
+        return {}
+
+    quali_results = {}
+    for qr in races[0].get("QualifyingResults", []):
+        driver_id = qr["Driver"]["driverId"]
+        position = int(qr["position"])
+
+        q1 = qr.get("Q1", "")
+        q2 = qr.get("Q2", "")
+        q3 = qr.get("Q3", "")
+
+        # Determine best session reached
+        if q3 and q3.strip():
+            best_session = "Q3"
+        elif q2 and q2.strip():
+            best_session = "Q2"
+        elif q1 and q1.strip():
+            best_session = "Q1"
+        else:
+            best_session = "NONE"
+
+        quali_results[driver_id] = {
+            "position": position,
+            "best_session": best_session,
+            "q1": q1,
+            "q2": q2,
+            "q3": q3,
+        }
+
+    return quali_results
+
+
+def parse_pitstops(data: dict) -> dict:
+    """Parse Jolpica pitstops.json.
+
+    Returns:
+        dict mapping jolpica_driver_id -> list of pit stop durations (float seconds)
+    """
+    races = data.get("MRData", {}).get("RaceTable", {}).get("Races", [])
+    if not races:
+        return {}
+
+    pitstops_by_driver = {}
+    for ps in races[0].get("PitStops", []):
+        driver_id = ps["driverId"]
+        raw_dur = ps["duration"]
+        try:
+            if ":" in str(raw_dur):
+                # Format "mm:ss.sss" — convert to seconds
+                parts = str(raw_dur).split(":")
+                duration = float(parts[0]) * 60 + float(parts[1])
+            else:
+                duration = float(raw_dur)
+        except (ValueError, IndexError):
+            continue  # Skip malformed pit stop entries
+        # Only include reasonable pit stops (< 60s, exclude drive-throughs etc.)
+        if duration < 60:
+            pitstops_by_driver.setdefault(driver_id, []).append(duration)
+
+    return pitstops_by_driver
+
+
+def parse_sprint_results(data: dict) -> list[dict]:
+    """Parse Jolpica sprint.json into a flat list of sprint results."""
+    races = data.get("MRData", {}).get("RaceTable", {}).get("Races", [])
+    if not races:
+        return []
+
+    results = []
+    for r in races[0].get("SprintResults", []):
+        driver_id = r["Driver"]["driverId"]
+        position = int(r["position"])
+        grid = int(r["grid"])
+        status = r.get("status", "")
+        position_text = r.get("positionText", "")
+        laps = int(r.get("laps", 0))
+
+        is_dnf = position_text == "R" or status in ("Retired", "Accident", "Collision")
+        if status == "Lapped":
+            is_dnf = False
+        is_dsq = status == "Disqualified" or position_text == "D"
+        is_dns = status == "Did not start" or position_text == "W" or laps == 0
+
+        fastest_lap = r.get("FastestLap", {})
+        is_fastest_lap = fastest_lap.get("rank") == "1"
+
+        results.append({
+            "jolpica_driver_id": driver_id,
+            "jolpica_constructor_id": r["Constructor"]["constructorId"],
+            "position": position,
+            "grid": grid,
+            "status": status,
+            "is_dnf": is_dnf,
+            "is_dsq": is_dsq,
+            "is_dns": is_dns,
+            "is_fastest_lap": is_fastest_lap,
+            "laps": laps,
+        })
+
+    return results
+
+
+def get_pitstops_from_post_race(round_num: int, jolpica_to_abbrev: dict) -> dict:
+    """Fallback: load pitstop durations from post_race_analysis.json.
+
+    Returns dict mapping jolpica_driver_id -> list of durations.
+    """
+    analysis = load_post_race_analysis(round_num)
+    if not analysis:
+        return {}
+
+    # Build reverse map: abbrev -> jolpica
+    abbrev_to_jolpica = {v: k for k, v in jolpica_to_abbrev.items()}
+
+    pitstops = {}
+    by_driver = analysis.get("pitstops", {}).get("by_driver", {})
+    for abbrev, stops in by_driver.items():
+        jolpica_id = abbrev_to_jolpica.get(abbrev)
+        if jolpica_id:
+            pitstops[jolpica_id] = [s["duration"] for s in stops]
+
+    return pitstops
+
+
+# ==============================================================================
+# Core calculation
+# ==============================================================================
+
+def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) -> Optional[dict]:
+    """Calculate actual fantasy points for a given round.
+
+    Returns the full output dict, or None if data is unavailable.
+    """
+    is_sprint = round_num in SPRINT_ROUNDS_2026
+
+    # -- Load mappings and seed data --
+    jolpica_to_abbrev, id_data, jolpica_constructor_map = load_id_maps()
+    drivers_info = load_drivers_info()
+    constructors_info = load_constructors_info()
+    driver_prices, constructor_prices = load_fantasy_prices()
+
+    # -- Load Jolpica race results (required) --
+    results_data = load_jolpica_json(year, round_num, "results.json")
+    if not results_data:
+        # Try post_race_analysis as fallback
+        analysis = load_post_race_analysis(round_num)
+        if not analysis:
+            print(f"  No results data found for round {round_num}")
+            return None
+        return calculate_from_post_race_analysis(round_num, year, analysis)
+
+    race_results, race_name = parse_race_results(results_data)
+    if not race_results:
+        print(f"  No race results parsed for round {round_num}")
+        return None
+
+    # -- Load qualifying --
+    quali_data = load_jolpica_json(year, round_num, "qualifying.json")
+    quali_map = parse_qualifying(quali_data) if quali_data else {}
+
+    # -- Load pitstops --
+    pitstops_data = load_jolpica_json(year, round_num, "pitstops.json")
+    if pitstops_data:
+        pitstops_by_driver = parse_pitstops(pitstops_data)
+    else:
+        # Fallback to post_race_analysis pitstop data
+        pitstops_by_driver = get_pitstops_from_post_race(round_num, jolpica_to_abbrev)
+
+    # -- Load sprint (if applicable) --
+    sprint_results = []
+    if is_sprint:
+        sprint_data = load_jolpica_json(year, round_num, "sprint.json")
+        if sprint_data:
+            sprint_results = parse_sprint_results(sprint_data)
+
+    # Sprint lookup by jolpica driver ID
+    sprint_map = {sr["jolpica_driver_id"]: sr for sr in sprint_results}
+
+    # -- Build constructor -> pitstop times mapping --
+    constructor_pitstops: dict[str, list[float]] = {}
+    for jol_driver_id, times in pitstops_by_driver.items():
+        abbrev = jolpica_to_abbrev.get(jol_driver_id)
+        if abbrev and abbrev in drivers_info:
+            cid = drivers_info[abbrev]["constructor_id"]
+            constructor_pitstops.setdefault(cid, []).extend(times)
+
+    # Find fastest pitstop across all teams
+    all_pitstop_times = []
+    for times in constructor_pitstops.values():
+        all_pitstop_times.extend(times)
+    global_fastest_pitstop = min(all_pitstop_times) if all_pitstop_times else 999.0
+
+    # -- Calculate driver fantasy points --
+    driver_outputs = []
+    driver_points_by_abbrev = {}  # for constructor calculation
+
+    for r in race_results:
+        jol_id = r["jolpica_driver_id"]
+        abbrev = jolpica_to_abbrev.get(jol_id, r["code"])
+        info = drivers_info.get(abbrev, {})
+        constructor_id = jolpica_constructor_map.get(r["jolpica_constructor_id"],
+                                                     r["jolpica_constructor_id"])
+        full_name = f"{info.get('first_name', r['given_name'])} {info.get('last_name', r['family_name'])}"
+
+        # Qualifying
+        quali = quali_map.get(jol_id, {})
+        quali_position = quali.get("position")
+        quali_best_session = quali.get("best_session", "Q1")
+
+        if r["is_dns"]:
+            # DNS drivers: no qualifying penalty if they qualified, just no race points
+            if quali_position is not None:
+                quali_pts = calc_qualifying_points_driver(quali_position)
+            else:
+                quali_pts = QUALIFYING_NC_DSQ_PENALTY
+            race_pts = 0  # DNS = no race points at all (not DNF penalty)
+            race_position = None
+            positions_gained = 0
+            overtakes = 0
+        elif r["is_dsq"]:
+            quali_pts = calc_qualifying_points_driver(quali_position, is_dsq=True)
+            race_pts = RACE_DNF_DSQ_PENALTY
+            race_position = None
+            positions_gained = 0
+            overtakes = 0
+        elif r["is_dnf"]:
+            if quali_position is not None:
+                quali_pts = calc_qualifying_points_driver(quali_position)
+            else:
+                quali_pts = QUALIFYING_NC_DSQ_PENALTY
+            race_pts = calc_race_points_driver(
+                finish_position=None,
+                grid_position=r["grid"],
+                is_dnf=True,
+            )
+            race_position = None
+            positions_gained = 0
+            overtakes = 0
+        else:
+            # Normal finisher (includes lapped drivers)
+            if quali_position is not None:
+                quali_pts = calc_qualifying_points_driver(quali_position)
+            else:
+                # Driver not in qualifying data (e.g., grid penalty pushed back)
+                # Use grid position as proxy
+                quali_pts = calc_qualifying_points_driver(r["grid"])
+
+            race_position = r["position"]
+            positions_gained = r["grid"] - race_position
+            # Estimate overtakes from positions gained (no overtake data in Jolpica)
+            overtakes = max(0, positions_gained)
+
+            race_pts = calc_race_points_driver(
+                finish_position=race_position,
+                grid_position=r["grid"],
+                overtakes=overtakes,
+                is_fastest_lap=r["is_fastest_lap"],
+                is_dnf=False,
+                is_dsq=False,
+            )
+
+        # Sprint points
+        sprint_pts = 0
+        sprint_position = None
+        sprint_grid = None
+        if is_sprint and jol_id in sprint_map:
+            sr = sprint_map[jol_id]
+            sprint_grid = sr["grid"]
+            if sr["is_dns"]:
+                sprint_pts = 0
+                sprint_position = None
+            elif sr["is_dnf"] or sr["is_dsq"]:
+                sprint_pts = calc_sprint_points_driver(
+                    finish_position=None,
+                    grid_position=sr["grid"],
+                    is_dnf=sr["is_dnf"],
+                    is_dsq=sr["is_dsq"],
+                )
+                sprint_position = None
+            else:
+                sprint_position = sr["position"]
+                sprint_overtakes = max(0, sr["grid"] - sr["position"])
+                sprint_pts = calc_sprint_points_driver(
+                    finish_position=sr["position"],
+                    grid_position=sr["grid"],
+                    overtakes=sprint_overtakes,
+                    is_fastest_lap=sr["is_fastest_lap"],
+                )
+
+        # Separate point components for output
+        if r["is_dns"]:
+            position_pts = 0
+            overtake_pts = 0
+            fastest_lap_pts = 0
+            dnf_penalty = 0
+            race_finish_pts = 0
+        elif r["is_dnf"] or r["is_dsq"]:
+            position_pts = 0
+            overtake_pts = 0
+            fastest_lap_pts = 0
+            dnf_penalty = RACE_DNF_DSQ_PENALTY
+            race_finish_pts = 0
+        else:
+            race_finish_pts = RACE_POSITION_POINTS.get(race_position, 0)
+            position_pts = positions_gained * RACE_POSITIONS_GAINED_PER_POS if positions_gained > 0 else positions_gained
+            overtake_pts = overtakes
+            fastest_lap_pts = RACE_FASTEST_LAP_BONUS if r["is_fastest_lap"] else 0
+            dnf_penalty = 0
+
+        total_pts = quali_pts + race_pts + sprint_pts
+        price = driver_prices.get(abbrev, 0.0)
+        ppm = round(total_pts / price, 2) if price > 0 else 0.0
+
+        driver_entry = {
+            "driver_id": abbrev,
+            "name": full_name,
+            "constructor": constructor_id,
+            "quali_position": quali_position,
+            "race_position": race_position,
+            "grid": r["grid"],
+            "status": r["status"],
+            "is_dnf": r["is_dnf"],
+            "is_dsq": r["is_dsq"],
+            "is_dns": r["is_dns"],
+            "is_fastest_lap": r["is_fastest_lap"],
+            "overtakes": overtakes,
+            "positions_gained": positions_gained,
+            "quali_points": quali_pts,
+            "race_points": race_pts,
+            "race_finish_points": race_finish_pts,
+            "position_points": position_pts,
+            "overtake_points": overtake_pts,
+            "fastest_lap_points": fastest_lap_pts,
+            "dotd_points": 0,  # DOTD not available from Jolpica data
+            "dnf_penalty": dnf_penalty,
+            "sprint_points": sprint_pts,
+            "total_points": total_pts,
+            "price": price,
+            "ppm": ppm,
+        }
+
+        if is_sprint:
+            driver_entry["sprint_position"] = sprint_position
+            driver_entry["sprint_grid"] = sprint_grid
+
+        driver_outputs.append(driver_entry)
+        driver_points_by_abbrev[abbrev] = driver_entry
+
+    # Sort drivers by total points descending
+    driver_outputs.sort(key=lambda x: x["total_points"], reverse=True)
+
+    # -- Calculate constructor fantasy points --
+    constructor_outputs = []
+
+    # Map constructor -> driver abbreviations from seed data
+    constructor_drivers: dict[str, list[str]] = {}
+    for d in drivers_info.values():
+        cid = d["constructor_id"]
+        constructor_drivers.setdefault(cid, []).append(d["driver_id"])
+
+    for cid, cinfo in constructors_info.items():
+        c_drivers = constructor_drivers.get(cid, [])
+        if not c_drivers:
+            continue
+
+        d1_abbrev = c_drivers[0] if len(c_drivers) > 0 else ""
+        d2_abbrev = c_drivers[1] if len(c_drivers) > 1 else ""
+
+        d1 = driver_points_by_abbrev.get(d1_abbrev, {})
+        d2 = driver_points_by_abbrev.get(d2_abbrev, {})
+
+        # Qualifying: combined driver quali points + bonus
+        d1_quali = d1.get("quali_points", 0)
+        d2_quali = d2.get("quali_points", 0)
+        combined_quali = d1_quali + d2_quali
+
+        # Quali bonus based on best session reached
+        d1_jol = None
+        d2_jol = None
+        for jol_id, abbrev in jolpica_to_abbrev.items():
+            if abbrev == d1_abbrev:
+                d1_jol = jol_id
+            if abbrev == d2_abbrev:
+                d2_jol = jol_id
+
+        d1_session = quali_map.get(d1_jol, {}).get("best_session", "Q1") if d1_jol else "Q1"
+        d2_session = quali_map.get(d2_jol, {}).get("best_session", "Q1") if d2_jol else "Q1"
+
+        # Handle DNS / no quali for session determination
+        if d1.get("is_dns") and d1.get("quali_position") is None:
+            d1_session = "Q1"
+        if d2.get("is_dns") and d2.get("quali_position") is None:
+            d2_session = "Q1"
+
+        quali_bonus = calc_constructor_quali_bonus(d1_session, d2_session)
+
+        # Race: combined driver race points (excluding DOTD)
+        d1_race = d1.get("race_points", 0) - d1.get("dotd_points", 0)
+        d2_race = d2.get("race_points", 0) - d2.get("dotd_points", 0)
+        combined_race = d1_race + d2_race
+
+        # Sprint: combined
+        combined_sprint = d1.get("sprint_points", 0) + d2.get("sprint_points", 0)
+
+        # Pitstop points
+        team_pitstop_times = constructor_pitstops.get(cid, [])
+        pitstop_pts = calc_pitstop_points_constructor(team_pitstop_times)
+
+        # Fastest pitstop bonus
+        team_best = min(team_pitstop_times) if team_pitstop_times else 999.0
+        is_fastest_pit = (team_best == global_fastest_pitstop and team_best < 999.0)
+        pitstop_pts += calc_fastest_pitstop_bonus(is_fastest_pit)
+        pitstop_pts += calc_world_record_pitstop_bonus(team_best)
+
+        total_constructor = combined_quali + quali_bonus + combined_race + pitstop_pts + combined_sprint
+        c_price = constructor_prices.get(cid, 0.0)
+        c_ppm = round(total_constructor / c_price, 2) if c_price > 0 else 0.0
+
+        constructor_entry = {
+            "constructor_id": cid,
+            "name": cinfo["name"],
+            "driver_1": d1_abbrev,
+            "driver_2": d2_abbrev,
+            "quali_points": combined_quali,
+            "quali_bonus": quali_bonus,
+            "race_points": combined_race,
+            "sprint_points": combined_sprint if is_sprint else 0,
+            "pitstop_points": pitstop_pts,
+            "total_points": total_constructor,
+            "price": c_price,
+            "ppm": c_ppm,
+        }
+
+        constructor_outputs.append(constructor_entry)
+
+    # Sort constructors by total points
+    constructor_outputs.sort(key=lambda x: x["total_points"], reverse=True)
+
+    return {
+        "round": round_num,
+        "race": race_name,
+        "season": year,
+        "is_sprint_weekend": is_sprint,
+        "drivers": driver_outputs,
+        "constructors": constructor_outputs,
+    }
+
+
+def calculate_from_post_race_analysis(
+    round_num: int,
+    year: int,
+    analysis: dict,
+) -> Optional[dict]:
+    """Fallback calculation using only post_race_analysis.json when Jolpica data
+    is unavailable. Less accurate (no quali session detail, no fastest lap from
+    Jolpica), but still produces reasonable fantasy point estimates."""
+
+    is_sprint = round_num in SPRINT_ROUNDS_2026
+    jolpica_to_abbrev, _, _ = load_id_maps()
+    drivers_info = load_drivers_info()
+    constructors_info = load_constructors_info()
+    driver_prices, constructor_prices = load_fantasy_prices()
+
+    race_name = analysis.get("race", "Unknown")
+    results = analysis.get("results", [])
+
+    driver_outputs = []
+    driver_points_by_abbrev = {}
+
+    for r in results:
+        abbrev = r["driver_id"]
+        info = drivers_info.get(abbrev, {})
+        constructor_id = r.get("constructor_id", info.get("constructor_id", ""))
+        full_name = f"{info.get('first_name', '')} {info.get('last_name', '')}".strip()
+
+        grid = r.get("grid", 22)
+        finish = r.get("finish_position")
+        status = r.get("status", "")
+        is_finished = r.get("is_finished", False)
+
+        is_dns = status == "Did not start"
+        is_dnf = status == "Retired" and not is_dns
+        is_dsq = status == "Disqualified"
+        # Lapped drivers are finishers
+        if status == "Lapped":
+            is_dnf = False
+
+        # Use grid as rough quali position (post_race_analysis doesn't have quali)
+        quali_position = grid
+        quali_pts = calc_qualifying_points_driver(quali_position)
+
+        if is_dns:
+            race_pts = 0
+            race_position = None
+            positions_gained = 0
+            overtakes = 0
+        elif is_dnf or is_dsq:
+            race_pts = RACE_DNF_DSQ_PENALTY
+            race_position = None
+            positions_gained = 0
+            overtakes = 0
+        else:
+            # For lapped drivers, use the position from results order
+            race_position = finish if finish else results.index(r) + 1
+            positions_gained = grid - race_position
+            overtakes = max(0, positions_gained)
+            race_pts = calc_race_points_driver(
+                finish_position=race_position,
+                grid_position=grid,
+                overtakes=overtakes,
+            )
+
+        total_pts = quali_pts + race_pts
+        price = driver_prices.get(abbrev, 0.0)
+        ppm = round(total_pts / price, 2) if price > 0 else 0.0
+
+        entry = {
+            "driver_id": abbrev,
+            "name": full_name,
+            "constructor": constructor_id,
+            "quali_position": quali_position,
+            "race_position": race_position,
+            "grid": grid,
+            "status": status,
+            "is_dnf": is_dnf,
+            "is_dsq": is_dsq,
+            "is_dns": is_dns,
+            "is_fastest_lap": False,
+            "overtakes": overtakes,
+            "positions_gained": positions_gained,
+            "quali_points": quali_pts,
+            "race_points": race_pts,
+            "race_finish_points": 0,
+            "position_points": 0,
+            "overtake_points": overtakes,
+            "fastest_lap_points": 0,
+            "dotd_points": 0,
+            "dnf_penalty": RACE_DNF_DSQ_PENALTY if (is_dnf or is_dsq) else 0,
+            "sprint_points": 0,
+            "total_points": total_pts,
+            "price": price,
+            "ppm": ppm,
+        }
+        driver_outputs.append(entry)
+        driver_points_by_abbrev[abbrev] = entry
+
+    driver_outputs.sort(key=lambda x: x["total_points"], reverse=True)
+
+    # Constructors (simplified without detailed pitstop/quali session data)
+    constructor_drivers: dict[str, list[str]] = {}
+    for d in drivers_info.values():
+        constructor_drivers.setdefault(d["constructor_id"], []).append(d["driver_id"])
+
+    constructor_outputs = []
+    for cid, cinfo in constructors_info.items():
+        c_drivers = constructor_drivers.get(cid, [])
+        d1_abbrev = c_drivers[0] if len(c_drivers) > 0 else ""
+        d2_abbrev = c_drivers[1] if len(c_drivers) > 1 else ""
+        d1 = driver_points_by_abbrev.get(d1_abbrev, {})
+        d2 = driver_points_by_abbrev.get(d2_abbrev, {})
+
+        combined_quali = d1.get("quali_points", 0) + d2.get("quali_points", 0)
+        combined_race = d1.get("race_points", 0) + d2.get("race_points", 0)
+
+        total = combined_quali + combined_race
+        c_price = constructor_prices.get(cid, 0.0)
+        c_ppm = round(total / c_price, 2) if c_price > 0 else 0.0
+
+        constructor_outputs.append({
+            "constructor_id": cid,
+            "name": cinfo["name"],
+            "driver_1": d1_abbrev,
+            "driver_2": d2_abbrev,
+            "quali_points": combined_quali,
+            "quali_bonus": 0,
+            "race_points": combined_race,
+            "sprint_points": 0,
+            "pitstop_points": 0,
+            "total_points": total,
+            "price": c_price,
+            "ppm": c_ppm,
+        })
+
+    constructor_outputs.sort(key=lambda x: x["total_points"], reverse=True)
+
+    return {
+        "round": round_num,
+        "race": race_name,
+        "season": year,
+        "is_sprint_weekend": is_sprint,
+        "data_source": "post_race_analysis_fallback",
+        "drivers": driver_outputs,
+        "constructors": constructor_outputs,
+    }
+
+
+# ==============================================================================
+# Predicted vs Actual comparison
+# ==============================================================================
+
+def compare_predicted_vs_actual(round_num: int, actual: dict) -> None:
+    """Print a comparison of predicted vs actual points if predicted data exists."""
+    try:
+        import pandas as pd
+    except ImportError:
+        print("  (pandas not available, skipping comparison)")
+        return
+
+    pred_path = PREDICTIONS_DIR / f"round{round_num}" / "fantasy_points.parquet"
+    if not pred_path.exists():
+        print(f"\n  No predicted fantasy points found at {pred_path}")
+        print("  Skipping predicted vs actual comparison.")
+        return
+
+    pred_df = pd.read_parquet(pred_path)
+
+    print(f"\n{'=' * 80}")
+    print("PREDICTED vs ACTUAL COMPARISON")
+    print(f"{'=' * 80}")
+
+    # Driver comparison
+    actual_drivers = {d["driver_id"]: d for d in actual["drivers"]}
+
+    print(f"\n{'Driver':<6} {'Pred Quali':>10} {'Act Quali':>10} {'Pred Race':>10} "
+          f"{'Act Race':>10} {'Pred Total':>11} {'Act Total':>10} {'Delta':>7}")
+    print("-" * 80)
+
+    deltas = []
+    for _, row in pred_df.iterrows():
+        abbrev = row.get("driver_abbrev", "")
+        if abbrev not in actual_drivers:
+            continue
+        act = actual_drivers[abbrev]
+
+        pred_quali = row.get("expected_quali_pts", 0)
+        pred_race = row.get("expected_race_pts", 0)
+        pred_total = row.get("total_expected_fantasy_points", 0)
+
+        act_quali = act.get("quali_points", 0)
+        act_race = act.get("race_points", 0)
+        act_total = act.get("total_points", 0)
+        delta = act_total - pred_total
+
+        deltas.append(abs(delta))
+
+        print(f"{abbrev:<6} {pred_quali:>10.1f} {act_quali:>10} {pred_race:>10.1f} "
+              f"{act_race:>10} {pred_total:>11.1f} {act_total:>10} {delta:>+7.1f}")
+
+    if deltas:
+        print("-" * 80)
+        mae = sum(deltas) / len(deltas)
+        print(f"Mean Absolute Error: {mae:.1f} points")
+
+    # Constructor comparison
+    pred_c_path = PREDICTIONS_DIR / f"round{round_num}" / "fantasy_points_constructors.parquet"
+    if pred_c_path.exists():
+        pred_c_df = pd.read_parquet(pred_c_path)
+        actual_constructors = {c["constructor_id"]: c for c in actual["constructors"]}
+
+        print(f"\n{'Constructor':<15} {'Pred Total':>11} {'Act Total':>10} {'Delta':>7}")
+        print("-" * 50)
+
+        for _, row in pred_c_df.iterrows():
+            cid = row.get("constructor_id", "")
+            if cid not in actual_constructors:
+                continue
+            act = actual_constructors[cid]
+            pred_total = row.get("total_expected_fantasy_points", 0)
+            act_total = act.get("total_points", 0)
+            delta = act_total - pred_total
+            print(f"{cid:<15} {pred_total:>11.1f} {act_total:>10} {delta:>+7.1f}")
+
+
+# ==============================================================================
+# Save outputs
+# ==============================================================================
+
+def save_outputs(output: dict, round_num: int) -> None:
+    """Save actual fantasy points to predictions dir and web dir."""
+    # Save to predictions directory
+    pred_dir = PREDICTIONS_DIR / f"round{round_num}"
+    pred_dir.mkdir(parents=True, exist_ok=True)
+    pred_path = pred_dir / "actual_fantasy_points.json"
+    with open(pred_path, "w") as f:
+        json.dump(output, f, indent=2)
+    print(f"  Saved -> {pred_path}")
+
+    # Save to web directory
+    WEB_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    web_path = WEB_DATA_DIR / f"actual_round{round_num}.json"
+    with open(web_path, "w") as f:
+        json.dump(output, f, indent=2)
+    print(f"  Saved -> {web_path}")
+
+
+# ==============================================================================
+# Display
+# ==============================================================================
+
+def print_summary(output: dict) -> None:
+    """Print a formatted summary of the actual fantasy points."""
+    print(f"\n{'=' * 80}")
+    print(f"ACTUAL FANTASY POINTS — Round {output['round']}: {output['race']}")
+    print(f"{'=' * 80}")
+
+    if output.get("data_source") == "post_race_analysis_fallback":
+        print("  [Using post_race_analysis fallback — limited accuracy]")
+
+    # Drivers
+    print(f"\n{'Pos':>3} {'Driver':<6} {'Team':<15} {'Quali':>5} {'Grid':>4} "
+          f"{'Race':>4} {'Status':<12} {'Q Pts':>5} {'R Pts':>5} "
+          f"{'Spr':>4} {'Total':>6} {'Price':>6} {'PPM':>5}")
+    print("-" * 100)
+
+    for i, d in enumerate(output["drivers"], 1):
+        race_pos = d["race_position"] if d["race_position"] is not None else "-"
+        sprint_pts = d.get("sprint_points", 0)
+        fl_marker = " *" if d["is_fastest_lap"] else ""
+        status_short = d["status"][:12]
+        print(f"{i:>3} {d['driver_id']:<6} {d['constructor']:<15} "
+              f"P{d['quali_position'] or '-':<4} P{d['grid']:<3} "
+              f"P{str(race_pos):<3} {status_short:<12} "
+              f"{d['quali_points']:>5} {d['race_points']:>5} "
+              f"{sprint_pts:>4} {d['total_points']:>6} "
+              f"{d['price']:>6.1f} {d['ppm']:>5.2f}{fl_marker}")
+
+    print(f"\n  * = Fastest Lap")
+
+    # Constructors
+    print(f"\n{'Pos':>3} {'Constructor':<15} {'D1':<5} {'D2':<5} "
+          f"{'Quali':>5} {'Bonus':>5} {'Race':>5} {'Pit':>4} "
+          f"{'Spr':>4} {'Total':>6} {'Price':>6} {'PPM':>5}")
+    print("-" * 85)
+
+    for i, c in enumerate(output["constructors"], 1):
+        sprint_pts = c.get("sprint_points", 0)
+        print(f"{i:>3} {c['name']:<15} {c['driver_1']:<5} {c['driver_2']:<5} "
+              f"{c['quali_points']:>5} {c['quali_bonus']:>5} {c['race_points']:>5} "
+              f"{c['pitstop_points']:>4} {sprint_pts:>4} {c['total_points']:>6} "
+              f"{c['price']:>6.1f} {c['ppm']:>5.2f}")
+
+
+# ==============================================================================
+# Main
+# ==============================================================================
+
+def get_completed_rounds(year: int) -> list[int]:
+    """Determine which rounds have been completed (have results data)."""
+    completed = []
+    for rnd in range(1, 25):
+        if rnd in CANCELLED_ROUNDS_2026:
+            continue
+        # Check for Jolpica results or post_race_analysis
+        jolpica_path = JOLPICA_RAW_DIR / f"year{year}" / f"round{rnd}" / "results.json"
+        analysis_path = PREDICTIONS_DIR / f"round{rnd}" / "post_race_analysis.json"
+        if jolpica_path.exists() or analysis_path.exists():
+            completed.append(rnd)
+    return completed
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Calculate actual F1 Fantasy points from real race results"
+    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--round", type=int, help="Round number to process")
+    group.add_argument("--all", action="store_true", help="Process all completed rounds")
+    parser.add_argument("--year", type=int, default=CURRENT_SEASON, help="Season year")
+    args = parser.parse_args()
+
+    print("=" * 80)
+    print(f"BoxBoxF1Fantasy — Actual Fantasy Points Calculator ({args.year})")
+    print("=" * 80)
+
+    if args.all:
+        rounds = get_completed_rounds(args.year)
+        if not rounds:
+            print("No completed rounds found.")
+            return
+        print(f"Processing {len(rounds)} completed round(s): {rounds}")
+    else:
+        if args.round in CANCELLED_ROUNDS_2026:
+            print(f"Round {args.round} is cancelled.")
+            return
+        rounds = [args.round]
+
+    for round_num in rounds:
+        print(f"\n--- Round {round_num} ---")
+        output = calculate_actual_fantasy_points(round_num, args.year)
+
+        if output is None:
+            print(f"  Skipping round {round_num} (no data available)")
+            continue
+
+        print_summary(output)
+        save_outputs(output, round_num)
+        compare_predicted_vs_actual(round_num, output)
+
+    print(f"\n{'=' * 80}")
+    print("Done.")
+
+
+if __name__ == "__main__":
+    main()

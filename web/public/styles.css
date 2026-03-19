@@ -1202,3 +1202,39 @@ select:focus, input:focus {
     font-size: 1.1rem;
     color: var(--accent);
 }
+
+/* -- Predicted vs Actual Comparison -- */
+.cmp-green { color: var(--green); font-weight: 700; }
+.cmp-yellow { color: var(--yellow); font-weight: 700; }
+.cmp-red { color: var(--accent); font-weight: 700; }
+
+.accuracy-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.accuracy-stat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+.accuracy-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+.accuracy-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+}
+
+/* Clickable rows in season calendar */
+.clickable-row:hover {
+    background: var(--bg-card-hover);
+    transition: background 0.15s;
+}

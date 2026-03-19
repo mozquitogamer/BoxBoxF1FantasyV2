@@ -249,12 +249,16 @@ def extract_driver_features(
     # Add pace rank (1 = fastest)
     if "best_lap_time" in df.columns:
         df["pace_rank"] = df["best_lap_time"].rank(method="min")
-        df["pace_rank"] = df["pace_rank"].fillna(df["pace_rank"].max() + 1).astype(int)
+        max_rank = df["pace_rank"].max()
+        fill_val = (max_rank + 1) if pd.notna(max_rank) else 1
+        df["pace_rank"] = df["pace_rank"].fillna(fill_val).astype(int)
 
     # Add long run rank (NaN for drivers with no long runs)
     if "long_run_avg" in df.columns:
         df["long_run_rank"] = df["long_run_avg"].rank(method="min")
-        df["long_run_rank"] = df["long_run_rank"].fillna(df["long_run_rank"].max() + 1).astype(int)
+        max_rank = df["long_run_rank"].max()
+        fill_val = (max_rank + 1) if pd.notna(max_rank) else 1
+        df["long_run_rank"] = df["long_run_rank"].fillna(fill_val).astype(int)
 
     return df
 

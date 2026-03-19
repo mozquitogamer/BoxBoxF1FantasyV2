@@ -51,6 +51,8 @@ let lockedConstructors = new Set();
 let fpAnalysis = null;
 let seasonSummary = null;
 let postRaceCache = {};
+let predictionsCache = {};
+let actualCache = {};
 let tableSortColumn = null;
 let tableSortAsc = true;
 
@@ -125,6 +127,26 @@ async function loadPostRaceData(roundNum) {
     } catch(e) { return null; }
 }
 
+async function loadPredictionsData(roundNum) {
+    if (predictionsCache[roundNum]) return predictionsCache[roundNum];
+    try {
+        const resp = await fetch(cacheBust(`data/predictions_round${roundNum}.json`));
+        const d = await resp.json();
+        predictionsCache[roundNum] = d;
+        return d;
+    } catch(e) { return null; }
+}
+
+async function loadActualData(roundNum) {
+    if (actualCache[roundNum]) return actualCache[roundNum];
+    try {
+        const resp = await fetch(cacheBust(`data/actual_round${roundNum}.json`));
+        const d = await resp.json();
+        actualCache[roundNum] = d;
+        return d;
+    } catch(e) { return null; }
+}
+
 // -- Tabs --
 function setupTabs() {
     document.querySelectorAll('.tab').forEach(tab => {
@@ -172,8 +194,12 @@ function setupControls() {
 
     // Post-race round selector
     document.getElementById('postRaceRound').addEventListener('change', async (e) => {
-        const data = await loadPostRaceData(e.target.value);
-        renderPostRace(data);
+        const roundNum = e.target.value;
+        if (!roundNum) return;
+        const postRace = await loadPostRaceData(roundNum);
+        const predictions = await loadPredictionsData(roundNum);
+        const actual = await loadActualData(roundNum);
+        renderPostRace(postRace, predictions, actual, roundNum);
     });
 }
 
@@ -864,46 +890,81 @@ function renderFPAnalysis() {
 }
 
 // -- Post-Race --
-function renderPostRace(data) {
+function renderPostRace(postRaceData, predictions, actual, roundNum) {
     const el = document.getElementById('postRaceContent');
-    if (!data) {
+
+    // Handle legacy calls with just one argument
+    if (!postRaceData && !predictions && !actual) {
         el.innerHTML = '<p class="no-data">No post-race analysis for this round.</p>';
         return;
     }
 
-    let html = `<div class="analysis-race-header">${data.race} — Round ${data.round}</div>`;
+    let html = '';
 
-    // Race Results as driver cards
-    if (data.results && data.results.length > 0) {
-        html += `
-        <div class="analysis-block">
-            <h3>Race Results</h3>
-            <div class="postrace-cards">
-                ${data.results.map(r => {
-                    const team = TEAMS[r.constructor_id] || { name: r.constructor_id, color: '#666' };
-                    const posChange = r.positions_gained || 0;
-                    const changeClass = posChange > 0 ? 'positive' : posChange < 0 ? 'negative' : 'neutral';
-                    const changeText = posChange > 0 ? `+${posChange}` : `${posChange}`;
-                    const finished = r.is_finished || (r.finish_position != null);
-                    return `
-                    <div class="postrace-card" style="--team-color:${team.color}">
-                        <div class="pr-header">
-                            <div>
-                                <div class="pr-driver">${r.driver_id}</div>
-                                <div class="pr-team">${team.name}</div>
+    // --- Predicted vs Actual Comparison ---
+    if (predictions && actual && actual.drivers) {
+        const raceName = actual.race || predictions.race || `Round ${roundNum}`;
+        html += `<div class="analysis-race-header">${raceName} — Predicted vs Actual</div>`;
+        html += renderComparison(predictions, actual);
+    }
+
+    // --- Original post-race analysis (if available) ---
+    const data = postRaceData;
+    if (data) {
+        if (!html) {
+            html += `<div class="analysis-race-header">${data.race} — Round ${data.round}</div>`;
+        }
+
+        // Race Results as driver cards
+        if (data.results && data.results.length > 0) {
+            html += `
+            <div class="analysis-block">
+                <h3>Race Results</h3>
+                <div class="postrace-cards">
+                    ${data.results.map(r => {
+                        const team = TEAMS[r.constructor_id] || { name: r.constructor_id, color: '#666' };
+                        const posChange = r.positions_gained || 0;
+                        const changeClass = posChange > 0 ? 'positive' : posChange < 0 ? 'negative' : 'neutral';
+                        const changeText = posChange > 0 ? `+${posChange}` : `${posChange}`;
+                        const finished = r.is_finished || (r.finish_position != null);
+                        return `
+                        <div class="postrace-card" style="--team-color:${team.color}">
+                            <div class="pr-header">
+                                <div>
+                                    <div class="pr-driver">${r.driver_id}</div>
+                                    <div class="pr-team">${team.name}</div>
+                                </div>
+                                <div class="pr-position ${!finished ? 'dnf' : ''}">${finished ? 'P' + r.finish_position : r.status || 'DNF'}</div>
                             </div>
-                            <div class="pr-position ${!finished ? 'dnf' : ''}">${finished ? 'P' + r.finish_position : r.status || 'DNF'}</div>
-                        </div>
-                        <div class="pr-stats">
-                            <div>Grid: <span class="pr-stat-value">P${r.grid}</span></div>
-                            <div>Change: <span class="pr-change ${changeClass}">${changeText}</span></div>
-                            <div>Points: <span class="pr-points">${r.points}</span></div>
-                            <div>Status: <span class="pr-stat-value">${r.is_finished ? 'Finished' : r.status}</span></div>
-                        </div>
-                    </div>`;
-                }).join('')}
-            </div>
-        </div>`;
+                            <div class="pr-stats">
+                                <div>Grid: <span class="pr-stat-value">P${r.grid}</span></div>
+                                <div>Change: <span class="pr-change ${changeClass}">${changeText}</span></div>
+                                <div>Points: <span class="pr-points">${r.points}</span></div>
+                                <div>Status: <span class="pr-stat-value">${r.is_finished ? 'Finished' : r.status}</span></div>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>`;
+        }
+    } else if (!predictions && !actual) {
+        el.innerHTML = '<p class="no-data">No post-race analysis for this round.</p>';
+        return;
+    } else if (!html) {
+        // We have predictions but no actual, or actual but no predictions
+        const source = predictions || actual;
+        const raceName = source.race || `Round ${roundNum}`;
+        html += `<div class="analysis-race-header">${raceName} — Round ${roundNum}</div>`;
+        if (predictions && !actual) {
+            html += '<p class="no-data">Predictions available but no actual results yet. Check back after the race.</p>';
+            // Show predictions summary
+            if (predictions.drivers) {
+                html += renderPredictionsSummary(predictions);
+            }
+        }
+        if (actual && !predictions) {
+            html += '<p class="no-data">Actual results available but no predictions were made for this round.</p>';
+        }
     }
 
     // Race Pace
@@ -989,6 +1050,175 @@ function renderPostRace(data) {
     el.innerHTML = html;
 }
 
+function renderComparison(predictions, actual) {
+    // Build lookup maps
+    const predDrivers = {};
+    if (predictions.drivers) {
+        predictions.drivers.forEach(d => {
+            predDrivers[d.driver_id] = d;
+        });
+    }
+    const actualDrivers = {};
+    if (actual.drivers) {
+        actual.drivers.forEach(d => {
+            actualDrivers[d.driver_id] = d;
+        });
+    }
+
+    // Merge all driver IDs
+    const allIds = [...new Set([...Object.keys(predDrivers), ...Object.keys(actualDrivers)])];
+
+    // Build comparison rows
+    const rows = [];
+    let totalAbsError = 0;
+    let countCompared = 0;
+    let within2 = 0;
+    let totalPredPts = 0;
+    let totalActualPts = 0;
+
+    allIds.forEach(id => {
+        const pred = predDrivers[id];
+        const act = actualDrivers[id];
+        if (!pred || !act) return;
+
+        const predQuali = pred.predicted_quali;
+        const actQuali = act.quali_position;
+        const predRace = pred.predicted_finish;
+        const actRace = act.race_position;
+        const predPts = pred.expected_points || 0;
+        const actPts = act.total_points || 0;
+
+        const qualiDiff = actQuali != null && predQuali != null ? Math.abs(actQuali - predQuali) : null;
+        const raceDiff = actRace != null && predRace != null ? Math.abs(actRace - predRace) : null;
+
+        if (raceDiff != null) {
+            totalAbsError += raceDiff;
+            countCompared++;
+            if (raceDiff <= 2) within2++;
+        }
+
+        totalPredPts += predPts;
+        totalActualPts += actPts;
+
+        rows.push({
+            id,
+            name: pred.name || id,
+            constructor: pred.constructor || '',
+            predQuali,
+            actQuali,
+            qualiDiff,
+            predRace,
+            actRace,
+            raceDiff,
+            predPts: predPts,
+            actPts: actPts,
+        });
+    });
+
+    // Sort by actual race position
+    rows.sort((a, b) => (a.actRace || 99) - (b.actRace || 99));
+
+    const mae = countCompared > 0 ? (totalAbsError / countCompared) : 0;
+    const within2Pct = countCompared > 0 ? (within2 / countCompared * 100) : 0;
+
+    function posColorClass(diff) {
+        if (diff == null) return '';
+        if (diff <= 2) return 'cmp-green';
+        if (diff <= 4) return 'cmp-yellow';
+        return 'cmp-red';
+    }
+
+    let html = '';
+
+    // Model accuracy summary
+    html += `
+    <div class="analysis-block">
+        <h3>Model Accuracy</h3>
+        <div class="accuracy-summary">
+            <div class="accuracy-stat">
+                <div class="accuracy-value">${mae.toFixed(1)}</div>
+                <div class="accuracy-label">Mean Absolute Error (positions)</div>
+            </div>
+            <div class="accuracy-stat">
+                <div class="accuracy-value">${within2Pct.toFixed(0)}%</div>
+                <div class="accuracy-label">Predictions within +/-2 positions</div>
+            </div>
+            <div class="accuracy-stat">
+                <div class="accuracy-value">${totalPredPts.toFixed(1)}</div>
+                <div class="accuracy-label">Total Predicted Points</div>
+            </div>
+            <div class="accuracy-stat">
+                <div class="accuracy-value">${totalActualPts.toFixed(1)}</div>
+                <div class="accuracy-label">Total Actual Points</div>
+            </div>
+        </div>
+    </div>`;
+
+    // Comparison table
+    html += `
+    <div class="analysis-block">
+        <h3>Predicted vs Actual — Driver Comparison</h3>
+        <table class="data-table">
+            <thead><tr>
+                <th>Driver</th><th>Team</th>
+                <th class="num">Pred Quali</th><th class="num">Act Quali</th><th class="num">Diff</th>
+                <th class="num">Pred Race</th><th class="num">Act Race</th><th class="num">Diff</th>
+                <th class="num">Pred Pts</th><th class="num">Act Pts</th>
+            </tr></thead>
+            <tbody>${rows.map(r => {
+                const team = TEAMS[r.constructor] || { name: r.constructor, color: '#666' };
+                const qClass = posColorClass(r.qualiDiff);
+                const rClass = posColorClass(r.raceDiff);
+                return `
+                <tr>
+                    <td><strong>${r.name}</strong></td>
+                    <td><span class="team-dot" style="background:${team.color}"></span>${team.name}</td>
+                    <td class="num">${r.predQuali != null ? 'P' + r.predQuali : '-'}</td>
+                    <td class="num">${r.actQuali != null ? 'P' + r.actQuali : '-'}</td>
+                    <td class="num ${qClass}">${r.qualiDiff != null ? r.qualiDiff : '-'}</td>
+                    <td class="num">${r.predRace != null ? 'P' + r.predRace : '-'}</td>
+                    <td class="num">${r.actRace != null ? 'P' + r.actRace : '-'}</td>
+                    <td class="num ${rClass}">${r.raceDiff != null ? r.raceDiff : '-'}</td>
+                    <td class="num">${r.predPts.toFixed(1)}</td>
+                    <td class="num">${r.actPts.toFixed(1)}</td>
+                </tr>`;
+            }).join('')}
+            </tbody>
+        </table>
+    </div>`;
+
+    return html;
+}
+
+function renderPredictionsSummary(predictions) {
+    if (!predictions.drivers || predictions.drivers.length === 0) return '';
+    const sorted = [...predictions.drivers].sort((a, b) => a.predicted_finish - b.predicted_finish);
+
+    return `
+    <div class="analysis-block">
+        <h3>Predictions Summary</h3>
+        <table class="data-table">
+            <thead><tr>
+                <th>#</th><th>Driver</th><th>Team</th>
+                <th class="num">Pred Quali</th><th class="num">Pred Race</th><th class="num">Exp Pts</th>
+            </tr></thead>
+            <tbody>${sorted.map((d, i) => {
+                const team = TEAMS[d.constructor] || { name: d.constructor, color: '#666' };
+                return `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td><strong>${d.name}</strong></td>
+                    <td><span class="team-dot" style="background:${team.color}"></span>${team.name}</td>
+                    <td class="num">P${d.predicted_quali}</td>
+                    <td class="num">P${d.predicted_finish}</td>
+                    <td class="num">${d.expected_points.toFixed(1)}</td>
+                </tr>`;
+            }).join('')}
+            </tbody>
+        </table>
+    </div>`;
+}
+
 // -- Season --
 function renderSeason() {
     // Calendar
@@ -1000,8 +1230,11 @@ function renderSeason() {
             <thead><tr>
                 <th>Rd</th><th>Race</th><th>Circuit</th><th>Date</th><th>Status</th>
             </tr></thead>
-            <tbody>${seasonSummary.rounds.map(r => `
-                <tr>
+            <tbody>${seasonSummary.rounds.map(r => {
+                const clickable = r.has_post_race || r.has_predictions;
+                const rowClass = clickable ? 'class="clickable-row" data-round="' + r.round + '"' : '';
+                return `
+                <tr ${rowClass} ${clickable ? 'style="cursor:pointer"' : ''}>
                     <td>${r.round}</td>
                     <td><strong>${r.name}</strong></td>
                     <td>${r.circuit}</td>
@@ -1009,10 +1242,38 @@ function renderSeason() {
                     <td>${r.has_post_race ? '<span class="status-done">Complete</span>' :
                           r.has_predictions ? '<span class="status-predicted">Predicted</span>' :
                           '<span class="status-upcoming">Upcoming</span>'}</td>
-                </tr>`).join('')}
+                </tr>`;
+            }).join('')}
             </tbody>
         </table>`;
         calEl.innerHTML = html;
+
+        // Add click handlers for completed/predicted rounds
+        calEl.querySelectorAll('.clickable-row').forEach(row => {
+            row.addEventListener('click', async () => {
+                const roundNum = row.dataset.round;
+                // Switch to Analysis tab, Post-Race panel
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.querySelector('[data-tab="analysis"]').classList.add('active');
+                document.getElementById('tab-analysis').classList.add('active');
+
+                document.querySelectorAll('.analysis-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.analysis-panel').forEach(p => p.classList.remove('active'));
+                document.querySelector('[data-panel="postrace"]').classList.add('active');
+                document.getElementById('panel-postrace').classList.add('active');
+
+                // Set selector value
+                const selector = document.getElementById('postRaceRound');
+                selector.value = roundNum;
+
+                // Load and render
+                const postRace = await loadPostRaceData(roundNum);
+                const predictions = await loadPredictionsData(roundNum);
+                const actual = await loadActualData(roundNum);
+                renderPostRace(postRace, predictions, actual, roundNum);
+            });
+        });
     }
 
     // Price Tracker
