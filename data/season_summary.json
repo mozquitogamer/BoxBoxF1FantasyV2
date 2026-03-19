@@ -1,0 +1,360 @@
+{
+  "season": 2026,
+  "generated_at": "2026-03-18T19:08:14.892056+00:00",
+  "rounds": [
+    {
+      "round": 1,
+      "name": "Australian Grand Prix",
+      "circuit": "Melbourne",
+      "date": "2026-03-08",
+      "has_predictions": true,
+      "has_post_race": true
+    },
+    {
+      "round": 2,
+      "name": "Chinese Grand Prix",
+      "circuit": "Shanghai",
+      "date": "2026-03-15",
+      "has_predictions": false,
+      "has_post_race": true
+    },
+    {
+      "round": 3,
+      "name": "Japanese Grand Prix",
+      "circuit": "Suzuka",
+      "date": "2026-03-29",
+      "has_predictions": true,
+      "has_post_race": false
+    },
+    {
+      "round": 6,
+      "name": "Miami Grand Prix",
+      "circuit": "Miami",
+      "date": "2026-05-03",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 7,
+      "name": "Canadian Grand Prix",
+      "circuit": "Montreal",
+      "date": "2026-05-24",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 8,
+      "name": "Monaco Grand Prix",
+      "circuit": "Monaco",
+      "date": "2026-06-07",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 9,
+      "name": "Spanish Grand Prix",
+      "circuit": "Barcelona",
+      "date": "2026-06-14",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 10,
+      "name": "Austrian Grand Prix",
+      "circuit": "Spielberg",
+      "date": "2026-06-28",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 11,
+      "name": "British Grand Prix",
+      "circuit": "Silverstone",
+      "date": "2026-07-05",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 12,
+      "name": "Belgian Grand Prix",
+      "circuit": "Spa-Francorchamps",
+      "date": "2026-07-19",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 13,
+      "name": "Hungarian Grand Prix",
+      "circuit": "Budapest",
+      "date": "2026-07-26",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 14,
+      "name": "Dutch Grand Prix",
+      "circuit": "Zandvoort",
+      "date": "2026-08-23",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 15,
+      "name": "Italian Grand Prix",
+      "circuit": "Monza",
+      "date": "2026-09-06",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 16,
+      "name": "Spanish Grand Prix (Madrid)",
+      "circuit": "Madrid",
+      "date": "2026-09-13",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 17,
+      "name": "Azerbaijan Grand Prix",
+      "circuit": "Baku",
+      "date": "2026-09-26",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 18,
+      "name": "Singapore Grand Prix",
+      "circuit": "Singapore",
+      "date": "2026-10-11",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 19,
+      "name": "United States Grand Prix",
+      "circuit": "Austin",
+      "date": "2026-10-25",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 20,
+      "name": "Mexican Grand Prix",
+      "circuit": "Mexico City",
+      "date": "2026-11-01",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 21,
+      "name": "Brazilian Grand Prix",
+      "circuit": "S\u00c3\u00a3o Paulo",
+      "date": "2026-11-08",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 22,
+      "name": "Las Vegas Grand Prix",
+      "circuit": "Las Vegas",
+      "date": "2026-11-21",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 23,
+      "name": "Qatar Grand Prix",
+      "circuit": "Lusail",
+      "date": "2026-11-29",
+      "has_predictions": false,
+      "has_post_race": false
+    },
+    {
+      "round": 24,
+      "name": "Abu Dhabi Grand Prix",
+      "circuit": "Yas Marina",
+      "date": "2026-12-06",
+      "has_predictions": false,
+      "has_post_race": false
+    }
+  ],
+  "driver_prices": {
+    "RUS": {
+      "name": "George Russell",
+      "constructor": "mercedes",
+      "current_price": 28.0,
+      "starting_price": 27.4,
+      "price_change": 0.6,
+      "price_trend": "up"
+    },
+    "VER": {
+      "name": "Max Verstappen",
+      "constructor": "red_bull",
+      "current_price": 28.1,
+      "starting_price": 27.7,
+      "price_change": 0.4,
+      "price_trend": "up"
+    },
+    "NOR": {
+      "name": "Lando Norris",
+      "constructor": "mclaren",
+      "current_price": 26.8,
+      "starting_price": 27.2,
+      "price_change": -0.4,
+      "price_trend": "down"
+    },
+    "PIA": {
+      "name": "Oscar Piastri",
+      "constructor": "mclaren",
+      "current_price": 24.9,
+      "starting_price": 25.5,
+      "price_change": -0.6,
+      "price_trend": "down"
+    },
+    "ANT": {
+      "name": "Kimi Antonelli",
+      "constructor": "mercedes",
+      "current_price": 23.8,
+      "starting_price": 23.2,
+      "price_change": 0.6,
+      "price_trend": "up"
+    },
+    "LEC": {
+      "name": "Charles Leclerc",
+      "constructor": "ferrari",
+      "current_price": 23.4,
+      "starting_price": 22.8,
+      "price_change": 0.6,
+      "price_trend": "up"
+    },
+    "HAM": {
+      "name": "Lewis Hamilton",
+      "constructor": "ferrari",
+      "current_price": 22.9,
+      "starting_price": 22.5,
+      "price_change": 0.4,
+      "price_trend": "up"
+    },
+    "HAD": {
+      "name": "Isack Hadjar",
+      "constructor": "red_bull",
+      "current_price": 13.9,
+      "starting_price": 15.1,
+      "price_change": -1.2,
+      "price_trend": "down"
+    },
+    "GAS": {
+      "name": "Pierre Gasly",
+      "constructor": "alpine",
+      "current_price": 12.8,
+      "starting_price": 12.0,
+      "price_change": 0.8,
+      "price_trend": "up"
+    },
+    "SAI": {
+      "name": "Carlos Sainz",
+      "constructor": "williams",
+      "current_price": 12.2,
+      "starting_price": 12.0,
+      "price_change": 0.2,
+      "price_trend": "stable"
+    },
+    "ALB": {
+      "name": "Alex Albon",
+      "constructor": "williams",
+      "current_price": 10.8,
+      "starting_price": 10.5,
+      "price_change": 0.3,
+      "price_trend": "up"
+    },
+    "ALO": {
+      "name": "Fernando Alonso",
+      "constructor": "aston_martin",
+      "current_price": 8.8,
+      "starting_price": 10.0,
+      "price_change": -1.2,
+      "price_trend": "down"
+    },
+    "BEA": {
+      "name": "Oliver Bearman",
+      "constructor": "haas",
+      "current_price": 8.6,
+      "starting_price": 7.4,
+      "price_change": 1.2,
+      "price_trend": "up"
+    },
+    "OCO": {
+      "name": "Esteban Ocon",
+      "constructor": "haas",
+      "current_price": 8.5,
+      "starting_price": 8.0,
+      "price_change": 0.5,
+      "price_trend": "up"
+    },
+    "LIN": {
+      "name": "Arvid Lindblad",
+      "constructor": "racing_bulls",
+      "current_price": 7.4,
+      "starting_price": 7.0,
+      "price_change": 0.4,
+      "price_trend": "up"
+    },
+    "COL": {
+      "name": "Franco Colapinto",
+      "constructor": "alpine",
+      "current_price": 7.0,
+      "starting_price": 6.2,
+      "price_change": 0.8,
+      "price_trend": "up"
+    },
+    "LAW": {
+      "name": "Liam Lawson",
+      "constructor": "racing_bulls",
+      "current_price": 6.9,
+      "starting_price": 7.0,
+      "price_change": -0.1,
+      "price_trend": "stable"
+    },
+    "STR": {
+      "name": "Lance Stroll",
+      "constructor": "aston_martin",
+      "current_price": 6.8,
+      "starting_price": 7.0,
+      "price_change": -0.2,
+      "price_trend": "down"
+    },
+    "BOR": {
+      "name": "Gabriel Bortoleto",
+      "constructor": "audi",
+      "current_price": 6.4,
+      "starting_price": 6.5,
+      "price_change": -0.1,
+      "price_trend": "stable"
+    },
+    "PER": {
+      "name": "Sergio Perez",
+      "constructor": "cadillac",
+      "current_price": 6.4,
+      "starting_price": 7.0,
+      "price_change": -0.6,
+      "price_trend": "down"
+    },
+    "HUL": {
+      "name": "Nico Hulkenberg",
+      "constructor": "audi",
+      "current_price": 5.6,
+      "starting_price": 6.0,
+      "price_change": -0.4,
+      "price_trend": "down"
+    },
+    "BOT": {
+      "name": "Valtteri Bottas",
+      "constructor": "cadillac",
+      "current_price": 4.7,
+      "starting_price": 5.0,
+      "price_change": -0.3,
+      "price_trend": "down"
+    }
+  }
+}
