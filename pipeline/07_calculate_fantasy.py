@@ -117,22 +117,35 @@ def risk_label(rating: float) -> str:
 
 def estimate_overtakes(predicted_quali: int, predicted_race: int, grid_size: int = 22) -> int:
     """
-    Estimate expected overtakes based on predicted positions gained.
+    Estimate expected overtakes from grid position and positions gained.
 
-    Calibrated from actual 2026 Rounds 1-2 data where overtakes tracked by
-    F1 Fantasy almost exactly equal positions gained (1:1 ratio across all
-    drivers). A small 10% multiplier accounts for wheel-to-wheel battles
-    where a driver overtakes then isn't overtaken back.
+    2026 regs (active aero, ground effect) produce significantly more on-track
+    passing than pre-2026. F1 Fantasy tracks overtakes via sensors — drivers
+    routinely make many more overtakes than their net position change due to
+    battles, re-passes, and lapped traffic.
 
-    Examples from actual R1-R2 data:
-      VER P20→P6: 14 positions gained, 14 overtakes
-      BEA P12→P7: 5 positions gained, 5 overtakes
-      SAI P17→P9: 8 positions gained, 8 overtakes
-      HAM P7→P4:  3 positions gained, 3 overtakes
+    Calibrated from f1fantasytool.com actual data (Rounds 1-2):
+      BEA R1: P12→P7, 5 gained, 9 overtakes  (base ~4)
+      BEA R2: P10→P5, 5 gained, 13 overtakes (base ~8)
+      LIN R1: P9→P8,  1 gained, 8 overtakes  (base ~7)
+      LIN R2: P15→P12, 3 gained, 8 overtakes (base ~5)
+
+    Model: overtakes = base(grid_position) + positions_gained
     """
     positions_gained = max(0, predicted_quali - predicted_race)
-    # ~1.1x positions gained — slight boost for 2026 closer racing
-    return round(positions_gained * 1.1)
+
+    # Base overtakes from wheel-to-wheel racing (even without net position gain)
+    # Front-runners have fewer cars to battle; midfield/back have more traffic
+    if predicted_quali <= 3:
+        base = 2
+    elif predicted_quali <= 6:
+        base = 4
+    elif predicted_quali <= 12:
+        base = 6
+    else:
+        base = 7
+
+    return base + positions_gained
 
 
 # -- Fantasy prices ------------------------------------------------------------

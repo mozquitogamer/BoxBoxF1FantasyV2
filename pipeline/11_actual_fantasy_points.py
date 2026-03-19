@@ -446,8 +446,20 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
 
             race_position = r["position"]
             positions_gained = r["grid"] - race_position
-            # Estimate overtakes from positions gained (no overtake data in Jolpica)
-            overtakes = max(0, positions_gained)
+            # Estimate overtakes: F1 Fantasy tracks via sensors, not just net positions.
+            # 2026 regs produce many more passes than net position change.
+            # Calibrated from f1fantasytool.com R1-R2 actual data:
+            #   BEA P12->P7: 5 gained, 9 OT; LIN P9->P8: 1 gained, 8 OT
+            pos_gained = max(0, positions_gained)
+            if r["grid"] <= 3:
+                ot_base = 2
+            elif r["grid"] <= 6:
+                ot_base = 4
+            elif r["grid"] <= 12:
+                ot_base = 6
+            else:
+                ot_base = 7
+            overtakes = ot_base + pos_gained
 
             race_pts = calc_race_points_driver(
                 finish_position=race_position,
@@ -478,7 +490,10 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
                 sprint_position = None
             else:
                 sprint_position = sr["position"]
-                sprint_overtakes = max(0, sr["grid"] - sr["position"])
+                sprint_pos_gained = max(0, sr["grid"] - sr["position"])
+                # Sprint has fewer laps = fewer overtaking opportunities
+                sprint_ot_base = 2 if sr["grid"] <= 6 else 3
+                sprint_overtakes = sprint_ot_base + sprint_pos_gained
                 sprint_pts = calc_sprint_points_driver(
                     finish_position=sr["position"],
                     grid_position=sr["grid"],
@@ -702,7 +717,16 @@ def calculate_from_post_race_analysis(
             # For lapped drivers, use the position from results order
             race_position = finish if finish else results.index(r) + 1
             positions_gained = grid - race_position
-            overtakes = max(0, positions_gained)
+            pos_gained_fb = max(0, positions_gained)
+            if grid <= 3:
+                ot_base_fb = 2
+            elif grid <= 6:
+                ot_base_fb = 4
+            elif grid <= 12:
+                ot_base_fb = 6
+            else:
+                ot_base_fb = 7
+            overtakes = ot_base_fb + pos_gained_fb
             race_pts = calc_race_points_driver(
                 finish_position=race_position,
                 grid_position=grid,
