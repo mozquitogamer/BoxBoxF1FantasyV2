@@ -12,7 +12,7 @@ const TEAMS = {
     alpine:         { name: 'Alpine',         color: '#FF87BC', flag: '' },
     williams:       { name: 'Williams',       color: '#64C4FF', flag: '' },
     racing_bulls:   { name: 'Racing Bulls',   color: '#6692FF', flag: '' },
-    audi:           { name: 'Kick Sauber',    color: '#00E701', flag: '' },
+    audi:           { name: 'Audi',            color: '#00E701', flag: '' },
     haas:           { name: 'Haas',           color: '#B6BABD', flag: '' },
     cadillac:       { name: 'Cadillac',       color: '#FFD700', flag: '' },
 };
@@ -51,6 +51,8 @@ let lockedConstructors = new Set();
 let fpAnalysis = null;
 let seasonSummary = null;
 let postRaceCache = {};
+let tableSortColumn = null;
+let tableSortAsc = true;
 
 // -- Init --
 document.addEventListener('DOMContentLoaded', async () => {
@@ -152,6 +154,9 @@ function setupControls() {
         });
     });
 
+    // Table header sorting
+    setupTableSorting();
+
     // Optimizer
     document.getElementById('runOptimizer').addEventListener('click', runOptimizer);
 
@@ -169,6 +174,65 @@ function setupControls() {
     document.getElementById('postRaceRound').addEventListener('change', async (e) => {
         const data = await loadPostRaceData(e.target.value);
         renderPostRace(data);
+    });
+}
+
+// -- Table header sorting --
+const TABLE_COLUMNS = [
+    { key: null, label: '#' },
+    { key: 'name', label: 'Driver' },
+    { key: 'constructor', label: 'Team' },
+    { key: 'expected_points', label: 'Pts' },
+    { key: 'predicted_quali', label: 'Quali' },
+    { key: 'predicted_finish', label: 'Race' },
+    { key: 'confidence', label: 'Conf' },
+    { key: 'risk', label: 'Risk' },
+    { key: 'expected_overtakes', label: 'OT' },
+    { key: 'current_price', label: 'Price' },
+    { key: 'value_score', label: 'Value' },
+];
+
+function setupTableSorting() {
+    const headerRow = document.querySelector('#driverTable thead tr');
+    if (!headerRow) return;
+    const ths = headerRow.querySelectorAll('th');
+    ths.forEach((th, idx) => {
+        const col = TABLE_COLUMNS[idx];
+        if (!col || !col.key) return;
+        th.style.cursor = 'pointer';
+        th.style.userSelect = 'none';
+        th.addEventListener('click', () => {
+            if (tableSortColumn === col.key) {
+                tableSortAsc = !tableSortAsc;
+            } else {
+                tableSortColumn = col.key;
+                // Default direction: ascending for position-like columns, descending for others
+                tableSortAsc = ['predicted_quali', 'predicted_finish', 'current_price', 'name', 'constructor'].includes(col.key);
+            }
+            renderDrivers();
+            updateSortIndicators();
+        });
+    });
+}
+
+function updateSortIndicators() {
+    const headerRow = document.querySelector('#driverTable thead tr');
+    if (!headerRow) return;
+    const ths = headerRow.querySelectorAll('th');
+    ths.forEach((th, idx) => {
+        const col = TABLE_COLUMNS[idx];
+        if (!col || !col.key) return;
+        // Remove existing indicator
+        const existing = th.querySelector('.sort-arrow');
+        if (existing) existing.remove();
+        if (tableSortColumn === col.key) {
+            const arrow = document.createElement('span');
+            arrow.className = 'sort-arrow';
+            arrow.style.marginLeft = '4px';
+            arrow.style.fontSize = '0.75em';
+            arrow.textContent = tableSortAsc ? '\u25B2' : '\u25BC';
+            th.appendChild(arrow);
+        }
     });
 }
 
@@ -203,9 +267,28 @@ function renderDrivers() {
     const cardsEl = document.getElementById('driverCards');
     cardsEl.innerHTML = drivers.map((d, i) => driverCard(d, i)).join('');
 
-    // Table
+    // Table - apply column header sort if active, otherwise use dropdown sort
+    let tableDrivers = [...drivers];
+    if (tableSortColumn) {
+        const riskOrder = { 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3, 'VERY HIGH': 4 };
+        tableDrivers.sort((a, b) => {
+            let va = a[tableSortColumn], vb = b[tableSortColumn];
+            if (tableSortColumn === 'risk') {
+                va = riskOrder[a.risk] || 0;
+                vb = riskOrder[b.risk] || 0;
+            }
+            if (tableSortColumn === 'name' || tableSortColumn === 'constructor') {
+                va = String(va).toLowerCase();
+                vb = String(vb).toLowerCase();
+                return tableSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            }
+            return tableSortAsc ? va - vb : vb - va;
+        });
+    }
+
     const tbody = document.getElementById('driverTableBody');
-    tbody.innerHTML = drivers.map((d, i) => driverRow(d, i)).join('');
+    tbody.innerHTML = tableDrivers.map((d, i) => driverRow(d, i)).join('');
+    updateSortIndicators();
 }
 
 function driverCard(d, i) {
@@ -284,7 +367,7 @@ function driverCard(d, i) {
             </div>
             <span class="risk-badge ${riskClass}">${d.risk}</span>
             <span class="price-tag">$${d.current_price.toFixed(1)}M</span>
-            <span class="value-tag">${d.value_score.toFixed(2)}x</span>
+            <span class="value-tag" style="position:relative;cursor:help" title="Value Score = Expected Fantasy Points / Price ($M). Higher is better. Above 1.0 = good value, above 2.0 = excellent, below 0 = negative expected return.">${d.value_score.toFixed(2)}x<span class="value-tooltip">Value Score = Expected Fantasy Points &divide; Price ($M). Higher is better. Above 1.0 = good value, above 2.0 = excellent, below 0 = negative expected return.</span></span>
         </div>
     </div>`;
 }
@@ -519,7 +602,7 @@ function runOptimizer() {
             if (remainBudget < 0) continue;
 
             // Try all combinations of top N drivers
-            const topN = freeDrivers.slice(0, Math.min(12, freeDrivers.length));
+            const topN = freeDrivers;
             const combos = combinations(topN, neededDrivers);
 
             for (const combo of combos) {
@@ -790,29 +873,36 @@ function renderPostRace(data) {
 
     let html = `<div class="analysis-race-header">${data.race} — Round ${data.round}</div>`;
 
-    // Race Results
+    // Race Results as driver cards
     if (data.results && data.results.length > 0) {
         html += `
         <div class="analysis-block">
             <h3>Race Results</h3>
-            <table class="data-table">
-                <thead><tr>
-                    <th>#</th><th>Driver</th><th class="num">Grid</th>
-                    <th class="num">Finish</th><th class="num">+/-</th>
-                    <th class="num">Pts</th><th>Status</th>
-                </tr></thead>
-                <tbody>${data.results.map(r => `
-                    <tr>
-                        <td>${r.finish_position || '-'}</td>
-                        <td><strong>${r.driver_id}</strong></td>
-                        <td class="num">${r.grid}</td>
-                        <td class="num">${r.finish_position || 'DNF'}</td>
-                        <td class="num ${r.positions_gained > 0 ? 'text-green' : r.positions_gained < 0 ? 'text-red' : ''}">${r.positions_gained > 0 ? '+' : ''}${r.positions_gained}</td>
-                        <td class="num">${r.points}</td>
-                        <td>${r.is_finished ? 'Finished' : r.status}</td>
-                    </tr>`).join('')}
-                </tbody>
-            </table>
+            <div class="postrace-cards">
+                ${data.results.map(r => {
+                    const team = TEAMS[r.constructor_id] || { name: r.constructor_id, color: '#666' };
+                    const posChange = r.positions_gained || 0;
+                    const changeClass = posChange > 0 ? 'positive' : posChange < 0 ? 'negative' : 'neutral';
+                    const changeText = posChange > 0 ? `+${posChange}` : `${posChange}`;
+                    const finished = r.is_finished || (r.finish_position != null);
+                    return `
+                    <div class="postrace-card" style="--team-color:${team.color}">
+                        <div class="pr-header">
+                            <div>
+                                <div class="pr-driver">${r.driver_id}</div>
+                                <div class="pr-team">${team.name}</div>
+                            </div>
+                            <div class="pr-position ${!finished ? 'dnf' : ''}">${finished ? 'P' + r.finish_position : r.status || 'DNF'}</div>
+                        </div>
+                        <div class="pr-stats">
+                            <div>Grid: <span class="pr-stat-value">P${r.grid}</span></div>
+                            <div>Change: <span class="pr-change ${changeClass}">${changeText}</span></div>
+                            <div>Points: <span class="pr-points">${r.points}</span></div>
+                            <div>Status: <span class="pr-stat-value">${r.is_finished ? 'Finished' : r.status}</span></div>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>
         </div>`;
     }
 

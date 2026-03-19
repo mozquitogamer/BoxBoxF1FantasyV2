@@ -2,7 +2,7 @@
   "season": 2026,
   "drivers": [
     {"driver_id": "RUS", "first_name": "George", "last_name": "Russell", "constructor_id": "mercedes", "number": 63},
-    {"driver_id": "VER", "first_name": "Max", "last_name": "Verstappen", "constructor_id": "red_bull", "number": 1},
+    {"driver_id": "VER", "first_name": "Max", "last_name": "Verstappen", "constructor_id": "red_bull", "number": 33},
     {"driver_id": "NOR", "first_name": "Lando", "last_name": "Norris", "constructor_id": "mclaren", "number": 4},
     {"driver_id": "PIA", "first_name": "Oscar", "last_name": "Piastri", "constructor_id": "mclaren", "number": 81},
     {"driver_id": "ANT", "first_name": "Kimi", "last_name": "Antonelli", "constructor_id": "mercedes", "number": 12},

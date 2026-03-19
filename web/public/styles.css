@@ -1113,3 +1113,92 @@ select:focus, input:focus {
 }
 
 .driver-card:nth-child(n) { animation-delay: calc(0.03s * var(--i, 0)); }
+
+/* Value score tooltip */
+.value-tag .value-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    width: 260px;
+    padding: 10px 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    pointer-events: none;
+}
+.value-tag:hover .value-tooltip {
+    display: block;
+}
+
+/* Post-race driver cards */
+.postrace-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+.postrace-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    border-left: 3px solid var(--team-color, var(--border));
+    transition: background 0.15s;
+}
+.postrace-card:hover {
+    background: var(--bg-card-hover);
+}
+.postrace-card .pr-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+.postrace-card .pr-driver {
+    font-weight: 700;
+    font-size: 1rem;
+}
+.postrace-card .pr-team {
+    font-size: 0.8rem;
+    color: var(--team-color, var(--text-secondary));
+}
+.postrace-card .pr-position {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+}
+.postrace-card .pr-position.dnf {
+    color: var(--orange);
+    font-size: 1rem;
+}
+.postrace-card .pr-stats {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+.postrace-card .pr-stat-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.postrace-card .pr-change {
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+.postrace-card .pr-change.positive { color: var(--green); }
+.postrace-card .pr-change.negative { color: var(--accent); }
+.postrace-card .pr-change.neutral { color: var(--text-muted); }
+.postrace-card .pr-points {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--accent);
+}

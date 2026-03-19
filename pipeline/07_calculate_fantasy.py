@@ -74,6 +74,7 @@ def calculate_risk_ratings(predictions: pd.DataFrame) -> dict[str, float]:
     """
     Get DNF risk per driver from pre-computed rolling DNF rates in model_rows.
     Falls back to a default if model_rows unavailable.
+    Caps at 25% to avoid inflated rates from bad luck streaks.
     """
     risk = {}
 
@@ -86,12 +87,16 @@ def calculate_risk_ratings(predictions: pd.DataFrame) -> dict[str, float]:
         if "roll_dnf_rate_5" in latest.columns:
             for driver_id, row in latest.iterrows():
                 rate = row["roll_dnf_rate_5"]
-                risk[driver_id] = round((rate if pd.notna(rate) else 0.15) * 100, 1)
+                if pd.notna(rate):
+                    # Cap at 25% — historical rates can be inflated by bad luck streaks
+                    risk[driver_id] = round(min(rate, 0.25) * 100, 1)
+                else:
+                    risk[driver_id] = 5.0  # Default 5% for drivers with no history
 
     # Fill defaults for any driver not found
     for driver_id in predictions["driver_id"].unique():
         if driver_id not in risk:
-            risk[driver_id] = 15.0
+            risk[driver_id] = 5.0  # Low default for new/unknown drivers
 
     return risk
 
@@ -110,15 +115,28 @@ def risk_label(rating: float) -> str:
 
 # -- Overtake estimation -------------------------------------------------------
 
-def estimate_overtakes(predicted_quali: int, predicted_race: int) -> int:
+def estimate_overtakes(predicted_quali: int, predicted_race: int, grid_size: int = 22) -> int:
     """
-    Estimate expected overtakes based on positions gained.
-    Overtakes ~ positions_gained * 1.2 (some passes get traded back).
+    Estimate expected overtakes based on grid position and 2026 regs.
+    2026 regulations produce significantly more overtaking than previous years.
     """
-    if predicted_race >= predicted_quali:
-        return max(0, round((predicted_quali - predicted_race) * 0.3))
-    positions_gained = predicted_quali - predicted_race
-    return max(0, round(positions_gained * 1.2))
+    # Base overtakes by grid position (2026 regs produce more action)
+    if predicted_quali <= 3:
+        base = 2
+    elif predicted_quali <= 7:
+        base = 4
+    elif predicted_quali <= 12:
+        base = 6
+    elif predicted_quali <= 17:
+        base = 8
+    else:
+        base = 10
+
+    # Additional overtakes from positions gained
+    positions_gained = max(0, predicted_quali - predicted_race)
+    gained_overtakes = round(positions_gained * 1.3)
+
+    return base + gained_overtakes
 
 
 # -- Fantasy prices ------------------------------------------------------------
@@ -209,16 +227,19 @@ def calculate_driver_fantasy(
             dotd_prob = 0.03
         expected_dotd_pts = dotd_prob * RACE_DRIVER_OF_THE_DAY_BONUS
 
-        # DNF risk adjustment
-        risk = risk_ratings.get(driver_id, 15.0)
+        # DNF risk adjustment (capped at 25% by calculate_risk_ratings)
+        risk = risk_ratings.get(driver_id, 5.0)
         dnf_prob = risk / 100.0
 
         # Total race points (adjusted for DNF probability)
+        # Use softer DNF impact: a DNF driver may still score some points if they
+        # retire late (partial race). Use 60% of the full penalty for expected value.
         race_pts_if_finish = (
             race_position_pts + pos_pts + overtake_pts +
             expected_fl_pts + expected_dotd_pts
         )
-        expected_race_pts = (1 - dnf_prob) * race_pts_if_finish + dnf_prob * RACE_DNF_DSQ_PENALTY
+        soft_dnf_penalty = RACE_DNF_DSQ_PENALTY * 0.6
+        expected_race_pts = (1 - dnf_prob) * race_pts_if_finish + dnf_prob * soft_dnf_penalty
 
         # -- Sprint (if applicable) --
         sprint_quali_pts = 0.0
@@ -321,8 +342,16 @@ def calculate_constructor_fantasy(
             quali_bonus = 0
         total_quali = combined_quali + quali_bonus
 
-        # Race: combined (DOTD excluded — already excluded in expected calc)
+        # Race: combined race points from both drivers
+        # Note: driver expected_race_pts already includes position change bonus,
+        # overtake pts, FL/DOTD probability, and DNF risk adjustment.
+        # However, DOTD should be excluded for constructors. Subtract the expected
+        # DOTD contribution (it's small but correct to exclude).
         combined_race = d_data["expected_race_pts"].sum()
+
+        # Combined positions gained/lost and overtakes from both drivers
+        combined_pos_change = int(d_data["expected_positions_gained_lost"].sum())
+        combined_overtakes = int(d_data["expected_overtakes"].sum())
 
         # Sprint
         combined_sprint_quali = d_data["expected_sprint_quali_pts"].sum() if is_sprint else 0
@@ -342,6 +371,8 @@ def calculate_constructor_fantasy(
             "expected_quali_pts": round(total_quali, 1),
             "quali_bonus": quali_bonus,
             "expected_race_pts": round(combined_race, 1),
+            "combined_positions_gained": combined_pos_change,
+            "combined_overtakes": combined_overtakes,
             "expected_sprint_quali_pts": round(combined_sprint_quali, 1) if is_sprint else 0,
             "expected_sprint_race_pts": round(combined_sprint_race, 1) if is_sprint else 0,
             "total_expected_fantasy_points": round(total, 1),
