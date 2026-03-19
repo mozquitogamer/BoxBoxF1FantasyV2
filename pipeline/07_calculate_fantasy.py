@@ -117,30 +117,22 @@ def risk_label(rating: float) -> str:
 
 def estimate_overtakes(predicted_quali: int, predicted_race: int, grid_size: int = 22) -> int:
     """
-    Estimate expected overtakes based on grid position and 2026 regs.
+    Estimate expected overtakes based on predicted positions gained.
 
-    2026 regulations with active aero and ground effect produce dramatically more
-    overtaking than previous years. Early 2026 races show even front-runners making
-    5-10 overtakes and midfield/backmarkers routinely making 15-25+.
-    Base values calibrated from Rounds 1-2 actual overtake data.
+    Calibrated from actual 2026 Rounds 1-2 data where overtakes tracked by
+    F1 Fantasy almost exactly equal positions gained (1:1 ratio across all
+    drivers). A small 10% multiplier accounts for wheel-to-wheel battles
+    where a driver overtakes then isn't overtaken back.
+
+    Examples from actual R1-R2 data:
+      VER P20→P6: 14 positions gained, 14 overtakes
+      BEA P12→P7: 5 positions gained, 5 overtakes
+      SAI P17→P9: 8 positions gained, 8 overtakes
+      HAM P7→P4:  3 positions gained, 3 overtakes
     """
-    # Base overtakes by grid position (2026 regs — much higher than pre-2026)
-    if predicted_quali <= 3:
-        base = 5
-    elif predicted_quali <= 7:
-        base = 8
-    elif predicted_quali <= 12:
-        base = 12
-    elif predicted_quali <= 17:
-        base = 15
-    else:
-        base = 18
-
-    # Additional overtakes from positions gained (2026: more wheel-to-wheel racing)
     positions_gained = max(0, predicted_quali - predicted_race)
-    gained_overtakes = round(positions_gained * 1.5)
-
-    return base + gained_overtakes
+    # ~1.1x positions gained — slight boost for 2026 closer racing
+    return round(positions_gained * 1.1)
 
 
 # -- Fantasy prices ------------------------------------------------------------
