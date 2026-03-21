@@ -92,7 +92,7 @@ PHASES = {
             ("01_download_data.py", ["--mode", "historical", "--start-year", "2020", "--end-year", "2025"]),
             ("03a_normalize_jolpica.py", []),
             ("03b_build_jolpica_features.py", []),
-            ("04_build_model_inputs.py", []),
+            ("04_build_model_inputs.py", ["--exclude-after", "{year}:{round}"]),
             ("05_train_models.py", []),
         ],
     },
@@ -206,8 +206,8 @@ Examples:
     start_total = time.time()
 
     for i, (script, step_args) in enumerate(steps, 1):
-        # Replace {round} placeholder
-        resolved_args = [a.replace("{round}", str(round_num)) for a in step_args]
+        # Replace {round} and {year} placeholders
+        resolved_args = [a.replace("{round}", str(round_num)).replace("{year}", str(CURRENT_SEASON)) for a in step_args]
         success = run_step(script, resolved_args, i, total, dry_run=args.dry_run)
         results.append((script, success))
         if not success and not args.dry_run:

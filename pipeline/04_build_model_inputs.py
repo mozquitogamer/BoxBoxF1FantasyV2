@@ -26,6 +26,7 @@ Output:
     models/training_data/all_training_data.parquet
 """
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -292,6 +293,21 @@ def merge_fp_features(
 
 def main() -> None:
     """Build the unified training dataset: Jolpica priors + FP telemetry."""
+    parser = argparse.ArgumentParser(description="Build model inputs with leakage prevention")
+    parser.add_argument(
+        "--exclude-season-round",
+        type=str,
+        default=None,
+        help="Exclude a specific round from training data. Format: YEAR:ROUND (e.g. 2026:3)",
+    )
+    parser.add_argument(
+        "--exclude-after",
+        type=str,
+        default=None,
+        help="Exclude all rounds at or after this point. Format: YEAR:ROUND (e.g. 2026:1)",
+    )
+    args = parser.parse_args()
+
     print("=" * 70)
     print("04 -- Build Model Inputs (Jolpica Priors + FP Telemetry)")
     print("=" * 70)
@@ -350,6 +366,48 @@ def main() -> None:
 
     if training_data.empty:
         print("\nERROR: No valid training data after filtering.")
+        return
+
+    # Step 6b: Data leakage prevention
+    print(f"\n[Step 6b] Data leakage prevention ...")
+
+    if args.exclude_season_round:
+        parts = args.exclude_season_round.split(":")
+        ex_year, ex_round = int(parts[0]), int(parts[1])
+        before = len(training_data)
+        training_data = training_data[
+            ~((training_data["season"] == ex_year) & (training_data["round"] == ex_round))
+        ]
+        removed = before - len(training_data)
+        print(f"  LEAKAGE GUARD: Excluded season {ex_year} round {ex_round}")
+        print(f"  Rows: {before:,} -> {len(training_data):,} ({removed} removed)")
+
+    if args.exclude_after:
+        parts = args.exclude_after.split(":")
+        ex_year, ex_round = int(parts[0]), int(parts[1])
+        before = len(training_data)
+        # Remove the target round and all later rounds in that season
+        training_data = training_data[
+            ~((training_data["season"] == ex_year) & (training_data["round"] >= ex_round))
+        ]
+        # Also exclude any future seasons
+        training_data = training_data[training_data["season"] <= ex_year]
+        removed = before - len(training_data)
+        print(f"  LEAKAGE GUARD: Excluded season {ex_year} round >= {ex_round}")
+        print(f"  Rows: {before:,} -> {len(training_data):,} ({removed} removed)")
+
+    # Automatic leakage detection warning
+    current_season_rows = training_data[training_data["season"] == CURRENT_SEASON]
+    if len(current_season_rows) > 0:
+        rounds_present = sorted(current_season_rows["round"].unique())
+        print(f"\n  !! WARNING: Current season ({CURRENT_SEASON}) data in training set !!")
+        print(f"  !! Rounds present: {[int(r) for r in rounds_present]}")
+        print(f"  !! If predicting any of these rounds, use --exclude-after to prevent leakage !!")
+    else:
+        print(f"  OK: No current season ({CURRENT_SEASON}) data in training set.")
+
+    if training_data.empty:
+        print("\nERROR: No valid training data after leakage exclusions.")
         return
 
     # Step 7: Save
