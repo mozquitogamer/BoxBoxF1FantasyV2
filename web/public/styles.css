@@ -136,6 +136,59 @@ body {
     color: var(--text-muted);
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.countdown-badge {
+    background: var(--bg-card);
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--accent);
+    text-align: center;
+    min-width: 160px;
+}
+
+.countdown-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.countdown-timer {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+
+.countdown-timer.urgent {
+    color: var(--accent);
+    animation: pulse-urgent 1s ease-in-out infinite;
+}
+
+@keyframes pulse-urgent {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.countdown-race {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    white-space: nowrap;
+}
+
+.countdown-badge.past-deadline .countdown-timer {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
 /* ---- Tabs ---- */
 .tabs {
     background: var(--bg-secondary);
@@ -1151,7 +1204,16 @@ select:focus, input:focus {
         align-items: flex-start;
     }
 
+    .header-right {
+        flex-direction: column;
+        width: 100%;
+    }
+
     .race-badge {
+        width: 100%;
+    }
+
+    .countdown-badge {
         width: 100%;
     }
 

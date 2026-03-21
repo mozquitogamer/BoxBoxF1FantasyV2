@@ -44,6 +44,35 @@ const RACE_FLAGS = {
     'Abu Dhabi Grand Prix': '🇦🇪',
 };
 
+// -- 2026 F1 Fantasy Lock Deadlines (qualifying/sprint-quali start, UTC) --
+// Lock deadline = start of qualifying (or sprint qualifying for sprint weekends)
+const LOCK_DEADLINES = [
+    { round: 1,  race: 'Australian Grand Prix',      lock: '2026-03-07T05:00:00Z', sprint: false },
+    { round: 2,  race: 'Chinese Grand Prix',          lock: '2026-03-13T07:30:00Z', sprint: true  },
+    { round: 3,  race: 'Japanese Grand Prix',          lock: '2026-03-28T06:00:00Z', sprint: false },
+    { round: 4,  race: 'Bahrain Grand Prix',           lock: '2026-04-11T15:00:00Z', sprint: false },
+    { round: 5,  race: 'Saudi Arabian Grand Prix',     lock: '2026-04-18T17:00:00Z', sprint: false },
+    { round: 6,  race: 'Miami Grand Prix',             lock: '2026-05-01T21:30:00Z', sprint: true  },
+    { round: 7,  race: 'Canadian Grand Prix',          lock: '2026-05-23T18:00:00Z', sprint: false },
+    { round: 8,  race: 'Monaco Grand Prix',            lock: '2026-06-06T14:00:00Z', sprint: false },
+    { round: 9,  race: 'Spanish Grand Prix',           lock: '2026-06-13T13:00:00Z', sprint: false },
+    { round: 10, race: 'Austrian Grand Prix',          lock: '2026-06-26T14:30:00Z', sprint: true  },
+    { round: 11, race: 'British Grand Prix',           lock: '2026-07-04T14:00:00Z', sprint: false },
+    { round: 12, race: 'Belgian Grand Prix',           lock: '2026-07-18T14:00:00Z', sprint: false },
+    { round: 13, race: 'Hungarian Grand Prix',         lock: '2026-07-25T14:00:00Z', sprint: false },
+    { round: 14, race: 'Dutch Grand Prix',             lock: '2026-08-22T13:00:00Z', sprint: false },
+    { round: 15, race: 'Italian Grand Prix',           lock: '2026-09-05T14:00:00Z', sprint: false },
+    { round: 16, race: 'Spanish Grand Prix (Madrid)',   lock: '2026-09-12T14:00:00Z', sprint: false },
+    { round: 17, race: 'Azerbaijan Grand Prix',        lock: '2026-09-25T12:00:00Z', sprint: false },
+    { round: 18, race: 'Singapore Grand Prix',         lock: '2026-10-10T13:00:00Z', sprint: false },
+    { round: 19, race: 'United States Grand Prix',     lock: '2026-10-23T21:30:00Z', sprint: true  },
+    { round: 20, race: 'Mexican Grand Prix',           lock: '2026-10-31T20:00:00Z', sprint: false },
+    { round: 21, race: 'Brazilian Grand Prix',         lock: '2026-11-06T18:30:00Z', sprint: true  },
+    { round: 22, race: 'Las Vegas Grand Prix',         lock: '2026-11-21T04:00:00Z', sprint: false },
+    { round: 23, race: 'Qatar Grand Prix',             lock: '2026-11-27T16:30:00Z', sprint: true  },
+    { round: 24, race: 'Abu Dhabi Grand Prix',         lock: '2026-12-05T13:00:00Z', sprint: false },
+];
+
 // -- State --
 let data = null;
 let lockedDrivers = new Set();
@@ -81,6 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadSeasonData();
     await preloadActualData();
     await loadPitstopData();
+    startCountdown();
     setupTabs();
     setupControls();
     render();
@@ -195,6 +225,57 @@ async function loadActualData(roundNum) {
         actualCache[roundNum] = d;
         return d;
     } catch(e) { return null; }
+}
+
+// -- Countdown Timer --
+function startCountdown() {
+    const badge = document.getElementById('countdownBadge');
+    const timerEl = document.getElementById('countdownTimer');
+    const labelEl = document.getElementById('countdownLabel');
+    const raceEl = document.getElementById('countdownRace');
+
+    function update() {
+        const now = new Date();
+        // Find the next upcoming deadline
+        let next = null;
+        for (const dl of LOCK_DEADLINES) {
+            const lockTime = new Date(dl.lock);
+            if (lockTime > now) { next = dl; break; }
+        }
+
+        if (!next) {
+            badge.style.display = 'none';
+            return;
+        }
+
+        badge.style.display = '';
+        const lockTime = new Date(next.lock);
+        const diff = lockTime - now;
+
+        const days = Math.floor(diff / 86400000);
+        const hrs = Math.floor((diff % 86400000) / 3600000);
+        const mins = Math.floor((diff % 3600000) / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+
+        let timerStr;
+        if (days > 0) {
+            timerStr = `${days}d ${hrs}h ${mins}m`;
+        } else if (hrs > 0) {
+            timerStr = `${hrs}h ${mins}m ${secs}s`;
+        } else {
+            timerStr = `${mins}m ${secs}s`;
+        }
+
+        timerEl.textContent = timerStr;
+        timerEl.classList.toggle('urgent', diff < 3600000); // < 1 hour
+
+        labelEl.textContent = next.sprint ? 'Sprint lock deadline' : 'Lock deadline';
+        const flag = RACE_FLAGS[next.race] || '🏁';
+        raceEl.textContent = `${flag} R${next.round} · ${lockTime.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} · ${lockTime.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`;
+    }
+
+    update();
+    setInterval(update, 1000);
 }
 
 // -- Tabs --
