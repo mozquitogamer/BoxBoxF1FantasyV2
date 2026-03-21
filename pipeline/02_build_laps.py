@@ -17,6 +17,7 @@ Output:
     data/processed/laps/roundX/all_laps_fpX.parquet
 """
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -294,6 +295,11 @@ def process_fp_session(
 
 def main() -> None:
     """Build clean lap datasets for a specified round."""
+    parser = argparse.ArgumentParser(description="BoxBoxF1Fantasy — Build Laps")
+    parser.add_argument("--round", type=int, default=None,
+                        help="Round number to process")
+    args, _ = parser.parse_known_args()
+
     print("=" * 60)
     print("BoxBoxF1Fantasy — Build Laps")
     print("=" * 60)
@@ -303,7 +309,10 @@ def main() -> None:
     fastf1.Cache.enable_cache(str(FASTF1_CACHE_DIR))
 
     year = CURRENT_SEASON
-    round_num = int(input(f"\nEnter round number for {year}: ").strip())
+    if args.round is not None:
+        round_num = args.round
+    else:
+        round_num = int(input(f"\nEnter round number for {year}: ").strip())
 
     if round_num in CANCELLED_ROUNDS_2026:
         print(f"Round {round_num} is cancelled.")

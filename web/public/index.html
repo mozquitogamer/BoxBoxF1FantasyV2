@@ -10,6 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="dev-banner">
+        <span class="dev-banner-icon">🚧</span>
+        This site is under active development. Predictions and features may change.
+        <span class="dev-banner-icon">🚧</span>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="container">
@@ -48,6 +54,8 @@
                 <button class="tab" data-tab="optimizer">Lineup Optimizer</button>
                 <button class="tab" data-tab="analysis">Analysis</button>
                 <button class="tab" data-tab="season">Season</button>
+                <button class="tab" data-tab="h2h">H2H</button>
+                <button class="tab" data-tab="accuracy">Accuracy</button>
                 <button class="tab" data-tab="about">About</button>
             </div>
         </div>
@@ -59,6 +67,11 @@
 
             <!-- Drivers Tab -->
             <section class="tab-content active" id="tab-drivers">
+                <!-- Hero Section -->
+                <div class="hero" id="heroSection">
+                    <!-- JS will populate this -->
+                </div>
+
                 <!-- Sort/Filter controls -->
                 <div class="controls">
                     <div class="control-group">
@@ -239,6 +252,37 @@
                 </div>
             </section>
 
+            <!-- H2H Tab -->
+            <section class="tab-content" id="tab-h2h">
+                <div class="h2h-header">
+                    <h2>Head-to-Head Matchup</h2>
+                    <p>Compare any two drivers side-by-side. See who to pick based on predictions, value, and historical performance.</p>
+                </div>
+                <div class="h2h-selectors">
+                    <div class="h2h-selector-group">
+                        <label>Driver A</label>
+                        <select id="h2hDriverA"></select>
+                    </div>
+                    <div class="h2h-vs">VS</div>
+                    <div class="h2h-selector-group">
+                        <label>Driver B</label>
+                        <select id="h2hDriverB"></select>
+                    </div>
+                </div>
+                <div id="h2hComparison"></div>
+            </section>
+
+            <!-- Accuracy Tab -->
+            <section class="tab-content" id="tab-accuracy">
+                <div class="accuracy-header">
+                    <h2>Model Accuracy</h2>
+                    <p>Track how well our predictions match reality. Updated after each race weekend.</p>
+                </div>
+                <div id="accuracyContent">
+                    <p class="no-data">Loading accuracy data...</p>
+                </div>
+            </section>
+
             <!-- About Tab -->
             <section class="tab-content" id="tab-about">
                 <div class="about-content">
@@ -291,6 +335,6 @@
         </div>
     </main>
 
-    <script src="app.js?v=6"></script>
+    <script src="app.js?v=8"></script>
 </body>
 </html>

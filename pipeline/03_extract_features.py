@@ -18,6 +18,7 @@ Output:
     data/processed/features/roundX/features.parquet
 """
 
+import argparse
 import sys
 from pathlib import Path
 from typing import Optional
@@ -267,11 +268,19 @@ def extract_driver_features(
 
 def main() -> None:
     """Extract features for a specified round."""
+    parser = argparse.ArgumentParser(description="BoxBoxF1Fantasy — Extract Features")
+    parser.add_argument("--round", type=int, default=None,
+                        help="Round number to process")
+    args, _ = parser.parse_known_args()
+
     print("=" * 60)
     print("BoxBoxF1Fantasy — Extract Features")
     print("=" * 60)
 
-    round_num = int(input(f"\nEnter round number for {CURRENT_SEASON}: ").strip())
+    if args.round is not None:
+        round_num = args.round
+    else:
+        round_num = int(input(f"\nEnter round number for {CURRENT_SEASON}: ").strip())
 
     laps_dir = LAPS_DIR / f"round{round_num}"
     if not laps_dir.exists():

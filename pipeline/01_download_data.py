@@ -13,6 +13,7 @@ The script will prompt the user to choose between:
 - Downloading historical data for a custom year range
 """
 
+import argparse
 import json
 import sys
 import time
@@ -280,7 +281,18 @@ def get_total_rounds_for_year(year: int) -> int:
 
 
 def main() -> None:
-    """Main entry point — interactive prompts for download mode."""
+    """Main entry point — supports both CLI args and interactive prompts."""
+    parser = argparse.ArgumentParser(description="BoxBoxF1Fantasy — Data Downloader")
+    parser.add_argument("--mode", choices=["current", "historical"],
+                        help="Download mode: 'current' for a specific round, 'historical' for year range")
+    parser.add_argument("--round", type=int, default=None,
+                        help="Round number (used with --mode current)")
+    parser.add_argument("--start-year", type=int, default=None,
+                        help="Start year (used with --mode historical)")
+    parser.add_argument("--end-year", type=int, default=None,
+                        help="End year (used with --mode historical)")
+    args, _ = parser.parse_known_args()
+
     print("=" * 60)
     print("BoxBoxF1Fantasy — Data Downloader")
     print("=" * 60)
@@ -292,6 +304,48 @@ def main() -> None:
     print(f"\nCurrent season: {CURRENT_SEASON}")
     print(f"Cancelled rounds: {CANCELLED_ROUNDS_2026}")
 
+    # --- CLI-driven paths ---
+    if args.mode == "current":
+        round_num = args.round
+        if round_num is None:
+            print("Error: --round is required with --mode current")
+            sys.exit(1)
+        if round_num in CANCELLED_ROUNDS_2026:
+            print(f"Round {round_num} is cancelled. Aborting.")
+            return
+        print(f"\nDownloading {CURRENT_SEASON} Round {round_num}...")
+        download_fastf1_round(CURRENT_SEASON, round_num)
+        download_jolpica_round(CURRENT_SEASON, round_num)
+        print("\n" + "=" * 60)
+        print("Download complete!")
+        print("=" * 60)
+        return
+
+    if args.mode == "historical":
+        start_year = args.start_year
+        end_year = args.end_year
+        if start_year is None or end_year is None:
+            print("Error: --start-year and --end-year are required with --mode historical")
+            sys.exit(1)
+        print(f"\nDownloading historical data from {start_year} to {end_year}...")
+        for year in range(start_year, end_year + 1):
+            print(f"\n{'-' * 40}")
+            print(f"Season {year}")
+            print(f"{'-' * 40}")
+            download_jolpica_year(year)
+            total_rounds = get_total_rounds_for_year(year)
+            if total_rounds == 0:
+                print(f"  Could not determine rounds for {year}, skipping FastF1")
+                continue
+            print(f"\n  FastF1 — downloading {total_rounds} rounds...")
+            for rnd in tqdm(range(1, total_rounds + 1), desc=f"  FastF1 {year}", unit="round"):
+                download_fastf1_round(year, rnd)
+        print("\n" + "=" * 60)
+        print("Download complete!")
+        print("=" * 60)
+        return
+
+    # --- Interactive fallback (no --mode provided) ---
     print("\nOptions:")
     print("  1. Download current round data (specific round)")
     print("  2. Download historical data (year range)")

@@ -430,11 +430,63 @@ function updateSortIndicators() {
 // -- Render --
 function render() {
     if (!data) return;
+    renderHero();
     renderDrivers();
     renderConstructors();
     renderLockGrid();
     renderFPAnalysis();
     renderSeason();
+    renderH2H();
+    renderAccuracy();
+}
+
+// -- Hero Section --
+function renderHero() {
+    if (!data || !data.drivers) return;
+    const hero = document.getElementById('heroSection');
+    if (!hero) return;
+
+    const topPick = data.drivers[0]; // already sorted by expected_points
+    const bestValue = [...data.drivers].sort((a,b) => (b.value_score||0) - (a.value_score||0))[0];
+    const darkHorse = [...data.drivers].sort((a,b) => {
+        const aUp = (a.mc_total_p95||0) - (a.mc_total_mean||a.expected_points);
+        const bUp = (b.mc_total_p95||0) - (b.mc_total_mean||b.expected_points);
+        return bUp - aUp;
+    })[0]; // highest upside
+
+    const flag = RACE_FLAGS[data.race] || '';
+
+    hero.innerHTML = `
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div class="hero-title-area">
+                <div class="hero-flag">${flag}</div>
+                <div>
+                    <h2 class="hero-title">${data.race}</h2>
+                    <p class="hero-subtitle">Round ${data.round} \u00b7 ${data.season}${data.is_sprint_weekend ? ' \u00b7 Sprint Weekend' : ''} \u00b7 ML-Powered Predictions</p>
+                </div>
+            </div>
+            <div class="hero-picks">
+                ${heroCard('Top Pick', topPick, 'trophy')}
+                ${heroCard('Best Value', bestValue, 'value')}
+                ${heroCard('Dark Horse', darkHorse, 'rocket')}
+            </div>
+        </div>
+    `;
+}
+
+function heroCard(label, driver, type) {
+    const team = TEAMS[driver.constructor] || { name: driver.constructor, color: '#666' };
+    const icon = type === 'trophy' ? '\u{1F3C6}' : type === 'value' ? '\u{1F48E}' : '\u{1F680}';
+    return `
+        <div class="hero-card" style="--team-color:${team.color}">
+            <div class="hero-card-label">${icon} ${label}</div>
+            <div class="hero-card-driver">${driver.name || driver.driver_id}</div>
+            <div class="hero-card-team">${team.name}</div>
+            <div class="hero-card-pts">${driver.expected_points.toFixed(1)} pts</div>
+            <div class="hero-card-meta">$${driver.current_price}M \u00b7 ${(driver.value_score||0).toFixed(2)}x value</div>
+        </div>
+    `;
 }
 
 // -- Driver rendering --
@@ -1006,15 +1058,17 @@ function renderSingleLineup(lineup, index, strategy, budget) {
         totalExpChange += pc.expectedChange;
     });
 
-    let html = `<div class="lineup-block" style="margin-bottom:24px;">
+    const expandedClass = index === 0 ? ' expanded' : '';
+    let html = `<div class="lineup-block${expandedClass}" style="margin-bottom:24px;" onclick="this.classList.toggle('expanded')">
         <div class="lineup-block-header">
-            <h4>Lineup #${index + 1}</h4>
+            <h4><span class="lineup-expand-icon">\u25BC</span> Lineup #${index + 1}</h4>
             <span class="lineup-block-stats">
-                ${lineup.totalPoints.toFixed(1)} pts · $${lineup.totalCost.toFixed(1)}M ·
-                $${(budget - lineup.totalCost).toFixed(1)}M left ·
+                ${lineup.totalPoints.toFixed(1)} pts \u00b7 $${lineup.totalCost.toFixed(1)}M \u00b7
+                $${(budget - lineup.totalCost).toFixed(1)}M left \u00b7
                 <span style="color:${totalExpChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)'}">${totalExpChange >= 0 ? '+' : ''}${totalExpChange.toFixed(1)}M exp change</span>
             </span>
         </div>
+        <div class="lineup-details">
         <div class="lineup-picks-grid">`;
 
     lineup.drivers.sort((a, b) => b.expected_points - a.expected_points);
@@ -1065,7 +1119,7 @@ function renderSingleLineup(lineup, index, strategy, budget) {
         </div>`;
     });
 
-    html += '</div></div>';
+    html += '</div></div></div>';
     return html;
 }
 
@@ -1862,4 +1916,482 @@ function renderSeason() {
                 selector.appendChild(opt);
             });
     }
+}
+
+// ============================================================
+// Head-to-Head Matchup Tab
+// ============================================================
+
+function normalCDF(x) {
+    const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+    const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+    const sign = x < 0 ? -1 : 1;
+    x = Math.abs(x) / Math.SQRT2;
+    const t = 1.0 / (1.0 + p * x);
+    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+    return 0.5 * (1.0 + sign * y);
+}
+
+let h2hInitialized = false;
+
+function renderH2H() {
+    if (!data || !data.drivers) return;
+    const selA = document.getElementById('h2hDriverA');
+    const selB = document.getElementById('h2hDriverB');
+    if (!selA || !selB) return;
+
+    // Only populate dropdowns once
+    if (!h2hInitialized) {
+        const sorted = [...data.drivers].sort((a, b) => a.name.localeCompare(b.name));
+        [selA, selB].forEach(sel => {
+            sel.innerHTML = '<option value="">Select a driver...</option>';
+            sorted.forEach(d => {
+                const team = TEAMS[d.constructor] || { name: d.constructor, color: '#666' };
+                const opt = document.createElement('option');
+                opt.value = d.driver_id;
+                opt.textContent = `${d.name} (${team.name})`;
+                opt.style.color = team.color;
+                sel.appendChild(opt);
+            });
+        });
+        // Default to first two drivers by expected points
+        const byPts = [...data.drivers].sort((a, b) => b.expected_points - a.expected_points);
+        if (byPts.length >= 2) {
+            selA.value = byPts[0].driver_id;
+            selB.value = byPts[1].driver_id;
+        }
+        selA.addEventListener('change', updateH2HComparison);
+        selB.addEventListener('change', updateH2HComparison);
+        h2hInitialized = true;
+        updateH2HComparison();
+    }
+}
+
+function updateH2HComparison() {
+    const container = document.getElementById('h2hComparison');
+    const idA = document.getElementById('h2hDriverA').value;
+    const idB = document.getElementById('h2hDriverB').value;
+
+    if (!idA || !idB || idA === idB) {
+        container.innerHTML = idA === idB && idA ? '<p class="no-data">Please select two different drivers.</p>' : '<p class="no-data">Select two drivers above to compare.</p>';
+        return;
+    }
+
+    const dA = data.drivers.find(d => d.driver_id === idA);
+    const dB = data.drivers.find(d => d.driver_id === idB);
+    if (!dA || !dB) return;
+
+    const teamA = TEAMS[dA.constructor] || { name: dA.constructor, color: '#666' };
+    const teamB = TEAMS[dB.constructor] || { name: dB.constructor, color: '#666' };
+
+    // Win probability
+    const stdA = dA.mc_total_std || 10;
+    const stdB = dB.mc_total_std || 10;
+    const meanA = dA.mc_total_mean != null ? dA.mc_total_mean : dA.expected_points;
+    const meanB = dB.mc_total_mean != null ? dB.mc_total_mean : dB.expected_points;
+    const combinedStd = Math.sqrt(stdA * stdA + stdB * stdB);
+    const z = combinedStd > 0 ? (meanA - meanB) / combinedStd : 0;
+    const winProbA = normalCDF(z);
+    const winProbB = 1 - winProbA;
+    const winPctA = (winProbA * 100).toFixed(1);
+    const winPctB = (winProbB * 100).toFixed(1);
+
+    // Price fields
+    computeDriverPriceFields(dA);
+    computeDriverPriceFields(dB);
+
+    // Historical H2H
+    let histHTML = '';
+    let h2hWinsA = 0, h2hWinsB = 0, totalPtsA = 0, totalPtsB = 0, h2hRounds = 0;
+    if (seasonSummary && seasonSummary.rounds) {
+        const completedRounds = seasonSummary.rounds.filter(r => r.has_actual);
+        const histRows = [];
+        completedRounds.forEach(r => {
+            const actData = actualCache[r.round];
+            if (!actData || !actData.drivers) return;
+            const actA = actData.drivers.find(d => d.driver_id === idA);
+            const actB = actData.drivers.find(d => d.driver_id === idB);
+            if (!actA || !actB) return;
+            h2hRounds++;
+            const ptsA = actA.total_points || 0;
+            const ptsB = actB.total_points || 0;
+            totalPtsA += ptsA;
+            totalPtsB += ptsB;
+            if (ptsA > ptsB) h2hWinsA++;
+            else if (ptsB > ptsA) h2hWinsB++;
+            const winnerClass = ptsA > ptsB ? 'h2h-winner-a' : ptsB > ptsA ? 'h2h-winner-b' : '';
+            histRows.push(`<tr class="${winnerClass}">
+                <td>R${r.round}</td>
+                <td>${r.name}</td>
+                <td class="num" style="color:${teamA.color}">${ptsA}</td>
+                <td class="num" style="color:${teamB.color}">${ptsB}</td>
+                <td class="num">${ptsA - ptsB > 0 ? '+' : ''}${ptsA - ptsB}</td>
+            </tr>`);
+        });
+
+        if (histRows.length > 0) {
+            const avgA = (totalPtsA / h2hRounds).toFixed(1);
+            const avgB = (totalPtsB / h2hRounds).toFixed(1);
+            histHTML = `
+            <div class="h2h-section">
+                <h3>Historical H2H</h3>
+                <div class="h2h-record">
+                    <span style="color:${teamA.color}">${dA.name} ${h2hWinsA}</span>
+                    <span class="h2h-record-sep"> - </span>
+                    <span style="color:${teamB.color}">${h2hWinsB} ${dB.name}</span>
+                </div>
+                <div class="h2h-averages">
+                    Avg pts: <span style="color:${teamA.color}">${avgA}</span> vs <span style="color:${teamB.color}">${avgB}</span>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table h2h-history-table">
+                        <thead><tr><th>Rd</th><th>Race</th><th class="num">${dA.name}</th><th class="num">${dB.name}</th><th class="num">Diff</th></tr></thead>
+                        <tbody>${histRows.join('')}</tbody>
+                    </table>
+                </div>
+            </div>`;
+        }
+    }
+
+    // Recommendation
+    let recText = '';
+    const ptsDiff = dA.expected_points - dB.expected_points;
+    const valueDiff = dA.value_score - dB.value_score;
+    const pick = ptsDiff >= 0 ? dA : dB;
+    const pickTeam = ptsDiff >= 0 ? teamA : teamB;
+    const reasons = [];
+    if (Math.abs(ptsDiff) >= 0.5) reasons.push(`${Math.abs(ptsDiff).toFixed(1)} more expected points`);
+    if ((ptsDiff >= 0 && valueDiff >= 0.05) || (ptsDiff < 0 && valueDiff < -0.05)) reasons.push('better value');
+    if ((ptsDiff >= 0 && stdA < stdB) || (ptsDiff < 0 && stdB < stdA)) reasons.push('lower risk');
+    if ((ptsDiff >= 0 && winProbA > 0.5) || (ptsDiff < 0 && winProbB > 0.5)) {
+        const wp = ptsDiff >= 0 ? winPctA : winPctB;
+        reasons.push(`${wp}% win probability`);
+    }
+    recText = reasons.length > 0
+        ? `Pick <strong style="color:${pickTeam.color}">${pick.name}</strong>: ${reasons.join(', ')}`
+        : 'These drivers are very evenly matched. Consider other factors like upcoming schedule and team momentum.';
+
+    // Build stat comparison helper
+    function statRow(label, valA, valB, fmt, higherBetter = true) {
+        const nA = parseFloat(valA), nB = parseFloat(valB);
+        let clsA = '', clsB = '';
+        if (!isNaN(nA) && !isNaN(nB) && nA !== nB) {
+            const aBetter = higherBetter ? nA > nB : nA < nB;
+            clsA = aBetter ? 'h2h-better' : 'h2h-worse';
+            clsB = aBetter ? 'h2h-worse' : 'h2h-better';
+        }
+        const fA = typeof fmt === 'function' ? fmt(valA) : valA;
+        const fB = typeof fmt === 'function' ? fmt(valB) : valB;
+        return `<div class="h2h-stat-row">
+            <span class="h2h-stat-val ${clsA}" style="color:${teamA.color}">${fA}</span>
+            <span class="h2h-stat-label">${label}</span>
+            <span class="h2h-stat-val ${clsB}" style="color:${teamB.color}">${fB}</span>
+        </div>`;
+    }
+
+    const fmtPts = v => v != null ? v.toFixed(1) : '-';
+    const fmtPos = v => v != null ? 'P' + v : '-';
+    const fmtPct = v => v != null ? (v * 100).toFixed(0) + '%' : '-';
+    const fmtPrice = v => v != null ? '$' + v.toFixed(1) + 'M' : '-';
+
+    container.innerHTML = `
+    <div class="h2h-comparison">
+        <div class="h2h-drivers-header">
+            <div class="h2h-driver-name" style="color:${teamA.color}">${dA.name}<span class="h2h-driver-team">${teamA.name}</span></div>
+            <div class="h2h-driver-name" style="color:${teamB.color}">${dB.name}<span class="h2h-driver-team">${teamB.name}</span></div>
+        </div>
+
+        <div class="h2h-section">
+            <h3>This Weekend</h3>
+            ${statRow('Expected Points', dA.expected_points, dB.expected_points, fmtPts, true)}
+            ${statRow('MC Mean', meanA, meanB, fmtPts, true)}
+            ${statRow('90% CI Range', dA.mc_total_p5 != null ? `${dA.mc_total_p5.toFixed(0)} - ${dA.mc_total_p95.toFixed(0)}` : '-', dB.mc_total_p5 != null ? `${dB.mc_total_p5.toFixed(0)} - ${dB.mc_total_p95.toFixed(0)}` : '-', v => v)}
+            ${statRow('Top 3 Prob', dA.prob_top3, dB.prob_top3, fmtPct, true)}
+            ${statRow('Top 5 Prob', dA.prob_top5, dB.prob_top5, fmtPct, true)}
+            ${statRow('Top 10 Prob', dA.prob_top10, dB.prob_top10, fmtPct, true)}
+            ${statRow('Pred Quali', dA.predicted_quali, dB.predicted_quali, fmtPos, false)}
+            ${statRow('Pred Finish', dA.predicted_finish, dB.predicted_finish, fmtPos, false)}
+            <div class="h2h-win-bar-container">
+                <div class="h2h-win-bar-label">Win Probability</div>
+                <div class="h2h-win-bar">
+                    <div class="h2h-win-bar-a" style="width:${winPctA}%;background:${teamA.color}">
+                        ${winProbA >= 0.15 ? winPctA + '%' : ''}
+                    </div>
+                    <div class="h2h-win-bar-b" style="width:${winPctB}%;background:${teamB.color}">
+                        ${winProbB >= 0.15 ? winPctB + '%' : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="h2h-section">
+            <h3>Value Comparison</h3>
+            ${statRow('Price', dA.current_price, dB.current_price, fmtPrice, false)}
+            ${statRow('Pts / $M', dA.points_per_million, dB.points_per_million, fmtPts, true)}
+            ${statRow('Value Score', dA.value_score, dB.value_score, v => v != null ? v.toFixed(2) + 'x' : '-', true)}
+            ${statRow('MC Value', dA.mc_value_score, dB.mc_value_score, v => v != null ? v.toFixed(2) + 'x' : '-', true)}
+            ${statRow('Price Change', dA._price_change, dB._price_change, v => (v >= 0 ? '+' : '') + v.toFixed(1), true)}
+        </div>
+
+        ${histHTML}
+
+        <div class="h2h-recommendation">
+            <div class="h2h-rec-label">Recommendation</div>
+            <div class="h2h-rec-text">${recText}</div>
+        </div>
+    </div>`;
+}
+
+// ============================================================
+// Model Accuracy Dashboard Tab
+// ============================================================
+
+let accuracyRendered = false;
+
+async function renderAccuracy() {
+    if (!data || accuracyRendered) return;
+    if (!seasonSummary || !seasonSummary.rounds) return;
+    const container = document.getElementById('accuracyContent');
+    if (!container) return;
+
+    const roundsWithBoth = seasonSummary.rounds.filter(r => r.has_predictions && r.has_actual);
+    if (roundsWithBoth.length === 0) {
+        container.innerHTML = '<p class="no-data">No rounds with both predictions and actuals available yet. Check back after a completed race weekend.</p>';
+        accuracyRendered = true;
+        return;
+    }
+
+    container.innerHTML = '<p class="no-data">Analyzing prediction accuracy...</p>';
+
+    // Load all prediction/actual pairs
+    const pairs = [];
+    for (const r of roundsWithBoth) {
+        const [pred, act] = await Promise.all([
+            loadPredictionsData(r.round),
+            loadActualData(r.round)
+        ]);
+        if (pred && act) pairs.push({ round: r.round, name: r.name, pred, act });
+    }
+
+    if (pairs.length === 0) {
+        container.innerHTML = '<p class="no-data">Could not load prediction/actual data pairs.</p>';
+        accuracyRendered = true;
+        return;
+    }
+
+    // Compute all metrics
+    const scatterPoints = [];
+    const roundStats = [];
+    const driverAccum = {};
+    let totalPtsMAE = 0, totalPosMAE = 0, totalCIHits = 0, totalCITotal = 0, totalComparisons = 0, totalPosComparisons = 0;
+
+    pairs.forEach(({ round, name, pred, act }) => {
+        const predMap = {};
+        if (pred.drivers) pred.drivers.forEach(d => { predMap[d.driver_id] = d; });
+        const actMap = {};
+        if (act.drivers) act.drivers.forEach(d => { actMap[d.driver_id] = d; });
+
+        let rPtsMAE = 0, rPosMAE = 0, rCIHits = 0, rCITotal = 0, rCount = 0, rPosCount = 0;
+        let bestErr = Infinity, worstErr = 0, bestDriver = '', worstDriver = '';
+
+        const allIds = [...new Set([...Object.keys(predMap), ...Object.keys(actMap)])];
+        allIds.forEach(id => {
+            const p = predMap[id], a = actMap[id];
+            if (!p || !a) return;
+            const predPts = p.expected_points || 0;
+            const actPts = a.total_points || 0;
+            const ptsErr = Math.abs(predPts - actPts);
+            rPtsMAE += ptsErr;
+            rCount++;
+            totalPtsMAE += ptsErr;
+            totalComparisons++;
+
+            if (ptsErr < bestErr) { bestErr = ptsErr; bestDriver = p.name || id; }
+            if (ptsErr > worstErr) { worstErr = ptsErr; worstDriver = p.name || id; }
+
+            const predFinish = p.predicted_finish;
+            const actFinish = a.race_position;
+            if (predFinish != null && actFinish != null) {
+                const posErr = Math.abs(predFinish - actFinish);
+                rPosMAE += posErr;
+                rPosCount++;
+                totalPosMAE += posErr;
+                totalPosComparisons++;
+            }
+
+            if (p.mc_total_p5 != null && p.mc_total_p95 != null) {
+                rCITotal++;
+                totalCITotal++;
+                if (actPts >= p.mc_total_p5 && actPts <= p.mc_total_p95) {
+                    rCIHits++;
+                    totalCIHits++;
+                }
+            }
+
+            scatterPoints.push({
+                pred: predPts, actual: actPts, driver_id: id,
+                constructor: p.constructor || a.constructor, round, name: p.name || id
+            });
+
+            // Accumulate per-driver
+            if (!driverAccum[id]) {
+                driverAccum[id] = { name: p.name || id, constructor: p.constructor || a.constructor, totalPred: 0, totalActual: 0, totalErr: 0, rounds: 0 };
+            }
+            driverAccum[id].totalPred += predPts;
+            driverAccum[id].totalActual += actPts;
+            driverAccum[id].totalErr += ptsErr;
+            driverAccum[id].rounds++;
+        });
+
+        roundStats.push({
+            round, name,
+            ptsMAE: rCount > 0 ? (rPtsMAE / rCount).toFixed(1) : '-',
+            posMAE: rPosCount > 0 ? (rPosMAE / rPosCount).toFixed(1) : '-',
+            ciCoverage: rCITotal > 0 ? ((rCIHits / rCITotal) * 100).toFixed(0) + '%' : '-',
+            best: bestDriver + ' (' + bestErr.toFixed(1) + ')',
+            worst: worstDriver + ' (' + worstErr.toFixed(1) + ')'
+        });
+    });
+
+    const overallPtsMAE = totalComparisons > 0 ? (totalPtsMAE / totalComparisons).toFixed(1) : '-';
+    const overallPosMAE = totalPosComparisons > 0 ? (totalPosMAE / totalPosComparisons).toFixed(1) : '-';
+    const overallCICov = totalCITotal > 0 ? ((totalCIHits / totalCITotal) * 100).toFixed(0) : '-';
+
+    // Build scatter plot SVG
+    const scatterSVG = buildScatterPlot(scatterPoints);
+
+    // CI coverage bar
+    const ciPct = totalCITotal > 0 ? (totalCIHits / totalCITotal) * 100 : 0;
+    const ciBarHTML = `
+    <div class="ci-bar-container">
+        <div class="ci-bar-label">90% CI Coverage: ${ciPct.toFixed(0)}% of predictions within confidence interval</div>
+        <div class="ci-bar">
+            <div class="ci-bar-fill" style="width:${ciPct}%;background:${ciPct >= 80 ? 'var(--green)' : ciPct >= 60 ? 'var(--yellow)' : 'var(--red)'}"></div>
+            <div class="ci-bar-target" style="left:90%"><span>90%</span></div>
+        </div>
+    </div>`;
+
+    // Per-round table
+    const roundTableRows = roundStats.map(r => `<tr>
+        <td>R${r.round}</td><td>${r.name}</td><td class="num">${r.ptsMAE}</td>
+        <td class="num">${r.posMAE}</td><td class="num">${r.ciCoverage}</td>
+        <td>${r.best}</td><td>${r.worst}</td>
+    </tr>`).join('');
+
+    // Per-driver table
+    const driverRows = Object.values(driverAccum)
+        .map(d => ({
+            ...d,
+            avgPred: d.totalPred / d.rounds,
+            avgActual: d.totalActual / d.rounds,
+            avgErr: d.totalErr / d.rounds,
+            bias: (d.totalPred - d.totalActual) / d.rounds
+        }))
+        .sort((a, b) => b.avgErr - a.avgErr);
+
+    const driverTableRows = driverRows.map(d => {
+        const team = TEAMS[d.constructor] || { name: d.constructor, color: '#666' };
+        const biasClass = d.bias > 2 ? 'bias-over' : d.bias < -2 ? 'bias-under' : '';
+        const biasSign = d.bias >= 0 ? '+' : '';
+        return `<tr>
+            <td>${d.name}</td>
+            <td style="color:${team.color}">${team.name}</td>
+            <td class="num">${d.avgPred.toFixed(1)}</td>
+            <td class="num">${d.avgActual.toFixed(1)}</td>
+            <td class="num">${d.avgErr.toFixed(1)}</td>
+            <td class="num ${biasClass}">${biasSign}${d.bias.toFixed(1)}</td>
+            <td class="num">${d.rounds}</td>
+        </tr>`;
+    }).join('');
+
+    container.innerHTML = `
+    <div class="accuracy-stats">
+        <div class="accuracy-stat-card">
+            <div class="accuracy-stat-value">${overallPtsMAE}</div>
+            <div class="accuracy-stat-label">Points MAE</div>
+        </div>
+        <div class="accuracy-stat-card">
+            <div class="accuracy-stat-value">${overallPosMAE}</div>
+            <div class="accuracy-stat-label">Position MAE</div>
+        </div>
+        <div class="accuracy-stat-card">
+            <div class="accuracy-stat-value">${overallCICov}%</div>
+            <div class="accuracy-stat-label">90% CI Coverage</div>
+        </div>
+        <div class="accuracy-stat-card">
+            <div class="accuracy-stat-value">${pairs.length}</div>
+            <div class="accuracy-stat-label">Rounds Analyzed</div>
+        </div>
+    </div>
+
+    <div class="accuracy-section">
+        <h3>Predicted vs Actual Points</h3>
+        <div class="scatter-container">${scatterSVG}</div>
+    </div>
+
+    ${ciBarHTML}
+
+    <div class="accuracy-section">
+        <h3>Per-Round Accuracy</h3>
+        <div class="table-wrapper">
+            <table class="data-table accuracy-round-table">
+                <thead><tr>
+                    <th>Rd</th><th>Race</th><th class="num">Pts MAE</th>
+                    <th class="num">Pos MAE</th><th class="num">CI Coverage</th>
+                    <th>Best Prediction</th><th>Worst Prediction</th>
+                </tr></thead>
+                <tbody>${roundTableRows}</tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="accuracy-section">
+        <h3>Per-Driver Accuracy</h3>
+        <div class="table-wrapper">
+            <table class="data-table accuracy-driver-table">
+                <thead><tr>
+                    <th>Driver</th><th>Team</th><th class="num">Avg Pred</th>
+                    <th class="num">Avg Actual</th><th class="num">Avg Error</th>
+                    <th class="num">Bias</th><th class="num">Rounds</th>
+                </tr></thead>
+                <tbody>${driverTableRows}</tbody>
+            </table>
+        </div>
+    </div>`;
+
+    accuracyRendered = true;
+}
+
+function buildScatterPlot(dataPoints) {
+    const width = 500, height = 500, pad = 50;
+    const allVals = dataPoints.flatMap(d => [d.pred, d.actual]);
+    const min = Math.min(...allVals, 0);
+    const max = Math.max(...allVals) * 1.1;
+    const range = max - min || 1;
+
+    const sx = (v) => pad + ((v - min) / range) * (width - 2 * pad);
+    const sy = (v) => height - pad - ((v - min) / range) * (height - 2 * pad);
+
+    let svg = `<svg viewBox="0 0 ${width} ${height}" class="scatter-svg" preserveAspectRatio="xMidYMid meet">`;
+    // Grid lines
+    for (let i = 0; i <= 5; i++) {
+        const val = min + (range * i / 5);
+        svg += `<line x1="${pad}" y1="${sy(val)}" x2="${width - pad}" y2="${sy(val)}" stroke="var(--border)" stroke-dasharray="3"/>`;
+        svg += `<text x="${pad - 5}" y="${sy(val) + 4}" text-anchor="end" fill="var(--text-secondary)" font-size="11">${val.toFixed(0)}</text>`;
+        svg += `<text x="${sx(val)}" y="${height - pad + 15}" text-anchor="middle" fill="var(--text-secondary)" font-size="11">${val.toFixed(0)}</text>`;
+    }
+    // Reference line (perfect prediction)
+    svg += `<line x1="${sx(min)}" y1="${sy(min)}" x2="${sx(max)}" y2="${sy(max)}" stroke="var(--text-muted)" stroke-dasharray="6" stroke-width="1.5"/>`;
+    // Points
+    dataPoints.forEach(d => {
+        const color = TEAMS[d.constructor]?.color || '#666';
+        svg += `<circle cx="${sx(d.pred)}" cy="${sy(d.actual)}" r="5" fill="${color}" opacity="0.8">
+            <title>${d.driver_id} R${d.round}: Pred ${d.pred.toFixed(1)}, Actual ${d.actual}</title>
+        </circle>`;
+    });
+    // Axis labels
+    svg += `<text x="${width / 2}" y="${height - 5}" text-anchor="middle" fill="var(--text-secondary)" font-size="12">Predicted Points</text>`;
+    svg += `<text x="12" y="${height / 2}" text-anchor="middle" fill="var(--text-secondary)" font-size="12" transform="rotate(-90,12,${height / 2})">Actual Points</text>`;
+    svg += '</svg>';
+    return svg;
 }
