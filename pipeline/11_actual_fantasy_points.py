@@ -29,6 +29,7 @@ from typing import Optional
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config.settings import (
     CURRENT_SEASON,
+    DATA_DIR,
     JOLPICA_RAW_DIR,
     PREDICTIONS_DIR,
     SEED_DIR,
@@ -48,13 +49,29 @@ from config.fantasy_scoring import (
     RACE_POSITION_POINTS,
     RACE_FASTEST_LAP_BONUS,
     RACE_POSITIONS_GAINED_PER_POS,
+    RACE_DRIVER_OF_THE_DAY_BONUS,
     QUALIFYING_NC_DSQ_PENALTY,
+    SPRINT_DNF_DSQ_PENALTY,
 )
 
 
 # ==============================================================================
 # Data loading helpers
 # ==============================================================================
+
+def load_dotd_winner(round_num: int) -> Optional[str]:
+    """Load Driver of the Day winner for a given round.
+
+    Returns driver abbreviation or None if not available.
+    Source: formula1.com/en/results/2026/awards/driver-of-the-day
+    """
+    dotd_path = SEED_DIR / "dotd_winners.json"
+    if not dotd_path.exists():
+        return None
+    with open(dotd_path) as f:
+        data = json.load(f)
+    return data.get("winners", {}).get(str(round_num))
+
 
 def load_id_maps() -> tuple[dict, dict, dict]:
     """Load driver and constructor ID mappings.
@@ -121,6 +138,61 @@ def load_post_race_analysis(round_num: int) -> Optional[dict]:
         return None
     with open(path) as f:
         return json.load(f)
+
+
+def load_detected_overtakes(year: int, round_num: int) -> tuple[dict, dict]:
+    """Load detected overtake counts from 12_count_overtakes.py output.
+
+    Returns:
+        (race_overtakes, sprint_overtakes) — each is a dict mapping
+        driver abbreviation -> overtake count, or empty dict if unavailable.
+    """
+    path = DATA_DIR / "overtakes" / f"year{year}" / f"round{round_num}" / "overtakes.json"
+    if not path.exists():
+        return {}, {}
+
+    with open(path) as f:
+        data = json.load(f)
+
+    race_ot = {}
+    sprint_ot = {}
+
+    sessions = data.get("sessions", {})
+    if "race" in sessions:
+        for d in sessions["race"].get("drivers", []):
+            race_ot[d["driver"]] = d["overtakes"]
+
+    if "sprint" in sessions:
+        for d in sessions["sprint"].get("drivers", []):
+            sprint_ot[d["driver"]] = d["overtakes"]
+
+    return race_ot, sprint_ot
+
+
+def load_openf1_pitstops(year: int, round_num: int) -> Optional[dict]:
+    """Load OpenF1 pit stop stationary times (stop_duration).
+
+    Returns dict mapping driver abbreviation -> list of stop_duration floats,
+    or None if not available. These are the actual "wheels up" service times
+    (2-4 seconds) used for F1 Fantasy constructor pit stop scoring.
+    """
+    path = DATA_DIR / "overtakes" / f"year{year}" / f"round{round_num}" / "overtakes.json"
+    if not path.exists():
+        return None
+
+    with open(path) as f:
+        data = json.load(f)
+
+    pitstops = data.get("pitstops")
+    if not pitstops or not pitstops.get("by_driver"):
+        return None
+
+    # Convert to driver_abbrev -> list of stop_duration
+    result = {}
+    for abbrev, stops in pitstops["by_driver"].items():
+        result[abbrev] = [s["stop_duration"] for s in stops if s.get("stop_duration")]
+
+    return result
 
 
 # ==============================================================================
@@ -337,6 +409,9 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
     drivers_info = load_drivers_info()
     constructors_info = load_constructors_info()
     driver_prices, constructor_prices = load_fantasy_prices()
+    dotd_winner = load_dotd_winner(round_num)
+    if dotd_winner:
+        print(f"  Driver of the Day: {dotd_winner} (+{RACE_DRIVER_OF_THE_DAY_BONUS} pts)")
 
     # -- Load Jolpica race results (required) --
     results_data = load_jolpica_json(year, round_num, "results.json")
@@ -358,12 +433,24 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
     quali_map = parse_qualifying(quali_data) if quali_data else {}
 
     # -- Load pitstops --
-    pitstops_data = load_jolpica_json(year, round_num, "pitstops.json")
-    if pitstops_data:
-        pitstops_by_driver = parse_pitstops(pitstops_data)
+    # Prefer OpenF1 stop_duration (actual stationary "wheels up" time, ~2-4s)
+    # over Jolpica duration (pit lane transit time, ~17-25s).
+    # F1 Fantasy scoring is based on stationary time.
+    openf1_pitstops = load_openf1_pitstops(year, round_num)
+    pitstop_source = None
+
+    if openf1_pitstops:
+        pitstop_source = "openf1_stop_duration"
+        print(f"  Using OpenF1 stationary pit stop times ({len(openf1_pitstops)} drivers)")
     else:
-        # Fallback to post_race_analysis pitstop data
-        pitstops_by_driver = get_pitstops_from_post_race(round_num, jolpica_to_abbrev)
+        pitstop_source = "jolpica_lane_duration"
+        pitstops_data = load_jolpica_json(year, round_num, "pitstops.json")
+        if pitstops_data:
+            pitstops_by_driver = parse_pitstops(pitstops_data)
+        else:
+            pitstops_by_driver = get_pitstops_from_post_race(round_num, jolpica_to_abbrev)
+        print(f"  Warning: Using Jolpica lane transit times (not stationary times)")
+        print(f"    Pit stop scoring may be inaccurate — run 13_fetch_openf1_overtakes.py to get stop_duration")
 
     # -- Load sprint (if applicable) --
     sprint_results = []
@@ -375,13 +462,28 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
     # Sprint lookup by jolpica driver ID
     sprint_map = {sr["jolpica_driver_id"]: sr for sr in sprint_results}
 
+    # -- Load detected overtakes (from 12_count_overtakes.py) --
+    detected_race_ot, detected_sprint_ot = load_detected_overtakes(year, round_num)
+    if detected_race_ot:
+        print(f"  Using detected overtakes for race ({len(detected_race_ot)} drivers)")
+    if detected_sprint_ot:
+        print(f"  Using detected overtakes for sprint ({len(detected_sprint_ot)} drivers)")
+
     # -- Build constructor -> pitstop times mapping --
     constructor_pitstops: dict[str, list[float]] = {}
-    for jol_driver_id, times in pitstops_by_driver.items():
-        abbrev = jolpica_to_abbrev.get(jol_driver_id)
-        if abbrev and abbrev in drivers_info:
-            cid = drivers_info[abbrev]["constructor_id"]
-            constructor_pitstops.setdefault(cid, []).extend(times)
+    if openf1_pitstops:
+        # Use OpenF1 stop_duration (stationary time) keyed by abbreviation
+        for abbrev, times in openf1_pitstops.items():
+            if abbrev in drivers_info:
+                cid = drivers_info[abbrev]["constructor_id"]
+                constructor_pitstops.setdefault(cid, []).extend(times)
+    else:
+        # Fallback: Jolpica lane transit times keyed by jolpica driver ID
+        for jol_driver_id, times in pitstops_by_driver.items():
+            abbrev = jolpica_to_abbrev.get(jol_driver_id)
+            if abbrev and abbrev in drivers_info:
+                cid = drivers_info[abbrev]["constructor_id"]
+                constructor_pitstops.setdefault(cid, []).extend(times)
 
     # Find fastest pitstop across all teams
     all_pitstop_times = []
@@ -407,12 +509,12 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
         quali_best_session = quali.get("best_session", "Q1")
 
         if r["is_dns"]:
-            # DNS drivers: no qualifying penalty if they qualified, just no race points
+            # DNS drivers: keep qualifying points (they did qualify), but race = -20 same as DNF
             if quali_position is not None:
                 quali_pts = calc_qualifying_points_driver(quali_position)
             else:
                 quali_pts = QUALIFYING_NC_DSQ_PENALTY
-            race_pts = 0  # DNS = no race points at all (not DNF penalty)
+            race_pts = RACE_DNF_DSQ_PENALTY  # DNS = same penalty as DNF (-20)
             race_position = None
             positions_gained = 0
             overtakes = 0
@@ -440,26 +542,28 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             if quali_position is not None:
                 quali_pts = calc_qualifying_points_driver(quali_position)
             else:
-                # Driver not in qualifying data (e.g., grid penalty pushed back)
-                # Use grid position as proxy
-                quali_pts = calc_qualifying_points_driver(r["grid"])
+                # Driver not in qualifying data = Not Classified (NC) = -5 penalty
+                # This happens when a driver didn't set a time, was excluded,
+                # or had their qualifying times deleted (e.g. penalty)
+                quali_pts = QUALIFYING_NC_DSQ_PENALTY
 
             race_position = r["position"]
             positions_gained = r["grid"] - race_position
-            # Estimate overtakes: F1 Fantasy tracks via sensors, not just net positions.
-            # 2026 regs produce many more passes than net position change.
-            # Calibrated from f1fantasytool.com R1-R2 actual data:
-            #   BEA P12->P7: 5 gained, 9 OT; LIN P9->P8: 1 gained, 8 OT
-            pos_gained = max(0, positions_gained)
-            if r["grid"] <= 3:
-                ot_base = 2
-            elif r["grid"] <= 6:
-                ot_base = 4
-            elif r["grid"] <= 12:
-                ot_base = 6
+            # Use detected overtakes if available, otherwise estimate
+            if abbrev in detected_race_ot:
+                overtakes = detected_race_ot[abbrev]
             else:
-                ot_base = 7
-            overtakes = ot_base + pos_gained
+                # Fallback: calibrated estimate from f1fantasytool.com R1-R2 data
+                pos_gained = max(0, positions_gained)
+                if r["grid"] <= 3:
+                    ot_base = 2
+                elif r["grid"] <= 6:
+                    ot_base = 4
+                elif r["grid"] <= 12:
+                    ot_base = 6
+                else:
+                    ot_base = 7
+                overtakes = ot_base + pos_gained
 
             race_pts = calc_race_points_driver(
                 finish_position=race_position,
@@ -478,7 +582,7 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             sr = sprint_map[jol_id]
             sprint_grid = sr["grid"]
             if sr["is_dns"]:
-                sprint_pts = 0
+                sprint_pts = SPRINT_DNF_DSQ_PENALTY  # DNS = same penalty as DNF (-10)
                 sprint_position = None
             elif sr["is_dnf"] or sr["is_dsq"]:
                 sprint_pts = calc_sprint_points_driver(
@@ -490,10 +594,13 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
                 sprint_position = None
             else:
                 sprint_position = sr["position"]
-                sprint_pos_gained = max(0, sr["grid"] - sr["position"])
-                # Sprint has fewer laps = fewer overtaking opportunities
-                sprint_ot_base = 2 if sr["grid"] <= 6 else 3
-                sprint_overtakes = sprint_ot_base + sprint_pos_gained
+                # Use detected sprint overtakes if available
+                if abbrev in detected_sprint_ot:
+                    sprint_overtakes = detected_sprint_ot[abbrev]
+                else:
+                    sprint_pos_gained = max(0, sr["grid"] - sr["position"])
+                    sprint_ot_base = 2 if sr["grid"] <= 6 else 3
+                    sprint_overtakes = sprint_ot_base + sprint_pos_gained
                 sprint_pts = calc_sprint_points_driver(
                     finish_position=sr["position"],
                     grid_position=sr["grid"],
@@ -506,7 +613,7 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             position_pts = 0
             overtake_pts = 0
             fastest_lap_pts = 0
-            dnf_penalty = 0
+            dnf_penalty = RACE_DNF_DSQ_PENALTY  # DNS = same penalty as DNF
             race_finish_pts = 0
         elif r["is_dnf"] or r["is_dsq"]:
             position_pts = 0
@@ -521,7 +628,14 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             fastest_lap_pts = RACE_FASTEST_LAP_BONUS if r["is_fastest_lap"] else 0
             dnf_penalty = 0
 
-        total_pts = quali_pts + race_pts + sprint_pts
+        # Driver of the Day bonus (driver only, not constructors)
+        is_dotd = (dotd_winner is not None and abbrev == dotd_winner)
+        dotd_pts = RACE_DRIVER_OF_THE_DAY_BONUS if is_dotd else 0
+
+        # DOTD is already included in calc_race_points_driver via is_driver_of_the_day param,
+        # but we calculated race_pts without it above. Add it now.
+        race_pts_with_dotd = race_pts + dotd_pts
+        total_pts = quali_pts + race_pts_with_dotd + sprint_pts
         price = driver_prices.get(abbrev, 0.0)
         ppm = round(total_pts / price, 2) if price > 0 else 0.0
 
@@ -537,15 +651,17 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             "is_dsq": r["is_dsq"],
             "is_dns": r["is_dns"],
             "is_fastest_lap": r["is_fastest_lap"],
+            "is_dotd": is_dotd,
             "overtakes": overtakes,
+            "overtake_source": "detected" if abbrev in detected_race_ot and not (r["is_dnf"] or r["is_dsq"] or r["is_dns"]) else "estimated",
             "positions_gained": positions_gained,
             "quali_points": quali_pts,
-            "race_points": race_pts,
+            "race_points": race_pts_with_dotd,
             "race_finish_points": race_finish_pts,
             "position_points": position_pts,
             "overtake_points": overtake_pts,
             "fastest_lap_points": fastest_lap_pts,
-            "dotd_points": 0,  # DOTD not available from Jolpica data
+            "dotd_points": dotd_pts,
             "dnf_penalty": dnf_penalty,
             "sprint_points": sprint_pts,
             "total_points": total_pts,
@@ -678,6 +794,11 @@ def calculate_from_post_race_analysis(
     race_name = analysis.get("race", "Unknown")
     results = analysis.get("results", [])
 
+    # Load detected overtakes
+    detected_race_ot, detected_sprint_ot = load_detected_overtakes(year, round_num)
+    if detected_race_ot:
+        print(f"  Using detected overtakes for race ({len(detected_race_ot)} drivers)")
+
     driver_outputs = []
     driver_points_by_abbrev = {}
 
@@ -704,7 +825,7 @@ def calculate_from_post_race_analysis(
         quali_pts = calc_qualifying_points_driver(quali_position)
 
         if is_dns:
-            race_pts = 0
+            race_pts = RACE_DNF_DSQ_PENALTY  # DNS = same penalty as DNF (-20)
             race_position = None
             positions_gained = 0
             overtakes = 0
@@ -717,16 +838,20 @@ def calculate_from_post_race_analysis(
             # For lapped drivers, use the position from results order
             race_position = finish if finish else results.index(r) + 1
             positions_gained = grid - race_position
-            pos_gained_fb = max(0, positions_gained)
-            if grid <= 3:
-                ot_base_fb = 2
-            elif grid <= 6:
-                ot_base_fb = 4
-            elif grid <= 12:
-                ot_base_fb = 6
+            # Use detected overtakes if available
+            if abbrev in detected_race_ot:
+                overtakes = detected_race_ot[abbrev]
             else:
-                ot_base_fb = 7
-            overtakes = ot_base_fb + pos_gained_fb
+                pos_gained_fb = max(0, positions_gained)
+                if grid <= 3:
+                    ot_base_fb = 2
+                elif grid <= 6:
+                    ot_base_fb = 4
+                elif grid <= 12:
+                    ot_base_fb = 6
+                else:
+                    ot_base_fb = 7
+                overtakes = ot_base_fb + pos_gained_fb
             race_pts = calc_race_points_driver(
                 finish_position=race_position,
                 grid_position=grid,

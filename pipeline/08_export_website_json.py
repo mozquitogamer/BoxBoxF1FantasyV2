@@ -181,6 +181,7 @@ def build_season_summary() -> dict:
     for rnd_num in range(1, 25):
         pred_path = PREDICTIONS_DIR / f"round{rnd_num}" / "fantasy_points.parquet"
         post_race_path = PREDICTIONS_DIR / f"round{rnd_num}" / "post_race_analysis.json"
+        actual_path = PREDICTIONS_DIR / f"round{rnd_num}" / "actual_fantasy_points.json"
 
         race = race_info.get(rnd_num, {})
         if race.get("cancelled"):
@@ -193,6 +194,7 @@ def build_season_summary() -> dict:
             "date": race.get("date", ""),
             "has_predictions": pred_path.exists(),
             "has_post_race": post_race_path.exists(),
+            "has_actual": actual_path.exists(),
         }
         completed_rounds.append(round_entry)
 

@@ -5,7 +5,7 @@
   "circuit": "Melbourne",
   "date": "2026-03-08",
   "is_sprint_weekend": false,
-  "generated_at": "2026-03-19T12:45:09.405836+00:00",
+  "generated_at": "2026-03-21T10:29:04.413491+00:00",
   "drivers": [
     {
       "driver_id": "RUS",
@@ -27,7 +27,19 @@
       "dotd_probability": 0.12,
       "points_per_million": 0.0,
       "value_score": 1.36,
-      "current_price": 28.0
+      "current_price": 28.0,
+      "mc_total_mean": 35.7,
+      "mc_total_std": 13.7,
+      "mc_total_p5": -10.0,
+      "mc_total_p25": 31.0,
+      "mc_total_p75": 43.0,
+      "mc_total_p95": 53.0,
+      "mc_upside": 13.3,
+      "mc_downside": 11.7,
+      "prob_top3": 0.846,
+      "prob_top5": 0.935,
+      "prob_top10": 0.948,
+      "mc_value_score": 1.28
     },
     {
       "driver_id": "ANT",
@@ -49,7 +61,19 @@
       "dotd_probability": 0.12,
       "points_per_million": 0.0,
       "value_score": 1.28,
-      "current_price": 23.8
+      "current_price": 23.8,
+      "mc_total_mean": 32.9,
+      "mc_total_std": 13.6,
+      "mc_total_p5": -10.0,
+      "mc_total_p25": 28.0,
+      "mc_total_p75": 42.0,
+      "mc_total_p95": 51.0,
+      "mc_upside": 13.1,
+      "mc_downside": 10.9,
+      "prob_top3": 0.747,
+      "prob_top5": 0.913,
+      "prob_top10": 0.949,
+      "mc_value_score": 1.38
     },
     {
       "driver_id": "LEC",
@@ -71,7 +95,19 @@
       "dotd_probability": 0.12,
       "points_per_million": 0.0,
       "value_score": 1.26,
-      "current_price": 23.4
+      "current_price": 23.4,
+      "mc_total_mean": 30.5,
+      "mc_total_std": 13.4,
+      "mc_total_p5": 12.0,
+      "mc_total_p25": 25.0,
+      "mc_total_p75": 38.0,
+      "mc_total_p95": 50.0,
+      "mc_upside": 14.5,
+      "mc_downside": 11.5,
+      "prob_top3": 0.58,
+      "prob_top5": 0.87,
+      "prob_top10": 0.953,
+      "mc_value_score": 1.3
     },
     {
       "driver_id": "HAM",
@@ -93,7 +129,19 @@
       "dotd_probability": 0.08,
       "points_per_million": 0.0,
       "value_score": 1.26,
-      "current_price": 22.9
+      "current_price": 22.9,
+      "mc_total_mean": 32.5,
+      "mc_total_std": 15.7,
+      "mc_total_p5": 8.0,
+      "mc_total_p25": 26.0,
+      "mc_total_p75": 42.0,
+      "mc_total_p95": 55.0,
+      "mc_upside": 17.5,
+      "mc_downside": 13.5,
+      "prob_top3": 0.364,
+      "prob_top5": 0.756,
+      "prob_top10": 0.951,
+      "mc_value_score": 1.42
     },
     {
       "driver_id": "LIN",
@@ -115,7 +163,19 @@
       "dotd_probability": 0.12,
       "points_per_million": 0.0,
       "value_score": 2.96,
-      "current_price": 7.4
+      "current_price": 7.4,
+      "mc_total_mean": 25.4,
+      "mc_total_std": 14.5,
+      "mc_total_p5": -17.0,
+      "mc_total_p25": 19.0,
+      "mc_total_p75": 34.0,
+      "mc_total_p95": 46.0,
+      "mc_upside": 15.6,
+      "mc_downside": 12.4,
+      "prob_top3": 0.03,
+      "prob_top5": 0.188,
+      "prob_top10": 0.915,
+      "mc_value_score": 3.43
     },
     {
       "driver_id": "NOR",
@@ -137,7 +197,19 @@
       "dotd_probability": 0.08,
       "points_per_million": 0.0,
       "value_score": 0.8,
-      "current_price": 26.8
+      "current_price": 26.8,
+      "mc_total_mean": 24.9,
+      "mc_total_std": 13.1,
+      "mc_total_p5": -11.0,
+      "mc_total_p25": 20.0,
+      "mc_total_p75": 32.0,
+      "mc_total_p95": 45.0,
+      "mc_upside": 15.1,
+      "mc_downside": 10.9,
+      "prob_top3": 0.185,
+      "prob_top5": 0.579,
+      "prob_top10": 0.946,
+      "mc_value_score": 0.93
     },
     {
       "driver_id": "BEA",
@@ -159,7 +231,19 @@
       "dotd_probability": 0.12,
       "points_per_million": 0.0,
       "value_score": 2.44,
-      "current_price": 8.6
+      "current_price": 8.6,
+      "mc_total_mean": 23.7,
+      "mc_total_std": 14.1,
+      "mc_total_p5": 2.0,
+      "mc_total_p25": 17.0,
+      "mc_total_p75": 32.0,
+      "mc_total_p95": 44.0,
+      "mc_upside": 15.3,
+      "mc_downside": 11.7,
+      "prob_top3": 0.012,
+      "prob_top5": 0.095,
+      "prob_top10": 0.852,
+      "mc_value_score": 2.76
     },
     {
       "driver_id": "VER",
@@ -181,7 +265,19 @@
       "dotd_probability": 0.08,
       "points_per_million": 0.0,
       "value_score": 0.72,
-      "current_price": 28.1
+      "current_price": 28.1,
+      "mc_total_mean": 23.1,
+      "mc_total_std": 12.6,
+      "mc_total_p5": 5.0,
+      "mc_total_p25": 18.0,
+      "mc_total_p75": 30.0,
+      "mc_total_p95": 41.0,
+      "mc_upside": 13.0,
+      "mc_downside": 11.1,
+      "prob_top3": 0.078,
+      "prob_top5": 0.365,
+      "prob_top10": 0.943,
+      "mc_value_score": 0.82
     },
     {
       "driver_id": "GAS",
@@ -203,7 +299,19 @@
       "dotd_probability": 0.12,
       "points_per_million": 0.0,
       "value_score": 1.42,
-      "current_price": 12.8
+      "current_price": 12.8,
+      "mc_total_mean": 21.0,
+      "mc_total_std": 13.2,
+      "mc_total_p5": -20.0,
+      "mc_total_p25": 16.0,
+      "mc_total_p75": 28.0,
+      "mc_total_p95": 39.0,
+      "mc_upside": 14.0,
+      "mc_downside": 11.0,
+      "prob_top3": 0.001,
+      "prob_top5": 0.012,
+      "prob_top10": 0.572,
+      "mc_value_score": 1.64
     },
     {
       "driver_id": "PER",
@@ -225,7 +333,19 @@
       "dotd_probability": 0.12,
       "points_per_million": 0.0,
       "value_score": 2.64,
-      "current_price": 6.4
+      "current_price": 6.4,
+      "mc_total_mean": 18.9,
+      "mc_total_std": 11.5,
+      "mc_total_p5": 2.0,
+      "mc_total_p25": 15.0,
+      "mc_total_p75": 25.0,
+      "mc_total_p95": 34.0,
+      "mc_upside": 12.1,
+      "mc_downside": 8.9,
+      "prob_top3": 0.0,
+      "prob_top5": 0.0,
+      "prob_top10": 0.019,
+      "mc_value_score": 2.95
     },
     {
       "driver_id": "STR",
@@ -247,7 +367,19 @@
       "dotd_probability": 0.03,
       "points_per_million": 0.0,
       "value_score": 2.08,
-      "current_price": 6.8
+      "current_price": 6.8,
+      "mc_total_mean": 16.9,
+      "mc_total_std": 11.5,
+      "mc_total_p5": -20.0,
+      "mc_total_p25": 13.0,
+      "mc_total_p75": 23.0,
+      "mc_total_p95": 33.0,
+      "mc_upside": 11.1,
+      "mc_downside": 8.9,
+      "prob_top3": 0.0,
+      "prob_top5": 0.0,
+      "prob_top10": 0.011,
+      "mc_value_score": 2.49
     },
     {
       "driver_id": "COL",
@@ -269,7 +401,19 @@
       "dotd_probability": 0.03,
       "points_per_million": 0.0,
       "value_score": 2.02,
-      "current_price": 7.0
+      "current_price": 7.0,
+      "mc_total_mean": 17.8,
+      "mc_total_std": 11.1,
+      "mc_total_p5": 2.0,
+      "mc_total_p25": 14.0,
+      "mc_total_p75": 24.0,
+      "mc_total_p95": 33.0,
+      "mc_upside": 11.2,
+      "mc_downside": 8.8,
+      "prob_top3": 0.0,
+      "prob_top5": 0.0,
+      "prob_top10": 0.038,
+      "mc_value_score": 2.54
     },
     {
       "driver_id": "ALB",
@@ -291,7 +435,19 @@
       "dotd_probability": 0.03,
       "points_per_million": 0.0,
       "value_score": 1.31,
-      "current_price": 10.8
+      "current_price": 10.8,
+      "mc_total_mean": 18.1,
+      "mc_total_std": 11.6,
+      "mc_total_p5": -20.0,
+      "mc_total_p25": 14.0,
+      "mc_total_p75": 24.0,
+      "mc_total_p95": 34.0,
+      "mc_upside": 11.9,
+      "mc_downside": 9.1,
+      "prob_top3": 0.0,
+      "prob_top5": 0.0,
+      "prob_top10": 0.191,
+      "mc_value_score": 1.68
     },
     {
       "driver_id": "BOT",
@@ -313,7 +469,19 @@
       "dotd_probability": 0.03,
       "points_per_million": 0.0,
       "value_score": 2.6,
-      "current_price": 4.7
+      "current_price": 4.7,
+      "mc_total_mean": 15.4,
+      "mc_total_std": 9.9,
+      "mc_total_p5": 2.0,
+      "mc_total_p25": 12.0,
+      "mc_total_p75": 21.0,
+      "mc_total_p95": 27.0,
+      "mc_upside": 9.6,
+      "mc_downside": 7.4,
+      "prob_top3": 0.0,
+      "prob_top5": 0.0,
+      "prob_top10": 0.0,
+      "mc_value_score": 3.28
     },
     {
       "driver_id": "OCO",
@@ -335,7 +503,19 @@
       "dotd_probability": 0.03,
       "points_per_million": 0.0,
       "value_score": 1.44,
-      "current_price": 8.5
+      "current_price": 8.5,
+      "mc_total_mean": 17.0,
+      "mc_total_std": 11.1,
+      "mc_total_p5": 2.0,
+      "mc_total_p25": 13.0,
+      "mc_total_p75": 23.0,
+      "mc_total_p95": 33.0,
+      "mc_upside": 12.0,
+      "mc_downside": 9.0,
+      "prob_top3": 0.0,
+      "prob_top5": 0.002,
+      "prob_top10": 0.359,
+      "mc_value_score": 2.0
     },
     {
       "driver_id": "BOR",
@@ -357,7 +537,19 @@
       "dotd_probability": 0.03,
       "points_per_million": 0.0,
       "value_score": 1.67,
-      "current_price": 6.4
+      "current_price": 6.4,
+      "mc_total_mean": 16.3,
+      "mc_total_std": 11.4,
+      "mc_total_p5": -17.0,
+      "mc_total_p25": 12.0,
+      "mc_total_p75": 22.0,
+      "mc_total_p95": 32.0,
+      "mc_upside": 11.7,
+      "mc_downside": 9.3,
+      "prob_top3": 0.003,
+      "prob_top5": 0.034,
+      "prob_top10": 0.756,
+      "mc_value_score": 2.55
     },
     {
       "driver_id": "ALO",
@@ -379,7 +571,19 @@
       "dotd_probability": 0.03,
       "points_per_million": 0.0,
       "value_score": 0.96,
-      "current_price": 8.8
+      "current_price": 8.8,
+      "mc_total_mean": 13.9,
+      "mc_total_std": 9.5,
+      "mc_total_p5": 1.0,
+      "mc_total_p25": 11.0,
+      "mc_total_p75": 19.0,
+      "mc_total_p95": 26.0,
+      "mc_upside": 9.1,
+      "mc_downside": 7.9,
+      "prob_top3": 0.0,
+      "prob_top5": 0.0,
+      "prob_top10": 0.0,
+      "mc_value_score": 1.58
     },
     {
       "driver_id": "SAI",
@@ -401,7 +605,19 @@
       "dotd_probability": 0.03,
       "points_per_million": 0.0,
       "value_score": 0.69,
-      "current_price": 12.2
+      "current_price": 12.2,
+      "mc_total_mean": 13.9,
+      "mc_total_std": 9.6,
+      "mc_total_p5": 0.0,
+      "mc_total_p25": 11.0,
+      "mc_total_p75": 19.0,
+      "mc_total_p95": 26.0,
+      "mc_upside": 9.1,
+      "mc_downside": 7.9,
+      "prob_top3": 0.0,
+      "prob_top5": 0.0,
+      "prob_top10": 0.004,
+      "mc_value_score": 1.14
     },
     {
       "driver_id": "LAW",
@@ -423,7 +639,19 @@
       "dotd_probability": 0.03,
       "points_per_million": 0.0,
       "value_score": 0.55,
-      "current_price": 6.9
+      "current_price": 6.9,
+      "mc_total_mean": 8.7,
+      "mc_total_std": 8.0,
+      "mc_total_p5": -6.0,
+      "mc_total_p25": 6.0,
+      "mc_total_p75": 13.0,
+      "mc_total_p95": 19.0,
+      "mc_upside": 8.3,
+      "mc_downside": 6.7,
+      "prob_top3": 0.0,
+      "prob_top5": 0.0,
+      "prob_top10": 0.088,
+      "mc_value_score": 1.26
     },
     {
       "driver_id": "HUL",
@@ -445,7 +673,19 @@
       "dotd_probability": 0.03,
       "points_per_million": 0.0,
       "value_score": -0.87,
-      "current_price": 5.6
+      "current_price": 5.6,
+      "mc_total_mean": 2.0,
+      "mc_total_std": 6.9,
+      "mc_total_p5": -16.0,
+      "mc_total_p25": -1.0,
+      "mc_total_p75": 6.0,
+      "mc_total_p95": 12.0,
+      "mc_upside": 7.0,
+      "mc_downside": 7.0,
+      "prob_top3": 0.0,
+      "prob_top5": 0.0,
+      "prob_top10": 0.0,
+      "mc_value_score": 0.36
     },
     {
       "driver_id": "PIA",
@@ -467,7 +707,19 @@
       "dotd_probability": 0.03,
       "points_per_million": 0.0,
       "value_score": -0.22,
-      "current_price": 24.9
+      "current_price": 24.9,
+      "mc_total_mean": -2.1,
+      "mc_total_std": 4.7,
+      "mc_total_p5": -10.0,
+      "mc_total_p25": -5.0,
+      "mc_total_p75": 0.0,
+      "mc_total_p95": 6.0,
+      "mc_upside": 6.1,
+      "mc_downside": 4.9,
+      "prob_top3": 0.0,
+      "prob_top5": 0.0,
+      "prob_top10": 0.0,
+      "mc_value_score": -0.08
     },
     {
       "driver_id": "HAD",
@@ -489,7 +741,19 @@
       "dotd_probability": 0.03,
       "points_per_million": 0.0,
       "value_score": -0.46,
-      "current_price": 13.9
+      "current_price": 13.9,
+      "mc_total_mean": -2.5,
+      "mc_total_std": 4.1,
+      "mc_total_p5": -11.0,
+      "mc_total_p25": -5.0,
+      "mc_total_p75": 0.0,
+      "mc_total_p95": 4.0,
+      "mc_upside": 4.5,
+      "mc_downside": 4.5,
+      "prob_top3": 0.0,
+      "prob_top5": 0.0,
+      "prob_top10": 0.0,
+      "mc_value_score": -0.18
     }
   ],
   "constructors": [
@@ -506,7 +770,12 @@
       "risk": "LOW",
       "risk_rating": 5.0,
       "value_score": 2.63,
-      "current_price": 29.9
+      "current_price": 29.9,
+      "mc_total_mean": 68.6,
+      "mc_total_std": 22.0,
+      "mc_total_p5": 32.3,
+      "mc_total_p95": 104.9,
+      "mc_value_score": 2.29
     },
     {
       "constructor_id": "ferrari",
@@ -521,7 +790,12 @@
       "risk": "LOW",
       "risk_rating": 5.0,
       "value_score": 2.85,
-      "current_price": 23.9
+      "current_price": 23.9,
+      "mc_total_mean": 63.0,
+      "mc_total_std": 23.5,
+      "mc_total_p5": 24.2,
+      "mc_total_p95": 101.8,
+      "mc_value_score": 2.64
     },
     {
       "constructor_id": "haas",
@@ -536,7 +810,12 @@
       "risk": "LOW",
       "risk_rating": 5.0,
       "value_score": 4.21,
-      "current_price": 8.6
+      "current_price": 8.6,
+      "mc_total_mean": 40.7,
+      "mc_total_std": 20.4,
+      "mc_total_p5": 7.0,
+      "mc_total_p95": 74.4,
+      "mc_value_score": 4.73
     },
     {
       "constructor_id": "alpine",
@@ -551,7 +830,12 @@
       "risk": "LOW",
       "risk_rating": 5.0,
       "value_score": 2.42,
-      "current_price": 13.7
+      "current_price": 13.7,
+      "mc_total_mean": 38.8,
+      "mc_total_std": 19.6,
+      "mc_total_p5": 6.5,
+      "mc_total_p95": 71.1,
+      "mc_value_score": 2.83
     },
     {
       "constructor_id": "racing_bulls",
@@ -566,7 +850,12 @@
       "risk": "LOW",
       "risk_rating": 5.0,
       "value_score": 4.09,
-      "current_price": 7.5
+      "current_price": 7.5,
+      "mc_total_mean": 34.1,
+      "mc_total_std": 18.5,
+      "mc_total_p5": 3.6,
+      "mc_total_p95": 64.6,
+      "mc_value_score": 4.55
     },
     {
       "constructor_id": "cadillac",
@@ -581,7 +870,12 @@
       "risk": "LOW",
       "risk_rating": 5.0,
       "value_score": 5.4,
-      "current_price": 5.2
+      "current_price": 5.2,
+      "mc_total_mean": 34.3,
+      "mc_total_std": 17.3,
+      "mc_total_p5": 5.8,
+      "mc_total_p95": 62.8,
+      "mc_value_score": 6.6
     },
     {
       "constructor_id": "mclaren",
@@ -596,7 +890,12 @@
       "risk": "LOW",
       "risk_rating": 5.0,
       "value_score": 0.91,
-      "current_price": 28.5
+      "current_price": 28.5,
+      "mc_total_mean": 22.8,
+      "mc_total_std": 15.2,
+      "mc_total_p5": -2.3,
+      "mc_total_p95": 47.9,
+      "mc_value_score": 0.8
     },
     {
       "constructor_id": "red_bull",
@@ -611,7 +910,12 @@
       "risk": "LOW",
       "risk_rating": 5.0,
       "value_score": 0.83,
-      "current_price": 28.8
+      "current_price": 28.8,
+      "mc_total_mean": 20.6,
+      "mc_total_std": 14.4,
+      "mc_total_p5": -3.2,
+      "mc_total_p95": 44.4,
+      "mc_value_score": 0.72
     },
     {
       "constructor_id": "williams",
@@ -626,7 +930,12 @@
       "risk": "LOW",
       "risk_rating": 5.0,
       "value_score": 1.63,
-      "current_price": 13.2
+      "current_price": 13.2,
+      "mc_total_mean": 32.0,
+      "mc_total_std": 17.1,
+      "mc_total_p5": 3.8,
+      "mc_total_p95": 60.2,
+      "mc_value_score": 2.42
     },
     {
       "constructor_id": "aston_martin",
@@ -641,7 +950,12 @@
       "risk": "LOW",
       "risk_rating": 5.0,
       "value_score": 2.36,
-      "current_price": 9.1
+      "current_price": 9.1,
+      "mc_total_mean": 30.8,
+      "mc_total_std": 17.0,
+      "mc_total_p5": 2.8,
+      "mc_total_p95": 58.8,
+      "mc_value_score": 3.38
     },
     {
       "constructor_id": "audi",
@@ -656,7 +970,16 @@
       "risk": "LOW",
       "risk_rating": 5.0,
       "value_score": 2.0,
-      "current_price": 5.4
+      "current_price": 5.4,
+      "mc_total_mean": 18.3,
+      "mc_total_std": 15.0,
+      "mc_total_p5": -6.4,
+      "mc_total_p95": 43.0,
+      "mc_value_score": 3.39
     }
-  ]
+  ],
+  "monte_carlo": {
+    "n_simulations": 10000,
+    "seed": 42
+  }
 }

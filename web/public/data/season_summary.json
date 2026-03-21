@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-03-19T12:45:09.424547+00:00",
+  "generated_at": "2026-03-21T10:29:04.423915+00:00",
   "rounds": [
     {
       "round": 1,
@@ -8,7 +8,8 @@
       "circuit": "Melbourne",
       "date": "2026-03-08",
       "has_predictions": true,
-      "has_post_race": true
+      "has_post_race": true,
+      "has_actual": true
     },
     {
       "round": 2,
@@ -16,7 +17,8 @@
       "circuit": "Shanghai",
       "date": "2026-03-15",
       "has_predictions": false,
-      "has_post_race": true
+      "has_post_race": true,
+      "has_actual": true
     },
     {
       "round": 3,
@@ -24,7 +26,8 @@
       "circuit": "Suzuka",
       "date": "2026-03-29",
       "has_predictions": true,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 6,
@@ -32,7 +35,8 @@
       "circuit": "Miami",
       "date": "2026-05-03",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 7,
@@ -40,7 +44,8 @@
       "circuit": "Montreal",
       "date": "2026-05-24",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 8,
@@ -48,7 +53,8 @@
       "circuit": "Monaco",
       "date": "2026-06-07",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 9,
@@ -56,7 +62,8 @@
       "circuit": "Barcelona",
       "date": "2026-06-14",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 10,
@@ -64,7 +71,8 @@
       "circuit": "Spielberg",
       "date": "2026-06-28",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 11,
@@ -72,7 +80,8 @@
       "circuit": "Silverstone",
       "date": "2026-07-05",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 12,
@@ -80,7 +89,8 @@
       "circuit": "Spa-Francorchamps",
       "date": "2026-07-19",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 13,
@@ -88,7 +98,8 @@
       "circuit": "Budapest",
       "date": "2026-07-26",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 14,
@@ -96,7 +107,8 @@
       "circuit": "Zandvoort",
       "date": "2026-08-23",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 15,
@@ -104,7 +116,8 @@
       "circuit": "Monza",
       "date": "2026-09-06",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 16,
@@ -112,7 +125,8 @@
       "circuit": "Madrid",
       "date": "2026-09-13",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 17,
@@ -120,7 +134,8 @@
       "circuit": "Baku",
       "date": "2026-09-26",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 18,
@@ -128,7 +143,8 @@
       "circuit": "Singapore",
       "date": "2026-10-11",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 19,
@@ -136,7 +152,8 @@
       "circuit": "Austin",
       "date": "2026-10-25",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 20,
@@ -144,7 +161,8 @@
       "circuit": "Mexico City",
       "date": "2026-11-01",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 21,
@@ -152,7 +170,8 @@
       "circuit": "S\u00c3\u00a3o Paulo",
       "date": "2026-11-08",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 22,
@@ -160,7 +179,8 @@
       "circuit": "Las Vegas",
       "date": "2026-11-21",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 23,
@@ -168,7 +188,8 @@
       "circuit": "Lusail",
       "date": "2026-11-29",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     },
     {
       "round": 24,
@@ -176,7 +197,8 @@
       "circuit": "Yas Marina",
       "date": "2026-12-06",
       "has_predictions": false,
-      "has_post_race": false
+      "has_post_race": false,
+      "has_actual": false
     }
   ],
   "driver_prices": {

@@ -1148,6 +1148,12 @@ function renderComparison(predictions, actual) {
     let within2 = 0;
     let totalPredPts = 0;
     let totalActualPts = 0;
+    let totalPtsAbsError = 0;
+    let ptsCompared = 0;
+    let inCI = 0;
+    let ciTotal = 0;
+    let within5pts = 0;
+    let within10pts = 0;
 
     allIds.forEach(id => {
         const pred = predDrivers[id];
@@ -1160,6 +1166,18 @@ function renderComparison(predictions, actual) {
         const actRace = act.race_position;
         const predPts = pred.expected_points || 0;
         const actPts = act.total_points || 0;
+        const ptsDiff = actPts - predPts;
+
+        // MC data if available
+        const mcMean = pred.mc_total_mean;
+        const mcP5 = pred.mc_total_p5;
+        const mcP95 = pred.mc_total_p95;
+        const withinCI = (mcP5 != null && mcP95 != null) ? (actPts >= mcP5 && actPts <= mcP95) : null;
+
+        if (withinCI !== null) {
+            ciTotal++;
+            if (withinCI) inCI++;
+        }
 
         const qualiDiff = actQuali != null && predQuali != null ? Math.abs(actQuali - predQuali) : null;
         const raceDiff = actRace != null && predRace != null ? Math.abs(actRace - predRace) : null;
@@ -1172,6 +1190,10 @@ function renderComparison(predictions, actual) {
 
         totalPredPts += predPts;
         totalActualPts += actPts;
+        totalPtsAbsError += Math.abs(ptsDiff);
+        ptsCompared++;
+        if (Math.abs(ptsDiff) <= 5) within5pts++;
+        if (Math.abs(ptsDiff) <= 10) within10pts++;
 
         rows.push({
             id,
@@ -1183,21 +1205,37 @@ function renderComparison(predictions, actual) {
             predRace,
             actRace,
             raceDiff,
-            predPts: predPts,
-            actPts: actPts,
+            predPts,
+            actPts,
+            ptsDiff,
+            mcMean,
+            mcP5,
+            mcP95,
+            withinCI,
         });
     });
 
-    // Sort by actual race position
-    rows.sort((a, b) => (a.actRace || 99) - (b.actRace || 99));
+    // Sort by actual total points descending
+    rows.sort((a, b) => (b.actPts) - (a.actPts));
 
     const mae = countCompared > 0 ? (totalAbsError / countCompared) : 0;
     const within2Pct = countCompared > 0 ? (within2 / countCompared * 100) : 0;
+    const ptsMae = ptsCompared > 0 ? (totalPtsAbsError / ptsCompared) : 0;
+    const within10Pct = ptsCompared > 0 ? (within10pts / ptsCompared * 100) : 0;
+    const ciCoverage = ciTotal > 0 ? (inCI / ciTotal * 100) : null;
 
     function posColorClass(diff) {
         if (diff == null) return '';
         if (diff <= 2) return 'cmp-green';
         if (diff <= 4) return 'cmp-yellow';
+        return 'cmp-red';
+    }
+
+    function ptsColorClass(diff) {
+        if (diff == null) return '';
+        const abs = Math.abs(diff);
+        if (abs <= 5) return 'cmp-green';
+        if (abs <= 10) return 'cmp-yellow';
         return 'cmp-red';
     }
 
@@ -1210,38 +1248,53 @@ function renderComparison(predictions, actual) {
         <div class="accuracy-summary">
             <div class="accuracy-stat">
                 <div class="accuracy-value">${mae.toFixed(1)}</div>
-                <div class="accuracy-label">Mean Absolute Error (positions)</div>
+                <div class="accuracy-label">Position MAE</div>
             </div>
             <div class="accuracy-stat">
                 <div class="accuracy-value">${within2Pct.toFixed(0)}%</div>
-                <div class="accuracy-label">Predictions within +/-2 positions</div>
+                <div class="accuracy-label">Within ±2 positions</div>
             </div>
             <div class="accuracy-stat">
-                <div class="accuracy-value">${totalPredPts.toFixed(1)}</div>
-                <div class="accuracy-label">Total Predicted Points</div>
+                <div class="accuracy-value">${ptsMae.toFixed(1)}</div>
+                <div class="accuracy-label">Fantasy Points MAE</div>
             </div>
             <div class="accuracy-stat">
-                <div class="accuracy-value">${totalActualPts.toFixed(1)}</div>
-                <div class="accuracy-label">Total Actual Points</div>
+                <div class="accuracy-value">${within10Pct.toFixed(0)}%</div>
+                <div class="accuracy-label">Within ±10 pts</div>
+            </div>
+            ${ciCoverage !== null ? `
+            <div class="accuracy-stat">
+                <div class="accuracy-value">${ciCoverage.toFixed(0)}%</div>
+                <div class="accuracy-label">90% CI Coverage (${inCI}/${ciTotal})</div>
+            </div>` : ''}
+            <div class="accuracy-stat">
+                <div class="accuracy-value" style="font-size:1.2rem">${totalPredPts.toFixed(0)} → ${totalActualPts.toFixed(0)}</div>
+                <div class="accuracy-label">Pred vs Actual Total</div>
             </div>
         </div>
     </div>`;
 
     // Comparison table
+    const hasMC = rows.some(r => r.mcMean != null);
     html += `
     <div class="analysis-block">
         <h3>Predicted vs Actual — Driver Comparison</h3>
         <table class="data-table">
             <thead><tr>
                 <th>Driver</th><th>Team</th>
-                <th class="num">Pred Quali</th><th class="num">Act Quali</th><th class="num">Diff</th>
-                <th class="num">Pred Race</th><th class="num">Act Race</th><th class="num">Diff</th>
-                <th class="num">Pred Pts</th><th class="num">Act Pts</th>
+                <th class="num">Pred Q</th><th class="num">Act Q</th><th class="num">Δ</th>
+                <th class="num">Pred R</th><th class="num">Act R</th><th class="num">Δ</th>
+                <th class="num">Pred Pts</th>${hasMC ? '<th class="num">MC Mean</th>' : ''}
+                <th class="num">Act Pts</th><th class="num">Pts Δ</th>
+                ${hasMC ? '<th class="num">90% CI</th><th class="num">In CI</th>' : ''}
             </tr></thead>
             <tbody>${rows.map(r => {
                 const team = TEAMS[r.constructor] || { name: r.constructor, color: '#666' };
                 const qClass = posColorClass(r.qualiDiff);
                 const rClass = posColorClass(r.raceDiff);
+                const pClass = ptsColorClass(r.ptsDiff);
+                const ciStr = (r.mcP5 != null && r.mcP95 != null) ? `${r.mcP5.toFixed(0)}–${r.mcP95.toFixed(0)}` : '-';
+                const ciClass = r.withinCI === true ? 'cmp-green' : r.withinCI === false ? 'cmp-red' : '';
                 return `
                 <tr>
                     <td><strong>${r.name}</strong></td>
@@ -1253,7 +1306,10 @@ function renderComparison(predictions, actual) {
                     <td class="num">${r.actRace != null ? 'P' + r.actRace : '-'}</td>
                     <td class="num ${rClass}">${r.raceDiff != null ? r.raceDiff : '-'}</td>
                     <td class="num">${r.predPts.toFixed(1)}</td>
-                    <td class="num">${r.actPts.toFixed(1)}</td>
+                    ${hasMC ? `<td class="num">${r.mcMean != null ? r.mcMean.toFixed(1) : '-'}</td>` : ''}
+                    <td class="num"><strong>${r.actPts.toFixed(1)}</strong></td>
+                    <td class="num ${pClass}">${r.ptsDiff >= 0 ? '+' : ''}${r.ptsDiff.toFixed(1)}</td>
+                    ${hasMC ? `<td class="num">${ciStr}</td><td class="num ${ciClass}">${r.withinCI === true ? '✓' : r.withinCI === false ? '✗' : '-'}</td>` : ''}
                 </tr>`;
             }).join('')}
             </tbody>
@@ -1304,7 +1360,7 @@ function renderSeason() {
                 <th>Rd</th><th>Race</th><th>Circuit</th><th>Date</th><th>Status</th>
             </tr></thead>
             <tbody>${seasonSummary.rounds.map(r => {
-                const clickable = r.has_post_race || r.has_predictions;
+                const clickable = r.has_post_race || r.has_predictions || r.has_actual;
                 const rowClass = clickable ? 'class="clickable-row" data-round="' + r.round + '"' : '';
                 return `
                 <tr ${rowClass} ${clickable ? 'style="cursor:pointer"' : ''}>
@@ -1386,11 +1442,14 @@ function renderSeason() {
     if (seasonSummary && seasonSummary.rounds) {
         selector.innerHTML = '<option value="">Select a round...</option>';
         seasonSummary.rounds
-            .filter(r => r.has_post_race || r.has_predictions || r.round <= (data ? data.round : 0))
+            .filter(r => r.has_post_race || r.has_predictions || r.has_actual || r.round <= (data ? data.round : 0))
             .forEach(r => {
                 const opt = document.createElement('option');
                 opt.value = r.round;
-                const label = r.has_post_race ? ' (Complete)' : r.has_predictions ? ' (Predicted)' : '';
+                let label = '';
+                if (r.has_actual && r.has_predictions) label = ' ✓ Pred vs Actual';
+                else if (r.has_actual || r.has_post_race) label = ' (Complete)';
+                else if (r.has_predictions) label = ' (Predicted)';
                 opt.textContent = `Round ${r.round}: ${r.name}${label}`;
                 selector.appendChild(opt);
             });
