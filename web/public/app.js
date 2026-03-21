@@ -48,6 +48,8 @@ const RACE_FLAGS = {
 let data = null;
 let lockedDrivers = new Set();
 let lockedConstructors = new Set();
+let excludedDrivers = new Set();
+let excludedConstructors = new Set();
 let fpAnalysis = null;
 let seasonSummary = null;
 let postRaceCache = {};
@@ -55,15 +57,63 @@ let predictionsCache = {};
 let actualCache = {};
 let tableSortColumn = null;
 let tableSortAsc = true;
+let allLineups = [];
+let lineupsShown = 0;
+const LINEUPS_PER_PAGE = 10;
+
+// -- F1 Fantasy Price Change Thresholds --
+const PRICE_TIERS = {
+    A_TIER_THRESHOLD: 20.0,   // Above $20M = A-tier (smaller price swings)
+    A_TIER_CHANGE: 0.3,       // A-tier max change per race
+    B_TIER_CHANGE: 0.6,       // B-tier max change per race
+};
+// PPM rating thresholds (avg PPM over last 3 races)
+const PPM_RATINGS = {
+    GREAT: 0.4,    // >= 0.4 PPM = Great (price increase likely)
+    GOOD: 0.3,     // >= 0.3 PPM = Good (slight increase)
+    POOR: 0.2,     // >= 0.2 PPM = Poor (slight decrease)
+    // < 0.2 = Terrible (price decrease likely)
+};
 
 // -- Init --
 document.addEventListener('DOMContentLoaded', async () => {
     await loadData();
     await loadSeasonData();
+    await preloadActualData();
+    await loadPitstopData();
     setupTabs();
     setupControls();
     render();
 });
+
+async function preloadActualData() {
+    // Preload all available actual round data for price change predictions
+    if (!seasonSummary || !seasonSummary.rounds) return;
+    const promises = seasonSummary.rounds
+        .filter(r => r.has_actual)
+        .map(r => loadActualData(r.round));
+    await Promise.all(promises);
+}
+
+async function loadPitstopData() {
+    // Load pit stop stationary times from overtakes JSON files
+    window._pitstopData = {};
+    if (!seasonSummary || !seasonSummary.rounds) return;
+    for (const r of seasonSummary.rounds) {
+        if (!r.has_actual) continue;
+        try {
+            const resp = await fetch(cacheBust(`data/pitstops_round${r.round}.json`));
+            if (!resp.ok) continue;
+            const psData = await resp.json();
+            if (psData && psData.by_constructor) {
+                for (const [cid, times] of Object.entries(psData.by_constructor)) {
+                    if (!window._pitstopData[cid]) window._pitstopData[cid] = [];
+                    window._pitstopData[cid].push(...times);
+                }
+            }
+        } catch (e) { /* no pitstop data for this round */ }
+    }
+}
 
 function cacheBust(url) {
     return url + (url.includes('?') ? '&' : '?') + '_=' + Date.now();
@@ -182,6 +232,10 @@ function setupControls() {
 
     // Optimizer
     document.getElementById('runOptimizer').addEventListener('click', runOptimizer);
+    document.getElementById('loadMoreLineups').addEventListener('click', () => {
+        const strategy = document.getElementById('strategy').value;
+        displayLineups(strategy);
+    });
 
     // Analysis panel toggle
     document.querySelectorAll('.analysis-btn').forEach(btn => {
@@ -414,32 +468,37 @@ function driverCard(d, i) {
         </div>
 
         <div class="card-stats">
-            <div class="stat">
+            <div class="stat" title="Predicted qualifying position">
                 <div class="stat-value">P${d.predicted_quali}</div>
                 <div class="stat-label">Quali</div>
             </div>
-            <div class="stat">
+            <div class="stat" title="Predicted race finish position">
                 <div class="stat-value">P${d.predicted_finish}</div>
                 <div class="stat-label">Race</div>
             </div>
-            <div class="stat">
+            <div class="stat" title="Expected positions gained (positive) or lost (negative) from grid to finish">
                 <div class="stat-value">${posIcon}</div>
                 <div class="stat-label">Pos +/-</div>
             </div>
         </div>
 
         <div class="card-meta">
-            <div class="confidence-bar">
+            <div class="confidence-bar" title="Prediction confidence (0-100%). Higher = more data available and models agree. Based on FP data completeness and model agreement.">
                 <span>Conf</span>
                 <div class="conf-track">
                     <div class="conf-fill" style="width:${d.confidence}%;background:${confColor}"></div>
                 </div>
                 <span>${d.confidence}%</span>
             </div>
-            <span class="risk-badge ${riskClass}">${d.risk}</span>
-            <span class="price-tag">$${d.current_price.toFixed(1)}M</span>
+            <span class="risk-badge ${riskClass}" title="DNF risk based on rolling 5-race DNF probability. LOW = safe pick, HIGH = DNF-prone.">${d.risk}</span>
+            <span class="price-tag" title="Current F1 Fantasy price">$${d.current_price.toFixed(1)}M</span>
             <span class="value-tag" style="position:relative;cursor:help" title="Value Score = Expected Fantasy Points / Price ($M). Higher is better. Above 1.0 = good value, above 2.0 = excellent, below 0 = negative expected return.">${d.value_score.toFixed(2)}x<span class="value-tooltip">Value Score = Expected Fantasy Points &divide; Price ($M). Higher is better. Above 1.0 = good value, above 2.0 = excellent, below 0 = negative expected return.</span></span>
         </div>
+        ${d.mc_total_p5 != null ? `
+        <div class="mc-range" title="Monte Carlo simulation: 90% of outcomes fall within this range (5th to 95th percentile). Shows downside risk and upside potential.">
+            <span class="mc-label">MC 90% CI</span>
+            <span class="mc-values">${d.mc_total_p5.toFixed(0)} — ${d.mc_total_p95.toFixed(0)} pts</span>
+        </div>` : ''}
     </div>`;
 }
 
@@ -492,6 +551,8 @@ function constructorCard(c, i) {
     const riskClass = c.risk === 'LOW' ? 'risk-low' :
                       c.risk === 'MEDIUM' ? 'risk-medium' : 'risk-high';
 
+    const pitHtml = getPitStopStatsHtml(c.constructor_id);
+
     return `
     <div class="constructor-card" style="--team-color:${team.color};--i:${i}">
         <div class="constructor-header">
@@ -518,14 +579,15 @@ function constructorCard(c, i) {
         </div>
 
         <div class="card-meta">
-            <span class="risk-badge ${riskClass}">${c.risk}</span>
-            <span class="price-tag">$${c.current_price.toFixed(1)}M</span>
-            <span class="value-tag">${c.value_score.toFixed(2)}x</span>
+            <span class="risk-badge ${riskClass}" title="DNF risk based on combined driver risk">${c.risk}</span>
+            <span class="price-tag" title="Current F1 Fantasy price">$${c.current_price.toFixed(1)}M</span>
+            <span class="value-tag" title="Value Score = Expected Points / Price">${c.value_score.toFixed(2)}x</span>
         </div>
+        ${pitHtml}
     </div>`;
 }
 
-// -- Lock grid for optimizer --
+// -- Lock / Exclude grid for optimizer --
 function renderLockGrid() {
     if (!data) return;
 
@@ -536,42 +598,107 @@ function renderLockGrid() {
     data.drivers.forEach(d => {
         const team = TEAMS[d.constructor] || { color: '#666' };
         const locked = lockedDrivers.has(d.driver_id);
+        const excluded = excludedDrivers.has(d.driver_id);
+        const chipClass = locked ? 'locked' : excluded ? 'excluded' : '';
+        const icon = locked ? '🔒' : excluded ? '🚫' : '';
         html += `
-        <div class="lock-chip ${locked ? 'locked' : ''}" data-type="driver" data-id="${d.driver_id}">
+        <div class="lock-chip ${chipClass}" data-type="driver" data-id="${d.driver_id}">
             <span class="chip-dot" style="background:${team.color}"></span>
             ${d.name.split(' ').pop()}
-            <span class="lock-icon">${locked ? '🔒' : ''}</span>
+            <span class="lock-icon">${icon}</span>
         </div>`;
     });
 
-    // Constructors
-    html += '<div style="width:100%;height:1px;"></div>';
+    // Constructors — ALL CAPS + bold styling
+    html += '<div class="lock-grid-separator"></div>';
     data.constructors.forEach(c => {
         const team = TEAMS[c.constructor_id] || { color: '#666' };
         const locked = lockedConstructors.has(c.constructor_id);
+        const excluded = excludedConstructors.has(c.constructor_id);
+        const chipClass = locked ? 'locked' : excluded ? 'excluded' : '';
+        const icon = locked ? '🔒' : excluded ? '🚫' : '';
         html += `
-        <div class="lock-chip ${locked ? 'locked' : ''}" data-type="constructor" data-id="${c.constructor_id}">
+        <div class="lock-chip constructor-chip ${chipClass}" data-type="constructor" data-id="${c.constructor_id}">
             <span class="chip-dot" style="background:${team.color}"></span>
-            ${c.name}
-            <span class="lock-icon">${locked ? '🔒' : ''}</span>
+            <strong>${c.name.toUpperCase()}</strong>
+            <span class="lock-icon">${icon}</span>
         </div>`;
     });
 
     grid.innerHTML = html;
 
-    // Click handlers
+    // Click handlers: left click = lock, right click = exclude
     grid.querySelectorAll('.lock-chip').forEach(chip => {
+        // Left click: toggle lock (clears exclude if set)
         chip.addEventListener('click', () => {
             const type = chip.dataset.type;
             const id = chip.dataset.id;
-            if (type === 'driver') {
-                lockedDrivers.has(id) ? lockedDrivers.delete(id) : lockedDrivers.add(id);
+            const lockSet = type === 'driver' ? lockedDrivers : lockedConstructors;
+            const excludeSet = type === 'driver' ? excludedDrivers : excludedConstructors;
+            if (lockSet.has(id)) {
+                lockSet.delete(id);
             } else {
-                lockedConstructors.has(id) ? lockedConstructors.delete(id) : lockedConstructors.add(id);
+                excludeSet.delete(id);
+                lockSet.add(id);
+            }
+            renderLockGrid();
+        });
+        // Right click: toggle exclude (clears lock if set)
+        chip.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            const type = chip.dataset.type;
+            const id = chip.dataset.id;
+            const lockSet = type === 'driver' ? lockedDrivers : lockedConstructors;
+            const excludeSet = type === 'driver' ? excludedDrivers : excludedConstructors;
+            if (excludeSet.has(id)) {
+                excludeSet.delete(id);
+            } else {
+                lockSet.delete(id);
+                excludeSet.add(id);
             }
             renderLockGrid();
         });
     });
+}
+
+// -- Price change prediction helpers --
+function getPpmRating(avgPpm) {
+    if (avgPpm >= PPM_RATINGS.GREAT) return { label: 'Great', class: 'rating-great', color: 'var(--green)' };
+    if (avgPpm >= PPM_RATINGS.GOOD) return { label: 'Good', class: 'rating-good', color: '#22d3ee' };
+    if (avgPpm >= PPM_RATINGS.POOR) return { label: 'Poor', class: 'rating-poor', color: 'var(--orange)' };
+    return { label: 'Terrible', class: 'rating-terrible', color: 'var(--red, #ef4444)' };
+}
+
+function predictPriceChange(item, predictedPts) {
+    const price = item.current_price || 10;
+    const isATier = price >= PRICE_TIERS.A_TIER_THRESHOLD;
+    const maxChange = isATier ? PRICE_TIERS.A_TIER_CHANGE : PRICE_TIERS.B_TIER_CHANGE;
+
+    // Collect past PPM scores from actuals
+    const pastScores = [];
+    for (const [rn, actData] of Object.entries(actualCache)) {
+        if (!actData || !actData.drivers) continue;
+        const actDriver = actData.drivers.find(d => d.driver_id === (item.driver_id || item.constructor_id));
+        const actCon = actData.constructors ? actData.constructors.find(c => c.constructor_id === (item.constructor_id || item.driver_id)) : null;
+        const match = actDriver || actCon;
+        if (match && match.total_points != null) pastScores.push(match.total_points);
+    }
+
+    // Hypothetical avg including predicted this round
+    const allScores = [...pastScores, predictedPts];
+    const last3 = allScores.slice(-3);
+    const avgPts = last3.reduce((a, b) => a + b, 0) / last3.length;
+    const avgPpm = avgPts / price;
+    const rating = getPpmRating(avgPpm);
+
+    // Estimate price change direction
+    let expectedChange = 0;
+    if (avgPpm >= PPM_RATINGS.GREAT) expectedChange = maxChange;
+    else if (avgPpm >= PPM_RATINGS.GOOD) expectedChange = maxChange * 0.5;
+    else if (avgPpm >= PPM_RATINGS.POOR) expectedChange = -maxChange * 0.5;
+    else expectedChange = -maxChange;
+
+    return { avgPpm, rating, expectedChange, avgPts, pastScores, isATier, maxChange, tier: isATier ? 'A' : 'B' };
 }
 
 // -- Lineup Optimizer --
@@ -586,29 +713,34 @@ function runOptimizer() {
     function score(item) {
         if (strategy === 'max_points') return item.expected_points;
         if (strategy === 'max_value') return item.value_score;
+        if (strategy === 'budget_gain') {
+            // Favor items likely to increase in price
+            const pc = predictPriceChange(item, item.expected_points);
+            return pc.expectedChange * 100 + item.value_score * 5;
+        }
         // Balanced: weighted combo
         return item.expected_points * 0.6 + item.value_score * 10 * 0.4;
     }
 
-    const drivers = data.drivers.map(d => ({ ...d, _type: 'driver', _score: score(d) }));
-    const constructors = data.constructors.map(c => ({ ...c, _type: 'constructor', _score: score(c) }));
+    // Filter out excluded picks
+    const drivers = data.drivers
+        .filter(d => !excludedDrivers.has(d.driver_id))
+        .map(d => ({ ...d, _type: 'driver', _score: score(d) }));
+    const constructors = data.constructors
+        .filter(c => !excludedConstructors.has(c.constructor_id))
+        .map(c => ({ ...c, _type: 'constructor', _score: score(c) }));
 
     // Sort by score descending
     drivers.sort((a, b) => b._score - a._score);
     constructors.sort((a, b) => b._score - a._score);
 
-    // Brute force best lineup: 5 drivers + 2 constructors
-    // With 22 drivers, C(22,5) = 26,334 and C(11,2) = 55 => ~1.4M combos
-    // That's manageable in JS
-
-    let bestLineup = null;
-    let bestScore = -Infinity;
+    // Brute force all valid lineups: 5 drivers + 2 constructors within budget
+    allLineups = [];
 
     // Generate constructor pairs
     const cPairs = [];
     for (let i = 0; i < constructors.length; i++) {
         for (let j = i + 1; j < constructors.length; j++) {
-            // Check locked constructors
             if (lockedConstructors.size > 0) {
                 const pair = new Set([constructors[i].constructor_id, constructors[j].constructor_id]);
                 let valid = true;
@@ -625,7 +757,6 @@ function runOptimizer() {
         }
     }
 
-    // Filter drivers with locked ones
     const lockedDriverList = drivers.filter(d => lockedDrivers.has(d.driver_id));
     const freeDrivers = drivers.filter(d => !lockedDrivers.has(d.driver_id));
     const neededDrivers = 5 - lockedDriverList.length;
@@ -637,136 +768,181 @@ function runOptimizer() {
         return;
     }
 
-    // For large combos, use greedy with pairs
+    // Cap results to avoid freezing on huge searches
+    const MAX_LINEUPS = 200;
+
     for (const cp of cPairs) {
         const remainBudget = budget - cp.cost - lockedDriverCost;
         if (remainBudget < 0) continue;
 
-        // Greedy fill for drivers (good enough given sorted order)
-        const picked = [];
-        let cost = 0;
-        for (const d of freeDrivers) {
-            if (picked.length >= neededDrivers) break;
-            if (cost + d.current_price <= remainBudget) {
-                // Check we have enough budget for remaining picks
-                picked.push(d);
-                cost += d.current_price;
-            }
-        }
+        const combos = combinations(freeDrivers, neededDrivers);
+        for (const combo of combos) {
+            const cost = combo.reduce((s, d) => s + d.current_price, 0);
+            if (cost > remainBudget) continue;
 
-        if (picked.length === neededDrivers) {
-            const totalScore = cp.score + lockedDriverScore + picked.reduce((s, d) => s + d._score, 0);
-            if (totalScore > bestScore) {
-                bestScore = totalScore;
-                bestLineup = {
-                    drivers: [...lockedDriverList, ...picked],
-                    constructors: cp.items,
-                    totalCost: cp.cost + lockedDriverCost + cost,
-                    totalPoints: cp.items.reduce((s, c) => s + c.expected_points, 0) +
-                                 lockedDriverList.reduce((s, d) => s + d.expected_points, 0) +
-                                 picked.reduce((s, d) => s + d.expected_points, 0),
-                };
-            }
+            const allDrivers = [...lockedDriverList, ...combo];
+            const totalScore = cp.score + lockedDriverScore + combo.reduce((s, d) => s + d._score, 0);
+            const totalPoints = cp.items.reduce((s, c) => s + c.expected_points, 0) +
+                                allDrivers.reduce((s, d) => s + d.expected_points, 0);
+            const totalCost = cp.cost + lockedDriverCost + cost;
+
+            allLineups.push({
+                drivers: allDrivers,
+                constructors: cp.items,
+                totalCost,
+                totalPoints,
+                totalScore,
+            });
         }
     }
 
-    // Also try non-greedy: for each constructor pair, try swapping last picked with next options
-    // (Simple improvement pass)
-    if (bestLineup && neededDrivers > 0) {
-        for (const cp of cPairs) {
-            const remainBudget = budget - cp.cost - lockedDriverCost;
-            if (remainBudget < 0) continue;
+    // Sort by total score descending
+    allLineups.sort((a, b) => b.totalScore - a.totalScore);
 
-            // Try all combinations of top N drivers
-            const topN = freeDrivers;
-            const combos = combinations(topN, neededDrivers);
+    // Deduplicate (same set of driver+constructor IDs)
+    const seen = new Set();
+    allLineups = allLineups.filter(l => {
+        const key = [...l.drivers.map(d => d.driver_id).sort(), ...l.constructors.map(c => c.constructor_id).sort()].join(',');
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
 
-            for (const combo of combos) {
-                const cost = combo.reduce((s, d) => s + d.current_price, 0);
-                if (cost > remainBudget) continue;
+    if (allLineups.length > MAX_LINEUPS) allLineups.length = MAX_LINEUPS;
 
-                const totalScore = cp.score + lockedDriverScore + combo.reduce((s, d) => s + d._score, 0);
-                if (totalScore > bestScore) {
-                    bestScore = totalScore;
-                    bestLineup = {
-                        drivers: [...lockedDriverList, ...combo],
-                        constructors: cp.items,
-                        totalCost: cp.cost + lockedDriverCost + cost,
-                        totalPoints: cp.items.reduce((s, c) => s + c.expected_points, 0) +
-                                     lockedDriverList.reduce((s, d) => s + d.expected_points, 0) +
-                                     combo.reduce((s, d) => s + d.expected_points, 0),
-                    };
-                }
-            }
-        }
-    }
-
-    if (!bestLineup) {
+    if (allLineups.length === 0) {
         const resultEl = document.getElementById('optimizerResult');
         resultEl.classList.remove('hidden');
         document.getElementById('lineupSummary').innerHTML = '';
         document.getElementById('lineupCards').innerHTML = `
             <div class="optimizer-warning" style="background:var(--card);border:2px solid var(--orange, #f59e0b);border-radius:10px;padding:20px;text-align:center;">
                 <h3 style="color:var(--orange, #f59e0b);margin-bottom:8px;">No Valid Lineup Found</h3>
-                <p style="color:var(--text-secondary);">Could not find a lineup of 5 drivers + 2 constructors within your $${budget.toFixed(1)}M budget${lockedDrivers.size || lockedConstructors.size ? ' with the current locked picks' : ''}.</p>
-                <p style="color:var(--text-secondary);margin-top:8px;">Try increasing the budget or unlocking some picks.</p>
+                <p style="color:var(--text-secondary);">Could not find a lineup within your $${budget.toFixed(1)}M budget${lockedDrivers.size || lockedConstructors.size ? ' with the current locked/excluded picks' : ''}.</p>
+                <p style="color:var(--text-secondary);margin-top:8px;">Try increasing the budget, unlocking some picks, or removing exclusions.</p>
             </div>`;
+        document.getElementById('lineupLoadMore').classList.add('hidden');
         resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
     }
 
-    displayLineup(bestLineup, strategy);
+    lineupsShown = 0;
+    displayLineups(strategy);
 }
 
-function combinations(arr, k) {
-    const result = [];
-    function helper(start, combo) {
-        if (combo.length === k) {
-            result.push([...combo]);
-            return;
-        }
-        for (let i = start; i < arr.length; i++) {
-            combo.push(arr[i]);
-            helper(i + 1, combo);
-            combo.pop();
+function* combinations(arr, k) {
+    if (k === 0) { yield []; return; }
+    for (let i = 0; i <= arr.length - k; i++) {
+        for (const rest of combinations(arr.slice(i + 1), k - 1)) {
+            yield [arr[i], ...rest];
         }
     }
-    helper(0, []);
-    return result;
 }
 
-function displayLineup(lineup, strategy) {
+function displayLineups(strategy) {
     const resultEl = document.getElementById('optimizerResult');
     resultEl.classList.remove('hidden');
 
     const budget = parseFloat(document.getElementById('budget').value);
+    const total = allLineups.length;
+    const end = Math.min(lineupsShown + LINEUPS_PER_PAGE, total);
 
-    // Summary
-    document.getElementById('lineupSummary').innerHTML = `
-        <div class="lineup-stat">
-            <div class="big-num">${lineup.totalPoints.toFixed(1)}</div>
-            <div class="label">Expected Points</div>
-        </div>
-        <div class="lineup-stat">
-            <div class="big-num">$${lineup.totalCost.toFixed(1)}M</div>
-            <div class="label">Total Cost</div>
-        </div>
-        <div class="lineup-stat">
-            <div class="big-num">$${(budget - lineup.totalCost).toFixed(1)}M</div>
-            <div class="label">Remaining</div>
-        </div>
-    `;
+    // Summary for best lineup
+    if (lineupsShown === 0) {
+        const best = allLineups[0];
+        const allPicks = [...best.drivers, ...best.constructors];
+        const avgConf = best.drivers.reduce((s, d) => s + (d.confidence || 0), 0) / best.drivers.length;
+        const highRiskCount = allPicks.filter(p => p.risk === 'HIGH' || p.risk === 'VERY HIGH').length;
+        const riskLevel = highRiskCount === 0 ? 'Low' : highRiskCount <= 2 ? 'Medium' : 'High';
+        const riskColor = riskLevel === 'Low' ? 'var(--green)' : riskLevel === 'Medium' ? 'var(--orange)' : 'var(--red, #ef4444)';
 
-    // Cards with reasoning
+        // Expected budget gain from price changes
+        let totalExpChange = 0;
+        allPicks.forEach(p => {
+            const pc = predictPriceChange(p, p.expected_points);
+            totalExpChange += pc.expectedChange;
+        });
+
+        document.getElementById('lineupSummary').innerHTML = `
+            <div class="lineup-stat">
+                <div class="big-num">${best.totalPoints.toFixed(1)}</div>
+                <div class="label" title="Sum of expected fantasy points for all 7 picks">Expected Points</div>
+            </div>
+            <div class="lineup-stat">
+                <div class="big-num">$${best.totalCost.toFixed(1)}M</div>
+                <div class="label">Total Cost</div>
+            </div>
+            <div class="lineup-stat">
+                <div class="big-num">$${(budget - best.totalCost).toFixed(1)}M</div>
+                <div class="label">Remaining</div>
+            </div>
+            <div class="lineup-stat">
+                <div class="big-num">${avgConf.toFixed(0)}%</div>
+                <div class="label" title="Average prediction confidence across all 5 drivers">Avg Confidence</div>
+            </div>
+            <div class="lineup-stat">
+                <div class="big-num" style="color:${riskColor}">${riskLevel}</div>
+                <div class="label" title="Based on number of high-risk picks (DNF probability)">Risk Level</div>
+            </div>
+            <div class="lineup-stat">
+                <div class="big-num" style="color:${totalExpChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)'}">${totalExpChange >= 0 ? '+' : ''}${totalExpChange.toFixed(1)}M</div>
+                <div class="label" title="Expected combined price change for all picks based on predicted PPM ratings">Exp Budget Change</div>
+            </div>
+        `;
+
+        document.getElementById('lineupCards').innerHTML = '';
+        document.getElementById('lineupCounter').textContent = `${total} valid lineup${total !== 1 ? 's' : ''} found`;
+    }
+
+    // Render lineups from lineupsShown to end
     let html = '';
+    for (let li = lineupsShown; li < end; li++) {
+        const lineup = allLineups[li];
+        html += renderSingleLineup(lineup, li, strategy, budget);
+    }
 
-    const strategyLabel = strategy === 'max_points' ? 'Pts' : strategy === 'max_value' ? 'Value' : 'Score';
+    document.getElementById('lineupCards').insertAdjacentHTML('beforeend', html);
+    lineupsShown = end;
+
+    // Show/hide load more
+    const loadMoreEl = document.getElementById('lineupLoadMore');
+    if (lineupsShown < total) {
+        loadMoreEl.classList.remove('hidden');
+        loadMoreEl.querySelector('.load-more-text').textContent = `Show more (${lineupsShown}/${total})`;
+    } else {
+        loadMoreEl.classList.add('hidden');
+    }
+
+    if (lineupsShown === end && lineupsShown <= LINEUPS_PER_PAGE) {
+        resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function renderSingleLineup(lineup, index, strategy, budget) {
+    const allPicks = [...lineup.drivers, ...lineup.constructors];
+    let totalExpChange = 0;
+    allPicks.forEach(p => {
+        const pc = predictPriceChange(p, p.expected_points);
+        totalExpChange += pc.expectedChange;
+    });
+
+    let html = `<div class="lineup-block" style="margin-bottom:24px;">
+        <div class="lineup-block-header">
+            <h4>Lineup #${index + 1}</h4>
+            <span class="lineup-block-stats">
+                ${lineup.totalPoints.toFixed(1)} pts · $${lineup.totalCost.toFixed(1)}M ·
+                $${(budget - lineup.totalCost).toFixed(1)}M left ·
+                <span style="color:${totalExpChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)'}">${totalExpChange >= 0 ? '+' : ''}${totalExpChange.toFixed(1)}M exp change</span>
+            </span>
+        </div>
+        <div class="lineup-picks-grid">`;
 
     lineup.drivers.sort((a, b) => b.expected_points - a.expected_points);
     lineup.drivers.forEach((d, i) => {
         const team = TEAMS[d.constructor] || { color: '#666', name: d.constructor };
         const locked = lockedDrivers.has(d.driver_id);
         const valueScore = d.value_score != null ? d.value_score.toFixed(2) : (d.expected_points / d.current_price).toFixed(2);
+        const pc = predictPriceChange(d, d.expected_points);
+        const changeColor = pc.expectedChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)';
         html += `
         <div class="lineup-pick" style="--team-color:${team.color}">
             <div class="pick-type">Driver ${i + 1} ${locked ? '🔒' : ''}</div>
@@ -776,6 +952,8 @@ function displayLineup(lineup, strategy) {
                 <span>Price: <strong style="color:var(--text)">$${d.current_price.toFixed(1)}M</strong></span>
                 <span>Value: <strong style="color:var(--text)">${valueScore}x</strong></span>
                 <span>P${d.predicted_quali} → P${d.predicted_finish}</span>
+                <span>PPM: <strong style="color:${pc.rating.color}">${pc.avgPpm.toFixed(2)}</strong></span>
+                <span style="color:${changeColor}">Exp: ${pc.expectedChange >= 0 ? '+' : ''}${pc.expectedChange.toFixed(1)}M <span class="ppm-rating ${pc.rating.class}">${pc.rating.label}</span></span>
             </div>
         </div>`;
     });
@@ -784,23 +962,68 @@ function displayLineup(lineup, strategy) {
         const team = TEAMS[c.constructor_id] || { color: '#666', name: c.name };
         const locked = lockedConstructors.has(c.constructor_id);
         const valueScore = c.value_score != null ? c.value_score.toFixed(2) : (c.expected_points / c.current_price).toFixed(2);
+        const pc = predictPriceChange(c, c.expected_points);
+        const changeColor = pc.expectedChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)';
+
+        // Pit stop stats
+        const pitHtml = getPitStopStatsHtml(c.constructor_id);
+
         html += `
-        <div class="lineup-pick" style="--team-color:${team.color}">
-            <div class="pick-type">Constructor ${i + 1} ${locked ? '🔒' : ''}</div>
-            <div class="pick-name">${c.full_name || c.name}</div>
+        <div class="lineup-pick constructor-pick" style="--team-color:${team.color}">
+            <div class="pick-type">CONSTRUCTOR ${i + 1} ${locked ? '🔒' : ''}</div>
+            <div class="pick-name">${(c.full_name || c.name).toUpperCase()}</div>
             <div class="pick-details" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:0.8rem;color:var(--text-secondary);margin-top:6px;">
                 <span>Exp Pts: <strong style="color:var(--text)">${c.expected_points.toFixed(1)}</strong></span>
                 <span>Price: <strong style="color:var(--text)">$${c.current_price.toFixed(1)}M</strong></span>
                 <span>Value: <strong style="color:var(--text)">${valueScore}x</strong></span>
                 <span>${c.driver_1} & ${c.driver_2}</span>
+                <span>PPM: <strong style="color:${pc.rating.color}">${pc.avgPpm.toFixed(2)}</strong></span>
+                <span style="color:${changeColor}">Exp: ${pc.expectedChange >= 0 ? '+' : ''}${pc.expectedChange.toFixed(1)}M <span class="ppm-rating ${pc.rating.class}">${pc.rating.label}</span></span>
             </div>
+            ${pitHtml}
         </div>`;
     });
 
-    document.getElementById('lineupCards').innerHTML = html;
+    html += '</div></div>';
+    return html;
+}
 
-    // Scroll into view
-    resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+function getPitStopStatsHtml(constructorId) {
+    // Aggregate pit stop stationary times from all cached actual data
+    const stops = [];
+    for (const [rn, actData] of Object.entries(actualCache)) {
+        if (!actData) continue;
+        // Check if we have pitstop data in the overtakes cache
+    }
+    // Also check global pitstopCache
+    if (window._pitstopData && window._pitstopData[constructorId]) {
+        const teamStops = window._pitstopData[constructorId];
+        stops.push(...teamStops);
+    }
+
+    if (stops.length === 0) return '';
+
+    stops.sort((a, b) => a - b);
+    const avg = stops.reduce((a, b) => a + b, 0) / stops.length;
+    const fastest = stops[0];
+    const slowest = stops[stops.length - 1];
+    const p10idx = Math.floor(stops.length * 0.1);
+    const p90idx = Math.min(Math.floor(stops.length * 0.9), stops.length - 1);
+    const p10 = stops[p10idx];
+    const p90 = stops[p90idx];
+
+    return `
+    <div class="pit-stats" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--text-secondary);">
+        <div style="font-weight:600;margin-bottom:4px;" title="Stationary pit stop times (wheels up to wheels down)">Pit Stops (stationary)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px 8px;">
+            <span>Avg: <strong style="color:var(--text)">${avg.toFixed(2)}s</strong></span>
+            <span>Fast: <strong style="color:var(--green)">${fastest.toFixed(2)}s</strong></span>
+            <span>Slow: <strong style="color:var(--red, #ef4444)">${slowest.toFixed(2)}s</strong></span>
+            <span>P10: ${p10.toFixed(2)}s</span>
+            <span>P90: ${p90.toFixed(2)}s</span>
+            <span>Count: ${stops.length}</span>
+        </div>
+    </div>`;
 }
 
 // -- FP Analysis --
@@ -1145,7 +1368,7 @@ function renderComparison(predictions, actual) {
     const rows = [];
     let totalAbsError = 0;
     let countCompared = 0;
-    let within2 = 0;
+    let within1 = 0;
     let totalPredPts = 0;
     let totalActualPts = 0;
     let totalPtsAbsError = 0;
@@ -1185,7 +1408,7 @@ function renderComparison(predictions, actual) {
         if (raceDiff != null) {
             totalAbsError += raceDiff;
             countCompared++;
-            if (raceDiff <= 2) within2++;
+            if (raceDiff <= 1) within1++;
         }
 
         totalPredPts += predPts;
@@ -1212,6 +1435,9 @@ function renderComparison(predictions, actual) {
             mcP5,
             mcP95,
             withinCI,
+            actOvertakes: act.overtakes,
+            overtakeSource: act.overtake_source,
+            predOvertakes: pred.expected_overtakes,
         });
     });
 
@@ -1219,7 +1445,7 @@ function renderComparison(predictions, actual) {
     rows.sort((a, b) => (b.actPts) - (a.actPts));
 
     const mae = countCompared > 0 ? (totalAbsError / countCompared) : 0;
-    const within2Pct = countCompared > 0 ? (within2 / countCompared * 100) : 0;
+    const within1Pct = countCompared > 0 ? (within1 / countCompared * 100) : 0;
     const ptsMae = ptsCompared > 0 ? (totalPtsAbsError / ptsCompared) : 0;
     const within10Pct = ptsCompared > 0 ? (within10pts / ptsCompared * 100) : 0;
     const ciCoverage = ciTotal > 0 ? (inCI / ciTotal * 100) : null;
@@ -1248,24 +1474,24 @@ function renderComparison(predictions, actual) {
         <div class="accuracy-summary">
             <div class="accuracy-stat">
                 <div class="accuracy-value">${mae.toFixed(1)}</div>
-                <div class="accuracy-label">Position MAE</div>
+                <div class="accuracy-label" title="Mean Absolute Error: average number of positions our prediction was off by. Lower is better.">Position MAE</div>
             </div>
             <div class="accuracy-stat">
-                <div class="accuracy-value">${within2Pct.toFixed(0)}%</div>
-                <div class="accuracy-label">Within ±2 positions</div>
+                <div class="accuracy-value">${within1Pct.toFixed(0)}%</div>
+                <div class="accuracy-label" title="Percentage of race finish predictions within 1 position of actual result">Within ±1 position</div>
             </div>
             <div class="accuracy-stat">
                 <div class="accuracy-value">${ptsMae.toFixed(1)}</div>
-                <div class="accuracy-label">Fantasy Points MAE</div>
+                <div class="accuracy-label" title="Mean Absolute Error for fantasy points prediction. Lower means our point estimates were more accurate.">Fantasy Points MAE</div>
             </div>
             <div class="accuracy-stat">
                 <div class="accuracy-value">${within10Pct.toFixed(0)}%</div>
-                <div class="accuracy-label">Within ±10 pts</div>
+                <div class="accuracy-label" title="Percentage of drivers whose predicted fantasy points were within 10 points of actual">Within ±10 pts</div>
             </div>
             ${ciCoverage !== null ? `
             <div class="accuracy-stat">
                 <div class="accuracy-value">${ciCoverage.toFixed(0)}%</div>
-                <div class="accuracy-label">90% CI Coverage (${inCI}/${ciTotal})</div>
+                <div class="accuracy-label" title="Percentage of actual results falling within the Monte Carlo 90% confidence interval (p5 to p95). Target: 90%.">90% CI Coverage (${inCI}/${ciTotal})</div>
             </div>` : ''}
             <div class="accuracy-stat">
                 <div class="accuracy-value" style="font-size:1.2rem">${totalPredPts.toFixed(0)} → ${totalActualPts.toFixed(0)}</div>
@@ -1284,6 +1510,7 @@ function renderComparison(predictions, actual) {
                 <th>Driver</th><th>Team</th>
                 <th class="num">Pred Q</th><th class="num">Act Q</th><th class="num">Δ</th>
                 <th class="num">Pred R</th><th class="num">Act R</th><th class="num">Δ</th>
+                <th class="num" title="Predicted overtakes">Pred OT</th><th class="num" title="Actual overtakes (source: detected from OpenF1 or estimated)">Act OT</th>
                 <th class="num">Pred Pts</th>${hasMC ? '<th class="num">MC Mean</th>' : ''}
                 <th class="num">Act Pts</th><th class="num">Pts Δ</th>
                 ${hasMC ? '<th class="num">90% CI</th><th class="num">In CI</th>' : ''}
@@ -1305,6 +1532,8 @@ function renderComparison(predictions, actual) {
                     <td class="num">${r.predRace != null ? 'P' + r.predRace : '-'}</td>
                     <td class="num">${r.actRace != null ? 'P' + r.actRace : '-'}</td>
                     <td class="num ${rClass}">${r.raceDiff != null ? r.raceDiff : '-'}</td>
+                    <td class="num">${r.predOvertakes != null ? r.predOvertakes : '-'}</td>
+                    <td class="num" title="${r.overtakeSource || ''}">${r.actOvertakes != null ? r.actOvertakes : '-'}${r.overtakeSource === 'detected' ? '' : r.overtakeSource === 'estimated' ? '*' : ''}</td>
                     <td class="num">${r.predPts.toFixed(1)}</td>
                     ${hasMC ? `<td class="num">${r.mcMean != null ? r.mcMean.toFixed(1) : '-'}</td>` : ''}
                     <td class="num"><strong>${r.actPts.toFixed(1)}</strong></td>
@@ -1435,6 +1664,104 @@ function renderSeason() {
             </tbody>
         </table>`;
         priceEl.innerHTML = html;
+    }
+
+    // Cumulative Fantasy Standings (from actual data)
+    const standingsEl = document.getElementById('fantasyStandings');
+    if (standingsEl) {
+        const driverTotals = {};
+        const constructorTotals = {};
+        let roundsWithData = 0;
+
+        for (const [rn, actData] of Object.entries(actualCache)) {
+            if (!actData) continue;
+            roundsWithData++;
+            if (actData.drivers) {
+                actData.drivers.forEach(d => {
+                    if (!driverTotals[d.driver_id]) {
+                        driverTotals[d.driver_id] = { name: d.name, constructor: d.constructor, total: 0, rounds: 0, price: d.price };
+                    }
+                    driverTotals[d.driver_id].total += d.total_points || 0;
+                    driverTotals[d.driver_id].rounds++;
+                    driverTotals[d.driver_id].price = d.price;
+                });
+            }
+            if (actData.constructors) {
+                actData.constructors.forEach(c => {
+                    if (!constructorTotals[c.constructor_id]) {
+                        constructorTotals[c.constructor_id] = { name: c.name, total: 0, rounds: 0, price: c.price };
+                    }
+                    constructorTotals[c.constructor_id].total += c.total_points || 0;
+                    constructorTotals[c.constructor_id].rounds++;
+                    constructorTotals[c.constructor_id].price = c.price;
+                });
+            }
+        }
+
+        if (roundsWithData > 0) {
+            const sortedDrivers = Object.entries(driverTotals).sort((a, b) => b[1].total - a[1].total);
+            const sortedConstructors = Object.entries(constructorTotals).sort((a, b) => b[1].total - a[1].total);
+
+            let sHtml = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">`;
+
+            // Driver standings
+            sHtml += `<div>
+                <h4 style="margin-bottom:12px;">Driver Fantasy Standings (${roundsWithData} rounds)</h4>
+                <table class="data-table">
+                    <thead><tr>
+                        <th>#</th><th>Driver</th><th>Team</th>
+                        <th class="num" title="Total fantasy points scored across all completed rounds">Total</th>
+                        <th class="num" title="Average fantasy points per race weekend">Avg</th>
+                        <th class="num" title="Total points divided by current price">PPM</th>
+                    </tr></thead>
+                    <tbody>${sortedDrivers.map(([id, d], i) => {
+                        const team = TEAMS[d.constructor] || { name: d.constructor, color: '#666' };
+                        const avg = d.rounds > 0 ? d.total / d.rounds : 0;
+                        const ppm = d.price > 0 ? d.total / d.price : 0;
+                        const ppmRating = ppm >= 2.0 ? 'color:var(--green)' : ppm >= 1.0 ? 'color:#22d3ee' : ppm < 0 ? 'color:var(--red, #ef4444)' : '';
+                        return `<tr>
+                            <td>${i + 1}</td>
+                            <td><strong>${d.name || id}</strong></td>
+                            <td><span class="team-dot" style="background:${team.color}"></span>${team.name}</td>
+                            <td class="num"><strong>${d.total}</strong></td>
+                            <td class="num">${avg.toFixed(1)}</td>
+                            <td class="num" style="${ppmRating}">${ppm.toFixed(2)}</td>
+                        </tr>`;
+                    }).join('')}</tbody>
+                </table>
+            </div>`;
+
+            // Constructor standings
+            sHtml += `<div>
+                <h4 style="margin-bottom:12px;">Constructor Fantasy Standings</h4>
+                <table class="data-table">
+                    <thead><tr>
+                        <th>#</th><th>Constructor</th>
+                        <th class="num">Total</th>
+                        <th class="num">Avg</th>
+                        <th class="num">PPM</th>
+                    </tr></thead>
+                    <tbody>${sortedConstructors.map(([id, c], i) => {
+                        const team = TEAMS[id] || { name: c.name, color: '#666' };
+                        const avg = c.rounds > 0 ? c.total / c.rounds : 0;
+                        const ppm = c.price > 0 ? c.total / c.price : 0;
+                        const ppmRating = ppm >= 2.0 ? 'color:var(--green)' : ppm >= 1.0 ? 'color:#22d3ee' : ppm < 0 ? 'color:var(--red, #ef4444)' : '';
+                        return `<tr>
+                            <td>${i + 1}</td>
+                            <td><span class="team-dot" style="background:${team.color}"></span><strong>${team.name}</strong></td>
+                            <td class="num"><strong>${c.total}</strong></td>
+                            <td class="num">${avg.toFixed(1)}</td>
+                            <td class="num" style="${ppmRating}">${ppm.toFixed(2)}</td>
+                        </tr>`;
+                    }).join('')}</tbody>
+                </table>
+            </div>`;
+
+            sHtml += `</div>`;
+            standingsEl.innerHTML = sHtml;
+        } else {
+            standingsEl.innerHTML = '<p class="no-data">No actual race data available yet.</p>';
+        }
     }
 
     // Populate post-race round selector — show all rounds that have any data

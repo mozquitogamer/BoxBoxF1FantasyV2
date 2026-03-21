@@ -98,15 +98,15 @@
                                 <th>#</th>
                                 <th>Driver</th>
                                 <th>Team</th>
-                                <th class="num">Pts</th>
-                                <th class="num">Quali</th>
-                                <th class="num">Race</th>
-                                <th class="num">Conf</th>
-                                <th class="num">Risk</th>
-                                <th class="num">OT</th>
-                                <th class="num">Price</th>
-                                <th class="num">Change</th>
-                                <th class="num">Value</th>
+                                <th class="num" title="Expected fantasy points for this race weekend">Pts</th>
+                                <th class="num" title="Predicted qualifying position">Quali</th>
+                                <th class="num" title="Predicted race finish position">Race</th>
+                                <th class="num" title="Prediction confidence (0-100%). Higher = more data and model agreement">Conf</th>
+                                <th class="num" title="DNF risk level based on rolling 5-race DNF probability">Risk</th>
+                                <th class="num" title="Expected number of overtakes during the race">OT</th>
+                                <th class="num" title="Current F1 Fantasy price in millions">Price</th>
+                                <th class="num" title="Price change since season start">Change</th>
+                                <th class="num" title="Value Score = Expected Points / Price. Above 1.0 = good, above 2.0 = excellent">Value</th>
                             </tr>
                         </thead>
                         <tbody id="driverTableBody"></tbody>
@@ -133,34 +133,44 @@
             <section class="tab-content" id="tab-optimizer">
                 <div class="optimizer-header">
                     <h2>Lineup Optimizer</h2>
-                    <p>Find the best F1 Fantasy lineup within your budget.</p>
+                    <p>Find the best F1 Fantasy lineups within your budget. Shows all valid combinations ranked by strategy.</p>
                 </div>
 
                 <div class="optimizer-controls">
                     <div class="control-group">
-                        <label>Budget ($M)</label>
+                        <label title="Your total F1 Fantasy budget cap">Budget ($M)</label>
                         <input type="number" id="budget" value="100.0" step="0.1" min="0">
                     </div>
                     <div class="control-group">
-                        <label>Strategy</label>
+                        <label title="How to rank and optimize lineups">Strategy</label>
                         <select id="strategy">
                             <option value="max_points">Max Expected Points</option>
                             <option value="max_value">Max Value (Points/$M)</option>
+                            <option value="budget_gain" title="Prioritize picks likely to increase in price based on PPM ratings">Budget Builder</option>
                             <option value="balanced">Balanced</option>
                         </select>
                     </div>
-                    <button class="btn-primary" id="runOptimizer">Find Best Lineup</button>
+                    <button class="btn-primary" id="runOptimizer">Find Best Lineups</button>
                 </div>
 
                 <div class="optimizer-constraints">
-                    <h3>Locked Picks <span class="hint">(optional — force specific drivers/constructors into lineup)</span></h3>
+                    <h3>Lock / Exclude Picks</h3>
+                    <p class="hint" style="margin-bottom:10px;">Left-click to lock (force into lineup). Right-click to exclude (remove from consideration). Constructors shown in <strong>ALL CAPS</strong>.</p>
                     <div class="lock-grid" id="lockGrid"></div>
                 </div>
 
                 <div class="optimizer-result hidden" id="optimizerResult">
-                    <h3>Recommended Lineup</h3>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                        <h3 style="margin:0;">Recommended Lineups</h3>
+                        <span class="lineup-counter" id="lineupCounter" style="color:var(--text-secondary);font-size:0.85rem;"></span>
+                    </div>
                     <div class="lineup-summary" id="lineupSummary"></div>
                     <div class="lineup-cards" id="lineupCards"></div>
+                    <div class="lineup-load-more hidden" id="lineupLoadMore" style="text-align:center;margin-top:16px;">
+                        <button class="btn-primary" id="loadMoreLineups" style="background:var(--bg-card);color:var(--text);border:1px solid var(--border);">
+                            <span class="load-more-text">Show more</span>
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -206,6 +216,12 @@
                     <div class="season-section">
                         <h3>Race Calendar & Results</h3>
                         <div id="seasonCalendar"></div>
+                    </div>
+
+                    <!-- Fantasy Standings -->
+                    <div class="season-section">
+                        <h3>Fantasy Points Standings</h3>
+                        <div id="fantasyStandings"></div>
                     </div>
 
                     <!-- Price Tracker -->
@@ -268,6 +284,6 @@
         </div>
     </main>
 
-    <script src="app.js?v=4"></script>
+    <script src="app.js?v=6"></script>
 </body>
 </html>

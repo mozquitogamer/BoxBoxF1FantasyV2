@@ -354,9 +354,10 @@ def calculate_constructor_fantasy(
         # Race: combined race points from both drivers
         # Note: driver expected_race_pts already includes position change bonus,
         # overtake pts, FL/DOTD probability, and DNF risk adjustment.
-        # However, DOTD should be excluded for constructors. Subtract the expected
-        # DOTD contribution (it's small but correct to exclude).
-        combined_race = d_data["expected_race_pts"].sum()
+        # DOTD must be excluded for constructors per official rules.
+        # Subtract the expected DOTD contribution from each driver.
+        expected_dotd_contribution = (d_data["dotd_probability"] * RACE_DRIVER_OF_THE_DAY_BONUS).sum()
+        combined_race = d_data["expected_race_pts"].sum() - expected_dotd_contribution
 
         # Combined positions gained/lost and overtakes from both drivers
         combined_pos_change = int(d_data["expected_positions_gained_lost"].sum())

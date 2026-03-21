@@ -16,4 +16,4 @@ class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
 print(f"Serving {SERVE_DIR} on port 3000", flush=True)
-http.server.HTTPServer(("", 3000), NoCacheHandler).serve_forever()
+http.server.HTTPServer(("127.0.0.1", 3000), NoCacheHandler).serve_forever()

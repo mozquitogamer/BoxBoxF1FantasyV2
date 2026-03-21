@@ -677,6 +677,109 @@ select:focus, input:focus {
     font-size: 11px;
 }
 
+.lock-chip.excluded {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--red, #ef4444);
+    color: var(--red, #ef4444);
+    opacity: 0.7;
+    text-decoration: line-through;
+}
+
+.lock-chip.constructor-chip {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.lock-grid-separator {
+    width: 100%;
+    height: 0;
+    border-top: 1px dashed var(--border);
+    margin: 4px 0;
+}
+
+/* Lineup blocks */
+.lineup-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+}
+
+.lineup-block:first-child {
+    border-color: var(--accent);
+    border-width: 2px;
+}
+
+.lineup-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.lineup-block-header h4 {
+    font-size: 14px;
+    margin: 0;
+}
+
+.lineup-block-stats {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.lineup-picks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+/* PPM rating badges */
+.ppm-rating {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+.rating-great { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+.rating-good { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+.rating-poor { background: rgba(245, 158, 11, 0.15); color: var(--orange); }
+.rating-terrible { background: rgba(239, 68, 68, 0.15); color: var(--red, #ef4444); }
+
+.constructor-pick .pick-type,
+.constructor-pick .pick-name {
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+/* Monte Carlo range on driver cards */
+.mc-range {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    margin-top: 6px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    cursor: help;
+}
+
+.mc-range .mc-label {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.65rem;
+}
+
+.mc-range .mc-values {
+    color: var(--text);
+    font-weight: 500;
+}
+
 .optimizer-result h3 {
     font-size: 18px;
     margin-bottom: 16px;
