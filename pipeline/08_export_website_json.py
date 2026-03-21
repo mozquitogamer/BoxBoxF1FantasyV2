@@ -126,6 +126,31 @@ def build_predictions_json(round_num: int) -> dict | None:
 
         drivers_json.append(entry)
 
+    # Merge Monte Carlo data if available
+    mc_path = PREDICTIONS_DIR / f"round{round_num}" / "monte_carlo_fantasy.json"
+    if mc_path.exists():
+        try:
+            with open(mc_path) as f:
+                mc_data = json.load(f)
+            mc_by_driver = {d["driver_abbrev"]: d for d in mc_data.get("drivers", [])}
+            for entry in drivers_json:
+                mc = mc_by_driver.get(entry["driver_id"])
+                if mc:
+                    entry["mc_total_mean"] = round(mc.get("mc_total_mean", 0), 1)
+                    entry["mc_total_std"] = round(mc.get("mc_total_std", 0), 1)
+                    entry["mc_total_p5"] = round(mc.get("mc_total_p5", 0), 1)
+                    entry["mc_total_p25"] = round(mc.get("mc_total_p25", 0), 1)
+                    entry["mc_total_p75"] = round(mc.get("mc_total_p75", 0), 1)
+                    entry["mc_total_p95"] = round(mc.get("mc_total_p95", 0), 1)
+                    entry["mc_upside"] = round(mc.get("mc_upside", 0), 1)
+                    entry["mc_dnf_rate"] = round(mc.get("mc_dnf_rate", 0), 1)
+            mc_by_con = {c["constructor_id"]: c for c in mc_data.get("constructors", [])}
+        except Exception as e:
+            print(f"  Warning: Could not load MC data: {e}")
+            mc_by_con = {}
+    else:
+        mc_by_con = {}
+
     # Build constructor entries
     constructors_json = []
     for _, row in constructor_df.sort_values("total_expected_fantasy_points", ascending=False).iterrows():
@@ -151,6 +176,14 @@ def build_predictions_json(round_num: int) -> dict | None:
         if is_sprint:
             entry["expected_points_sprint_quali"] = round(float(row.get("expected_sprint_quali_pts", 0)), 1)
             entry["expected_points_sprint_race"] = round(float(row.get("expected_sprint_race_pts", 0)), 1)
+
+        # Merge MC data for constructor if available
+        mc_c = mc_by_con.get(cid) if mc_by_con else None
+        if mc_c:
+            entry["mc_total_mean"] = round(mc_c.get("mc_total_mean", 0), 1)
+            entry["mc_total_std"] = round(mc_c.get("mc_total_std", 0), 1)
+            entry["mc_total_p5"] = round(mc_c.get("mc_total_p5", 0), 1)
+            entry["mc_total_p95"] = round(mc_c.get("mc_total_p95", 0), 1)
 
         constructors_json.append(entry)
 
