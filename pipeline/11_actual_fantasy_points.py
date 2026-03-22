@@ -550,20 +550,25 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             race_position = r["position"]
             positions_gained = r["grid"] - race_position
             # Use detected overtakes if available, otherwise estimate
+            # NOTE: Detected overtakes from telemetry include pit-cycle position
+            # swaps, safety car reshuffles, and blue-flag passes. Official F1
+            # Fantasy counts only genuine on-track overtakes, which are much fewer.
+            # We cap at MAX_RACE_OVERTAKES to stay realistic.
+            MAX_RACE_OVERTAKES = 8
             if abbrev in detected_race_ot:
-                overtakes = detected_race_ot[abbrev]
+                overtakes = min(detected_race_ot[abbrev], MAX_RACE_OVERTAKES)
             else:
-                # Fallback: calibrated estimate from f1fantasytool.com R1-R2 data
+                # Fallback: calibrated estimate
                 pos_gained = max(0, positions_gained)
                 if r["grid"] <= 3:
-                    ot_base = 2
+                    ot_base = 1
                 elif r["grid"] <= 6:
-                    ot_base = 4
+                    ot_base = 2
                 elif r["grid"] <= 12:
-                    ot_base = 6
+                    ot_base = 3
                 else:
-                    ot_base = 7
-                overtakes = ot_base + pos_gained
+                    ot_base = 4
+                overtakes = min(ot_base + pos_gained, MAX_RACE_OVERTAKES)
 
             race_pts = calc_race_points_driver(
                 finish_position=race_position,
@@ -594,13 +599,14 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
                 sprint_position = None
             else:
                 sprint_position = sr["position"]
-                # Use detected sprint overtakes if available
+                # Use detected sprint overtakes if available (capped)
+                MAX_SPRINT_OVERTAKES = 5
                 if abbrev in detected_sprint_ot:
-                    sprint_overtakes = detected_sprint_ot[abbrev]
+                    sprint_overtakes = min(detected_sprint_ot[abbrev], MAX_SPRINT_OVERTAKES)
                 else:
                     sprint_pos_gained = max(0, sr["grid"] - sr["position"])
-                    sprint_ot_base = 2 if sr["grid"] <= 6 else 3
-                    sprint_overtakes = sprint_ot_base + sprint_pos_gained
+                    sprint_ot_base = 1 if sr["grid"] <= 6 else 2
+                    sprint_overtakes = min(sprint_ot_base + sprint_pos_gained, MAX_SPRINT_OVERTAKES)
                 sprint_pts = calc_sprint_points_driver(
                     finish_position=sr["position"],
                     grid_position=sr["grid"],
