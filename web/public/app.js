@@ -99,7 +99,7 @@ const PRICE_TIERS = {
     A_TIER_CHANGES: { great: 0.3, good: 0.1, poor: -0.1, terrible: -0.3 },
     B_TIER_CHANGES: { great: 0.6, good: 0.2, poor: -0.2, terrible: -0.6 },
 };
-// PPM rating thresholds (cumulative season PPM = total_season_points / price)
+// PPM rating thresholds (rolling avg of last 3 rounds / price)
 const PPM_RATINGS = {
     GREAT: 1.2,    // >= 1.2 PPM = Great
     GOOD: 0.9,     // >= 0.9 PPM = Good
@@ -831,7 +831,7 @@ function predictPriceChange(item, predictedPts) {
     const isATier = price > PRICE_TIERS.A_TIER_THRESHOLD;
     const tierChanges = isATier ? PRICE_TIERS.A_TIER_CHANGES : PRICE_TIERS.B_TIER_CHANGES;
 
-    // Collect past scores from actuals (cumulative season total)
+    // Collect past scores from actuals
     const pastScores = [];
     let cumulativeTotal = 0;
     for (const [rn, actData] of Object.entries(actualCache)) {
@@ -846,30 +846,37 @@ function predictPriceChange(item, predictedPts) {
         }
     }
 
-    // Projected cumulative including predicted this round
-    const projectedTotal = cumulativeTotal + predictedPts;
-    const projectedPpm = projectedTotal / price;
-    const rating = getPpmRating(projectedPpm);
+    // PPM = average of last 3 rounds (including predicted this round) / price
+    const allScores = [...pastScores, predictedPts];
+    const last3 = allScores.slice(-3);
+    const avgPts = last3.reduce((a, b) => a + b, 0) / last3.length;
+    const avgPpm = avgPts / price;
+    const rating = getPpmRating(avgPpm);
 
     // Determine expected price change based on rating + tier
     let expectedChange = 0;
-    if (projectedPpm >= PPM_RATINGS.GREAT) expectedChange = tierChanges.great;
-    else if (projectedPpm >= PPM_RATINGS.GOOD) expectedChange = tierChanges.good;
-    else if (projectedPpm >= PPM_RATINGS.POOR) expectedChange = tierChanges.poor;
+    if (avgPpm >= PPM_RATINGS.GREAT) expectedChange = tierChanges.great;
+    else if (avgPpm >= PPM_RATINGS.GOOD) expectedChange = tierChanges.good;
+    else if (avgPpm >= PPM_RATINGS.POOR) expectedChange = tierChanges.poor;
     else expectedChange = tierChanges.terrible;
 
-    // Calculate points needed for each threshold
-    const ptsForGreat = Math.max(0, PPM_RATINGS.GREAT * price - cumulativeTotal);
-    const ptsForGood = Math.max(0, PPM_RATINGS.GOOD * price - cumulativeTotal);
-    const ptsForPoor = PPM_RATINGS.POOR * price - cumulativeTotal; // can be negative (already above)
+    // Points needed this round for each threshold
+    // With N past rounds in window: new_avg = (sum_of_last2 + X) / 3
+    // For avg/price >= threshold: X >= threshold * price * 3 - sum_of_last2
+    const recentWindow = pastScores.slice(-2);
+    const recentSum = recentWindow.reduce((a, b) => a + b, 0);
+    const windowSize = Math.min(recentWindow.length + 1, 3);
+    const ptsForGreat = Math.max(0, PPM_RATINGS.GREAT * price * windowSize - recentSum);
+    const ptsForGood = Math.max(0, PPM_RATINGS.GOOD * price * windowSize - recentSum);
+    const ptsForPoor = PPM_RATINGS.POOR * price * windowSize - recentSum;
 
     return {
-        projectedPpm, rating, expectedChange, projectedTotal,
+        avgPpm, rating, expectedChange, avgPts,
         cumulativeTotal, pastScores, isATier, tierChanges,
         tier: isATier ? 'A' : 'B',
         ptsForGreat, ptsForGood, ptsForPoor,
-        // Legacy compat
-        avgPpm: projectedPpm, avgPts: projectedTotal,
+        // Compat aliases
+        projectedPpm: avgPpm, projectedTotal: cumulativeTotal + predictedPts,
     };
 }
 
