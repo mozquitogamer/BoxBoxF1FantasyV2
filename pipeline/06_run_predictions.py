@@ -240,24 +240,37 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
 
     # ---- Step 5: Load models ----
     print(f"\n[Step 5] Loading trained models...")
-    quali_path = TRAINED_DIR / "quali_model.pkl"
-    race_path = TRAINED_DIR / "race_model.pkl"
-    fp_model_path = TRAINED_DIR / "fp_model.pkl"
+    try:
+        import xgboost as xgb
+    except ImportError:
+        print("ERROR: xgboost not installed. Run: pip install xgboost")
+        return pd.DataFrame()
 
-    for p in [quali_path, race_path]:
+    quali_path = TRAINED_DIR / "quali_model.json"
+    race_path = TRAINED_DIR / "race_model.json"
+    fp_model_path = TRAINED_DIR / "fp_signal_model.pkl"
+    feature_cols_path = TRAINED_DIR / "feature_columns.json"
+
+    for p in [quali_path, race_path, feature_cols_path]:
         if not p.exists():
             print(f"ERROR: Model not found: {p}")
             print("Run 05_train_models.py first.")
             return pd.DataFrame()
 
-    quali_info = joblib.load(quali_path)
-    race_info = joblib.load(race_path)
-    fp_info = joblib.load(fp_model_path) if fp_model_path.exists() else None
+    # Load XGBoost models from JSON format
+    quali_model = xgb.XGBRegressor()
+    quali_model.load_model(str(quali_path))
+    race_model = xgb.XGBRegressor()
+    race_model.load_model(str(race_path))
 
-    quali_model = quali_info["model"]
-    race_model = race_info["model"]
-    quali_feature_list = quali_info["features"]
-    race_feature_list = race_info["features"]
+    # Load feature column lists
+    with open(feature_cols_path) as f:
+        feature_cols_data = json.load(f)
+    quali_feature_list = feature_cols_data["quali_features"]
+    race_feature_list = feature_cols_data["race_features"]
+
+    # Load FP signal model (optional, pkl format)
+    fp_info = joblib.load(fp_model_path) if fp_model_path.exists() else None
 
     # ---- Step 6: Predict qualifying ----
     print(f"\n[Step 6] Predicting qualifying positions...")

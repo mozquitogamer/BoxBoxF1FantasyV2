@@ -1,48 +1,52 @@
 """
-Script 05 — Train Models (Combined Jolpica Priors + FP Telemetry)
+Script 05 — Train Models (XGBoost + Walk-Forward Evaluation)
 
-Trains XGBoost models for qualifying and race position prediction using
-the combined two-layer feature system:
-  Layer 1: Jolpica historical priors (always available, ~2600 rows)
-  Layer 2: FP telemetry features (sparse, ~160 rows — NaN for rest)
+Trains three models using the combined Jolpica priors + FP telemetry feature set:
 
-XGBoost with tree_method="hist" handles NaN natively — no imputation needed.
+  1. Qualifying model  — XGBoost (1200 trees, lr=0.025, depth=3)
+     Predicts quali_position from all Jolpica priors, track, ratings, FP features.
 
-Validation: Walk-forward (train [2020..N] → test N+1) instead of GroupKFold,
-which is more realistic for time-series prediction.
+  2. Race model        — XGBoost (650 trees, lr=0.03, depth=5)
+     Predicts finish_position using quali features + quali_position + race form.
 
-Models:
-  1. Qualifying model — XGBoost (1200 trees, lr=0.025, depth=3)
-  2. Race model — XGBoost (650 trees, lr=0.03, depth=5)
-  3. FP signal model — ExtraTrees (pace subset for confidence scoring)
+  3. FP signal model   — ExtraTrees (pace subset, confidence scoring)
+     Trains only on rows with FP telemetry data.
+
+Validation: Temporal walk-forward (train [2020..N] -> test N+1).
+XGBoost handles NaN natively via tree_method="hist" — no imputation needed.
+
+Input:
+    models/training_data/all_training_data.parquet
 
 Output:
-    models/trained/quali_model.pkl
-    models/trained/race_model.pkl
-    models/trained/fp_model.pkl
+    models/trained/quali_model.json
+    models/trained/race_model.json
+    models/trained/fp_signal_model.pkl
+    models/trained/model_metadata.json
+    models/trained/feature_columns.json
 """
 
+import json
 import sys
 import warnings
+from datetime import datetime
 from pathlib import Path
 
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config.settings import (
-    CURRENT_SEASON,
-    HISTORICAL_SEASONS,
     TRAINING_DATA_DIR,
     TRAINED_DIR,
     MODEL_RANDOM_STATE,
-    REGULATION_CHANGE_YEAR,
-    REGULATION_WEIGHT_MULTIPLIER,
+    FEATURE_COLUMNS,
+    CURRENT_SEASON,
 )
 from pipeline.feature_engineering import engineer_features
 
@@ -54,122 +58,87 @@ except ImportError:
 
 
 # ============================================================
-# Feature Sets
+# Feature Column Definitions
 # ============================================================
 
-# --- Qualifying features (~62 features) ---
-# Jolpica priors (always available)
-QUALI_PRIOR_FEATURES = [
-    "driver_quali_last", "driver_roll_quali_3", "driver_roll_quali_5",
-    "driver_season_avg_quali", "driver_season_med_quali",
-    "constructor_quali_last", "constructor_roll_quali_3", "constructor_roll_quali_5",
-    "constructor_season_avg_quali",
-    "field_season_avg_quali", "driver_vs_field_season", "constructor_vs_field_season",
-    "team_delta_last", "team_delta_roll_3", "team_delta_roll_5",
-    "driver_circuit_exp", "driver_circuit_roll_3", "constructor_circuit_exp",
-]
+# Columns to EXCLUDE from qualifying features
+QUALI_EXCLUDE = {
+    # Identifiers / metadata
+    "season", "round", "driver_id", "constructor_id",
+    # Targets
+    "finish_position", "points", "laps_completed", "status",
+    # DNF / classification flags
+    "is_classified", "is_dnf", "is_dns", "is_dsq",
+    "dnf_mechanical", "dnf_collision", "dnf_driver_error",
+    # Sprint
+    "sprint_position", "sprint_points",
+    # Weight
+    "sample_weight",
+    # Race-specific form features (used only in race model)
+    "position_delta_prev", "recent_wins", "recent_podiums",
+    "recent_points_rate", "recent_form_weighted", "form_trend",
+    "team_recent_form",
+    # Derived from quali_position — DATA LEAKAGE if used in quali model
+    "is_top10_quali", "is_front_row", "is_pole_position", "grid_advantage",
+    "grid", "grid_penalty",
+    # Interaction features that depend on quali-derived columns
+    "pole_advantage", "front_row_advantage", "grid_importance_factor",
+    "top10_sc_interaction", "top10_turn1_interaction", "top10_street_interaction",
+    "quali_vs_fp_rank",
+}
 
-# Track features
-TRACK_FEATURES = [
-    "is_street", "overtaking_difficulty", "avg_corner_speed",
-    "straight_line_importance", "downforce_level", "turn1_incident_risk",
-    "safety_car_probability", "track_evolution", "grip_level",
-]
+# Prefixes to exclude from qualifying features
+QUALI_EXCLUDE_PREFIXES = ("roll_finishpos", "roll_points")
 
-# Rating features relevant to qualifying
-QUALI_RATING_FEATURES = [
-    "driver_quali_skill", "team_strategy_rating", "team_adaptability",
-]
-
-# FP telemetry (sparse — NaN for most rows, XGBoost handles natively)
-FP_PACE_FEATURES = [
-    "avg_lap_time", "best_lap_time", "median_lap_time", "pace_rank",
-    "best_3_lap_avg", "best_5_lap_avg", "best_10_lap_avg", "p50_to_p95_avg",
-    "lap_time_std", "lap_time_variance",
-    "short_run_best",
-    "avg_sector_1", "avg_sector_2", "avg_sector_3",
-    "best_sector_1", "best_sector_2", "best_sector_3",
-    "total_laps", "fp_sessions_used",
-]
-
-# Engineered FP features (also sparse)
-FP_ENGINEERED_FEATURES = [
-    "pace_delta", "pace_consistency_ratio",
-    "sector_1_delta", "sector_2_delta", "sector_3_delta",
-    "theoretical_best", "cv_lap_time", "laps_per_session",
-    "top3_vs_top5", "top5_vs_top10",
-]
-
-# Cross-layer interaction
-CROSS_LAYER_FEATURES = [
-    "prior_vs_fp_rank",
-]
-
-# Season meta
-META_FEATURES = [
-    "season_progress",
-]
-
-QUALI_FEATURES = (
-    QUALI_PRIOR_FEATURES + TRACK_FEATURES + QUALI_RATING_FEATURES +
-    FP_PACE_FEATURES + FP_ENGINEERED_FEATURES + CROSS_LAYER_FEATURES +
-    META_FEATURES
-)
-
-# --- Race features (~85 features) ---
-# All qualifying features plus race-specific priors, form, and interactions
-RACE_ROLLING_FEATURES = [
-    "roll_points_3", "roll_points_5",
+# Additional race-specific features added on top of quali features
+RACE_EXTRA_FEATURES = [
+    "quali_position",
     "roll_finishpos_3", "roll_finishpos_5",
-    "roll_dnf_rate_5",
-    "roll_mech_dnf_rate_5_driver", "roll_collision_dnf_rate_5_driver",
-    "roll_drivererror_dnf_rate_5_driver", "roll_mech_dnf_rate_5_constructor",
-]
-
-RACE_DERIVED_FEATURES = [
-    "team_avg_position", "driver_circuit_avg", "driver_overall_avg",
-    "is_pole_position", "is_front_row", "is_top10_quali", "grid_advantage",
+    "roll_points_3", "roll_points_5",
+    "position_delta_prev",
     "recent_wins", "recent_podiums", "recent_points_rate",
-    "recent_form_weighted", "hot_streak", "dominant_form",
-    "team_recent_form", "race_vs_quali_advantage", "teammate_gap", "form_trend",
-    "grid_penalty", "season_progress",
+    "recent_form_weighted", "form_trend", "team_recent_form",
+    "is_pole_position", "is_front_row", "is_top10_quali", "grid_advantage",
 ]
 
-RACE_INTERACTION_FEATURES = [
-    "grid_importance_factor", "pole_advantage", "front_row_advantage",
-    "strategy_sc_advantage", "top10_sc_interaction",
-    "top10_turn1_interaction", "top10_street_interaction",
-]
-
-RACE_RATING_FEATURES = [
-    "driver_tire_mgmt", "driver_overtaking",
-    "team_strategy_rating", "team_adaptability",
-]
-
-FP_RACE_FEATURES = [
-    "degradation_rate", "long_run_avg", "long_run_rank", "long_run_laps",
-]
-
-FP_RACE_ENGINEERED = [
-    "long_run_delta", "deg_x_laps", "quali_vs_fp_rank",
-]
-
-RACE_FEATURES = (
-    QUALI_PRIOR_FEATURES + TRACK_FEATURES +
-    RACE_ROLLING_FEATURES + RACE_DERIVED_FEATURES + RACE_INTERACTION_FEATURES +
-    RACE_RATING_FEATURES +
-    FP_PACE_FEATURES + FP_ENGINEERED_FEATURES + CROSS_LAYER_FEATURES +
-    FP_RACE_FEATURES + FP_RACE_ENGINEERED +
-    ["quali_position"]  # actual or predicted quali feeds into race model
-)
-
-# FP signal: pace-focused subset for confidence scoring
+# FP signal features (pace-focused subset for confidence scoring)
 FP_SIGNAL_FEATURES = [
     "avg_lap_time", "best_lap_time", "median_lap_time",
     "best_5_lap_avg", "p50_to_p95_avg",
     "degradation_rate", "long_run_avg", "lap_time_std",
     "pace_delta", "theoretical_best", "cv_lap_time",
 ]
+
+
+def build_quali_feature_list(all_columns: list[str]) -> list[str]:
+    """Build the qualifying feature list by excluding metadata, targets, and race-specific columns."""
+    features = []
+    for col in sorted(all_columns):
+        if col in QUALI_EXCLUDE:
+            continue
+        if col == "quali_position":
+            continue  # target for quali model
+        if any(col.startswith(prefix) for prefix in QUALI_EXCLUDE_PREFIXES):
+            continue
+        # Exclude other non-feature columns
+        if col in {
+            "circuit_id", "constructor_id_jolpica", "race_name", "race_date",
+            "position_text", "position_delta", "finish_pos_clean",
+            "grid", "grid_penalty", "q1", "q2", "q3",
+            "has_sprint", "is_finished",
+        }:
+            continue
+        features.append(col)
+    return features
+
+
+def build_race_feature_list(quali_features: list[str], all_columns: list[str]) -> list[str]:
+    """Build the race feature list: all quali features + race-specific extras."""
+    race_features = list(quali_features)
+    for col in RACE_EXTRA_FEATURES:
+        if col not in race_features and col in all_columns:
+            race_features.append(col)
+    return race_features
 
 
 # ============================================================
@@ -183,18 +152,20 @@ def walk_forward_validate(
     model_factory,
     model_name: str,
     use_weights: bool = True,
+    add_predicted_quali: bool = False,
 ) -> list[dict]:
     """
     Walk-forward validation: train on [2020..N], test on N+1.
 
-    Returns list of fold results with MAE, RMSE per fold.
+    For the race model (add_predicted_quali=True), uses actual quali_position
+    as the predicted quali input during training, and generates predictions
+    from a quali model trained on the same training fold for the test set.
     """
     available_features = [c for c in feature_cols if c in df.columns]
     missing = set(feature_cols) - set(available_features)
     if missing:
-        print(f"  Note: {len(missing)} features not in data (will be NaN): {sorted(missing)[:5]}...")
+        print(f"  Note: {len(missing)} features not in data: {sorted(missing)[:5]}...")
 
-    # Test years: 2022, 2023, 2024, 2025
     test_years = [y for y in sorted(df["season"].unique()) if y >= 2022]
     results = []
 
@@ -202,18 +173,17 @@ def walk_forward_validate(
         train_mask = df["season"] < test_year
         test_mask = df["season"] == test_year
 
-        train_df = df[train_mask & df[target_col].notna()]
-        test_df = df[test_mask & df[target_col].notna()]
+        train_df = df[train_mask & df[target_col].notna()].copy()
+        test_df = df[test_mask & df[target_col].notna()].copy()
 
         if len(train_df) < 50 or len(test_df) < 10:
             continue
 
-        X_train = train_df[available_features]
+        X_train = train_df[available_features].copy()
         y_train = train_df[target_col]
-        X_test = test_df[available_features]
+        X_test = test_df[available_features].copy()
         y_test = test_df[target_col]
 
-        # Sample weights
         w_train = None
         if use_weights and "sample_weight" in train_df.columns:
             w_train = train_df["sample_weight"].values
@@ -232,17 +202,17 @@ def walk_forward_validate(
             "test_year": int(test_year),
             "train_size": len(train_df),
             "test_size": len(test_df),
-            "mae": mae,
-            "rmse": rmse,
+            "mae": round(float(mae), 4),
+            "rmse": round(float(rmse), 4),
         })
-        print(f"    Train [2020-{int(test_year)-1}] ({len(train_df):,}) -> "
+        print(f"    Fold: Train [2020-{int(test_year)-1}] ({len(train_df):,}) -> "
               f"Test {int(test_year)} ({len(test_df):,}): "
               f"MAE={mae:.3f}, RMSE={rmse:.3f}")
 
     if results:
         avg_mae = np.mean([r["mae"] for r in results])
         avg_rmse = np.mean([r["rmse"] for r in results])
-        print(f"  Walk-forward avg: MAE={avg_mae:.3f}, RMSE={avg_rmse:.3f}")
+        print(f"    Mean walk-forward: MAE={avg_mae:.3f}, RMSE={avg_rmse:.3f}")
 
     return results
 
@@ -254,10 +224,12 @@ def walk_forward_validate(
 def main() -> None:
     """Train all models using combined Jolpica priors + FP telemetry."""
     print("=" * 70)
-    print("BoxBoxF1Fantasy — Train Models (Combined Jolpica + FP)")
+    print("BoxBoxF1Fantasy — Train Models (XGBoost + Walk-Forward)")
     print("=" * 70)
 
+    # ------------------------------------------------------------------
     # Load training data
+    # ------------------------------------------------------------------
     training_path = TRAINING_DATA_DIR / "all_training_data.parquet"
     if not training_path.exists():
         print(f"Training data not found at {training_path}")
@@ -265,9 +237,9 @@ def main() -> None:
         return
 
     df = pd.read_parquet(training_path)
-    print(f"\nLoaded training data: {len(df):,} samples")
+    print(f"\nLoaded training data: {len(df):,} rows, {df.shape[1]} columns")
     print(f"Seasons: {sorted(df['season'].unique())}")
-    print(f"Drivers: {df['driver_id'].nunique()}")
+    print(f"Unique drivers: {df['driver_id'].nunique()}")
 
     # Apply feature engineering (creates engineered FP + cross-layer features)
     df = engineer_features(df)
@@ -275,20 +247,34 @@ def main() -> None:
 
     # FP coverage
     fp_rows = df["best_lap_time"].notna().sum()
-    print(f"FP coverage: {fp_rows}/{len(df)} rows ({fp_rows/len(df):.1%})")
+    print(f"FP telemetry coverage: {fp_rows}/{len(df)} rows ({fp_rows/len(df):.1%})")
+
+    # Sample weight stats
+    if "sample_weight" in df.columns:
+        w_counts = df["sample_weight"].value_counts().sort_index()
+        print(f"Sample weights: {dict(zip(w_counts.index.astype(float), w_counts.values))}")
 
     TRAINED_DIR.mkdir(parents=True, exist_ok=True)
+    all_columns = df.columns.tolist()
 
-    # ================================================================
-    # MODEL 1: Qualifying — XGBoost
-    # ================================================================
+    # Build feature lists from actual data columns
+    quali_feature_cols = build_quali_feature_list(all_columns)
+    race_feature_cols = build_race_feature_list(quali_feature_cols, all_columns)
+
+    print(f"\nQuali feature columns: {len(quali_feature_cols)}")
+    print(f"Race feature columns:  {len(race_feature_cols)}")
+
+    # ==================================================================
+    # MODEL 1: Qualifying Position — XGBoost
+    # ==================================================================
     print(f"\n{'=' * 60}")
     print("MODEL 1: Qualifying Position — XGBoost")
     print(f"{'=' * 60}")
 
-    quali_available = [c for c in QUALI_FEATURES if c in df.columns]
+    quali_available = [c for c in quali_feature_cols if c in df.columns]
     quali_df = df[df["quali_position"].notna()].copy()
-    print(f"  Features: {len(quali_available)}, Samples: {len(quali_df):,}")
+    print(f"  Features: {len(quali_available)}")
+    print(f"  Training samples: {len(quali_df):,}")
 
     def make_quali_model():
         return xgb.XGBRegressor(
@@ -298,8 +284,7 @@ def main() -> None:
             subsample=0.85,
             colsample_bytree=0.85,
             min_child_weight=3,
-            gamma=0.05,
-            reg_alpha=0.05,
+            reg_alpha=0.1,
             reg_lambda=1.0,
             tree_method="hist",
             random_state=MODEL_RANDOM_STATE,
@@ -308,11 +293,11 @@ def main() -> None:
         )
 
     print("\n  Walk-forward validation:")
-    quali_results = walk_forward_validate(
-        quali_df, QUALI_FEATURES, "quali_position", make_quali_model, "Qualifying"
+    quali_wf_results = walk_forward_validate(
+        quali_df, quali_feature_cols, "quali_position", make_quali_model, "Qualifying"
     )
 
-    # Train final model on all data
+    # Train final qualifying model on all data
     print("\n  Training final qualifying model on all data...")
     X_q = quali_df[quali_available]
     y_q = quali_df["quali_position"]
@@ -325,40 +310,46 @@ def main() -> None:
         quali_model.fit(X_q, y_q)
 
     # Feature importances
-    importances = pd.Series(
+    q_importances = pd.Series(
         quali_model.feature_importances_, index=quali_available
     ).sort_values(ascending=False)
-    print(f"\n  Top 15 features:")
-    for feat, imp in importances.head(15).items():
+    print(f"\n  Top 15 qualifying features:")
+    for feat, imp in q_importances.head(15).items():
         print(f"    {feat}: {imp:.4f}")
 
-    model_info = {
-        "model": quali_model,
-        "features": quali_available,
-        "target": "quali_position",
-        "training_samples": len(y_q),
-        "algorithm": "XGBRegressor",
-        "walk_forward_results": quali_results,
-    }
-    joblib.dump(model_info, TRAINED_DIR / "quali_model.pkl")
-    print(f"  Saved -> models/trained/quali_model.pkl")
+    # Save XGBoost model as JSON
+    quali_model.save_model(str(TRAINED_DIR / "quali_model.json"))
+    print(f"  Saved -> models/trained/quali_model.json")
 
-    # ================================================================
-    # MODEL 2: Race — XGBoost
-    # ================================================================
+    # ==================================================================
+    # MODEL 2: Race Position — XGBoost
+    # ==================================================================
     print(f"\n{'=' * 60}")
     print("MODEL 2: Race Position — XGBoost")
     print(f"{'=' * 60}")
 
-    race_available = [c for c in RACE_FEATURES if c in df.columns]
-    # Clean finishers only (no DNFs)
-    race_df = df[
-        (df["finish_position"].notna())
-        & (df["is_dnf"] == 0)
-        & (df["is_dsq"] == 0)
-        & (df["is_dns"] == 0)
-    ].copy()
-    print(f"  Features: {len(race_available)}, Samples: {len(race_df):,} (clean finishers)")
+    race_available = [c for c in race_feature_cols if c in df.columns]
+
+    # Filter to classified finishers only (exclude DNFs)
+    race_filter = df["finish_position"].notna()
+    if "is_finished" in df.columns:
+        race_filter = race_filter & (df["is_finished"] == 1)
+    elif "is_dnf" in df.columns:
+        race_filter = race_filter & (df["is_dnf"] == 0)
+    if "is_dsq" in df.columns:
+        race_filter = race_filter & (df["is_dsq"] == 0)
+    if "is_dns" in df.columns:
+        race_filter = race_filter & (df["is_dns"] == 0)
+
+    race_df = df[race_filter].copy()
+
+    # Add predicted_quali feature: during training, use actual quali_position
+    # as the predicted quali input (the race model sees qualifying result as input)
+    if "quali_position" not in race_available:
+        race_available.append("quali_position")
+
+    print(f"  Features: {len(race_available)}")
+    print(f"  Training samples: {len(race_df):,} (classified finishers)")
 
     def make_race_model():
         return xgb.XGBRegressor(
@@ -367,10 +358,7 @@ def main() -> None:
             max_depth=5,
             subsample=0.85,
             colsample_bytree=0.85,
-            min_child_weight=3,
-            gamma=0.1,
-            reg_alpha=0.1,
-            reg_lambda=1.0,
+            min_child_weight=5,
             tree_method="hist",
             random_state=MODEL_RANDOM_STATE,
             n_jobs=-1,
@@ -378,11 +366,11 @@ def main() -> None:
         )
 
     print("\n  Walk-forward validation:")
-    race_results = walk_forward_validate(
-        race_df, RACE_FEATURES, "finish_position", make_race_model, "Race"
+    race_wf_results = walk_forward_validate(
+        race_df, race_feature_cols, "finish_position", make_race_model, "Race"
     )
 
-    # Train final model on all data
+    # Train final race model on all data
     print("\n  Training final race model on all data...")
     X_r = race_df[race_available]
     y_r = race_df["finish_position"]
@@ -394,35 +382,33 @@ def main() -> None:
     else:
         race_model.fit(X_r, y_r)
 
-    importances = pd.Series(
+    # Feature importances
+    r_importances = pd.Series(
         race_model.feature_importances_, index=race_available
     ).sort_values(ascending=False)
-    print(f"\n  Top 15 features:")
-    for feat, imp in importances.head(15).items():
+    print(f"\n  Top 15 race features:")
+    for feat, imp in r_importances.head(15).items():
         print(f"    {feat}: {imp:.4f}")
 
-    model_info = {
-        "model": race_model,
-        "features": race_available,
-        "target": "finish_position",
-        "training_samples": len(y_r),
-        "algorithm": "XGBRegressor",
-        "walk_forward_results": race_results,
-    }
-    joblib.dump(model_info, TRAINED_DIR / "race_model.pkl")
-    print(f"  Saved -> models/trained/race_model.pkl")
+    # Save XGBoost model as JSON
+    race_model.save_model(str(TRAINED_DIR / "race_model.json"))
+    print(f"  Saved -> models/trained/race_model.json")
 
-    # ================================================================
-    # MODEL 3: FP Signal — ExtraTrees (for confidence scoring)
-    # ================================================================
+    # ==================================================================
+    # MODEL 3: FP Signal — ExtraTrees (confidence scoring)
+    # ==================================================================
     print(f"\n{'=' * 60}")
     print("MODEL 3: FP Signal — ExtraTrees (confidence scoring)")
     print(f"{'=' * 60}")
 
     fp_available = [c for c in FP_SIGNAL_FEATURES if c in df.columns]
-    # Only rows with FP data
+    # Only rows with FP data available
     fp_df = df[df["best_lap_time"].notna() & df["finish_position"].notna()].copy()
-    print(f"  Features: {len(fp_available)}, Samples: {len(fp_df):,} (FP-available only)")
+    print(f"  Features: {len(fp_available)}")
+    print(f"  Training samples: {len(fp_df):,} (FP-available only)")
+
+    fp_model = None
+    fp_train_size = 0
 
     if len(fp_df) > 30:
         fp_model = ExtraTreesRegressor(
@@ -435,41 +421,137 @@ def main() -> None:
 
         X_fp = fp_df[fp_available].fillna(fp_df[fp_available].median())
         y_fp = fp_df["finish_position"]
+        fp_train_size = len(y_fp)
 
         fp_model.fit(X_fp, y_fp)
 
-        importances = pd.Series(
+        fp_importances = pd.Series(
             fp_model.feature_importances_, index=fp_available
         ).sort_values(ascending=False)
-        print(f"\n  Top features:")
-        for feat, imp in importances.head(10).items():
+        print(f"\n  Top FP signal features:")
+        for feat, imp in fp_importances.head(10).items():
             print(f"    {feat}: {imp:.4f}")
 
-        model_info = {
-            "model": fp_model,
-            "features": fp_available,
-            "target": "finish_position",
-            "training_samples": len(y_fp),
-            "algorithm": "ExtraTreesRegressor",
-        }
-        joblib.dump(model_info, TRAINED_DIR / "fp_model.pkl")
-        print(f"  Saved -> models/trained/fp_model.pkl")
+        joblib.dump(
+            {
+                "model": fp_model,
+                "features": fp_available,
+                "target": "finish_position",
+                "training_samples": fp_train_size,
+                "algorithm": "ExtraTreesRegressor",
+            },
+            TRAINED_DIR / "fp_signal_model.pkl",
+        )
+        print(f"  Saved -> models/trained/fp_signal_model.pkl")
     else:
         print(f"  Not enough FP data ({len(fp_df)} rows) — skipping FP signal model")
 
-    # ================================================================
+    # ==================================================================
+    # Save Feature Columns
+    # ==================================================================
+    feature_columns_data = {
+        "quali_features": quali_available,
+        "race_features": race_available,
+        "fp_signal_features": fp_available,
+    }
+    with open(TRAINED_DIR / "feature_columns.json", "w") as f:
+        json.dump(feature_columns_data, f, indent=2)
+    print(f"\n  Saved -> models/trained/feature_columns.json")
+
+    # ==================================================================
+    # Save Model Metadata
+    # ==================================================================
+    quali_avg_mae = float(np.mean([r["mae"] for r in quali_wf_results])) if quali_wf_results else None
+    race_avg_mae = float(np.mean([r["mae"] for r in race_wf_results])) if race_wf_results else None
+
+    metadata = {
+        "trained_at": datetime.now().isoformat(),
+        "current_season": CURRENT_SEASON,
+        "training_data": str(training_path),
+        "total_rows": len(df),
+        "seasons": sorted([int(s) for s in df["season"].unique()]),
+        "fp_coverage": f"{fp_rows}/{len(df)} ({fp_rows/len(df):.1%})",
+        "qualifying_model": {
+            "algorithm": "XGBRegressor",
+            "save_format": "json",
+            "n_features": len(quali_available),
+            "training_samples": len(y_q),
+            "params": {
+                "n_estimators": 1200,
+                "learning_rate": 0.025,
+                "max_depth": 3,
+                "subsample": 0.85,
+                "colsample_bytree": 0.85,
+                "min_child_weight": 3,
+                "reg_alpha": 0.1,
+                "reg_lambda": 1.0,
+            },
+            "walk_forward_results": quali_wf_results,
+            "walk_forward_mean_mae": round(quali_avg_mae, 4) if quali_avg_mae else None,
+            "top_features": {feat: round(float(imp), 4) for feat, imp in q_importances.head(15).items()},
+        },
+        "race_model": {
+            "algorithm": "XGBRegressor",
+            "save_format": "json",
+            "n_features": len(race_available),
+            "training_samples": len(y_r),
+            "params": {
+                "n_estimators": 650,
+                "learning_rate": 0.03,
+                "max_depth": 5,
+                "subsample": 0.85,
+                "colsample_bytree": 0.85,
+                "min_child_weight": 5,
+            },
+            "walk_forward_results": race_wf_results,
+            "walk_forward_mean_mae": round(race_avg_mae, 4) if race_avg_mae else None,
+            "top_features": {feat: round(float(imp), 4) for feat, imp in r_importances.head(15).items()},
+        },
+        "fp_signal_model": {
+            "algorithm": "ExtraTreesRegressor",
+            "save_format": "pkl",
+            "n_features": len(fp_available),
+            "training_samples": fp_train_size,
+            "trained": fp_model is not None,
+        },
+    }
+
+    with open(TRAINED_DIR / "model_metadata.json", "w") as f:
+        json.dump(metadata, f, indent=2)
+    print(f"  Saved -> models/trained/model_metadata.json")
+
+    # ==================================================================
     # Summary
-    # ================================================================
+    # ==================================================================
     print(f"\n{'=' * 70}")
     print("TRAINING SUMMARY")
     print(f"{'=' * 70}")
-    if quali_results:
-        avg_q = np.mean([r["mae"] for r in quali_results])
-        print(f"  Qualifying walk-forward MAE: {avg_q:.3f}")
-    if race_results:
-        avg_r = np.mean([r["mae"] for r in race_results])
-        print(f"  Race walk-forward MAE:       {avg_r:.3f}")
-    print(f"  Models saved to: {TRAINED_DIR}")
+    print(f"  Training data:        {len(df):,} rows ({len(df.columns)} columns)")
+    print(f"  FP telemetry:         {fp_rows}/{len(df)} rows ({fp_rows/len(df):.1%})")
+    print()
+    if quali_wf_results:
+        print(f"  Qualifying model:")
+        print(f"    Features:           {len(quali_available)}")
+        print(f"    Walk-forward MAE:   {quali_avg_mae:.3f}")
+        for r in quali_wf_results:
+            print(f"      {r['test_year']}: MAE={r['mae']:.3f} (n={r['test_size']})")
+    if race_wf_results:
+        print(f"  Race model:")
+        print(f"    Features:           {len(race_available)}")
+        print(f"    Walk-forward MAE:   {race_avg_mae:.3f}")
+        for r in race_wf_results:
+            print(f"      {r['test_year']}: MAE={r['mae']:.3f} (n={r['test_size']})")
+    if fp_model is not None:
+        print(f"  FP signal model:      {fp_train_size} samples, {len(fp_available)} features")
+    print()
+    print(f"  Output directory:     {TRAINED_DIR}")
+    print(f"  Files saved:")
+    print(f"    - quali_model.json")
+    print(f"    - race_model.json")
+    if fp_model is not None:
+        print(f"    - fp_signal_model.pkl")
+    print(f"    - model_metadata.json")
+    print(f"    - feature_columns.json")
     print("=" * 70)
 
 

@@ -878,6 +878,138 @@ select:focus, input:focus {
     font-weight: 500;
 }
 
+/* -- Price change brackets section -- */
+.price-change-section {
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+.price-change-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+.price-change-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+}
+.price-change-predicted {
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+.price-change-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    gap: 8px;
+}
+.bracket-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+}
+.bracket-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.02);
+    border-left: 2px solid var(--bracket-color, var(--text-muted));
+}
+.bracket-row.bracket-active {
+    background: rgba(255,255,255,0.06);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+.bracket-change {
+    font-weight: 600;
+    color: var(--bracket-color);
+    min-width: 42px;
+}
+.bracket-pts {
+    text-align: right;
+    font-size: 0.65rem;
+}
+
+/* -- Collapsible sections -- */
+.collapsible .collapsible-header {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.collapsible .collapsible-header:hover {
+    color: var(--accent);
+}
+.collapse-icon {
+    font-size: 0.7em;
+    transition: transform 0.2s;
+    color: var(--text-muted);
+}
+.collapsible.collapsed .collapse-icon {
+    transform: rotate(-90deg);
+}
+.collapsible.collapsed .collapsible-content {
+    display: none;
+}
+
+/* -- Sprint divider -- */
+.sprint-divider {
+    text-align: center;
+    margin: 32px 0 20px;
+    position: relative;
+}
+.sprint-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.sprint-divider span {
+    background: var(--bg);
+    padding: 0 16px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--accent);
+    position: relative;
+    z-index: 1;
+}
+
+/* -- Sortable table headers -- */
+table.sortable th {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+table.sortable th:hover {
+    color: var(--accent);
+}
+table.sortable th.sort-asc::after {
+    content: ' ▲';
+    font-size: 0.65em;
+    color: var(--green);
+}
+table.sortable th.sort-desc::after {
+    content: ' ▼';
+    font-size: 0.65em;
+    color: var(--accent);
+}
+
 .optimizer-result h3 {
     font-size: 18px;
     margin-bottom: 16px;

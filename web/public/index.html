@@ -80,8 +80,7 @@
                             <option value="expected_points">Expected Points</option>
                             <option value="predicted_quali">Predicted Quali</option>
                             <option value="predicted_finish">Predicted Finish</option>
-                            <option value="value_score">Value Score</option>
-                            <option value="points_per_million">Points / $M</option>
+                            <option value="value_score">PPM</option>
                             <option value="confidence">Confidence</option>
                             <option value="current_price">Price</option>
                             <option value="starting_price">Starting Price</option>
@@ -126,7 +125,7 @@
                                 <th class="num" title="Expected number of overtakes during the race">OT</th>
                                 <th class="num" title="Current F1 Fantasy price in millions">Price</th>
                                 <th class="num" title="Price change since season start">Change</th>
-                                <th class="num" title="Value Score = Expected Points / Price. Above 1.0 = good, above 2.0 = excellent">Value</th>
+                                <th class="num" title="Points Per Million = Expected Points / Price. Above 1.0 = good, above 2.0 = excellent">PPM</th>
                             </tr>
                         </thead>
                         <tbody id="driverTableBody"></tbody>
@@ -141,7 +140,7 @@
                         <label>Sort by</label>
                         <select id="constructorSort">
                             <option value="expected_points">Expected Points</option>
-                            <option value="value_score">Value Score</option>
+                            <option value="value_score">PPM</option>
                             <option value="current_price">Price</option>
                         </select>
                     </div>
@@ -335,6 +334,6 @@
         </div>
     </main>
 
-    <script src="app.js?v=9"></script>
+    <script src="app.js?v=12"></script>
 </body>
 </html>

@@ -84,6 +84,7 @@ let seasonSummary = null;
 let postRaceCache = {};
 let predictionsCache = {};
 let actualCache = {};
+let officialPointsData = null;   // official F1 Fantasy points per round
 let tableSortColumn = null;
 let tableSortAsc = true;
 let allLineups = [];
@@ -112,6 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadData();
     await loadSeasonData();
     await preloadActualData();
+    await loadOfficialPoints();
     await loadPitstopData();
     startCountdown();
     setupTabs();
@@ -126,6 +128,39 @@ async function preloadActualData() {
         .filter(r => r.has_actual)
         .map(r => loadActualData(r.round));
     await Promise.all(promises);
+}
+
+async function loadOfficialPoints() {
+    try {
+        const resp = await fetch(cacheBust('data/official_points.json'));
+        officialPointsData = await resp.json();
+    } catch(e) { officialPointsData = null; }
+}
+
+// Get the best available score for a driver/constructor in a given round.
+// Prefers official F1 Fantasy points when available, falls back to pipeline-calculated actuals.
+function getOfficialScore(roundNum, itemId, isDriver) {
+    // Check official points first
+    if (officialPointsData && officialPointsData.rounds) {
+        const roundData = officialPointsData.rounds[String(roundNum)];
+        if (roundData) {
+            const bucket = isDriver ? roundData.drivers : roundData.constructors;
+            if (bucket && bucket[itemId] != null) {
+                return { points: bucket[itemId], source: 'official' };
+            }
+        }
+    }
+    // Fall back to pipeline-calculated actuals
+    const actData = actualCache[roundNum];
+    if (actData) {
+        const list = isDriver ? (actData.drivers || []) : (actData.constructors || []);
+        const idField = isDriver ? 'driver_id' : 'constructor_id';
+        const match = list.find(x => x[idField] === itemId);
+        if (match && match.total_points != null) {
+            return { points: match.total_points, source: 'calculated' };
+        }
+    }
+    return null;
 }
 
 async function loadPitstopData() {
@@ -383,7 +418,7 @@ const TABLE_COLUMNS = [
     { key: 'expected_overtakes', label: 'OT' },
     { key: 'current_price', label: 'Price' },
     { key: 'price_change', label: 'Change' },
-    { key: 'value_score', label: 'Value' },
+    { key: 'value_score', label: 'PPM' },
 ];
 
 function setupTableSorting() {
@@ -508,7 +543,7 @@ function heroCard(label, driver, type) {
             <div class="hero-card-driver">${driver.name || driver.driver_id}</div>
             <div class="hero-card-team">${team.name}</div>
             <div class="hero-card-pts">${driver.expected_points.toFixed(1)} pts</div>
-            <div class="hero-card-meta">$${driver.current_price}M \u00b7 ${(driver.value_score||0).toFixed(2)}x value</div>
+            <div class="hero-card-meta">$${driver.current_price}M \u00b7 ${(driver.value_score||0).toFixed(2)} ppm</div>
         </div>
     `;
 }
@@ -649,13 +684,14 @@ function driverCard(d, i) {
             </div>
             <span class="risk-badge ${riskClass}" title="DNF risk based on rolling 5-race DNF probability. LOW = safe pick, HIGH = DNF-prone.">${d.risk}</span>
             <span class="price-tag" title="Current F1 Fantasy price">$${d.current_price.toFixed(1)}M</span>
-            <span class="value-tag" style="position:relative;cursor:help" title="Value Score = Expected Fantasy Points / Price ($M). Higher is better. Above 1.0 = good value, above 2.0 = excellent, below 0 = negative expected return.">${d.value_score.toFixed(2)}x<span class="value-tooltip">Value Score = Expected Fantasy Points &divide; Price ($M). Higher is better. Above 1.0 = good value, above 2.0 = excellent, below 0 = negative expected return.</span></span>
+            <span class="value-tag" style="position:relative;cursor:help" title="PPM = Points Per Million. Expected Fantasy Points / Price ($M). Higher is better. Above 1.0 = good, above 2.0 = excellent.">${d.value_score.toFixed(2)} ppm<span class="value-tooltip">PPM = Points Per Million (Expected Fantasy Points &divide; Price). Higher is better. Above 1.0 = good, above 2.0 = excellent.</span></span>
         </div>
         ${d.mc_total_p5 != null ? `
         <div class="mc-range" title="Monte Carlo simulation: 90% of outcomes fall within this range (5th to 95th percentile). Shows downside risk and upside potential.">
             <span class="mc-label">MC 90% CI</span>
             <span class="mc-values">${d.mc_total_p5.toFixed(0)} — ${d.mc_total_p95.toFixed(0)} pts</span>
         </div>` : ''}
+        ${renderPriceChangeBrackets(d)}
     </div>`;
 }
 
@@ -681,7 +717,7 @@ function driverRow(d, i) {
         <td class="num">${d.expected_overtakes}</td>
         <td class="num">$${d.current_price.toFixed(1)}M</td>
         <td class="num" style="${pcColor}">${pcText}</td>
-        <td class="num">${d.value_score.toFixed(2)}x</td>
+        <td class="num">${d.value_score.toFixed(2)}</td>
     </tr>`;
 }
 
@@ -738,9 +774,10 @@ function constructorCard(c, i) {
         <div class="card-meta">
             <span class="risk-badge ${riskClass}" title="DNF risk based on combined driver risk">${c.risk}</span>
             <span class="price-tag" title="Current F1 Fantasy price">$${c.current_price.toFixed(1)}M</span>
-            <span class="value-tag" title="Value Score = Expected Points / Price">${c.value_score.toFixed(2)}x</span>
+            <span class="value-tag" title="PPM = Points Per Million. Expected Points / Price ($M).">${c.value_score.toFixed(2)} ppm</span>
         </div>
         ${pitHtml}
+        ${renderPriceChangeBrackets(c)}
     </div>`;
 }
 
@@ -818,6 +855,92 @@ function renderLockGrid() {
     });
 }
 
+// -- Sortable table utility --
+function makeTableSortable(tableEl) {
+    const headers = tableEl.querySelectorAll('th');
+    headers.forEach((th, colIdx) => {
+        th.style.cursor = 'pointer';
+        th.title = 'Click to sort';
+        th.addEventListener('click', () => {
+            const tbody = tableEl.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const isAsc = th.dataset.sortDir !== 'asc';
+
+            // Reset other headers
+            headers.forEach(h => { h.dataset.sortDir = ''; h.classList.remove('sort-asc', 'sort-desc'); });
+            th.dataset.sortDir = isAsc ? 'asc' : 'desc';
+            th.classList.add(isAsc ? 'sort-asc' : 'sort-desc');
+
+            rows.sort((a, b) => {
+                let va = a.cells[colIdx]?.textContent.trim() || '';
+                let vb = b.cells[colIdx]?.textContent.trim() || '';
+                // Try numeric sort
+                const na = parseFloat(va.replace(/[^0-9.\-]/g, ''));
+                const nb = parseFloat(vb.replace(/[^0-9.\-]/g, ''));
+                if (!isNaN(na) && !isNaN(nb)) {
+                    return isAsc ? na - nb : nb - na;
+                }
+                return isAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            });
+
+            rows.forEach(r => tbody.appendChild(r));
+        });
+    });
+}
+
+// -- Price change brackets display --
+function renderPriceChangeBrackets(item) {
+    const pc = predictPriceChange(item, item.expected_points);
+    const changeColor = pc.expectedChange > 0 ? 'var(--green)' : pc.expectedChange < 0 ? 'var(--red, #ef4444)' : 'var(--text-secondary)';
+    const changeSign = pc.expectedChange >= 0 ? '+' : '';
+    const tierLabel = pc.isATier ? 'A-tier' : 'B-tier';
+    const tc = pc.tierChanges;
+
+    // Build bracket rows — show how many points needed for each bracket
+    const brackets = [
+        { label: `${tc.great >= 0 ? '+' : ''}${tc.great.toFixed(1)}M`, threshold: 'great', pts: pc.ptsForGreat, color: 'var(--green)' },
+        { label: `${tc.good >= 0 ? '+' : ''}${tc.good.toFixed(1)}M`, threshold: 'good', pts: pc.ptsForGood, color: '#22d3ee' },
+        { label: `${tc.poor >= 0 ? '+' : ''}${tc.poor.toFixed(1)}M`, threshold: 'poor', pts: pc.ptsForPoor, color: 'var(--orange)' },
+        { label: `${tc.terrible >= 0 ? '+' : ''}${tc.terrible.toFixed(1)}M`, threshold: 'terrible', pts: null, color: 'var(--red, #ef4444)' },
+    ];
+
+    // Determine which bracket the predicted score falls into
+    const predicted = item.expected_points;
+    let activeBracket = 'terrible';
+    if (predicted >= pc.ptsForGreat) activeBracket = 'great';
+    else if (predicted >= pc.ptsForGood) activeBracket = 'good';
+    else if (predicted >= pc.ptsForPoor) activeBracket = 'poor';
+
+    const sourceLabel = pc.hasOfficialData ? 'Official pts' : 'Calculated pts';
+    const pastDisplay = pc.pastScores.length > 0
+        ? pc.pastScores.map(s => s.toFixed(0)).join(', ')
+        : 'No data';
+
+    let bracketRows = brackets.map(b => {
+        const isActive = b.threshold === activeBracket;
+        const ptsText = b.pts != null ? `${b.pts.toFixed(0)} pts needed` : `< ${pc.ptsForPoor.toFixed(0)} pts`;
+        return `<div class="bracket-row ${isActive ? 'bracket-active' : ''}" style="--bracket-color:${b.color}">
+            <span class="bracket-change">${b.label}</span>
+            <span class="bracket-pts">${ptsText}</span>
+        </div>`;
+    }).join('');
+
+    return `
+    <div class="price-change-section">
+        <div class="price-change-header">
+            <span class="price-change-title">Price Change (${tierLabel})</span>
+            <span class="price-change-predicted" style="color:${changeColor}">${changeSign}${pc.expectedChange.toFixed(1)}M</span>
+        </div>
+        <div class="price-change-meta">
+            <span title="${sourceLabel}: last ${pc.pastScores.length} round(s)">${sourceLabel}: ${pastDisplay}</span>
+            <span>PPM: ${pc.avgPpm.toFixed(2)} <span class="ppm-rating ${pc.rating.class}" style="font-size:0.7em">${pc.rating.label}</span></span>
+        </div>
+        <div class="bracket-grid">
+            ${bracketRows}
+        </div>
+    </div>`;
+}
+
 // -- Price change prediction helpers --
 function getPpmRating(avgPpm) {
     if (avgPpm >= PPM_RATINGS.GREAT) return { label: 'Great', class: 'rating-great', color: 'var(--green)' };
@@ -830,19 +953,33 @@ function predictPriceChange(item, predictedPts) {
     const price = item.current_price || 10;
     const isATier = price > PRICE_TIERS.A_TIER_THRESHOLD;
     const tierChanges = isATier ? PRICE_TIERS.A_TIER_CHANGES : PRICE_TIERS.B_TIER_CHANGES;
+    const isDriver = !!item.driver_id;
+    const itemId = isDriver ? item.driver_id : item.constructor_id;
 
-    // Collect past scores from actuals
+    // Collect past scores — prefer official F1 Fantasy points over calculated
     const pastScores = [];
     let cumulativeTotal = 0;
-    for (const [rn, actData] of Object.entries(actualCache)) {
-        if (!actData) continue;
-        const isDriver = !!item.driver_id;
-        const match = isDriver
-            ? (actData.drivers || []).find(d => d.driver_id === item.driver_id)
-            : (actData.constructors || []).find(c => c.constructor_id === item.constructor_id);
-        if (match && match.total_points != null) {
-            pastScores.push(match.total_points);
-            cumulativeTotal += match.total_points;
+    let hasOfficialData = false;
+    if (seasonSummary && seasonSummary.rounds) {
+        for (const r of seasonSummary.rounds) {
+            if (!r.has_actual) continue;
+            const result = getOfficialScore(r.round, itemId, isDriver);
+            if (result) {
+                pastScores.push(result.points);
+                cumulativeTotal += result.points;
+                if (result.source === 'official') hasOfficialData = true;
+            }
+        }
+    } else {
+        // Fallback: iterate actualCache keys in order
+        const rounds = Object.keys(actualCache).map(Number).sort((a, b) => a - b);
+        for (const rn of rounds) {
+            const result = getOfficialScore(rn, itemId, isDriver);
+            if (result) {
+                pastScores.push(result.points);
+                cumulativeTotal += result.points;
+                if (result.source === 'official') hasOfficialData = true;
+            }
         }
     }
 
@@ -861,8 +998,9 @@ function predictPriceChange(item, predictedPts) {
     else expectedChange = tierChanges.terrible;
 
     // Points needed this round for each threshold
-    // With N past rounds in window: new_avg = (sum_of_last2 + X) / 3
-    // For avg/price >= threshold: X >= threshold * price * 3 - sum_of_last2
+    // Rolling window = last 2 actual rounds + predicted this round = 3 total
+    // new_avg = (sum_of_last2 + X) / windowSize
+    // For avg/price >= threshold: X >= threshold * price * windowSize - sum_of_last2
     const recentWindow = pastScores.slice(-2);
     const recentSum = recentWindow.reduce((a, b) => a + b, 0);
     const windowSize = Math.min(recentWindow.length + 1, 3);
@@ -872,7 +1010,7 @@ function predictPriceChange(item, predictedPts) {
 
     return {
         avgPpm, rating, expectedChange, avgPts,
-        cumulativeTotal, pastScores, isATier, tierChanges,
+        cumulativeTotal, pastScores, isATier, tierChanges, hasOfficialData,
         tier: isATier ? 'A' : 'B',
         ptsForGreat, ptsForGood, ptsForPoor,
         // Compat aliases
@@ -1416,8 +1554,9 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
         // Race Results as driver cards
         if (data.results && data.results.length > 0) {
             html += `
-            <div class="analysis-block">
-                <h3>Race Results</h3>
+            <div class="analysis-block collapsible">
+                <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Race Results <span class="collapse-icon">▼</span></h3>
+                <div class="collapsible-content">
                 <div class="postrace-cards">
                     ${data.results.map(r => {
                         const team = TEAMS[r.constructor_id] || { name: r.constructor_id, color: '#666' };
@@ -1442,6 +1581,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
                             </div>
                         </div>`;
                     }).join('')}
+                </div>
                 </div>
             </div>`;
         }
@@ -1471,9 +1611,10 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
             .sort((a,b) => a[1].avg_race_pace - b[1].avg_race_pace);
 
         html += `
-        <div class="analysis-block">
-            <h3>Normalized Race Pace</h3>
-            <table class="data-table">
+        <div class="analysis-block collapsible">
+            <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Normalized Race Pace <span class="collapse-icon">▼</span></h3>
+            <div class="collapsible-content">
+            <table class="data-table sortable">
                 <thead><tr>
                     <th>#</th><th>Driver</th><th class="num">Avg Pace</th>
                     <th class="num">Median</th><th class="num">Best Lap</th>
@@ -1493,15 +1634,17 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
                     </tr>`).join('')}
                 </tbody>
             </table>
+            </div>
         </div>`;
     }
 
     // Pit Stops by Team
     if (data.pitstops && data.pitstops.by_team && data.pitstops.by_team.length > 0) {
         html += `
-        <div class="analysis-block">
-            <h3>Pit Stop Performance</h3>
-            <table class="data-table">
+        <div class="analysis-block collapsible">
+            <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Pit Stop Performance <span class="collapse-icon">▼</span></h3>
+            <div class="collapsible-content">
+            <table class="data-table sortable">
                 <thead><tr>
                     <th>#</th><th>Team</th><th class="num">Avg Time</th>
                     <th class="num">Best Time</th><th class="num">Stops</th>
@@ -1516,6 +1659,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
                     </tr>`).join('')}
                 </tbody>
             </table>
+            </div>
         </div>`;
     }
 
@@ -1525,9 +1669,10 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
             .sort((a,b) => b[1].management_score - a[1].management_score);
 
         html += `
-        <div class="analysis-block">
-            <h3>Tyre Management</h3>
-            <table class="data-table">
+        <div class="analysis-block collapsible">
+            <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Tyre Management <span class="collapse-icon">▼</span></h3>
+            <div class="collapsible-content">
+            <table class="data-table sortable">
                 <thead><tr>
                     <th>#</th><th>Driver</th><th class="num">Score</th>
                     <th class="num">Avg Deg</th><th>Stints</th>
@@ -1542,10 +1687,115 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
                     </tr>`).join('')}
                 </tbody>
             </table>
+            </div>
         </div>`;
     }
 
+    // ── Sprint Weekend sections ──
+    if (data && data.is_sprint_weekend) {
+        html += `<div class="sprint-divider"><span>🏁 Sprint Session</span></div>`;
+
+        // Sprint Results
+        if (data.sprint_results && data.sprint_results.length > 0) {
+            html += `
+            <div class="analysis-block collapsible">
+                <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Sprint Results <span class="collapse-icon">▼</span></h3>
+                <div class="collapsible-content">
+                <div class="postrace-cards">
+                    ${data.sprint_results.map(r => {
+                        const team = TEAMS[r.constructor_id] || { name: r.constructor_id, color: '#666' };
+                        const posChange = r.positions_gained || 0;
+                        const changeClass = posChange > 0 ? 'positive' : posChange < 0 ? 'negative' : 'neutral';
+                        const changeText = posChange > 0 ? '+' + posChange : '' + posChange;
+                        const finished = r.is_finished || (r.finish_position != null);
+                        return `
+                        <div class="postrace-card" style="--team-color:${team.color}">
+                            <div class="pr-header">
+                                <div>
+                                    <div class="pr-driver">${r.driver_id}</div>
+                                    <div class="pr-team">${team.name}</div>
+                                </div>
+                                <div class="pr-position ${!finished ? 'dnf' : ''}">${finished ? 'P' + r.finish_position : r.status || 'DNF'}</div>
+                            </div>
+                            <div class="pr-stats">
+                                <div>Grid: <span class="pr-stat-value">P${r.grid}</span></div>
+                                <div>Change: <span class="pr-change ${changeClass}">${changeText}</span></div>
+                                <div>Points: <span class="pr-points">${r.points}</span></div>
+                                <div>Status: <span class="pr-stat-value">${r.is_finished ? 'Finished' : r.status}</span></div>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+                </div>
+            </div>`;
+        }
+
+        // Sprint Race Pace
+        if (data.sprint_pace && Object.keys(data.sprint_pace).length > 0) {
+            const sorted = Object.entries(data.sprint_pace)
+                .sort((a,b) => a[1].avg_race_pace - b[1].avg_race_pace);
+
+            html += `
+            <div class="analysis-block collapsible">
+                <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Sprint Race Pace <span class="collapse-icon">▼</span></h3>
+                <div class="collapsible-content">
+                <table class="data-table sortable">
+                    <thead><tr>
+                        <th>#</th><th>Driver</th><th class="num">Avg Pace</th>
+                        <th class="num">Median</th><th class="num">Best Lap</th>
+                        <th class="num">Delta</th><th class="num">Consistency</th>
+                        <th class="num">Laps</th>
+                    </tr></thead>
+                    <tbody>${sorted.map(([id, d], i) => `
+                        <tr>
+                            <td>${i+1}</td>
+                            <td><strong>${id}</strong></td>
+                            <td class="num">${fmtTime(d.avg_race_pace)}</td>
+                            <td class="num">${fmtTime(d.median_race_pace)}</td>
+                            <td class="num">${fmtTime(d.best_race_lap)}</td>
+                            <td class="num ${d.pace_delta_to_leader === 0 ? 'text-green' : ''}">${d.pace_delta_to_leader === 0 ? 'Leader' : '+' + d.pace_delta_to_leader.toFixed(3)}</td>
+                            <td class="num">${d.consistency_std.toFixed(3)}s</td>
+                            <td class="num">${d.laps_analyzed}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+                </div>
+            </div>`;
+        }
+
+        // Sprint Tyre Management
+        if (data.sprint_tyre_management && Object.keys(data.sprint_tyre_management).length > 0) {
+            const sorted = Object.entries(data.sprint_tyre_management)
+                .sort((a,b) => b[1].management_score - a[1].management_score);
+
+            html += `
+            <div class="analysis-block collapsible">
+                <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Sprint Tyre Management <span class="collapse-icon">▼</span></h3>
+                <div class="collapsible-content">
+                <table class="data-table sortable">
+                    <thead><tr>
+                        <th>#</th><th>Driver</th><th class="num">Score</th>
+                        <th class="num">Avg Deg</th><th>Stints</th>
+                    </tr></thead>
+                    <tbody>${sorted.map(([id, d], i) => `
+                        <tr>
+                            <td>${i+1}</td>
+                            <td><strong>${id}</strong></td>
+                            <td class="num"><span class="mgmt-score ${d.management_score >= 70 ? 'score-good' : d.management_score >= 40 ? 'score-ok' : 'score-bad'}">${d.management_score}/100</span></td>
+                            <td class="num">${d.avg_degradation.toFixed(4)}s/lap</td>
+                            <td>${d.stints.map(s => `<span class="compound-badge ${s.compound.toLowerCase()}">${s.compound} (${s.laps}L)</span>`).join(' ')}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+                </div>
+            </div>`;
+        }
+    }
+
     el.innerHTML = html;
+
+    // Make all sortable tables interactive
+    el.querySelectorAll('table.sortable').forEach(makeTableSortable);
 }
 
 function renderComparison(predictions, actual) {
@@ -1705,9 +1955,10 @@ function renderComparison(predictions, actual) {
     // Comparison table
     const hasMC = rows.some(r => r.mcMean != null);
     html += `
-    <div class="analysis-block">
-        <h3>Predicted vs Actual — Driver Comparison</h3>
-        <table class="data-table">
+    <div class="analysis-block collapsible">
+        <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Predicted vs Actual — Driver Comparison <span class="collapse-icon">▼</span></h3>
+        <div class="collapsible-content">
+        <table class="data-table sortable">
             <thead><tr>
                 <th>Driver</th><th>Team</th>
                 <th class="num">Pred Q</th><th class="num">Act Q</th><th class="num">Δ</th>
@@ -1745,6 +1996,7 @@ function renderComparison(predictions, actual) {
             }).join('')}
             </tbody>
         </table>
+        </div>
     </div>`;
 
     return html;
@@ -1786,7 +2038,7 @@ function renderSeason() {
     if (!seasonSummary || !seasonSummary.rounds) {
         calEl.innerHTML = '<p class="no-data">No season data available. Run pipeline/08_export_website_json.py first.</p>';
     } else {
-        let html = `<table class="data-table">
+        let html = `<table class="data-table sortable">
             <thead><tr>
                 <th>Rd</th><th>Race</th><th>Circuit</th><th>Date</th><th>Status</th>
             </tr></thead>
@@ -1807,6 +2059,7 @@ function renderSeason() {
             </tbody>
         </table>`;
         calEl.innerHTML = html;
+        calEl.querySelectorAll('table.sortable').forEach(makeTableSortable);
 
         // Add click handlers for completed/predicted rounds
         calEl.querySelectorAll('.clickable-row').forEach(row => {
@@ -1844,7 +2097,7 @@ function renderSeason() {
         const sorted = Object.entries(seasonSummary.driver_prices)
             .sort((a,b) => b[1].price_change - a[1].price_change);
 
-        let html = `<table class="data-table">
+        let html = `<table class="data-table sortable">
             <thead><tr>
                 <th>Driver</th><th>Team</th><th class="num">Current</th>
                 <th class="num">Starting</th><th class="num">Change</th><th>Trend</th>
@@ -1866,14 +2119,16 @@ function renderSeason() {
             </tbody>
         </table>`;
         priceEl.innerHTML = html;
+        priceEl.querySelectorAll('table.sortable').forEach(makeTableSortable);
     }
 
-    // Cumulative Fantasy Standings (from actual data)
+    // Cumulative Fantasy Standings (prefers official points when available)
     const standingsEl = document.getElementById('fantasyStandings');
     if (standingsEl) {
         const driverTotals = {};
         const constructorTotals = {};
         let roundsWithData = 0;
+        let hasAnyOfficial = false;
 
         for (const [rn, actData] of Object.entries(actualCache)) {
             if (!actData) continue;
@@ -1883,7 +2138,10 @@ function renderSeason() {
                     if (!driverTotals[d.driver_id]) {
                         driverTotals[d.driver_id] = { name: d.name, constructor: d.constructor, total: 0, rounds: 0, price: d.price };
                     }
-                    driverTotals[d.driver_id].total += d.total_points || 0;
+                    const result = getOfficialScore(Number(rn), d.driver_id, true);
+                    const pts = result ? result.points : (d.total_points || 0);
+                    if (result && result.source === 'official') hasAnyOfficial = true;
+                    driverTotals[d.driver_id].total += pts;
                     driverTotals[d.driver_id].rounds++;
                     driverTotals[d.driver_id].price = d.price;
                 });
@@ -1893,7 +2151,10 @@ function renderSeason() {
                     if (!constructorTotals[c.constructor_id]) {
                         constructorTotals[c.constructor_id] = { name: c.name, total: 0, rounds: 0, price: c.price };
                     }
-                    constructorTotals[c.constructor_id].total += c.total_points || 0;
+                    const result = getOfficialScore(Number(rn), c.constructor_id, false);
+                    const pts = result ? result.points : (c.total_points || 0);
+                    if (result && result.source === 'official') hasAnyOfficial = true;
+                    constructorTotals[c.constructor_id].total += pts;
                     constructorTotals[c.constructor_id].rounds++;
                     constructorTotals[c.constructor_id].price = c.price;
                 });
@@ -1906,10 +2167,12 @@ function renderSeason() {
 
             let sHtml = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">`;
 
+            const sourceTag = hasAnyOfficial ? ' <span style="font-size:0.7em;color:var(--green)">(Official pts)</span>' : ' <span style="font-size:0.7em;color:var(--text-muted)">(Calculated pts)</span>';
+
             // Driver standings
             sHtml += `<div>
-                <h4 style="margin-bottom:12px;">Driver Fantasy Standings (${roundsWithData} rounds)</h4>
-                <table class="data-table">
+                <h4 style="margin-bottom:12px;">Driver Fantasy Standings (${roundsWithData} rounds)${sourceTag}</h4>
+                <table class="data-table sortable">
                     <thead><tr>
                         <th>#</th><th>Driver</th><th>Team</th>
                         <th class="num" title="Total fantasy points scored across all completed rounds">Total</th>
@@ -1936,7 +2199,7 @@ function renderSeason() {
             // Constructor standings
             sHtml += `<div>
                 <h4 style="margin-bottom:12px;">Constructor Fantasy Standings</h4>
-                <table class="data-table">
+                <table class="data-table sortable">
                     <thead><tr>
                         <th>#</th><th>Constructor</th>
                         <th class="num">Total</th>
@@ -1961,6 +2224,7 @@ function renderSeason() {
 
             sHtml += `</div>`;
             standingsEl.innerHTML = sHtml;
+            standingsEl.querySelectorAll('.data-table').forEach(makeTableSortable);
         } else {
             standingsEl.innerHTML = '<p class="no-data">No actual race data available yet.</p>';
         }
@@ -2111,7 +2375,7 @@ function updateH2HComparison() {
                     Avg pts: <span style="color:${teamA.color}">${avgA}</span> vs <span style="color:${teamB.color}">${avgB}</span>
                 </div>
                 <div class="table-wrapper">
-                    <table class="data-table h2h-history-table">
+                    <table class="data-table h2h-history-table sortable">
                         <thead><tr><th>Rd</th><th>Race</th><th class="num">${dA.name}</th><th class="num">${dB.name}</th><th class="num">Diff</th></tr></thead>
                         <tbody>${histRows.join('')}</tbody>
                     </table>
@@ -2195,8 +2459,8 @@ function updateH2HComparison() {
             <h3>Value Comparison</h3>
             ${statRow('Price', dA.current_price, dB.current_price, fmtPrice, false)}
             ${statRow('Pts / $M', dA.points_per_million, dB.points_per_million, fmtPts, true)}
-            ${statRow('Value Score', dA.value_score, dB.value_score, v => v != null ? v.toFixed(2) + 'x' : '-', true)}
-            ${statRow('MC Value', dA.mc_value_score, dB.mc_value_score, v => v != null ? v.toFixed(2) + 'x' : '-', true)}
+            ${statRow('PPM', dA.value_score, dB.value_score, v => v != null ? v.toFixed(2) + ' ppm' : '-', true)}
+            ${statRow('MC PPM', dA.mc_value_score, dB.mc_value_score, v => v != null ? v.toFixed(2) + ' ppm' : '-', true)}
             ${statRow('Price Change', dA._price_change, dB._price_change, v => (v >= 0 ? '+' : '') + v.toFixed(1), true)}
         </div>
 
@@ -2207,6 +2471,7 @@ function updateH2HComparison() {
             <div class="h2h-rec-text">${recText}</div>
         </div>
     </div>`;
+    container.querySelectorAll('table.sortable').forEach(makeTableSortable);
 }
 
 // ============================================================
@@ -2401,7 +2666,7 @@ async function renderAccuracy() {
     <div class="accuracy-section">
         <h3>Per-Round Accuracy</h3>
         <div class="table-wrapper">
-            <table class="data-table accuracy-round-table">
+            <table class="data-table accuracy-round-table sortable">
                 <thead><tr>
                     <th>Rd</th><th>Race</th><th class="num">Pts MAE</th>
                     <th class="num">Pos MAE</th><th class="num">CI Coverage</th>
@@ -2415,7 +2680,7 @@ async function renderAccuracy() {
     <div class="accuracy-section">
         <h3>Per-Driver Accuracy</h3>
         <div class="table-wrapper">
-            <table class="data-table accuracy-driver-table">
+            <table class="data-table accuracy-driver-table sortable">
                 <thead><tr>
                     <th>Driver</th><th>Team</th><th class="num">Avg Pred</th>
                     <th class="num">Avg Actual</th><th class="num">Avg Error</th>
@@ -2426,6 +2691,7 @@ async function renderAccuracy() {
         </div>
     </div>`;
 
+    container.querySelectorAll('table.sortable').forEach(makeTableSortable);
     accuracyRendered = true;
 }
 

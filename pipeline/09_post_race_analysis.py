@@ -55,6 +55,17 @@ def load_race_results(year: int, round_num: int) -> dict | None:
     return races[0] if races else None
 
 
+def load_sprint_results(year: int, round_num: int) -> dict | None:
+    """Load sprint results from Jolpica JSON."""
+    path = JOLPICA_RAW_DIR / f"year{year}" / f"round{round_num}" / "sprint.json"
+    if not path.exists():
+        return None
+    with open(path) as f:
+        data = json.load(f)
+    races = data.get("MRData", {}).get("RaceTable", {}).get("Races", [])
+    return races[0] if races else None
+
+
 def load_pitstops(year: int, round_num: int) -> list[dict]:
     """Load pit stop data from Jolpica JSON."""
     path = JOLPICA_RAW_DIR / f"year{year}" / f"round{round_num}" / "pitstops.json"
@@ -68,11 +79,8 @@ def load_pitstops(year: int, round_num: int) -> list[dict]:
     return races[0].get("PitStops", [])
 
 
-def load_race_laps(year: int, round_num: int) -> pd.DataFrame | None:
-    """Load race lap data from FastF1 parquet."""
-    path = FASTF1_RAW_DIR / f"year{year}" / f"round{round_num}" / "race.parquet"
-    if not path.exists():
-        return None
+def _load_laps_parquet(path: Path) -> pd.DataFrame | None:
+    """Load lap data from a FastF1 parquet file."""
     try:
         df = pd.read_parquet(path)
         # Standardize column names
@@ -100,8 +108,24 @@ def load_race_laps(year: int, round_num: int) -> pd.DataFrame | None:
         df = df.rename(columns=col_map)
         return df
     except Exception as e:
-        print(f"  Warning: could not load race laps: {e}")
+        print(f"  Warning: could not load laps from {path.name}: {e}")
         return None
+
+
+def load_sprint_laps(year: int, round_num: int) -> pd.DataFrame | None:
+    """Load sprint lap data from FastF1 parquet."""
+    path = FASTF1_RAW_DIR / f"year{year}" / f"round{round_num}" / "sprint.parquet"
+    if not path.exists():
+        return None
+    return _load_laps_parquet(path)
+
+
+def load_race_laps(year: int, round_num: int) -> pd.DataFrame | None:
+    """Load race lap data from FastF1 parquet."""
+    path = FASTF1_RAW_DIR / f"year{year}" / f"round{round_num}" / "race.parquet"
+    if not path.exists():
+        return None
+    return _load_laps_parquet(path)
 
 
 def load_driver_map() -> tuple[dict, dict]:
@@ -136,6 +160,35 @@ def analyze_race_results(race_data: dict, jolpica_to_abbrev: dict) -> list[dict]
     """Parse race results into a clean list."""
     results = []
     for r in race_data.get("Results", []):
+        driver_id = r.get("Driver", {}).get("driverId", "")
+        abbrev = jolpica_to_abbrev.get(driver_id, driver_id[:3].upper())
+        constructor = r.get("Constructor", {}).get("constructorId", "")
+
+        status = r.get("status", "Finished")
+        is_finished = status.lower() in ["finished"] or status.startswith("+")
+        grid = int(r.get("grid", 0))
+        position = int(r.get("position", 0)) if is_finished else None
+        points = float(r.get("points", 0))
+
+        pos_change = (grid - position) if position and grid else 0
+
+        results.append({
+            "driver_id": abbrev,
+            "constructor_id": constructor,
+            "grid": grid,
+            "finish_position": position,
+            "status": status,
+            "is_finished": is_finished,
+            "points": points,
+            "positions_gained": pos_change,
+        })
+    return results
+
+
+def analyze_sprint_results(sprint_data: dict, jolpica_to_abbrev: dict) -> list[dict]:
+    """Parse sprint results into a clean list."""
+    results = []
+    for r in sprint_data.get("SprintResults", []):
         driver_id = r.get("Driver", {}).get("driverId", "")
         abbrev = jolpica_to_abbrev.get(driver_id, driver_id[:3].upper())
         constructor = r.get("Constructor", {}).get("constructorId", "")
@@ -347,16 +400,19 @@ def run_post_race_analysis(round_num: int, year: int = CURRENT_SEASON) -> dict:
     constructor_names = load_constructor_map()
     driver_constructors = load_driver_constructors()
 
-    # Load race name
+    # Load race info
     with open(SEED_DIR / "races.json") as f:
         races = json.load(f)["races"]
-    race_name = next((r["name"] for r in races if r["round"] == round_num), f"Round {round_num}")
+    race_info = next((r for r in races if r["round"] == round_num), None)
+    race_name = race_info["name"] if race_info else f"Round {round_num}"
+    is_sprint = race_info.get("sprint", False) if race_info else False
 
     output = {
         "race": race_name,
         "round": round_num,
         "season": year,
         "type": "post_race_analysis",
+        "is_sprint_weekend": is_sprint,
     }
 
     # 1. Race results
@@ -394,7 +450,31 @@ def run_post_race_analysis(round_num: int, year: int = CURRENT_SEASON) -> dict:
     output["tyre_management"] = tyre_data
     print(f"  {len(tyre_data)} drivers with tyre data")
 
-    # 5. Save
+    # 5. Sprint analysis (if sprint weekend)
+    if is_sprint:
+        print("\n[5] Sprint Weekend — Analyzing sprint session...")
+
+        # Sprint results
+        sprint_data = load_sprint_results(year, round_num)
+        if sprint_data:
+            sprint_results = analyze_sprint_results(sprint_data, jolpica_to_abbrev)
+            output["sprint_results"] = sprint_results
+            print(f"  Sprint results: {len(sprint_results)} drivers")
+        else:
+            output["sprint_results"] = []
+            print("  No sprint results found")
+
+        # Sprint pace & tyre management (from FastF1 sprint laps)
+        sprint_laps = load_sprint_laps(year, round_num)
+        sprint_pace = analyze_race_pace(sprint_laps)
+        output["sprint_pace"] = sprint_pace
+        print(f"  Sprint pace: {len(sprint_pace)} drivers with pace data")
+
+        sprint_tyre = analyze_tyre_management(sprint_laps)
+        output["sprint_tyre_management"] = sprint_tyre
+        print(f"  Sprint tyre management: {len(sprint_tyre)} drivers with tyre data")
+
+    # Save
     output_dir = PREDICTIONS_DIR / f"round{round_num}"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / "post_race_analysis.json"

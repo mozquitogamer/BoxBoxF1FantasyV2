@@ -1,291 +1,71 @@
 """
-Script 03a — Normalize Jolpica API JSON into clean CSVs.
+03a_normalize_jolpica.py — Normalize raw Jolpica JSON into clean CSVs.
 
-Reads raw Jolpica/Ergast JSON (race results, qualifying, sprint, schedule)
-and produces normalized CSV files per season.
+Reads per-round JSON files (results.json, qualifying.json, sprint.json)
+from data/raw/jolpica/year{YYYY}/round{N}/ and produces consolidated CSVs
+in data/processed/jolpica/normalized/{year}/.
 
-Handles two raw data formats:
-  - V1 (2020-2021): Single JSON per data type at year level, containing all rounds.
-  - V2 (2022+):     Per-round JSON files under round{N}/ subdirectories.
-
-Output directory: data/processed/jolpica/normalized/{year}/
-  - races.csv
+Output files:
   - race_results.csv
   - qualifying_results.csv
-  - sprint_results.csv
+  - sprint_results.csv (only if sprint data exists)
 
 Usage:
-    python pipeline/03a_normalize_jolpica.py
+    python pipeline/03a_normalize_jolpica.py --year 2022
+    python pipeline/03a_normalize_jolpica.py --all
 """
 
+import argparse
 import json
+import re
 import sys
 from pathlib import Path
+from typing import Any, Dict, List
 
 import pandas as pd
 
-# ---------------------------------------------------------------------------
-# Config imports
-# ---------------------------------------------------------------------------
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config.settings import (
-    HISTORICAL_SEASONS,
-    CURRENT_SEASON,
     JOLPICA_RAW_DIR,
     JOLPICA_NORMALIZED_DIR,
+    HISTORICAL_SEASONS,
+    CURRENT_SEASON,
     SEED_DIR,
 )
 
-# Years that use V1 format (single file with all rounds)
-V1_SEASONS = {2020, 2021}
-
 
 # ---------------------------------------------------------------------------
-# Seed-data loaders
+# Helpers
 # ---------------------------------------------------------------------------
 
-def load_constructor_mapping(seed_dir: Path) -> dict[str, str]:
-    """Build a lookup from any legacy Jolpica/Ergast constructor ID to canonical ID.
-
-    Returns dict like {"alphatauri": "racing_bulls", "rb": "racing_bulls", ...}.
-    """
-    path = seed_dir / "driver_ids.json"
-    if not path.exists():
-        print(f"  [WARN] Constructor seed file not found: {path}")
-        return {}
-
-    with open(path, encoding="utf-8") as f:
-        data = json.load(f)
-
-    mapping: dict[str, str] = {}
-    for entry in data.get("constructor_mappings", []):
-        canonical = entry["id"]
-        # Map the primary jolpica id
-        if "jolpica" in entry:
-            mapping[entry["jolpica"]] = canonical
-        # Map all ergast alternatives
-        for alt in entry.get("ergast_alt", []):
-            mapping[alt] = canonical
-    return mapping
+def read_json(path: Path) -> Dict[str, Any]:
+    """Read a JSON file and return its contents."""
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
-# ---------------------------------------------------------------------------
-# JSON loading helpers
-# ---------------------------------------------------------------------------
+def safe_get(d: Dict[str, Any], keys: List[str], default=None):
+    """Safely navigate nested dicts."""
+    cur: Any = d
+    for k in keys:
+        if not isinstance(cur, dict) or k not in cur:
+            return default
+        cur = cur[k]
+    return cur
 
-def _load_json(path: Path) -> dict | None:
-    """Load a JSON file, returning None if missing or malformed."""
-    if not path.exists():
+
+def safe_int(val) -> Any:
+    """Convert to int if the string is all digits, else None."""
+    if val is None:
         return None
-    try:
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)
-    except (json.JSONDecodeError, OSError) as exc:
-        print(f"  [WARN] Failed to read {path}: {exc}")
-        return None
+    s = str(val).strip()
+    if s.isdigit():
+        return int(s)
+    return None
 
 
-def _extract_races(data: dict) -> list[dict]:
-    """Pull the Races list from a Jolpica MRData envelope."""
-    try:
-        return data["MRData"]["RaceTable"]["Races"]
-    except (KeyError, TypeError):
-        return []
-
-
-def load_races_for_year(year: int, data_type: str) -> list[dict]:
-    """Return a flat list of Race dicts for *data_type* across all rounds.
-
-    data_type is one of: results, qualifying, sprint, races (schedule).
-    """
-    year_dir = JOLPICA_RAW_DIR / f"year{year}"
-
-    if year in V1_SEASONS:
-        # V1: single file at year level
-        filename = f"{data_type}.json"
-        data = _load_json(year_dir / filename)
-        if data is None:
-            return []
-        return _extract_races(data)
-
-    # V2: per-round files, or schedule.json at year level for "races"
-    if data_type == "races":
-        # Schedule lives at year level as schedule.json
-        data = _load_json(year_dir / "schedule.json")
-        if data is None:
-            # Fallback: try races.json at year level (V1-style)
-            data = _load_json(year_dir / "races.json")
-        if data is None:
-            return []
-        return _extract_races(data)
-
-    # Per-round data (results, qualifying, sprint)
-    all_races: list[dict] = []
-    if not year_dir.exists():
-        return all_races
-
-    round_dirs = sorted(
-        (d for d in year_dir.iterdir() if d.is_dir() and d.name.startswith("round")),
-        key=lambda d: int(d.name.replace("round", "")),
-    )
-    for rdir in round_dirs:
-        fpath = rdir / f"{data_type}.json"
-        data = _load_json(fpath)
-        if data is None:
-            continue
-        races = _extract_races(data)
-        all_races.extend(races)
-
-    return all_races
-
-
-# ---------------------------------------------------------------------------
-# Canonicalization helpers
-# ---------------------------------------------------------------------------
-
-def canonicalize_constructor(raw_id: str, mapping: dict[str, str]) -> str:
-    """Return the canonical constructor ID, falling back to the raw ID."""
-    return mapping.get(raw_id, raw_id)
-
-
-# ---------------------------------------------------------------------------
-# Row extraction functions
-# ---------------------------------------------------------------------------
-
-def extract_race_rows(
-    races: list[dict],
-    sprint_rounds: set[int],
-    year: int,
-) -> list[dict]:
-    """Extract race schedule rows."""
-    rows: list[dict] = []
-    for race in races:
-        rnd = int(race.get("round", 0))
-        rows.append({
-            "season": year,
-            "round": rnd,
-            "race_name": race.get("raceName", ""),
-            "race_date": race.get("date", ""),
-            "circuit_id": race.get("Circuit", {}).get("circuitId", ""),
-            "has_sprint": rnd in sprint_rounds,
-        })
-    return rows
-
-
-def extract_race_result_rows(
-    races: list[dict],
-    quali_lookup: dict[tuple[int, str], str],
-    constructor_map: dict[str, str],
-    year: int,
-) -> list[dict]:
-    """Extract race result rows, merging qualifying position from quali data."""
-    rows: list[dict] = []
-    for race in races:
-        rnd = int(race.get("round", 0))
-        for res in race.get("Results", []):
-            driver_id = res.get("Driver", {}).get("driverId", "")
-            raw_constructor = res.get("Constructor", {}).get("constructorId", "")
-
-            # Parse finish position — handle "R" (retired), "D" (disqualified), etc.
-            pos_text = res.get("positionText", "")
-            try:
-                finish_pos = int(res.get("position", 0))
-            except (ValueError, TypeError):
-                finish_pos = None
-
-            # Qualifying position from the lookup table
-            quali_pos = quali_lookup.get((rnd, driver_id))
-
-            rows.append({
-                "season": year,
-                "round": rnd,
-                "driver_id": driver_id,
-                "constructor_id": canonicalize_constructor(raw_constructor, constructor_map),
-                "constructor_id_jolpica": raw_constructor,
-                "grid": _safe_int(res.get("grid")),
-                "finish_position": finish_pos,
-                "position_text": pos_text,
-                "points": _safe_float(res.get("points")),
-                "status": res.get("status", ""),
-                "laps_completed": _safe_int(res.get("laps")),
-                "quali_position": _safe_int(quali_pos),
-            })
-    return rows
-
-
-def extract_qualifying_rows(
-    races: list[dict],
-    constructor_map: dict[str, str],
-    year: int,
-) -> list[dict]:
-    """Extract qualifying result rows."""
-    rows: list[dict] = []
-    for race in races:
-        rnd = int(race.get("round", 0))
-        for qr in race.get("QualifyingResults", []):
-            driver_id = qr.get("Driver", {}).get("driverId", "")
-            raw_constructor = qr.get("Constructor", {}).get("constructorId", "")
-            rows.append({
-                "season": year,
-                "round": rnd,
-                "driver_id": driver_id,
-                "constructor_id": canonicalize_constructor(raw_constructor, constructor_map),
-                "constructor_id_jolpica": raw_constructor,
-                "quali_position": _safe_int(qr.get("position")),
-                "q1": qr.get("Q1", ""),
-                "q2": qr.get("Q2", ""),
-                "q3": qr.get("Q3", ""),
-            })
-    return rows
-
-
-def extract_sprint_rows(
-    races: list[dict],
-    constructor_map: dict[str, str],
-    year: int,
-) -> list[dict]:
-    """Extract sprint result rows."""
-    rows: list[dict] = []
-    for race in races:
-        rnd = int(race.get("round", 0))
-        for sr in race.get("SprintResults", []):
-            driver_id = sr.get("Driver", {}).get("driverId", "")
-            raw_constructor = sr.get("Constructor", {}).get("constructorId", "")
-
-            try:
-                sprint_pos = int(sr.get("position", 0))
-            except (ValueError, TypeError):
-                sprint_pos = None
-
-            rows.append({
-                "season": year,
-                "round": rnd,
-                "driver_id": driver_id,
-                "constructor_id": canonicalize_constructor(raw_constructor, constructor_map),
-                "constructor_id_jolpica": raw_constructor,
-                "sprint_position": sprint_pos,
-                "sprint_points": _safe_float(sr.get("points")),
-            })
-    return rows
-
-
-# ---------------------------------------------------------------------------
-# Utility
-# ---------------------------------------------------------------------------
-
-def _safe_int(val) -> int | None:
-    """Convert to int if possible, else None."""
-    if val is None or val == "":
-        return None
-    try:
-        return int(val)
-    except (ValueError, TypeError):
-        return None
-
-
-def _safe_float(val) -> float | None:
+def safe_float(val) -> Any:
     """Convert to float if possible, else None."""
-    if val is None or val == "":
+    if val is None:
         return None
     try:
         return float(val)
@@ -293,104 +73,369 @@ def _safe_float(val) -> float | None:
         return None
 
 
-def _detect_sprint_rounds(schedule_races: list[dict]) -> set[int]:
-    """Determine which rounds are sprint weekends from the schedule data."""
-    sprint_rounds: set[int] = set()
-    for race in schedule_races:
-        if "Sprint" in race:
-            sprint_rounds.add(int(race.get("round", 0)))
-    return sprint_rounds
-
-
-def _build_quali_lookup(quali_races: list[dict]) -> dict[tuple[int, str], str]:
-    """Build a (round, driver_id) -> qualifying position lookup."""
-    lookup: dict[tuple[int, str], str] = {}
-    for race in quali_races:
-        rnd = int(race.get("round", 0))
-        for qr in race.get("QualifyingResults", []):
-            driver_id = qr.get("Driver", {}).get("driverId", "")
-            pos = qr.get("position", "")
-            if driver_id and pos:
-                lookup[(rnd, driver_id)] = pos
-    return lookup
-
-
-def save_csv(rows: list[dict], path: Path, label: str) -> None:
-    """Save rows as a CSV, creating parent directories as needed."""
-    if not rows:
-        print(f"    {label}: 0 rows (skipped)")
-        return
+def write_csv(df: pd.DataFrame, path: Path) -> None:
+    """Write a DataFrame to CSV, creating parent dirs as needed."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    df = pd.DataFrame(rows)
-    df.to_csv(path, index=False)
-    print(f"    {label}: {len(df)} rows -> {path.name}")
+    df.to_csv(path, index=False, encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# Driver abbrev and constructor mappings from seed data
+# ---------------------------------------------------------------------------
+
+def load_driver_abbrev_map(seed_dir: Path) -> Dict[str, str]:
+    """
+    Build jolpica driverId -> abbrev mapping from driver_ids.json.
+    e.g. {"max_verstappen": "VER", "leclerc": "LEC", ...}
+    """
+    path = seed_dir / "driver_ids.json"
+    if not path.exists():
+        print(f"[WARN] Missing {path}, abbrev column will be empty.")
+        return {}
+
+    obj = json.loads(path.read_text(encoding="utf-8"))
+    mappings = obj.get("mappings", [])
+    result: Dict[str, str] = {}
+    for row in mappings:
+        jolpica_id = str(row.get("jolpica", "")).strip().lower()
+        abbrev = str(row.get("abbrev", "")).strip().upper()
+        if jolpica_id and abbrev:
+            result[jolpica_id] = abbrev
+    return result
+
+
+def load_constructor_map(seed_dir: Path) -> Dict[str, str]:
+    """
+    Build a mapping of legacy/raw constructor IDs to canonical IDs.
+    e.g. {"alphatauri": "racing_bulls", "rb": "racing_bulls",
+           "sauber": "audi", "alfa": "audi", "toro_rosso": "racing_bulls"}
+    Only entries where the alt differs from the canonical ID are included.
+    """
+    path = seed_dir / "driver_ids.json"
+    if not path.exists():
+        print(f"[WARN] Missing {path}, constructor mapping will be identity.")
+        return {}
+
+    obj = json.loads(path.read_text(encoding="utf-8"))
+    raw_to_canonical: Dict[str, str] = {}
+    for entry in obj.get("constructor_mappings", []):
+        canonical_id = entry.get("id", "").strip().lower()
+        if not canonical_id:
+            continue
+        # Map the jolpica key
+        jolpica_id = entry.get("jolpica", "").strip().lower()
+        if jolpica_id and jolpica_id != canonical_id:
+            raw_to_canonical[jolpica_id] = canonical_id
+        # Map all ergast_alt keys
+        for alt in entry.get("ergast_alt", []):
+            alt_lower = alt.strip().lower()
+            if alt_lower and alt_lower != canonical_id:
+                raw_to_canonical[alt_lower] = canonical_id
+    return raw_to_canonical
+
+
+def add_abbrev_column(df: pd.DataFrame, abbrev_map: Dict[str, str]) -> pd.DataFrame:
+    """Add an 'abbrev' column from the driver_id -> abbrev mapping."""
+    if df is None or len(df) == 0 or "driver_id" not in df.columns:
+        return df
+    df = df.copy()
+    df["abbrev"] = df["driver_id"].map(
+        lambda x: abbrev_map.get(str(x).strip().lower(), "") if pd.notna(x) else ""
+    )
+    return df
+
+
+def canonicalize_constructors(df: pd.DataFrame, cmap: Dict[str, str]) -> pd.DataFrame:
+    """Canonicalize the constructor_id column in-place."""
+    if df is None or len(df) == 0 or "constructor_id" not in df.columns:
+        return df
+    df = df.copy()
+    df["constructor_id"] = df["constructor_id"].map(
+        lambda x: cmap.get(str(x).strip().lower(), str(x).strip().lower()) if pd.notna(x) else x
+    )
+    return df
+
+
+# ---------------------------------------------------------------------------
+# Per-round JSON parsers
+# ---------------------------------------------------------------------------
+
+def _extract_race_meta(race_obj: Dict[str, Any]) -> Dict[str, Any]:
+    """Extract common race-level metadata from a Jolpica Race object."""
+    circuit = race_obj.get("Circuit", {}) or {}
+    return {
+        "season": int(race_obj["season"]) if race_obj.get("season") else None,
+        "round": int(race_obj["round"]) if race_obj.get("round") else None,
+        "race_name": race_obj.get("raceName"),
+        "race_date": race_obj.get("date"),
+        "circuit_id": circuit.get("circuitId"),
+    }
+
+
+def parse_round_results(results_json: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Parse a single round's results.json into a list of row dicts."""
+    races = safe_get(results_json, ["MRData", "RaceTable", "Races"], []) or []
+    rows: List[Dict[str, Any]] = []
+    for r in races:
+        meta = _extract_race_meta(r)
+        for res in (r.get("Results") or []):
+            drv = res.get("Driver", {}) or {}
+            con = res.get("Constructor", {}) or {}
+            fl = res.get("FastestLap", {}) or {}
+            fl_time_obj = fl.get("Time")
+            fl_time = fl_time_obj.get("time") if isinstance(fl_time_obj, dict) else None
+
+            rows.append({
+                **meta,
+                "driver_id": drv.get("driverId"),
+                "driver_code": drv.get("code"),
+                "constructor_id": con.get("constructorId"),
+                "grid": safe_int(res.get("grid")),
+                "finish_position": safe_int(res.get("position")),
+                "position_text": res.get("positionText"),
+                "points": safe_float(res.get("points")),
+                "laps_completed": safe_int(res.get("laps")),
+                "status": res.get("status"),
+                "fastest_lap_rank": safe_int(fl.get("rank")),
+                "fastest_lap_time": fl_time,
+            })
+    return rows
+
+
+def parse_round_qualifying(qual_json: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Parse a single round's qualifying.json into a list of row dicts."""
+    races = safe_get(qual_json, ["MRData", "RaceTable", "Races"], []) or []
+    rows: List[Dict[str, Any]] = []
+    for r in races:
+        meta = _extract_race_meta(r)
+        for q in (r.get("QualifyingResults") or []):
+            drv = q.get("Driver", {}) or {}
+            con = q.get("Constructor", {}) or {}
+            rows.append({
+                **meta,
+                "driver_id": drv.get("driverId"),
+                "driver_code": drv.get("code"),
+                "constructor_id": con.get("constructorId"),
+                "quali_position": safe_int(q.get("position")),
+                "q1": q.get("Q1"),
+                "q2": q.get("Q2"),
+                "q3": q.get("Q3"),
+            })
+    return rows
+
+
+def parse_round_sprint(sprint_json: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Parse a single round's sprint.json into a list of row dicts."""
+    races = safe_get(sprint_json, ["MRData", "RaceTable", "Races"], []) or []
+    rows: List[Dict[str, Any]] = []
+    for r in races:
+        meta = _extract_race_meta(r)
+        for s in (r.get("SprintResults") or []):
+            drv = s.get("Driver", {}) or {}
+            con = s.get("Constructor", {}) or {}
+            rows.append({
+                **meta,
+                "driver_id": drv.get("driverId"),
+                "driver_code": drv.get("code"),
+                "constructor_id": con.get("constructorId"),
+                "grid": safe_int(s.get("grid")),
+                "sprint_position": safe_int(s.get("position")),
+                "points": safe_float(s.get("points")),
+                "laps_completed": safe_int(s.get("laps")),
+                "status": s.get("status"),
+            })
+    return rows
+
+
+# ---------------------------------------------------------------------------
+# Round directory discovery
+# ---------------------------------------------------------------------------
+
+def discover_round_dirs(year_dir: Path) -> List[Path]:
+    """Return sorted list of round directories (round1, round2, ...) in year_dir."""
+    round_dirs: List[Path] = []
+    if not year_dir.is_dir():
+        return round_dirs
+    for child in year_dir.iterdir():
+        if child.is_dir() and re.match(r"^round\d+$", child.name):
+            round_dirs.append(child)
+    round_dirs.sort(key=lambda p: int(re.search(r"\d+", p.name).group()))
+    return round_dirs
 
 
 # ---------------------------------------------------------------------------
 # Per-year processing
 # ---------------------------------------------------------------------------
 
-def process_year(year: int, constructor_map: dict[str, str]) -> None:
-    """Normalize all Jolpica data for a single season."""
-    print(f"\n[{year}] Loading raw JSON...")
+RACE_RESULT_COLUMNS = [
+    "season", "round", "race_name", "race_date", "circuit_id",
+    "driver_id", "abbrev", "driver_code", "constructor_id",
+    "grid", "finish_position", "position_text", "points",
+    "laps_completed", "status", "fastest_lap_rank", "fastest_lap_time",
+]
 
-    out_dir = JOLPICA_NORMALIZED_DIR / str(year)
+QUALIFYING_COLUMNS = [
+    "season", "round", "race_name", "race_date", "circuit_id",
+    "driver_id", "abbrev", "driver_code", "constructor_id",
+    "quali_position", "q1", "q2", "q3",
+]
 
-    # 1. Load schedule / race metadata
-    schedule_races = load_races_for_year(year, "races")
-    sprint_rounds = _detect_sprint_rounds(schedule_races)
-    if sprint_rounds:
-        print(f"  Sprint rounds detected: {sorted(sprint_rounds)}")
-
-    # 2. Load qualifying (needed for race_results.csv quali_position column)
-    quali_races = load_races_for_year(year, "qualifying")
-    quali_lookup = _build_quali_lookup(quali_races)
-
-    # 3. Load race results
-    result_races = load_races_for_year(year, "results")
-
-    # 4. Load sprint results
-    sprint_races = load_races_for_year(year, "sprint")
-
-    # --- Build rows ---
-    race_rows = extract_race_rows(schedule_races, sprint_rounds, year)
-    result_rows = extract_race_result_rows(result_races, quali_lookup, constructor_map, year)
-    quali_rows = extract_qualifying_rows(quali_races, constructor_map, year)
-    sprint_rows = extract_sprint_rows(sprint_races, constructor_map, year)
-
-    # --- Save CSVs ---
-    print(f"  Saving to {out_dir}/")
-    save_csv(race_rows, out_dir / "races.csv", "races")
-    save_csv(result_rows, out_dir / "race_results.csv", "race_results")
-    save_csv(quali_rows, out_dir / "qualifying_results.csv", "qualifying_results")
-    save_csv(sprint_rows, out_dir / "sprint_results.csv", "sprint_results")
+SPRINT_COLUMNS = [
+    "season", "round", "race_name", "race_date", "circuit_id",
+    "driver_id", "abbrev", "driver_code", "constructor_id",
+    "grid", "sprint_position", "points", "laps_completed", "status",
+]
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
+def process_year(
+    year: int,
+    jolpica_raw_dir: Path,
+    normalized_dir: Path,
+    abbrev_map: Dict[str, str],
+    constructor_map: Dict[str, str],
+) -> None:
+    """Process all rounds for a given year and write consolidated CSVs."""
+    year_dir = jolpica_raw_dir / f"year{year}"
+    out_dir = normalized_dir / str(year)
 
-def main() -> None:
-    print("=" * 60)
-    print("03a — Normalize Jolpica JSON -> CSV")
-    print("=" * 60)
+    if not year_dir.exists():
+        print(f"[WARN] Year directory not found: {year_dir}")
+        return
 
-    all_seasons = HISTORICAL_SEASONS + [CURRENT_SEASON]
-    print(f"Seasons to process: {all_seasons}")
+    round_dirs = discover_round_dirs(year_dir)
 
-    # Load constructor canonicalization mapping
-    constructor_map = load_constructor_mapping(SEED_DIR)
-    if constructor_map:
-        print(f"Loaded {len(constructor_map)} constructor ID mappings from seed data.")
+    print(f"\n{'='*60}")
+
+    # Collect rows from all rounds
+    all_results: List[Dict[str, Any]] = []
+    all_qualifying: List[Dict[str, Any]] = []
+    all_sprint: List[Dict[str, Any]] = []
+
+    if round_dirs:
+        # Per-round format (2022+): data/raw/jolpica/year{YYYY}/round{N}/results.json
+        print(f"Processing year {year}: {len(round_dirs)} round directories")
+        print(f"{'='*60}")
+
+        for rdir in round_dirs:
+            rnd_num = int(re.search(r"\d+", rdir.name).group())
+
+            results_path = rdir / "results.json"
+            if results_path.exists():
+                all_results.extend(parse_round_results(read_json(results_path)))
+            else:
+                print(f"  [WARN] Missing results.json for round {rnd_num}")
+
+            qual_path = rdir / "qualifying.json"
+            if qual_path.exists():
+                all_qualifying.extend(parse_round_qualifying(read_json(qual_path)))
+            else:
+                print(f"  [WARN] Missing qualifying.json for round {rnd_num}")
+
+            sprint_path = rdir / "sprint.json"
+            if sprint_path.exists():
+                sprint_rows = parse_round_sprint(read_json(sprint_path))
+                if sprint_rows:
+                    all_sprint.extend(sprint_rows)
     else:
-        print("[WARN] No constructor mappings loaded — raw IDs will be used as-is.")
+        # Season-level bulk format (2020-2021): data/raw/jolpica/year{YYYY}/results.json
+        print(f"Processing year {year}: using season-level bulk JSON files")
+        print(f"{'='*60}")
 
-    for year in all_seasons:
-        process_year(year, constructor_map)
+        results_path = year_dir / "results.json"
+        if results_path.exists():
+            all_results.extend(parse_round_results(read_json(results_path)))
+            print(f"  Loaded {len(all_results)} race results from bulk results.json")
+        else:
+            print(f"  [WARN] No results.json found for {year}")
 
-    print("\n" + "=" * 60)
-    print("Done. Normalized CSVs written to:", JOLPICA_NORMALIZED_DIR)
-    print("=" * 60)
+        qual_path = year_dir / "qualifying.json"
+        if qual_path.exists():
+            all_qualifying.extend(parse_round_qualifying(read_json(qual_path)))
+            print(f"  Loaded {len(all_qualifying)} qualifying results from bulk qualifying.json")
+        else:
+            print(f"  [WARN] No qualifying.json found for {year}")
+
+        sprint_path = year_dir / "sprint.json"
+        if sprint_path.exists():
+            sprint_rows = parse_round_sprint(read_json(sprint_path))
+            if sprint_rows:
+                all_sprint.extend(sprint_rows)
+                print(f"  Loaded {len(all_sprint)} sprint results from bulk sprint.json")
+
+    # --- Build and write race_results.csv ---
+    if all_results:
+        df = pd.DataFrame(all_results)
+        df = canonicalize_constructors(df, constructor_map)
+        df = add_abbrev_column(df, abbrev_map)
+        df = df.sort_values(["season", "round", "finish_position"], na_position="last")
+        cols = [c for c in RACE_RESULT_COLUMNS if c in df.columns]
+        df = df[cols]
+        write_csv(df, out_dir / "race_results.csv")
+        print(f"  Wrote race_results.csv ({len(df)} rows)")
+    else:
+        print(f"  [WARN] No race results found for {year}")
+
+    # --- Build and write qualifying_results.csv ---
+    if all_qualifying:
+        df = pd.DataFrame(all_qualifying)
+        df = canonicalize_constructors(df, constructor_map)
+        df = add_abbrev_column(df, abbrev_map)
+        df = df.sort_values(["season", "round", "quali_position"], na_position="last")
+        cols = [c for c in QUALIFYING_COLUMNS if c in df.columns]
+        df = df[cols]
+        write_csv(df, out_dir / "qualifying_results.csv")
+        print(f"  Wrote qualifying_results.csv ({len(df)} rows)")
+    else:
+        print(f"  [WARN] No qualifying results found for {year}")
+
+    # --- Build and write sprint_results.csv ---
+    if all_sprint:
+        df = pd.DataFrame(all_sprint)
+        df = canonicalize_constructors(df, constructor_map)
+        df = add_abbrev_column(df, abbrev_map)
+        df = df.sort_values(["season", "round", "sprint_position"], na_position="last")
+        cols = [c for c in SPRINT_COLUMNS if c in df.columns]
+        df = df[cols]
+        write_csv(df, out_dir / "sprint_results.csv")
+        print(f"  Wrote sprint_results.csv ({len(df)} rows)")
+    else:
+        print(f"  No sprint results for {year} (expected for non-sprint seasons)")
+
+    print(f"  Done with {year}.")
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Normalize raw Jolpica JSON into clean CSVs for the feature builder."
+    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--year", type=int, help="Process a single season (e.g. 2022)")
+    group.add_argument("--all", action="store_true", help="Process all historical + current seasons")
+    args = parser.parse_args()
+
+    # Load mappings once
+    abbrev_map = load_driver_abbrev_map(SEED_DIR)
+    constructor_map = load_constructor_map(SEED_DIR)
+
+    print(f"Loaded {len(abbrev_map)} driver abbrev mappings")
+    print(f"Loaded {len(constructor_map)} constructor canonical mappings")
+    print(f"Raw dir:  {JOLPICA_RAW_DIR}")
+    print(f"Out dir:  {JOLPICA_NORMALIZED_DIR}")
+
+    if args.all:
+        years = sorted(set(HISTORICAL_SEASONS + [CURRENT_SEASON]))
+    else:
+        years = [args.year]
+
+    for year in years:
+        process_year(year, JOLPICA_RAW_DIR, JOLPICA_NORMALIZED_DIR,
+                     abbrev_map, constructor_map)
+
+    print("\nAll done.")
 
 
 if __name__ == "__main__":
