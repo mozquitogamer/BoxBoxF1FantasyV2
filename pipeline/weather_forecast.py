@@ -134,15 +134,15 @@ def classify_rain_risk(precip_prob: float) -> str:
 def get_weather_icon(code_name: str) -> str:
     """Map weather code category to emoji."""
     icons = {
-        "clear": "\u2600\ufe0f",       # sunny
-        "cloudy": "\u26c5",            # partly cloudy
-        "overcast": "\u2601\ufe0f",    # cloud
-        "fog": "\ud83c\udf2b\ufe0f",  # fog
-        "drizzle": "\ud83c\udf26\ufe0f",  # sun behind rain
-        "rain": "\ud83c\udf27\ufe0f",     # rain
-        "heavy_rain": "\u26c8\ufe0f",     # thunder cloud
-        "snow": "\u2744\ufe0f",            # snowflake
-        "thunderstorm": "\u26a1",          # lightning
+        "clear": "\u2600\ufe0f",        # ☀️ sunny
+        "cloudy": "\u26c5",             # ⛅ partly cloudy
+        "overcast": "\u2601\ufe0f",     # ☁️ cloud
+        "fog": "\U0001F32B\ufe0f",      # 🌫️ fog
+        "drizzle": "\U0001F326\ufe0f",  # 🌦️ sun behind rain
+        "rain": "\U0001F327\ufe0f",     # 🌧️ rain
+        "heavy_rain": "\u26c8\ufe0f",   # ⛈️ thunder cloud
+        "snow": "\u2744\ufe0f",         # ❄️ snowflake
+        "thunderstorm": "\u26a1",       # ⚡ lightning
     }
     return icons.get(code_name, "\u2601\ufe0f")
 
@@ -395,7 +395,7 @@ def run_weather_forecast(round_num: int | None = None) -> dict:
 
     print()
     for s in session_forecast:
-        risk_badge = {"NONE": "\u2705", "LOW": "\ud83d\udfe1", "MEDIUM": "\ud83d\udfe0", "HIGH": "\ud83d\udd34", "UNKNOWN": "\u2753"}
+        risk_badge = {"NONE": "\u2705", "LOW": "\U0001F7E1", "MEDIUM": "\U0001F7E0", "HIGH": "\U0001F534", "UNKNOWN": "\u2753"}
         badge = risk_badge.get(s["rain_risk"], "\u2753")
         rain_str = f"{s['rain_probability']}%" if s["rain_probability"] is not None else "N/A"
         print(f"  {badge} {s['name']:20s} {s['day_label']:9s} | "
