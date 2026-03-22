@@ -85,6 +85,7 @@ let postRaceCache = {};
 let predictionsCache = {};
 let actualCache = {};
 let officialPointsData = null;   // official F1 Fantasy points per round
+let weatherData = null;          // weather forecast for current race weekend
 let tableSortColumn = null;
 let tableSortAsc = true;
 let allLineups = [];
@@ -114,6 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadSeasonData();
     await preloadActualData();
     await loadOfficialPoints();
+    await loadWeatherData();
     await loadPitstopData();
     startCountdown();
     setupTabs();
@@ -135,6 +137,13 @@ async function loadOfficialPoints() {
         const resp = await fetch(cacheBust('data/official_points.json'));
         officialPointsData = await resp.json();
     } catch(e) { officialPointsData = null; }
+}
+
+async function loadWeatherData() {
+    try {
+        const resp = await fetch(cacheBust('data/weather.json'));
+        if (resp.ok) weatherData = await resp.json();
+    } catch(e) { weatherData = null; }
 }
 
 // Get the best available score for a driver/constructor in a given round.
@@ -469,6 +478,7 @@ function updateSortIndicators() {
 function render() {
     if (!data) return;
     renderHero();
+    renderWeather();
     renderDrivers();
     renderConstructors();
     renderLockGrid();
@@ -544,6 +554,108 @@ function heroCard(label, driver, type) {
             <div class="hero-card-team">${team.name}</div>
             <div class="hero-card-pts">${driver.expected_points.toFixed(1)} pts</div>
             <div class="hero-card-meta">$${driver.current_price}M \u00b7 ${(driver.value_score||0).toFixed(2)} ppm</div>
+        </div>
+    `;
+}
+
+// -- Weather Widget --
+function renderWeather() {
+    const el = document.getElementById('weatherSection');
+    if (!el) return;
+    if (!weatherData || !weatherData.sessions) {
+        el.innerHTML = '';
+        return;
+    }
+
+    const w = weatherData;
+    const riskColors = {
+        'NONE': '#27ae60', 'LOW': '#2ecc71', 'MEDIUM': '#f39c12',
+        'HIGH': '#e74c3c', 'UNKNOWN': '#666'
+    };
+    const riskBg = {
+        'NONE': 'rgba(39,174,96,0.12)', 'LOW': 'rgba(46,204,113,0.12)',
+        'MEDIUM': 'rgba(243,156,18,0.12)', 'HIGH': 'rgba(231,76,60,0.12)',
+        'UNKNOWN': 'rgba(102,102,102,0.12)'
+    };
+
+    // Format last/next update times
+    const lastUpdate = new Date(w.last_updated);
+    const nextUpdate = new Date(w.next_update);
+    const now = new Date();
+    const formatTime = (d) => {
+        const diff = Math.abs(now - d);
+        const mins = Math.floor(diff / 60000);
+        const hrs = Math.floor(mins / 60);
+        if (hrs > 0) return `${hrs}h ${mins % 60}m ago`;
+        return `${mins}m ago`;
+    };
+    const formatUntil = (d) => {
+        const diff = d - now;
+        if (diff < 0) return 'overdue';
+        const mins = Math.floor(diff / 60000);
+        const hrs = Math.floor(mins / 60);
+        if (hrs > 0) return `in ${hrs}h ${mins % 60}m`;
+        return `in ${mins}m`;
+    };
+
+    // Group sessions by day
+    const days = {};
+    w.sessions.forEach(s => {
+        if (!days[s.day_label]) days[s.day_label] = [];
+        days[s.day_label].push(s);
+    });
+
+    // Build session cards
+    let sessionsHtml = '';
+    for (const [dayLabel, sessions] of Object.entries(days)) {
+        sessionsHtml += `<div class="weather-day-group">`;
+        sessionsHtml += `<div class="weather-day-label">${dayLabel}</div>`;
+        sessions.forEach(s => {
+            const rainPct = s.rain_probability !== null ? s.rain_probability : '?';
+            const rColor = riskColors[s.rain_risk] || '#666';
+            const rBg = riskBg[s.rain_risk] || riskBg['UNKNOWN'];
+            const tempStr = s.avg_temp !== null ? `${s.avg_temp}°C` : '--';
+            const windStr = s.avg_wind !== null ? `${s.avg_wind} km/h` : '--';
+            const isRainSession = s.rain_risk === 'MEDIUM' || s.rain_risk === 'HIGH';
+
+            sessionsHtml += `
+                <div class="weather-session ${isRainSession ? 'weather-rain' : ''}" style="--risk-color:${rColor};--risk-bg:${rBg}">
+                    <div class="weather-session-header">
+                        <span class="weather-session-name">${s.name}</span>
+                        <span class="weather-session-icon">${s.weather_icon || ''}</span>
+                    </div>
+                    <div class="weather-rain-bar">
+                        <div class="weather-rain-fill" style="width:${Math.min(rainPct, 100)}%;background:${rColor}"></div>
+                    </div>
+                    <div class="weather-rain-pct" style="color:${rColor}">${rainPct}% rain</div>
+                    <div class="weather-session-details">
+                        <span title="Temperature">\ud83c\udf21\ufe0f ${tempStr}</span>
+                        <span title="Wind">\ud83d\udca8 ${windStr}</span>
+                    </div>
+                    <div class="weather-session-desc">${s.weather_description}</div>
+                </div>`;
+        });
+        sessionsHtml += `</div>`;
+    }
+
+    const overallColor = riskColors[w.overall_rain_risk] || '#666';
+
+    el.innerHTML = `
+        <div class="weather-widget">
+            <div class="weather-header">
+                <div class="weather-title">
+                    <span class="weather-title-icon">\u{1F326}\ufe0f</span>
+                    <span>Weekend Weather</span>
+                    <span class="weather-overall-badge" style="background:${overallColor}">${w.overall_rain_risk} RAIN RISK</span>
+                </div>
+                <div class="weather-update-info">
+                    Updated ${formatTime(lastUpdate)} \u00b7 Next update ${formatUntil(nextUpdate)}
+                </div>
+            </div>
+            <div class="weather-sessions-grid">
+                ${sessionsHtml}
+            </div>
+            <div class="weather-source">Data: ${w.data_source || 'Open-Meteo'}</div>
         </div>
     `;
 }
