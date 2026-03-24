@@ -3203,6 +3203,13 @@ async function renderDeepDive(roundNum) {
 }
 
 function renderDDCharts(dd, sorted) {
+    if (typeof Chart === 'undefined') {
+        // Chart.js not loaded yet — hide chart sections gracefully
+        document.querySelectorAll('#deepdiveContent .chart-container').forEach(c => {
+            c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">Charts loading... If this persists, refresh the page.</p>';
+        });
+        return;
+    }
     const COMPOUND_COLORS = { SOFT: '#FF3333', MEDIUM: '#FFD700', HARD: '#CCCCCC', INTERMEDIATE: '#39B54A', WET: '#0067FF' };
     const top5 = sorted.slice(0, 5);
 
