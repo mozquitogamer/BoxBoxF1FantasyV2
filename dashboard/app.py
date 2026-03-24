@@ -674,6 +674,239 @@ def page_season():
 
 
 # ==============================================================================
+# Race Deep Dive
+# ==============================================================================
+
+TEAM_COLORS_HEX = {
+    'red_bull': '#3671C6', 'ferrari': '#E80020', 'mercedes': '#27F4D2',
+    'mclaren': '#FF8000', 'aston_martin': '#229971', 'alpine': '#FF87BC',
+    'williams': '#64C4FF', 'racing_bulls': '#6692FF', 'audi': '#00E701',
+    'haas': '#B6BABD', 'cadillac': '#FFD700',
+}
+
+def load_deep_dive(round_num):
+    path = PREDICTIONS_DIR / f"round{round_num}" / "race_deep_dive.json"
+    if not path.exists():
+        return None
+    with open(path) as f:
+        return json.load(f)
+
+
+def page_deep_dive():
+    st.header("Race Deep Dive")
+    st.caption("Fuel-corrected pace analysis, sector breakdowns, tyre degradation & more")
+
+    # Find available rounds
+    available = []
+    for rd in sorted(PREDICTIONS_DIR.glob("round*")):
+        rn = int(rd.name.replace("round", ""))
+        if (rd / "race_deep_dive.json").exists():
+            available.append(rn)
+
+    if not available:
+        st.warning("No deep dive data available. Run `python pipeline/11_race_deep_dive.py --round N` first.")
+        return
+
+    round_num = st.selectbox("Select Round", available, index=len(available) - 1,
+                             format_func=lambda r: f"Round {r}")
+    dd = load_deep_dive(round_num)
+    if not dd:
+        st.error("Failed to load deep dive data.")
+        return
+
+    st.subheader(f"{dd['race']} — {dd['season']}")
+
+    metrics = dd["driver_metrics"]
+    drivers_sorted = sorted(metrics.keys(), key=lambda d: metrics[d]["avg_lap"])
+
+    # -- Pace Summary Table --
+    st.markdown("### Driver Pace Summary (Fuel-Corrected)")
+    pace_rows = []
+    for d in drivers_sorted:
+        m = metrics[d]
+        pace_rows.append({
+            "Driver": d,
+            "Team": dd["driver_constructors"].get(d, ""),
+            "Avg Lap": round(m["avg_lap"], 3),
+            "Best Lap": round(m["best_lap"], 3),
+            "3-Lap Avg": round(m["best_3_lap_avg"], 3),
+            "5-Lap Avg": round(m["best_5_lap_avg"], 3),
+            "10-Lap Avg": round(m["best_10_lap_avg"], 3),
+            "Theo. Best": round(m["theoretical_best"], 3),
+            "Gap": round(m["pace_delta"], 3),
+            "Std Dev": round(m["lap_time_std"], 3),
+            "Laps": m["laps_analyzed"],
+        })
+    st.dataframe(pd.DataFrame(pace_rows), use_container_width=True, hide_index=True)
+
+    # -- Lap Time Evolution Chart --
+    st.markdown("### Lap Time Evolution")
+    n_drivers = st.slider("Number of drivers to show", 3, len(drivers_sorted), 5)
+    show_drivers = drivers_sorted[:n_drivers]
+
+    import plotly.graph_objects as go
+    fig_laps = go.Figure()
+    for d in show_drivers:
+        laps = dd["lap_data"].get(d, [])
+        if not laps:
+            continue
+        color = TEAM_COLORS_HEX.get(dd["driver_constructors"].get(d, ""), "#888")
+        fig_laps.add_trace(go.Scatter(
+            x=[l["lap"] for l in laps],
+            y=[l["fuel_corrected"] for l in laps],
+            name=d, mode='lines+markers',
+            line=dict(color=color, width=2),
+            marker=dict(size=3),
+        ))
+    fig_laps.update_layout(
+        template="plotly_dark", height=450,
+        xaxis_title="Lap", yaxis_title="Lap Time (s)",
+        legend=dict(orientation="h", y=-0.15),
+    )
+    st.plotly_chart(fig_laps, use_container_width=True)
+
+    # -- Position Tracker --
+    st.markdown("### Position Tracker")
+    fig_pos = go.Figure()
+    for d in show_drivers:
+        positions = dd["position_tracker"].get(d, [])
+        if not positions:
+            continue
+        color = TEAM_COLORS_HEX.get(dd["driver_constructors"].get(d, ""), "#888")
+        fig_pos.add_trace(go.Scatter(
+            x=[p["lap"] for p in positions],
+            y=[p["position"] for p in positions],
+            name=d, mode='lines',
+            line=dict(color=color, width=2),
+        ))
+    fig_pos.update_layout(
+        template="plotly_dark", height=450,
+        xaxis_title="Lap", yaxis_title="Position",
+        yaxis=dict(autorange="reversed", dtick=1),
+        legend=dict(orientation="h", y=-0.15),
+    )
+    st.plotly_chart(fig_pos, use_container_width=True)
+
+    # -- Sector Performance --
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("### Sector Performance (Best)")
+        sec_rows = []
+        for d in drivers_sorted:
+            m = metrics[d]
+            sec_rows.append({
+                "Driver": d,
+                "Best S1": round(m["best_s1"], 3),
+                "Best S2": round(m["best_s2"], 3),
+                "Best S3": round(m["best_s3"], 3),
+                "Theo. Best": round(m["theoretical_best"], 3),
+            })
+        st.dataframe(pd.DataFrame(sec_rows), use_container_width=True, hide_index=True)
+
+    with col2:
+        st.markdown("### Speed Trap")
+        spd_rows = []
+        for d in sorted(drivers_sorted, key=lambda d: -(metrics[d].get("max_speed_trap", 0))):
+            m = metrics[d]
+            spd_rows.append({
+                "Driver": d,
+                "Max Speed": round(m.get("max_speed_trap", 0), 1),
+                "Avg Speed": round(m.get("avg_speed_trap", 0), 1),
+            })
+        st.dataframe(pd.DataFrame(spd_rows), use_container_width=True, hide_index=True)
+
+    # -- Tyre Strategy --
+    st.markdown("### Tyre Strategy & Degradation")
+    stint_rows = []
+    for d in drivers_sorted:
+        for s in dd["stint_analysis"].get(d, []):
+            cliff = any(c["stint"] == s["stint"] for c in dd["tyre_cliffs"].get(d, []))
+            stint_rows.append({
+                "Driver": d,
+                "Stint": s["stint"],
+                "Compound": s["compound"],
+                "Laps": s["laps"],
+                "Avg Pace": round(s["avg_pace"], 3),
+                "Start Pace": round(s["start_pace"], 3),
+                "End Pace": round(s["end_pace"], 3),
+                "Deg Rate": round(s["degradation_rate"], 4),
+                "Cliff?": "YES" if cliff else "",
+            })
+    st.dataframe(pd.DataFrame(stint_rows), use_container_width=True, hide_index=True)
+
+    # -- Gap to Leader --
+    st.markdown("### Gap to Leader")
+    fig_gap = go.Figure()
+    for d in drivers_sorted[:8]:
+        gaps = dd["gap_to_leader"].get(d, [])
+        if not gaps:
+            continue
+        color = TEAM_COLORS_HEX.get(dd["driver_constructors"].get(d, ""), "#888")
+        fig_gap.add_trace(go.Scatter(
+            x=[g["lap"] for g in gaps],
+            y=[g["gap"] for g in gaps],
+            name=d, mode='lines',
+            line=dict(color=color, width=1.5),
+        ))
+    fig_gap.update_layout(
+        template="plotly_dark", height=450,
+        xaxis_title="Lap", yaxis_title="Gap to Leader (s)",
+        legend=dict(orientation="h", y=-0.15),
+    )
+    st.plotly_chart(fig_gap, use_container_width=True)
+
+    # -- Race Momentum --
+    if dd.get("race_momentum"):
+        st.markdown("### Race Momentum (Pace by Third)")
+        mom_rows = []
+        for d in drivers_sorted:
+            m = dd["race_momentum"].get(d)
+            if not m:
+                continue
+            mom_rows.append({
+                "Driver": d,
+                "Opening Rank": m["opening_rank"],
+                "Opening Pace": round(m["opening_pace"], 3),
+                "Middle Rank": m["middle_rank"],
+                "Middle Pace": round(m["middle_pace"], 3),
+                "Closing Rank": m["closing_rank"],
+                "Closing Pace": round(m["closing_pace"], 3),
+            })
+        st.dataframe(pd.DataFrame(mom_rows), use_container_width=True, hide_index=True)
+
+    # -- Dirty Air --
+    if dd.get("dirty_air"):
+        st.markdown("### Dirty Air Effect")
+        st.caption("Clean air = >3s gap ahead | Dirty air = <1.5s gap")
+        da_rows = []
+        for d, da in sorted(dd["dirty_air"].items(), key=lambda x: -x[1]["delta"]):
+            da_rows.append({
+                "Driver": d,
+                "Clean Pace": round(da["clean_air_pace"], 3),
+                "Dirty Pace": round(da["dirty_air_pace"], 3),
+                "Delta": round(da["delta"], 3),
+                "Clean Laps": da["clean_laps"],
+                "Dirty Laps": da["dirty_laps"],
+            })
+        st.dataframe(pd.DataFrame(da_rows), use_container_width=True, hide_index=True)
+
+    # -- Team Summary --
+    if dd.get("team_summary"):
+        st.markdown("### Team Performance")
+        team_rows = []
+        for t in sorted(dd["team_summary"].keys(), key=lambda t: dd["team_summary"][t]["avg_pace"]):
+            ts = dd["team_summary"][t]
+            team_rows.append({
+                "Team": t,
+                "Drivers": ", ".join(ts.get("drivers", [])),
+                "Avg Pace": round(ts["avg_pace"], 3),
+                "Best Pace": round(ts["best_pace"], 3),
+                "Fastest Sector": ts.get("fastest_sector", "-"),
+            })
+        st.dataframe(pd.DataFrame(team_rows), use_container_width=True, hide_index=True)
+
+
+# ==============================================================================
 # Main App
 # ==============================================================================
 
@@ -690,7 +923,7 @@ def main():
 
     page = st.sidebar.radio(
         "Navigation",
-        ["Race Predictions", "Actual Results", "Season Overview"],
+        ["Race Predictions", "Actual Results", "Season Overview", "Race Deep Dive"],
         index=0,
     )
 
@@ -700,6 +933,8 @@ def main():
         page_actuals()
     elif page == "Season Overview":
         page_season()
+    elif page == "Race Deep Dive":
+        page_deep_dive()
 
 
 if __name__ == "__main__":

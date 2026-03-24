@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupTabs();
     setupControls();
     render();
+    initDeepDiveTab();
 });
 
 async function preloadActualData() {
@@ -2839,4 +2840,571 @@ function buildScatterPlot(dataPoints) {
     svg += `<text x="12" y="${height / 2}" text-anchor="middle" fill="var(--text-secondary)" font-size="12" transform="rotate(-90,12,${height / 2})">Actual Points</text>`;
     svg += '</svg>';
     return svg;
+}
+
+// =====================================================================
+// RACE DEEP DIVE TAB
+// =====================================================================
+
+let deepDiveCache = {};
+let deepDiveCharts = [];
+
+async function loadDeepDiveData(roundNum) {
+    if (deepDiveCache[roundNum]) return deepDiveCache[roundNum];
+    try {
+        const resp = await fetch(cacheBust(`data/deep_dive_round${roundNum}.json`));
+        if (!resp.ok) return null;
+        const d = await resp.json();
+        deepDiveCache[roundNum] = d;
+        return d;
+    } catch(e) { return null; }
+}
+
+function destroyDeepDiveCharts() {
+    deepDiveCharts.forEach(c => { try { c.destroy(); } catch(e) {} });
+    deepDiveCharts = [];
+}
+
+function ddColor(dd, id) {
+    const cid = dd.driver_constructors[id];
+    return dd.team_colors[cid] || '#888';
+}
+
+function initDeepDiveTab() {
+    const sel = document.getElementById('deepdiveRoundSelect');
+    if (!sel || !data) return;
+    sel.innerHTML = '';
+    const rounds = (data.predictions || [])
+        .filter(p => p.has_actual)
+        .map(p => ({ round: p.round, name: p.race_name }));
+    if (!rounds.length) {
+        sel.innerHTML = '<option>No race data yet</option>';
+        return;
+    }
+    rounds.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.round;
+        opt.textContent = `R${r.round} \u2014 ${r.name}`;
+        sel.appendChild(opt);
+    });
+    sel.value = rounds[rounds.length - 1].round;
+    sel.addEventListener('change', () => renderDeepDive(parseInt(sel.value)));
+    renderDeepDive(parseInt(sel.value));
+}
+
+async function renderDeepDive(roundNum) {
+    const el = document.getElementById('deepdiveContent');
+    if (!el) return;
+    el.innerHTML = '<p class="no-data">Loading deep dive data...</p>';
+
+    const dd = await loadDeepDiveData(roundNum);
+    if (!dd || !dd.driver_metrics) {
+        el.innerHTML = '<p class="no-data">No deep dive data available for this round.</p>';
+        return;
+    }
+
+    destroyDeepDiveCharts();
+
+    const drivers = Object.keys(dd.driver_metrics);
+    const metrics = dd.driver_metrics;
+    const sorted = [...drivers].sort((a, b) => metrics[a].avg_lap - metrics[b].avg_lap);
+
+    let html = `<h3 class="deepdive-race-title">${dd.race} \u2014 ${dd.season}</h3>`;
+
+    // 1. DRIVER PACE SUMMARY TABLE
+    html += `
+    <div class="collapsible-section open">
+        <div class="section-header"><h3>Driver Pace Summary (Fuel-Corrected)</h3><span class="toggle-icon">\u25BC</span></div>
+        <div class="section-body">
+        <div class="table-wrapper">
+        <table class="data-table sortable" id="dd-pace-table">
+            <thead><tr>
+                <th>#</th><th>Driver</th><th>Team</th>
+                <th class="num">Avg Lap</th><th class="num">Median</th>
+                <th class="num">Best Lap</th><th class="num">3-Lap Avg</th>
+                <th class="num">5-Lap Avg</th><th class="num">10-Lap Avg</th>
+                <th class="num">Theo. Best</th><th class="num">Gap</th>
+                <th class="num">Std Dev</th><th class="num">Laps</th>
+            </tr></thead><tbody>`;
+    sorted.forEach((d, i) => {
+        const m = metrics[d];
+        const team = TEAMS[dd.driver_constructors[d]] || { name: dd.driver_constructors[d], color: '#666' };
+        const gap = m.pace_delta === 0 ? 'Leader' : `+${m.pace_delta.toFixed(3)}`;
+        html += `<tr>
+            <td>${i+1}</td>
+            <td><span class="team-dot" style="background:${team.color}"></span>${d}</td>
+            <td>${team.name}</td>
+            <td class="num">${m.avg_lap.toFixed(3)}</td>
+            <td class="num">${m.median_lap.toFixed(3)}</td>
+            <td class="num">${m.best_lap.toFixed(3)}</td>
+            <td class="num">${m.best_3_lap_avg.toFixed(3)}</td>
+            <td class="num">${m.best_5_lap_avg.toFixed(3)}</td>
+            <td class="num">${m.best_10_lap_avg.toFixed(3)}</td>
+            <td class="num">${m.theoretical_best.toFixed(3)}</td>
+            <td class="num ${m.pace_delta === 0 ? 'positive' : ''}">${gap}</td>
+            <td class="num">${m.lap_time_std.toFixed(3)}</td>
+            <td class="num">${m.laps_analyzed}</td>
+        </tr>`;
+    });
+    html += `</tbody></table></div></div></div>`;
+
+    // 2. SECTOR ANALYSIS TABLE
+    const bestS1 = Math.min(...drivers.map(d => metrics[d].best_s1));
+    const bestS2 = Math.min(...drivers.map(d => metrics[d].best_s2));
+    const bestS3 = Math.min(...drivers.map(d => metrics[d].best_s3));
+    const sectorSorted = [...drivers].sort((a, b) =>
+        (metrics[a].best_s1 + metrics[a].best_s2 + metrics[a].best_s3) -
+        (metrics[b].best_s1 + metrics[b].best_s2 + metrics[b].best_s3));
+    html += `
+    <div class="collapsible-section">
+        <div class="section-header"><h3>Sector Performance</h3><span class="toggle-icon">\u25BC</span></div>
+        <div class="section-body">
+        <div class="table-wrapper">
+        <table class="data-table sortable" id="dd-sector-table">
+            <thead><tr>
+                <th>#</th><th>Driver</th>
+                <th class="num">Best S1</th><th class="num">Best S2</th><th class="num">Best S3</th>
+                <th class="num">Avg S1</th><th class="num">Avg S2</th><th class="num">Avg S3</th>
+                <th class="num">% S1</th><th class="num">% S2</th><th class="num">% S3</th>
+            </tr></thead><tbody>`;
+    sectorSorted.forEach((d, i) => {
+        const m = metrics[d];
+        const team = TEAMS[dd.driver_constructors[d]] || { color: '#666' };
+        html += `<tr>
+            <td>${i+1}</td>
+            <td><span class="team-dot" style="background:${team.color}"></span>${d}</td>
+            <td class="num ${m.best_s1 === bestS1 ? 'highlight-purple' : ''}">${m.best_s1.toFixed(3)}</td>
+            <td class="num ${m.best_s2 === bestS2 ? 'highlight-purple' : ''}">${m.best_s2.toFixed(3)}</td>
+            <td class="num ${m.best_s3 === bestS3 ? 'highlight-purple' : ''}">${m.best_s3.toFixed(3)}</td>
+            <td class="num">${m.avg_s1.toFixed(3)}</td>
+            <td class="num">${m.avg_s2.toFixed(3)}</td>
+            <td class="num">${m.avg_s3.toFixed(3)}</td>
+            <td class="num">${m.pct_time_s1.toFixed(1)}%</td>
+            <td class="num">${m.pct_time_s2.toFixed(1)}%</td>
+            <td class="num">${m.pct_time_s3.toFixed(1)}%</td>
+        </tr>`;
+    });
+    html += `</tbody></table></div></div></div>`;
+
+    // 3. SPEED TRAP TABLE
+    const speedSorted = [...drivers].sort((a, b) => (metrics[b].max_speed_trap || 0) - (metrics[a].max_speed_trap || 0));
+    html += `
+    <div class="collapsible-section">
+        <div class="section-header"><h3>Speed Trap Analysis</h3><span class="toggle-icon">\u25BC</span></div>
+        <div class="section-body">
+        <div class="table-wrapper">
+        <table class="data-table sortable" id="dd-speed-table">
+            <thead><tr>
+                <th>#</th><th>Driver</th><th>Team</th>
+                <th class="num">Max Speed (km/h)</th><th class="num">Avg Speed (km/h)</th>
+                <th class="num">Avg Finish Line</th>
+            </tr></thead><tbody>`;
+    speedSorted.forEach((d, i) => {
+        const m = metrics[d];
+        const team = TEAMS[dd.driver_constructors[d]] || { name: dd.driver_constructors[d], color: '#666' };
+        html += `<tr>
+            <td>${i+1}</td>
+            <td><span class="team-dot" style="background:${team.color}"></span>${d}</td>
+            <td>${team.name}</td>
+            <td class="num">${(m.max_speed_trap||0).toFixed(1)}</td>
+            <td class="num">${(m.avg_speed_trap||0).toFixed(1)}</td>
+            <td class="num">${(m.avg_finish_line_speed||0).toFixed(1)}</td>
+        </tr>`;
+    });
+    html += `</tbody></table></div></div></div>`;
+
+    // 4. TYRE STINT TABLE
+    html += `
+    <div class="collapsible-section">
+        <div class="section-header"><h3>Tyre Strategy & Degradation</h3><span class="toggle-icon">\u25BC</span></div>
+        <div class="section-body">
+        <div class="table-wrapper">
+        <table class="data-table sortable" id="dd-stint-table">
+            <thead><tr>
+                <th>Driver</th><th>Stint</th><th>Compound</th>
+                <th class="num">Laps</th><th class="num">Avg Pace</th>
+                <th class="num">Start Pace</th><th class="num">End Pace</th>
+                <th class="num">Deg Rate (s/lap)</th><th>Cliff?</th>
+            </tr></thead><tbody>`;
+    sorted.forEach(d => {
+        const stints = dd.stint_analysis[d] || [];
+        const cliffs = dd.tyre_cliffs[d] || [];
+        const cliffSet = new Set(cliffs.map(c => c.stint));
+        const team = TEAMS[dd.driver_constructors[d]] || { color: '#666' };
+        stints.forEach(s => {
+            const cc = s.compound === 'SOFT' ? 'compound-soft' : s.compound === 'MEDIUM' ? 'compound-medium' : s.compound === 'HARD' ? 'compound-hard' : '';
+            html += `<tr>
+                <td><span class="team-dot" style="background:${team.color}"></span>${d}</td>
+                <td>${s.stint}</td>
+                <td><span class="compound-badge ${cc}">${s.compound}</span></td>
+                <td class="num">${s.laps}</td>
+                <td class="num">${s.avg_pace.toFixed(3)}</td>
+                <td class="num">${s.start_pace.toFixed(3)}</td>
+                <td class="num">${s.end_pace.toFixed(3)}</td>
+                <td class="num">${s.degradation_rate.toFixed(4)}</td>
+                <td>${cliffSet.has(s.stint) ? '<span class="badge badge-red">CLIFF</span>' : ''}</td>
+            </tr>`;
+        });
+    });
+    html += `</tbody></table></div></div></div>`;
+
+    // 5. RACE MOMENTUM TABLE
+    if (dd.race_momentum && Object.keys(dd.race_momentum).length) {
+        const momDrivers = [...drivers].filter(d => dd.race_momentum[d]).sort((a, b) => {
+            const am = dd.race_momentum[a], bm = dd.race_momentum[b];
+            return ((am.opening_rank + am.middle_rank + am.closing_rank)/3) - ((bm.opening_rank + bm.middle_rank + bm.closing_rank)/3);
+        });
+        html += `
+        <div class="collapsible-section">
+            <div class="section-header"><h3>Race Momentum (Pace by Third)</h3><span class="toggle-icon">\u25BC</span></div>
+            <div class="section-body">
+            <div class="table-wrapper">
+            <table class="data-table sortable" id="dd-momentum-table">
+                <thead><tr>
+                    <th>Driver</th>
+                    <th class="num">Opening Rank</th><th class="num">Opening Pace</th>
+                    <th class="num">Middle Rank</th><th class="num">Middle Pace</th>
+                    <th class="num">Closing Rank</th><th class="num">Closing Pace</th>
+                </tr></thead><tbody>`;
+        momDrivers.forEach(d => {
+            const m = dd.race_momentum[d];
+            const team = TEAMS[dd.driver_constructors[d]] || { color: '#666' };
+            html += `<tr>
+                <td><span class="team-dot" style="background:${team.color}"></span>${d}</td>
+                <td class="num">${m.opening_rank}</td><td class="num">${m.opening_pace.toFixed(3)}</td>
+                <td class="num">${m.middle_rank}</td><td class="num">${m.middle_pace.toFixed(3)}</td>
+                <td class="num">${m.closing_rank}</td><td class="num">${m.closing_pace.toFixed(3)}</td>
+            </tr>`;
+        });
+        html += `</tbody></table></div></div></div>`;
+    }
+
+    // 6. DIRTY AIR TABLE
+    if (dd.dirty_air && Object.keys(dd.dirty_air).length) {
+        const daSorted = Object.keys(dd.dirty_air).sort((a, b) => dd.dirty_air[b].delta - dd.dirty_air[a].delta);
+        html += `
+        <div class="collapsible-section">
+            <div class="section-header"><h3>Dirty Air Effect</h3><span class="toggle-icon">\u25BC</span></div>
+            <div class="section-body">
+            <p class="analysis-note">Compares pace within 1.5s of car ahead (dirty air) vs >3s gap (clean air). Larger delta = more affected.</p>
+            <div class="table-wrapper">
+            <table class="data-table sortable" id="dd-dirtyair-table">
+                <thead><tr>
+                    <th>Driver</th>
+                    <th class="num">Clean Air Pace</th><th class="num">Dirty Air Pace</th>
+                    <th class="num">Delta (s)</th>
+                    <th class="num">Clean Laps</th><th class="num">Dirty Laps</th>
+                </tr></thead><tbody>`;
+        daSorted.forEach(d => {
+            const da = dd.dirty_air[d];
+            const team = TEAMS[dd.driver_constructors[d]] || { color: '#666' };
+            html += `<tr>
+                <td><span class="team-dot" style="background:${team.color}"></span>${d}</td>
+                <td class="num">${da.clean_air_pace.toFixed(3)}</td>
+                <td class="num">${da.dirty_air_pace.toFixed(3)}</td>
+                <td class="num">${da.delta.toFixed(3)}</td>
+                <td class="num">${da.clean_laps}</td>
+                <td class="num">${da.dirty_laps}</td>
+            </tr>`;
+        });
+        html += `</tbody></table></div></div></div>`;
+    }
+
+    // 7. TEAM SUMMARY TABLE
+    if (dd.team_summary) {
+        const teams = Object.keys(dd.team_summary).sort((a, b) => dd.team_summary[a].avg_pace - dd.team_summary[b].avg_pace);
+        html += `
+        <div class="collapsible-section">
+            <div class="section-header"><h3>Team Performance Summary</h3><span class="toggle-icon">\u25BC</span></div>
+            <div class="section-body">
+            <div class="table-wrapper">
+            <table class="data-table sortable" id="dd-team-table">
+                <thead><tr>
+                    <th>#</th><th>Team</th><th>Drivers</th>
+                    <th class="num">Avg Pace</th><th class="num">Best Pace</th>
+                    <th>Fastest Sector</th>
+                </tr></thead><tbody>`;
+        teams.forEach((t, i) => {
+            const ts = dd.team_summary[t];
+            const team = TEAMS[t] || { name: t, color: '#666' };
+            html += `<tr>
+                <td>${i+1}</td>
+                <td><span class="team-dot" style="background:${team.color}"></span>${team.name}</td>
+                <td>${(ts.drivers || []).join(', ')}</td>
+                <td class="num">${ts.avg_pace.toFixed(3)}</td>
+                <td class="num">${ts.best_pace.toFixed(3)}</td>
+                <td>${ts.fastest_sector || '-'}</td>
+            </tr>`;
+        });
+        html += `</tbody></table></div></div></div>`;
+    }
+
+    // 8. CHART CONTAINERS
+    html += `
+    <div class="collapsible-section open">
+        <div class="section-header"><h3>Lap Time Evolution (Fuel-Corrected)</h3><span class="toggle-icon">\u25BC</span></div>
+        <div class="section-body">
+            <div class="chart-controls">
+                <button class="btn-small dd-chart-btn active" data-show="top5">Top 5</button>
+                <button class="btn-small dd-chart-btn" data-show="top10">Top 10</button>
+                <button class="btn-small dd-chart-btn" data-show="all">All</button>
+            </div>
+            <div class="chart-container"><canvas id="chart-laptimes"></canvas></div>
+        </div>
+    </div>
+
+    <div class="collapsible-section open">
+        <div class="section-header"><h3>Position Tracker</h3><span class="toggle-icon">\u25BC</span></div>
+        <div class="section-body">
+            <div class="chart-container"><canvas id="chart-positions"></canvas></div>
+        </div>
+    </div>
+
+    <div class="collapsible-section">
+        <div class="section-header"><h3>Gap to Leader</h3><span class="toggle-icon">\u25BC</span></div>
+        <div class="section-body">
+            <div class="chart-container chart-tall"><canvas id="chart-gap"></canvas></div>
+        </div>
+    </div>
+
+    <div class="collapsible-section">
+        <div class="section-header"><h3>Sector Comparison (Best Sectors, Stacked)</h3><span class="toggle-icon">\u25BC</span></div>
+        <div class="section-body">
+            <div class="chart-container"><canvas id="chart-sectors"></canvas></div>
+        </div>
+    </div>
+
+    <div class="collapsible-section">
+        <div class="section-header"><h3>Tyre Degradation Curves (Top 5)</h3><span class="toggle-icon">\u25BC</span></div>
+        <div class="section-body">
+            <div class="chart-container chart-tall"><canvas id="chart-tyredeg"></canvas></div>
+        </div>
+    </div>
+
+    <div class="collapsible-section">
+        <div class="section-header"><h3>Speed Trap Comparison</h3><span class="toggle-icon">\u25BC</span></div>
+        <div class="section-body">
+            <div class="chart-container"><canvas id="chart-speed"></canvas></div>
+        </div>
+    </div>`;
+
+    el.innerHTML = html;
+
+    // Make tables sortable
+    el.querySelectorAll('table.sortable').forEach(makeTableSortable);
+
+    // Collapsible sections
+    el.querySelectorAll('.section-header').forEach(h => {
+        h.addEventListener('click', () => h.parentElement.classList.toggle('open'));
+    });
+
+    // Render charts
+    renderDDCharts(dd, sorted);
+}
+
+function renderDDCharts(dd, sorted) {
+    const COMPOUND_COLORS = { SOFT: '#FF3333', MEDIUM: '#FFD700', HARD: '#CCCCCC', INTERMEDIATE: '#39B54A', WET: '#0067FF' };
+    const top5 = sorted.slice(0, 5);
+
+    // Chart defaults
+    const gridColor = '#333';
+    const tickColor = '#999';
+    const labelColor = '#aaa';
+    const legendColor = '#ccc';
+
+    // -- LAP TIMES --
+    const lapCtx = document.getElementById('chart-laptimes');
+    if (lapCtx && dd.lap_data) {
+        function makeLapDS(driverList, pw, pr) {
+            return driverList.filter(d => dd.lap_data[d]).map(d => ({
+                label: d,
+                data: dd.lap_data[d].map(l => ({ x: l.lap, y: l.fuel_corrected })),
+                borderColor: ddColor(dd, d),
+                borderWidth: pw || 1.5,
+                pointRadius: pr || 1.5,
+                pointHoverRadius: 4,
+                tension: 0.3,
+                fill: false,
+            }));
+        }
+        const lapChart = new Chart(lapCtx, {
+            type: 'line',
+            data: { datasets: makeLapDS(top5) },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'nearest', intersect: false },
+                plugins: {
+                    legend: { position: 'top', labels: { color: legendColor, usePointStyle: true, font: { size: 11 } } },
+                    tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)}s (Lap ${ctx.parsed.x})` } }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Lap', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } },
+                    y: { title: { display: true, text: 'Lap Time (s)', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } }
+                }
+            }
+        });
+        deepDiveCharts.push(lapChart);
+
+        // Filter buttons
+        document.querySelectorAll('.dd-chart-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.dd-chart-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const show = btn.dataset.show;
+                const list = show === 'top5' ? sorted.slice(0, 5) : show === 'top10' ? sorted.slice(0, 10) : sorted;
+                lapChart.data.datasets = makeLapDS(list, show === 'all' ? 1 : 1.5, show === 'all' ? 0.5 : 1.5);
+                lapChart.update();
+            });
+        });
+    }
+
+    // -- POSITION TRACKER --
+    const posCtx = document.getElementById('chart-positions');
+    if (posCtx && dd.position_tracker) {
+        const posChart = new Chart(posCtx, {
+            type: 'line',
+            data: { datasets: sorted.slice(0, 10).filter(d => dd.position_tracker[d]).map(d => ({
+                label: d,
+                data: dd.position_tracker[d].map(p => ({ x: p.lap, y: p.position })),
+                borderColor: ddColor(dd, d),
+                borderWidth: 2, pointRadius: 0, tension: 0.1, fill: false,
+            })) },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { color: legendColor, usePointStyle: true, font: { size: 11 } } },
+                    tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: P${ctx.parsed.y} (Lap ${ctx.parsed.x})` } }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Lap', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } },
+                    y: { reverse: true, title: { display: true, text: 'Position', color: labelColor }, ticks: { color: tickColor, stepSize: 1 }, grid: { color: gridColor }, min: 1, max: 22 }
+                }
+            }
+        });
+        deepDiveCharts.push(posChart);
+    }
+
+    // -- GAP TO LEADER --
+    const gapCtx = document.getElementById('chart-gap');
+    if (gapCtx && dd.gap_to_leader) {
+        const gapChart = new Chart(gapCtx, {
+            type: 'line',
+            data: { datasets: sorted.slice(0, 8).filter(d => dd.gap_to_leader[d]).map(d => ({
+                label: d,
+                data: dd.gap_to_leader[d].map(g => ({ x: g.lap, y: g.gap })),
+                borderColor: ddColor(dd, d),
+                borderWidth: 1.5, pointRadius: 0, tension: 0.2, fill: false,
+            })) },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { color: legendColor, usePointStyle: true, font: { size: 11 } } },
+                    tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: +${ctx.parsed.y.toFixed(1)}s (Lap ${ctx.parsed.x})` } }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Lap', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } },
+                    y: { title: { display: true, text: 'Gap to Leader (s)', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } }
+                }
+            }
+        });
+        deepDiveCharts.push(gapChart);
+    }
+
+    // -- SECTOR COMPARISON (stacked bar) --
+    const secCtx = document.getElementById('chart-sectors');
+    if (secCtx) {
+        const top10 = sorted.slice(0, 10);
+        const secChart = new Chart(secCtx, {
+            type: 'bar',
+            data: {
+                labels: top10,
+                datasets: [
+                    { label: 'S1', data: top10.map(d => dd.driver_metrics[d].best_s1), backgroundColor: '#E80020CC' },
+                    { label: 'S2', data: top10.map(d => dd.driver_metrics[d].best_s2), backgroundColor: '#FF8000CC' },
+                    { label: 'S3', data: top10.map(d => dd.driver_metrics[d].best_s3), backgroundColor: '#27F4D2CC' },
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { position: 'top', labels: { color: legendColor } },
+                    tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.x.toFixed(3)}s` } }
+                },
+                scales: {
+                    x: { stacked: true, title: { display: true, text: 'Time (s)', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } },
+                    y: { stacked: true, ticks: { color: legendColor }, grid: { color: gridColor } }
+                }
+            }
+        });
+        deepDiveCharts.push(secChart);
+    }
+
+    // -- TYRE DEGRADATION SCATTER --
+    const tyreCtx = document.getElementById('chart-tyredeg');
+    if (tyreCtx && dd.lap_data) {
+        const shapes = ['circle', 'rect', 'triangle', 'star', 'cross'];
+        const tyreDS = [];
+        top5.forEach((d, di) => {
+            const laps = dd.lap_data[d] || [];
+            const byComp = {};
+            laps.forEach(l => { if (!byComp[l.compound]) byComp[l.compound] = []; byComp[l.compound].push({ x: l.lap, y: l.fuel_corrected }); });
+            Object.entries(byComp).forEach(([comp, pts]) => {
+                tyreDS.push({
+                    label: `${d} (${comp})`,
+                    data: pts,
+                    borderColor: COMPOUND_COLORS[comp] || '#888',
+                    backgroundColor: (COMPOUND_COLORS[comp] || '#888') + '66',
+                    borderWidth: 1, pointRadius: 2.5,
+                    pointStyle: shapes[di] || 'circle',
+                    showLine: true, tension: 0.2, fill: false,
+                });
+            });
+        });
+        const tyreChart = new Chart(tyreCtx, {
+            type: 'scatter',
+            data: { datasets: tyreDS },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { color: legendColor, usePointStyle: true, font: { size: 10 } } },
+                    tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)}s (Lap ${ctx.parsed.x})` } }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Lap', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } },
+                    y: { title: { display: true, text: 'Lap Time (s)', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } }
+                }
+            }
+        });
+        deepDiveCharts.push(tyreChart);
+    }
+
+    // -- SPEED TRAP BAR --
+    const spdCtx = document.getElementById('chart-speed');
+    if (spdCtx) {
+        const spdSorted = [...sorted].sort((a, b) => (dd.driver_metrics[b].max_speed_trap || 0) - (dd.driver_metrics[a].max_speed_trap || 0)).slice(0, 15);
+        const spdChart = new Chart(spdCtx, {
+            type: 'bar',
+            data: {
+                labels: spdSorted,
+                datasets: [{
+                    label: 'Max Speed (km/h)',
+                    data: spdSorted.map(d => dd.driver_metrics[d].max_speed_trap || 0),
+                    backgroundColor: spdSorted.map(d => ddColor(dd, d) + 'CC'),
+                    borderColor: spdSorted.map(d => ddColor(dd, d)),
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.parsed.y.toFixed(1)} km/h` } } },
+                scales: {
+                    x: { ticks: { color: legendColor }, grid: { color: gridColor } },
+                    y: { title: { display: true, text: 'Speed (km/h)', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor },
+                        beginAtZero: false, suggestedMin: Math.min(...spdSorted.map(d => dd.driver_metrics[d].max_speed_trap || 280)) - 5 }
+                }
+            }
+        });
+        deepDiveCharts.push(spdChart);
+    }
 }

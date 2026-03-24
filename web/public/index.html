@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <div class="dev-banner">
@@ -56,6 +57,7 @@
                 <button class="tab" data-tab="season">Season</button>
                 <button class="tab" data-tab="h2h">H2H</button>
                 <button class="tab" data-tab="accuracy">Accuracy</button>
+                <button class="tab" data-tab="deepdive">Race Deep Dive</button>
                 <button class="tab" data-tab="about">About</button>
             </div>
         </div>
@@ -287,6 +289,21 @@
                 </div>
             </section>
 
+            <!-- Race Deep Dive Tab -->
+            <section class="tab-content" id="tab-deepdive">
+                <div class="deepdive-header">
+                    <h2>Race Deep Dive</h2>
+                    <p>Detailed post-race telemetry analysis with fuel-corrected pace, sector breakdowns, and tyre degradation.</p>
+                    <div class="round-selector">
+                        <label>Select Round:</label>
+                        <select id="deepdiveRoundSelect"></select>
+                    </div>
+                </div>
+                <div id="deepdiveContent">
+                    <p class="no-data">Select a round to view deep dive analysis...</p>
+                </div>
+            </section>
+
             <!-- About Tab -->
             <section class="tab-content" id="tab-about">
                 <div class="about-content">
@@ -339,6 +356,6 @@
         </div>
     </main>
 
-    <script src="app.js?v=13"></script>
+    <script src="app.js?v=14"></script>
 </body>
 </html>
