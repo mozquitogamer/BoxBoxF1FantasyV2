@@ -2911,20 +2911,37 @@ async function renderDeepDive(roundNum) {
 
     let html = `<h3 class="deepdive-race-title">${dd.race} \u2014 ${dd.season}</h3>`;
 
+    // How it works explainer
+    html += `
+    <div class="collapsible-section">
+        <div class="section-header"><h3>How This Analysis Works</h3><span class="toggle-icon">\u25BC</span></div>
+        <div class="section-body">
+            <div class="analysis-note" style="font-style:normal; line-height:1.7;">
+                <strong>Data Cleaning:</strong> Removes pit in/out laps, lap 1, safety car laps, inaccurate laps, and outliers beyond 107% of a driver's median.<br>
+                <strong>Fuel Correction:</strong> Cars burn ~0.035s/lap of fuel. Earlier laps on a full tank are inherently slower. We normalize all laps to low-fuel equivalent so lap 5 and lap 50 are directly comparable.<br>
+                <strong>Best N-Lap Avg:</strong> Fastest consecutive N-lap window. 3-lap = quali-style bursts, 10-lap = sustained race pace.<br>
+                <strong>Theoretical Best:</strong> Sum of each driver's personal best S1 + S2 + S3 from any lap \u2014 the fastest possible lap if every sector was perfect.<br>
+                <strong>Deg Rate:</strong> Linear regression slope of lap time vs tyre age. Higher = tyres wearing faster.<br>
+                <strong>Tyre Cliff:</strong> Flagged when the last 3 laps of a stint degrade >2\u00d7 the stint average.
+            </div>
+        </div>
+    </div>`;
+
     // 1. DRIVER PACE SUMMARY TABLE
     html += `
     <div class="collapsible-section open">
         <div class="section-header"><h3>Driver Pace Summary (Fuel-Corrected)</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
+        <p class="analysis-note">All times adjusted for fuel load. Gap = seconds slower than the fastest driver. Std Dev measures consistency (lower = steadier).</p>
         <div class="table-wrapper">
         <table class="data-table sortable" id="dd-pace-table">
             <thead><tr>
                 <th>#</th><th>Driver</th><th>Team</th>
-                <th class="num">Avg Lap</th><th class="num">Median</th>
-                <th class="num">Best Lap</th><th class="num">3-Lap Avg</th>
-                <th class="num">5-Lap Avg</th><th class="num">10-Lap Avg</th>
-                <th class="num">Theo. Best</th><th class="num">Gap</th>
-                <th class="num">Std Dev</th><th class="num">Laps</th>
+                <th class="num" title="Average fuel-corrected lap time across all clean laps">Avg Lap</th><th class="num" title="Median fuel-corrected lap time (less affected by outliers than average)">Median</th>
+                <th class="num" title="Single fastest fuel-corrected lap">Best Lap</th><th class="num" title="Best consecutive 3-lap average \u2014 shows peak short-burst pace">3-Lap Avg</th>
+                <th class="num" title="Best consecutive 5-lap average">5-Lap Avg</th><th class="num" title="Best consecutive 10-lap average \u2014 true race pace indicator">10-Lap Avg</th>
+                <th class="num" title="Best S1 + Best S2 + Best S3 from any lap \u2014 theoretical perfect lap">Theo. Best</th><th class="num" title="Gap to fastest driver in seconds (0 = pace leader)">Gap</th>
+                <th class="num" title="Standard deviation of lap times \u2014 lower = more consistent">Std Dev</th><th class="num" title="Number of clean laps used in analysis (after filtering)">Laps</th>
             </tr></thead><tbody>`;
     sorted.forEach((d, i) => {
         const m = metrics[d];
@@ -2959,13 +2976,14 @@ async function renderDeepDive(roundNum) {
     <div class="collapsible-section">
         <div class="section-header"><h3>Sector Performance</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
+        <p class="analysis-note">Personal best sector times from any lap. Purple = overall fastest in that sector. % = proportion of total lap time spent in each sector.</p>
         <div class="table-wrapper">
         <table class="data-table sortable" id="dd-sector-table">
             <thead><tr>
                 <th>#</th><th>Driver</th>
-                <th class="num">Best S1</th><th class="num">Best S2</th><th class="num">Best S3</th>
-                <th class="num">Avg S1</th><th class="num">Avg S2</th><th class="num">Avg S3</th>
-                <th class="num">% S1</th><th class="num">% S2</th><th class="num">% S3</th>
+                <th class="num" title="Fastest Sector 1 time from any lap">Best S1</th><th class="num" title="Fastest Sector 2 time from any lap">Best S2</th><th class="num" title="Fastest Sector 3 time from any lap">Best S3</th>
+                <th class="num" title="Average Sector 1 time across all clean laps">Avg S1</th><th class="num" title="Average Sector 2 time across all clean laps">Avg S2</th><th class="num" title="Average Sector 3 time across all clean laps">Avg S3</th>
+                <th class="num" title="% of total lap time spent in Sector 1">% S1</th><th class="num" title="% of total lap time spent in Sector 2">% S2</th><th class="num" title="% of total lap time spent in Sector 3">% S3</th>
             </tr></thead><tbody>`;
     sectorSorted.forEach((d, i) => {
         const m = metrics[d];
@@ -2992,12 +3010,13 @@ async function renderDeepDive(roundNum) {
     <div class="collapsible-section">
         <div class="section-header"><h3>Speed Trap Analysis</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
+        <p class="analysis-note">Top speed at the speed trap point on the main straight. Indicates straight-line performance, low-drag setups, and engine/battery deployment differences.</p>
         <div class="table-wrapper">
         <table class="data-table sortable" id="dd-speed-table">
             <thead><tr>
                 <th>#</th><th>Driver</th><th>Team</th>
-                <th class="num">Max Speed (km/h)</th><th class="num">Avg Speed (km/h)</th>
-                <th class="num">Avg Finish Line</th>
+                <th class="num" title="Highest speed recorded at the speed trap">Max Speed (km/h)</th><th class="num" title="Average speed across all laps at the speed trap">Avg Speed (km/h)</th>
+                <th class="num" title="Average speed crossing the finish line">Avg Finish Line</th>
             </tr></thead><tbody>`;
     speedSorted.forEach((d, i) => {
         const m = metrics[d];
@@ -3018,13 +3037,14 @@ async function renderDeepDive(roundNum) {
     <div class="collapsible-section">
         <div class="section-header"><h3>Tyre Strategy & Degradation</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
+        <p class="analysis-note">Per-stint breakdown. Deg Rate = seconds lost per lap from tyre wear (linear regression slope). CLIFF = last 3 laps degraded >2\u00d7 the stint average, indicating the tyre hit a performance cliff.</p>
         <div class="table-wrapper">
         <table class="data-table sortable" id="dd-stint-table">
             <thead><tr>
                 <th>Driver</th><th>Stint</th><th>Compound</th>
-                <th class="num">Laps</th><th class="num">Avg Pace</th>
-                <th class="num">Start Pace</th><th class="num">End Pace</th>
-                <th class="num">Deg Rate (s/lap)</th><th>Cliff?</th>
+                <th class="num" title="Number of laps on this set of tyres">Laps</th><th class="num" title="Average pace across the stint">Avg Pace</th>
+                <th class="num" title="Average of first 3 laps on fresh tyres">Start Pace</th><th class="num" title="Average of last 3 laps before pit/end">End Pace</th>
+                <th class="num" title="Linear regression slope: seconds lost per additional lap of tyre age">Deg Rate (s/lap)</th><th title="Tyre cliff detected: last 3 laps degraded >2\u00d7 stint average">Cliff?</th>
             </tr></thead><tbody>`;
     sorted.forEach(d => {
         const stints = dd.stint_analysis[d] || [];
@@ -3058,6 +3078,7 @@ async function renderDeepDive(roundNum) {
         <div class="collapsible-section">
             <div class="section-header"><h3>Race Momentum (Pace by Third)</h3><span class="toggle-icon">\u25BC</span></div>
             <div class="section-body">
+            <p class="analysis-note">Race split into 3 equal parts. Rank 1 = fastest driver in that phase. Shows who was strong early (lighter fuel, fresh tyres), mid-race (strategy phase), or had a strong closing stint.</p>
             <div class="table-wrapper">
             <table class="data-table sortable" id="dd-momentum-table">
                 <thead><tr>
@@ -3117,6 +3138,7 @@ async function renderDeepDive(roundNum) {
         <div class="collapsible-section">
             <div class="section-header"><h3>Team Performance Summary</h3><span class="toggle-icon">\u25BC</span></div>
             <div class="section-body">
+            <p class="analysis-note">Average of both drivers' fuel-corrected pace. Best Pace = fastest single lap by either driver. Fastest Sector = which sector the team dominated.</p>
             <div class="table-wrapper">
             <table class="data-table sortable" id="dd-team-table">
                 <thead><tr>
@@ -3144,6 +3166,7 @@ async function renderDeepDive(roundNum) {
     <div class="collapsible-section open">
         <div class="section-header"><h3>Lap Time Evolution (Fuel-Corrected)</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
+            <p class="analysis-note">Fuel-corrected lap times lap by lap. Gaps in lines indicate pit stops. Downward trends suggest improving pace or lighter fuel. Use buttons to filter drivers.</p>
             <div class="chart-controls">
                 <button class="btn-small dd-chart-btn active" data-show="top5">Top 5</button>
                 <button class="btn-small dd-chart-btn" data-show="top10">Top 10</button>
@@ -3156,6 +3179,7 @@ async function renderDeepDive(roundNum) {
     <div class="collapsible-section open">
         <div class="section-header"><h3>Position Tracker</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
+            <p class="analysis-note">On-track position each lap. Line crossovers show overtakes and pit stop position swaps. Lower = better position.</p>
             <div class="chart-container"><canvas id="chart-positions"></canvas></div>
         </div>
     </div>
@@ -3163,6 +3187,7 @@ async function renderDeepDive(roundNum) {
     <div class="collapsible-section">
         <div class="section-header"><h3>Gap to Leader</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
+            <p class="analysis-note">Cumulative time gap to race leader each lap. Flat line = matching leader pace. Rising = falling behind. Sudden drops = pit stops or safety cars.</p>
             <div class="chart-container chart-tall"><canvas id="chart-gap"></canvas></div>
         </div>
     </div>
@@ -3170,6 +3195,7 @@ async function renderDeepDive(roundNum) {
     <div class="collapsible-section">
         <div class="section-header"><h3>Sector Comparison (Best Sectors, Stacked)</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
+            <p class="analysis-note">Best sector times stacked to show total theoretical lap. Shorter total bar = faster overall. Color segments show where time is gained or lost.</p>
             <div class="chart-container"><canvas id="chart-sectors"></canvas></div>
         </div>
     </div>
@@ -3177,6 +3203,7 @@ async function renderDeepDive(roundNum) {
     <div class="collapsible-section">
         <div class="section-header"><h3>Tyre Degradation Curves (Top 5)</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
+            <p class="analysis-note">Fuel-corrected lap times colored by tyre compound (Red = Soft, Yellow = Medium, White = Hard). Upward slope within a stint shows tyre degradation. Different point shapes distinguish drivers.</p>
             <div class="chart-container chart-tall"><canvas id="chart-tyredeg"></canvas></div>
         </div>
     </div>
@@ -3184,6 +3211,7 @@ async function renderDeepDive(roundNum) {
     <div class="collapsible-section">
         <div class="section-header"><h3>Speed Trap Comparison</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
+            <p class="analysis-note">Maximum speed recorded at the speed trap. Higher bars indicate better straight-line performance, lower drag setup, or more efficient energy deployment.</p>
             <div class="chart-container"><canvas id="chart-speed"></canvas></div>
         </div>
     </div>`;

@@ -696,6 +696,28 @@ def page_deep_dive():
     st.header("Race Deep Dive")
     st.caption("Fuel-corrected pace analysis, sector breakdowns, tyre degradation & more")
 
+    with st.expander("How this analysis works", expanded=False):
+        st.markdown("""
+**Data Cleaning Pipeline**
+- Removes pit in/out laps, lap 1 (standing start), safety car laps, and inaccurate laps flagged by FastF1
+- Outliers beyond 107% of a driver's median are excluded to remove slow laps caused by traffic or mistakes
+
+**Fuel Correction**
+- Cars burn ~0.035s/lap of fuel weight. Early laps on a full tank are inherently slower
+- We subtract `(total_laps - lap_number) × 0.035` from each lap time, normalizing all laps to an equivalent low-fuel pace
+- This lets you fairly compare lap 5 vs lap 50
+
+**Key Metrics Explained**
+- **Best N-Lap Avg**: The fastest consecutive N-lap window — smooths out single-lap anomalies. 3-lap = quali-style bursts, 10-lap = true race pace
+- **Theoretical Best**: Sum of each driver's personal best sector times from any lap in the race — the fastest possible lap if every sector was perfect
+- **Coefficient of Variation (Std Dev)**: Lower = more consistent. Measures how much a driver's pace fluctuates
+- **Degradation Rate**: Linear regression slope of lap time vs tyre age within a stint. Higher = tyres wearing out faster
+- **Tyre Cliff**: Flagged when the last 3 laps of a stint degrade >2× the stint average — indicates the tyre "fell off a cliff"
+- **Dirty Air Effect**: Compares pace when <1.5s behind another car (turbulent air) vs >3s gap (clean air). Larger delta = car more affected by dirty air
+- **Race Momentum**: Race split into equal thirds — shows which drivers were strongest at the start, middle, or end
+        """)
+
+
     # Find available rounds
     available = []
     for rd in sorted(PREDICTIONS_DIR.glob("round*")):
@@ -721,6 +743,7 @@ def page_deep_dive():
 
     # -- Pace Summary Table --
     st.markdown("### Driver Pace Summary (Fuel-Corrected)")
+    st.caption("All times adjusted for fuel load. Gap = seconds slower than the fastest driver. Std Dev measures consistency (lower = steadier).")
     pace_rows = []
     for d in drivers_sorted:
         m = metrics[d]
@@ -741,6 +764,7 @@ def page_deep_dive():
 
     # -- Lap Time Evolution Chart --
     st.markdown("### Lap Time Evolution")
+    st.caption("Fuel-corrected lap times across the race. Pit stops show as gaps. Hover for exact times.")
     n_drivers = st.slider("Number of drivers to show", 3, len(drivers_sorted), 5)
     show_drivers = drivers_sorted[:n_drivers]
 
@@ -767,6 +791,7 @@ def page_deep_dive():
 
     # -- Position Tracker --
     st.markdown("### Position Tracker")
+    st.caption("On-track position each lap. Crossovers show overtakes and pit stop position changes.")
     fig_pos = go.Figure()
     for d in show_drivers:
         positions = dd["position_tracker"].get(d, [])
@@ -791,6 +816,7 @@ def page_deep_dive():
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("### Sector Performance (Best)")
+        st.caption("Each driver's fastest individual sector time from any lap. Theo. Best = sum of best sectors.")
         sec_rows = []
         for d in drivers_sorted:
             m = metrics[d]
@@ -805,6 +831,7 @@ def page_deep_dive():
 
     with col2:
         st.markdown("### Speed Trap")
+        st.caption("Maximum and average top speed recorded at the speed trap (km/h). Indicates straight-line performance.")
         spd_rows = []
         for d in sorted(drivers_sorted, key=lambda d: -(metrics[d].get("max_speed_trap", 0))):
             m = metrics[d]
@@ -817,6 +844,7 @@ def page_deep_dive():
 
     # -- Tyre Strategy --
     st.markdown("### Tyre Strategy & Degradation")
+    st.caption("Per-stint breakdown. Deg Rate = seconds lost per lap due to tyre wear (linear regression). CLIFF = last 3 laps degraded >2× the stint average.")
     stint_rows = []
     for d in drivers_sorted:
         for s in dd["stint_analysis"].get(d, []):
@@ -836,6 +864,7 @@ def page_deep_dive():
 
     # -- Gap to Leader --
     st.markdown("### Gap to Leader")
+    st.caption("Cumulative time gap to the race leader at each lap. Flat = matching leader pace. Rising = falling behind. Drops = pit stops or incidents.")
     fig_gap = go.Figure()
     for d in drivers_sorted[:8]:
         gaps = dd["gap_to_leader"].get(d, [])
@@ -858,6 +887,7 @@ def page_deep_dive():
     # -- Race Momentum --
     if dd.get("race_momentum"):
         st.markdown("### Race Momentum (Pace by Third)")
+        st.caption("Race split into 3 equal parts. Rank 1 = fastest in that phase. Shows who was strong early, mid-race, or had a strong finish.")
         mom_rows = []
         for d in drivers_sorted:
             m = dd["race_momentum"].get(d)
@@ -877,7 +907,7 @@ def page_deep_dive():
     # -- Dirty Air --
     if dd.get("dirty_air"):
         st.markdown("### Dirty Air Effect")
-        st.caption("Clean air = >3s gap ahead | Dirty air = <1.5s gap")
+        st.caption("Clean air = >3s gap to car ahead | Dirty air = <1.5s behind another car. Delta shows how much pace is lost in turbulent air. Larger delta = car more sensitive to dirty air.")
         da_rows = []
         for d, da in sorted(dd["dirty_air"].items(), key=lambda x: -x[1]["delta"]):
             da_rows.append({
@@ -893,6 +923,7 @@ def page_deep_dive():
     # -- Team Summary --
     if dd.get("team_summary"):
         st.markdown("### Team Performance")
+        st.caption("Average of both drivers' fuel-corrected pace. Fastest Sector = which sector the team dominated.")
         team_rows = []
         for t in sorted(dd["team_summary"].keys(), key=lambda t: dd["team_summary"][t]["avg_pace"]):
             ts = dd["team_summary"][t]
