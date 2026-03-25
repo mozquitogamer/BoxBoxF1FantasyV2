@@ -118,12 +118,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadWeatherData();
     await loadPitstopData();
     await loadArticles();
+    await loadVideos();
     startCountdown();
     setupTabs();
     setupControls();
     render();
     initDeepDiveTab();
     renderArticles();
+    renderVideos();
 });
 
 async function preloadActualData() {
@@ -3560,5 +3562,45 @@ function renderArticles() {
         </div>`;
     });
     html += '</div>';
+    container.innerHTML = html;
+}
+
+// ============================================================
+// Videos Tab
+// ============================================================
+let videosData = null;
+
+async function loadVideos() {
+    try {
+        const resp = await fetch(cacheBust('data/youtube_videos.json'));
+        if (resp.ok) videosData = await resp.json();
+    } catch(e) { videosData = null; }
+}
+
+function renderVideos() {
+    const container = document.getElementById('videosGrid');
+    if (!container) return;
+    if (!videosData || !videosData.videos || videosData.videos.length === 0) {
+        container.innerHTML = '<p class="no-data">No videos yet. Check back soon!</p>';
+        return;
+    }
+    const videos = videosData.videos.slice(0, 4);
+    let html = '';
+    videos.forEach(v => {
+        const dateStr = v.published ? new Date(v.published + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+        html += `
+        <div class="video-card">
+            <a href="${v.url}" target="_blank" rel="noopener">
+                <div class="video-thumb">
+                    <img src="${v.thumbnail}" alt="${v.title}" loading="lazy">
+                    <div class="video-play-icon"></div>
+                </div>
+                <div class="video-info">
+                    <h3>${v.title}</h3>
+                    <span class="video-date">${dateStr}</span>
+                </div>
+            </a>
+        </div>`;
+    });
     container.innerHTML = html;
 }
