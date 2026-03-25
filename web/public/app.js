@@ -331,14 +331,33 @@ function startCountdown() {
 }
 
 // -- Tabs --
+function switchTab(tabName) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    const btn = document.querySelector(`.tab[data-tab="${tabName}"]`);
+    const panel = document.getElementById(`tab-${tabName}`);
+    if (btn) btn.classList.add('active');
+    if (panel) panel.classList.add('active');
+}
+
 function setupTabs() {
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+            switchTab(tab.dataset.tab);
+            history.replaceState(null, '', `#${tab.dataset.tab}`);
         });
+    });
+
+    // Deep-link: activate tab from URL hash on load
+    const hash = location.hash.replace('#', '');
+    if (hash && document.getElementById(`tab-${hash}`)) {
+        switchTab(hash);
+    }
+
+    // Handle browser back/forward
+    window.addEventListener('hashchange', () => {
+        const h = location.hash.replace('#', '');
+        if (h && document.getElementById(`tab-${h}`)) switchTab(h);
     });
 }
 
