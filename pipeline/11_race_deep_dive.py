@@ -398,26 +398,27 @@ def build_position_tracker(df: pd.DataFrame) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Gap to leader (cumulative race time)
+# Gap to leader (per-lap delta)
 # ---------------------------------------------------------------------------
 
 def build_gap_to_leader(df: pd.DataFrame) -> dict:
     """
-    Cumulative time per driver per lap.  Gap = driver cumulative - leader
-    cumulative at that lap.  Uses raw laps (with LapTime_seconds) so we
-    capture pit time etc.
+    Per-lap delta to leader: for each lap, how much slower (positive) or
+    faster (negative) each driver was compared to the fastest driver on
+    that specific lap.  More useful than cumulative gap for pace analysis.
+    Uses fuel-corrected times when available, else raw LapTime_seconds.
     """
-    if "LapTime_seconds" not in df.columns or "LapNumber" not in df.columns:
+    time_col = "fuel_corrected" if "fuel_corrected" in df.columns else "LapTime_seconds"
+    if time_col not in df.columns or "LapNumber" not in df.columns:
         return {}
 
-    sub = df.dropna(subset=["LapTime_seconds", "LapNumber"]).copy()
+    sub = df.dropna(subset=[time_col, "LapNumber"]).copy()
     sub = sub.sort_values(["Driver", "LapNumber"])
-    sub["cumtime"] = sub.groupby("Driver")["LapTime_seconds"].cumsum()
 
-    # Leader cumulative per lap (minimum cumtime)
-    leader = sub.groupby("LapNumber")["cumtime"].min().rename("leader_cum")
-    sub = sub.merge(leader, on="LapNumber", how="left")
-    sub["gap"] = sub["cumtime"] - sub["leader_cum"]
+    # Fastest lap time per lap (leader pace that lap)
+    leader_pace = sub.groupby("LapNumber")[time_col].min().rename("leader_pace")
+    sub = sub.merge(leader_pace, on="LapNumber", how="left")
+    sub["delta"] = sub[time_col] - sub["leader_pace"]
 
     out: dict[str, list[dict]] = {}
     for drv, grp in sub.groupby("Driver"):
@@ -425,7 +426,7 @@ def build_gap_to_leader(df: pd.DataFrame) -> dict:
         for _, row in grp.sort_values("LapNumber").iterrows():
             rows.append({
                 "lap": int(row["LapNumber"]),
-                "gap": round(float(row["gap"]), 3),
+                "gap": round(float(row["delta"]), 3),
             })
         out[drv] = rows
     return out

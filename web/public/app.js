@@ -3198,9 +3198,9 @@ async function renderDeepDive(roundNum) {
     </div>
 
     <div class="collapsible-section">
-        <div class="section-header"><h3>Gap to Leader</h3><span class="toggle-icon">\u25BC</span></div>
+        <div class="section-header"><h3>Lap-by-Lap Delta to Leader</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
-            <p class="analysis-note">Cumulative time gap to race leader each lap. Flat line = matching leader pace. Rising = falling behind. Sudden drops = pit stops or safety cars.</p>
+            <p class="analysis-note">Per-lap delta to leader: how much slower (+) each driver was vs the fastest driver on that specific lap. Flat near zero = matching leader pace. Spikes = slow laps or traffic.</p>
             ${ddDriverSelector('dd-sel-gap', 8)}
             <div class="chart-container chart-tall"><canvas id="chart-gap"></canvas></div>
         </div>
@@ -3383,11 +3383,11 @@ function renderDDCharts(dd, sorted) {
                 responsive: true, maintainAspectRatio: false,
                 plugins: {
                     legend: { position: 'top', labels: { color: LGC, usePointStyle: true, font: { size: 11 } } },
-                    tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: +${ctx.parsed.y.toFixed(1)}s (Lap ${ctx.parsed.x})` } }
+                    tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: +${ctx.parsed.y.toFixed(3)}s (Lap ${ctx.parsed.x})` } }
                 },
                 scales: {
                     x: { ...xLinear },
-                    y: { title: { display: true, text: 'Gap to Leader (s)', color: LC }, ticks: { color: TC }, grid: { color: GC } }
+                    y: { title: { display: true, text: 'Delta to Leader (s)', color: LC }, ticks: { color: TC }, grid: { color: GC } }
                 }
             }
         });
@@ -3503,7 +3503,7 @@ function renderDDCharts(dd, sorted) {
                 plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.parsed.y.toFixed(1)} km/h` } } },
                 scales: {
                     x: { ticks: { color: LGC }, grid: { color: GC } },
-                    y: { title: { display: true, text: 'Speed (km/h)', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor },
+                    y: { title: { display: true, text: 'Speed (km/h)', color: LC }, ticks: { color: TC }, grid: { color: GC },
                         beginAtZero: false, suggestedMin: Math.min(...spdSorted.map(d => dd.driver_metrics[d].max_speed_trap || 280)) - 5 }
                 }
             }
