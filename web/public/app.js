@@ -2632,8 +2632,10 @@ function updateH2HComparison() {
             const actB = actData.drivers.find(d => d.driver_id === idB);
             if (!actA || !actB) return;
             h2hRounds++;
-            const ptsA = actA.total_points || 0;
-            const ptsB = actB.total_points || 0;
+            const offA = getOfficialScore(r.round, idA, true);
+            const offB = getOfficialScore(r.round, idB, true);
+            const ptsA = offA ? offA.points : (actA.total_points || 0);
+            const ptsB = offB ? offB.points : (actB.total_points || 0);
             totalPtsA += ptsA;
             totalPtsB += ptsB;
             if (ptsA > ptsB) h2hWinsA++;
