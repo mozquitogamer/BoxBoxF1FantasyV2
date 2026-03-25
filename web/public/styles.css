@@ -2299,6 +2299,16 @@ table.sortable th.sort-desc::after {
 .deepdive-header p { color: var(--text-secondary); margin-bottom: 16px; }
 .deepdive-race-title { font-size: 1.3rem; color: var(--accent); margin-bottom: 20px; }
 
+/* Collapsible sections */
+.collapsible-section { margin-bottom: 16px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.collapsible-section .section-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; cursor: pointer; user-select: none; background: var(--bg-card); transition: background 0.2s; }
+.collapsible-section .section-header:hover { opacity: 0.85; }
+.collapsible-section .section-header h3 { margin: 0; font-size: 1rem; }
+.collapsible-section .toggle-icon { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.2s; }
+.collapsible-section .section-body { max-height: 0; overflow: hidden; padding: 0 16px; }
+.collapsible-section.open .section-body { max-height: none; padding: 12px 16px 16px; overflow: visible; }
+.collapsible-section.open .toggle-icon { transform: rotate(180deg); }
+
 .chart-container { position: relative; height: 400px; margin: 16px 0; background: var(--bg-card); border-radius: 10px; padding: 12px; }
 .chart-container.chart-tall { height: 550px; }
 
