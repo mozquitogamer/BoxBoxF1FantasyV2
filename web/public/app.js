@@ -2168,6 +2168,135 @@ function renderPredictionsSummary(predictions) {
 }
 
 // -- Season --
+// F1 2026 WDC points: P1=25, P2=18, P3=15, P4=12, P5=10, P6=8, P7=6, P8=4, P9=2, P10=1
+// Sprint points: P1=8, P2=7, P3=6, P4=5, P5=4, P6=3, P7=2, P8=1
+const WDC_RACE_PTS = { 1:25, 2:18, 3:15, 4:12, 5:10, 6:8, 7:6, 8:4, 9:2, 10:1 };
+const WDC_SPRINT_PTS = { 1:8, 2:7, 3:6, 4:5, 5:4, 6:3, 7:2, 8:1 };
+const FASTEST_LAP_BONUS = 1; // +1 point if finished P1-P10
+
+function renderChampionshipStandings() {
+    const el = document.getElementById('championshipStandings');
+    if (!el) return;
+
+    const driverChamp = {};
+    const constructorChamp = {};
+    const completedRounds = [];
+
+    // Gather data from all actual rounds
+    for (const [rn, actData] of Object.entries(actualCache)) {
+        if (!actData || !actData.drivers) continue;
+        const roundNum = Number(rn);
+        const roundInfo = seasonSummary?.rounds?.find(r => r.round === roundNum);
+        const roundName = roundInfo?.name || actData.race || `Round ${roundNum}`;
+        completedRounds.push({ round: roundNum, name: roundName, isSprint: !!actData.is_sprint_weekend });
+
+        actData.drivers.forEach(d => {
+            if (!driverChamp[d.driver_id]) {
+                driverChamp[d.driver_id] = { name: d.name, constructor: d.constructor, total: 0, rounds: {} };
+            }
+            let rPts = 0;
+            // Race points
+            if (d.race_position && WDC_RACE_PTS[d.race_position]) {
+                rPts += WDC_RACE_PTS[d.race_position];
+                // Fastest lap bonus (only if finished in top 10)
+                if (d.is_fastest_lap && d.race_position <= 10) rPts += FASTEST_LAP_BONUS;
+            }
+            // Sprint points
+            let sPts = 0;
+            if (d.sprint_position && WDC_SPRINT_PTS[d.sprint_position]) {
+                sPts = WDC_SPRINT_PTS[d.sprint_position];
+            }
+            const totalRound = rPts + sPts;
+            driverChamp[d.driver_id].total += totalRound;
+            driverChamp[d.driver_id].rounds[roundNum] = { race: rPts, sprint: sPts, total: totalRound };
+
+            // Constructor
+            const cid = d.constructor;
+            if (!constructorChamp[cid]) {
+                constructorChamp[cid] = { total: 0, rounds: {} };
+            }
+            constructorChamp[cid].total += totalRound;
+            if (!constructorChamp[cid].rounds[roundNum]) constructorChamp[cid].rounds[roundNum] = 0;
+            constructorChamp[cid].rounds[roundNum] += totalRound;
+        });
+    }
+
+    completedRounds.sort((a, b) => a.round - b.round);
+
+    if (completedRounds.length === 0) {
+        el.innerHTML = '<p class="no-data">No race results available yet.</p>';
+        return;
+    }
+
+    const sortedDrivers = Object.entries(driverChamp).sort((a, b) => b[1].total - a[1].total);
+    const sortedConstructors = Object.entries(constructorChamp).sort((a, b) => b[1].total - a[1].total);
+    const leader = sortedDrivers.length > 0 ? sortedDrivers[0][1].total : 0;
+    const cLeader = sortedConstructors.length > 0 ? sortedConstructors[0][1].total : 0;
+
+    let html = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">`;
+
+    // WDC
+    html += `<div>
+        <h4 style="margin-bottom:12px;">Drivers' Championship</h4>
+        <table class="data-table sortable">
+            <thead><tr>
+                <th>#</th><th>Driver</th><th>Team</th>`;
+    completedRounds.forEach(r => {
+        html += `<th class="num" title="${r.name}">R${r.round}</th>`;
+    });
+    html += `<th class="num">Total</th><th class="num">Gap</th>
+            </tr></thead><tbody>`;
+    sortedDrivers.forEach(([id, d], i) => {
+        const team = TEAMS[d.constructor] || { name: d.constructor, color: '#666' };
+        const gap = i === 0 ? '-' : `${d.total - leader}`;
+        html += `<tr>
+            <td>${i + 1}</td>
+            <td><strong>${d.name || id}</strong></td>
+            <td><span class="team-dot" style="background:${team.color}"></span>${team.name}</td>`;
+        completedRounds.forEach(r => {
+            const rData = d.rounds[r.round];
+            const pts = rData ? rData.total : 0;
+            const cls = pts >= 25 ? 'color:var(--green);font-weight:700' : pts >= 10 ? 'color:var(--text)' : pts > 0 ? '' : 'color:var(--text-muted)';
+            html += `<td class="num" style="${cls}" title="R${r.round}: Race ${rData?.race || 0}${rData?.sprint ? ' + Sprint ' + rData.sprint : ''}">${pts}</td>`;
+        });
+        html += `<td class="num"><strong>${d.total}</strong></td>
+            <td class="num" style="color:var(--text-secondary)">${gap}</td>
+        </tr>`;
+    });
+    html += `</tbody></table></div>`;
+
+    // WCC
+    html += `<div>
+        <h4 style="margin-bottom:12px;">Constructors' Championship</h4>
+        <table class="data-table sortable">
+            <thead><tr>
+                <th>#</th><th>Constructor</th>`;
+    completedRounds.forEach(r => {
+        html += `<th class="num" title="${r.name}">R${r.round}</th>`;
+    });
+    html += `<th class="num">Total</th><th class="num">Gap</th>
+            </tr></thead><tbody>`;
+    sortedConstructors.forEach(([id, c], i) => {
+        const team = TEAMS[id] || { name: id, color: '#666' };
+        const gap = i === 0 ? '-' : `${c.total - cLeader}`;
+        html += `<tr>
+            <td>${i + 1}</td>
+            <td><span class="team-dot" style="background:${team.color}"></span><strong>${team.name}</strong></td>`;
+        completedRounds.forEach(r => {
+            const pts = c.rounds[r.round] || 0;
+            const cls = pts >= 25 ? 'color:var(--green);font-weight:700' : pts > 0 ? '' : 'color:var(--text-muted)';
+            html += `<td class="num" style="${cls}">${pts}</td>`;
+        });
+        html += `<td class="num"><strong>${c.total}</strong></td>
+            <td class="num" style="color:var(--text-secondary)">${gap}</td>
+        </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+
+    el.innerHTML = html;
+    el.querySelectorAll('.data-table').forEach(makeTableSortable);
+}
+
 function renderSeason() {
     // Calendar
     const calEl = document.getElementById('seasonCalendar');
@@ -2225,6 +2354,9 @@ function renderSeason() {
         });
     }
 
+    // Championship Standings (WDC / WCC)
+    renderChampionshipStandings();
+
     // Price Tracker
     const priceEl = document.getElementById('priceTracker');
     if (!seasonSummary || !seasonSummary.driver_prices || Object.keys(seasonSummary.driver_prices).length === 0) {
@@ -2263,97 +2395,117 @@ function renderSeason() {
     if (standingsEl) {
         const driverTotals = {};
         const constructorTotals = {};
-        let roundsWithData = 0;
+        const fantasyRounds = [];
         let hasAnyOfficial = false;
 
-        for (const [rn, actData] of Object.entries(actualCache)) {
+        // Collect round numbers that have data, sorted
+        const roundNums = Object.keys(actualCache).map(Number).filter(rn => actualCache[rn]).sort((a, b) => a - b);
+
+        for (const rn of roundNums) {
+            const actData = actualCache[rn];
             if (!actData) continue;
-            roundsWithData++;
+            const roundInfo = seasonSummary?.rounds?.find(r => r.round === rn);
+            fantasyRounds.push({ round: rn, name: roundInfo?.name || `Round ${rn}` });
+
             if (actData.drivers) {
                 actData.drivers.forEach(d => {
                     if (!driverTotals[d.driver_id]) {
-                        driverTotals[d.driver_id] = { name: d.name, constructor: d.constructor, total: 0, rounds: 0, price: d.price };
+                        driverTotals[d.driver_id] = { name: d.name, constructor: d.constructor, total: 0, roundPts: {}, price: d.price };
                     }
-                    const result = getOfficialScore(Number(rn), d.driver_id, true);
+                    const result = getOfficialScore(rn, d.driver_id, true);
                     const pts = result ? result.points : (d.total_points || 0);
                     if (result && result.source === 'official') hasAnyOfficial = true;
                     driverTotals[d.driver_id].total += pts;
-                    driverTotals[d.driver_id].rounds++;
+                    driverTotals[d.driver_id].roundPts[rn] = pts;
                     driverTotals[d.driver_id].price = d.price;
                 });
             }
             if (actData.constructors) {
                 actData.constructors.forEach(c => {
                     if (!constructorTotals[c.constructor_id]) {
-                        constructorTotals[c.constructor_id] = { name: c.name, total: 0, rounds: 0, price: c.price };
+                        constructorTotals[c.constructor_id] = { name: c.name, total: 0, roundPts: {}, price: c.price };
                     }
-                    const result = getOfficialScore(Number(rn), c.constructor_id, false);
+                    const result = getOfficialScore(rn, c.constructor_id, false);
                     const pts = result ? result.points : (c.total_points || 0);
                     if (result && result.source === 'official') hasAnyOfficial = true;
                     constructorTotals[c.constructor_id].total += pts;
-                    constructorTotals[c.constructor_id].rounds++;
+                    constructorTotals[c.constructor_id].roundPts[rn] = pts;
                     constructorTotals[c.constructor_id].price = c.price;
                 });
             }
         }
 
-        if (roundsWithData > 0) {
+        if (fantasyRounds.length > 0) {
             const sortedDrivers = Object.entries(driverTotals).sort((a, b) => b[1].total - a[1].total);
             const sortedConstructors = Object.entries(constructorTotals).sort((a, b) => b[1].total - a[1].total);
 
-            let sHtml = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">`;
-
             const sourceTag = hasAnyOfficial ? ' <span style="font-size:0.7em;color:var(--green)">(Official pts)</span>' : ' <span style="font-size:0.7em;color:var(--text-muted)">(Calculated pts)</span>';
 
-            // Driver standings
+            let sHtml = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">`;
+
+            // Driver fantasy standings with per-round columns
             sHtml += `<div>
-                <h4 style="margin-bottom:12px;">Driver Fantasy Standings (${roundsWithData} rounds)${sourceTag}</h4>
+                <h4 style="margin-bottom:12px;">Driver Fantasy Standings (${fantasyRounds.length} rounds)${sourceTag}</h4>
                 <table class="data-table sortable">
                     <thead><tr>
-                        <th>#</th><th>Driver</th><th>Team</th>
-                        <th class="num" title="Total fantasy points scored across all completed rounds">Total</th>
-                        <th class="num" title="Average fantasy points per race weekend">Avg</th>
-                        <th class="num" title="Total points divided by current price">PPM</th>
+                        <th>#</th><th>Driver</th><th>Team</th>`;
+            fantasyRounds.forEach(r => { sHtml += `<th class="num" title="${r.name}">R${r.round}</th>`; });
+            sHtml += `<th class="num" title="Total fantasy points scored">Total</th>
+                        <th class="num" title="Average fantasy points per round">Avg</th>
+                        <th class="num" title="Total points / current price">PPM</th>
                     </tr></thead>
                     <tbody>${sortedDrivers.map(([id, d], i) => {
                         const team = TEAMS[d.constructor] || { name: d.constructor, color: '#666' };
-                        const avg = d.rounds > 0 ? d.total / d.rounds : 0;
+                        const avg = fantasyRounds.length > 0 ? d.total / fantasyRounds.length : 0;
                         const ppm = d.price > 0 ? d.total / d.price : 0;
                         const ppmRating = ppm >= 2.0 ? 'color:var(--green)' : ppm >= 1.0 ? 'color:#22d3ee' : ppm < 0 ? 'color:var(--red, #ef4444)' : '';
-                        return `<tr>
+                        let row = `<tr>
                             <td>${i + 1}</td>
                             <td><strong>${d.name || id}</strong></td>
-                            <td><span class="team-dot" style="background:${team.color}"></span>${team.name}</td>
-                            <td class="num"><strong>${d.total}</strong></td>
+                            <td><span class="team-dot" style="background:${team.color}"></span>${team.name}</td>`;
+                        fantasyRounds.forEach(r => {
+                            const p = d.roundPts[r.round] ?? '-';
+                            const cls = typeof p === 'number' ? (p >= 40 ? 'color:var(--green);font-weight:700' : p < 0 ? 'color:var(--red)' : '') : 'color:var(--text-muted)';
+                            row += `<td class="num" style="${cls}">${p}</td>`;
+                        });
+                        row += `<td class="num"><strong>${d.total}</strong></td>
                             <td class="num">${avg.toFixed(1)}</td>
                             <td class="num" style="${ppmRating}">${ppm.toFixed(2)}</td>
                         </tr>`;
+                        return row;
                     }).join('')}</tbody>
                 </table>
             </div>`;
 
-            // Constructor standings
+            // Constructor fantasy standings with per-round columns
             sHtml += `<div>
                 <h4 style="margin-bottom:12px;">Constructor Fantasy Standings</h4>
                 <table class="data-table sortable">
                     <thead><tr>
-                        <th>#</th><th>Constructor</th>
-                        <th class="num">Total</th>
+                        <th>#</th><th>Constructor</th>`;
+            fantasyRounds.forEach(r => { sHtml += `<th class="num" title="${r.name}">R${r.round}</th>`; });
+            sHtml += `<th class="num">Total</th>
                         <th class="num">Avg</th>
                         <th class="num">PPM</th>
                     </tr></thead>
                     <tbody>${sortedConstructors.map(([id, c], i) => {
                         const team = TEAMS[id] || { name: c.name, color: '#666' };
-                        const avg = c.rounds > 0 ? c.total / c.rounds : 0;
+                        const avg = fantasyRounds.length > 0 ? c.total / fantasyRounds.length : 0;
                         const ppm = c.price > 0 ? c.total / c.price : 0;
                         const ppmRating = ppm >= 2.0 ? 'color:var(--green)' : ppm >= 1.0 ? 'color:#22d3ee' : ppm < 0 ? 'color:var(--red, #ef4444)' : '';
-                        return `<tr>
+                        let row = `<tr>
                             <td>${i + 1}</td>
-                            <td><span class="team-dot" style="background:${team.color}"></span><strong>${team.name}</strong></td>
-                            <td class="num"><strong>${c.total}</strong></td>
+                            <td><span class="team-dot" style="background:${team.color}"></span><strong>${team.name}</strong></td>`;
+                        fantasyRounds.forEach(r => {
+                            const p = c.roundPts[r.round] ?? '-';
+                            const cls = typeof p === 'number' ? (p >= 60 ? 'color:var(--green);font-weight:700' : p < 0 ? 'color:var(--red)' : '') : 'color:var(--text-muted)';
+                            row += `<td class="num" style="${cls}">${p}</td>`;
+                        });
+                        row += `<td class="num"><strong>${c.total}</strong></td>
                             <td class="num">${avg.toFixed(1)}</td>
                             <td class="num" style="${ppmRating}">${ppm.toFixed(2)}</td>
                         </tr>`;
+                        return row;
                     }).join('')}</tbody>
                 </table>
             </div>`;
