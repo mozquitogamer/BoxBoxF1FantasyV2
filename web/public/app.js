@@ -2848,6 +2848,7 @@ function buildScatterPlot(dataPoints) {
 
 let deepDiveCache = {};
 let deepDiveCharts = [];
+function ddFix(v, decimals = 3) { return v != null ? v.toFixed(decimals) : '-'; }
 
 async function loadDeepDiveData(roundNum) {
     if (deepDiveCache[roundNum]) return deepDiveCache[roundNum];
@@ -2872,11 +2873,12 @@ function ddColor(dd, id) {
 
 function initDeepDiveTab() {
     const sel = document.getElementById('deepdiveRoundSelect');
-    if (!sel || !data) return;
+    if (!sel) return;
     sel.innerHTML = '';
-    const rounds = (data.predictions || [])
-        .filter(p => p.has_actual)
-        .map(p => ({ round: p.round, name: p.race_name }));
+    // Use seasonSummary.rounds which has has_actual flags, falling back to checking deep_dive files directly
+    const rounds = (seasonSummary && seasonSummary.rounds || [])
+        .filter(r => r.has_actual)
+        .map(r => ({ round: r.round, name: r.race_name || `Round ${r.round}` }));
     if (!rounds.length) {
         sel.innerHTML = '<option>No race data yet</option>';
         return;
@@ -2946,20 +2948,20 @@ async function renderDeepDive(roundNum) {
     sorted.forEach((d, i) => {
         const m = metrics[d];
         const team = TEAMS[dd.driver_constructors[d]] || { name: dd.driver_constructors[d], color: '#666' };
-        const gap = m.pace_delta === 0 ? 'Leader' : `+${m.pace_delta.toFixed(3)}`;
+        const gap = m.pace_delta === 0 ? 'Leader' : `+${ddFix(m.pace_delta)}`;
         html += `<tr>
             <td>${i+1}</td>
             <td><span class="team-dot" style="background:${team.color}"></span>${d}</td>
             <td>${team.name}</td>
-            <td class="num">${m.avg_lap.toFixed(3)}</td>
-            <td class="num">${m.median_lap.toFixed(3)}</td>
-            <td class="num">${m.best_lap.toFixed(3)}</td>
-            <td class="num">${m.best_3_lap_avg.toFixed(3)}</td>
-            <td class="num">${m.best_5_lap_avg.toFixed(3)}</td>
-            <td class="num">${m.best_10_lap_avg.toFixed(3)}</td>
-            <td class="num">${m.theoretical_best.toFixed(3)}</td>
+            <td class="num">${ddFix(m.avg_lap)}</td>
+            <td class="num">${ddFix(m.median_lap)}</td>
+            <td class="num">${ddFix(m.best_lap)}</td>
+            <td class="num">${ddFix(m.best_3_lap_avg)}</td>
+            <td class="num">${ddFix(m.best_5_lap_avg)}</td>
+            <td class="num">${ddFix(m.best_10_lap_avg)}</td>
+            <td class="num">${ddFix(m.theoretical_best)}</td>
             <td class="num ${m.pace_delta === 0 ? 'positive' : ''}">${gap}</td>
-            <td class="num">${m.lap_time_std.toFixed(3)}</td>
+            <td class="num">${ddFix(m.lap_time_std)}</td>
             <td class="num">${m.laps_analyzed}</td>
         </tr>`;
     });
@@ -2991,15 +2993,15 @@ async function renderDeepDive(roundNum) {
         html += `<tr>
             <td>${i+1}</td>
             <td><span class="team-dot" style="background:${team.color}"></span>${d}</td>
-            <td class="num ${m.best_s1 === bestS1 ? 'highlight-purple' : ''}">${m.best_s1.toFixed(3)}</td>
-            <td class="num ${m.best_s2 === bestS2 ? 'highlight-purple' : ''}">${m.best_s2.toFixed(3)}</td>
-            <td class="num ${m.best_s3 === bestS3 ? 'highlight-purple' : ''}">${m.best_s3.toFixed(3)}</td>
-            <td class="num">${m.avg_s1.toFixed(3)}</td>
-            <td class="num">${m.avg_s2.toFixed(3)}</td>
-            <td class="num">${m.avg_s3.toFixed(3)}</td>
-            <td class="num">${m.pct_time_s1.toFixed(1)}%</td>
-            <td class="num">${m.pct_time_s2.toFixed(1)}%</td>
-            <td class="num">${m.pct_time_s3.toFixed(1)}%</td>
+            <td class="num ${m.best_s1 === bestS1 ? 'highlight-purple' : ''}">${ddFix(m.best_s1)}</td>
+            <td class="num ${m.best_s2 === bestS2 ? 'highlight-purple' : ''}">${ddFix(m.best_s2)}</td>
+            <td class="num ${m.best_s3 === bestS3 ? 'highlight-purple' : ''}">${ddFix(m.best_s3)}</td>
+            <td class="num">${ddFix(m.avg_s1)}</td>
+            <td class="num">${ddFix(m.avg_s2)}</td>
+            <td class="num">${ddFix(m.avg_s3)}</td>
+            <td class="num">${ddFix(m.pct_time_s1, 1)}%</td>
+            <td class="num">${ddFix(m.pct_time_s2, 1)}%</td>
+            <td class="num">${ddFix(m.pct_time_s3, 1)}%</td>
         </tr>`;
     });
     html += `</tbody></table></div></div></div>`;
@@ -3025,9 +3027,9 @@ async function renderDeepDive(roundNum) {
             <td>${i+1}</td>
             <td><span class="team-dot" style="background:${team.color}"></span>${d}</td>
             <td>${team.name}</td>
-            <td class="num">${(m.max_speed_trap||0).toFixed(1)}</td>
-            <td class="num">${(m.avg_speed_trap||0).toFixed(1)}</td>
-            <td class="num">${(m.avg_finish_line_speed||0).toFixed(1)}</td>
+            <td class="num">${ddFix(m.max_speed_trap, 1)}</td>
+            <td class="num">${ddFix(m.avg_speed_trap, 1)}</td>
+            <td class="num">${ddFix(m.avg_finish_line_speed, 1)}</td>
         </tr>`;
     });
     html += `</tbody></table></div></div></div>`;
@@ -3058,10 +3060,10 @@ async function renderDeepDive(roundNum) {
                 <td>${s.stint}</td>
                 <td><span class="compound-badge ${cc}">${s.compound}</span></td>
                 <td class="num">${s.laps}</td>
-                <td class="num">${s.avg_pace.toFixed(3)}</td>
-                <td class="num">${s.start_pace.toFixed(3)}</td>
-                <td class="num">${s.end_pace.toFixed(3)}</td>
-                <td class="num">${s.degradation_rate.toFixed(4)}</td>
+                <td class="num">${ddFix(s.avg_pace)}</td>
+                <td class="num">${ddFix(s.start_pace)}</td>
+                <td class="num">${ddFix(s.end_pace)}</td>
+                <td class="num">${ddFix(s.degradation_rate, 4)}</td>
                 <td>${cliffSet.has(s.stint) ? '<span class="badge badge-red">CLIFF</span>' : ''}</td>
             </tr>`;
         });
@@ -3092,9 +3094,9 @@ async function renderDeepDive(roundNum) {
             const team = TEAMS[dd.driver_constructors[d]] || { color: '#666' };
             html += `<tr>
                 <td><span class="team-dot" style="background:${team.color}"></span>${d}</td>
-                <td class="num">${m.opening_rank}</td><td class="num">${m.opening_pace.toFixed(3)}</td>
-                <td class="num">${m.middle_rank}</td><td class="num">${m.middle_pace.toFixed(3)}</td>
-                <td class="num">${m.closing_rank}</td><td class="num">${m.closing_pace.toFixed(3)}</td>
+                <td class="num">${m.opening_rank}</td><td class="num">${ddFix(m.opening_pace)}</td>
+                <td class="num">${m.middle_rank}</td><td class="num">${ddFix(m.middle_pace)}</td>
+                <td class="num">${m.closing_rank}</td><td class="num">${ddFix(m.closing_pace)}</td>
             </tr>`;
         });
         html += `</tbody></table></div></div></div>`;
@@ -3121,9 +3123,9 @@ async function renderDeepDive(roundNum) {
             const team = TEAMS[dd.driver_constructors[d]] || { color: '#666' };
             html += `<tr>
                 <td><span class="team-dot" style="background:${team.color}"></span>${d}</td>
-                <td class="num">${da.clean_air_pace.toFixed(3)}</td>
-                <td class="num">${da.dirty_air_pace.toFixed(3)}</td>
-                <td class="num">${da.delta.toFixed(3)}</td>
+                <td class="num">${ddFix(da.clean_air_pace)}</td>
+                <td class="num">${ddFix(da.dirty_air_pace)}</td>
+                <td class="num">${ddFix(da.delta)}</td>
                 <td class="num">${da.clean_laps}</td>
                 <td class="num">${da.dirty_laps}</td>
             </tr>`;
@@ -3153,8 +3155,8 @@ async function renderDeepDive(roundNum) {
                 <td>${i+1}</td>
                 <td><span class="team-dot" style="background:${team.color}"></span>${team.name}</td>
                 <td>${(ts.drivers || []).join(', ')}</td>
-                <td class="num">${ts.avg_pace.toFixed(3)}</td>
-                <td class="num">${ts.best_pace.toFixed(3)}</td>
+                <td class="num">${ddFix(ts.avg_pace)}</td>
+                <td class="num">${ddFix(ts.best_pace)}</td>
                 <td>${ts.fastest_sector || '-'}</td>
             </tr>`;
         });
