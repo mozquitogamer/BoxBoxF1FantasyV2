@@ -117,11 +117,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadOfficialPoints();
     await loadWeatherData();
     await loadPitstopData();
+    await loadArticles();
     startCountdown();
     setupTabs();
     setupControls();
     render();
     initDeepDiveTab();
+    renderArticles();
 });
 
 async function preloadActualData() {
@@ -2848,6 +2850,7 @@ function buildScatterPlot(dataPoints) {
 
 let deepDiveCache = {};
 let deepDiveCharts = [];
+let articlesData = null;
 function ddFix(v, decimals = 3) { return v != null ? v.toFixed(decimals) : '-'; }
 
 async function loadDeepDiveData(roundNum) {
@@ -3510,4 +3513,52 @@ function renderDDCharts(dd, sorted) {
         });
         deepDiveCharts.push(spdChart);
     }
+}
+
+/* ============================================================
+   Articles
+   ============================================================ */
+async function loadArticles() {
+    try {
+        const resp = await fetch(cacheBust('data/articles.json'));
+        if (resp.ok) articlesData = await resp.json();
+    } catch(e) { articlesData = null; }
+}
+
+function renderArticles() {
+    const container = document.getElementById('articlesContent');
+    if (!container) return;
+    if (!articlesData || !articlesData.articles || articlesData.articles.length === 0) {
+        container.innerHTML = '<p class="no-data">No articles yet. Check back after the next race weekend!</p>';
+        return;
+    }
+    const articles = articlesData.articles;
+    // Sort newest first
+    articles.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+    let html = '<div class="articles-list">';
+    articles.forEach((art, i) => {
+        const dateStr = art.date ? new Date(art.date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+        const roundBadge = art.round ? `<span class="article-round">Round ${art.round}</span>` : '';
+        const tagBadges = (art.tags || []).map(t => `<span class="article-tag">${t}</span>`).join('');
+        const isOpen = i === 0 ? ' open' : '';
+        html += `
+        <div class="article-card collapsible-section${isOpen}">
+            <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+                <div class="article-header-content">
+                    <h3>${art.title || 'Untitled'}</h3>
+                    <div class="article-meta">
+                        ${roundBadge}${tagBadges}
+                        <span class="article-date">${dateStr}</span>
+                    </div>
+                </div>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-body">
+                <div class="article-body">${art.content_html || '<p>No content.</p>'}</div>
+            </div>
+        </div>`;
+    });
+    html += '</div>';
+    container.innerHTML = html;
 }

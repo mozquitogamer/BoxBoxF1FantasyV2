@@ -1,0 +1,28 @@
+{
+  "articles": [
+    {
+      "slug": "2026-03-16-round1-australian-gp",
+      "title": "Round 1 — Australian Grand Prix Recap",
+      "date": "2026-03-16",
+      "round": 1,
+      "tags": [
+        "recap",
+        "melbourne",
+        "season opener"
+      ],
+      "content_html": "<h2>Season Opener in Melbourne</h2>\n<p>\nThe 2026 Formula 1 season kicked off under the lights of Albert Park with a dramatically reshuffled grid under the new technical regulations. With wider cars, new aero rules, and 11 teams on the grid for the first time, Melbourne delivered a weekend full of surprises.\n</p>\n<h2>Key Takeaways</h2>\n<ul>\n<li><strong>New regulations, new pecking order</strong> — The 2026 rule changes have shaken up the competitive order. Free practice telemetry suggested a tight midfield, and the race confirmed it.</li>\n<li><strong>Cadillac's debut</strong> — The 11th team made their F1 debut. Early days, but every team has to start somewhere.</li>\n<li><strong>Tyre degradation patterns</strong> — The new compounds behaved differently than expected. High deg on the medium compound caught several teams off guard with their strategy calls.</li>\n<li><strong>Our model's first test</strong> — With no 2026 race data to learn from, Round 1 predictions relied entirely on historical priors (Jolpica Layer 1). Confidence scores were lower than they'll be mid-season, but the qualifying model showed promising accuracy.</li>\n</ul>\n<h2>Fantasy Insights</h2>\n<p>\nThe key fantasy takeaway from Melbourne is that <strong>value picks in the midfield</strong> are where the points-per-million opportunities live. Frontrunners score reliably but are expensive. Midfield drivers who qualify well and avoid incidents can deliver outsized fantasy returns relative to their price.\n</p>\n<h2>Looking Ahead</h2>\n<p>\nWith Round 1 data now in the pipeline, our models will have their first real 2026 training signal. Expect confidence scores to improve for Round 2, and the Monte Carlo simulations will have better-calibrated distributions.\n</p>\n<blockquote>\n<p>The season is 24 races long. One data point doesn't make a trend — but it gives us something to work with.</p>\n</blockquote>"
+    },
+    {
+      "slug": "2026-03-23-round2-chinese-gp",
+      "title": "Round 2 — Chinese Grand Prix Recap",
+      "date": "2026-03-23",
+      "round": 2,
+      "tags": [
+        "recap",
+        "shanghai",
+        "sprint weekend"
+      ],
+      "content_html": "<h2>Shanghai Sprint Weekend</h2>\n<p>\nRound 2 took the paddock to the Shanghai International Circuit for the first sprint weekend of the season. The sprint format added an extra layer of complexity for both teams and fantasy managers.\n</p>\n<h2>Key Takeaways</h2>\n<ul>\n<li><strong>Sprint impact on strategy</strong> — With limited practice time in sprint weekends, teams had less data to fine-tune setups. This played into the hands of drivers who adapted quickly.</li>\n<li><strong>Sector analysis reveals patterns</strong> — Our deep dive telemetry shows distinct differences in how teams handle the high-speed sweeps of Sector 1 versus the technical Sector 3. These patterns are starting to form the basis for track-specific predictions.</li>\n<li><strong>Degradation data building up</strong> — Two races of tyre data means our degradation models are beginning to calibrate. The fuel-corrected pace curves from Shanghai showed clearer stint patterns than Melbourne.</li>\n</ul>\n<h2>Model Performance</h2>\n<p>\nWith Round 1 actual results now feeding into the pipeline, confidence scores improved for Round 2 predictions. The two-layer feature system is working as designed — Jolpica priors provide the baseline, and any available FP telemetry sharpens the predictions.\n</p>\n<h2>Fantasy Takeaways</h2>\n<ul>\n<li><strong>Sprint weekends are volatile</strong> — More on-track sessions means more points opportunities, but also more risk. Budget builders should look at consistent midfield performers on sprint weekends.</li>\n<li><strong>Price movements starting</strong> — After two rounds, driver prices are beginning to shift based on PPM ratings. Watch for undervalued drivers whose early-season price hasn't caught up to their performance.</li>\n</ul>\n<h2>What's Next</h2>\n<p>\nRound 3 data will give us enough signal for meaningful rolling averages. The Monte Carlo simulations become increasingly reliable as the sample size grows.\n</p>"
+    }
+  ]
+}

@@ -58,6 +58,7 @@
                 <button class="tab" data-tab="h2h">H2H</button>
                 <button class="tab" data-tab="accuracy">Accuracy</button>
                 <button class="tab" data-tab="deepdive">Race Deep Dive</button>
+                <button class="tab" data-tab="articles">Articles</button>
                 <button class="tab" data-tab="about">About</button>
             </div>
         </div>
@@ -304,41 +305,74 @@
                 </div>
             </section>
 
+            <!-- Articles Tab -->
+            <section class="tab-content" id="tab-articles">
+                <div class="articles-header">
+                    <h2>Race Weekend Articles</h2>
+                    <p>Analysis, insights, and commentary from each race weekend.</p>
+                </div>
+                <div id="articlesContent">
+                    <p class="no-data">Loading articles...</p>
+                </div>
+            </section>
+
             <!-- About Tab -->
             <section class="tab-content" id="tab-about">
                 <div class="about-content">
                     <h2>How It Works</h2>
+                    <p class="about-intro">BoxBoxF1Fantasy uses a multi-stage machine learning pipeline to predict F1 race outcomes and convert them into fantasy point projections. Here's the full process from raw data to your lineup recommendations.</p>
+
                     <div class="about-grid">
                         <div class="about-card">
                             <div class="about-icon">📊</div>
                             <h3>1. Data Collection</h3>
-                            <p>We collect free practice session data using FastF1 — lap times, sector times, tyre compounds, weather, and more.</p>
+                            <p>We pull from two sources: <strong>FastF1</strong> for live telemetry (lap times, sectors, tyre compounds, weather, track status) and the <strong>Jolpica API</strong> for historical results, qualifying, and championship standings from 2020-2026.</p>
                         </div>
                         <div class="about-card">
                             <div class="about-icon">⚙️</div>
                             <h3>2. Feature Engineering</h3>
-                            <p>Raw lap data is processed into 27+ features per driver: pace metrics, consistency, tyre degradation, long-run performance, and more.</p>
+                            <p>Two feature layers are built. <strong>Layer 1:</strong> Jolpica historical priors — rolling 3/5/10-race averages, team strategy ratings, driver skill ratings, and track classification features (always available). <strong>Layer 2:</strong> Free practice telemetry — 27+ engineered features including pace, consistency, degradation, long-run performance, and sector analysis (when FP data is available).</p>
                         </div>
                         <div class="about-card">
                             <div class="about-icon">🤖</div>
                             <h3>3. ML Predictions</h3>
-                            <p>XGBoost models trained on 2020-2026 historical data (2,600+ rows) combined with free practice telemetry — 136 features with walk-forward validation.</p>
+                            <p>Three XGBoost models are trained with walk-forward temporal validation on 2,600+ historical rows. The qualifying model predicts grid positions, which feed into the race model for finish predictions. A third model scores confidence based on data completeness and model agreement.</p>
+                        </div>
+                        <div class="about-card">
+                            <div class="about-icon">🎲</div>
+                            <h3>4. Monte Carlo Simulation</h3>
+                            <p>10,000 race simulations sample from prediction distributions with calibrated noise — stochastically modelling DNFs, overtakes, fastest laps, and DOTD. Because fantasy scoring is nonlinear, the expected points of a distribution differ from points of the expected position.</p>
                         </div>
                         <div class="about-card">
                             <div class="about-icon">🏆</div>
-                            <h3>4. Fantasy Points</h3>
-                            <p>Predicted positions are converted into expected F1 Official Fantasy points, including overtakes, DNF risk, and fastest lap probability.</p>
+                            <h3>5. Fantasy Points</h3>
+                            <p>Monte Carlo outputs are aggregated into mean, median, P5-P95 percentile ranges. Combined with driver prices to compute PPM (Points Per Million) value scores. The lineup optimizer then finds the best team combinations within your budget.</p>
+                        </div>
+                        <div class="about-card">
+                            <div class="about-icon">🔍</div>
+                            <h3>6. Post-Race Analysis</h3>
+                            <p>After each race, the deep dive pipeline processes full telemetry: fuel-corrected lap times, sector breakdowns, tyre degradation curves, dirty-air effects, race momentum phases, and speed trap data — all viewable in the Race Deep Dive tab.</p>
                         </div>
                     </div>
 
                     <div class="about-section">
                         <h3>Model Details</h3>
                         <ul>
-                            <li><strong>Qualifying model:</strong> XGBoost (1200 trees, lr=0.025, depth=3) predicting from historical priors + FP telemetry</li>
-                            <li><strong>Race model:</strong> XGBoost (650 trees, lr=0.03, depth=5) with predicted quali as input</li>
-                            <li><strong>Two-layer features:</strong> Layer 1 = Jolpica historical priors (always available), Layer 2 = FP telemetry (when available)</li>
-                            <li><strong>Confidence:</strong> 0-100 based on data completeness and model agreement</li>
-                            <li><strong>Risk:</strong> Rolling 5-race DNF probability</li>
+                            <li><strong>Qualifying model:</strong> XGBoost (1200 trees, lr=0.025, depth=3) — predicts qualifying position from historical priors + FP telemetry</li>
+                            <li><strong>Race model:</strong> XGBoost (650 trees, lr=0.03, depth=5) — predicts finish position using predicted quali as input feature</li>
+                            <li><strong>Confidence model:</strong> ExtraTrees classifier trained on FP-available rows, scoring prediction reliability 0-100</li>
+                            <li><strong>Monte Carlo:</strong> 10,000 simulations with calibrated noise, DNF sampling (rolling 5-race probability, capped at 25%), stochastic overtake/fastest-lap/DOTD assignment</li>
+                            <li><strong>Walk-forward validation:</strong> Models are only ever trained on past data — no future leakage. Jolpica features use shift(1) before rolling to prevent look-ahead bias</li>
+                            <li><strong>Feature count:</strong> 136 features total across both layers, with XGBoost handling missing FP data natively via histogram-based tree method</li>
+                        </ul>
+                    </div>
+
+                    <div class="about-section">
+                        <h3>Pipeline Automation</h3>
+                        <ul>
+                            <li><strong>Weekend orchestration:</strong> Automated phases — pre-FP (download + train), post-FP (features + predict), post-quali (re-predict with quali data), post-race (actuals + analysis)</li>
+                            <li><strong>Weather updates:</strong> Open-Meteo forecasts every 6 hours via GitHub Actions, showing rain probability for Friday/Saturday/Sunday</li>
+                            <li><strong>Deep dive generation:</strong> 7-step data cleaning (null removal, accuracy filter, pit/lap-1/safety-car exclusion, fuel correction, outlier removal) then 10+ analysis modules</li>
                         </ul>
                     </div>
 
@@ -348,7 +382,7 @@
                     </div>
 
                     <div class="about-footer">
-                        <p>Built with Python, XGBoost, FastF1 & Jolpica API</p>
+                        <p>Built with Python, XGBoost, FastF1, Jolpica API & Monte Carlo simulation</p>
                         <p class="generated-at" id="generatedAt"></p>
                     </div>
                 </div>
@@ -357,6 +391,6 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" async></script>
-    <script src="app.js?v=16"></script>
+    <script src="app.js?v=17"></script>
 </body>
 </html>
