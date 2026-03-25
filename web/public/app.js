@@ -126,6 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initDeepDiveTab();
     renderArticles();
     renderVideos();
+    showFallbackBanner();
 });
 
 async function preloadActualData() {
@@ -153,6 +154,9 @@ async function loadWeatherData() {
 
 // Get the best available score for a driver/constructor in a given round.
 // Prefers official F1 Fantasy points when available, falls back to pipeline-calculated actuals.
+// Track which rounds fell back to calculated points
+const _fallbackRounds = new Set();
+
 function getOfficialScore(roundNum, itemId, isDriver) {
     // Check official points first
     if (officialPointsData && officialPointsData.rounds) {
@@ -171,10 +175,25 @@ function getOfficialScore(roundNum, itemId, isDriver) {
         const idField = isDriver ? 'driver_id' : 'constructor_id';
         const match = list.find(x => x[idField] === itemId);
         if (match && match.total_points != null) {
+            _fallbackRounds.add(Number(roundNum));
             return { points: match.total_points, source: 'calculated' };
         }
     }
     return null;
+}
+
+function showFallbackBanner() {
+    if (_fallbackRounds.size === 0) return;
+    // Remove existing banner if present
+    const existing = document.getElementById('fallbackBanner');
+    if (existing) existing.remove();
+    const rounds = [..._fallbackRounds].sort((a, b) => a - b).map(r => `R${r}`).join(', ');
+    const banner = document.createElement('div');
+    banner.id = 'fallbackBanner';
+    banner.style.cssText = 'background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.3);color:#eab308;padding:8px 16px;margin:0 auto 16px;max-width:1280px;border-radius:8px;font-size:0.8rem;text-align:center;';
+    banner.innerHTML = `⚠️ Official F1 Fantasy points not available for ${rounds}. Some values shown are pipeline-calculated estimates and may differ slightly from official scores.`;
+    const main = document.querySelector('.main .container');
+    if (main) main.insertBefore(banner, main.firstChild);
 }
 
 async function loadPitstopData() {
@@ -1466,39 +1485,52 @@ function renderSingleLineup(lineup, index, strategy, budget) {
 
 function getPitStopStatsHtml(constructorId) {
     // Aggregate pit stop stationary times from all cached actual data
-    const stops = [];
-    for (const [rn, actData] of Object.entries(actualCache)) {
-        if (!actData) continue;
-        // Check if we have pitstop data in the overtakes cache
-    }
-    // Also check global pitstopCache
+    const allStops = [];
     if (window._pitstopData && window._pitstopData[constructorId]) {
-        const teamStops = window._pitstopData[constructorId];
-        stops.push(...teamStops);
+        allStops.push(...window._pitstopData[constructorId]);
     }
 
-    if (stops.length === 0) return '';
+    if (allStops.length === 0) return '';
+
+    allStops.sort((a, b) => a - b);
+
+    // Separate normal stops from outliers (>10s is likely mechanical issue / unsafe release)
+    const normal = allStops.filter(t => t <= 10);
+    const outliers = allStops.filter(t => t > 10);
+    const stops = normal.length > 0 ? normal : allStops; // fall back to all if everything is slow
 
     stops.sort((a, b) => a - b);
+    const median = stops.length % 2 === 0
+        ? (stops[stops.length / 2 - 1] + stops[stops.length / 2]) / 2
+        : stops[Math.floor(stops.length / 2)];
     const avg = stops.reduce((a, b) => a + b, 0) / stops.length;
     const fastest = stops[0];
     const slowest = stops[stops.length - 1];
-    const p10idx = Math.floor(stops.length * 0.1);
-    const p90idx = Math.min(Math.floor(stops.length * 0.9), stops.length - 1);
-    const p10 = stops[p10idx];
-    const p90 = stops[p90idx];
+
+    let extraRow = '';
+    if (stops.length >= 6) {
+        const p10 = stops[Math.floor(stops.length * 0.1)];
+        const p90 = stops[Math.min(Math.floor(stops.length * 0.9), stops.length - 1)];
+        extraRow = `<span>P10: ${p10.toFixed(2)}s</span><span>P90: ${p90.toFixed(2)}s</span>`;
+    } else {
+        extraRow = `<span>Mean: ${avg.toFixed(2)}s</span><span></span>`;
+    }
+
+    const outlierNote = outliers.length > 0
+        ? `<div style="margin-top:2px;font-size:0.68rem;color:var(--text-muted);" title="Stops over 10s excluded from stats">${outliers.length} abnormal stop${outliers.length > 1 ? 's' : ''} excluded (${outliers.map(t => t.toFixed(1) + 's').join(', ')})</div>`
+        : '';
 
     return `
     <div class="pit-stats" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--text-secondary);">
-        <div style="font-weight:600;margin-bottom:4px;" title="Stationary pit stop times (wheels up to wheels down)">Pit Stops (stationary)</div>
+        <div style="font-weight:600;margin-bottom:4px;" title="Stationary pit stop times (wheels up to wheels down). Median used for typical pace, outliers over 10s excluded.">Pit Stops (stationary)</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px 8px;">
-            <span>Avg: <strong style="color:var(--text)">${avg.toFixed(2)}s</strong></span>
+            <span>Median: <strong style="color:var(--text)">${median.toFixed(2)}s</strong></span>
             <span>Fast: <strong style="color:var(--green)">${fastest.toFixed(2)}s</strong></span>
             <span>Slow: <strong style="color:var(--red, #ef4444)">${slowest.toFixed(2)}s</strong></span>
-            <span>P10: ${p10.toFixed(2)}s</span>
-            <span>P90: ${p90.toFixed(2)}s</span>
-            <span>Count: ${stops.length}</span>
+            ${extraRow}
+            <span>Count: ${stops.length}${outliers.length > 0 ? ' (+' + outliers.length + ')' : ''}</span>
         </div>
+        ${outlierNote}
     </div>`;
 }
 
@@ -2777,13 +2809,22 @@ async function renderAccuracy() {
     if (!container) return;
 
     const roundsWithBoth = seasonSummary.rounds.filter(r => r.has_predictions && r.has_actual);
+    const roundsActualOnly = seasonSummary.rounds.filter(r => !r.has_predictions && r.has_actual);
     if (roundsWithBoth.length === 0) {
         container.innerHTML = '<p class="no-data">No rounds with both predictions and actuals available yet. Check back after a completed race weekend.</p>';
         accuracyRendered = true;
         return;
     }
 
-    container.innerHTML = '<p class="no-data">Analyzing prediction accuracy...</p>';
+    let missingNote = '';
+    if (roundsActualOnly.length > 0) {
+        const names = roundsActualOnly.map(r => `R${r.round} (${r.name})`).join(', ');
+        missingNote = `<div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.25);color:#eab308;padding:8px 14px;border-radius:8px;font-size:0.8rem;margin-bottom:16px;">
+            ⚠️ ${names}: Predictions were not generated before the race, so accuracy cannot be measured for ${roundsActualOnly.length === 1 ? 'this round' : 'these rounds'}.
+        </div>`;
+    }
+
+    container.innerHTML = missingNote + '<p class="no-data">Analyzing prediction accuracy...</p>';
 
     // Load all prediction/actual pairs
     const pairs = [];
@@ -2821,7 +2862,8 @@ async function renderAccuracy() {
             const p = predMap[id], a = actMap[id];
             if (!p || !a) return;
             const predPts = p.expected_points || 0;
-            const actPts = a.total_points || 0;
+            const offScore = getOfficialScore(round, id, true);
+            const actPts = offScore ? offScore.points : (a.total_points || 0);
             const ptsErr = Math.abs(predPts - actPts);
             rPtsMAE += ptsErr;
             rCount++;
@@ -2926,7 +2968,7 @@ async function renderAccuracy() {
         </tr>`;
     }).join('');
 
-    container.innerHTML = `
+    container.innerHTML = missingNote + `
     <div class="accuracy-stats">
         <div class="accuracy-stat-card">
             <div class="accuracy-stat-value">${overallPtsMAE}</div>
