@@ -1033,7 +1033,7 @@ function renderPriceChangeBrackets(item) {
 
     let bracketRows = brackets.map(b => {
         const isActive = b.threshold === activeBracket;
-        const ptsText = b.pts != null ? `${b.pts.toFixed(0)} pts needed` : `< ${pc.ptsForPoor.toFixed(0)} pts`;
+        const ptsText = b.pts != null ? `${Math.ceil(b.pts)} pts or more` : `< ${Math.ceil(pc.ptsForPoor)} pts`;
         return `<div class="bracket-row ${isActive ? 'bracket-active' : ''}" style="--bracket-color:${b.color}">
             <span class="bracket-change">${b.label}</span>
             <span class="bracket-pts">${ptsText}</span>
@@ -1119,8 +1119,8 @@ function predictPriceChange(item, predictedPts) {
     const recentWindow = pastScores.slice(-2);
     const recentSum = recentWindow.reduce((a, b) => a + b, 0);
     const windowSize = Math.min(recentWindow.length + 1, 3);
-    const ptsForGreat = Math.max(0, PPM_RATINGS.GREAT * price * windowSize - recentSum);
-    const ptsForGood = Math.max(0, PPM_RATINGS.GOOD * price * windowSize - recentSum);
+    const ptsForGreat = PPM_RATINGS.GREAT * price * windowSize - recentSum;
+    const ptsForGood = PPM_RATINGS.GOOD * price * windowSize - recentSum;
     const ptsForPoor = PPM_RATINGS.POOR * price * windowSize - recentSum;
 
     return {
