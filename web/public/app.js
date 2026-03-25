@@ -3163,17 +3163,27 @@ async function renderDeepDive(roundNum) {
         html += `</tbody></table></div></div></div>`;
     }
 
-    // 8. CHART CONTAINERS
+    // 8. CHART CONTAINERS — driver selector helper
+    function ddDriverSelector(id, maxNote) {
+        let opts = sorted.map(d => {
+            const team = TEAMS[dd.driver_constructors[d]] || { name: '?' };
+            return `<option value="${d}">${d} (${team.name})</option>`;
+        }).join('');
+        return `<div class="chart-controls">
+            <label>Drivers (max ${maxNote}):</label>
+            <select id="${id}" class="dd-driver-select" multiple size="1">${opts}</select>
+            <button class="btn-small" data-selid="${id}" data-n="4" data-list="top">Top 4</button>
+            <button class="btn-small" data-selid="${id}" data-n="10" data-list="top">Top 10</button>
+            <button class="btn-small" data-selid="${id}" data-n="0" data-list="all">All</button>
+        </div>`;
+    }
+
     html += `
     <div class="collapsible-section open">
         <div class="section-header"><h3>Lap Time Evolution (Fuel-Corrected)</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
-            <p class="analysis-note">Fuel-corrected lap times lap by lap. Gaps in lines indicate pit stops. Downward trends suggest improving pace or lighter fuel. Use buttons to filter drivers.</p>
-            <div class="chart-controls">
-                <button class="btn-small dd-chart-btn active" data-show="top5">Top 5</button>
-                <button class="btn-small dd-chart-btn" data-show="top10">Top 10</button>
-                <button class="btn-small dd-chart-btn" data-show="all">All</button>
-            </div>
+            <p class="analysis-note">Fuel-corrected lap times lap by lap. Gaps in lines indicate pit stops. Downward trends suggest improving pace or lighter fuel.</p>
+            ${ddDriverSelector('dd-sel-laps', 4)}
             <div class="chart-container"><canvas id="chart-laptimes"></canvas></div>
         </div>
     </div>
@@ -3182,6 +3192,7 @@ async function renderDeepDive(roundNum) {
         <div class="section-header"><h3>Position Tracker</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
             <p class="analysis-note">On-track position each lap. Line crossovers show overtakes and pit stop position swaps. Lower = better position.</p>
+            ${ddDriverSelector('dd-sel-pos', 10)}
             <div class="chart-container"><canvas id="chart-positions"></canvas></div>
         </div>
     </div>
@@ -3190,6 +3201,7 @@ async function renderDeepDive(roundNum) {
         <div class="section-header"><h3>Gap to Leader</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
             <p class="analysis-note">Cumulative time gap to race leader each lap. Flat line = matching leader pace. Rising = falling behind. Sudden drops = pit stops or safety cars.</p>
+            ${ddDriverSelector('dd-sel-gap', 8)}
             <div class="chart-container chart-tall"><canvas id="chart-gap"></canvas></div>
         </div>
     </div>
@@ -3198,14 +3210,16 @@ async function renderDeepDive(roundNum) {
         <div class="section-header"><h3>Sector Comparison (Best Sectors, Stacked)</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
             <p class="analysis-note">Best sector times stacked to show total theoretical lap. Shorter total bar = faster overall. Color segments show where time is gained or lost.</p>
+            ${ddDriverSelector('dd-sel-sec', 10)}
             <div class="chart-container"><canvas id="chart-sectors"></canvas></div>
         </div>
     </div>
 
     <div class="collapsible-section">
-        <div class="section-header"><h3>Tyre Degradation Curves (Top 5)</h3><span class="toggle-icon">\u25BC</span></div>
+        <div class="section-header"><h3>Tyre Degradation Curves</h3><span class="toggle-icon">\u25BC</span></div>
         <div class="section-body">
             <p class="analysis-note">Fuel-corrected lap times colored by tyre compound (Red = Soft, Yellow = Medium, White = Hard). Upward slope within a stint shows tyre degradation. Different point shapes distinguish drivers.</p>
+            ${ddDriverSelector('dd-sel-tyre', 4)}
             <div class="chart-container chart-tall"><canvas id="chart-tyredeg"></canvas></div>
         </div>
     </div>
@@ -3234,189 +3248,241 @@ async function renderDeepDive(roundNum) {
 
 function renderDDCharts(dd, sorted) {
     if (typeof Chart === 'undefined') {
-        // Chart.js not loaded yet — hide chart sections gracefully
         document.querySelectorAll('#deepdiveContent .chart-container').forEach(c => {
-            c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">Charts loading... If this persists, refresh the page.</p>';
+            c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">Charts loading... refresh page.</p>';
         });
         return;
     }
-    const COMPOUND_COLORS = { SOFT: '#FF3333', MEDIUM: '#FFD700', HARD: '#CCCCCC', INTERMEDIATE: '#39B54A', WET: '#0067FF' };
-    const top5 = sorted.slice(0, 5);
+    const CC = { SOFT: '#FF3333', MEDIUM: '#FFD700', HARD: '#CCCCCC', INTERMEDIATE: '#39B54A', WET: '#0067FF' };
+    const GC = '#333', TC = '#999', LC = '#aaa', LGC = '#ccc';
+    const shapes = ['circle', 'rect', 'triangle', 'star', 'crossRot'];
 
-    // Chart defaults
-    const gridColor = '#333';
-    const tickColor = '#999';
-    const labelColor = '#aaa';
-    const legendColor = '#ccc';
+    // --- Driver selector helper ---
+    function getSelected(selId, maxDrivers) {
+        const sel = document.getElementById(selId);
+        if (!sel) return sorted.slice(0, maxDrivers);
+        const vals = Array.from(sel.selectedOptions).map(o => o.value);
+        return vals.length ? vals.slice(0, maxDrivers) : sorted.slice(0, maxDrivers);
+    }
+    function setSelected(selId, driverList) {
+        const sel = document.getElementById(selId);
+        if (!sel) return;
+        Array.from(sel.options).forEach(o => { o.selected = driverList.includes(o.value); });
+    }
+    // Pre-select defaults
+    setSelected('dd-sel-laps', sorted.slice(0, 4));
+    setSelected('dd-sel-pos', sorted.slice(0, 10));
+    setSelected('dd-sel-gap', sorted.slice(0, 8));
+    setSelected('dd-sel-sec', sorted.slice(0, 10));
+    setSelected('dd-sel-tyre', sorted.slice(0, 4));
 
-    // -- LAP TIMES --
+    // --- Quick-select buttons ---
+    document.querySelectorAll('#deepdiveContent .btn-small[data-selid]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const selId = btn.dataset.selid;
+            const n = parseInt(btn.dataset.n);
+            const list = n === 0 ? sorted : sorted.slice(0, n);
+            setSelected(selId, list);
+            const sel = document.getElementById(selId);
+            if (sel) sel.dispatchEvent(new Event('change'));
+        });
+    });
+
+    // Linear x-axis base config
+    const xLinear = { type: 'linear', title: { display: true, text: 'Lap', color: LC }, ticks: { color: TC }, grid: { color: GC } };
+
+    // ---- LAP TIMES ----
     const lapCtx = document.getElementById('chart-laptimes');
+    let lapChart = null;
     if (lapCtx && dd.lap_data) {
-        function makeLapDS(driverList, pw, pr) {
-            return driverList.filter(d => dd.lap_data[d]).map(d => ({
+        function makeLapDS(drvs) {
+            return drvs.filter(d => dd.lap_data[d]).map(d => ({
                 label: d,
                 data: dd.lap_data[d].map(l => ({ x: l.lap, y: l.fuel_corrected })),
                 borderColor: ddColor(dd, d),
-                borderWidth: pw || 1.5,
-                pointRadius: pr || 1.5,
+                borderWidth: drvs.length > 6 ? 1 : 1.5,
+                pointRadius: drvs.length > 6 ? 0.5 : 2,
                 pointHoverRadius: 4,
-                tension: 0.3,
-                fill: false,
+                tension: 0.3, fill: false,
             }));
         }
-        const lapChart = new Chart(lapCtx, {
+        lapChart = new Chart(lapCtx, {
             type: 'line',
-            data: { datasets: makeLapDS(top5) },
+            data: { datasets: makeLapDS(sorted.slice(0, 4)) },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 interaction: { mode: 'nearest', intersect: false },
                 plugins: {
-                    legend: { position: 'top', labels: { color: legendColor, usePointStyle: true, font: { size: 11 } } },
+                    legend: { position: 'top', labels: { color: LGC, usePointStyle: true, font: { size: 11 } } },
                     tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)}s (Lap ${ctx.parsed.x})` } }
                 },
                 scales: {
-                    x: { title: { display: true, text: 'Lap', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } },
-                    y: { title: { display: true, text: 'Lap Time (s)', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } }
+                    x: { ...xLinear },
+                    y: { title: { display: true, text: 'Lap Time (s)', color: LC }, ticks: { color: TC }, grid: { color: GC } }
                 }
             }
         });
         deepDiveCharts.push(lapChart);
-
-        // Filter buttons
-        document.querySelectorAll('.dd-chart-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.dd-chart-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const show = btn.dataset.show;
-                const list = show === 'top5' ? sorted.slice(0, 5) : show === 'top10' ? sorted.slice(0, 10) : sorted;
-                lapChart.data.datasets = makeLapDS(list, show === 'all' ? 1 : 1.5, show === 'all' ? 0.5 : 1.5);
-                lapChart.update();
-            });
+        document.getElementById('dd-sel-laps')?.addEventListener('change', () => {
+            const drvs = getSelected('dd-sel-laps', 4);
+            lapChart.data.datasets = makeLapDS(drvs);
+            lapChart.update();
         });
     }
 
-    // -- POSITION TRACKER --
+    // ---- POSITION TRACKER ----
     const posCtx = document.getElementById('chart-positions');
+    let posChart = null;
     if (posCtx && dd.position_tracker) {
-        const posChart = new Chart(posCtx, {
-            type: 'line',
-            data: { datasets: sorted.slice(0, 10).filter(d => dd.position_tracker[d]).map(d => ({
+        function makePosDS(drvs) {
+            return drvs.filter(d => dd.position_tracker[d]).map(d => ({
                 label: d,
                 data: dd.position_tracker[d].map(p => ({ x: p.lap, y: p.position })),
                 borderColor: ddColor(dd, d),
                 borderWidth: 2, pointRadius: 0, tension: 0.1, fill: false,
-            })) },
+            }));
+        }
+        posChart = new Chart(posCtx, {
+            type: 'line',
+            data: { datasets: makePosDS(sorted.slice(0, 10)) },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'top', labels: { color: legendColor, usePointStyle: true, font: { size: 11 } } },
+                    legend: { position: 'top', labels: { color: LGC, usePointStyle: true, font: { size: 11 } } },
                     tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: P${ctx.parsed.y} (Lap ${ctx.parsed.x})` } }
                 },
                 scales: {
-                    x: { title: { display: true, text: 'Lap', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } },
-                    y: { reverse: true, title: { display: true, text: 'Position', color: labelColor }, ticks: { color: tickColor, stepSize: 1 }, grid: { color: gridColor }, min: 1, max: 22 }
+                    x: { ...xLinear },
+                    y: { reverse: true, title: { display: true, text: 'Position', color: LC }, ticks: { color: TC, stepSize: 1 }, grid: { color: GC }, min: 1, max: 22 }
                 }
             }
         });
         deepDiveCharts.push(posChart);
+        document.getElementById('dd-sel-pos')?.addEventListener('change', () => {
+            posChart.data.datasets = makePosDS(getSelected('dd-sel-pos', 10));
+            posChart.update();
+        });
     }
 
-    // -- GAP TO LEADER --
+    // ---- GAP TO LEADER ----
     const gapCtx = document.getElementById('chart-gap');
+    let gapChart = null;
     if (gapCtx && dd.gap_to_leader) {
-        const gapChart = new Chart(gapCtx, {
-            type: 'line',
-            data: { datasets: sorted.slice(0, 8).filter(d => dd.gap_to_leader[d]).map(d => ({
+        function makeGapDS(drvs) {
+            return drvs.filter(d => dd.gap_to_leader[d]).map(d => ({
                 label: d,
                 data: dd.gap_to_leader[d].map(g => ({ x: g.lap, y: g.gap })),
                 borderColor: ddColor(dd, d),
                 borderWidth: 1.5, pointRadius: 0, tension: 0.2, fill: false,
-            })) },
+            }));
+        }
+        gapChart = new Chart(gapCtx, {
+            type: 'line',
+            data: { datasets: makeGapDS(sorted.slice(0, 8)) },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'top', labels: { color: legendColor, usePointStyle: true, font: { size: 11 } } },
+                    legend: { position: 'top', labels: { color: LGC, usePointStyle: true, font: { size: 11 } } },
                     tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: +${ctx.parsed.y.toFixed(1)}s (Lap ${ctx.parsed.x})` } }
                 },
                 scales: {
-                    x: { title: { display: true, text: 'Lap', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } },
-                    y: { title: { display: true, text: 'Gap to Leader (s)', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } }
+                    x: { ...xLinear },
+                    y: { title: { display: true, text: 'Gap to Leader (s)', color: LC }, ticks: { color: TC }, grid: { color: GC } }
                 }
             }
         });
         deepDiveCharts.push(gapChart);
+        document.getElementById('dd-sel-gap')?.addEventListener('change', () => {
+            gapChart.data.datasets = makeGapDS(getSelected('dd-sel-gap', 8));
+            gapChart.update();
+        });
     }
 
-    // -- SECTOR COMPARISON (stacked bar) --
+    // ---- SECTOR COMPARISON (stacked bar) ----
     const secCtx = document.getElementById('chart-sectors');
+    let secChart = null;
     if (secCtx) {
-        const top10 = sorted.slice(0, 10);
-        const secChart = new Chart(secCtx, {
-            type: 'bar',
-            data: {
-                labels: top10,
+        function makeSecData(drvs) {
+            return {
+                labels: drvs,
                 datasets: [
-                    { label: 'S1', data: top10.map(d => dd.driver_metrics[d].best_s1), backgroundColor: '#E80020CC' },
-                    { label: 'S2', data: top10.map(d => dd.driver_metrics[d].best_s2), backgroundColor: '#FF8000CC' },
-                    { label: 'S3', data: top10.map(d => dd.driver_metrics[d].best_s3), backgroundColor: '#27F4D2CC' },
+                    { label: 'S1', data: drvs.map(d => dd.driver_metrics[d]?.best_s1 || 0), backgroundColor: '#E80020CC' },
+                    { label: 'S2', data: drvs.map(d => dd.driver_metrics[d]?.best_s2 || 0), backgroundColor: '#FF8000CC' },
+                    { label: 'S3', data: drvs.map(d => dd.driver_metrics[d]?.best_s3 || 0), backgroundColor: '#27F4D2CC' },
                 ]
-            },
+            };
+        }
+        secChart = new Chart(secCtx, {
+            type: 'bar',
+            data: makeSecData(sorted.slice(0, 10)),
             options: {
                 responsive: true, maintainAspectRatio: false,
                 indexAxis: 'y',
                 plugins: {
-                    legend: { position: 'top', labels: { color: legendColor } },
+                    legend: { position: 'top', labels: { color: LGC } },
                     tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.x.toFixed(3)}s` } }
                 },
                 scales: {
-                    x: { stacked: true, title: { display: true, text: 'Time (s)', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } },
-                    y: { stacked: true, ticks: { color: legendColor }, grid: { color: gridColor } }
+                    x: { stacked: true, title: { display: true, text: 'Time (s)', color: LC }, ticks: { color: TC }, grid: { color: GC } },
+                    y: { stacked: true, ticks: { color: LGC }, grid: { color: GC } }
                 }
             }
         });
         deepDiveCharts.push(secChart);
+        document.getElementById('dd-sel-sec')?.addEventListener('change', () => {
+            const drvs = getSelected('dd-sel-sec', 10);
+            secChart.data = makeSecData(drvs);
+            secChart.update();
+        });
     }
 
-    // -- TYRE DEGRADATION SCATTER --
+    // ---- TYRE DEGRADATION SCATTER ----
     const tyreCtx = document.getElementById('chart-tyredeg');
+    let tyreChart = null;
     if (tyreCtx && dd.lap_data) {
-        const shapes = ['circle', 'rect', 'triangle', 'star', 'cross'];
-        const tyreDS = [];
-        top5.forEach((d, di) => {
-            const laps = dd.lap_data[d] || [];
-            const byComp = {};
-            laps.forEach(l => { if (!byComp[l.compound]) byComp[l.compound] = []; byComp[l.compound].push({ x: l.lap, y: l.fuel_corrected }); });
-            Object.entries(byComp).forEach(([comp, pts]) => {
-                tyreDS.push({
-                    label: `${d} (${comp})`,
-                    data: pts,
-                    borderColor: COMPOUND_COLORS[comp] || '#888',
-                    backgroundColor: (COMPOUND_COLORS[comp] || '#888') + '66',
-                    borderWidth: 1, pointRadius: 2.5,
-                    pointStyle: shapes[di] || 'circle',
-                    showLine: true, tension: 0.2, fill: false,
+        function makeTyreDS(drvs) {
+            const ds = [];
+            drvs.forEach((d, di) => {
+                const laps = dd.lap_data[d] || [];
+                const byComp = {};
+                laps.forEach(l => { if (!byComp[l.compound]) byComp[l.compound] = []; byComp[l.compound].push({ x: l.lap, y: l.fuel_corrected }); });
+                Object.entries(byComp).forEach(([comp, pts]) => {
+                    ds.push({
+                        label: `${d} (${comp})`,
+                        data: pts,
+                        borderColor: CC[comp] || '#888',
+                        backgroundColor: (CC[comp] || '#888') + '66',
+                        borderWidth: 1, pointRadius: 3,
+                        pointStyle: shapes[di % shapes.length],
+                        showLine: true, tension: 0.2, fill: false,
+                    });
                 });
             });
-        });
-        const tyreChart = new Chart(tyreCtx, {
+            return ds;
+        }
+        tyreChart = new Chart(tyreCtx, {
             type: 'scatter',
-            data: { datasets: tyreDS },
+            data: { datasets: makeTyreDS(sorted.slice(0, 4)) },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'top', labels: { color: legendColor, usePointStyle: true, font: { size: 10 } } },
+                    legend: { position: 'top', labels: { color: LGC, usePointStyle: true, font: { size: 10 } } },
                     tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)}s (Lap ${ctx.parsed.x})` } }
                 },
                 scales: {
-                    x: { title: { display: true, text: 'Lap', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } },
-                    y: { title: { display: true, text: 'Lap Time (s)', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor } }
+                    x: { ...xLinear },
+                    y: { title: { display: true, text: 'Lap Time (s)', color: LC }, ticks: { color: TC }, grid: { color: GC } }
                 }
             }
         });
         deepDiveCharts.push(tyreChart);
+        document.getElementById('dd-sel-tyre')?.addEventListener('change', () => {
+            tyreChart.data.datasets = makeTyreDS(getSelected('dd-sel-tyre', 4));
+            tyreChart.update();
+        });
     }
 
-    // -- SPEED TRAP BAR --
+    // ---- SPEED TRAP BAR ----
     const spdCtx = document.getElementById('chart-speed');
     if (spdCtx) {
         const spdSorted = [...sorted].sort((a, b) => (dd.driver_metrics[b].max_speed_trap || 0) - (dd.driver_metrics[a].max_speed_trap || 0)).slice(0, 15);
@@ -3436,7 +3502,7 @@ function renderDDCharts(dd, sorted) {
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.parsed.y.toFixed(1)} km/h` } } },
                 scales: {
-                    x: { ticks: { color: legendColor }, grid: { color: gridColor } },
+                    x: { ticks: { color: LGC }, grid: { color: GC } },
                     y: { title: { display: true, text: 'Speed (km/h)', color: labelColor }, ticks: { color: tickColor }, grid: { color: gridColor },
                         beginAtZero: false, suggestedMin: Math.min(...spdSorted.map(d => dd.driver_metrics[d].max_speed_trap || 280)) - 5 }
                 }

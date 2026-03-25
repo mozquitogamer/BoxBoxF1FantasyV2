@@ -2325,3 +2325,26 @@ table.sortable th.sort-desc::after {
 .round-selector select { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 0.9rem; }
 
 .team-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+/* Driver multi-select for charts */
+.dd-driver-select {
+    background: var(--bg-card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 0.8rem;
+    min-width: 200px;
+    max-width: 400px;
+    height: auto;
+    max-height: 120px;
+    overflow-y: auto;
+}
+.dd-driver-select option {
+    padding: 2px 6px;
+}
+.dd-driver-select option:checked {
+    background: var(--accent);
+    color: #000;
+    font-weight: 600;
+}
