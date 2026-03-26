@@ -1,7 +1,14 @@
 {
-  "updated": "2026-03-25T14:45:19Z",
+  "updated": "2026-03-26T11:13:55Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "T4bYTJt-cCk",
+      "title": "Chinese GP Data Deep Dive - Pre Japanese Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-03-25",
+      "thumbnail": "https://i.ytimg.com/vi/T4bYTJt-cCk/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=T4bYTJt-cCk"
+    },
     {
       "id": "UArils8F_Fg",
       "title": "The BEST F1 Fantasy Team for the Japanese Grand Prix - F1 Fantasy Team Drafts, Tips and Strategy",
@@ -22,13 +29,6 @@
       "published": "2026-03-14",
       "thumbnail": "https://i.ytimg.com/vi/GhQe_CirRH8/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=GhQe_CirRH8"
-    },
-    {
-      "id": "G0ZrK87y5Qk",
-      "title": "Avoid THESE Assets for the Chinese Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips and Strategy",
-      "published": "2026-03-12",
-      "thumbnail": "https://i.ytimg.com/vi/G0ZrK87y5Qk/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=G0ZrK87y5Qk"
     }
   ]
 }
