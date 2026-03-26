@@ -197,22 +197,49 @@ function showFallbackBanner() {
 }
 
 async function loadPitstopData() {
-    // Load pit stop stationary times from overtakes JSON files
+    // Load pit stop stationary times from pitstop JSON files
+    // Also load fastest lap per constructor from deep dive data
     window._pitstopData = {};
+    window._fastestLapData = {};
     if (!seasonSummary || !seasonSummary.rounds) return;
     for (const r of seasonSummary.rounds) {
         if (!r.has_actual) continue;
+        // Pitstop data
         try {
             const resp = await fetch(cacheBust(`data/pitstops_round${r.round}.json`));
-            if (!resp.ok) continue;
-            const psData = await resp.json();
-            if (psData && psData.by_constructor) {
-                for (const [cid, times] of Object.entries(psData.by_constructor)) {
-                    if (!window._pitstopData[cid]) window._pitstopData[cid] = [];
-                    window._pitstopData[cid].push(...times);
+            if (resp.ok) {
+                const psData = await resp.json();
+                if (psData && psData.by_constructor) {
+                    for (const [cid, times] of Object.entries(psData.by_constructor)) {
+                        if (!window._pitstopData[cid]) window._pitstopData[cid] = [];
+                        window._pitstopData[cid].push(...times);
+                    }
                 }
             }
         } catch (e) { /* no pitstop data for this round */ }
+        // Fastest lap from deep dive
+        try {
+            const resp2 = await fetch(cacheBust(`data/deep_dive_round${r.round}.json`));
+            if (resp2.ok) {
+                const dd = await resp2.json();
+                if (dd && dd.driver_metrics && dd.driver_constructors) {
+                    for (const [drv, m] of Object.entries(dd.driver_metrics)) {
+                        const cid = dd.driver_constructors[drv];
+                        const bl = m.best_lap;
+                        if (cid && bl != null) {
+                            const prev = window._fastestLapRaw && window._fastestLapRaw[cid];
+                            if (!prev || bl < prev) {
+                                if (!window._fastestLapRaw) window._fastestLapRaw = {};
+                                window._fastestLapRaw[cid] = bl;
+                                const mins = Math.floor(bl / 60);
+                                const secs = (bl % 60).toFixed(3);
+                                window._fastestLapData[cid] = `${mins}:${secs.padStart(6, '0')}`;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e) { /* no deep dive data */ }
     }
 }
 
@@ -1485,52 +1512,44 @@ function renderSingleLineup(lineup, index, strategy, budget) {
 
 function getPitStopStatsHtml(constructorId) {
     // Aggregate pit stop stationary times from all cached actual data
-    const allStops = [];
+    const stops = [];
     if (window._pitstopData && window._pitstopData[constructorId]) {
-        allStops.push(...window._pitstopData[constructorId]);
+        stops.push(...window._pitstopData[constructorId]);
     }
 
-    if (allStops.length === 0) return '';
-
-    allStops.sort((a, b) => a - b);
-
-    // Separate normal stops from outliers (>10s is likely mechanical issue / unsafe release)
-    const normal = allStops.filter(t => t <= 10);
-    const outliers = allStops.filter(t => t > 10);
-    const stops = normal.length > 0 ? normal : allStops; // fall back to all if everything is slow
+    if (stops.length === 0) return '';
 
     stops.sort((a, b) => a - b);
+
     const median = stops.length % 2 === 0
         ? (stops[stops.length / 2 - 1] + stops[stops.length / 2]) / 2
         : stops[Math.floor(stops.length / 2)];
     const avg = stops.reduce((a, b) => a + b, 0) / stops.length;
     const fastest = stops[0];
     const slowest = stops[stops.length - 1];
+    const slowCount = stops.filter(t => t > 3.5).length;
 
-    let extraRow = '';
-    if (stops.length >= 6) {
-        const p10 = stops[Math.floor(stops.length * 0.1)];
-        const p90 = stops[Math.min(Math.floor(stops.length * 0.9), stops.length - 1)];
-        extraRow = `<span>P10: ${p10.toFixed(2)}s</span><span>P90: ${p90.toFixed(2)}s</span>`;
-    } else {
-        extraRow = `<span>Mean: ${avg.toFixed(2)}s</span><span></span>`;
-    }
-
-    const outlierNote = outliers.length > 0
-        ? `<div style="margin-top:2px;font-size:0.68rem;color:var(--text-muted);" title="Stops over 10s excluded from stats">${outliers.length} abnormal stop${outliers.length > 1 ? 's' : ''} excluded (${outliers.map(t => t.toFixed(1) + 's').join(', ')})</div>`
+    // Fastest race lap for this constructor
+    const fastLapHtml = window._fastestLapData && window._fastestLapData[constructorId]
+        ? `<span title="Fastest race lap this season">Fast Lap: <strong style="color:var(--accent)">${window._fastestLapData[constructorId]}</strong></span>`
         : '';
+
+    const slowNote = slowCount > 0
+        ? `<span style="color:var(--red, #ef4444);" title="Pit stops over 3.5s stationary">Slow (>3.5s): <strong>${slowCount}</strong></span>`
+        : `<span style="color:var(--green);" title="No pit stops over 3.5s">Slow (>3.5s): <strong>0</strong></span>`;
 
     return `
     <div class="pit-stats" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--text-secondary);">
-        <div style="font-weight:600;margin-bottom:4px;" title="Stationary pit stop times (wheels up to wheels down). Median used for typical pace, outliers over 10s excluded.">Pit Stops (stationary)</div>
+        <div style="font-weight:600;margin-bottom:4px;" title="Stationary pit stop times (wheels up to wheels down). All stops included.">Pit Stops (stationary)</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px 8px;">
             <span>Median: <strong style="color:var(--text)">${median.toFixed(2)}s</strong></span>
             <span>Fast: <strong style="color:var(--green)">${fastest.toFixed(2)}s</strong></span>
             <span>Slow: <strong style="color:var(--red, #ef4444)">${slowest.toFixed(2)}s</strong></span>
-            ${extraRow}
-            <span>Count: ${stops.length}${outliers.length > 0 ? ' (+' + outliers.length + ')' : ''}</span>
+            <span>Mean: ${avg.toFixed(2)}s</span>
+            ${slowNote}
+            <span>Count: ${stops.length}</span>
+            ${fastLapHtml}
         </div>
-        ${outlierNote}
     </div>`;
 }
 
@@ -3263,10 +3282,15 @@ async function renderDeepDive(roundNum) {
         <div class="table-wrapper">
         <table class="data-table sortable" id="dd-stint-table">
             <thead><tr>
-                <th>Driver</th><th>Stint</th><th>Compound</th>
-                <th class="num" title="Number of laps on this set of tyres">Laps</th><th class="num" title="Average pace across the stint">Avg Pace</th>
-                <th class="num" title="Average of first 3 laps on fresh tyres">Start Pace</th><th class="num" title="Average of last 3 laps before pit/end">End Pace</th>
-                <th class="num" title="Linear regression slope: seconds lost per additional lap of tyre age">Deg Rate (s/lap)</th><th title="Tyre cliff detected: last 3 laps degraded >2\u00d7 stint average">Cliff?</th>
+                <th title="Driver abbreviation">Driver</th>
+                <th title="Stint number (1 = first set of tyres, 2 = after first pit stop, etc.)">Stint</th>
+                <th title="Tyre compound: SOFT (fastest, degrades quickest), MEDIUM (balanced), HARD (slowest, most durable)">Compound</th>
+                <th class="num" title="Number of clean laps on this set of tyres (excludes pit in/out laps, safety car laps)">Laps</th>
+                <th class="num" title="Average fuel-corrected lap time across the stint. Lower = faster.">Avg Pace</th>
+                <th class="num" title="Average of first 3 laps on fresh tyres. Shows initial tyre performance before degradation kicks in.">Start Pace</th>
+                <th class="num" title="Average of last 3 laps before pitting or race end. Compare to Start Pace to see total degradation.">End Pace</th>
+                <th class="num" title="Degradation rate: seconds lost per additional lap of tyre age, calculated via linear regression. Higher = tyres wearing faster. Negative means getting faster (e.g. track evolution, fuel burn).">Deg Rate (s/lap)</th>
+                <th title="CLIFF = tyre performance cliff detected. The last 3 laps of this stint degraded more than 2x the stint average rate, indicating the tyre suddenly lost grip.">Cliff?</th>
             </tr></thead><tbody>`;
     sorted.forEach(d => {
         const stints = dd.stint_analysis[d] || [];
@@ -3294,7 +3318,9 @@ async function renderDeepDive(roundNum) {
     if (dd.race_momentum && Object.keys(dd.race_momentum).length) {
         const momDrivers = [...drivers].filter(d => dd.race_momentum[d]).sort((a, b) => {
             const am = dd.race_momentum[a], bm = dd.race_momentum[b];
-            return ((am.opening_rank + am.middle_rank + am.closing_rank)/3) - ((bm.opening_rank + bm.middle_rank + bm.closing_rank)/3);
+            const aAvg = ((am.opening||{}).rank||99) + ((am.middle||{}).rank||99) + ((am.closing||{}).rank||99);
+            const bAvg = ((bm.opening||{}).rank||99) + ((bm.middle||{}).rank||99) + ((bm.closing||{}).rank||99);
+            return aAvg - bAvg;
         });
         html += `
         <div class="collapsible-section">
@@ -3305,55 +3331,25 @@ async function renderDeepDive(roundNum) {
             <table class="data-table sortable" id="dd-momentum-table">
                 <thead><tr>
                     <th>Driver</th>
-                    <th class="num">Opening Rank</th><th class="num">Opening Pace</th>
-                    <th class="num">Middle Rank</th><th class="num">Middle Pace</th>
-                    <th class="num">Closing Rank</th><th class="num">Closing Pace</th>
+                    <th class="num" title="Rank by fuel-corrected pace in the first third of the race">Opening Rank</th><th class="num" title="Avg fuel-corrected lap time in the first third">Opening Pace</th>
+                    <th class="num" title="Rank by fuel-corrected pace in the middle third">Middle Rank</th><th class="num" title="Avg fuel-corrected lap time in the middle third">Middle Pace</th>
+                    <th class="num" title="Rank by fuel-corrected pace in the final third">Closing Rank</th><th class="num" title="Avg fuel-corrected lap time in the final third">Closing Pace</th>
                 </tr></thead><tbody>`;
         momDrivers.forEach(d => {
             const m = dd.race_momentum[d];
             const team = TEAMS[dd.driver_constructors[d]] || { color: '#666' };
+            const op = m.opening || {}, mi = m.middle || {}, cl = m.closing || {};
             html += `<tr>
                 <td><span class="team-dot" style="background:${team.color}"></span>${d}</td>
-                <td class="num">${m.opening_rank}</td><td class="num">${ddFix(m.opening_pace)}</td>
-                <td class="num">${m.middle_rank}</td><td class="num">${ddFix(m.middle_pace)}</td>
-                <td class="num">${m.closing_rank}</td><td class="num">${ddFix(m.closing_pace)}</td>
+                <td class="num">${op.rank || '-'}</td><td class="num">${ddFix(op.avg_pace)}</td>
+                <td class="num">${mi.rank || '-'}</td><td class="num">${ddFix(mi.avg_pace)}</td>
+                <td class="num">${cl.rank || '-'}</td><td class="num">${ddFix(cl.avg_pace)}</td>
             </tr>`;
         });
         html += `</tbody></table></div></div></div>`;
     }
 
-    // 6. DIRTY AIR TABLE
-    if (dd.dirty_air && Object.keys(dd.dirty_air).length) {
-        const daSorted = Object.keys(dd.dirty_air).sort((a, b) => dd.dirty_air[b].delta - dd.dirty_air[a].delta);
-        html += `
-        <div class="collapsible-section">
-            <div class="section-header"><h3>Dirty Air Effect</h3><span class="toggle-icon">\u25BC</span></div>
-            <div class="section-body">
-            <p class="analysis-note">Compares pace within 1.5s of car ahead (dirty air) vs >3s gap (clean air). Larger delta = more affected.</p>
-            <div class="table-wrapper">
-            <table class="data-table sortable" id="dd-dirtyair-table">
-                <thead><tr>
-                    <th>Driver</th>
-                    <th class="num">Clean Air Pace</th><th class="num">Dirty Air Pace</th>
-                    <th class="num">Delta (s)</th>
-                    <th class="num">Clean Laps</th><th class="num">Dirty Laps</th>
-                </tr></thead><tbody>`;
-        daSorted.forEach(d => {
-            const da = dd.dirty_air[d];
-            const team = TEAMS[dd.driver_constructors[d]] || { color: '#666' };
-            html += `<tr>
-                <td><span class="team-dot" style="background:${team.color}"></span>${d}</td>
-                <td class="num">${ddFix(da.clean_air_pace)}</td>
-                <td class="num">${ddFix(da.dirty_air_pace)}</td>
-                <td class="num">${ddFix(da.delta)}</td>
-                <td class="num">${da.clean_laps}</td>
-                <td class="num">${da.dirty_laps}</td>
-            </tr>`;
-        });
-        html += `</tbody></table></div></div></div>`;
-    }
-
-    // 7. TEAM SUMMARY TABLE
+    // 6. TEAM SUMMARY TABLE
     if (dd.team_summary) {
         const teams = Object.keys(dd.team_summary).sort((a, b) => dd.team_summary[a].avg_pace - dd.team_summary[b].avg_pace);
         html += `

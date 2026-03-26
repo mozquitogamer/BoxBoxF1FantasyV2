@@ -198,13 +198,27 @@ def compute_driver_metrics(clean: pd.DataFrame) -> dict:
         b5 = _best_n_avg(fc, 5)
         b10 = _best_n_avg(fc, 10)
 
-        # --- theoretical best ---
-        s1 = grp["Sector1Time_seconds"].dropna()
-        s2 = grp["Sector2Time_seconds"].dropna()
-        s3 = grp["Sector3Time_seconds"].dropna()
+        # --- theoretical best (fuel-corrected) ---
+        # Apply same fuel correction to sector times so theoretical best
+        # is comparable to fuel-corrected best_lap
+        s1_raw = grp["Sector1Time_seconds"].dropna()
+        s2_raw = grp["Sector2Time_seconds"].dropna()
+        s3_raw = grp["Sector3Time_seconds"].dropna()
         theo = None
-        if len(s1) and len(s2) and len(s3):
-            theo = round(float(s1.min() + s2.min() + s3.min()), 3)
+        if len(s1_raw) and len(s2_raw) and len(s3_raw):
+            # Fuel correction factor per lap: (total_laps - lap_number) * 0.035 / 3
+            # Distribute equally across the 3 sectors
+            total_laps_est = grp["LapNumber"].max() if "LapNumber" in grp.columns else 0
+            fc_per_sector = grp["LapNumber"].map(
+                lambda ln: (total_laps_est - ln) * 0.035 / 3
+            )
+            s1_fc = (grp["Sector1Time_seconds"] - fc_per_sector).dropna()
+            s2_fc = (grp["Sector2Time_seconds"] - fc_per_sector).dropna()
+            s3_fc = (grp["Sector3Time_seconds"] - fc_per_sector).dropna()
+            if len(s1_fc) and len(s2_fc) and len(s3_fc):
+                theo = round(float(s1_fc.min() + s2_fc.min() + s3_fc.min()), 3)
+            else:
+                theo = round(float(s1_raw.min() + s2_raw.min() + s3_raw.min()), 3)
 
         # --- consistency ---
         std = round(float(np.std(fc, ddof=1)), 3) if len(fc) > 1 else 0.0
@@ -212,13 +226,13 @@ def compute_driver_metrics(clean: pd.DataFrame) -> dict:
         iqr = round(float(q3 - q1), 3)
         cv = round(float(std / avg_lap * 100), 3) if avg_lap > 0 else 0.0
 
-        # --- sectors ---
-        avg_s1 = round(float(s1.mean()), 3) if len(s1) else None
-        avg_s2 = round(float(s2.mean()), 3) if len(s2) else None
-        avg_s3 = round(float(s3.mean()), 3) if len(s3) else None
-        best_s1 = round(float(s1.min()), 3) if len(s1) else None
-        best_s2 = round(float(s2.min()), 3) if len(s2) else None
-        best_s3 = round(float(s3.min()), 3) if len(s3) else None
+        # --- sectors (raw, not fuel-corrected) ---
+        avg_s1 = round(float(s1_raw.mean()), 3) if len(s1_raw) else None
+        avg_s2 = round(float(s2_raw.mean()), 3) if len(s2_raw) else None
+        avg_s3 = round(float(s3_raw.mean()), 3) if len(s3_raw) else None
+        best_s1 = round(float(s1_raw.min()), 3) if len(s1_raw) else None
+        best_s2 = round(float(s2_raw.min()), 3) if len(s2_raw) else None
+        best_s3 = round(float(s3_raw.min()), 3) if len(s3_raw) else None
 
         # Sector % of total
         total_s = (avg_s1 or 0) + (avg_s2 or 0) + (avg_s3 or 0)
@@ -812,22 +826,18 @@ def run_deep_dive(round_num: int, year: int = CURRENT_SEASON) -> None:
     print(f"  Gap to leader: {len(gap_to_leader)} drivers")
 
     # ── creative analyses ────────────────────────────────────────────────
-    print("\n[7/10] Dirty air analysis...")
-    dirty_air = analyze_dirty_air(clean)
-    print(f"  {len(dirty_air)} drivers with enough data")
-
-    print("\n[8/10] Temperature sensitivity...")
+    print("\n[7/9] Temperature sensitivity...")
     temp_sensitivity = analyze_temp_sensitivity(clean)
     print(f"  {len(temp_sensitivity)} drivers with enough temp variation")
 
-    print("\n[9/10] Race momentum (thirds) & undercut/overcut...")
+    print("\n[8/9] Race momentum (thirds) & undercut/overcut...")
     momentum = analyze_race_momentum(clean)
     undercut = analyze_undercut_overcut(clean, raw_df)
     print(f"  Momentum: {len(momentum)} drivers")
     print(f"  Undercut/overcut comparisons: {len(undercut)}")
 
     # ── team summary ─────────────────────────────────────────────────────
-    print("\n[10/10] Team-level aggregation...")
+    print("\n[9/9] Team-level aggregation...")
     team_summary = compute_team_summary(driver_metrics, driver_constructors, abbrev_to_name)
     print(f"  {len(team_summary)} teams")
 
@@ -847,7 +857,6 @@ def run_deep_dive(round_num: int, year: int = CURRENT_SEASON) -> None:
         "lap_data": lap_data,
         "position_tracker": position_tracker,
         "gap_to_leader": gap_to_leader,
-        "dirty_air": dirty_air,
         "temperature_sensitivity": temp_sensitivity,
         "race_momentum": momentum,
         "undercut_overcut": undercut,
