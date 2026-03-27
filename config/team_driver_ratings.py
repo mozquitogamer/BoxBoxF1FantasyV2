@@ -16,7 +16,7 @@ TEAM_STRATEGY_RATINGS = {
     # 2026 season ratings — updated to reflect current constructor order
     'mercedes': {
         'strategy_rating': 9,    # Dominant car, Hamilton + Russell precision strategy
-        'pit_stop_speed': 9,
+        'pit_stop_speed': 8,
         'adaptability': 9,
     },
     'ferrari': {
@@ -25,13 +25,13 @@ TEAM_STRATEGY_RATINGS = {
         'adaptability': 7,
     },
     'red_bull': {
-        'strategy_rating': 7,    # Excellent infrastructure but car clearly off-pace in 2026; DNF China
+        'strategy_rating': 8,    # Excellent infrastructure but car clearly off-pace in 2026; DNF China
         'pit_stop_speed': 9,     # Consistently sub-2.5s stops
         'adaptability': 7,       # Car not adapting well to new 2026 regs
     },
     'mclaren': {
         'strategy_rating': 8,    # Very strong in 2024/2025, continues in 2026
-        'pit_stop_speed': 9,     # World record stop holders
+        'pit_stop_speed': 8,     # World record stop holders
         'adaptability': 8,
     },
     'haas': {
@@ -60,9 +60,9 @@ TEAM_STRATEGY_RATINGS = {
         'adaptability': 6,
     },
     'aston_martin': {
-        'strategy_rating': 5,    # Struggling in 2026
-        'pit_stop_speed': 6,
-        'adaptability': 5,
+        'strategy_rating': 4,    # Struggling in 2026
+        'pit_stop_speed': 3,
+        'adaptability': 3,
     },
     'audi': {                    # Formerly Kick Sauber / Sauber
         'strategy_rating': 5,
@@ -112,11 +112,11 @@ DRIVER_TIRE_MANAGEMENT = {
 
     # Good
     'valtteri_bottas': 7,
-    'sergio_perez': 7,
+    'sergio_perez': 8,
     'esteban_ocon': 7,
     'pierre_gasly': 7,
     'alexander_albon': 7,
-    'lance_stroll': 7,
+    'lance_stroll': 6,
     'charles_leclerc': 8,     # Consistently strong race pace — P4 race R2, P2 sprint
     'kimi_antonelli': 8,      # R2 race winner — controlled, composed tire management
 
@@ -128,7 +128,7 @@ DRIVER_TIRE_MANAGEMENT = {
     'franco_colapinto': 6,
 
     # Rookie / limited F1 data
-    'arvid_lindblad': 5,
+    'arvid_lindblad': 7,
 
     # Legacy drivers (2020-2025 training data compatibility)
     'daniel_ricciardo': 7,
@@ -167,15 +167,15 @@ DRIVER_WET_WEATHER_SKILL = {
     'franco_colapinto': 7,
 
     # Average
-    'valtteri_bottas': 6,
+    'valtteri_bottas': 7,
     'nico_hulkenberg': 6,
-    'lance_stroll': 6,
+    'lance_stroll': 7,
     'oliver_bearman': 6,
     'liam_lawson': 6,
     'gabriel_bortoleto': 6,
 
     # Rookie / limited data
-    'arvid_lindblad': 5,
+    'arvid_lindblad': 6,
 
     # Legacy drivers (2020-2025 training data compatibility)
     'daniel_ricciardo': 7,
@@ -213,12 +213,12 @@ DRIVER_OVERTAKING_SKILL = {
     'alexander_albon': 7,
     'isack_hadjar': 7,
     'liam_lawson': 7,
-    'oliver_bearman': 7,
+    'oliver_bearman': 8,
     'sergio_perez': 7,
     'nico_hulkenberg': 7,
 
     # Average
-    'valtteri_bottas': 6,
+    'valtteri_bottas': 7,
     'lance_stroll': 6,
     'arvid_lindblad': 6,
 
@@ -262,8 +262,8 @@ DRIVER_QUALIFYING_SPECIALIST = {
 
     # Average
     'sergio_perez': 6,        # DNS China SQ (mechanical), historically struggles vs teammate
-    'valtteri_bottas': 6,
-    'lance_stroll': 6,
+    'valtteri_bottas': 5,
+    'lance_stroll': 4,
     'arvid_lindblad': 6,
 
     # Legacy drivers (2020-2025 training data compatibility)

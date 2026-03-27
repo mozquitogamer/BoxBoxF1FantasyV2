@@ -144,6 +144,9 @@ def build_predictions_json(round_num: int) -> dict | None:
                     entry["mc_total_p95"] = round(mc.get("mc_total_p95", 0), 1)
                     entry["mc_upside"] = round(mc.get("mc_upside", 0), 1)
                     entry["mc_dnf_rate"] = round(mc.get("mc_dnf_rate", 0), 1)
+                    entry["mc_overtakes_mean"] = round(mc.get("mc_overtakes_mean", 0), 1)
+                    entry["mc_quali_pts_mean"] = round(mc.get("mc_quali_pts_mean", 0), 1)
+                    entry["mc_race_pts_mean"] = round(mc.get("mc_race_pts_mean", 0), 1)
             mc_by_con = {c["constructor_id"]: c for c in mc_data.get("constructors", [])}
         except Exception as e:
             print(f"  Warning: Could not load MC data: {e}")
