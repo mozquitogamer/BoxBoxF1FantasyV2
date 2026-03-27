@@ -191,6 +191,40 @@ def load_constructors_info() -> dict:
     return {c["constructor_id"]: c for c in data["constructors"]}
 
 
+def load_overtake_history() -> dict:
+    """Load manual overtake data from data/seed/overtakes.csv.
+
+    Returns dict keyed by driver_id with:
+      - avg_overtakes: mean overtakes per race
+      - avg_pos_gained: mean positions gained per race
+      - avg_pos_lost: mean positions lost per race
+      - races: number of data points
+    """
+    path = SEED_DIR / "overtakes.csv"
+    if not path.exists():
+        print(f"  No overtake history found at {path}")
+        return {}
+
+    df = pd.read_csv(path)
+    # Drop rows where overtakes_made is empty (unfilled)
+    df = df.dropna(subset=["overtakes_made"])
+    if df.empty:
+        print(f"  Overtakes CSV exists but has no filled data yet")
+        return {}
+
+    result = {}
+    for driver_id, grp in df.groupby("driver_id"):
+        result[driver_id] = {
+            "avg_overtakes": grp["overtakes_made"].mean(),
+            "avg_pos_gained": grp["positions_gained"].mean() if "positions_gained" in grp.columns else 0,
+            "avg_pos_lost": grp["positions_lost"].mean() if "positions_lost" in grp.columns else 0,
+            "races": len(grp),
+        }
+
+    print(f"  Loaded overtake history for {len(result)} drivers ({int(df['round'].max())} rounds)")
+    return result
+
+
 # ==============================================================================
 # Simulation engine
 # ==============================================================================
@@ -230,14 +264,22 @@ def sample_positions(raw_scores: np.ndarray, noise_base: float,
 
 def sample_overtakes(grid_positions: np.ndarray, race_positions: np.ndarray,
                      dnf_mask: np.ndarray, rng: np.random.Generator,
-                     is_sprint: bool = False) -> np.ndarray:
+                     is_sprint: bool = False,
+                     driver_ids: list[str] | None = None,
+                     overtake_history: dict | None = None) -> np.ndarray:
     """Sample overtake counts for each driver.
 
-    Calibrated from OpenF1 R1+R2 actual data. The base already includes
-    typical position gains for each grid bucket, so we only add EXCESS
-    gains beyond what's typical. This prevents double-counting.
+    Uses driver-specific overtake history from data/seed/overtakes.csv when
+    available. Falls back to grid-bucket estimates calibrated from OpenF1 data.
 
-    Distribution: Normal approximation with CV from actual data.
+    When driver history is available:
+      - Mean = driver's actual average overtakes per race
+      - Std = 30% of mean (tight) since we have real data
+      - Adjusted for simulated position change vs their typical gains
+
+    When no history available:
+      - Uses grid-bucket base + excess gains beyond typical
+      - Distribution: Normal with CV from actual data
     """
     n = len(grid_positions)
     overtakes = np.zeros(n, dtype=int)
@@ -261,14 +303,36 @@ def sample_overtakes(grid_positions: np.ndarray, race_positions: np.ndarray,
         else:
             bucket = "back"
 
-        base = base_map[bucket]
-        # Only add gains BEYOND what's typical for this grid bucket
-        pos_gained = max(0, grid - race_positions[i])
-        excess_gains = max(0, pos_gained - typical[bucket])
-        expected_ot = base + excess_gains
+        # Check for driver-specific overtake data
+        driver_id = driver_ids[i] if driver_ids else None
+        hist = overtake_history.get(driver_id) if (overtake_history and driver_id) else None
 
-        # Sample from normal with calibrated CV
-        std = max(1.5, expected_ot * cv)
+        if hist and hist["races"] >= 1:
+            # Use actual driver overtake average as base
+            driver_avg_ot = hist["avg_overtakes"]
+            driver_avg_gained = hist["avg_pos_gained"]
+
+            # Adjust for this simulation's position change vs their typical
+            sim_gained = max(0, grid - race_positions[i])
+            typical_gained = max(0, driver_avg_gained)
+            gain_diff = sim_gained - typical_gained
+
+            # More gains than usual = more overtakes, scaled
+            expected_ot = max(0, driver_avg_ot + gain_diff * 0.5)
+
+            # Tighter std since we have real data (30% CV)
+            std = max(1.0, expected_ot * 0.30)
+            if is_sprint:
+                expected_ot *= 0.45  # Sprint ~45% of race overtakes
+                std = max(1.0, expected_ot * 0.40)
+        else:
+            # Fallback: grid-bucket estimate
+            base = base_map[bucket]
+            pos_gained = max(0, grid - race_positions[i])
+            excess_gains = max(0, pos_gained - typical[bucket])
+            expected_ot = base + excess_gains
+            std = max(1.5, expected_ot * cv)
+
         sampled = rng.normal(expected_ot, std)
         overtakes[i] = max(0, round(sampled))
 
@@ -446,9 +510,25 @@ def run_simulations(
         race_raw = pred_df["predicted_race_raw"].values.astype(float)
     else:
         # Older format: synthesize continuous scores from discrete positions
-        # Add small jitter to break ties and create a smooth distribution
         quali_raw = pred_df["predicted_quali_position"].values.astype(float)
         race_raw = pred_df["predicted_race_position"].values.astype(float)
+
+    # Quantile-transform raw scores to evenly-spaced values.
+    # This ensures noise affects all positions equally — without this,
+    # clusters of drivers with similar raw scores (e.g. P8-P11 within 1 point)
+    # get shuffled much more than isolated drivers (e.g. P1 with 2-point gap).
+    # The transform preserves rank order but makes gaps uniform.
+    def quantile_transform(scores: np.ndarray) -> np.ndarray:
+        n = len(scores)
+        order = scores.argsort()
+        transformed = np.empty(n, dtype=float)
+        # Evenly space from 1 to n, preserving original rank
+        transformed[order] = np.linspace(1.0, float(n), n)
+        return transformed
+
+    quali_raw = quantile_transform(quali_raw)
+    race_raw = quantile_transform(race_raw)
+    print(f"  Applied quantile transform to raw scores (uniform gap = {22/(len(quali_raw)-1):.2f})")
 
     confidences = pred_df["confidence"].values.astype(float)
 
@@ -458,6 +538,19 @@ def run_simulations(
     for i, abbrev in enumerate(abbrevs):
         if abbrev in fp_lookup.index:
             dnf_probs[i] = fp_lookup.loc[abbrev, "dnf_probability"]
+
+    # Load driver-specific overtake history from seed data
+    overtake_hist = load_overtake_history()
+    # Map abbreviations to full driver_ids for overtake lookup
+    abbrev_to_id = {}
+    driver_info = load_drivers_info()
+    for did, info in driver_info.items():
+        abbrev_to_id[info.get("abbreviation", did)] = did
+    # Also try pred_df driver_id column directly
+    if "driver_id" in pred_df.columns:
+        for i, row in pred_df.iterrows():
+            abbrev_to_id[row.get("driver_abbrev", "")] = row["driver_id"]
+    driver_id_list = [abbrev_to_id.get(a, a) for a in abbrevs]
 
     # Storage for all simulation results
     all_total_pts = np.zeros((n_sims, n_drivers))
@@ -483,8 +576,9 @@ def run_simulations(
         # DNF drivers get position = grid_size (last)
         race_positions[dnf_mask] = GRID_SIZE
 
-        # 4. Sample overtakes
-        overtakes = sample_overtakes(quali_positions, race_positions, dnf_mask, rng)
+        # 4. Sample overtakes (use driver-specific history when available)
+        overtakes = sample_overtakes(quali_positions, race_positions, dnf_mask, rng,
+                                     driver_ids=driver_id_list, overtake_history=overtake_hist)
 
         # 5. Sample fastest lap & DOTD
         fl_idx = sample_fastest_lap(race_positions, dnf_mask, rng)
@@ -503,7 +597,8 @@ def run_simulations(
             sprint_dnf_mask = rng.random(n_drivers) < (dnf_probs * 0.5)  # Lower DNF in sprint
             sprint_positions[sprint_dnf_mask] = GRID_SIZE
             sprint_overtakes = sample_overtakes(
-                quali_positions, sprint_positions, sprint_dnf_mask, rng, is_sprint=True
+                quali_positions, sprint_positions, sprint_dnf_mask, rng, is_sprint=True,
+                driver_ids=driver_id_list, overtake_history=overtake_hist
             )
             sprint_fl_idx = sample_fastest_lap(sprint_positions, sprint_dnf_mask, rng)
 
