@@ -69,6 +69,21 @@ def load_fp_laps(round_num: int) -> pd.DataFrame | None:
     if "lap_time" not in combined.columns and "lap_time_seconds" in combined.columns:
         combined["lap_time"] = combined["lap_time_seconds"]
 
+    # Normalize column names so analysis functions find what they expect
+    rename_map = {}
+    if "stint_number" in combined.columns and "stint" not in combined.columns:
+        rename_map["stint_number"] = "stint"
+    if "Driver" in combined.columns and "driver_id" not in combined.columns:
+        rename_map["Driver"] = "driver_id"
+    if "Compound" in combined.columns and "compound" not in combined.columns:
+        rename_map["Compound"] = "compound"
+    if "LapNumber" in combined.columns and "lap_number" not in combined.columns:
+        rename_map["LapNumber"] = "lap_number"
+    if "TyreLife" in combined.columns and "tyre_life" not in combined.columns:
+        rename_map["TyreLife"] = "tyre_life"
+    if rename_map:
+        combined.rename(columns=rename_map, inplace=True)
+
     return combined
 
 

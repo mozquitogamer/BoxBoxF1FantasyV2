@@ -1568,64 +1568,110 @@ function renderFPAnalysis() {
         return;
     }
 
+    // Helper: make sortable table. Each column: { key, label, fmt, title?, cls? }
+    // data: array of { id, ...values }
+    function sortableTable(tableId, columns, data, defaultSortKey, defaultAsc) {
+        let sortKey = defaultSortKey, sortAsc = defaultAsc;
+        function renderTable() {
+            const sorted = [...data].sort((a, b) => {
+                const av = a[sortKey], bv = b[sortKey];
+                if (av == null && bv == null) return 0;
+                if (av == null) return 1;
+                if (bv == null) return -1;
+                return sortAsc ? (av < bv ? -1 : av > bv ? 1 : 0) : (av > bv ? -1 : av < bv ? 1 : 0);
+            });
+            const thead = columns.map(c => {
+                const arrow = c.key === sortKey ? (sortAsc ? ' ▲' : ' ▼') : '';
+                const cls = c.cls ? ` class="${c.cls}"` : '';
+                const ttl = c.title ? ` title="${c.title}"` : '';
+                return `<th${cls}${ttl} data-sortkey="${c.key}" style="cursor:pointer">${c.label}${arrow}</th>`;
+            }).join('');
+            const tbody = sorted.map((row, i) => {
+                const cells = columns.map(c => {
+                    const cls = c.cls ? ` class="${c.cls}"` : '';
+                    const val = c.fmt ? c.fmt(row, i) : (row[c.key] ?? '-');
+                    return `<td${cls}>${val}</td>`;
+                }).join('');
+                return `<tr>${cells}</tr>`;
+            }).join('');
+            const tbl = document.getElementById(tableId);
+            if (tbl) {
+                tbl.querySelector('thead tr').innerHTML = thead;
+                tbl.querySelector('tbody').innerHTML = tbody;
+                tbl.querySelectorAll('thead th[data-sortkey]').forEach(th => {
+                    th.onclick = () => {
+                        const k = th.dataset.sortkey;
+                        if (k === sortKey) sortAsc = !sortAsc;
+                        else { sortKey = k; sortAsc = true; }
+                        renderTable();
+                    };
+                });
+            }
+        }
+        return { renderTable, getHtml: () => `<table class="data-table" id="${tableId}"><thead><tr></tr></thead><tbody></tbody></table>` };
+    }
+
     let html = `<div class="analysis-race-header">${fpAnalysis.race} — Round ${fpAnalysis.round}</div>`;
+    const postRenderFns = [];
+
+    // Search/filter bar
+    html += `<div class="controls" style="margin-bottom:12px;"><div class="control-group"><label>Filter driver</label>
+        <input type="text" id="fpDriverFilter" placeholder="Search driver..." style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:0.85rem;width:140px;">
+    </div></div>`;
 
     // Qualifying Pace
     if (fpAnalysis.qualifying_pace && Object.keys(fpAnalysis.qualifying_pace).length > 0) {
-        const sorted = Object.entries(fpAnalysis.qualifying_pace)
-            .filter(([,v]) => v.best_lap)
-            .sort((a,b) => a[1].best_lap - b[1].best_lap);
-
-        html += `
-        <div class="analysis-block">
-            <h3>Qualifying Pace (Short Runs)</h3>
-            <table class="data-table">
-                <thead><tr>
-                    <th>#</th><th>Driver</th><th class="num">Best Lap</th>
-                    <th class="num">Best 3 Avg</th><th class="num">Best 5 Avg</th>
-                    <th class="num">Gap</th><th class="num">Laps</th>
-                </tr></thead>
-                <tbody>${sorted.map(([id, d], i) => `
-                    <tr>
-                        <td>${i+1}</td>
-                        <td><strong>${id}</strong></td>
-                        <td class="num">${fmtTime(d.best_lap)}</td>
-                        <td class="num">${fmtTime(d.best_3_avg)}</td>
-                        <td class="num">${fmtTime(d.best_5_avg)}</td>
-                        <td class="num ${d.gap_to_fastest === 0 ? 'text-green' : ''}">${d.gap_to_fastest === 0 ? 'Leader' : '+' + d.gap_to_fastest.toFixed(3)}</td>
-                        <td class="num">${d.total_laps}</td>
-                    </tr>`).join('')}
-                </tbody>
-            </table>
-        </div>`;
+        const rows = Object.entries(fpAnalysis.qualifying_pace).filter(([,v]) => v.best_lap).map(([id, d]) => ({
+            id, best_lap: d.best_lap, best_3_avg: d.best_3_avg, best_5_avg: d.best_5_avg,
+            gap: d.gap_to_fastest, laps: d.total_laps
+        }));
+        const tbl = sortableTable('fpQualiTable', [
+            { key: '_rank', label: '#', cls: 'num', fmt: (r, i) => i + 1 },
+            { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
+            { key: 'best_lap', label: 'Best Lap', cls: 'num', title: 'Fastest single lap in FP sessions', fmt: r => fmtTime(r.best_lap) },
+            { key: 'best_3_avg', label: 'Best 3 Avg', cls: 'num', title: 'Average of 3 fastest laps', fmt: r => fmtTime(r.best_3_avg) },
+            { key: 'best_5_avg', label: 'Best 5 Avg', cls: 'num', title: 'Average of 5 fastest laps', fmt: r => fmtTime(r.best_5_avg) },
+            { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to fastest driver', fmt: r => r.gap === 0 ? '<span class="text-green">Leader</span>' : '+' + r.gap.toFixed(3) },
+            { key: 'laps', label: 'Laps', cls: 'num', title: 'Total clean laps completed' }
+        ], rows, 'best_lap', true);
+        html += `<div class="analysis-block"><h3>Qualifying Pace (Short Runs)</h3><p class="analysis-note">Best single-lap and multi-lap averages. Click column headers to sort.</p>${tbl.getHtml()}</div>`;
+        postRenderFns.push(tbl.renderTable);
     }
 
     // Long Run Pace
     if (fpAnalysis.long_run_pace && Object.keys(fpAnalysis.long_run_pace).length > 0) {
-        const sorted = Object.entries(fpAnalysis.long_run_pace)
-            .sort((a,b) => a[1].avg_long_run_pace - b[1].avg_long_run_pace);
+        const rows = Object.entries(fpAnalysis.long_run_pace).map(([id, d]) => ({
+            id, avg_pace: d.avg_long_run_pace, gap: d.gap_to_fastest, laps: d.total_long_run_laps, runs: d.runs
+        }));
+        const tbl = sortableTable('fpLongRunTable', [
+            { key: '_rank', label: '#', cls: 'num', fmt: (r, i) => i + 1 },
+            { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
+            { key: 'avg_pace', label: 'Avg Pace', cls: 'num', title: 'Average lap time across all long run stints (5+ laps). Lower = faster race pace.', fmt: r => fmtTime(r.avg_pace) },
+            { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to fastest long-run driver', fmt: r => r.gap === 0 ? '<span class="text-green">Leader</span>' : '+' + r.gap.toFixed(3) },
+            { key: 'laps', label: 'Laps', cls: 'num', title: 'Total long-run laps (stints of 5+ laps)' },
+            { key: 'runs', label: 'Runs', title: 'Individual stint details: compound, laps, avg pace', fmt: r => r.runs.map(s => `<span class="compound-badge ${s.compound.toLowerCase()}">${s.compound} (${s.laps}L, ${fmtTime(s.avg_pace)})</span>`).join(' ') }
+        ], rows, 'avg_pace', true);
+        html += `<div class="analysis-block"><h3>Long Run Pace (Predicted Race Pace)</h3><p class="analysis-note">Stints of 5+ laps on the same compound. Best indicator of race-day pace. Click headers to sort.</p>${tbl.getHtml()}</div>`;
+        postRenderFns.push(tbl.renderTable);
+    }
 
-        html += `
-        <div class="analysis-block">
-            <h3>Long Run Pace (Predicted Race Pace)</h3>
-            <table class="data-table">
-                <thead><tr>
-                    <th>#</th><th>Driver</th><th class="num">Avg Pace</th>
-                    <th class="num">Gap</th><th class="num">Laps</th>
-                    <th>Runs</th>
-                </tr></thead>
-                <tbody>${sorted.map(([id, d], i) => `
-                    <tr>
-                        <td>${i+1}</td>
-                        <td><strong>${id}</strong></td>
-                        <td class="num">${fmtTime(d.avg_long_run_pace)}</td>
-                        <td class="num ${d.gap_to_fastest === 0 ? 'text-green' : ''}">${d.gap_to_fastest === 0 ? 'Leader' : '+' + d.gap_to_fastest.toFixed(3)}</td>
-                        <td class="num">${d.total_long_run_laps}</td>
-                        <td>${d.runs.map(r => `<span class="compound-badge ${r.compound.toLowerCase()}">${r.compound} (${r.laps}L, ${fmtTime(r.avg_pace)})</span>`).join(' ')}</td>
-                    </tr>`).join('')}
-                </tbody>
-            </table>
-        </div>`;
+    // Fuel-Corrected Pace
+    if (fpAnalysis.fuel_corrected_pace && Object.keys(fpAnalysis.fuel_corrected_pace).length > 0) {
+        const rows = Object.entries(fpAnalysis.fuel_corrected_pace).map(([id, d]) => ({
+            id, corrected_pace: d.avg_corrected_pace || d.corrected_pace, raw_pace: d.avg_raw_pace || d.raw_pace,
+            fuel_effect: d.fuel_effect || d.correction, laps: d.laps || d.total_laps,
+            gap: d.gap_to_fastest || 0
+        }));
+        const tbl = sortableTable('fpFuelTable', [
+            { key: '_rank', label: '#', cls: 'num', fmt: (r, i) => i + 1 },
+            { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
+            { key: 'corrected_pace', label: 'Corrected Pace', cls: 'num', title: 'Lap time adjusted for estimated fuel load (removes fuel weight advantage of late-stint laps)', fmt: r => r.corrected_pace ? fmtTime(r.corrected_pace) : '-' },
+            { key: 'raw_pace', label: 'Raw Pace', cls: 'num', title: 'Unadjusted average lap time', fmt: r => r.raw_pace ? fmtTime(r.raw_pace) : '-' },
+            { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to fastest fuel-corrected pace', fmt: r => r.gap === 0 ? '<span class="text-green">Leader</span>' : '+' + (r.gap || 0).toFixed(3) },
+            { key: 'laps', label: 'Laps', cls: 'num' }
+        ], rows, 'corrected_pace', true);
+        html += `<div class="analysis-block"><h3>Fuel-Corrected Pace</h3><p class="analysis-note">Lap times adjusted for estimated fuel load to give a truer picture of underlying pace.</p>${tbl.getHtml()}</div>`;
+        postRenderFns.push(tbl.renderTable);
     }
 
     // Tyre Degradation
@@ -1634,6 +1680,7 @@ function renderFPAnalysis() {
         html += `
         <div class="analysis-block">
             <h3>Tyre Degradation</h3>
+            <p class="analysis-note">Seconds lost per additional lap of tyre age. Green = low degradation, red = high. Lower is better for race strategy.</p>
             <div class="deg-grid">${entries.map(([id, compounds]) => {
                 const compoundEntries = Object.entries(compounds);
                 return `
@@ -1652,64 +1699,110 @@ function renderFPAnalysis() {
         </div>`;
     }
 
+    // Stint Breakdown
+    if (fpAnalysis.stint_breakdown && Object.keys(fpAnalysis.stint_breakdown).length > 0) {
+        const rows = [];
+        Object.entries(fpAnalysis.stint_breakdown).forEach(([id, stints]) => {
+            (Array.isArray(stints) ? stints : Object.values(stints)).forEach(s => {
+                rows.push({
+                    id, stint: s.stint || s.stint_number || 0, compound: s.compound || '?',
+                    laps: s.laps || s.lap_count || 0, avg_pace: s.avg_pace || s.avg_time || 0,
+                    first_lap: s.first_lap_pace || s.first_lap || 0, last_lap: s.last_lap_pace || s.last_lap || 0,
+                    deg: s.degradation || s.deg_rate || 0
+                });
+            });
+        });
+        if (rows.length > 0) {
+            const tbl = sortableTable('fpStintTable', [
+                { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
+                { key: 'stint', label: 'Stint', cls: 'num', title: 'Stint number within the session' },
+                { key: 'compound', label: 'Tyre', title: 'Tyre compound used', fmt: r => `<span class="compound-badge ${r.compound.toLowerCase()}">${r.compound}</span>` },
+                { key: 'laps', label: 'Laps', cls: 'num' },
+                { key: 'avg_pace', label: 'Avg Pace', cls: 'num', title: 'Average lap time across the stint', fmt: r => r.avg_pace ? fmtTime(r.avg_pace) : '-' },
+                { key: 'first_lap', label: 'First Lap', cls: 'num', title: 'Pace of first timed lap in stint', fmt: r => r.first_lap ? fmtTime(r.first_lap) : '-' },
+                { key: 'last_lap', label: 'Last Lap', cls: 'num', title: 'Pace of last lap in stint', fmt: r => r.last_lap ? fmtTime(r.last_lap) : '-' },
+                { key: 'deg', label: 'Deg (s/lap)', cls: 'num', title: 'Degradation rate: seconds lost per lap of tyre age', fmt: r => r.deg ? (r.deg >= 0 ? '+' : '') + r.deg.toFixed(4) : '-' }
+            ], rows, 'avg_pace', true);
+            html += `<div class="analysis-block"><h3>Stint Breakdown</h3><p class="analysis-note">Detailed per-stint data showing pace evolution and tyre degradation within each run.</p>${tbl.getHtml()}</div>`;
+            postRenderFns.push(tbl.renderTable);
+        }
+    }
+
     // Consistency
     if (fpAnalysis.consistency && Object.keys(fpAnalysis.consistency).length > 0) {
-        const sorted = Object.entries(fpAnalysis.consistency)
-            .sort((a,b) => a[1].cv - b[1].cv);
+        const rows = Object.entries(fpAnalysis.consistency).map(([id, d]) => ({
+            id, cv: d.cv, std: d.std, pct102: d.laps_within_102pct, best_lap: d.best_lap, laps: d.total_laps
+        }));
+        const tbl = sortableTable('fpConsistencyTable', [
+            { key: '_rank', label: '#', cls: 'num', fmt: (r, i) => i + 1 },
+            { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
+            { key: 'cv', label: 'CV%', cls: 'num', title: 'Coefficient of Variation — lower = more consistent lap times', fmt: r => (r.cv * 100).toFixed(2) + '%' },
+            { key: 'std', label: 'Std Dev', cls: 'num', title: 'Standard deviation of lap times in seconds', fmt: r => r.std.toFixed(3) + 's' },
+            { key: 'pct102', label: 'Within 102%', cls: 'num', title: 'Percentage of laps within 102% of personal best', fmt: r => r.pct102.toFixed(0) + '%' },
+            { key: 'best_lap', label: 'Best Lap', cls: 'num', fmt: r => fmtTime(r.best_lap) },
+            { key: 'laps', label: 'Laps', cls: 'num' }
+        ], rows, 'cv', true);
+        html += `<div class="analysis-block"><h3>Consistency</h3><p class="analysis-note">How repeatable a driver's lap times are. Low CV% = consistent, high Within 102% = staying near their best pace.</p>${tbl.getHtml()}</div>`;
+        postRenderFns.push(tbl.renderTable);
+    }
 
-        html += `
-        <div class="analysis-block">
-            <h3>Consistency</h3>
-            <table class="data-table">
-                <thead><tr>
-                    <th>#</th><th>Driver</th><th class="num">CV</th>
-                    <th class="num">Std Dev</th><th class="num">Within 102%</th>
-                    <th class="num">Best Lap</th><th class="num">Laps</th>
-                </tr></thead>
-                <tbody>${sorted.map(([id, d], i) => `
-                    <tr>
-                        <td>${i+1}</td>
-                        <td><strong>${id}</strong></td>
-                        <td class="num">${(d.cv * 100).toFixed(2)}%</td>
-                        <td class="num">${d.std.toFixed(3)}s</td>
-                        <td class="num">${d.laps_within_102pct.toFixed(0)}%</td>
-                        <td class="num">${fmtTime(d.best_lap)}</td>
-                        <td class="num">${d.total_laps}</td>
-                    </tr>`).join('')}
-                </tbody>
-            </table>
-        </div>`;
+    // Sector Rankings
+    if (fpAnalysis.sector_rankings && Object.keys(fpAnalysis.sector_rankings).length > 0) {
+        html += `<div class="analysis-block"><h3>Sector Rankings</h3><p class="analysis-note">Fastest drivers in each sector. Shows raw best sector times.</p>`;
+        for (const [sector, rankings] of Object.entries(fpAnalysis.sector_rankings)) {
+            const label = sector.replace('sector_', 'Sector ').replace('s1', 'Sector 1').replace('s2', 'Sector 2').replace('s3', 'Sector 3');
+            html += `<h4 style="margin:8px 0 4px">${label}</h4><table class="data-table"><thead><tr><th>#</th><th>Driver</th><th class="num">Best</th><th class="num">Gap</th></tr></thead><tbody>`;
+            const items = Array.isArray(rankings) ? rankings : Object.entries(rankings).map(([id, d]) => ({driver: id, ...d}));
+            items.forEach((r, i) => {
+                const id = r.driver || r.driver_id || r.id || '?';
+                const best = r.best || r.time || 0;
+                const gap = r.gap || r.gap_to_fastest || 0;
+                html += `<tr><td>${i+1}</td><td><strong>${id}</strong></td><td class="num">${best.toFixed(3)}s</td><td class="num">${gap === 0 ? '<span class="text-green">Leader</span>' : '+' + gap.toFixed(3)}</td></tr>`;
+            });
+            html += `</tbody></table>`;
+        }
+        html += `</div>`;
     }
 
     // Session Evolution
     if (fpAnalysis.session_evolution && Object.keys(fpAnalysis.session_evolution).length > 0) {
-        const sorted = Object.entries(fpAnalysis.session_evolution)
-            .sort((a,b) => (b[1].improvement || 0) - (a[1].improvement || 0));
-
-        html += `
-        <div class="analysis-block">
-            <h3>Session Evolution (FP1 → FP3)</h3>
-            <table class="data-table">
-                <thead><tr>
-                    <th>#</th><th>Driver</th><th class="num">FP1</th>
-                    <th class="num">FP2</th><th class="num">FP3</th>
-                    <th class="num">Improvement</th>
-                </tr></thead>
-                <tbody>${sorted.map(([id, d], i) => `
-                    <tr>
-                        <td>${i+1}</td>
-                        <td><strong>${id}</strong></td>
-                        <td class="num">${d.sessions.FP1 ? fmtTime(d.sessions.FP1) : '-'}</td>
-                        <td class="num">${d.sessions.FP2 ? fmtTime(d.sessions.FP2) : '-'}</td>
-                        <td class="num">${d.sessions.FP3 ? fmtTime(d.sessions.FP3) : '-'}</td>
-                        <td class="num ${d.improved ? 'text-green' : 'text-red'}">${d.improvement > 0 ? '-' : '+'}${Math.abs(d.improvement).toFixed(3)}s</td>
-                    </tr>`).join('')}
-                </tbody>
-            </table>
-        </div>`;
+        const rows = Object.entries(fpAnalysis.session_evolution).map(([id, d]) => ({
+            id, fp1: d.sessions.FP1 || null, fp2: d.sessions.FP2 || null, fp3: d.sessions.FP3 || null,
+            improvement: d.improvement || 0, improved: d.improved
+        }));
+        const tbl = sortableTable('fpEvoTable', [
+            { key: '_rank', label: '#', cls: 'num', fmt: (r, i) => i + 1 },
+            { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
+            { key: 'fp1', label: 'FP1', cls: 'num', fmt: r => r.fp1 ? fmtTime(r.fp1) : '-' },
+            { key: 'fp2', label: 'FP2', cls: 'num', fmt: r => r.fp2 ? fmtTime(r.fp2) : '-' },
+            { key: 'fp3', label: 'FP3', cls: 'num', fmt: r => r.fp3 ? fmtTime(r.fp3) : '-' },
+            { key: 'improvement', label: 'Improvement', cls: 'num', title: 'Pace gain from first to last session. Negative = got faster.', fmt: r => `<span class="${r.improved ? 'text-green' : 'text-red'}">${r.improvement > 0 ? '-' : '+'}${Math.abs(r.improvement).toFixed(3)}s</span>` }
+        ], rows, 'improvement', false);
+        html += `<div class="analysis-block"><h3>Session Evolution (FP1 → FP2)</h3><p class="analysis-note">How drivers improved their pace across practice sessions. Larger improvement may indicate setup breakthroughs.</p>${tbl.getHtml()}</div>`;
+        postRenderFns.push(tbl.renderTable);
     }
 
     el.innerHTML = html;
+
+    // Run all post-render functions to populate sortable tables
+    postRenderFns.forEach(fn => fn());
+
+    // Wire up driver filter
+    const filterInput = document.getElementById('fpDriverFilter');
+    if (filterInput) {
+        filterInput.addEventListener('input', () => {
+            const q = filterInput.value.toUpperCase().trim();
+            el.querySelectorAll('.data-table tbody tr').forEach(tr => {
+                const driverCell = tr.querySelector('td:nth-child(1) strong, td:nth-child(2) strong');
+                if (!driverCell) { tr.style.display = ''; return; }
+                tr.style.display = driverCell.textContent.toUpperCase().includes(q) || !q ? '' : 'none';
+            });
+            el.querySelectorAll('.deg-card').forEach(card => {
+                const name = card.querySelector('.deg-driver')?.textContent?.toUpperCase() || '';
+                card.style.display = name.includes(q) || !q ? '' : 'none';
+            });
+        });
+    }
 }
 
 // -- Post-Race --
