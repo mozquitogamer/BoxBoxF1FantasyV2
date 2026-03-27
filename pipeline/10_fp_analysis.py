@@ -805,7 +805,7 @@ def run_fp_analysis(round_num: int, year: int = CURRENT_SEASON) -> dict:
         print("  No temperature data available")
 
     # 7. Session evolution
-    print("[7] Analyzing session evolution (FP1→FP2→FP3)...")
+    print("[7] Analyzing session evolution (FP1->FP2->FP3)...")
     evolution = analyze_session_evolution(laps_df)
     if evolution:
         output["session_evolution"] = evolution

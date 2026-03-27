@@ -115,11 +115,11 @@ def download_fastf1_session(
             weather=True,
             messages=False,
         )
+        laps = session.laps
     except Exception as e:
         print(f"    Skipping {session_name}: {e}")
         return False
 
-    laps = session.laps
     if laps is None or laps.empty:
         print(f"    No lap data for {session_name}")
         return False

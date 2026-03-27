@@ -170,11 +170,11 @@ def process_fp_session(
     try:
         session = fastf1.get_session(year, round_num, session_name)
         session.load(laps=True, telemetry=False, weather=True, messages=False)
+        laps = session.laps
     except Exception as e:
         print(f"    Could not load {session_name}: {e}")
         return None
 
-    laps = session.laps
     if laps is None or laps.empty:
         print(f"    No lap data for {session_name}")
         return None
