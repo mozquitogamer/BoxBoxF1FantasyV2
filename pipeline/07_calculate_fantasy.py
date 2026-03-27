@@ -74,29 +74,69 @@ def calculate_risk_ratings(predictions: pd.DataFrame) -> dict[str, float]:
     """
     Get DNF risk per driver from pre-computed rolling DNF rates in model_rows.
     Falls back to a default if model_rows unavailable.
-    Caps at 25% to avoid inflated rates from bad luck streaks.
+
+    Blends the historical rolling rate with the current season's actual DNF rate
+    to avoid inflated probabilities from small samples or prior-season bad luck.
     """
     risk = {}
+    SEASON_DEFAULT_DNF = 5.0  # 5% base rate for F1
 
-    # Try to load pre-computed rolling DNF rates
+    # Try to load pre-computed rolling DNF rates from historical data
+    historical_rates = {}
     model_rows_path = JOLPICA_MODEL_ROWS_DIR / "all_model_rows.parquet"
     if model_rows_path.exists():
         mr = pd.read_parquet(model_rows_path)
-        # Get each driver's most recent roll_dnf_rate_5
         latest = mr.sort_values(["season", "round"]).groupby("driver_id").last()
         if "roll_dnf_rate_5" in latest.columns:
             for driver_id, row in latest.iterrows():
                 rate = row["roll_dnf_rate_5"]
                 if pd.notna(rate):
-                    # Cap at 25% — historical rates can be inflated by bad luck streaks
-                    risk[driver_id] = round(min(rate, 0.25) * 100, 1)
-                else:
-                    risk[driver_id] = 5.0  # Default 5% for drivers with no history
+                    historical_rates[driver_id] = rate
 
-    # Fill defaults for any driver not found
+    # Load actual 2026 DNF data from completed rounds
+    season_dnfs = {}  # driver_id -> (dnf_count, races_completed)
+    actuals_dir = PREDICTIONS_DIR
+    for rd in actuals_dir.iterdir():
+        if not rd.is_dir() or not rd.name.startswith("round"):
+            continue
+        act_file = rd / "actual_results.json"
+        if act_file.exists():
+            try:
+                with open(act_file) as f:
+                    act_data = json.load(f)
+                for d in act_data.get("drivers", []):
+                    did = d.get("driver_id", "")
+                    if not did:
+                        continue
+                    if did not in season_dnfs:
+                        season_dnfs[did] = [0, 0]
+                    season_dnfs[did][1] += 1  # races completed
+                    if d.get("status", "").upper() in ("DNF", "DSQ", "DNS", "RETIRED"):
+                        season_dnfs[did][0] += 1
+            except Exception:
+                continue
+
+    # Blend historical and current-season rates
     for driver_id in predictions["driver_id"].unique():
-        if driver_id not in risk:
-            risk[driver_id] = 5.0  # Low default for new/unknown drivers
+        hist_rate = historical_rates.get(driver_id, SEASON_DEFAULT_DNF / 100)
+        season_data = season_dnfs.get(driver_id)
+
+        if season_data and season_data[1] >= 1:
+            season_rate = season_data[0] / season_data[1]
+            n_races = season_data[1]
+            # Weight current season more as we get more data
+            # At 2 races: 60% season, 40% historical
+            # At 5 races: 80% season, 20% historical
+            season_weight = min(0.4 + n_races * 0.1, 0.9)
+            blended = season_weight * season_rate + (1 - season_weight) * hist_rate
+        else:
+            blended = hist_rate
+
+        # Cap at 15% early in season (unreliable small samples),
+        # increase cap as season progresses
+        max_races = max((d[1] for d in season_dnfs.values()), default=0)
+        cap = min(0.10 + max_races * 0.03, 0.50)  # 13% at R1, 16% at R2, up to 50% max
+        risk[driver_id] = round(min(blended, cap) * 100, 1)
 
     return risk
 

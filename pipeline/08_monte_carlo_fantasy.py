@@ -90,14 +90,16 @@ DEFAULT_SEED = 42
 # These are the noise scales at confidence=100 (perfect data).
 # The confidence factor scales noise UP for low-confidence predictions
 # (no FP data, less history).
-QUALI_NOISE_BASE = 1.4    # From R1 quali RMSE
-RACE_NOISE_BASE = 1.6     # Slightly above R1 race RMSE (0.5) to account for
-                           # R1 being unusually accurate; typical race variance
-                           # is higher (safety cars, incidents, strategy).
+QUALI_NOISE_BASE = 0.8    # Calibrated from R1+R2 prediction errors.
+                           # Gives ±1-2 positions at high confidence.
+RACE_NOISE_BASE = 0.8     # Calibrated: raw scores have uneven gaps (e.g.
+                           # 2.3-point gap before P8 but only 1-point spread
+                           # in P8-P11). Lower base prevents midfield drivers
+                           # from being systematically pushed outside top 10.
 
 # Confidence scaling: how much extra noise at low confidence.
-# At conf=91 (with FP): multiplier ~1.1x -> noise ≈ base
-# At conf=67 (no FP):   multiplier ~2.3x -> noise ≈ base * 2.3
+# At conf=86 (with FP): multiplier ~1.4x -> noise ≈ base * 1.4
+# At conf=67 (no FP):   multiplier ~2.0x -> noise ≈ base * 2.0
 # This means without FP data, position uncertainty roughly doubles.
 # Formula: multiplier = 1 + CONFIDENCE_NOISE_FACTOR * (100 - confidence) / 50
 CONFIDENCE_NOISE_FACTOR = 1.5
@@ -606,7 +608,16 @@ def run_simulations(
 
 def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
                            constructors_info: dict, constructor_prices: dict) -> list[dict]:
-    """Aggregate driver MC results into constructor-level statistics."""
+    """Aggregate driver MC results into constructor-level statistics.
+
+    Constructor F1 Fantasy scoring (2026):
+      - Sum of both drivers' qualifying + race + sprint points
+      - MINUS DOTD (DOTD does NOT count for constructors)
+      - PLUS constructor qualifying tier bonus:
+          Both in Q3 (+10), One in Q3 (+5), Both in Q2 (+3),
+          One in Q2 (+1), Neither in Q2 (-1)
+      - NOTE: Pit stop bonuses are not modelled yet (no reliable data)
+    """
     # Map constructor -> drivers
     constructor_drivers: dict[str, list[str]] = {}
     for d in drivers_info.values():
@@ -615,6 +626,45 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
 
     # Build lookup by abbreviation
     dr_lookup = {d["driver_abbrev"]: d for d in driver_results}
+
+    # Estimate DOTD contribution per driver (10 pts * prob_dotd ≈ 10/22 on average,
+    # but weighted by position). Use rough approximation: top-5 finisher ~7% chance,
+    # P6-P10 ~5%, P11+ ~3%
+    def est_dotd_pts(d):
+        pos = d.get("mc_race_pos_mean", 11)
+        if pos <= 5:
+            return 10 * 0.07
+        elif pos <= 10:
+            return 10 * 0.05
+        else:
+            return 10 * 0.03
+
+    # Estimate constructor qualifying tier bonus from driver quali positions
+    def est_quali_bonus(d1, d2):
+        q1 = d1.get("mc_quali_pos_mean", 15)
+        q2 = d2.get("mc_quali_pos_mean", 15)
+        # Probability-weighted approach:
+        # Use mean quali position to estimate bonus tier
+        # Q3 = P1-10, Q2 = P11-15, Q1 = P16-22
+        def q_tier_probs(mean_pos):
+            """Rough probability of reaching each tier given mean quali pos."""
+            # Simple sigmoid-ish estimate
+            p_q3 = max(0, min(1, (12 - mean_pos) / 5))  # ~100% at P7, ~0% at P12
+            p_q2 = max(0, min(1 - p_q3, (17 - mean_pos) / 5))
+            p_q1 = 1 - p_q3 - p_q2
+            return p_q3, p_q2, p_q1
+
+        p1_q3, p1_q2, p1_q1 = q_tier_probs(q1)
+        p2_q3, p2_q2, p2_q1 = q_tier_probs(q2)
+
+        # Both Q3: +10, One Q3: +5, Both Q2: +3, One Q2: +1, Neither Q2: -1
+        bonus = 0
+        bonus += (p1_q3 * p2_q3) * 10              # Both in Q3
+        bonus += (p1_q3 * (1 - p2_q3) + p2_q3 * (1 - p1_q3)) * 5  # One in Q3
+        bonus += ((1 - p1_q3) * p1_q2 * (1 - p2_q3) * p2_q2) * 3  # Both Q2, neither Q3
+        bonus += ((1 - p1_q3) * p1_q2 * p2_q1 + (1 - p2_q3) * p2_q2 * p1_q1) * 1  # One Q2
+        bonus += (p1_q1 * p2_q1) * (-1)            # Neither in Q2
+        return round(bonus, 1)
 
     constructor_results = []
     for cid, cinfo in constructors_info.items():
@@ -628,12 +678,16 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
         if not d1 or not d2:
             continue
 
-        # Simple aggregation: sum means, combine uncertainties
-        combined_mean = (d1.get("mc_total_mean", 0) + d2.get("mc_total_mean", 0))
-        # Approximate combined std (assuming some correlation)
+        # Sum driver points, subtract DOTD (doesn't count for constructors),
+        # add constructor quali bonus
+        d1_pts = d1.get("mc_total_mean", 0) - est_dotd_pts(d1)
+        d2_pts = d2.get("mc_total_mean", 0) - est_dotd_pts(d2)
+        quali_bonus = est_quali_bonus(d1, d2)
+        combined_mean = d1_pts + d2_pts + quali_bonus
+
+        # Approximate combined std (assuming ~0.3 correlation between teammates)
         d1_std = d1.get("mc_total_std", 0)
         d2_std = d2.get("mc_total_std", 0)
-        # Assume ~0.3 correlation between teammates
         correlation = 0.3
         combined_std = round(np.sqrt(d1_std**2 + d2_std**2 +
                                      2 * correlation * d1_std * d2_std), 1)
@@ -651,6 +705,7 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
             "mc_total_p95": round(combined_mean + 1.65 * combined_std, 1),
             "mc_value_score": round(combined_mean / c_price, 2) if c_price > 0 else 0.0,
             "price": c_price,
+            "quali_bonus": quali_bonus,
         })
 
     constructor_results.sort(key=lambda x: x["mc_total_mean"], reverse=True)
