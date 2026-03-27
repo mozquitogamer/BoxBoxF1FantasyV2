@@ -147,6 +147,14 @@ def build_predictions_json(round_num: int) -> dict | None:
                     entry["mc_overtakes_mean"] = round(mc.get("mc_overtakes_mean", 0), 1)
                     entry["mc_quali_pts_mean"] = round(mc.get("mc_quali_pts_mean", 0), 1)
                     entry["mc_race_pts_mean"] = round(mc.get("mc_race_pts_mean", 0), 1)
+                    # Use MC mean as primary expected_points (more accurate than deterministic)
+                    entry["expected_points"] = round(mc.get("mc_total_mean", 0), 1)
+                    entry["expected_points_quali"] = round(mc.get("mc_quali_pts_mean", 0), 1)
+                    entry["expected_points_race"] = round(mc.get("mc_race_pts_mean", 0), 1)
+                    # Recalculate value score with MC points
+                    price = entry.get("current_price", 0)
+                    if price > 0:
+                        entry["value_score"] = round(entry["expected_points"] / price, 2)
             mc_by_con = {c["constructor_id"]: c for c in mc_data.get("constructors", [])}
         except Exception as e:
             print(f"  Warning: Could not load MC data: {e}")
@@ -187,6 +195,11 @@ def build_predictions_json(round_num: int) -> dict | None:
             entry["mc_total_std"] = round(mc_c.get("mc_total_std", 0), 1)
             entry["mc_total_p5"] = round(mc_c.get("mc_total_p5", 0), 1)
             entry["mc_total_p95"] = round(mc_c.get("mc_total_p95", 0), 1)
+            # Use MC mean as primary expected_points
+            entry["expected_points"] = round(mc_c.get("mc_total_mean", 0), 1)
+            price = entry.get("current_price", 0)
+            if price > 0:
+                entry["value_score"] = round(entry["expected_points"] / price, 2)
 
         constructors_json.append(entry)
 
