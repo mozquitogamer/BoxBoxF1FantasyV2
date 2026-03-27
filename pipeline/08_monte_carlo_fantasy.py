@@ -214,12 +214,22 @@ def load_overtake_history() -> dict:
 
     result = {}
     for driver_id, grp in df.groupby("driver_id"):
-        result[driver_id] = {
+        entry = {
             "avg_overtakes": grp["overtakes_made"].mean(),
             "avg_pos_gained": grp["positions_gained"].mean() if "positions_gained" in grp.columns else 0,
             "avg_pos_lost": grp["positions_lost"].mean() if "positions_lost" in grp.columns else 0,
             "races": len(grp),
         }
+        # Sprint data (optional columns)
+        if "sprint_overtakes" in grp.columns:
+            sprint_data = grp["sprint_overtakes"].dropna()
+            sprint_data = sprint_data[sprint_data > 0]  # Only count rounds with actual sprint data
+            entry["avg_sprint_overtakes"] = sprint_data.mean() if len(sprint_data) > 0 else 0
+        if "sprint_positions_gained" in grp.columns:
+            entry["avg_sprint_pos_gained"] = grp["sprint_positions_gained"].dropna().mean()
+        if "sprint_positions_lost" in grp.columns:
+            entry["avg_sprint_pos_lost"] = grp["sprint_positions_lost"].dropna().mean()
+        result[driver_id] = entry
 
     print(f"  Loaded overtake history for {len(result)} drivers ({int(df['round'].max())} rounds)")
     return result
@@ -303,34 +313,46 @@ def sample_overtakes(grid_positions: np.ndarray, race_positions: np.ndarray,
         else:
             bucket = "back"
 
+        # Grid-bucket estimate (always computed as baseline)
+        base = base_map[bucket]
+        pos_gained = max(0, grid - race_positions[i])
+        excess_gains = max(0, pos_gained - typical[bucket])
+        bucket_ot = base + excess_gains
+
         # Check for driver-specific overtake data
         driver_id = driver_ids[i] if driver_ids else None
         hist = overtake_history.get(driver_id) if (overtake_history and driver_id) else None
 
         if hist and hist["races"] >= 1:
-            # Use actual driver overtake average as base
+            # Blend driver history with bucket estimate
+            # Weight driver data more as we get more races
+            # At 2 races: 50% driver, 50% bucket
+            # At 5 races: 80% driver, 20% bucket
+            n_races = hist["races"]
+            driver_weight = min(0.3 + n_races * 0.1, 0.85)
+
             driver_avg_ot = hist["avg_overtakes"]
             driver_avg_gained = hist["avg_pos_gained"]
 
-            # Adjust for this simulation's position change vs their typical
+            # Adjust driver average for this sim's position change vs typical
             sim_gained = max(0, grid - race_positions[i])
-            typical_gained = max(0, driver_avg_gained)
-            gain_diff = sim_gained - typical_gained
+            gain_diff = sim_gained - max(0, driver_avg_gained)
+            adjusted_driver_ot = max(0, driver_avg_ot + gain_diff * 0.5)
 
-            # More gains than usual = more overtakes, scaled
-            expected_ot = max(0, driver_avg_ot + gain_diff * 0.5)
-
-            # Tighter std since we have real data (30% CV)
-            std = max(1.0, expected_ot * 0.30)
             if is_sprint:
-                expected_ot *= 0.45  # Sprint ~45% of race overtakes
-                std = max(1.0, expected_ot * 0.40)
+                # Use sprint-specific data if available
+                sprint_avg = hist.get("avg_sprint_overtakes", 0)
+                if sprint_avg > 0:
+                    adjusted_driver_ot = sprint_avg
+                else:
+                    adjusted_driver_ot *= 0.45
+
+            expected_ot = driver_weight * adjusted_driver_ot + (1 - driver_weight) * bucket_ot
+            # Wider std early on since small sample
+            cv_adj = max(0.25, 0.45 - n_races * 0.03)
+            std = max(1.5, expected_ot * cv_adj)
         else:
-            # Fallback: grid-bucket estimate
-            base = base_map[bucket]
-            pos_gained = max(0, grid - race_positions[i])
-            excess_gains = max(0, pos_gained - typical[bucket])
-            expected_ot = base + excess_gains
+            expected_ot = bucket_ot
             std = max(1.5, expected_ot * cv)
 
         sampled = rng.normal(expected_ot, std)
