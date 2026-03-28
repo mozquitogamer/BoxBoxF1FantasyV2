@@ -1,7 +1,21 @@
 {
-  "updated": "2026-03-27T11:09:06Z",
+  "updated": "2026-03-28T10:52:37Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "ANUm2rtpmJM",
+      "title": "F1 Fantasy Deadline Stream - Japanese Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
+      "published": "2026-03-27",
+      "thumbnail": "https://i.ytimg.com/vi/ANUm2rtpmJM/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=ANUm2rtpmJM"
+    },
+    {
+      "id": "jYzSmuMW9R4",
+      "title": "Final Thoughts Japanese GP - Piastri 2X Boost?  - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-03-27",
+      "thumbnail": "https://i.ytimg.com/vi/jYzSmuMW9R4/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=jYzSmuMW9R4"
+    },
     {
       "id": "T4bYTJt-cCk",
       "title": "Chinese GP Data Deep Dive - Pre Japanese Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
@@ -15,20 +29,6 @@
       "published": "2026-03-24",
       "thumbnail": "https://i.ytimg.com/vi/UArils8F_Fg/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=UArils8F_Fg"
-    },
-    {
-      "id": "M8tVZfsbqXo",
-      "title": "F1 Fantasy Deadline Stream - Chinese Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
-      "published": "2026-03-14",
-      "thumbnail": "https://i.ytimg.com/vi/M8tVZfsbqXo/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=M8tVZfsbqXo"
-    },
-    {
-      "id": "GhQe_CirRH8",
-      "title": "Chinese Sprint Race Debrief - Chinese Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips and Strategy",
-      "published": "2026-03-14",
-      "thumbnail": "https://i.ytimg.com/vi/GhQe_CirRH8/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=GhQe_CirRH8"
     }
   ]
 }
