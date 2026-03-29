@@ -47,12 +47,12 @@
       "temp_max": 18.0,
       "temp_min": 8.4,
       "precip_probability_max": 23,
-      "precip_sum_mm": 0.0,
+      "precip_sum_mm": 0.3,
       "wind_max_kmh": 8.3,
-      "weather_description": "Partly cloudy",
-      "weather_category": "cloudy",
-      "weather_icon": "\u26c5",
-      "weather_code": 2,
+      "weather_description": "Light drizzle",
+      "weather_category": "drizzle",
+      "weather_icon": "\ud83c\udf26\ufe0f",
+      "weather_code": 51,
       "rain_risk": "LOW"
     }
   ],
@@ -284,7 +284,7 @@
       "rain_probability": 5,
       "rain_risk": "NONE",
       "avg_temp": 17.1,
-      "avg_wind": 6.9,
+      "avg_wind": 7.5,
       "total_precip_mm": 0.0,
       "weather_description": "Partly cloudy",
       "weather_category": "cloudy",
@@ -313,27 +313,27 @@
         {
           "hour": 15,
           "temp": 16.8,
-          "humidity": 65,
+          "humidity": 63,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 7.2,
+          "windspeed": 8.1,
           "windgusts": 31.7,
           "weather_code": 2
         },
         {
           "hour": 16,
-          "temp": 16.1,
+          "temp": 15.9,
           "humidity": 71,
           "precip_prob": 5,
           "precip_mm": 0.0,
-          "windspeed": 3.9,
-          "windgusts": 35.3,
+          "windspeed": 5.5,
+          "windgusts": 26.3,
           "weather_code": 2
         }
       ]
     }
   ],
-  "last_updated": "2026-03-29T06:54:17Z",
-  "next_update": "2026-03-29T12:54:17Z",
+  "last_updated": "2026-03-29T12:34:53Z",
+  "next_update": "2026-03-29T18:34:53Z",
   "data_source": "Open-Meteo (open-meteo.com)"
 }
