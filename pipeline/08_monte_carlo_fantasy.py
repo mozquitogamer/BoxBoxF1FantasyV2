@@ -63,6 +63,10 @@ from config.fantasy_scoring import (
     SPRINT_FASTEST_LAP_BONUS,
     SPRINT_DNF_DSQ_PENALTY,
     CONSTRUCTOR_QUALI_BONUSES,
+    PITSTOP_TIME_POINTS,
+    FASTEST_PITSTOP_BONUS,
+    PITSTOP_WORLD_RECORD_BONUS,
+    PITSTOP_WORLD_RECORD_TIME,
 )
 
 
@@ -90,12 +94,13 @@ DEFAULT_SEED = 42
 # These are the noise scales at confidence=100 (perfect data).
 # The confidence factor scales noise UP for low-confidence predictions
 # (no FP data, less history).
-QUALI_NOISE_BASE = 0.8    # Calibrated from R1+R2 prediction errors.
-                           # Gives ±1-2 positions at high confidence.
-RACE_NOISE_BASE = 0.8     # Calibrated: raw scores have uneven gaps (e.g.
-                           # 2.3-point gap before P8 but only 1-point spread
-                           # in P8-P11). Lower base prevents midfield drivers
-                           # from being systematically pushed outside top 10.
+QUALI_NOISE_BASE = 0.3    # Calibrated for z-scored values (std=1.0).
+                           # Adjacent gaps average ~0.2-0.3, so 0.3 gives
+                           # ±1-2 position swaps while preserving model gaps.
+RACE_NOISE_BASE = 0.3     # Same scale as quali. Z-score normalization
+                           # preserves the actual performance gaps the model
+                           # predicted, so noise doesn't need to compensate
+                           # for uneven raw score spacing.
 
 # Confidence scaling: how much extra noise at low confidence.
 # At conf=86 (with FP): multiplier ~1.4x -> noise ≈ base * 1.4
@@ -233,6 +238,84 @@ def load_overtake_history() -> dict:
 
     print(f"  Loaded overtake history for {len(result)} drivers ({int(df['round'].max())} rounds)")
     return result
+
+
+# ==============================================================================
+# Pit stop modeling
+# ==============================================================================
+
+def load_pitstop_priors():
+    """Load per-team pit stop time distributions from seed data or historical."""
+    path = SEED_DIR / "pit_stop_priors.json"
+    if path.exists():
+        with open(path) as f:
+            return json.load(f)
+    # Fallback: reasonable defaults for 2026 teams
+    return {
+        "red_bull":       {"mean": 2.15, "std": 0.25, "stops_per_race": 1.5},
+        "mclaren":        {"mean": 2.20, "std": 0.25, "stops_per_race": 1.5},
+        "ferrari":        {"mean": 2.25, "std": 0.30, "stops_per_race": 1.5},
+        "mercedes":       {"mean": 2.20, "std": 0.25, "stops_per_race": 1.5},
+        "aston_martin":   {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5},
+        "alpine":         {"mean": 2.40, "std": 0.35, "stops_per_race": 1.5},
+        "williams":       {"mean": 2.45, "std": 0.35, "stops_per_race": 1.5},
+        "racing_bulls":   {"mean": 2.30, "std": 0.30, "stops_per_race": 1.5},
+        "haas":           {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5},
+        "audi":           {"mean": 2.55, "std": 0.40, "stops_per_race": 1.5},
+        "cadillac":       {"mean": 2.60, "std": 0.45, "stops_per_race": 1.5},
+    }
+
+
+def score_pitstop(time_seconds):
+    """Score a single pit stop using official F1 Fantasy 2026 brackets."""
+    for lower, upper, pts in PITSTOP_TIME_POINTS:
+        if lower <= time_seconds < upper:
+            return pts
+    return 0
+
+
+def sample_pitstops(constructor_ids, rng, pitstop_priors):
+    """Sample pit stop times for all constructors in one simulation.
+
+    Returns dict: constructor_id -> {points, times, is_fastest}
+    """
+    # Get unique constructors
+    unique_constructors = list(set(constructor_ids))
+    all_stops = {}  # cid -> list of stop times
+
+    for cid in unique_constructors:
+        prior = pitstop_priors.get(cid, {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5})
+        # Sample number of stops (1 or 2, weighted by stops_per_race)
+        n_stops = 2 if rng.random() < (prior["stops_per_race"] - 1.0) else 1
+        # Sample each stop time
+        times = []
+        for _ in range(n_stops):
+            t = max(1.5, rng.normal(prior["mean"], prior["std"]))
+            times.append(round(t, 3))
+        all_stops[cid] = times
+
+    # Find fastest stop across all teams
+    fastest_time = 999.0
+    fastest_cid = None
+    for cid, times in all_stops.items():
+        best = min(times)
+        if best < fastest_time:
+            fastest_time = best
+            fastest_cid = cid
+
+    # Score each team
+    results = {}
+    for cid, times in all_stops.items():
+        pts = sum(score_pitstop(t) for t in times)
+        is_fastest = (cid == fastest_cid)
+        if is_fastest:
+            pts += FASTEST_PITSTOP_BONUS
+        # World record bonus
+        if min(times) < PITSTOP_WORLD_RECORD_TIME:
+            pts += PITSTOP_WORLD_RECORD_BONUS
+        results[cid] = {"points": pts, "times": times, "is_fastest": is_fastest}
+
+    return results
 
 
 # ==============================================================================
@@ -535,22 +618,21 @@ def run_simulations(
         quali_raw = pred_df["predicted_quali_position"].values.astype(float)
         race_raw = pred_df["predicted_race_position"].values.astype(float)
 
-    # Quantile-transform raw scores to evenly-spaced values.
-    # This ensures noise affects all positions equally — without this,
-    # clusters of drivers with similar raw scores (e.g. P8-P11 within 1 point)
-    # get shuffled much more than isolated drivers (e.g. P1 with 2-point gap).
-    # The transform preserves rank order but makes gaps uniform.
-    def quantile_transform(scores: np.ndarray) -> np.ndarray:
-        n = len(scores)
-        order = scores.argsort()
-        transformed = np.empty(n, dtype=float)
-        # Evenly space from 1 to n, preserving original rank
-        transformed[order] = np.linspace(1.0, float(n), n)
-        return transformed
+    # Z-score normalize raw scores, preserving performance gaps.
+    # Unlike quantile transform (which destroys gaps by mapping to uniform spacing),
+    # z-score normalization keeps the relative gaps the model predicted while putting
+    # scores on a consistent scale (mean=0, std=1).
+    def normalize_scores(scores):
+        """Z-score normalize raw model scores, preserving gaps."""
+        mean = scores.mean()
+        std = scores.std()
+        if std < 1e-6:
+            return scores - mean
+        return (scores - mean) / std
 
-    quali_raw = quantile_transform(quali_raw)
-    race_raw = quantile_transform(race_raw)
-    print(f"  Applied quantile transform to raw scores (uniform gap = {22/(len(quali_raw)-1):.2f})")
+    quali_raw = normalize_scores(quali_raw)
+    race_raw = normalize_scores(race_raw)
+    print(f"  Applied z-score normalization (preserving performance gaps)")
 
     confidences = pred_df["confidence"].values.astype(float)
 
@@ -716,6 +798,16 @@ def run_simulations(
             "calibration_source": "OpenF1 R1+R2 actual data (2026)",
             "is_sprint_weekend": is_sprint,
         },
+        # Return raw arrays for constructor per-iteration simulation
+        "_sim_arrays": {
+            "all_total_pts": all_total_pts,
+            "all_quali_pts": all_quali_pts,
+            "all_race_pts": all_race_pts,
+            "all_quali_pos": all_quali_pos,
+            "all_dnf": all_dnf,
+            "abbrevs": abbrevs,
+            "constructors": constructors,
+        },
     }
 
 
@@ -724,64 +816,37 @@ def run_simulations(
 # ==============================================================================
 
 def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
-                           constructors_info: dict, constructor_prices: dict) -> list[dict]:
+                           constructors_info: dict, constructor_prices: dict,
+                           sim_arrays=None, pitstop_priors=None,
+                           n_sims=DEFAULT_SIMULATIONS, seed=DEFAULT_SEED) -> list[dict]:
     """Aggregate driver MC results into constructor-level statistics.
 
     Constructor F1 Fantasy scoring (2026):
-      - Sum of both drivers' qualifying + race + sprint points
-      - MINUS DOTD (DOTD does NOT count for constructors)
-      - PLUS constructor qualifying tier bonus:
-          Both in Q3 (+10), One in Q3 (+5), Both in Q2 (+3),
-          One in Q2 (+1), Neither in Q2 (-1)
-      - NOTE: Pit stop bonuses are not modelled yet (no reliable data)
+      - Sum of both drivers' total points (excluding DOTD)
+      - PLUS constructor qualifying tier bonus (computed per-iteration from
+        actual simulated qualifying positions)
+      - PLUS pit stop points (sampled per-iteration from team priors)
+
+    When sim_arrays are provided, this does proper per-iteration simulation
+    instead of approximating from summary statistics.
     """
-    # Map constructor -> drivers
+    # Map constructor -> drivers (abbreviations)
     constructor_drivers: dict[str, list[str]] = {}
     for d in drivers_info.values():
         cid = d["constructor_id"]
         constructor_drivers.setdefault(cid, []).append(d["driver_id"])
 
-    # Build lookup by abbreviation
+    # Build lookup by abbreviation for fallback
     dr_lookup = {d["driver_abbrev"]: d for d in driver_results}
 
-    # Estimate DOTD contribution per driver (10 pts * prob_dotd ≈ 10/22 on average,
-    # but weighted by position). Use rough approximation: top-5 finisher ~7% chance,
-    # P6-P10 ~5%, P11+ ~3%
-    def est_dotd_pts(d):
-        pos = d.get("mc_race_pos_mean", 11)
-        if pos <= 5:
-            return 10 * 0.07
-        elif pos <= 10:
-            return 10 * 0.05
-        else:
-            return 10 * 0.03
+    # Build abbreviation -> sim array index mapping
+    abbrev_to_idx = {}
+    if sim_arrays is not None:
+        abbrevs = sim_arrays["abbrevs"]
+        for idx, abbrev in enumerate(abbrevs):
+            abbrev_to_idx[abbrev] = idx
 
-    # Estimate constructor qualifying tier bonus from driver quali positions
-    def est_quali_bonus(d1, d2):
-        q1 = d1.get("mc_quali_pos_mean", 15)
-        q2 = d2.get("mc_quali_pos_mean", 15)
-        # Probability-weighted approach:
-        # Use mean quali position to estimate bonus tier
-        # Q3 = P1-10, Q2 = P11-15, Q1 = P16-22
-        def q_tier_probs(mean_pos):
-            """Rough probability of reaching each tier given mean quali pos."""
-            # Simple sigmoid-ish estimate
-            p_q3 = max(0, min(1, (12 - mean_pos) / 5))  # ~100% at P7, ~0% at P12
-            p_q2 = max(0, min(1 - p_q3, (17 - mean_pos) / 5))
-            p_q1 = 1 - p_q3 - p_q2
-            return p_q3, p_q2, p_q1
-
-        p1_q3, p1_q2, p1_q1 = q_tier_probs(q1)
-        p2_q3, p2_q2, p2_q1 = q_tier_probs(q2)
-
-        # Both Q3: +10, One Q3: +5, Both Q2: +3, One Q2: +1, Neither Q2: -1
-        bonus = 0
-        bonus += (p1_q3 * p2_q3) * 10              # Both in Q3
-        bonus += (p1_q3 * (1 - p2_q3) + p2_q3 * (1 - p1_q3)) * 5  # One in Q3
-        bonus += ((1 - p1_q3) * p1_q2 * (1 - p2_q3) * p2_q2) * 3  # Both Q2, neither Q3
-        bonus += ((1 - p1_q3) * p1_q2 * p2_q1 + (1 - p2_q3) * p2_q2 * p1_q1) * 1  # One Q2
-        bonus += (p1_q1 * p2_q1) * (-1)            # Neither in Q2
-        return round(bonus, 1)
+    rng = np.random.default_rng(seed + 999)  # Different seed from main sim
 
     constructor_results = []
     for cid, cinfo in constructors_info.items():
@@ -789,27 +854,124 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
         if len(c_drivers) < 2:
             continue
 
-        d1 = dr_lookup.get(c_drivers[0], {})
-        d2 = dr_lookup.get(c_drivers[1], {})
+        d1_abbrev = c_drivers[0]
+        d2_abbrev = c_drivers[1]
+
+        d1 = dr_lookup.get(d1_abbrev, {})
+        d2 = dr_lookup.get(d2_abbrev, {})
 
         if not d1 or not d2:
             continue
 
-        # Sum driver points, subtract DOTD (doesn't count for constructors),
-        # add constructor quali bonus
-        d1_pts = d1.get("mc_total_mean", 0) - est_dotd_pts(d1)
-        d2_pts = d2.get("mc_total_mean", 0) - est_dotd_pts(d2)
-        quali_bonus = est_quali_bonus(d1, d2)
-        combined_mean = d1_pts + d2_pts + quali_bonus
-
-        # Approximate combined std (assuming ~0.3 correlation between teammates)
-        d1_std = d1.get("mc_total_std", 0)
-        d2_std = d2.get("mc_total_std", 0)
-        correlation = 0.3
-        combined_std = round(np.sqrt(d1_std**2 + d2_std**2 +
-                                     2 * correlation * d1_std * d2_std), 1)
-
         c_price = constructor_prices.get(cid, 0.0)
+
+        # Per-iteration simulation when we have the raw arrays
+        if sim_arrays is not None and d1_abbrev in abbrev_to_idx and d2_abbrev in abbrev_to_idx:
+            all_total_pts = sim_arrays["all_total_pts"]
+            all_quali_pos = sim_arrays["all_quali_pos"]
+
+            d1_idx = abbrev_to_idx[d1_abbrev]
+            d2_idx = abbrev_to_idx[d2_abbrev]
+
+            constructor_pts = np.zeros(n_sims)
+            for sim in range(n_sims):
+                # Driver points (we approximate DOTD removal since we don't
+                # track which driver won DOTD per-sim; use expected DOTD pts)
+                d1_pts = all_total_pts[sim, d1_idx]
+                d2_pts = all_total_pts[sim, d2_idx]
+
+                # Approximate DOTD subtraction (DOTD doesn't count for constructors)
+                # ~1/22 base chance, weighted by position
+                d1_race_pos_mean = d1.get("mc_race_pos_mean", 11)
+                d2_race_pos_mean = d2.get("mc_race_pos_mean", 11)
+                def _est_dotd(pos):
+                    if pos <= 5: return 10 * 0.07
+                    elif pos <= 10: return 10 * 0.05
+                    else: return 10 * 0.03
+                d1_pts -= _est_dotd(d1_race_pos_mean)
+                d2_pts -= _est_dotd(d2_race_pos_mean)
+
+                # Quali teamwork bonus (from actual simulated positions)
+                q1 = all_quali_pos[sim, d1_idx]
+                q2 = all_quali_pos[sim, d2_idx]
+                both_q3 = (q1 <= 10) and (q2 <= 10)
+                one_q3 = (q1 <= 10) or (q2 <= 10)
+                both_q2 = (q1 <= 15) and (q2 <= 15)
+                one_q2 = (q1 <= 15) or (q2 <= 15)
+                if both_q3:
+                    quali_bonus = 10
+                elif one_q3:
+                    quali_bonus = 5
+                elif both_q2:
+                    quali_bonus = 3
+                elif one_q2:
+                    quali_bonus = 1
+                else:
+                    quali_bonus = -1
+
+                constructor_pts[sim] = d1_pts + d2_pts + quali_bonus
+
+            # Add pit stop points (sampled independently for each sim)
+            if pitstop_priors:
+                prior = pitstop_priors.get(cid, {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5})
+                for sim in range(n_sims):
+                    n_stops = 2 if rng.random() < (prior["stops_per_race"] - 1.0) else 1
+                    pit_pts = 0
+                    for _ in range(n_stops):
+                        t = max(1.5, rng.normal(prior["mean"], prior["std"]))
+                        pit_pts += score_pitstop(t)
+                    constructor_pts[sim] += pit_pts
+                # Note: fastest pit stop bonus requires comparing across all teams
+                # per-sim. For simplicity, estimate as expected value addition.
+                # With 11 teams, ~1/11 chance of being fastest each race.
+                constructor_pts += FASTEST_PITSTOP_BONUS / len(constructors_info)
+
+            combined_mean = float(constructor_pts.mean())
+            combined_std = float(constructor_pts.std())
+            combined_p5 = float(np.percentile(constructor_pts, 5))
+            combined_p95 = float(np.percentile(constructor_pts, 95))
+            # Compute mean quali bonus across sims for reporting
+            avg_quali_bonus = float(constructor_pts.mean()) - float(
+                (all_total_pts[:, d1_idx] + all_total_pts[:, d2_idx]).mean()
+            )
+
+        else:
+            # Fallback: approximate from summary stats (no sim arrays)
+            def est_dotd_pts(d):
+                pos = d.get("mc_race_pos_mean", 11)
+                if pos <= 5: return 10 * 0.07
+                elif pos <= 10: return 10 * 0.05
+                else: return 10 * 0.03
+
+            d1_pts = d1.get("mc_total_mean", 0) - est_dotd_pts(d1)
+            d2_pts = d2.get("mc_total_mean", 0) - est_dotd_pts(d2)
+
+            # Approximate quali bonus from mean positions
+            q1 = d1.get("mc_quali_pos_mean", 15)
+            q2 = d2.get("mc_quali_pos_mean", 15)
+            def q_tier_probs(mean_pos):
+                p_q3 = max(0, min(1, (12 - mean_pos) / 5))
+                p_q2 = max(0, min(1 - p_q3, (17 - mean_pos) / 5))
+                p_q1 = 1 - p_q3 - p_q2
+                return p_q3, p_q2, p_q1
+            p1_q3, p1_q2, p1_q1 = q_tier_probs(q1)
+            p2_q3, p2_q2, p2_q1 = q_tier_probs(q2)
+            quali_bonus_est = 0.0
+            quali_bonus_est += (p1_q3 * p2_q3) * 10
+            quali_bonus_est += (p1_q3 * (1 - p2_q3) + p2_q3 * (1 - p1_q3)) * 5
+            quali_bonus_est += ((1 - p1_q3) * p1_q2 * (1 - p2_q3) * p2_q2) * 3
+            quali_bonus_est += ((1 - p1_q3) * p1_q2 * p2_q1 + (1 - p2_q3) * p2_q2 * p1_q1) * 1
+            quali_bonus_est += (p1_q1 * p2_q1) * (-1)
+
+            combined_mean = d1_pts + d2_pts + quali_bonus_est
+            d1_std = d1.get("mc_total_std", 0)
+            d2_std = d2.get("mc_total_std", 0)
+            correlation = 0.3
+            combined_std = float(np.sqrt(d1_std**2 + d2_std**2 +
+                                         2 * correlation * d1_std * d2_std))
+            combined_p5 = combined_mean - 1.65 * combined_std
+            combined_p95 = combined_mean + 1.65 * combined_std
+            avg_quali_bonus = quali_bonus_est
 
         constructor_results.append({
             "constructor_id": cid,
@@ -817,12 +979,12 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
             "driver_1": c_drivers[0],
             "driver_2": c_drivers[1],
             "mc_total_mean": round(combined_mean, 1),
-            "mc_total_std": combined_std,
-            "mc_total_p5": round(combined_mean - 1.65 * combined_std, 1),
-            "mc_total_p95": round(combined_mean + 1.65 * combined_std, 1),
+            "mc_total_std": round(combined_std, 1),
+            "mc_total_p5": round(combined_p5, 1),
+            "mc_total_p95": round(combined_p95, 1),
             "mc_value_score": round(combined_mean / c_price, 2) if c_price > 0 else 0.0,
             "price": c_price,
-            "quali_bonus": quali_bonus,
+            "quali_bonus": round(avg_quali_bonus, 1),
         })
 
     constructor_results.sort(key=lambda x: x["mc_total_mean"], reverse=True)
@@ -1022,9 +1184,17 @@ def main() -> None:
         is_sprint=is_sprint,
     )
 
-    # Aggregate constructors
+    # Load pitstop priors for constructor simulation
+    pitstop_priors = load_pitstop_priors()
+    print(f"  Loaded pit stop priors for {len(pitstop_priors)} teams")
+
+    # Aggregate constructors (per-iteration simulation with pit stops)
     constructor_results = aggregate_constructors(
-        results["drivers"], drivers_info, constructors_info, constructor_prices
+        results["drivers"], drivers_info, constructors_info, constructor_prices,
+        sim_arrays=results.get("_sim_arrays"),
+        pitstop_priors=pitstop_priors,
+        n_sims=args.simulations,
+        seed=args.seed,
     )
 
     # Display and save
