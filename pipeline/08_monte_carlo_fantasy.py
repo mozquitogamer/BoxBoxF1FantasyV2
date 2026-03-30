@@ -141,6 +141,15 @@ SPRINT_OVERTAKE_BASE = {
 SPRINT_TYPICAL_GAINS = {"front": 0, "upper_mid": 0, "mid": 1, "back": 2}
 SPRINT_OVERTAKE_CV = 0.45  # Higher CV in sprints (more volatile, fewer laps)
 
+# --- Teammate correlation (Fix 1.2) ---
+# ~35% of position variance is shared between teammates (team setup, car issues)
+# and ~65% is individual (driver skill, luck, errors).
+TEAMMATE_CORRELATION_ALPHA = 0.35
+
+# --- Correlated DNF modeling (Fix 1.5) ---
+TEAM_DNF_CORRELATION = 0.3  # Probability that if one driver DNFs, teammate also has elevated risk
+INCIDENT_DNF_BOOST = 0.02   # Small base probability of multi-car incident per sim
+
 
 # ==============================================================================
 # Data loading
@@ -323,7 +332,9 @@ def sample_pitstops(constructor_ids, rng, pitstop_priors):
 # ==============================================================================
 
 def sample_positions(raw_scores: np.ndarray, noise_base: float,
-                     confidences: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+                     confidences: np.ndarray, rng: np.random.Generator,
+                     constructor_ids: np.ndarray | None = None,
+                     team_shocks: np.ndarray | None = None) -> np.ndarray:
     """Sample a full grid of positions by adding noise to raw model scores.
 
     This naturally enforces the constraint that each position is used exactly
@@ -334,11 +345,17 @@ def sample_positions(raw_scores: np.ndarray, noise_base: float,
       At conf=91 (with FP data): multiplier ≈ 1.3 -> tight predictions
       At conf=67 (no FP data):   multiplier ≈ 2.0 -> wider uncertainty
 
+    When team_shocks is provided, noise is split into a shared team component
+    (~35%) and an individual component (~65%), creating realistic teammate
+    correlation.
+
     Args:
         raw_scores: Continuous model output scores (lower = better)
         noise_base: Base standard deviation of the noise (from calibration)
         confidences: Per-driver confidence scores (0-100)
         rng: Random number generator
+        constructor_ids: Per-driver constructor IDs (for team correlation)
+        team_shocks: Pre-sampled per-driver team shock values (or None)
 
     Returns:
         Array of sampled positions (1-indexed, each position used once)
@@ -346,7 +363,14 @@ def sample_positions(raw_scores: np.ndarray, noise_base: float,
     n = len(raw_scores)
     # Scale noise inversely with confidence
     confidence_multipliers = 1.0 + CONFIDENCE_NOISE_FACTOR * (100.0 - confidences) / 50.0
-    noise = rng.normal(0, noise_base, size=n) * confidence_multipliers
+
+    if team_shocks is not None:
+        # Team-correlated noise: shared team component + individual component
+        individual_noise = rng.normal(0, noise_base * (1 - TEAMMATE_CORRELATION_ALPHA), size=n) * confidence_multipliers
+        noise = team_shocks + individual_noise
+    else:
+        noise = rng.normal(0, noise_base, size=n) * confidence_multipliers
+
     perturbed = raw_scores + noise
     # Rank to get positions (1-based)
     order = perturbed.argsort()
@@ -668,15 +692,52 @@ def run_simulations(
 
     print(f"  Running {n_sims:,} simulations for {n_drivers} drivers...")
 
+    # Pre-compute unique constructors and per-driver constructor mapping for correlation
+    unique_constructors = list(set(constructors))
+
     for sim in range(n_sims):
-        # 1. Sample qualifying positions
-        quali_positions = sample_positions(quali_raw, QUALI_NOISE_BASE, confidences, rng)
+        # 1. Sample qualifying positions (with teammate correlation)
+        # Generate per-team shock for qualifying
+        quali_team_shocks = np.zeros(n_drivers)
+        quali_shock_by_cid = {cid: rng.normal(0, TEAMMATE_CORRELATION_ALPHA * QUALI_NOISE_BASE)
+                              for cid in unique_constructors}
+        for i in range(n_drivers):
+            quali_team_shocks[i] = quali_shock_by_cid[constructors[i]]
 
-        # 2. Sample race DNFs
-        dnf_mask = rng.random(n_drivers) < dnf_probs
+        quali_positions = sample_positions(quali_raw, QUALI_NOISE_BASE, confidences, rng,
+                                           constructor_ids=constructors, team_shocks=quali_team_shocks)
 
-        # 3. Sample race positions (for non-DNF drivers)
-        race_positions = sample_positions(race_raw, RACE_NOISE_BASE, confidences, rng)
+        # 2. Correlated DNF sampling
+        adjusted_probs = dnf_probs.copy()
+
+        # Multi-car incident simulation
+        if rng.random() < INCIDENT_DNF_BOOST * n_drivers:
+            adjusted_probs = np.minimum(adjusted_probs + 0.05, 0.95)
+
+        # Initial DNF sampling
+        dnf_mask = rng.random(n_drivers) < adjusted_probs
+
+        # Team-correlated failures
+        for cid in unique_constructors:
+            team_indices = [i for i in range(n_drivers) if constructors[i] == cid]
+            if len(team_indices) == 2:
+                i1, i2 = team_indices
+                if dnf_mask[i1] and not dnf_mask[i2]:
+                    if rng.random() < TEAM_DNF_CORRELATION:
+                        dnf_mask[i2] = rng.random() < min(dnf_probs[i2] * 3, 0.5)
+                elif dnf_mask[i2] and not dnf_mask[i1]:
+                    if rng.random() < TEAM_DNF_CORRELATION:
+                        dnf_mask[i1] = rng.random() < min(dnf_probs[i1] * 3, 0.5)
+
+        # 3. Sample race positions with teammate correlation (separate shocks from quali)
+        race_team_shocks = np.zeros(n_drivers)
+        race_shock_by_cid = {cid: rng.normal(0, TEAMMATE_CORRELATION_ALPHA * RACE_NOISE_BASE)
+                             for cid in unique_constructors}
+        for i in range(n_drivers):
+            race_team_shocks[i] = race_shock_by_cid[constructors[i]]
+
+        race_positions = sample_positions(race_raw, RACE_NOISE_BASE, confidences, rng,
+                                          constructor_ids=constructors, team_shocks=race_team_shocks)
         # DNF drivers get position = grid_size (last)
         race_positions[dnf_mask] = GRID_SIZE
 
@@ -795,6 +856,9 @@ def run_simulations(
             "race_noise_base": RACE_NOISE_BASE,
             "confidence_noise_factor": CONFIDENCE_NOISE_FACTOR,
             "overtake_cv": OVERTAKE_CV,
+            "teammate_correlation_alpha": TEAMMATE_CORRELATION_ALPHA,
+            "team_dnf_correlation": TEAM_DNF_CORRELATION,
+            "incident_dnf_boost": INCIDENT_DNF_BOOST,
             "calibration_source": "OpenF1 R1+R2 actual data (2026)",
             "is_sprint_weekend": is_sprint,
         },

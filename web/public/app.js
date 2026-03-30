@@ -198,9 +198,8 @@ function showFallbackBanner() {
 
 async function loadPitstopData() {
     // Load pit stop stationary times from pitstop JSON files
-    // Also load fastest lap per constructor from deep dive data
     window._pitstopData = {};
-    window._fastestLapData = {};
+
     if (!seasonSummary || !seasonSummary.rounds) return;
     for (const r of seasonSummary.rounds) {
         if (!r.has_actual) continue;
@@ -217,29 +216,6 @@ async function loadPitstopData() {
                 }
             }
         } catch (e) { /* no pitstop data for this round */ }
-        // Fastest lap from deep dive
-        try {
-            const resp2 = await fetch(cacheBust(`data/deep_dive_round${r.round}.json`));
-            if (resp2.ok) {
-                const dd = await resp2.json();
-                if (dd && dd.driver_metrics && dd.driver_constructors) {
-                    for (const [drv, m] of Object.entries(dd.driver_metrics)) {
-                        const cid = dd.driver_constructors[drv];
-                        const bl = m.best_lap;
-                        if (cid && bl != null) {
-                            const prev = window._fastestLapRaw && window._fastestLapRaw[cid];
-                            if (!prev || bl < prev) {
-                                if (!window._fastestLapRaw) window._fastestLapRaw = {};
-                                window._fastestLapRaw[cid] = bl;
-                                const mins = Math.floor(bl / 60);
-                                const secs = (bl % 60).toFixed(3);
-                                window._fastestLapData[cid] = `${mins}:${secs.padStart(6, '0')}`;
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (e) { /* no deep dive data */ }
     }
 }
 
@@ -1529,11 +1505,6 @@ function getPitStopStatsHtml(constructorId) {
     const slowest = stops[stops.length - 1];
     const slowCount = stops.filter(t => t > 3.5).length;
 
-    // Fastest race lap for this constructor
-    const fastLapHtml = window._fastestLapData && window._fastestLapData[constructorId]
-        ? `<span title="Fastest race lap this season">Fast Lap: <strong style="color:var(--accent)">${window._fastestLapData[constructorId]}</strong></span>`
-        : '';
-
     const slowNote = slowCount > 0
         ? `<span style="color:var(--red, #ef4444);" title="Pit stops over 3.5s stationary">Slow (>3.5s): <strong>${slowCount}</strong></span>`
         : `<span style="color:var(--green);" title="No pit stops over 3.5s">Slow (>3.5s): <strong>0</strong></span>`;
@@ -1548,7 +1519,6 @@ function getPitStopStatsHtml(constructorId) {
             <span>Mean: ${avg.toFixed(2)}s</span>
             ${slowNote}
             <span>Count: ${stops.length}</span>
-            ${fastLapHtml}
         </div>
     </div>`;
 }

@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "last_updated": "2026-03-22",
+  "last_updated": "2026-03-30",
   "description": "Official F1 Fantasy points per round. These override pipeline-calculated actuals for price change predictions.",
   "rounds": {
     "1": {

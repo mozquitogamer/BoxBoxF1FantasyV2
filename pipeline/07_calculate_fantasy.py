@@ -93,28 +93,50 @@ def calculate_risk_ratings(predictions: pd.DataFrame) -> dict[str, float]:
                 if pd.notna(rate):
                     historical_rates[driver_id] = rate
 
+    # Load abbreviation -> driver_id mapping for matching actual results
+    abbrev_to_driver_id = {}
+    driver_ids_path = SEED_DIR / "driver_ids.json"
+    if driver_ids_path.exists():
+        with open(driver_ids_path) as f:
+            id_data = json.load(f)
+        for m in id_data.get("mappings", []):
+            abbrev_to_driver_id[m["abbrev"]] = m["jolpica"]  # e.g. "VER" -> "max_verstappen"
+
     # Load actual 2026 DNF data from completed rounds
-    season_dnfs = {}  # driver_id -> (dnf_count, races_completed)
+    season_dnfs = {}  # driver_id (full) -> [dnf_count, races_completed]
     actuals_dir = PREDICTIONS_DIR
     for rd in actuals_dir.iterdir():
         if not rd.is_dir() or not rd.name.startswith("round"):
             continue
-        act_file = rd / "actual_results.json"
+        # Try both file names (actual_fantasy_points.json is the primary format)
+        act_file = rd / "actual_fantasy_points.json"
+        if not act_file.exists():
+            act_file = rd / "actual_results.json"
         if act_file.exists():
             try:
                 with open(act_file) as f:
                     act_data = json.load(f)
                 for d in act_data.get("drivers", []):
-                    did = d.get("driver_id", "")
-                    if not did:
+                    raw_id = d.get("driver_id", "")
+                    if not raw_id:
                         continue
+                    # Map abbreviations to full driver_id
+                    did = abbrev_to_driver_id.get(raw_id, raw_id)
                     if did not in season_dnfs:
                         season_dnfs[did] = [0, 0]
                     season_dnfs[did][1] += 1  # races completed
-                    if d.get("status", "").upper() in ("DNF", "DSQ", "DNS", "RETIRED"):
+                    # Check both is_dnf flag and status string
+                    is_dnf = d.get("is_dnf", False)
+                    status = d.get("status", "").upper()
+                    if is_dnf or status in ("DNF", "DSQ", "DNS", "RETIRED"):
                         season_dnfs[did][0] += 1
             except Exception:
                 continue
+
+    if season_dnfs:
+        total_dnfs = sum(d[0] for d in season_dnfs.values())
+        total_races = max(d[1] for d in season_dnfs.values())
+        print(f"  Loaded {total_races} rounds of actual DNF data ({total_dnfs} total DNFs)")
 
     # Blend historical and current-season rates
     for driver_id in predictions["driver_id"].unique():
@@ -136,7 +158,9 @@ def calculate_risk_ratings(predictions: pd.DataFrame) -> dict[str, float]:
         # increase cap as season progresses
         max_races = max((d[1] for d in season_dnfs.values()), default=0)
         cap = min(0.10 + max_races * 0.03, 0.50)  # 13% at R1, 16% at R2, up to 50% max
-        risk[driver_id] = round(min(blended, cap) * 100, 1)
+        # Floor: no driver has truly 0% DNF risk — mechanical failures, incidents etc.
+        floor = 0.02  # 2% minimum baseline
+        risk[driver_id] = round(min(max(blended, floor), cap) * 100, 1)
 
     return risk
 
