@@ -50,8 +50,8 @@ const LOCK_DEADLINES = [
     { round: 1,  race: 'Australian Grand Prix',      lock: '2026-03-07T05:00:00Z', sprint: false },
     { round: 2,  race: 'Chinese Grand Prix',          lock: '2026-03-13T07:30:00Z', sprint: true  },
     { round: 3,  race: 'Japanese Grand Prix',          lock: '2026-03-28T06:00:00Z', sprint: false },
-    { round: 4,  race: 'Bahrain Grand Prix',           lock: '2026-04-11T15:00:00Z', sprint: false },
-    { round: 5,  race: 'Saudi Arabian Grand Prix',     lock: '2026-04-18T17:00:00Z', sprint: false },
+    { round: 4,  race: 'Bahrain Grand Prix',           lock: '2026-04-11T15:00:00Z', sprint: false, cancelled: true },
+    { round: 5,  race: 'Saudi Arabian Grand Prix',     lock: '2026-04-18T17:00:00Z', sprint: false, cancelled: true },
     { round: 6,  race: 'Miami Grand Prix',             lock: '2026-05-01T21:30:00Z', sprint: true  },
     { round: 7,  race: 'Canadian Grand Prix',          lock: '2026-05-23T18:00:00Z', sprint: false },
     { round: 8,  race: 'Monaco Grand Prix',            lock: '2026-06-06T14:00:00Z', sprint: false },
@@ -313,6 +313,7 @@ function startCountdown() {
         // Find the next upcoming deadline
         let next = null;
         for (const dl of LOCK_DEADLINES) {
+            if (dl.cancelled) continue;
             const lockTime = new Date(dl.lock);
             if (lockTime > now) { next = dl; break; }
         }
