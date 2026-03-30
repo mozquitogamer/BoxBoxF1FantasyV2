@@ -1,7 +1,14 @@
 {
-  "updated": "2026-03-29T10:55:08Z",
+  "updated": "2026-03-30T11:29:24Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "h-tZ9dYYNDw",
+      "title": "Nailed this prediction #f1fantasy #formula1",
+      "published": "2026-03-30",
+      "thumbnail": "https://i.ytimg.com/vi/h-tZ9dYYNDw/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=h-tZ9dYYNDw"
+    },
     {
       "id": "ANUm2rtpmJM",
       "title": "F1 Fantasy Deadline Stream - Japanese Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
@@ -22,13 +29,6 @@
       "published": "2026-03-25",
       "thumbnail": "https://i.ytimg.com/vi/T4bYTJt-cCk/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=T4bYTJt-cCk"
-    },
-    {
-      "id": "UArils8F_Fg",
-      "title": "The BEST F1 Fantasy Team for the Japanese Grand Prix - F1 Fantasy Team Drafts, Tips and Strategy",
-      "published": "2026-03-24",
-      "thumbnail": "https://i.ytimg.com/vi/UArils8F_Fg/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=UArils8F_Fg"
     }
   ]
 }
