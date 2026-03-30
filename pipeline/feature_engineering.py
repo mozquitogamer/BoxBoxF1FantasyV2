@@ -67,4 +67,17 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     if "driver_roll_quali_3" in df.columns and "pace_rank" in df.columns:
         df["prior_vs_fp_rank"] = df["driver_roll_quali_3"] - df["pace_rank"]
 
+    # -- Compound-based features (Tier 2.2) --
+    # Soft vs medium gap: how much faster on soft (qualifying pace advantage)
+    if "soft_best_lap" in df.columns and "medium_long_run_avg" in df.columns:
+        df["soft_medium_gap"] = df["medium_long_run_avg"] - df["soft_best_lap"]
+
+    # Race compound preference: which gives better long-run pace
+    if "medium_long_run_avg" in df.columns and "hard_long_run_avg" in df.columns:
+        df["medium_hard_gap"] = df["hard_long_run_avg"] - df["medium_long_run_avg"]
+
+    # Quali vs race pace consistency: soft best vs overall best
+    if "soft_best_lap" in df.columns and "best_lap_time" in df.columns:
+        df["soft_vs_overall_best"] = df["soft_best_lap"] - df["best_lap_time"]
+
     return df

@@ -194,6 +194,68 @@ def sector_features(group: pd.DataFrame) -> pd.Series:
     return pd.Series(features)
 
 
+def compound_features(group: pd.DataFrame) -> pd.Series:
+    """
+    Extract tyre-compound-aware features.
+
+    Separates soft (qualifying sim) from medium/hard (race sim) pace.
+    Compound column may be 'compound' or 'Compound'.
+    """
+    features = {
+        "soft_best_lap": np.nan,
+        "soft_avg_lap": np.nan,
+        "medium_long_run_avg": np.nan,
+        "hard_long_run_avg": np.nan,
+        "medium_degradation": np.nan,
+        "hard_degradation": np.nan,
+    }
+
+    compound_col = None
+    for c in ["compound", "Compound", "tyre_compound"]:
+        if c in group.columns:
+            compound_col = c
+            break
+
+    if compound_col is None:
+        return pd.Series(features)
+
+    compounds = group[compound_col].str.upper()
+
+    # Soft tyre: qualifying sims
+    soft_mask = compounds.isin(["SOFT", "S"])
+    soft_laps = group.loc[soft_mask, "lap_time"].dropna()
+    if not soft_laps.empty:
+        features["soft_best_lap"] = soft_laps.min()
+        features["soft_avg_lap"] = soft_laps.mean()
+
+    # Medium tyre: race sims
+    med_mask = compounds.isin(["MEDIUM", "M"])
+    med_laps = group.loc[med_mask, "lap_time"].dropna()
+    if len(med_laps) >= 3:
+        features["medium_long_run_avg"] = med_laps.mean()
+        # Degradation: slope over sequential laps
+        x = np.arange(len(med_laps), dtype=float)
+        y = med_laps.values.astype(float)
+        x_mean, y_mean = x.mean(), y.mean()
+        denom = ((x - x_mean) ** 2).sum()
+        if denom > 0:
+            features["medium_degradation"] = ((x - x_mean) * (y - y_mean)).sum() / denom
+
+    # Hard tyre: race sims
+    hard_mask = compounds.isin(["HARD", "H"])
+    hard_laps = group.loc[hard_mask, "lap_time"].dropna()
+    if len(hard_laps) >= 3:
+        features["hard_long_run_avg"] = hard_laps.mean()
+        x = np.arange(len(hard_laps), dtype=float)
+        y = hard_laps.values.astype(float)
+        x_mean, y_mean = x.mean(), y.mean()
+        denom = ((x - x_mean) ** 2).sum()
+        if denom > 0:
+            features["hard_degradation"] = ((x - x_mean) * (y - y_mean)).sum() / denom
+
+    return pd.Series(features)
+
+
 # -- Main extraction -----------------------------------------------------------
 
 def extract_driver_features(
@@ -243,6 +305,10 @@ def extract_driver_features(
         sec = sector_features(group)
         row.update(sec.to_dict())
 
+        # Compound-specific features (Tier 2.2)
+        comp = compound_features(group)
+        row.update(comp.to_dict())
+
         results.append(row)
 
     df = pd.DataFrame(results)
@@ -260,6 +326,34 @@ def extract_driver_features(
         max_rank = df["long_run_rank"].max()
         fill_val = (max_rank + 1) if pd.notna(max_rank) else 1
         df["long_run_rank"] = df["long_run_rank"].fillna(fill_val).astype(int)
+
+    # -- Relative pace normalization (Tier 2.3) --
+    # These features transfer across circuits: a 0.5s delta means the same everywhere
+    if "best_lap_time" in df.columns:
+        session_fastest = df["best_lap_time"].min()
+        session_median = df["best_lap_time"].median()
+        df["pace_delta_to_fastest"] = df["best_lap_time"] - session_fastest
+        df["pace_delta_to_median"] = df["best_lap_time"] - session_median
+
+    if "avg_lap_time" in df.columns:
+        avg_median = df["avg_lap_time"].median()
+        df["avg_pace_delta_to_median"] = df["avg_lap_time"] - avg_median
+
+    if "p50_to_p95_avg" in df.columns:
+        race_pace_median = df["p50_to_p95_avg"].median()
+        df["race_pace_delta_to_median"] = df["p50_to_p95_avg"] - race_pace_median
+
+    # Per-sector relative pace (delta to session fastest in each sector)
+    for i in range(1, 4):
+        best_col = f"best_sector_{i}"
+        if best_col in df.columns:
+            sector_fastest = df[best_col].min()
+            df[f"sector_{i}_delta_to_fastest"] = df[best_col] - sector_fastest
+
+    # Long-run relative pace
+    if "long_run_avg" in df.columns:
+        lr_median = df["long_run_avg"].median()
+        df["long_run_delta_to_median"] = df["long_run_avg"] - lr_median
 
     return df
 

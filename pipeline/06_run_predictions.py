@@ -257,10 +257,11 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
             print("Run 05_train_models.py first.")
             return pd.DataFrame()
 
-    # Load XGBoost models from JSON format
-    quali_model = xgb.XGBRegressor()
+    # Load XGBoost ranking models from JSON format
+    # Models trained with rank:pairwise — output relevance scores (higher = better)
+    quali_model = xgb.XGBRanker()
     quali_model.load_model(str(quali_path))
-    race_model = xgb.XGBRegressor()
+    race_model = xgb.XGBRanker()
     race_model.load_model(str(race_path))
 
     # Load feature column lists
@@ -280,7 +281,8 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
             pred_df[col] = np.nan
     X_q = pred_df[quali_feature_list].copy()
     quali_raw = quali_model.predict(X_q)
-    quali_ranks = pd.Series(quali_raw).rank(method="first").astype(int)
+    # Ranking model: higher score = better position (P1). Rank descending.
+    quali_ranks = pd.Series(-quali_raw).rank(method="first").astype(int)
     pred_df["predicted_quali_position"] = quali_ranks.values
     pred_df["predicted_quali_raw"] = quali_raw
 
@@ -327,7 +329,8 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
             pred_df[col] = np.nan
     X_r = pred_df[race_feature_list].copy()
     race_raw = race_model.predict(X_r)
-    race_ranks = pd.Series(race_raw).rank(method="first").astype(int)
+    # Ranking model: higher score = better position (P1). Rank descending.
+    race_ranks = pd.Series(-race_raw).rank(method="first").astype(int)
     pred_df["predicted_race_position"] = race_ranks.values
     pred_df["predicted_race_raw"] = race_raw
 

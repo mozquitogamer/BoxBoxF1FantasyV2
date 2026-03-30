@@ -3,14 +3,21 @@ Script 05 — Train Models (XGBoost + Walk-Forward Evaluation)
 
 Trains three models using the combined Jolpica priors + FP telemetry feature set:
 
-  1. Qualifying model  — XGBoost (1200 trees, lr=0.025, depth=3)
-     Predicts quali_position from all Jolpica priors, track, ratings, FP features.
+  1. Qualifying model  — XGBoost with rank:pairwise (LambdaMART)
+     Ranks drivers within each race using all Jolpica priors, track, ratings, FP features.
 
-  2. Race model        — XGBoost (650 trees, lr=0.03, depth=5)
-     Predicts finish_position using quali features + quali_position + race form.
+  2. Race model        — XGBoost with rank:pairwise (LambdaMART)
+     Ranks drivers within each race using quali features + quali_position + race form.
 
   3. FP signal model   — ExtraTrees (pace subset, confidence scoring)
      Trains only on rows with FP telemetry data.
+
+Ranking models learn to ORDER drivers correctly within each race, rather than
+predicting exact position numbers. This better handles the nonlinear nature of
+positions (P1 vs P2 gap matters more than P15 vs P16 for fantasy scoring).
+
+The models output relevance scores (not positions) — higher = better predicted
+finish. These are converted to positions by ranking within each race group.
 
 Validation: Temporal walk-forward (train [2020..N] -> test N+1).
 XGBoost handles NaN natively via tree_method="hist" — no imputation needed.
@@ -35,6 +42,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
+from scipy.stats import kendalltau
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
@@ -107,6 +115,12 @@ FP_SIGNAL_FEATURES = [
     "best_5_lap_avg", "p50_to_p95_avg",
     "degradation_rate", "long_run_avg", "lap_time_std",
     "pace_delta", "theoretical_best", "cv_lap_time",
+    # Relative pace features (Tier 2.3 — transfer across circuits)
+    "pace_delta_to_fastest", "pace_delta_to_median",
+    "avg_pace_delta_to_median", "race_pace_delta_to_median",
+    # Compound features (Tier 2.2)
+    "soft_best_lap", "soft_avg_lap",
+    "medium_long_run_avg", "hard_long_run_avg",
 ]
 
 
@@ -142,6 +156,43 @@ def build_race_feature_list(quali_features: list[str], all_columns: list[str]) -
 
 
 # ============================================================
+# Ranking Utilities
+# ============================================================
+
+def make_race_groups(df: pd.DataFrame) -> np.ndarray:
+    """
+    Create group sizes array for XGBoost ranking.
+    Groups are (season, round) — each race is a ranking group.
+    Returns array of group sizes in order of appearance.
+    """
+    groups = df.groupby(["season", "round"], sort=False).size().values
+    return groups
+
+
+def position_to_relevance(positions: pd.Series, max_pos: int = 22) -> pd.Series:
+    """
+    Convert positions to relevance labels for ranking.
+    P1 gets highest relevance (21), P22 gets 0.
+    This tells the ranker that P1 > P2 > ... > P22.
+    """
+    return (max_pos - positions).clip(lower=0)
+
+
+def scores_to_positions(scores: np.ndarray, df: pd.DataFrame) -> np.ndarray:
+    """
+    Convert ranking model scores to predicted positions within each race group.
+    Higher score = better predicted finish = lower position number.
+    """
+    result = np.zeros_like(scores)
+    for (season, rnd), group_idx in df.groupby(["season", "round"]).groups.items():
+        group_scores = scores[group_idx]
+        # Rank: highest score gets position 1
+        positions = (-group_scores).argsort().argsort() + 1
+        result[group_idx] = positions
+    return result
+
+
+# ============================================================
 # Walk-Forward Validation
 # ============================================================
 
@@ -152,14 +203,14 @@ def walk_forward_validate(
     model_factory,
     model_name: str,
     use_weights: bool = True,
-    add_predicted_quali: bool = False,
+    use_ranking: bool = False,
 ) -> list[dict]:
     """
     Walk-forward validation: train on [2020..N], test on N+1.
 
-    For the race model (add_predicted_quali=True), uses actual quali_position
-    as the predicted quali input during training, and generates predictions
-    from a quali model trained on the same training fold for the test set.
+    If use_ranking=True, trains with rank:pairwise objective and evaluates
+    using position MAE (by converting scores back to positions per race)
+    plus Kendall's tau ranking correlation.
     """
     available_features = [c for c in feature_cols if c in df.columns]
     missing = set(feature_cols) - set(available_features)
@@ -189,14 +240,51 @@ def walk_forward_validate(
             w_train = train_df["sample_weight"].values
 
         model = model_factory()
-        if w_train is not None:
-            model.fit(X_train, y_train, sample_weight=w_train)
-        else:
-            model.fit(X_train, y_train)
 
-        y_pred = model.predict(X_test)
-        mae = mean_absolute_error(y_test, y_pred)
-        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+        if use_ranking:
+            # Convert positions to relevance labels
+            y_train_rel = position_to_relevance(y_train)
+            train_groups = make_race_groups(train_df)
+
+            model.fit(
+                X_train, y_train_rel,
+                sample_weight=w_train,
+                qid=train_groups,
+            )
+
+            # Predict scores and convert to positions
+            test_scores = model.predict(X_test)
+            y_pred_pos = scores_to_positions(test_scores, test_df)
+        else:
+            if w_train is not None:
+                model.fit(X_train, y_train, sample_weight=w_train)
+            else:
+                model.fit(X_train, y_train)
+            y_pred_pos = model.predict(X_test)
+
+        mae = mean_absolute_error(y_test, y_pred_pos)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred_pos))
+
+        # Ranking metrics: Kendall's tau per race, then average
+        taus = []
+        top3_correct = 0
+        top3_total = 0
+        for (season, rnd), group_idx in test_df.groupby(["season", "round"]).groups.items():
+            actual = y_test.iloc[y_test.index.get_indexer(group_idx)]
+            predicted = y_pred_pos[group_idx]
+            if len(actual) >= 3:
+                tau, _ = kendalltau(actual, predicted)
+                if not np.isnan(tau):
+                    taus.append(tau)
+                # Top-3 accuracy: how many of actual top-3 are in predicted top-3
+                actual_top3 = set(actual.nsmallest(3).index)
+                pred_top3_idx = np.argsort(predicted)[:3]
+                pred_top3 = set(test_df.index[group_idx[pred_top3_idx]])
+                top3_correct += len(actual_top3 & pred_top3)
+                top3_total += 3
+
+        avg_tau = np.mean(taus) if taus else 0.0
+        top3_acc = top3_correct / top3_total if top3_total > 0 else 0.0
 
         results.append({
             "test_year": int(test_year),
@@ -204,15 +292,20 @@ def walk_forward_validate(
             "test_size": len(test_df),
             "mae": round(float(mae), 4),
             "rmse": round(float(rmse), 4),
+            "kendall_tau": round(float(avg_tau), 4),
+            "top3_accuracy": round(float(top3_acc), 4),
         })
         print(f"    Fold: Train [2020-{int(test_year)-1}] ({len(train_df):,}) -> "
               f"Test {int(test_year)} ({len(test_df):,}): "
-              f"MAE={mae:.3f}, RMSE={rmse:.3f}")
+              f"MAE={mae:.3f}, RMSE={rmse:.3f}, τ={avg_tau:.3f}, Top3={top3_acc:.1%}")
 
     if results:
         avg_mae = np.mean([r["mae"] for r in results])
         avg_rmse = np.mean([r["rmse"] for r in results])
-        print(f"    Mean walk-forward: MAE={avg_mae:.3f}, RMSE={avg_rmse:.3f}")
+        avg_tau = np.mean([r["kendall_tau"] for r in results])
+        avg_top3 = np.mean([r["top3_accuracy"] for r in results])
+        print(f"    Mean walk-forward: MAE={avg_mae:.3f}, RMSE={avg_rmse:.3f}, "
+              f"τ={avg_tau:.3f}, Top3={avg_top3:.1%}")
 
     return results
 
@@ -277,7 +370,7 @@ def main() -> None:
     print(f"  Training samples: {len(quali_df):,}")
 
     def make_quali_model():
-        return xgb.XGBRegressor(
+        return xgb.XGBRanker(
             n_estimators=1200,
             learning_rate=0.025,
             max_depth=3,
@@ -287,6 +380,7 @@ def main() -> None:
             reg_alpha=0.1,
             reg_lambda=1.0,
             tree_method="hist",
+            objective="rank:pairwise",
             random_state=MODEL_RANDOM_STATE,
             n_jobs=-1,
             verbosity=0,
@@ -294,20 +388,19 @@ def main() -> None:
 
     print("\n  Walk-forward validation:")
     quali_wf_results = walk_forward_validate(
-        quali_df, quali_feature_cols, "quali_position", make_quali_model, "Qualifying"
+        quali_df, quali_feature_cols, "quali_position", make_quali_model, "Qualifying",
+        use_ranking=True,
     )
 
     # Train final qualifying model on all data
     print("\n  Training final qualifying model on all data...")
     X_q = quali_df[quali_available]
-    y_q = quali_df["quali_position"]
+    y_q_rel = position_to_relevance(quali_df["quali_position"])
     w_q = quali_df["sample_weight"].values if "sample_weight" in quali_df.columns else None
+    q_groups = make_race_groups(quali_df)
 
     quali_model = make_quali_model()
-    if w_q is not None:
-        quali_model.fit(X_q, y_q, sample_weight=w_q)
-    else:
-        quali_model.fit(X_q, y_q)
+    quali_model.fit(X_q, y_q_rel, sample_weight=w_q, qid=q_groups)
 
     # Feature importances
     q_importances = pd.Series(
@@ -352,7 +445,7 @@ def main() -> None:
     print(f"  Training samples: {len(race_df):,} (classified finishers)")
 
     def make_race_model():
-        return xgb.XGBRegressor(
+        return xgb.XGBRanker(
             n_estimators=650,
             learning_rate=0.03,
             max_depth=5,
@@ -360,6 +453,7 @@ def main() -> None:
             colsample_bytree=0.85,
             min_child_weight=5,
             tree_method="hist",
+            objective="rank:pairwise",
             random_state=MODEL_RANDOM_STATE,
             n_jobs=-1,
             verbosity=0,
@@ -367,20 +461,19 @@ def main() -> None:
 
     print("\n  Walk-forward validation:")
     race_wf_results = walk_forward_validate(
-        race_df, race_feature_cols, "finish_position", make_race_model, "Race"
+        race_df, race_feature_cols, "finish_position", make_race_model, "Race",
+        use_ranking=True,
     )
 
     # Train final race model on all data
     print("\n  Training final race model on all data...")
     X_r = race_df[race_available]
-    y_r = race_df["finish_position"]
+    y_r_rel = position_to_relevance(race_df["finish_position"])
     w_r = race_df["sample_weight"].values if "sample_weight" in race_df.columns else None
+    r_groups = make_race_groups(race_df)
 
     race_model = make_race_model()
-    if w_r is not None:
-        race_model.fit(X_r, y_r, sample_weight=w_r)
-    else:
-        race_model.fit(X_r, y_r)
+    race_model.fit(X_r, y_r_rel, sample_weight=w_r, qid=r_groups)
 
     # Feature importances
     r_importances = pd.Series(
@@ -462,7 +555,11 @@ def main() -> None:
     # Save Model Metadata
     # ==================================================================
     quali_avg_mae = float(np.mean([r["mae"] for r in quali_wf_results])) if quali_wf_results else None
+    quali_avg_tau = float(np.mean([r["kendall_tau"] for r in quali_wf_results])) if quali_wf_results else None
+    quali_avg_top3 = float(np.mean([r["top3_accuracy"] for r in quali_wf_results])) if quali_wf_results else None
     race_avg_mae = float(np.mean([r["mae"] for r in race_wf_results])) if race_wf_results else None
+    race_avg_tau = float(np.mean([r["kendall_tau"] for r in race_wf_results])) if race_wf_results else None
+    race_avg_top3 = float(np.mean([r["top3_accuracy"] for r in race_wf_results])) if race_wf_results else None
 
     metadata = {
         "trained_at": datetime.now().isoformat(),
@@ -472,10 +569,10 @@ def main() -> None:
         "seasons": sorted([int(s) for s in df["season"].unique()]),
         "fp_coverage": f"{fp_rows}/{len(df)} ({fp_rows/len(df):.1%})",
         "qualifying_model": {
-            "algorithm": "XGBRegressor",
+            "algorithm": "XGBRanker (rank:pairwise)",
             "save_format": "json",
             "n_features": len(quali_available),
-            "training_samples": len(y_q),
+            "training_samples": len(y_q_rel),
             "params": {
                 "n_estimators": 1200,
                 "learning_rate": 0.025,
@@ -488,13 +585,15 @@ def main() -> None:
             },
             "walk_forward_results": quali_wf_results,
             "walk_forward_mean_mae": round(quali_avg_mae, 4) if quali_avg_mae else None,
+            "walk_forward_mean_kendall_tau": round(quali_avg_tau, 4) if quali_avg_tau else None,
+            "walk_forward_mean_top3_accuracy": round(quali_avg_top3, 4) if quali_avg_top3 else None,
             "top_features": {feat: round(float(imp), 4) for feat, imp in q_importances.head(15).items()},
         },
         "race_model": {
-            "algorithm": "XGBRegressor",
+            "algorithm": "XGBRanker (rank:pairwise)",
             "save_format": "json",
             "n_features": len(race_available),
-            "training_samples": len(y_r),
+            "training_samples": len(y_r_rel),
             "params": {
                 "n_estimators": 650,
                 "learning_rate": 0.03,
@@ -505,6 +604,8 @@ def main() -> None:
             },
             "walk_forward_results": race_wf_results,
             "walk_forward_mean_mae": round(race_avg_mae, 4) if race_avg_mae else None,
+            "walk_forward_mean_kendall_tau": round(race_avg_tau, 4) if race_avg_tau else None,
+            "walk_forward_mean_top3_accuracy": round(race_avg_top3, 4) if race_avg_top3 else None,
             "top_features": {feat: round(float(imp), 4) for feat, imp in r_importances.head(15).items()},
         },
         "fp_signal_model": {
@@ -530,17 +631,21 @@ def main() -> None:
     print(f"  FP telemetry:         {fp_rows}/{len(df)} rows ({fp_rows/len(df):.1%})")
     print()
     if quali_wf_results:
-        print(f"  Qualifying model:")
+        print(f"  Qualifying model (rank:pairwise):")
         print(f"    Features:           {len(quali_available)}")
         print(f"    Walk-forward MAE:   {quali_avg_mae:.3f}")
+        print(f"    Kendall's tau:      {quali_avg_tau:.3f}")
+        print(f"    Top-3 accuracy:     {quali_avg_top3:.1%}")
         for r in quali_wf_results:
-            print(f"      {r['test_year']}: MAE={r['mae']:.3f} (n={r['test_size']})")
+            print(f"      {r['test_year']}: MAE={r['mae']:.3f}, τ={r['kendall_tau']:.3f}, Top3={r['top3_accuracy']:.1%} (n={r['test_size']})")
     if race_wf_results:
-        print(f"  Race model:")
+        print(f"  Race model (rank:pairwise):")
         print(f"    Features:           {len(race_available)}")
         print(f"    Walk-forward MAE:   {race_avg_mae:.3f}")
+        print(f"    Kendall's tau:      {race_avg_tau:.3f}")
+        print(f"    Top-3 accuracy:     {race_avg_top3:.1%}")
         for r in race_wf_results:
-            print(f"      {r['test_year']}: MAE={r['mae']:.3f} (n={r['test_size']})")
+            print(f"      {r['test_year']}: MAE={r['mae']:.3f}, τ={r['kendall_tau']:.3f}, Top3={r['top3_accuracy']:.1%} (n={r['test_size']})")
     if fp_model is not None:
         print(f"  FP signal model:      {fp_train_size} samples, {len(fp_available)} features")
     print()
