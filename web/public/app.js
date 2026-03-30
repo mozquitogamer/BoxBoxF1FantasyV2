@@ -239,12 +239,35 @@ async function loadData() {
         return;
     }
 
-    // Update header
-    const flag = RACE_FLAGS[data.race] || '🏁';
+    // Update header — show next upcoming race if the predicted race is already over
+    const now = new Date();
+    const predRound = LOCK_DEADLINES.find(dl => dl.round === data.round);
+    const predRaceOver = predRound && new Date(predRound.lock) < now;
+
+    let headerRace, headerRound, headerSprint, headerMeta;
+    if (predRaceOver) {
+        // Find next upcoming non-cancelled race
+        const nextRace = LOCK_DEADLINES.find(dl => !dl.cancelled && new Date(dl.lock) > now);
+        if (nextRace) {
+            headerRace = nextRace.race;
+            headerRound = nextRace.round;
+            headerSprint = nextRace.sprint;
+            headerMeta = `Round ${nextRace.round} · ${data.season}${nextRace.sprint ? ' · Sprint Weekend' : ''} · Upcoming`;
+        } else {
+            headerRace = data.race;
+            headerRound = data.round;
+            headerMeta = `Round ${data.round} · ${data.season} · Season Complete`;
+        }
+    } else {
+        headerRace = data.race;
+        headerRound = data.round;
+        headerMeta = `Round ${data.round} · ${data.season}${data.is_sprint_weekend ? ' · Sprint Weekend' : ''}`;
+    }
+
+    const flag = RACE_FLAGS[headerRace] || '🏁';
     document.getElementById('raceFlag').textContent = flag;
-    document.getElementById('raceName').textContent = data.race;
-    document.getElementById('raceMeta').textContent =
-        `Round ${data.round} · ${data.season}${data.is_sprint_weekend ? ' · Sprint Weekend' : ''}`;
+    document.getElementById('raceName').textContent = headerRace;
+    document.getElementById('raceMeta').textContent = headerMeta;
     document.getElementById('generatedAt').textContent =
         `Predictions generated: ${new Date(data.generated_at).toLocaleString()}`;
 
@@ -2287,7 +2310,7 @@ function renderPredictionsSummary(predictions) {
 // Sprint points: P1=8, P2=7, P3=6, P4=5, P5=4, P6=3, P7=2, P8=1
 const WDC_RACE_PTS = { 1:25, 2:18, 3:15, 4:12, 5:10, 6:8, 7:6, 8:4, 9:2, 10:1 };
 const WDC_SPRINT_PTS = { 1:8, 2:7, 3:6, 4:5, 5:4, 6:3, 7:2, 8:1 };
-const FASTEST_LAP_BONUS = 1; // +1 point if finished P1-P10
+// Note: Fastest lap bonus removed from F1 regulations starting 2026
 
 function renderChampionshipStandings() {
     const el = document.getElementById('championshipStandings');
@@ -2313,8 +2336,6 @@ function renderChampionshipStandings() {
             // Race points
             if (d.race_position && WDC_RACE_PTS[d.race_position]) {
                 rPts += WDC_RACE_PTS[d.race_position];
-                // Fastest lap bonus (only if finished in top 10)
-                if (d.is_fastest_lap && d.race_position <= 10) rPts += FASTEST_LAP_BONUS;
             }
             // Sprint points
             let sPts = 0;
