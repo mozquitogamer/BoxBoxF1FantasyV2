@@ -350,7 +350,7 @@ def sample_positions(raw_scores: np.ndarray, noise_base: float,
     correlation.
 
     Args:
-        raw_scores: Continuous model output scores (lower = better)
+        raw_scores: Continuous model output scores (higher = better, XGBRanker relevance)
         noise_base: Base standard deviation of the noise (from calibration)
         confidences: Per-driver confidence scores (0-100)
         rng: Random number generator
@@ -373,7 +373,8 @@ def sample_positions(raw_scores: np.ndarray, noise_base: float,
 
     perturbed = raw_scores + noise
     # Rank to get positions (1-based)
-    order = perturbed.argsort()
+    # Higher raw score = better (P1) for XGBRanker, so negate before argsort
+    order = (-perturbed).argsort()
     positions = np.empty(n, dtype=int)
     positions[order] = np.arange(1, n + 1)
     return positions
