@@ -71,6 +71,7 @@ def build_predictions_json(round_num: int) -> dict | None:
     race_info = load_race_info()
     driver_info = load_driver_info()
     constructor_info = load_constructor_info()
+    prices = load_fantasy_prices()
 
     race = race_info.get(round_num, {})
     race_name = race.get("name", f"Round {round_num}")
@@ -86,6 +87,16 @@ def build_predictions_json(round_num: int) -> dict | None:
 
     driver_df = pd.read_parquet(driver_path)
     constructor_df = pd.read_parquet(constructor_path) if constructor_path.exists() else pd.DataFrame()
+
+    # Build price lookup from latest fantasy_prices.json
+    driver_prices = {}
+    if prices and "drivers" in prices:
+        for abbrev, p in prices["drivers"].items():
+            driver_prices[abbrev] = p["current_price"]
+    constructor_prices = {}
+    if prices and "constructors" in prices:
+        for cid, p in prices["constructors"].items():
+            constructor_prices[cid] = p["current_price"]
 
     # Build driver entries
     drivers_json = []
@@ -115,6 +126,10 @@ def build_predictions_json(round_num: int) -> dict | None:
             "value_score": float(row.get("value_score", 0)),
             "current_price": float(row.get("current_price", 10)),
         }
+
+        # Override price from latest fantasy_prices.json if available
+        if abbrev in driver_prices:
+            entry["current_price"] = driver_prices[abbrev]
 
         if is_sprint:
             entry["expected_points_sprint_quali"] = round(
@@ -183,6 +198,10 @@ def build_predictions_json(round_num: int) -> dict | None:
             "value_score": float(row.get("value_score", 0)),
             "current_price": float(row.get("current_price", 10)),
         }
+
+        # Override price from latest fantasy_prices.json if available
+        if cid in constructor_prices:
+            entry["current_price"] = constructor_prices[cid]
 
         if is_sprint:
             entry["expected_points_sprint_quali"] = round(float(row.get("expected_sprint_quali_pts", 0)), 1)

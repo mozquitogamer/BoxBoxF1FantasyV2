@@ -82,6 +82,46 @@
         "audi": -4,
         "cadillac": 22
       }
+    },
+    "3": {
+      "race": "Japanese Grand Prix",
+      "drivers": {
+        "VER": 13,
+        "RUS": 27,
+        "NOR": 24,
+        "PIA": 43,
+        "ANT": 50,
+        "LEC": 31,
+        "HAM": 19,
+        "HAD": 5,
+        "GAS": 14,
+        "SAI": 4,
+        "ALB": -1,
+        "ALO": 4,
+        "BEA": -14,
+        "OCO": 9,
+        "LIN": 1,
+        "COL": 4,
+        "LAW": 10,
+        "STR": -17,
+        "BOR": 3,
+        "PER": 4,
+        "HUL": 10,
+        "BOT": 2
+      },
+      "constructors": {
+        "mercedes": 92,
+        "mclaren": 72,
+        "red_bull": 25,
+        "ferrari": 75,
+        "alpine": 25,
+        "williams": 9,
+        "aston_martin": -12,
+        "haas": -4,
+        "racing_bulls": 18,
+        "audi": 23,
+        "cadillac": 5
+      }
     }
   }
 }
