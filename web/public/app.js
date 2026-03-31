@@ -2904,47 +2904,59 @@ function updateH2HComparison() {
 // Model Accuracy Dashboard Tab
 // ============================================================
 
-let accuracyRendered = false;
+let accuracyDataLoaded = false;
+let accuracyPairs = [];
+let accuracyMissingNote = '';
+let accuracySelectedRounds = new Set();
 
 async function renderAccuracy() {
-    if (!data || accuracyRendered) return;
+    if (!data) return;
     if (!seasonSummary || !seasonSummary.rounds) return;
     const container = document.getElementById('accuracyContent');
     if (!container) return;
 
-    const roundsWithBoth = seasonSummary.rounds.filter(r => r.has_predictions && r.has_actual);
-    const roundsActualOnly = seasonSummary.rounds.filter(r => !r.has_predictions && r.has_actual);
-    if (roundsWithBoth.length === 0) {
-        container.innerHTML = '<p class="no-data">No rounds with both predictions and actuals available yet. Check back after a completed race weekend.</p>';
-        accuracyRendered = true;
-        return;
+    // Load data once, then re-render on filter changes
+    if (!accuracyDataLoaded) {
+        const roundsWithBoth = seasonSummary.rounds.filter(r => r.has_predictions && r.has_actual);
+        const roundsActualOnly = seasonSummary.rounds.filter(r => !r.has_predictions && r.has_actual);
+        if (roundsWithBoth.length === 0) {
+            container.innerHTML = '<p class="no-data">No rounds with both predictions and actuals available yet. Check back after a completed race weekend.</p>';
+            return;
+        }
+
+        if (roundsActualOnly.length > 0) {
+            const names = roundsActualOnly.map(r => `R${r.round} (${r.name})`).join(', ');
+            accuracyMissingNote = `<div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.25);color:#eab308;padding:8px 14px;border-radius:8px;font-size:0.8rem;margin-bottom:16px;">
+                ${names}: Predictions were not generated before the race, so accuracy cannot be measured for ${roundsActualOnly.length === 1 ? 'this round' : 'these rounds'}.
+            </div>`;
+        }
+
+        container.innerHTML = accuracyMissingNote + '<p class="no-data">Analyzing prediction accuracy...</p>';
+
+        accuracyPairs = [];
+        for (const r of roundsWithBoth) {
+            const [pred, act] = await Promise.all([
+                loadPredictionsData(r.round),
+                loadActualData(r.round)
+            ]);
+            if (pred && act) accuracyPairs.push({ round: r.round, name: r.name, pred, act });
+        }
+
+        if (accuracyPairs.length === 0) {
+            container.innerHTML = '<p class="no-data">Could not load prediction/actual data pairs.</p>';
+            return;
+        }
+
+        // Default: all rounds selected
+        accuracySelectedRounds = new Set(accuracyPairs.map(p => p.round));
+        accuracyDataLoaded = true;
     }
 
-    let missingNote = '';
-    if (roundsActualOnly.length > 0) {
-        const names = roundsActualOnly.map(r => `R${r.round} (${r.name})`).join(', ');
-        missingNote = `<div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.25);color:#eab308;padding:8px 14px;border-radius:8px;font-size:0.8rem;margin-bottom:16px;">
-            ⚠️ ${names}: Predictions were not generated before the race, so accuracy cannot be measured for ${roundsActualOnly.length === 1 ? 'this round' : 'these rounds'}.
-        </div>`;
-    }
+    renderAccuracyWithFilters(container);
+}
 
-    container.innerHTML = missingNote + '<p class="no-data">Analyzing prediction accuracy...</p>';
-
-    // Load all prediction/actual pairs
-    const pairs = [];
-    for (const r of roundsWithBoth) {
-        const [pred, act] = await Promise.all([
-            loadPredictionsData(r.round),
-            loadActualData(r.round)
-        ]);
-        if (pred && act) pairs.push({ round: r.round, name: r.name, pred, act });
-    }
-
-    if (pairs.length === 0) {
-        container.innerHTML = '<p class="no-data">Could not load prediction/actual data pairs.</p>';
-        accuracyRendered = true;
-        return;
-    }
+function renderAccuracyWithFilters(container) {
+    const activePairs = accuracyPairs.filter(p => accuracySelectedRounds.has(p.round));
 
     // Compute all metrics
     const scatterPoints = [];
@@ -2952,7 +2964,10 @@ async function renderAccuracy() {
     const driverAccum = {};
     let totalPtsMAE = 0, totalPosMAE = 0, totalCIHits = 0, totalCITotal = 0, totalComparisons = 0, totalPosComparisons = 0;
 
-    pairs.forEach(({ round, name, pred, act }) => {
+    // Track latest round for per-driver latest race columns
+    const latestRound = activePairs.length > 0 ? Math.max(...activePairs.map(p => p.round)) : null;
+
+    activePairs.forEach(({ round, name, pred, act }) => {
         const predMap = {};
         if (pred.drivers) pred.drivers.forEach(d => { predMap[d.driver_id] = d; });
         const actMap = {};
@@ -3003,12 +3018,19 @@ async function renderAccuracy() {
 
             // Accumulate per-driver
             if (!driverAccum[id]) {
-                driverAccum[id] = { name: p.name || id, constructor: p.constructor || a.constructor, totalPred: 0, totalActual: 0, totalErr: 0, rounds: 0 };
+                driverAccum[id] = { name: p.name || id, constructor: p.constructor || a.constructor, totalPred: 0, totalActual: 0, totalErr: 0, rounds: 0, latestPred: null, latestActual: null };
             }
             driverAccum[id].totalPred += predPts;
             driverAccum[id].totalActual += actPts;
             driverAccum[id].totalErr += ptsErr;
             driverAccum[id].rounds++;
+
+            // Track latest race data
+            if (round === latestRound) {
+                driverAccum[id].latestPred = predPts;
+                driverAccum[id].latestActual = actPts;
+                driverAccum[id].latestRound = round;
+            }
         });
 
         roundStats.push({
@@ -3026,7 +3048,7 @@ async function renderAccuracy() {
     const overallCICov = totalCITotal > 0 ? ((totalCIHits / totalCITotal) * 100).toFixed(0) : '-';
 
     // Build scatter plot SVG
-    const scatterSVG = buildScatterPlot(scatterPoints);
+    const scatterSVG = activePairs.length > 0 ? buildScatterPlot(scatterPoints) : '<p class="no-data">Select at least one round to see the chart.</p>';
 
     // CI coverage bar
     const ciPct = totalCITotal > 0 ? (totalCIHits / totalCITotal) * 100 : 0;
@@ -3039,6 +3061,18 @@ async function renderAccuracy() {
         </div>
     </div>`;
 
+    // Race filter toggle buttons
+    const filterHTML = `
+    <div class="accuracy-filter">
+        <span class="accuracy-filter-label">Filter by Race:</span>
+        <div class="accuracy-filter-buttons">
+            ${accuracyPairs.map(p => {
+                const active = accuracySelectedRounds.has(p.round);
+                return `<button class="accuracy-filter-btn${active ? ' active' : ''}" data-round="${p.round}">R${p.round} ${p.name}</button>`;
+            }).join('')}
+        </div>
+    </div>`;
+
     // Per-round table
     const roundTableRows = roundStats.map(r => `<tr>
         <td>R${r.round}</td><td>${r.name}</td><td class="num">${r.ptsMAE}</td>
@@ -3046,7 +3080,7 @@ async function renderAccuracy() {
         <td>${r.best}</td><td>${r.worst}</td>
     </tr>`).join('');
 
-    // Per-driver table
+    // Per-driver table with latest race columns
     const driverRows = Object.values(driverAccum)
         .map(d => ({
             ...d,
@@ -3057,13 +3091,21 @@ async function renderAccuracy() {
         }))
         .sort((a, b) => b.avgErr - a.avgErr);
 
+    const latestRoundLabel = latestRound ? `R${latestRound}` : 'Latest';
+
     const driverTableRows = driverRows.map(d => {
         const team = TEAMS[d.constructor] || { name: d.constructor, color: '#666' };
         const biasClass = d.bias > 2 ? 'bias-over' : d.bias < -2 ? 'bias-under' : '';
         const biasSign = d.bias >= 0 ? '+' : '';
+        const lPred = d.latestPred != null ? d.latestPred.toFixed(1) : '-';
+        const lActual = d.latestActual != null ? d.latestActual.toFixed(0) : '-';
+        const lErr = (d.latestPred != null && d.latestActual != null) ? Math.abs(d.latestPred - d.latestActual).toFixed(1) : '-';
         return `<tr>
             <td>${d.name}</td>
             <td style="color:${team.color}">${team.name}</td>
+            <td class="num">${lPred}</td>
+            <td class="num">${lActual}</td>
+            <td class="num">${lErr}</td>
             <td class="num">${d.avgPred.toFixed(1)}</td>
             <td class="num">${d.avgActual.toFixed(1)}</td>
             <td class="num">${d.avgErr.toFixed(1)}</td>
@@ -3072,7 +3114,9 @@ async function renderAccuracy() {
         </tr>`;
     }).join('');
 
-    container.innerHTML = missingNote + `
+    container.innerHTML = accuracyMissingNote + `
+    ${filterHTML}
+
     <div class="accuracy-stats">
         <div class="accuracy-stat-card">
             <div class="accuracy-stat-value">${overallPtsMAE}</div>
@@ -3087,7 +3131,7 @@ async function renderAccuracy() {
             <div class="accuracy-stat-label">90% CI Coverage</div>
         </div>
         <div class="accuracy-stat-card">
-            <div class="accuracy-stat-value">${pairs.length}</div>
+            <div class="accuracy-stat-value">${activePairs.length}</div>
             <div class="accuracy-stat-label">Rounds Analyzed</div>
         </div>
     </div>
@@ -3118,8 +3162,9 @@ async function renderAccuracy() {
         <div class="table-wrapper">
             <table class="data-table accuracy-driver-table sortable">
                 <thead><tr>
-                    <th>Driver</th><th>Team</th><th class="num">Avg Pred</th>
-                    <th class="num">Avg Actual</th><th class="num">Avg Error</th>
+                    <th>Driver</th><th>Team</th>
+                    <th class="num">${latestRoundLabel} Pred</th><th class="num">${latestRoundLabel} Actual</th><th class="num">${latestRoundLabel} Err</th>
+                    <th class="num">Avg Pred</th><th class="num">Avg Actual</th><th class="num">Avg Error</th>
                     <th class="num">Bias</th><th class="num">Rounds</th>
                 </tr></thead>
                 <tbody>${driverTableRows}</tbody>
@@ -3127,8 +3172,20 @@ async function renderAccuracy() {
         </div>
     </div>`;
 
+    // Wire up filter buttons
+    container.querySelectorAll('.accuracy-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const round = parseInt(btn.dataset.round);
+            if (accuracySelectedRounds.has(round)) {
+                accuracySelectedRounds.delete(round);
+            } else {
+                accuracySelectedRounds.add(round);
+            }
+            renderAccuracyWithFilters(container);
+        });
+    });
+
     container.querySelectorAll('table.sortable').forEach(makeTableSortable);
-    accuracyRendered = true;
 }
 
 function buildScatterPlot(dataPoints) {

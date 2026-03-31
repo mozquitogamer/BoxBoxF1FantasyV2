@@ -1985,6 +1985,45 @@ table.sortable th.sort-desc::after {
     white-space: nowrap;
 }
 
+.accuracy-filter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.accuracy-filter-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    white-space: nowrap;
+}
+.accuracy-filter-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.accuracy-filter-btn {
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.accuracy-filter-btn:hover {
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+}
+.accuracy-filter-btn.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+    font-weight: 600;
+}
+
 .accuracy-round-table,
 .accuracy-driver-table {
     width: 100%;
