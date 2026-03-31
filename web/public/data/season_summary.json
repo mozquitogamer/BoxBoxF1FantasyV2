@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-03-30T12:40:15.641567+00:00",
+  "generated_at": "2026-03-31T06:42:09.984782+00:00",
   "rounds": [
     {
       "round": 1,
@@ -34,7 +34,7 @@
       "name": "Miami Grand Prix",
       "circuit": "Miami",
       "date": "2026-05-03",
-      "has_predictions": false,
+      "has_predictions": true,
       "has_post_race": false,
       "has_actual": false
     },
