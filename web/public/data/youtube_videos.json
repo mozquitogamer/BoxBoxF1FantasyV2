@@ -1,7 +1,14 @@
 {
-  "updated": "2026-03-30T11:29:24Z",
+  "updated": "2026-03-31T11:12:48Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "rPm7-cxK3xY",
+      "title": "F1 Fantasy is broken #f1fantasy #formula1 #automobile",
+      "published": "2026-03-30",
+      "thumbnail": "https://i.ytimg.com/vi/rPm7-cxK3xY/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=rPm7-cxK3xY"
+    },
     {
       "id": "h-tZ9dYYNDw",
       "title": "Nailed this prediction #f1fantasy #formula1",
@@ -22,13 +29,6 @@
       "published": "2026-03-27",
       "thumbnail": "https://i.ytimg.com/vi/jYzSmuMW9R4/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=jYzSmuMW9R4"
-    },
-    {
-      "id": "T4bYTJt-cCk",
-      "title": "Chinese GP Data Deep Dive - Pre Japanese Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
-      "published": "2026-03-25",
-      "thumbnail": "https://i.ytimg.com/vi/T4bYTJt-cCk/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=T4bYTJt-cCk"
     }
   ]
 }
