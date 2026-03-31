@@ -178,7 +178,7 @@ A model trained only on historical data misses the crucial "how fast is the car 
 - Team/driver skill ratings (strategy, tyre management, overtaking, etc.)
 - Season progress (early vs. late season dynamics)
 
-**Layer 2 — FP Telemetry (sparse, 23+ features):**
+**Layer 2 — FP Telemetry (sparse, 40+ features):**
 - Average, best, median lap times
 - Best 3/5/10 lap averages
 - Consistency (standard deviation, coefficient of variation)
@@ -186,6 +186,8 @@ A model trained only on historical data misses the crucial "how fast is the car 
 - Long-run pace (average over stints >= 5 laps)
 - Short-run pace (best of first 3 laps)
 - Sector-level best and average times (3 sectors)
+- **Compound-specific features (Tier 2):** soft_best_lap, soft_avg_lap, medium_long_run_avg, hard_long_run_avg, medium_degradation, hard_degradation — separates qualifying sim pace (soft) from race sim pace (medium/hard)
+- **Relative pace normalization (Tier 2):** pace_delta_to_fastest, pace_delta_to_median, avg_pace_delta_to_median, race_pace_delta_to_median, sector_N_delta_to_fastest, long_run_delta_to_median — these transfer across circuits (a 0.5s advantage means the same at Monaco and Monza)
 
 **Why XGBoost handles this perfectly:**
 XGBoost's `tree_method="hist"` handles NaN (missing values) natively. When an FP feature is NaN (no FP data for that row), XGBoost learns a default split direction. This means:
@@ -195,6 +197,7 @@ XGBoost's `tree_method="hist"` handles NaN (missing values) natively. When an FP
 
 **Engineered Cross-Layer Features:**
 - `prior_vs_fp_rank`: Gap between Jolpica prior qualifying prediction and FP pace rank. If a driver's historical data says "P5" but FP pace says "P2", that's a strong signal of improvement.
+- `soft_medium_gap`, `medium_hard_gap`, `soft_vs_overall_best`: Compound-based interaction features that capture qualifying vs race pace tradeoffs.
 
 ### Why Shift(1) Matters
 
@@ -214,30 +217,49 @@ XGBoost won because:
 3. **Good regularization** — prevents overfitting on 2,600 rows
 4. **Fast training** — important for experimentation
 
-### Qualifying Model
+### Model Evolution
+
+The models have gone through two generations:
+
+**V1 (Baseline):** XGBRegressor with `reg:squarederror` objective. Treated positions as continuous numbers (P1=1, P22=22). Simple and effective but doesn't capture the fact that the gap between P1 and P2 matters more than P15 and P16.
+
+**V2 (Current — Tier 2):** XGBRanker with `rank:pairwise` (LambdaMART) objective. Learns to rank drivers *within each race* correctly rather than predicting exact position numbers. This better handles the nonlinear nature of positions and fantasy scoring. Old V1 models are preserved in `models/trained_v1_baseline/` for reference.
+
+### Qualifying Model (V2 — XGBRanker)
 
 ```
-XGBoost(n_estimators=1200, learning_rate=0.025, max_depth=3,
-        subsample=0.85, colsample_bytree=0.85, tree_method="hist")
+XGBRanker(n_estimators=1200, learning_rate=0.025, max_depth=3,
+          objective="rank:pairwise", subsample=0.85, colsample_bytree=0.85)
 ```
 
-- **Target:** `qualifying_position` (1-22)
-- **Features:** ~62 (Jolpica priors + track + ratings + FP pace)
-- **Why depth=3?** Qualifying is relatively predictable from historical data. Shallow trees prevent overfitting. The model relies on broad patterns (fast teams qualify fast) rather than complex interactions.
-- **Why 1200 trees?** With low learning rate (0.025) and shallow depth, we need more trees to capture the signal.
+- **Target:** Relevance labels derived from qualifying_position (P1 → label 21, P22 → label 0)
+- **Group key:** (season, round) — each race is a ranking group with its own qid
+- **Features:** ~62 (Jolpica priors + track + ratings + FP pace + relative pace features)
+- **Why depth=3?** Qualifying is relatively predictable from historical data. Shallow trees prevent overfitting.
+- **Walk-forward results:** MAE=3.26, Kendall's tau=0.536, Top-3 accuracy=57.3%
 
-### Race Model
+### Race Model (V2 — XGBRanker)
 
 ```
-XGBoost(n_estimators=650, learning_rate=0.03, max_depth=5,
-        subsample=0.85, colsample_bytree=0.85, tree_method="hist")
+XGBRanker(n_estimators=650, learning_rate=0.03, max_depth=5,
+          objective="rank:pairwise", subsample=0.85, colsample_bytree=0.85)
 ```
 
-- **Target:** `finish_position` (clean finishers only, no DNF/DSQ/DNS)
-- **Features:** ~85 (all quali features + grid position + race-specific features)
+- **Target:** Relevance labels derived from finish_position (clean finishers only)
+- **Group key:** (season, round) — per-group weights (2026 samples weighted 2.5x)
+- **Features:** ~85 (all quali features + grid position + race-specific + compound features)
 - **Key input:** Predicted qualifying position feeds in as a feature
-- **Why depth=5?** Races have more complex interactions than qualifying: safety cars, strategy, tyre degradation, traffic. Deeper trees capture things like "front-row starter on a high-SC-probability track benefits more from strategy."
-- **Why fewer trees?** Higher learning rate (0.03) and deeper trees means each tree captures more signal, so fewer are needed.
+- **Why depth=5?** Races have more complex interactions than qualifying: safety cars, strategy, tyre degradation, traffic.
+- **Walk-forward results:** MAE=2.20, Kendall's tau=0.647, Top-3 accuracy=67.2%
+- **2026-specific fold:** MAE=1.586, tau=0.741, Top-3=83.3%
+
+### Why Ranking Objective Over Regression?
+
+The ranking objective (`rank:pairwise`) uses LambdaMART, which optimizes for *correct ordering* rather than exact position numbers. Benefits:
+- Naturally handles the nonlinear gap between positions (P1→P2 matters more than P15→P16)
+- Groups by race so the model learns relative performance within each event
+- Output is relevance scores (higher = better) which are ranked to produce positions
+- Better aligns with the downstream fantasy scoring where rank order determines points
 
 ### FP Signal Model (ExtraTrees)
 
@@ -259,15 +281,27 @@ Fold 1: Train [2020-2021] → Test 2022
 Fold 2: Train [2020-2022] → Test 2023
 Fold 3: Train [2020-2023] → Test 2024
 Fold 4: Train [2020-2024] → Test 2025
+Fold 5: Train [2020-2025] → Test 2026 (R1-R3)
 ```
 
-This gives realistic accuracy estimates. Our targets:
-- **Qualifying MAE:** ~3.0 positions (meaning our predictions are off by ~3 grid slots on average)
-- **Race MAE:** ~3.5-4.0 positions
+**Metrics (V2 Tier 2 models):**
+- **Qualifying:** MAE=3.26, Kendall's tau=0.536, Top-3 accuracy=57.3%
+- **Race:** MAE=2.20, Kendall's tau=0.647, Top-3 accuracy=67.2%
+- **2026-only fold:** Race MAE=1.586, tau=0.741, Top-3=83.3%
+
+**Backtest results (2026 R1 Australian GP):**
+- Race MAE=2.71, Kendall's tau=0.853, Top-3=3/3 (predicted RUS, ANT, LEC correctly)
+
+**Backtest results (2026 R3 Japanese GP):**
+- Race MAE=2.55, Kendall's tau=0.695, Top-3=1/3 (predicted ANT correct)
+
+For the ranking models, we report Kendall's tau (rank correlation) and top-3 accuracy alongside MAE, since ranking quality matters more than exact position numbers for fantasy scoring.
 
 ### Sample Weighting
 
 2026 has new regulations (ground effect changes, new tyres). Data from 2020-2025 under old regulations is still useful (driver skill, track characteristics persist) but less relevant. We weight 2026 samples 2.5x to ensure the models prioritize current-regulation patterns.
+
+For XGBRanker, sample weights must be per-group (one weight per race), not per-sample. All drivers in the same race share the same weight based on the season's regulation relevance.
 
 ---
 
@@ -293,7 +327,7 @@ For each driver:
 2. **Race points:** Lookup table (P1=25, P2=18, ..., P10=1, P11+=0)
 3. **Positions gained/lost:** (grid_position - finish_position) × 1pt
 4. **Overtakes:** estimated_overtakes × 1pt
-5. **Fastest lap:** probability × 10pts
+5. **Fastest lap:** probability × 10pts (F1 Fantasy bonus, separate from championship FL which was removed in 2026)
 6. **Driver of the Day:** probability × 10pts
 7. **DNF risk:** probability × (-20pts)
 8. **Sprint (if applicable):** separate scoring (P1=8, ..., P8=1; FL=5pts; DNF=-10pts)

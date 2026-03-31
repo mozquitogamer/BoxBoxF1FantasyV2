@@ -18,9 +18,9 @@ Our pipeline (Jolpica priors + FP telemetry → XGBoost → Monte Carlo) is a so
 | **No teammate correlation** — MC samples each driver independently, producing unrealistic team outcomes (e.g. P1 + P15 for same team) | HIGH | `08_monte_carlo_fantasy.py:266` |
 | **Pit stop points completely missing** — 15-50+ constructor pts/race left on table | HIGH | `07_calculate_fantasy.py`, `08_monte_carlo_fantasy.py` |
 | **Constructor MC is approximate** — sums driver means instead of per-iteration simulation | MEDIUM | `08_monte_carlo_fantasy.py:800-822` |
-| **Regression target treats positions as continuous** — P1→P2 gap = P15→P16 gap, but scoring is hugely nonlinear | MEDIUM | `05_train_models.py` |
-| **FP features mix tyre compounds** — soft qualifying sims averaged with hard race sims | MEDIUM | `03_extract_features.py` |
-| **No relative pace normalization** — absolute lap times don't transfer across circuits | MEDIUM | `03_extract_features.py` |
+| ~~**Regression target treats positions as continuous**~~ — ✅ Fixed: switched to `rank:pairwise` (LambdaMART) | ~~MEDIUM~~ | `05_train_models.py` |
+| ~~**FP features mix tyre compounds**~~ — ✅ Fixed: compound-aware feature extraction | ~~MEDIUM~~ | `03_extract_features.py` |
+| ~~**No relative pace normalization**~~ — ✅ Fixed: session-relative delta features | ~~MEDIUM~~ | `03_extract_features.py` |
 | **Independent DNF sampling** — misses correlated incidents (first-lap pileups, team reliability) | LOW-MED | `08_monte_carlo_fantasy.py` |
 | **No betting odds calibration** — missing a free, highly-informative signal | LOW-MED | Not implemented |
 | **Confidence intervals uncalibrated** — no validation that P5-P95 captures 90% of outcomes | LOW | `08_monte_carlo_fantasy.py` |
@@ -97,7 +97,7 @@ This captures the full nonlinearity and correlations that the current approximat
 
 ### Tier 2: Improve the ML Model
 
-#### 2.1 Switch to ranking objective
+#### 2.1 Switch to ranking objective ✅ COMPLETED (2026-03-31)
 **File:** `05_train_models.py`
 
 **Current:** `objective="reg:squarederror"` — treats position as continuous number.
@@ -109,7 +109,7 @@ This captures the full nonlinearity and correlations that the current approximat
 
 **Fallback:** If rank:pairwise degrades performance (possible with our sample size), keep regression but add `log(position)` as target to compress the tail.
 
-#### 2.2 Tyre-compound-aware feature extraction
+#### 2.2 Tyre-compound-aware feature extraction ✅ COMPLETED (2026-03-31)
 **File:** `03_extract_features.py`
 
 **Current:** All laps averaged together regardless of compound.
@@ -121,7 +121,7 @@ This captures the full nonlinearity and correlations that the current approximat
 
 Requires reading the `Compound` column from FastF1 lap data (already available in the parquet files).
 
-#### 2.3 Relative pace normalization
+#### 2.3 Relative pace normalization ✅ COMPLETED (2026-03-31)
 **File:** `03_extract_features.py`, `feature_engineering.py`
 
 **Current:** Absolute lap times (circuit-dependent, don't transfer).
@@ -142,7 +142,7 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 - Use as features in XGBoost (the model learns how much to trust odds vs its own signals)
 - Also use as a calibration check: if our predictions diverge wildly from odds, flag for review
 
-#### 2.5 Walk-forward validation improvements
+#### 2.5 Walk-forward validation improvements ✅ COMPLETED (2026-03-31)
 **File:** `05_train_models.py`
 
 **Current issues:**

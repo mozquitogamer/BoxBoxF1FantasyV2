@@ -51,9 +51,10 @@ All commands below assume you're in this directory.
 Before generating predictions, trained models must exist:
 
 ```
-models/trained/quali_model.pkl    (~1.4 MB)
-models/trained/race_model.pkl     (~1.5 MB)
-models/trained/fp_model.pkl       (~2.0 MB)
+models/trained/quali_model.json   # XGBRanker qualifying model
+models/trained/race_model.json    # XGBRanker race model
+models/trained/fp_model.pkl       # ExtraTrees FP signal model (~2.0 MB)
+models/trained/feature_columns.json  # Feature column lists
 ```
 
 If these don't exist, see [Section 9: Retraining Models](#9-retraining-models).
@@ -81,10 +82,10 @@ data/seed/dotd_winners.json     # Driver of the Day winners (update after each r
 |-------|------|------|---------|--------|
 | 1 | Australian GP (Melbourne) | Mar 8 | No | Completed |
 | 2 | Chinese GP (Shanghai) | Mar 15 | Yes | Completed |
-| 3 | Japanese GP (Suzuka) | Mar 29 | No | Upcoming |
+| 3 | Japanese GP (Suzuka) | Mar 29 | No | Completed |
 | 4 | ~~Bahrain GP~~ | ~~Apr 12~~ | - | Cancelled |
 | 5 | ~~Saudi Arabian GP~~ | ~~Apr 19~~ | - | Cancelled |
-| 6 | Miami GP | May 3 | Yes | - |
+| 6 | Miami GP | May 3 | Yes | Next up |
 | 7 | Canadian GP | May 24 | No | - |
 | 8 | Monaco GP | Jun 7 | No | - |
 | 9 | Spanish GP (Barcelona) | Jun 14 | No | - |
@@ -429,11 +430,15 @@ python pipeline/04_build_model_inputs.py
 python pipeline/05_train_models.py
 ```
 
-After training, the script prints walk-forward MAE results:
-- **Qualifying MAE target:** ~3.0 positions
-- **Race MAE target:** ~3.5-4.0 positions
+After training, the script prints walk-forward validation results:
+- **Qualifying:** MAE, Kendall's tau, Top-3 accuracy
+- **Race:** MAE, Kendall's tau, Top-3 accuracy
 
-Models are saved to `models/trained/`.
+Current V2 benchmarks (Tier 2 ranking models):
+- **Qualifying:** MAE=3.26, tau=0.536, Top-3=57.3%
+- **Race:** MAE=2.20, tau=0.647, Top-3=67.2%
+
+Models are saved to `models/trained/`. The V1 baseline models (XGBRegressor) are preserved in `models/trained_v1_baseline/` for reference.
 
 ### Experimental Model Tuning
 
@@ -442,6 +447,14 @@ python pipeline/05b_experiment_models.py
 ```
 
 Tests different algorithms (XGBoost, LightGBM, Random Forest, stacking) and hyperparameters.
+
+### Note on Model Architecture (V2)
+
+The current models use XGBRanker with `rank:pairwise` (LambdaMART) instead of XGBRegressor. This means:
+- Models output relevance scores (higher = better predicted finish), not position numbers
+- Predictions are ranked within each race group to produce positions
+- The `.json` format is used for model persistence (not `.pkl`)
+- Training requires per-group query IDs (qid) and per-group weights
 
 ---
 
