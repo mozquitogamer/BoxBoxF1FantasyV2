@@ -312,6 +312,21 @@ def copy_analysis_files(round_num: int) -> None:
                 json.dump(data, f, indent=2)
 
 
+def sync_official_points() -> None:
+    """Sync official fantasy points from seed to web data directory."""
+    src = SEED_DIR / "official_fantasy_points.json"
+    dst = WEB_DATA_DIR / "official_points.json"
+    if src.exists():
+        with open(src) as f:
+            data = json.load(f)
+        with open(dst, "w") as f:
+            json.dump(data, f, indent=2)
+        n_rounds = len(data.get("rounds", {}))
+        print(f"  Synced official points ({n_rounds} rounds) -> {dst}")
+    else:
+        print("  No official_fantasy_points.json seed file found, skipping")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Export website JSON data")
     parser.add_argument("--round", type=int, required=True)
@@ -347,8 +362,12 @@ def main():
         json.dump(summary, f, indent=2)
     print(f"  {len(summary['rounds'])} rounds, {len(summary['driver_prices'])} driver prices")
 
-    # 3. Analysis files
-    print("[3] Copying analysis files...")
+    # 3. Sync official fantasy points
+    print("[3] Syncing official points...")
+    sync_official_points()
+
+    # 4. Analysis files
+    print("[4] Copying analysis files...")
     copy_analysis_files(round_num)
 
     print(f"\nAll data exported to {WEB_DATA_DIR}")

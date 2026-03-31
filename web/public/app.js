@@ -109,24 +109,171 @@ const PPM_RATINGS = {
     // < 0.6 = Terrible
 };
 
+// -- Deferred loading state --
+const _deferredLoaded = {};
+
+async function ensureLoaded(key, loadFn) {
+    if (_deferredLoaded[key]) return;
+    _deferredLoaded[key] = true;
+    await loadFn();
+}
+
+function showTabSpinner(tabId) {
+    const panel = document.getElementById(tabId);
+    if (!panel) return;
+    // Only show spinner if tab has no rendered content yet
+    const existing = panel.querySelector('.tab-spinner');
+    if (existing) return;
+    const hasContent = panel.querySelector('.driver-grid, .constructor-grid, .optimizer-header, .analysis-tabs, .season-standings, .h2h-container, .accuracy-stats, .accuracy-filter, .deep-dive-container, .video-grid, .articles-grid, .about-content');
+    if (hasContent) return;
+    const spinner = document.createElement('div');
+    spinner.className = 'tab-spinner';
+    spinner.innerHTML = '<div class="spinner-ring"></div><span>Loading...</span>';
+    panel.prepend(spinner);
+}
+
+function removeTabSpinner(tabId) {
+    const panel = document.getElementById(tabId);
+    if (!panel) return;
+    const spinner = panel.querySelector('.tab-spinner');
+    if (spinner) spinner.remove();
+}
+
+// -- Tab-specific data loaders (lazy) --
+async function ensureDriversData() {
+    // Drivers tab needs official points + actual data for price change predictions
+    await ensureLoaded('officialPoints', loadOfficialPoints);
+    await ensureLoaded('actualData', preloadActualData);
+}
+
+async function ensureAnalysisData() {
+    await ensureLoaded('officialPoints', loadOfficialPoints);
+    await ensureLoaded('actualData', preloadActualData);
+    await ensureLoaded('fpAnalysis', loadFPAnalysis);
+}
+
+async function ensureWeatherData() {
+    await ensureLoaded('weather', loadWeatherData);
+}
+
+async function ensureSeasonData() {
+    await ensureLoaded('pitstops', loadPitstopData);
+}
+
+async function ensureAccuracyData() {
+    await ensureLoaded('officialPoints', loadOfficialPoints);
+    await ensureLoaded('actualData', preloadActualData);
+}
+
+async function ensureDeepDiveData() {
+    await ensureLoaded('officialPoints', loadOfficialPoints);
+    await ensureLoaded('actualData', preloadActualData);
+}
+
+// -- Tab render tracking --
+const _tabRendered = {};
+
+async function renderTabIfNeeded(tabName) {
+    if (_tabRendered[tabName]) return;
+    const tabId = `tab-${tabName}`;
+
+    switch (tabName) {
+        case 'drivers':
+            // Already rendered on init
+            break;
+        case 'constructors':
+            showTabSpinner(tabId);
+            renderConstructors();
+            removeTabSpinner(tabId);
+            _tabRendered.constructors = true;
+            break;
+        case 'optimizer':
+            // Optimizer renders on button click, just mark ready
+            _tabRendered.optimizer = true;
+            break;
+        case 'analysis':
+            showTabSpinner(tabId);
+            await ensureAnalysisData();
+            renderLockGrid();
+            renderFPAnalysis();
+            removeTabSpinner(tabId);
+            _tabRendered.analysis = true;
+            break;
+        case 'season':
+            showTabSpinner(tabId);
+            await ensureSeasonData();
+            renderSeason();
+            removeTabSpinner(tabId);
+            _tabRendered.season = true;
+            break;
+        case 'h2h':
+            showTabSpinner(tabId);
+            renderH2H();
+            removeTabSpinner(tabId);
+            _tabRendered.h2h = true;
+            break;
+        case 'accuracy':
+            showTabSpinner(tabId);
+            await ensureAccuracyData();
+            await renderAccuracy();
+            removeTabSpinner(tabId);
+            _tabRendered.accuracy = true;
+            break;
+        case 'deepdive':
+            showTabSpinner(tabId);
+            await ensureDeepDiveData();
+            initDeepDiveTab();
+            removeTabSpinner(tabId);
+            _tabRendered.deepdive = true;
+            break;
+        case 'videos':
+            showTabSpinner(tabId);
+            await ensureLoaded('videos', loadVideos);
+            renderVideos();
+            removeTabSpinner(tabId);
+            _tabRendered.videos = true;
+            break;
+        case 'articles':
+            showTabSpinner(tabId);
+            await ensureLoaded('articles', loadArticles);
+            renderArticles();
+            removeTabSpinner(tabId);
+            _tabRendered.articles = true;
+            break;
+        case 'about':
+            _tabRendered.about = true;
+            break;
+    }
+}
+
 // -- Init --
 document.addEventListener('DOMContentLoaded', async () => {
+    // Phase 1: Load only essential data for home page (Drivers tab)
     await loadData();
     await loadSeasonData();
-    await preloadActualData();
-    await loadOfficialPoints();
-    await loadWeatherData();
-    await loadPitstopData();
-    await loadArticles();
-    await loadVideos();
     startCountdown();
     setupTabs();
     setupControls();
-    render();
-    initDeepDiveTab();
-    renderArticles();
-    renderVideos();
-    showFallbackBanner();
+
+    // Phase 2: Render Drivers tab immediately
+    renderHero();
+    renderDrivers();
+    _tabRendered.drivers = true;
+
+    // Phase 3: Load deferred data in background (non-blocking)
+    // Official points + actuals needed for price change brackets on driver cards
+    ensureDriversData().then(() => {
+        showFallbackBanner();
+        // Re-render drivers if price change data was missing initially
+        renderDrivers();
+    });
+    ensureWeatherData().then(() => renderWeather());
+
+    // Phase 4: If deep-linked to another tab, render it
+    const hash = location.hash.replace('#', '');
+    if (hash && hash !== 'drivers') {
+        await renderTabIfNeeded(hash);
+    }
 });
 
 async function preloadActualData() {
@@ -287,7 +434,9 @@ async function loadSeasonData() {
         const resp = await fetch(cacheBust('data/season_summary.json'));
         seasonSummary = await resp.json();
     } catch(e) { /* no season data yet */ }
+}
 
+async function loadFPAnalysis() {
     try {
         const resp = await fetch(cacheBust('data/fp_analysis.json'));
         fpAnalysis = await resp.json();
@@ -384,6 +533,9 @@ function switchTab(tabName) {
     const panel = document.getElementById(`tab-${tabName}`);
     if (btn) btn.classList.add('active');
     if (panel) panel.classList.add('active');
+
+    // Lazy render the tab content on first visit
+    renderTabIfNeeded(tabName);
 }
 
 function setupTabs() {
@@ -544,18 +696,12 @@ function updateSortIndicators() {
     });
 }
 
-// -- Render --
+// -- Render (legacy wrapper, individual tab rendering is now lazy) --
 function render() {
     if (!data) return;
     renderHero();
     renderWeather();
     renderDrivers();
-    renderConstructors();
-    renderLockGrid();
-    renderFPAnalysis();
-    renderSeason();
-    renderH2H();
-    renderAccuracy();
 }
 
 // -- Hero Section --
