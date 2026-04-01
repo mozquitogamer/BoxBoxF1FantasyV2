@@ -696,14 +696,6 @@ function updateSortIndicators() {
     });
 }
 
-// -- Render (legacy wrapper, individual tab rendering is now lazy) --
-function render() {
-    if (!data) return;
-    renderHero();
-    renderWeather();
-    renderDrivers();
-}
-
 // -- Hero Section --
 function renderHero() {
     if (!data || !data.drivers) return;

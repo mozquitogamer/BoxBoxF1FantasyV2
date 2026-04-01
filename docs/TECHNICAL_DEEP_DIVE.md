@@ -491,21 +491,23 @@ F1 Fantasy adjusts player prices after each race based on performance (Points Pe
 ### Our PPM Rating System
 
 ```javascript
-PPM = avg_fantasy_points / current_price
+PPM = avg_fantasy_points_last_3_rounds / current_price
 ```
 
-We compute PPM using the last 3 races' actual scores (if available) plus the predicted score for the upcoming race.
+We compute PPM using a rolling window of the last 2 actual scores plus the predicted score for the upcoming race (window of 3). The website's price change bracket display shows exactly how many points are needed this round to reach each threshold.
 
 **Thresholds:**
 
-| Rating | PPM | Expected Change (A-tier, >$20M) | Expected Change (B-tier, <$20M) |
-|--------|-----|--------------------------------|--------------------------------|
-| Great | ≥ 0.4 | +$0.3M | +$0.6M |
-| Good | ≥ 0.3 | +$0.15M | +$0.3M |
-| Poor | ≥ 0.2 | -$0.15M | -$0.3M |
-| Terrible | < 0.2 | -$0.3M | -$0.6M |
+| Rating | PPM | Expected Change (A-tier, >$18.5M) | Expected Change (B-tier, ≤$18.5M) |
+|--------|-----|----------------------------------|----------------------------------|
+| Great | ≥ 1.2 | +$0.3M | +$0.6M |
+| Good | ≥ 0.9 | +$0.1M | +$0.2M |
+| Poor | ≥ 0.6 | -$0.1M | -$0.2M |
+| Terrible | < 0.6 | -$0.3M | -$0.6M |
 
-**Why two tiers?** Expensive drivers (A-tier, >$20M) have smaller price swings. Budget drivers (B-tier) swing more aggressively. This matches observed F1 Fantasy behavior.
+**Why two tiers?** Expensive drivers (A-tier, >$18.5M) have smaller price swings. Budget drivers (B-tier) swing more aggressively. This matches observed F1 Fantasy behavior.
+
+**Data sources:** Price change calculations use official F1 Fantasy points (from `data/seed/official_fantasy_points.json`) when available, falling back to pipeline-calculated actuals. The export pipeline auto-syncs official points to the web directory.
 
 ### Application in Optimizer
 
@@ -552,7 +554,7 @@ Combinations use a JavaScript generator function (`function*`) instead of buildi
 
 ### Technology Stack
 
-- **Frontend:** Vanilla JavaScript (no framework). Single `app.js` file (~1,400 lines).
+- **Frontend:** Vanilla JavaScript (no framework). Single `app.js` file (~4,000 lines).
 - **Styling:** Pure CSS with CSS custom properties for theming.
 - **Hosting:** Vercel (static file hosting, CDN).
 - **Deployment:** Push to GitHub → Vercel auto-deploys.
@@ -560,13 +562,28 @@ Combinations use a JavaScript generator function (`function*`) instead of buildi
 
 **Why no framework?** The site is a single-page data dashboard. React/Vue would add complexity without benefit. The data is pre-computed — the frontend just renders it. Vanilla JS keeps it fast, simple, and dependency-free.
 
+### Performance: Lazy Tab Loading
+
+The site uses lazy tab loading to minimize time-to-interactive:
+
+1. **Phase 1 (blocking):** Fetch `predictions.json` + `season_summary.json` (2 requests)
+2. **Phase 2 (immediate):** Render the Drivers tab (hero, cards/table)
+3. **Phase 3 (background):** Deferred loads for weather, official points, actual round data
+4. **Phase 4 (on-demand):** Each tab renders on first click, with a loading spinner while data loads
+
+Tabs like Accuracy, Season, Deep Dive, Videos, and Articles only fetch their data when the user navigates to them. This brings initial page load from ~5s to ~1s.
+
 ### Data Flow to Website
 
 ```
 Pipeline → .parquet files → 08_export_website_json.py → .json files → git push → Vercel → CDN
 ```
 
-The website loads JSON files at startup and renders everything client-side. No server, no database, no API calls at runtime.
+The export script also:
+- **Auto-syncs official fantasy points** from `data/seed/official_fantasy_points.json` to the web directory
+- **Overrides prices** in predictions with latest values from `data/seed/fantasy_prices.json`
+
+The website loads JSON files client-side. No server, no database, no API calls at runtime.
 
 ### Countdown Timer
 

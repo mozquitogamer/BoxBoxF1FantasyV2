@@ -386,10 +386,13 @@ python pipeline/03b_build_jolpica_features.py
 | `predictions.json` | Current round predictions | After Phase 2 (post-FP) |
 | `predictions_round{N}.json` | Archived predictions per round | After Phase 2 |
 | `season_summary.json` | Season standings, prices, calendar | After Phase 4 (post-race) |
+| `official_points.json` | Official F1 Fantasy points per round | Auto-synced by export script |
 | `actual_round{N}.json` | Actual fantasy points for round N | After Phase 4 |
 | `post_race_round{N}.json` | Post-race analysis for round N | After Phase 4 |
 | `fp_analysis.json` | FP session analysis | After Phase 3 |
 | `pitstops_round{N}.json` | Pit stop times by constructor | After Phase 4 |
+
+> **Note:** The export script (`08_export_website_json.py`) automatically syncs official fantasy points from `data/seed/official_fantasy_points.json` to the web directory, and overrides driver/constructor prices from `data/seed/fantasy_prices.json`. You only need to update the seed files — the export handles propagation.
 
 ### Local Development
 
