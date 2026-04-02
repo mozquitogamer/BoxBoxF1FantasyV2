@@ -194,8 +194,10 @@ async function renderTabIfNeeded(tabName) {
         case 'analysis':
             showTabSpinner(tabId);
             await ensureAnalysisData();
+            await ensureSeasonData();
             renderLockGrid();
             renderFPAnalysis();
+            populatePostRaceSelector();
             removeTabSpinner(tabId);
             _tabRendered.analysis = true;
             break;
@@ -2792,23 +2794,29 @@ function renderSeason() {
         }
     }
 
-    // Populate post-race round selector — show all rounds that have any data
+    // Populate post-race round selector
+    populatePostRaceSelector();
+}
+
+function populatePostRaceSelector() {
     const selector = document.getElementById('postRaceRound');
-    if (seasonSummary && seasonSummary.rounds) {
-        selector.innerHTML = '<option value="">Select a round...</option>';
-        seasonSummary.rounds
-            .filter(r => r.has_post_race || r.has_predictions || r.has_actual || r.round <= (data ? data.round : 0))
-            .forEach(r => {
-                const opt = document.createElement('option');
-                opt.value = r.round;
-                let label = '';
-                if (r.has_actual && r.has_predictions) label = ' ✓ Pred vs Actual';
-                else if (r.has_actual || r.has_post_race) label = ' (Complete)';
-                else if (r.has_predictions) label = ' (Predicted)';
-                opt.textContent = `Round ${r.round}: ${r.name}${label}`;
-                selector.appendChild(opt);
-            });
-    }
+    if (!selector || !seasonSummary || !seasonSummary.rounds) return;
+    // Don't re-populate if already has options beyond the placeholder
+    if (selector.options.length > 1) return;
+    selector.innerHTML = '<option value="">Select a round...</option>';
+    const currentRound = data ? data.round : 99;
+    seasonSummary.rounds
+        .filter(r => r.has_post_race || r.has_predictions || r.has_actual || r.round <= currentRound)
+        .forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.round;
+            let label = '';
+            if (r.has_actual && r.has_predictions) label = ' ✓ Pred vs Actual';
+            else if (r.has_actual || r.has_post_race) label = ' (Complete)';
+            else if (r.has_predictions) label = ' (Predicted)';
+            opt.textContent = `Round ${r.round}: ${r.name}${label}`;
+            selector.appendChild(opt);
+        });
 }
 
 // ============================================================
