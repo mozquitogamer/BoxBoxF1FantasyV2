@@ -2,7 +2,7 @@
 title: Round 3 — Japanese Grand Prix Preview
 date: 2026-03-25
 round: 3
-tags: preview, preview
+tags: preview, japan, japanese grand prix
 ---
 
 ## Japanese Grand Prix Preview
