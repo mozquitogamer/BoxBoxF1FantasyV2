@@ -44,6 +44,8 @@ from config.settings import (
     CANCELLED_ROUNDS_2026,
 )
 from pipeline.feature_engineering import engineer_features
+from config.track_classifications import get_circuit_id_from_race_name
+from config.track_similarity import get_similarity
 
 
 # -- Driver ID mapping ---------------------------------------------------------
@@ -167,6 +169,90 @@ def calculate_confidence(
     return np.clip(scores, 0, 100).astype(int)
 
 
+# -- Track similarity recomputation for prediction round ----------------------
+
+def _resolve_circuit(round_num: int, year: int) -> str:
+    """Resolve the circuit_id for a given round from the race schedule."""
+    races_path = SEED_DIR / "races.json"
+    if not races_path.exists():
+        return "unknown"
+    with open(races_path) as f:
+        races = json.load(f)
+    for r in races.get("races", []):
+        if r.get("round") == round_num:
+            return get_circuit_id_from_race_name(r.get("name", ""))
+    return "unknown"
+
+
+def _recompute_sim_features(df: pd.DataFrame, target_circuit: str) -> pd.DataFrame:
+    """
+    Recompute similarity-weighted rolling features against the target circuit.
+
+    The priors carry sim_weighted_* values computed against each driver's LAST
+    race circuit. For predictions, we want them weighted against the UPCOMING
+    circuit instead. We recompute by looking at each driver's recent race
+    history in all_model_rows and weighting by similarity to target_circuit.
+    """
+    model_rows_path = JOLPICA_MODEL_ROWS_DIR / "all_model_rows.parquet"
+    if not model_rows_path.exists():
+        return df
+
+    all_rows = pd.read_parquet(model_rows_path)
+    all_rows = all_rows.sort_values(["driver_id", "season", "round"])
+
+    for i, row in df.iterrows():
+        driver = row["driver_id"]
+        # Get this driver's full history
+        hist = all_rows[all_rows["driver_id"] == driver].copy()
+        if hist.empty:
+            continue
+
+        for w in (3, 5):
+            # Take last `w` races
+            recent = hist.tail(w)
+
+            weights, pts_vals, fin_vals, qua_vals = [], [], [], []
+            for _, h in recent.iterrows():
+                cid = str(h.get("circuit_id", "unknown"))
+                sim = get_similarity(target_circuit, cid)
+                weight = sim * sim  # squared for sharper contrast
+                weights.append(weight)
+                pts_vals.append(float(h["points"]) if pd.notna(h.get("points")) else 0.0)
+                fin_vals.append(float(h["finish_position"]) if pd.notna(h.get("finish_position")) else np.nan)
+                qua_vals.append(float(h["quali_position"]) if pd.notna(h.get("quali_position")) else np.nan)
+
+            if not weights:
+                continue
+
+            w_sum = sum(weights)
+            if w_sum < 1e-9:
+                w_sum = len(weights)
+                weights = [1.0] * len(weights)
+
+            # Points (always valid)
+            df.at[i, f"sim_weighted_points_{w}"] = (
+                sum(wt * v for wt, v in zip(weights, pts_vals)) / w_sum
+            )
+
+            # Finish position
+            fin_pairs = [(wt, v) for wt, v in zip(weights, fin_vals) if pd.notna(v)]
+            if fin_pairs:
+                ws, vs = zip(*fin_pairs)
+                df.at[i, f"sim_weighted_finishpos_{w}"] = sum(
+                    w_ * v_ for w_, v_ in zip(ws, vs)
+                ) / sum(ws)
+
+            # Quali position
+            qua_pairs = [(wt, v) for wt, v in zip(weights, qua_vals) if pd.notna(v)]
+            if qua_pairs:
+                ws, vs = zip(*qua_pairs)
+                df.at[i, f"sim_weighted_quali_{w}"] = sum(
+                    w_ * v_ for w_, v_ in zip(ws, vs)
+                ) / sum(ws)
+
+    return df
+
+
 # -- Main prediction pipeline -------------------------------------------------
 
 def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
@@ -189,6 +275,14 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
     print(f"\n[Step 1] Building Jolpica priors...")
     priors_df = build_live_priors(round_num, year)
     print(f"  Prior rows: {len(priors_df)} drivers")
+
+    # ---- Step 1b: Recompute track-similarity features for target circuit ----
+    target_circuit = _resolve_circuit(round_num, year)
+    if target_circuit and target_circuit != "unknown":
+        print(f"  Recomputing similarity features for target circuit: {target_circuit}")
+        priors_df = _recompute_sim_features(priors_df, target_circuit)
+    else:
+        print(f"  Could not resolve target circuit — using prior similarity features as-is")
 
     # ---- Step 2: Load FP features ----
     print(f"\n[Step 2] Loading FP telemetry features...")

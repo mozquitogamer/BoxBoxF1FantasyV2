@@ -412,3 +412,47 @@ def get_track_features(circuit_id):
 
 # Export feature names for easy integration
 TRACK_FEATURE_NAMES = list(next(iter(TRACK_DATABASE.values())).keys())
+
+
+# ============================================================================
+# Race name → circuit_id mapping (for 2026 season prediction pipeline)
+# ============================================================================
+RACE_NAME_TO_CIRCUIT = {
+    'australian grand prix': 'albert_park',
+    'chinese grand prix': 'shanghai',
+    'japanese grand prix': 'suzuka',
+    'bahrain grand prix': 'bahrain',
+    'saudi arabian grand prix': 'jeddah',
+    'miami grand prix': 'miami',
+    'canadian grand prix': 'villeneuve',
+    'monaco grand prix': 'monaco',
+    'spanish grand prix': 'catalunya',
+    'austrian grand prix': 'red_bull_ring',
+    'british grand prix': 'silverstone',
+    'belgian grand prix': 'spa',
+    'hungarian grand prix': 'hungaroring',
+    'dutch grand prix': 'zandvoort',
+    'italian grand prix': 'monza',
+    'spanish grand prix (madrid)': 'madrid',
+    'azerbaijan grand prix': 'baku',
+    'singapore grand prix': 'marina_bay',
+    'united states grand prix': 'americas',
+    'mexican grand prix': 'rodriguez',
+    'brazilian grand prix': 'interlagos',
+    'las vegas grand prix': 'vegas',
+    'qatar grand prix': 'losail',
+    'abu dhabi grand prix': 'yas_marina',
+    # Additional aliases
+    'emilia romagna grand prix': 'imola',
+    'portuguese grand prix': 'portimao',
+    'turkish grand prix': 'istanbul',
+    'french grand prix': 'ricard',
+    'tuscan grand prix': 'mugello',
+    'eifel grand prix': 'nurburgring',
+    'russian grand prix': 'sochi',
+}
+
+
+def get_circuit_id_from_race_name(race_name: str) -> str:
+    """Map a GP name (e.g. 'Australian Grand Prix') to a circuit_id."""
+    return RACE_NAME_TO_CIRCUIT.get(race_name.lower().strip(), 'unknown')

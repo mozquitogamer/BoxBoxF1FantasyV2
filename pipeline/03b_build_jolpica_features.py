@@ -34,6 +34,7 @@ from config.settings import (
     SEED_DIR,
 )
 from config.track_classifications import get_track_features, TRACK_FEATURE_NAMES
+from config.track_similarity import get_similarity
 from config.team_driver_ratings import (
     get_team_strategy_rating,
     get_team_adaptability,
@@ -219,6 +220,126 @@ def compute_rolling_features(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     df.drop(columns=["points_prev", "finish_prev", "quali_prev", "dnf_prev"], inplace=True)
+    return df
+
+
+# ============================================================================
+# Group 2b: Track-similarity-weighted rolling features (time-safe)
+# ============================================================================
+
+def compute_similarity_weighted_rolling(df: pd.DataFrame, window: int = 5) -> pd.DataFrame:
+    """
+    Compute rolling features where each historical race is weighted by how
+    similar its circuit is to the current race's circuit.
+
+    For each row (driver, season, round, circuit_id):
+      - Look back at the driver's previous `window` races (time-safe via shift)
+      - Weight each by cosine similarity between its circuit and the target circuit
+      - Compute weighted averages of points, finish_position, and quali_position
+
+    Produces 6 new features:
+      - sim_weighted_points_{window}, sim_weighted_finishpos_{window},
+        sim_weighted_quali_{window}
+      - sim_weighted_points_3, sim_weighted_finishpos_3, sim_weighted_quali_3
+
+    Falls back to unweighted average when all similarities are near-zero
+    (which shouldn't happen since all tracks have positive feature values).
+    """
+    df = df.copy()
+
+    # Pre-sort by driver + time order
+    df = df.sort_values(["driver_id", "season", "round"]).reset_index(drop=True)
+
+    # Prepare shifted values (time-safe: we weight PREVIOUS results)
+    df["_pts_prev"] = df.groupby("driver_id")["points"].shift(1)
+    df["_fin_prev"] = df.groupby("driver_id")["finish_position"].shift(1)
+    df["_qua_prev"] = df.groupby("driver_id")["quali_position"].shift(1)
+    df["_cir_prev"] = df.groupby("driver_id")["circuit_id"].shift(1)
+
+    # Pre-compute similarity cache for all circuit pairs in the data
+    unique_circuits = df["circuit_id"].dropna().unique().tolist()
+    sim_cache: dict[tuple[str, str], float] = {}
+    for c1 in unique_circuits:
+        for c2 in unique_circuits:
+            key = (c1, c2)
+            if key not in sim_cache:
+                sim_cache[key] = get_similarity(c1, c2)
+
+    # Output columns
+    for w in (3, window):
+        df[f"sim_weighted_points_{w}"] = np.nan
+        df[f"sim_weighted_finishpos_{w}"] = np.nan
+        df[f"sim_weighted_quali_{w}"] = np.nan
+
+    # Group by driver and compute weighted rolling
+    for driver_id, group in df.groupby("driver_id"):
+        idx = group.index.tolist()
+        circuits = group["circuit_id"].values
+        pts = group["_pts_prev"].values
+        fin = group["_fin_prev"].values
+        qua = group["_qua_prev"].values
+        cir = group["_cir_prev"].values
+
+        for i_local, i_global in enumerate(idx):
+            target_circuit = str(circuits[i_local])
+
+            for w in (3, window):
+                # Look back at the last `w` shifted values
+                start = max(0, i_local - w + 1)
+                slice_pts = pts[start:i_local + 1]
+                slice_fin = fin[start:i_local + 1]
+                slice_qua = qua[start:i_local + 1]
+                slice_cir = cir[start:i_local + 1]
+
+                # Compute weights from similarity
+                weights = []
+                valid_pts, valid_fin, valid_qua = [], [], []
+                for j in range(len(slice_pts)):
+                    p, f, q, c = slice_pts[j], slice_fin[j], slice_qua[j], slice_cir[j]
+                    if pd.isna(p) and pd.isna(f) and pd.isna(q):
+                        continue
+                    c_str = str(c) if pd.notna(c) else "unknown"
+                    sim = sim_cache.get((target_circuit, c_str), get_similarity(target_circuit, c_str))
+                    # Raise similarity to power 2 to sharpen contrast
+                    weight = sim * sim
+                    weights.append(weight)
+                    valid_pts.append(p if pd.notna(p) else 0.0)
+                    valid_fin.append(f if pd.notna(f) else np.nan)
+                    valid_qua.append(q if pd.notna(q) else np.nan)
+
+                if not weights:
+                    continue
+
+                w_sum = sum(weights)
+                if w_sum < 1e-9:
+                    # All weights ~0 (shouldn't happen), fall back to uniform
+                    w_sum = len(weights)
+                    weights = [1.0] * len(weights)
+
+                # Weighted average for points (always valid)
+                df.at[i_global, f"sim_weighted_points_{w}"] = (
+                    sum(wt * v for wt, v in zip(weights, valid_pts)) / w_sum
+                )
+
+                # Weighted average for finish (skip NaN entries)
+                fin_pairs = [(wt, v) for wt, v in zip(weights, valid_fin) if pd.notna(v)]
+                if fin_pairs:
+                    ws, vs = zip(*fin_pairs)
+                    df.at[i_global, f"sim_weighted_finishpos_{w}"] = sum(
+                        w_ * v_ for w_, v_ in zip(ws, vs)
+                    ) / sum(ws)
+
+                # Weighted average for quali (skip NaN entries)
+                qua_pairs = [(wt, v) for wt, v in zip(weights, valid_qua)]
+                qua_pairs = [(wt, v) for wt, v in qua_pairs if pd.notna(v)]
+                if qua_pairs:
+                    ws, vs = zip(*qua_pairs)
+                    df.at[i_global, f"sim_weighted_quali_{w}"] = sum(
+                        w_ * v_ for w_, v_ in zip(ws, vs)
+                    ) / sum(ws)
+
+    # Clean up temp columns
+    df.drop(columns=["_pts_prev", "_fin_prev", "_qua_prev", "_cir_prev"], inplace=True)
     return df
 
 
@@ -637,15 +758,15 @@ def build_features(target_years: list[int]) -> None:
 
     # --- Load constructor canonical mapping ---
     constructor_map = load_constructor_canonical_map()
-    print(f"\n[1/8] Loaded constructor mappings: {len(constructor_map)} aliases")
+    print(f"\n[1/9] Loaded constructor mappings: {len(constructor_map)} aliases")
 
     # --- Load all normalized data ---
-    print(f"\n[2/8] Loading normalized data for seasons {ALL_SEASONS[0]}-{ALL_SEASONS[-1]}...")
+    print(f"\n[2/9] Loading normalized data for seasons {ALL_SEASONS[0]}-{ALL_SEASONS[-1]}...")
     df = load_all_normalized_data()
     print(f"  Loaded {len(df):,} rows across {df['season'].nunique()} seasons")
 
     # --- Canonicalize constructor IDs ---
-    print(f"\n[3/8] Canonicalizing constructor IDs...")
+    print(f"\n[3/9] Canonicalizing constructor IDs...")
     df["constructor_id"] = canonicalize_constructor(df["constructor_id"], constructor_map)
 
     # Normalize driver_id
@@ -658,7 +779,7 @@ def build_features(target_years: list[int]) -> None:
     df["points"] = pd.to_numeric(df["points"], errors="coerce").fillna(0.0)
 
     # --- Status flags and DNF cause buckets ---
-    print(f"\n[4/8] Computing status flags and DNF cause buckets...")
+    print(f"\n[4/9] Computing status flags and DNF cause buckets...")
     flags = status_flags(df["status"])
     df = pd.concat([df.reset_index(drop=True), flags.reset_index(drop=True)], axis=1)
 
@@ -671,7 +792,7 @@ def build_features(target_years: list[int]) -> None:
     df = df.sort_values(["driver_id", "season", "round"]).reset_index(drop=True)
 
     # --- Rolling features (Group 2) ---
-    print(f"\n[5/8] Computing rolling features (time-safe)...")
+    print(f"\n[5/9] Computing rolling features (time-safe)...")
     df = compute_rolling_features(df)
 
     # DNF cause rolling rates
@@ -680,16 +801,20 @@ def build_features(target_years: list[int]) -> None:
     df = add_rolling_rates(df, "driver_id", "dnf_collision", 5, "roll_collision_dnf_rate_5_driver")
     df = add_rolling_rates(df, "driver_id", "dnf_driver_error", 5, "roll_drivererror_dnf_rate_5_driver")
 
+    # --- Track-similarity-weighted rolling features (Group 2b) ---
+    print(f"\n[6/9] Computing track-similarity-weighted rolling features...")
+    df = compute_similarity_weighted_rolling(df, window=5)
+
     # --- Quali priors (Group 3) ---
-    print(f"\n[6/8] Computing qualifying priors (time-safe)...")
+    print(f"\n[7/9] Computing qualifying priors (time-safe)...")
     df = add_quali_priors(df)
 
     # --- Race model features (Group 4) ---
-    print(f"\n[7/8] Computing race model features...")
+    print(f"\n[8/9] Computing race model features...")
     df = add_race_model_features(df)
 
     # --- Track features + ratings (Group 5 & 6) ---
-    print(f"\n[8/8] Adding track features, team/driver ratings, and interaction features...")
+    print(f"\n[9/9] Adding track features, team/driver ratings, and interaction features...")
     df = add_track_features(df)
     df = add_team_driver_ratings(df)
     df = add_interaction_features(df)
@@ -709,6 +834,9 @@ def build_features(target_years: list[int]) -> None:
         "roll_quali_3", "roll_quali_5", "roll_dnf_rate_5",
         "roll_mech_dnf_rate_5_driver", "roll_mech_dnf_rate_5_constructor",
         "roll_collision_dnf_rate_5_driver", "roll_drivererror_dnf_rate_5_driver",
+        "sim_weighted_points_3", "sim_weighted_points_5",
+        "sim_weighted_finishpos_3", "sim_weighted_finishpos_5",
+        "sim_weighted_quali_3", "sim_weighted_quali_5",
     ]
     for c in impute_cols:
         if c in df.columns:
@@ -737,6 +865,13 @@ def build_features(target_years: list[int]) -> None:
         print(f"\n  Saved: {out_path}")
         print(f"    Rows: {len(year_df):,} | Columns: {len(year_df.columns)}")
         print(f"    Drivers: {year_df['driver_id'].nunique()} | Rounds: {year_df['round'].nunique()}")
+
+    # --- Save combined all_model_rows.parquet (used by steps 04, 06, 07) ---
+    all_out = JOLPICA_MODEL_ROWS_DIR / "all_model_rows.parquet"
+    df_all = df.sort_values(["season", "round", "driver_id"]).reset_index(drop=True)
+    df_all.to_parquet(all_out, index=False)
+    print(f"\n  Saved combined: {all_out}")
+    print(f"    Rows: {len(df_all):,} | Columns: {len(df_all.columns)}")
 
     print(f"\n{'=' * 70}")
     print(f"Done. Total rows saved: {total_saved:,}")
