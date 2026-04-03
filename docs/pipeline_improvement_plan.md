@@ -160,42 +160,83 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 
 ### Tier 3: New Capabilities (After Tier 1-2 are solid)
 
-#### 3.1 Track similarity weighting
-- Classify circuits by characteristics (high/low downforce, street/permanent, overtaking difficulty)
-- Weight historical results from similar tracks more heavily in rolling features
-- f1fantasytools offers this as a user-adjustable slider — we could do it automatically
+#### 3.1 Track similarity weighting ✅ COMPLETED (2026-04-03)
+- ~~Classify circuits by characteristics (high/low downforce, street/permanent, overtaking difficulty)~~
+- ~~Weight historical results from similar tracks more heavily in rolling features~~
+- Implemented in `config/track_similarity.py` + `config/track_classifications.py`
+- 9-dimensional feature vectors (downforce, overtaking difficulty, corner speed, straight-line importance, safety car probability, etc.) for 26 circuits
+- Cosine similarity with squared weighting for sharper contrast
+- Produces 6 similarity-weighted rolling features (`sim_weighted_points_3/5`, `sim_weighted_finishpos_3/5`, `sim_weighted_quali_3/5`)
+- Prediction-time recomputation against upcoming circuit via `06_run_predictions.py`
 
-#### 3.2 Fuel-corrected practice pace
-- Approximate fuel correction: ~0.035s/kg/lap (varies by circuit)
-- Classify FP stints as low-fuel (qualifying sims) vs high-fuel (race sims) by lap time profile
-- Apply correction to normalize comparisons
+#### 3.2 Fuel-corrected practice pace ✅ COMPLETED (2026-03-31)
+- Implemented in `11_race_deep_dive.py` deep dive analysis
+- ~0.035s/lap fuel correction applied to normalize lap times
+- Full stint-by-stint fuel-corrected pace analysis with degradation rates
 
-#### 3.3 Optimal team selection (integer linear programming)
-- Given predicted fantasy points + confidence intervals, solve for the optimal 5-driver + 2-constructor team under the $100M budget constraint
-- Consider chip deployment strategy across the season
-- Several open-source projects implement this successfully
+#### 3.3 Optimal team selection ✅ COMPLETED (2026-04-03)
+- ~~Given predicted fantasy points + confidence intervals, solve for the optimal 5-driver + 2-constructor team under the $100M budget constraint~~
+- Brute-force optimizer checking C(22,5) x C(11,2) = ~1.4M combinations
+- Transfer advisor: given current team + budget + free transfers, find optimal swaps with -10pt penalty per extra transfer
+- All 5 chip types supported: Mega Driver (3x), Extra DRS (+1 driver), No Negative, Limitless, Wildcard
+- Lock/exclude picks: left-click to force into lineup, right-click to exclude
+- 4 strategies: Max Points, Max Value, Budget Builder, Balanced
 
-#### 3.4 Price change prediction
-- f1fantasytools reverse-engineered the F1 Fantasy pricing algorithm
-- Model expected price changes to help users grow budget early in season
-- Valuable for long-term league performance
+#### 3.4 Price change prediction ✅ COMPLETED (2026-04-01)
+- PPM (Points Per Million) rating system based on rolling 3-round average
+- A-tier (>$18.5M) and B-tier (≤$18.5M) with different price swing magnitudes
+- Per-driver price bracket display showing points needed for each rating threshold
+- Budget Builder optimizer strategy that prioritizes picks likely to increase in price
 
-#### 3.5 Weather integration
-- Incorporate weather forecasts to adjust predictions for wet sessions
-- Use `driver_wet_skill` rating (already exists in 03b but unused)
+#### 3.5 Weather integration ✅ COMPLETED (2026-04-01)
+- `pipeline/weather_forecast.py` fetches hourly forecasts from Open-Meteo API
+- Per-session rain probability, temperature, wind speed
+- Overall weekend rain risk assessment (NONE/LOW/MEDIUM/HIGH)
+- Weather widget on website home page with session-by-session breakdown
+
+---
+
+### Tier 4: Next Wave (Planned)
+
+#### 4.1 DNF/reliability modeling
+- Predict per-driver DNF probability using team reliability rates + historical data
+- Apply negative expected points adjustment to predicted scores
+- Two-stage MC sampling: incident events (first-lap pileups) + mechanical DNFs
+- Teammate correlation for shared team reliability
+
+#### 4.2 Sprint-specific predictions
+- Dedicated sprint model (shorter race, limited strategy, different scoring)
+- Currently sprint points derived from race model — sprint dynamics differ significantly
+
+#### 4.3 Enhanced constructor scoring
+- Constructor points currently = sum of two drivers' predictions
+- Add: expected pit stop points (from team pit stop time distributions)
+- Add: qualifying teamwork bonus prediction
+- Subtract: expected DNF penalty based on team reliability
+- Per-iteration constructor simulation in Monte Carlo
 
 ---
 
 ## Implementation Order
 
-```
-Week 1:  1.1 (gap-preserving noise) + 1.3 (pit stops)
-Week 2:  1.2 (teammate correlation) + 1.4 (constructor per-iteration MC)
-Week 3:  1.5 (correlated DNF) + 2.3 (relative pace normalization)
-Week 4:  2.2 (tyre-compound features) + 2.5 (validation improvements)
-Week 5:  2.1 (ranking objective) + 2.4 (betting odds)
-Ongoing: Tier 3 items as time permits
-```
+**Completed:**
+- ✅ 2.1 Ranking objective (2026-03-31)
+- ✅ 2.2 Tyre-compound features (2026-03-31)
+- ✅ 2.3 Relative pace normalization (2026-03-31)
+- ✅ 2.5 Walk-forward validation (2026-03-31)
+- ✅ 3.1 Track similarity weighting (2026-04-03)
+- ✅ 3.2 Fuel-corrected pace (2026-03-31)
+- ✅ 3.3 Optimal team selection (2026-04-03)
+- ✅ 3.4 Price change prediction (2026-04-01)
+- ✅ 3.5 Weather integration (2026-04-01)
+
+**Next up:**
+- 4.1 DNF/reliability modeling
+- 4.2 Sprint-specific predictions
+- 4.3 Enhanced constructor scoring
+- 1.1 Gap-preserving noise model
+- 1.2 Teammate correlation
+- 1.4 Per-iteration constructor MC simulation
 
 ## How to Validate Improvements
 

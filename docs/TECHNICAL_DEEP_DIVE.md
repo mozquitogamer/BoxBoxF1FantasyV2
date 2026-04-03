@@ -617,68 +617,93 @@ Sprint weekends only have FP1 (60 minutes vs. 180 minutes of FP data on normal w
 
 ### High Priority (Immediate Value)
 
-1. **Automated Pipeline Runner**
-   Create a single-command script that detects the current race weekend, checks what data is available, and runs the appropriate pipeline phase automatically.
+### Recently Completed
 
-2. **Weather Integration**
-   Pull weather forecasts for race weekend and adjust predictions. Wet-weather specialists (Verstappen, Hamilton) should get a boost when rain is expected. Could use OpenWeatherMap API or F1-specific weather feeds.
+1. ~~**Automated Pipeline Runner**~~ ✅
+   `pipeline/run_weekend.py` detects current race weekend phase and runs appropriate pipeline steps automatically.
 
-3. **Grid Penalty Integration**
-   Detect and automatically apply grid penalties (engine penalties, gearbox changes, pit lane starts). These dramatically affect fantasy scoring but currently require manual override via the Streamlit dashboard.
+2. ~~**Weather Integration**~~ ✅
+   `pipeline/weather_forecast.py` pulls Open-Meteo forecasts. Per-session rain probability, temperature, wind speed. Weather widget on website.
 
-4. **Q-Session Progression Model**
+3. ~~**Chip Strategy Advisor**~~ ✅
+   All 5 chips supported in the lineup optimizer: Mega Driver (3x), Extra DRS (+1 driver), No Negative, Limitless, Wildcard.
+
+4. ~~**Team Setup Integration / Transfer Advisor**~~ ✅
+   Users input current team, budget, free transfers. Optimizer recommends optimal transfers with penalty calculation.
+
+5. ~~**Head-to-Head Matchup Predictions**~~ ✅
+   Dedicated H2H tab with win probabilities (normal CDF on MC distributions), stat comparisons, historical record, and pick recommendation.
+
+6. ~~**Historical Accuracy Dashboard**~~ ✅
+   Dedicated Accuracy tab with per-round and per-driver MAE, scatter plots, CI coverage analysis, and round filter toggles.
+
+7. ~~**Track Similarity Weighting**~~ ✅
+   9-dimensional circuit feature vectors with cosine similarity. Produces 6 similarity-weighted rolling features in the ML pipeline.
+
+8. ~~**Price Change Prediction**~~ ✅
+   PPM-based A/B tier system with bracket displays showing points needed for each price change threshold.
+
+9. ~~**Fuel-Corrected Practice Pace**~~ ✅
+   Race deep dive applies ~0.035s/lap fuel correction for normalized pace comparisons.
+
+### High Priority (Next Up)
+
+1. **DNF/Reliability Modeling**
+   Predict per-driver DNF probability using team reliability rates + historical patterns. Apply negative expected points adjustment. Two-stage MC sampling: correlated incident events + independent mechanical failures.
+
+2. **Sprint-Specific Predictions**
+   Dedicated sprint model trained on sprint-only data. Sprint dynamics differ from race (shorter distance, limited strategy, different scoring table).
+
+3. **Enhanced Constructor Scoring**
+   Currently constructors = sum of two drivers. Add: expected pit stop fantasy points (from team pit stop time distributions), qualifying teamwork bonus prediction, DNF penalty adjustment. Per-iteration constructor simulation in Monte Carlo.
+
+4. **Grid Penalty Integration**
+   Detect and automatically apply grid penalties (engine penalties, gearbox changes, pit lane starts). These dramatically affect fantasy scoring.
+
+5. **Q-Session Progression Model**
    Build a classifier to predict Q1/Q2/Q3 progression for each driver, improving constructor qualifying bonus estimates.
-
-5. **Chip Strategy Advisor**
-   F1 Fantasy has chips (Wildcard, Mega Driver, Extra DRS, Final Fix, No Negative). Build a tool that recommends optimal chip usage based on remaining rounds, predicted matchups, and schedule difficulty.
 
 ### Medium Priority (Season Enhancement)
 
-6. **Team Setup Integration**
-   Let users input their current team, budget, remaining transfers, and available chips. The optimizer then recommends optimal transfers (who to swap in/out) rather than building from scratch.
+6. **Track-Specific Model Tuning**
+   Train specialized models for different track types (street circuits, power tracks, high-downforce tracks).
 
-7. **Head-to-Head Matchup Predictions**
-   Show win probabilities for specific matchups: "What are the chances Hamilton outscores Leclerc this weekend?"
+7. **Tyre Strategy Prediction**
+   Predict likely tyre strategies (1-stop, 2-stop, 3-stop) based on FP degradation data and track characteristics.
 
-8. **Track-Specific Model Tuning**
-   Train specialized models for different track types (street circuits, power tracks, high-downforce tracks). Some features matter more at certain tracks.
+8. **Multi-Week Transfer Planning**
+   Forecast multiple rounds ahead for transfer planning — which drivers to buy now for future value growth.
 
-9. **Tyre Strategy Prediction**
-   Predict likely tyre strategies (1-stop, 2-stop, 3-stop) based on FP degradation data and track characteristics. This would improve position change estimates.
-
-10. **Historical Accuracy Dashboard**
-    A dedicated page showing model accuracy over time: prediction vs. actual for every round, tracking improvement as more data is incorporated.
+9. **Betting Odds Integration**
+   Fetch pre-race odds, convert to implied probabilities, use as ensemble signal in XGBoost.
 
 ### Lower Priority (Future Season)
 
-11. **Live Race Tracking**
-    Real-time fantasy point tracking during the race using live timing data. Show how your team is performing vs. alternatives.
+10. **Live Race Tracking**
+    Real-time fantasy point tracking during the race using live timing data.
 
-12. **Social/Community Features**
+11. **Social/Community Features**
     Let users share and compare lineups. Leaderboard for prediction accuracy.
 
-13. **Push Notifications**
-    Alert when predictions are updated, when the lock deadline approaches, or when significant data becomes available (e.g., grid penalties announced).
+12. **Push Notifications**
+    Alert when predictions are updated, lock deadline approaches, or grid penalties announced.
 
-14. **Multi-Season Backtesting**
-    Run the full pipeline on 2022-2025 seasons as if predicting in real-time. Measure what the fantasy ROI would have been using our predictions.
+13. **Multi-Season Backtesting**
+    Run the full pipeline on 2022-2025 seasons as if predicting in real-time.
 
-15. **Alternative Scoring Systems**
-    Support other fantasy platforms (Fantasy GP, Grid Rivals) in addition to official F1 Fantasy.
-
-16. **Natural Language Race Previews**
-    Auto-generate written race previews from the prediction data: "Russell is the standout pick this weekend, combining strong historical pace at Suzuka (avg P2 over last 3 visits) with impressive FP long-run pace..."
+14. **Natural Language Race Previews**
+    Auto-generate written race previews from prediction data.
 
 ### Technical Improvements
 
-17. **Incremental Model Updates**
-    Instead of full retraining, use XGBoost's `process_type='update'` to incrementally add new race data. Faster and preserves learned patterns.
+15. **Incremental Model Updates**
+    Use XGBoost's `process_type='update'` to incrementally add new race data.
 
-18. **Bayesian Optimization for Hyperparameters**
-    Replace manual tuning with automated hyperparameter search using Optuna or similar.
+16. **Bayesian Optimization for Hyperparameters**
+    Replace manual tuning with Optuna or similar.
 
-19. **Ensemble of Specialized Models**
-    Train separate models for wet/dry, sprint/standard, street/permanent circuits and ensemble them.
+17. **Ensemble of Specialized Models**
+    Separate models for wet/dry, sprint/standard, street/permanent circuits.
 
-20. **Telemetry-Based Features**
-    Use FastF1 car telemetry (throttle %, brake %, speed traces, DRS activation) for richer FP features. Currently we only use lap/sector times.
+18. **Telemetry-Based Features**
+    Use FastF1 car telemetry (throttle %, brake %, speed traces, DRS activation) for richer FP features.
