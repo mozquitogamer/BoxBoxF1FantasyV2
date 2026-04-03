@@ -1623,7 +1623,7 @@ function renderSingleLineup(lineup, index, strategy, budget) {
         <div class="lineup-block-header">
             <h4><span class="lineup-expand-icon">\u25BC</span> Lineup #${index + 1}</h4>
             <span class="lineup-block-stats">
-                ${lineup.totalPoints.toFixed(1)} pts (incl 2x) \u00b7 $${lineup.totalCost.toFixed(1)}M \u00b7
+                ${lineup.totalPoints.toFixed(1)} pts (incl boost) \u00b7 $${lineup.totalCost.toFixed(1)}M \u00b7
                 $${(budget - lineup.totalCost).toFixed(1)}M left \u00b7
                 <span style="color:${totalExpChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)'}">${totalExpChange >= 0 ? '+' : ''}${totalExpChange.toFixed(1)}M exp change</span>
             </span>
@@ -2529,7 +2529,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
     }
 
     // Race Pace
-    if (data.race_pace && Object.keys(data.race_pace).length > 0) {
+    if (data && data.race_pace && Object.keys(data.race_pace).length > 0) {
         const sorted = Object.entries(data.race_pace)
             .sort((a,b) => a[1].avg_race_pace - b[1].avg_race_pace);
 
@@ -2562,7 +2562,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
     }
 
     // Pit Stops by Team
-    if (data.pitstops && data.pitstops.by_team && data.pitstops.by_team.length > 0) {
+    if (data && data.pitstops && data.pitstops.by_team && data.pitstops.by_team.length > 0) {
         html += `
         <div class="analysis-block collapsible">
             <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Pit Stop Performance <span class="collapse-icon">▼</span></h3>
@@ -2587,7 +2587,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
     }
 
     // Tyre Management
-    if (data.tyre_management && Object.keys(data.tyre_management).length > 0) {
+    if (data && data.tyre_management && Object.keys(data.tyre_management).length > 0) {
         const sorted = Object.entries(data.tyre_management)
             .sort((a,b) => b[1].management_score - a[1].management_score);
 
@@ -3914,7 +3914,7 @@ function initDeepDiveTab() {
     // Use seasonSummary.rounds which has has_actual flags, falling back to checking deep_dive files directly
     const rounds = (seasonSummary && seasonSummary.rounds || [])
         .filter(r => r.has_actual)
-        .map(r => ({ round: r.round, name: r.race_name || `Round ${r.round}` }));
+        .map(r => ({ round: r.round, name: r.name || r.race_name || `Round ${r.round}` }));
     if (!rounds.length) {
         sel.innerHTML = '<option>No race data yet</option>';
         return;
