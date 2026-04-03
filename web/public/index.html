@@ -171,24 +171,84 @@
             <section class="tab-content" id="tab-optimizer">
                 <div class="optimizer-header">
                     <h2>Lineup Optimizer</h2>
-                    <p>Find the best F1 Fantasy lineups within your budget. Shows all valid combinations ranked by strategy.</p>
+                    <p>Find the best F1 Fantasy lineups within your budget, or get transfer recommendations for your current team.</p>
                 </div>
 
-                <div class="optimizer-controls">
-                    <div class="control-group">
-                        <label title="Your total F1 Fantasy budget cap">Budget ($M)</label>
-                        <input type="number" id="budget" value="100.0" step="0.1" min="0">
+                <!-- Mode toggle -->
+                <div class="optimizer-mode-toggle">
+                    <button class="mode-btn active" data-mode="fresh">Build Fresh Lineup</button>
+                    <button class="mode-btn" data-mode="transfers">Transfer Advisor</button>
+                </div>
+
+                <!-- Fresh lineup mode controls -->
+                <div class="optimizer-mode" id="mode-fresh">
+                    <div class="optimizer-controls">
+                        <div class="control-group">
+                            <label title="Your total F1 Fantasy budget cap">Budget ($M)</label>
+                            <input type="number" id="budget" value="100.0" step="0.1" min="0">
+                        </div>
+                        <div class="control-group">
+                            <label title="How to rank and optimize lineups">Strategy</label>
+                            <select id="strategy">
+                                <option value="max_points">Max Expected Points</option>
+                                <option value="max_value">Max Value (Points/$M)</option>
+                                <option value="budget_gain" title="Prioritize picks likely to increase in price based on PPM ratings">Budget Builder</option>
+                                <option value="balanced">Balanced</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label title="Active chip for this gameweek">Chip</label>
+                            <select id="chipSelect">
+                                <option value="none">No Chip</option>
+                                <option value="mega_driver" title="Triple points for one driver instead of 2x">Mega Driver (3x)</option>
+                                <option value="extra_drs" title="Extra driver slot: 6 drivers + 2 constructors">Extra DRS (+1 driver)</option>
+                                <option value="no_negative" title="All negative scores count as zero">No Negative</option>
+                                <option value="limitless" title="No budget cap for this gameweek">Limitless</option>
+                                <option value="wildcard" title="Unlimited free transfers (use Transfer Advisor mode)">Wildcard</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" id="runOptimizer">Find Best Lineups</button>
                     </div>
-                    <div class="control-group">
-                        <label title="How to rank and optimize lineups">Strategy</label>
-                        <select id="strategy">
-                            <option value="max_points">Max Expected Points</option>
-                            <option value="max_value">Max Value (Points/$M)</option>
-                            <option value="budget_gain" title="Prioritize picks likely to increase in price based on PPM ratings">Budget Builder</option>
-                            <option value="balanced">Balanced</option>
-                        </select>
+                </div>
+
+                <!-- Transfer advisor mode controls -->
+                <div class="optimizer-mode hidden" id="mode-transfers">
+                    <div class="my-team-section">
+                        <h3>My Current Team</h3>
+                        <p class="hint">Select your current 5 drivers and 2 constructors. Click a slot to change it.</p>
+                        <div class="my-team-grid" id="myTeamGrid"></div>
+                        <div class="my-team-controls">
+                            <div class="control-group">
+                                <label>Available Budget ($M)</label>
+                                <input type="number" id="transferBudget" value="100.0" step="0.1" min="0">
+                            </div>
+                            <div class="control-group">
+                                <label title="Free transfers available (extra transfers cost -10 pts each)">Free Transfers</label>
+                                <input type="number" id="freeTransfers" value="2" step="1" min="0" max="5">
+                            </div>
+                            <div class="control-group">
+                                <label>Strategy</label>
+                                <select id="transferStrategy">
+                                    <option value="max_points">Max Expected Points</option>
+                                    <option value="max_value">Max Value (Points/$M)</option>
+                                    <option value="budget_gain">Budget Builder</option>
+                                    <option value="balanced">Balanced</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label>Chip</label>
+                                <select id="transferChip">
+                                    <option value="none">No Chip</option>
+                                    <option value="mega_driver">Mega Driver (3x)</option>
+                                    <option value="extra_drs">Extra DRS (+1 driver)</option>
+                                    <option value="no_negative">No Negative</option>
+                                    <option value="limitless">Limitless</option>
+                                    <option value="wildcard">Wildcard (unlimited transfers)</option>
+                                </select>
+                            </div>
+                            <button class="btn-primary" id="runTransferAdvisor">Find Best Transfers</button>
+                        </div>
                     </div>
-                    <button class="btn-primary" id="runOptimizer">Find Best Lineups</button>
                 </div>
 
                 <div class="optimizer-constraints">
@@ -439,6 +499,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" async></script>
-    <script src="app.js?v=32"></script>
+    <script src="app.js?v=33"></script>
 </body>
 </html>

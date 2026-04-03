@@ -91,6 +91,9 @@ let tableSortAsc = true;
 let allLineups = [];
 let lineupsShown = 0;
 const LINEUPS_PER_PAGE = 10;
+// My Team state (for Transfer Advisor)
+let myTeamDrivers = [null, null, null, null, null];   // 5 driver_id slots
+let myTeamConstructors = [null, null];                  // 2 constructor_id slots
 
 // -- F1 Fantasy Price Change Thresholds --
 // PPM = cumulative_season_points / current_price
@@ -188,6 +191,7 @@ async function renderTabIfNeeded(tabName) {
             _tabRendered.constructors = true;
             break;
         case 'optimizer':
+            renderMyTeamGrid();
             // Optimizer renders on button click, just mark ready
             _tabRendered.optimizer = true;
             break;
@@ -585,9 +589,31 @@ function setupControls() {
     // Optimizer
     document.getElementById('runOptimizer').addEventListener('click', runOptimizer);
     document.getElementById('loadMoreLineups').addEventListener('click', () => {
-        const strategy = document.getElementById('strategy').value;
-        displayLineups(strategy);
+        const activeMode = document.querySelector('.mode-btn.active');
+        const mode = activeMode ? activeMode.dataset.mode : 'fresh';
+        if (mode === 'transfers') {
+            const strategy = document.getElementById('transferStrategy').value;
+            const chip = document.getElementById('transferChip').value;
+            displayTransferResults(strategy, chip);
+        } else {
+            const strategy = document.getElementById('strategy').value;
+            displayLineups(strategy);
+        }
     });
+
+    // Optimizer mode toggle
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const mode = btn.dataset.mode;
+            document.querySelectorAll('.optimizer-mode').forEach(m => m.classList.add('hidden'));
+            document.getElementById(`mode-${mode}`).classList.remove('hidden');
+        });
+    });
+
+    // Transfer advisor
+    document.getElementById('runTransferAdvisor').addEventListener('click', runTransferAdvisor);
 
     // Analysis panel toggle
     document.querySelectorAll('.analysis-btn').forEach(btn => {
@@ -1347,17 +1373,18 @@ function runOptimizer() {
 
     const budget = parseFloat(document.getElementById('budget').value);
     const strategy = document.getElementById('strategy').value;
+    const chip = document.getElementById('chipSelect').value;
+    const numDriverSlots = chip === 'extra_drs' ? 6 : 5;
+    const effectiveBudget = chip === 'limitless' ? 999 : budget;
 
     // Score function
     function score(item) {
         if (strategy === 'max_points') return item.expected_points;
         if (strategy === 'max_value') return item.value_score;
         if (strategy === 'budget_gain') {
-            // Favor items likely to increase in price
             const pc = predictPriceChange(item, item.expected_points);
             return pc.expectedChange * 100 + item.value_score * 5;
         }
-        // Balanced: weighted combo
         return item.expected_points * 0.6 + item.value_score * 10 * 0.4;
     }
 
@@ -1369,14 +1396,11 @@ function runOptimizer() {
         .filter(c => !excludedConstructors.has(c.constructor_id))
         .map(c => ({ ...c, _type: 'constructor', _score: score(c) }));
 
-    // Sort by score descending
     drivers.sort((a, b) => b._score - a._score);
     constructors.sort((a, b) => b._score - a._score);
 
-    // Brute force all valid lineups: 5 drivers + 2 constructors within budget
     allLineups = [];
 
-    // Generate constructor pairs
     const cPairs = [];
     for (let i = 0; i < constructors.length; i++) {
         for (let j = i + 1; j < constructors.length; j++) {
@@ -1398,12 +1422,12 @@ function runOptimizer() {
 
     const lockedDriverList = drivers.filter(d => lockedDrivers.has(d.driver_id));
     const freeDrivers = drivers.filter(d => !lockedDrivers.has(d.driver_id));
-    const neededDrivers = 5 - lockedDriverList.length;
+    const neededDrivers = numDriverSlots - lockedDriverList.length;
     const lockedDriverCost = lockedDriverList.reduce((s, d) => s + d.current_price, 0);
     const lockedDriverScore = lockedDriverList.reduce((s, d) => s + d._score, 0);
 
     if (neededDrivers < 0) {
-        alert('You have locked more than 5 drivers. Please unlock some.');
+        alert(`You have locked more than ${numDriverSlots} drivers. Please unlock some.`);
         return;
     }
 
@@ -1411,7 +1435,7 @@ function runOptimizer() {
     const MAX_LINEUPS = 200;
 
     for (const cp of cPairs) {
-        const remainBudget = budget - cp.cost - lockedDriverCost;
+        const remainBudget = effectiveBudget - cp.cost - lockedDriverCost;
         if (remainBudget < 0) continue;
 
         const combos = combinations(freeDrivers, neededDrivers);
@@ -1422,17 +1446,30 @@ function runOptimizer() {
             const allDrivers = [...lockedDriverList, ...combo];
             const totalCost = cp.cost + lockedDriverCost + cost;
 
-            // Find highest scoring driver for 2x boost
+            // Find highest scoring driver for boost
+            const boostMultiplier = chip === 'mega_driver' ? 3 : 2;
             let boostedDriver = allDrivers[0];
             for (const d of allDrivers) {
                 if (d.expected_points > boostedDriver.expected_points) boostedDriver = d;
             }
 
-            // Total points with 2x on best driver
-            const driverPoints = allDrivers.reduce((s, d) => s + d.expected_points, 0);
-            const constructorPoints = cp.items.reduce((s, c) => s + c.expected_points, 0);
-            const totalPoints = driverPoints + boostedDriver.expected_points + constructorPoints; // boosted driver counted twice = 2x
-            // For scoring/ranking, also account for the 2x boost
+            // Total points with chip effects
+            let driverPoints = 0;
+            for (const d of allDrivers) {
+                let pts = d.expected_points;
+                if (chip === 'no_negative' && pts < 0) pts = 0;
+                driverPoints += pts;
+            }
+            let constructorPoints = 0;
+            for (const c of cp.items) {
+                let pts = c.expected_points;
+                if (chip === 'no_negative' && pts < 0) pts = 0;
+                constructorPoints += pts;
+            }
+            let boostedPts = boostedDriver.expected_points;
+            if (chip === 'no_negative' && boostedPts < 0) boostedPts = 0;
+            const totalPoints = driverPoints + constructorPoints + boostedPts * (boostMultiplier - 1);
+
             const baseScore = cp.score + lockedDriverScore + combo.reduce((s, d) => s + d._score, 0);
             const totalScore = (strategy === 'max_points') ? totalPoints : baseScore;
 
@@ -1520,7 +1557,7 @@ function displayLineups(strategy) {
         document.getElementById('lineupSummary').innerHTML = `
             <div class="lineup-stat">
                 <div class="big-num">${best.totalPoints.toFixed(1)}</div>
-                <div class="label" title="Sum of expected fantasy points for all 7 picks, including 2x on ${boostedSummaryName}">Expected Points (incl 2x)</div>
+                <div class="label" title="Sum of expected fantasy points including boost on ${boostedSummaryName}">Expected Points (incl boost)</div>
             </div>
             <div class="lineup-stat">
                 <div class="big-num">$${best.totalCost.toFixed(1)}M</div>
@@ -1601,8 +1638,11 @@ function renderSingleLineup(lineup, index, strategy, budget) {
         const isBoosted = d.driver_id === boostedId;
         const pc = predictPriceChange(d, d.expected_points);
         const changeColor = pc.expectedChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)';
-        const displayPts = isBoosted ? (d.expected_points * 2).toFixed(1) : d.expected_points.toFixed(1);
-        const boostBadge = isBoosted ? '<span class="boost-badge">2x</span>' : '';
+        const chipSel = document.getElementById('chipSelect');
+        const activeChip = chipSel ? chipSel.value : 'none';
+        const boostMult = (isBoosted && activeChip === 'mega_driver') ? 3 : isBoosted ? 2 : 1;
+        const displayPts = (d.expected_points * boostMult).toFixed(1);
+        const boostBadge = isBoosted ? `<span class="boost-badge">${boostMult}x</span>` : '';
         html += `
         <div class="lineup-pick-h${isBoosted ? ' boosted' : ''}" style="--team-color:${team.color}">
             <div class="pick-h-header">
@@ -1649,6 +1689,475 @@ function renderSingleLineup(lineup, index, strategy, budget) {
     html += '</div></div></div>';
     return html;
 }
+
+// ============================================================
+// My Team Grid (Transfer Advisor)
+// ============================================================
+
+function renderMyTeamGrid() {
+    if (!data) return;
+    const grid = document.getElementById('myTeamGrid');
+    if (!grid) return;
+
+    let html = '';
+    // 5 driver slots
+    for (let i = 0; i < 5; i++) {
+        const did = myTeamDrivers[i];
+        const driver = did ? data.drivers.find(d => d.driver_id === did) : null;
+        if (driver) {
+            const team = TEAMS[driver.constructor] || { color: '#666' };
+            html += `<div class="my-team-slot filled" style="--team-color:${team.color}" data-slot="driver" data-index="${i}">
+                <div class="slot-label">Driver ${i + 1}</div>
+                <div class="slot-name">${driver.name.split(' ').pop()}</div>
+                <div class="slot-price">$${driver.current_price.toFixed(1)}M</div>
+                <span class="slot-remove" data-slot="driver" data-index="${i}">&times;</span>
+            </div>`;
+        } else {
+            html += `<div class="my-team-slot" data-slot="driver" data-index="${i}">
+                <div class="slot-label">Driver ${i + 1}</div>
+                <div class="slot-name" style="color:var(--text-secondary)">+ Select</div>
+            </div>`;
+        }
+    }
+    // 2 constructor slots
+    for (let i = 0; i < 2; i++) {
+        const cid = myTeamConstructors[i];
+        const con = cid ? data.constructors.find(c => c.constructor_id === cid) : null;
+        if (con) {
+            const team = TEAMS[con.constructor_id] || { color: '#666' };
+            html += `<div class="my-team-slot filled" style="--team-color:${team.color}" data-slot="constructor" data-index="${i}">
+                <div class="slot-label">Constructor ${i + 1}</div>
+                <div class="slot-name">${(con.name || con.constructor_id).toUpperCase()}</div>
+                <div class="slot-price">$${con.current_price.toFixed(1)}M</div>
+                <span class="slot-remove" data-slot="constructor" data-index="${i}">&times;</span>
+            </div>`;
+        } else {
+            html += `<div class="my-team-slot" data-slot="constructor" data-index="${i}">
+                <div class="slot-label">Constructor ${i + 1}</div>
+                <div class="slot-name" style="color:var(--text-secondary)">+ Select</div>
+            </div>`;
+        }
+    }
+    grid.innerHTML = html;
+
+    // Update budget display based on team cost
+    const totalCost = getMyTeamCost();
+    if (totalCost > 0) {
+        document.getElementById('transferBudget').value = totalCost.toFixed(1);
+    }
+
+    // Click handlers
+    grid.querySelectorAll('.my-team-slot').forEach(slot => {
+        slot.addEventListener('click', (e) => {
+            // If clicking the remove X, clear the slot
+            if (e.target.classList.contains('slot-remove')) {
+                const type = e.target.dataset.slot;
+                const idx = parseInt(e.target.dataset.index);
+                if (type === 'driver') myTeamDrivers[idx] = null;
+                else myTeamConstructors[idx] = null;
+                renderMyTeamGrid();
+                return;
+            }
+            const type = slot.dataset.slot;
+            const idx = parseInt(slot.dataset.index);
+            showSlotPicker(type, idx);
+        });
+    });
+}
+
+function getMyTeamCost() {
+    let cost = 0;
+    for (const did of myTeamDrivers) {
+        if (!did || !data) continue;
+        const d = data.drivers.find(x => x.driver_id === did);
+        if (d) cost += d.current_price;
+    }
+    for (const cid of myTeamConstructors) {
+        if (!cid || !data) continue;
+        const c = data.constructors.find(x => x.constructor_id === cid);
+        if (c) cost += c.current_price;
+    }
+    return cost;
+}
+
+function showSlotPicker(type, index) {
+    const alreadySelected = type === 'driver'
+        ? new Set(myTeamDrivers.filter(Boolean))
+        : new Set(myTeamConstructors.filter(Boolean));
+
+    const items = type === 'driver' ? data.drivers : data.constructors;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'slot-picker-overlay';
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+    });
+
+    let html = `<div class="slot-picker"><h4>Select ${type === 'driver' ? 'Driver' : 'Constructor'}</h4>`;
+    items.forEach(item => {
+        const id = type === 'driver' ? item.driver_id : item.constructor_id;
+        const team = TEAMS[type === 'driver' ? item.constructor : item.constructor_id] || { color: '#666' };
+        const name = type === 'driver' ? item.name : (item.name || item.constructor_id).toUpperCase();
+        const disabled = alreadySelected.has(id) ? ' disabled' : '';
+        html += `<div class="slot-picker-item${disabled}" data-id="${id}">
+            <span class="sp-dot" style="background:${team.color}"></span>
+            <span class="sp-name">${name}</span>
+            <span class="sp-price">$${item.current_price.toFixed(1)}M</span>
+        </div>`;
+    });
+    html += '</div>';
+    overlay.innerHTML = html;
+    document.body.appendChild(overlay);
+
+    overlay.querySelectorAll('.slot-picker-item:not(.disabled)').forEach(el => {
+        el.addEventListener('click', () => {
+            const id = el.dataset.id;
+            if (type === 'driver') myTeamDrivers[index] = id;
+            else myTeamConstructors[index] = id;
+            overlay.remove();
+            renderMyTeamGrid();
+        });
+    });
+}
+
+// ============================================================
+// Transfer Advisor
+// ============================================================
+
+function runTransferAdvisor() {
+    if (!data) return;
+
+    const budget = parseFloat(document.getElementById('transferBudget').value);
+    const freeTransfers = parseInt(document.getElementById('freeTransfers').value) || 0;
+    const strategy = document.getElementById('transferStrategy').value;
+    const chip = document.getElementById('transferChip').value;
+
+    // Validate team
+    const currentDriverIds = myTeamDrivers.filter(Boolean);
+    const currentConstructorIds = myTeamConstructors.filter(Boolean);
+    if (currentDriverIds.length < 5 || currentConstructorIds.length < 2) {
+        alert('Please select your full current team (5 drivers + 2 constructors) before running the transfer advisor.');
+        return;
+    }
+
+    const isWildcard = chip === 'wildcard';
+    const maxTransfers = isWildcard ? 7 : freeTransfers; // Wildcard = unlimited
+    const transferPenalty = 10; // -10 pts per extra transfer
+
+    // Score function
+    function score(item) {
+        if (strategy === 'max_points') return item.expected_points;
+        if (strategy === 'max_value') return item.value_score;
+        if (strategy === 'budget_gain') {
+            const pc = predictPriceChange(item, item.expected_points);
+            return pc.expectedChange * 100 + item.value_score * 5;
+        }
+        return item.expected_points * 0.6 + item.value_score * 10 * 0.4;
+    }
+
+    // Apply chip modifiers to scoring
+    function chipAdjustedPoints(picks, boostedId) {
+        let total = 0;
+        for (const p of picks) {
+            let pts = p.expected_points;
+            if (chip === 'no_negative' && pts < 0) pts = 0;
+            if (p.driver_id === boostedId) {
+                pts *= (chip === 'mega_driver' ? 3 : 2);
+            } else if (p.driver_id) {
+                // non-boosted drivers get normal points
+            }
+            total += pts;
+        }
+        return total;
+    }
+
+    const allDrivers = data.drivers.filter(d => !excludedDrivers.has(d.driver_id));
+    const allConstructors = data.constructors.filter(c => !excludedConstructors.has(c.constructor_id));
+
+    const numDriverSlots = chip === 'extra_drs' ? 6 : 5;
+    const effectiveBudget = chip === 'limitless' ? 999 : budget;
+
+    // Generate all valid lineups and score them, tracking transfers needed
+    const results = [];
+    const MAX_RESULTS = 200;
+
+    // Generate constructor pairs
+    const cPairs = [];
+    for (let i = 0; i < allConstructors.length; i++) {
+        for (let j = i + 1; j < allConstructors.length; j++) {
+            cPairs.push({
+                items: [allConstructors[i], allConstructors[j]],
+                cost: allConstructors[i].current_price + allConstructors[j].current_price,
+            });
+        }
+    }
+
+    for (const cp of cPairs) {
+        const combos = combinations(allDrivers, numDriverSlots);
+        for (const combo of combos) {
+            const driverCost = combo.reduce((s, d) => s + d.current_price, 0);
+            const totalCost = cp.cost + driverCost;
+            if (totalCost > effectiveBudget) continue;
+
+            // Count transfers needed
+            const newDriverIds = new Set(combo.map(d => d.driver_id));
+            const newConIds = new Set(cp.items.map(c => c.constructor_id));
+            let transfersNeeded = 0;
+            for (const did of currentDriverIds) {
+                if (!newDriverIds.has(did)) transfersNeeded++;
+            }
+            for (const cid of currentConstructorIds) {
+                if (!newConIds.has(cid)) transfersNeeded++;
+            }
+            // For extra_drs, the 6th driver is always "new" but doesn't cost a transfer
+            if (chip === 'extra_drs') {
+                // Only count transfers for the 5 original slots
+                const kept = combo.filter(d => currentDriverIds.includes(d.driver_id)).length;
+                transfersNeeded = currentDriverIds.length - kept;
+                for (const cid of currentConstructorIds) {
+                    if (!newConIds.has(cid)) transfersNeeded++;
+                }
+            }
+
+            if (!isWildcard && transfersNeeded > maxTransfers + 3) continue; // cap search space
+
+            // Find best boost driver
+            let boostedDriver = combo[0];
+            for (const d of combo) {
+                const bpts = chip === 'mega_driver' ? d.expected_points * 3 : d.expected_points * 2;
+                const cpts = chip === 'mega_driver' ? boostedDriver.expected_points * 3 : boostedDriver.expected_points * 2;
+                if (bpts > cpts) boostedDriver = d;
+            }
+
+            const allPicks = [...combo, ...cp.items];
+            const totalPoints = chipAdjustedPoints(allPicks, boostedDriver.driver_id);
+
+            // Penalty for extra transfers
+            const extraTransfers = Math.max(0, transfersNeeded - freeTransfers);
+            const penalty = isWildcard ? 0 : extraTransfers * transferPenalty;
+            const netPoints = totalPoints - penalty;
+
+            // Final score
+            const baseScore = [...combo, ...cp.items].reduce((s, x) => s + score(x), 0);
+            const finalScore = (strategy === 'max_points') ? netPoints : baseScore - penalty;
+
+            results.push({
+                drivers: combo,
+                constructors: cp.items,
+                totalCost,
+                totalPoints,
+                netPoints,
+                transfersNeeded,
+                extraTransfers,
+                penalty,
+                boostedDriverId: boostedDriver.driver_id,
+                totalScore: finalScore,
+            });
+        }
+    }
+
+    // Sort by score
+    results.sort((a, b) => b.totalScore - a.totalScore);
+
+    // Deduplicate
+    const seen = new Set();
+    const unique = results.filter(l => {
+        const key = [...l.drivers.map(d => d.driver_id).sort(), ...l.constructors.map(c => c.constructor_id).sort()].join(',');
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+
+    // Take top results
+    allLineups = unique.slice(0, MAX_RESULTS);
+
+    if (allLineups.length === 0) {
+        const resultEl = document.getElementById('optimizerResult');
+        resultEl.classList.remove('hidden');
+        document.getElementById('lineupSummary').innerHTML = '';
+        document.getElementById('lineupCards').innerHTML = `
+            <div class="optimizer-warning" style="background:var(--card);border:2px solid var(--orange, #f59e0b);border-radius:10px;padding:20px;text-align:center;">
+                <h3 style="color:var(--orange, #f59e0b);margin-bottom:8px;">No Valid Transfers Found</h3>
+                <p style="color:var(--text-secondary);">No lineup improvements found within budget and transfer constraints.</p>
+            </div>`;
+        document.getElementById('lineupLoadMore').classList.add('hidden');
+        resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+    }
+
+    lineupsShown = 0;
+    displayTransferResults(strategy, chip);
+}
+
+function displayTransferResults(strategy, chip) {
+    const resultEl = document.getElementById('optimizerResult');
+    resultEl.classList.remove('hidden');
+
+    const total = allLineups.length;
+    const end = Math.min(lineupsShown + LINEUPS_PER_PAGE, total);
+
+    if (lineupsShown === 0) {
+        const best = allLineups[0];
+        const chipLabel = chip !== 'none' ? ` <span class="chip-badge">${chip.replace('_', ' ').toUpperCase()}</span>` : '';
+
+        document.getElementById('lineupSummary').innerHTML = `
+            <div class="lineup-stat">
+                <div class="big-num">${best.netPoints.toFixed(1)}</div>
+                <div class="label">Net Points${best.penalty > 0 ? ` (-${best.penalty} penalty)` : ''}</div>
+            </div>
+            <div class="lineup-stat">
+                <div class="big-num">${best.transfersNeeded}</div>
+                <div class="label">Transfers${chipLabel}</div>
+            </div>
+            <div class="lineup-stat">
+                <div class="big-num">$${best.totalCost.toFixed(1)}M</div>
+                <div class="label">Total Cost</div>
+            </div>
+            <div class="lineup-stat">
+                <div class="big-num">${best.totalPoints.toFixed(1)}</div>
+                <div class="label">Gross Points (incl boost)</div>
+            </div>
+        `;
+        document.getElementById('lineupCards').innerHTML = '';
+        document.getElementById('lineupCounter').textContent = `${total} option${total !== 1 ? 's' : ''} found`;
+    }
+
+    // Build transfer diff cards
+    let html = '';
+    for (let li = lineupsShown; li < end; li++) {
+        const lineup = allLineups[li];
+        html += renderTransferCard(lineup, li, chip);
+    }
+
+    document.getElementById('lineupCards').insertAdjacentHTML('beforeend', html);
+    lineupsShown = end;
+
+    const loadMoreEl = document.getElementById('lineupLoadMore');
+    if (lineupsShown < total) {
+        loadMoreEl.classList.remove('hidden');
+        loadMoreEl.querySelector('.load-more-text').textContent = `Show more (${lineupsShown}/${total})`;
+    } else {
+        loadMoreEl.classList.add('hidden');
+    }
+
+    if (lineupsShown <= LINEUPS_PER_PAGE) {
+        resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function renderTransferCard(lineup, index, chip) {
+    const currentDriverIds = myTeamDrivers.filter(Boolean);
+    const currentConstructorIds = myTeamConstructors.filter(Boolean);
+    const newDriverIds = lineup.drivers.map(d => d.driver_id);
+    const newConIds = lineup.constructors.map(c => c.constructor_id);
+
+    // Build swaps
+    const driversOut = currentDriverIds.filter(id => !newDriverIds.includes(id));
+    const driversIn = newDriverIds.filter(id => !currentDriverIds.includes(id));
+    const consOut = currentConstructorIds.filter(id => !newConIds.includes(id));
+    const consIn = newConIds.filter(id => !currentConstructorIds.includes(id));
+
+    const expandedClass = index === 0 ? ' expanded' : '';
+    let html = `<div class="lineup-block${expandedClass}" style="margin-bottom:16px;" onclick="this.classList.toggle('expanded')">
+        <div class="lineup-block-header">
+            <h4><span class="lineup-expand-icon">▼</span> Option #${index + 1}</h4>
+            <span class="lineup-block-stats">
+                ${lineup.netPoints.toFixed(1)} net pts · ${lineup.transfersNeeded} transfer${lineup.transfersNeeded !== 1 ? 's' : ''}
+                ${lineup.penalty > 0 ? ` · <span style="color:var(--red, #ef4444)">-${lineup.penalty} penalty</span>` : ''}
+                · $${lineup.totalCost.toFixed(1)}M
+            </span>
+        </div>
+        <div class="lineup-details">`;
+
+    // Show transfer swaps
+    if (driversOut.length === 0 && consOut.length === 0) {
+        html += '<p style="color:var(--green);font-weight:600;margin-bottom:12px;">No transfers needed — keep your current team!</p>';
+    } else {
+        html += '<div style="margin-bottom:12px;">';
+        for (let i = 0; i < Math.max(driversOut.length, driversIn.length); i++) {
+            const outId = driversOut[i];
+            const inId = driversIn[i];
+            const outDriver = outId ? data.drivers.find(d => d.driver_id === outId) : null;
+            const inDriver = inId ? data.drivers.find(d => d.driver_id === inId) : null;
+            html += renderSwapRow(outDriver, inDriver, 'driver');
+        }
+        for (let i = 0; i < Math.max(consOut.length, consIn.length); i++) {
+            const outId = consOut[i];
+            const inId = consIn[i];
+            const outCon = outId ? data.constructors.find(c => c.constructor_id === outId) : null;
+            const inCon = inId ? data.constructors.find(c => c.constructor_id === inId) : null;
+            html += renderSwapRow(outCon, inCon, 'constructor');
+        }
+        html += '</div>';
+    }
+
+    // Show resulting lineup
+    html += '<div class="lineup-picks-row">';
+    const sorted = [...lineup.drivers].sort((a, b) => b.expected_points - a.expected_points);
+    sorted.forEach(d => {
+        const team = TEAMS[d.constructor] || { color: '#666', name: d.constructor };
+        const isBoosted = d.driver_id === lineup.boostedDriverId;
+        const multiplier = isBoosted ? (chip === 'mega_driver' ? 3 : 2) : 1;
+        const displayPts = (d.expected_points * multiplier).toFixed(1);
+        const boostBadge = isBoosted ? `<span class="boost-badge">${multiplier}x</span>` : '';
+        const isNew = !currentDriverIds.includes(d.driver_id);
+        html += `<div class="lineup-pick-h${isBoosted ? ' boosted' : ''}" style="--team-color:${team.color}">
+            <div class="pick-h-header">
+                <span class="pick-h-name">${d.name.split(' ').pop()}${isNew ? ' <span style="color:var(--green);font-size:0.7rem;">NEW</span>' : ''}</span>
+                ${boostBadge}
+            </div>
+            <div class="pick-h-team">${team.name}</div>
+            <div class="pick-h-pts">${displayPts}<span class="pick-h-pts-label"> pts</span></div>
+            <div class="pick-h-meta">
+                <span>$${d.current_price.toFixed(1)}M</span>
+                <span>P${d.predicted_quali}→P${d.predicted_finish}</span>
+            </div>
+        </div>`;
+    });
+    lineup.constructors.forEach(c => {
+        const team = TEAMS[c.constructor_id] || { color: '#666', name: c.name };
+        const isNew = !currentConstructorIds.includes(c.constructor_id);
+        html += `<div class="lineup-pick-h constructor-pick-h" style="--team-color:${team.color}">
+            <div class="pick-h-header">
+                <span class="pick-h-name">${(c.name || c.constructor_id).toUpperCase()}${isNew ? ' <span style="color:var(--green);font-size:0.7rem;">NEW</span>' : ''}</span>
+            </div>
+            <div class="pick-h-team">${c.driver_1} & ${c.driver_2}</div>
+            <div class="pick-h-pts">${c.expected_points.toFixed(1)}<span class="pick-h-pts-label"> pts</span></div>
+            <div class="pick-h-meta">
+                <span>$${c.current_price.toFixed(1)}M</span>
+            </div>
+        </div>`;
+    });
+    html += '</div></div></div>';
+    return html;
+}
+
+function renderSwapRow(outItem, inItem, type) {
+    const outName = outItem
+        ? (type === 'driver' ? outItem.name.split(' ').pop() : (outItem.name || outItem.constructor_id).toUpperCase())
+        : '—';
+    const inName = inItem
+        ? (type === 'driver' ? inItem.name.split(' ').pop() : (inItem.name || inItem.constructor_id).toUpperCase())
+        : '—';
+    const outPts = outItem ? outItem.expected_points.toFixed(1) : '—';
+    const inPts = inItem ? inItem.expected_points.toFixed(1) : '—';
+    const outPrice = outItem ? `$${outItem.current_price.toFixed(1)}M` : '';
+    const inPrice = inItem ? `$${inItem.current_price.toFixed(1)}M` : '';
+
+    return `<div class="transfer-swap">
+        <div class="transfer-out" style="flex:1">
+            <div class="transfer-pick-name">${outName}</div>
+            <div class="transfer-pick-detail">${outPts} pts · ${outPrice}</div>
+        </div>
+        <div class="transfer-arrow">→</div>
+        <div class="transfer-in" style="flex:1">
+            <div class="transfer-pick-name">${inName}</div>
+            <div class="transfer-pick-detail">${inPts} pts · ${inPrice}</div>
+        </div>
+    </div>`;
+}
+
+// ============================================================
 
 function getPitStopStatsHtml(constructorId) {
     // Aggregate pit stop stationary times from all cached actual data
