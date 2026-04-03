@@ -192,6 +192,7 @@ async function renderTabIfNeeded(tabName) {
             break;
         case 'optimizer':
             renderMyTeamGrid();
+            renderLockGrid();
             // Optimizer renders on button click, just mark ready
             _tabRendered.optimizer = true;
             break;
@@ -199,7 +200,6 @@ async function renderTabIfNeeded(tabName) {
             showTabSpinner(tabId);
             await ensureAnalysisData();
             await ensureSeasonData();
-            renderLockGrid();
             renderFPAnalysis();
             populatePostRaceSelector();
             removeTabSpinner(tabId);
