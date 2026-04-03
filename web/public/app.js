@@ -625,13 +625,18 @@ function setupControls() {
         });
     });
 
-    // Post-race round selector
+    // Post-race round selector (with race-condition guard)
+    let _postRaceRequestId = 0;
     document.getElementById('postRaceRound').addEventListener('change', async (e) => {
         const roundNum = e.target.value;
         if (!roundNum) return;
-        const postRace = await loadPostRaceData(roundNum);
-        const predictions = await loadPredictionsData(roundNum);
-        const actual = await loadActualData(roundNum);
+        const requestId = ++_postRaceRequestId;
+        const [postRace, predictions, actual] = await Promise.all([
+            loadPostRaceData(roundNum),
+            loadPredictionsData(roundNum),
+            loadActualData(roundNum),
+        ]);
+        if (requestId !== _postRaceRequestId) return; // stale request, discard
         renderPostRace(postRace, predictions, actual, roundNum);
     });
 }
@@ -740,7 +745,7 @@ function renderHero() {
         return d.driver_id !== topPick.driver_id &&
                pc.cumulativeTotal > 0 && d.expected_points > 5 && d.value_score > 0.5;
     });
-    const bestValue = (valueCandidates.length > 0 ? valueCandidates : data.drivers)
+    const bestValue = [...(valueCandidates.length > 0 ? valueCandidates : data.drivers)]
         .sort((a,b) => (b.value_score||0) - (a.value_score||0))[0];
 
     // Dark Horse: high upside from a non-top pick, must have non-negative actual season
@@ -752,7 +757,7 @@ function renderHero() {
                d.risk !== 'VERY HIGH' &&
                pc.cumulativeTotal >= 0; // not negative actual season
     });
-    const darkHorse = (darkHorseCandidates.length > 0 ? darkHorseCandidates : data.drivers)
+    const darkHorse = [...(darkHorseCandidates.length > 0 ? darkHorseCandidates : data.drivers)]
         .sort((a,b) => {
             const aUp = (a.mc_total_p95||0) - (a.mc_total_mean||a.expected_points);
             const bUp = (b.mc_total_p95||0) - (b.mc_total_mean||b.expected_points);
@@ -789,7 +794,7 @@ function heroCard(label, driver, type) {
             <div class="hero-card-driver">${driver.name || driver.driver_id}</div>
             <div class="hero-card-team">${team.name}</div>
             <div class="hero-card-pts">${driver.expected_points.toFixed(1)} pts</div>
-            <div class="hero-card-meta">$${driver.current_price}M \u00b7 ${(driver.value_score||0).toFixed(2)} ppm</div>
+            <div class="hero-card-meta">$${driver.current_price.toFixed(1)}M \u00b7 ${(driver.value_score||0).toFixed(2)} ppm</div>
         </div>
     `;
 }
@@ -1892,31 +1897,41 @@ function runTransferAdvisor() {
         }
     }
 
+    // Cap total iterations to prevent browser freeze (C(22,5)*C(11,2) = ~1.45M)
+    const MAX_ITERATIONS = 500000;
+    let iterations = 0;
+    let hitCap = false;
+
     for (const cp of cPairs) {
+        if (hitCap) break;
+        // Pre-check: skip constructor pairs that don't keep any locked constructors
+        const newConIds = new Set(cp.items.map(c => c.constructor_id));
+        let conTransfers = 0;
+        for (const cid of currentConstructorIds) {
+            if (!newConIds.has(cid)) conTransfers++;
+        }
+        // If constructor transfers alone exceed limit, skip this pair
+        if (!isWildcard && conTransfers > maxTransfers + 3) continue;
+
         const combos = combinations(allDrivers, numDriverSlots);
         for (const combo of combos) {
+            if (++iterations > MAX_ITERATIONS) { hitCap = true; break; }
+
             const driverCost = combo.reduce((s, d) => s + d.current_price, 0);
             const totalCost = cp.cost + driverCost;
             if (totalCost > effectiveBudget) continue;
 
             // Count transfers needed
             const newDriverIds = new Set(combo.map(d => d.driver_id));
-            const newConIds = new Set(cp.items.map(c => c.constructor_id));
-            let transfersNeeded = 0;
+            let transfersNeeded = conTransfers;
             for (const did of currentDriverIds) {
                 if (!newDriverIds.has(did)) transfersNeeded++;
-            }
-            for (const cid of currentConstructorIds) {
-                if (!newConIds.has(cid)) transfersNeeded++;
             }
             // For extra_drs, the 6th driver is always "new" but doesn't cost a transfer
             if (chip === 'extra_drs') {
                 // Only count transfers for the 5 original slots
                 const kept = combo.filter(d => currentDriverIds.includes(d.driver_id)).length;
-                transfersNeeded = currentDriverIds.length - kept;
-                for (const cid of currentConstructorIds) {
-                    if (!newConIds.has(cid)) transfersNeeded++;
-                }
+                transfersNeeded = currentDriverIds.length - kept + conTransfers;
             }
 
             if (!isWildcard && transfersNeeded > maxTransfers + 3) continue; // cap search space
@@ -2274,7 +2289,7 @@ function renderFPAnalysis() {
             { key: 'best_lap', label: 'Best Lap', cls: 'num', title: 'Fastest single lap in FP sessions', fmt: r => fmtTime(r.best_lap) },
             { key: 'best_3_avg', label: 'Best 3 Avg', cls: 'num', title: 'Average of 3 fastest laps', fmt: r => fmtTime(r.best_3_avg) },
             { key: 'best_5_avg', label: 'Best 5 Avg', cls: 'num', title: 'Average of 5 fastest laps', fmt: r => fmtTime(r.best_5_avg) },
-            { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to fastest driver', fmt: r => r.gap === 0 ? '<span class="text-green">Leader</span>' : '+' + r.gap.toFixed(3) },
+            { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to fastest driver', fmt: r => r.gap === 0 ? '<span class="text-green">Leader</span>' : r.gap != null ? '+' + r.gap.toFixed(3) : '-' },
             { key: 'laps', label: 'Laps', cls: 'num', title: 'Total clean laps completed' }
         ], rows, 'best_lap', true);
         html += `<div class="analysis-block"><h3>Qualifying Pace (Short Runs)</h3><p class="analysis-note">Best single-lap and multi-lap averages. Click column headers to sort.</p>${tbl.getHtml()}</div>`;
@@ -2284,13 +2299,13 @@ function renderFPAnalysis() {
     // Long Run Pace
     if (fpAnalysis.long_run_pace && Object.keys(fpAnalysis.long_run_pace).length > 0) {
         const rows = Object.entries(fpAnalysis.long_run_pace).map(([id, d]) => ({
-            id, avg_pace: d.avg_long_run_pace, gap: d.gap_to_fastest, laps: d.total_long_run_laps, runs: d.runs
+            id, avg_pace: d.avg_long_run_pace, gap: d.gap_to_fastest, laps: d.total_long_run_laps, runs: d.runs || []
         }));
         const tbl = sortableTable('fpLongRunTable', [
             { key: '_rank', label: '#', cls: 'num', fmt: (r, i) => i + 1 },
             { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
             { key: 'avg_pace', label: 'Avg Pace', cls: 'num', title: 'Average lap time across all long run stints (5+ laps). Lower = faster race pace.', fmt: r => fmtTime(r.avg_pace) },
-            { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to fastest long-run driver', fmt: r => r.gap === 0 ? '<span class="text-green">Leader</span>' : '+' + r.gap.toFixed(3) },
+            { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to fastest long-run driver', fmt: r => r.gap === 0 ? '<span class="text-green">Leader</span>' : r.gap != null ? '+' + r.gap.toFixed(3) : '-' },
             { key: 'laps', label: 'Laps', cls: 'num', title: 'Total long-run laps (stints of 5+ laps)' },
             { key: 'runs', label: 'Runs', title: 'Individual stint details: compound, laps, avg pace', fmt: r => r.runs.map(s => `<span class="compound-badge ${s.compound.toLowerCase()}">${s.compound} (${s.laps}L, ${fmtTime(s.avg_pace)})</span>`).join(' ') }
         ], rows, 'avg_pace', true);
@@ -2329,14 +2344,17 @@ function renderFPAnalysis() {
                 return `
                 <div class="deg-card">
                     <div class="deg-driver">${id}</div>
-                    ${compoundEntries.map(([comp, data]) => `
+                    ${compoundEntries.map(([comp, data]) => {
+                        const deg = data.avg_degradation;
+                        if (deg == null) return '';
+                        return `
                         <div class="deg-compound">
                             <span class="compound-badge ${comp.toLowerCase()}">${comp}</span>
-                            <span class="deg-rate ${data.avg_degradation <= 0.03 ? 'deg-good' : data.avg_degradation <= 0.06 ? 'deg-ok' : 'deg-bad'}">
-                                ${data.avg_degradation >= 0 ? '+' : ''}${data.avg_degradation.toFixed(4)}s/lap
+                            <span class="deg-rate ${deg <= 0.03 ? 'deg-good' : deg <= 0.06 ? 'deg-ok' : 'deg-bad'}">
+                                ${deg >= 0 ? '+' : ''}${deg.toFixed(4)}s/lap
                             </span>
-                        </div>
-                    `).join('')}
+                        </div>`;
+                    }).join('')}
                 </div>`;
             }).join('')}</div>
         </div>`;
@@ -2468,20 +2486,20 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
     }
 
     // --- Original post-race analysis (if available) ---
-    const data = postRaceData;
-    if (data) {
+    const prData = postRaceData;
+    if (prData) {
         if (!html) {
-            html += `<div class="analysis-race-header">${data.race} — Round ${data.round}</div>`;
+            html += `<div class="analysis-race-header">${prData.race} — Round ${prData.round}</div>`;
         }
 
         // Race Results as driver cards
-        if (data.results && data.results.length > 0) {
+        if (prData.results && prData.results.length > 0) {
             html += `
             <div class="analysis-block collapsible">
                 <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Race Results <span class="collapse-icon">▼</span></h3>
                 <div class="collapsible-content">
                 <div class="postrace-cards">
-                    ${data.results.map(r => {
+                    ${prData.results.map(r => {
                         const team = TEAMS[r.constructor_id] || { name: r.constructor_id, color: '#666' };
                         const posChange = r.positions_gained || 0;
                         const changeClass = posChange > 0 ? 'positive' : posChange < 0 ? 'negative' : 'neutral';
@@ -2529,8 +2547,8 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
     }
 
     // Race Pace
-    if (data && data.race_pace && Object.keys(data.race_pace).length > 0) {
-        const sorted = Object.entries(data.race_pace)
+    if (prData && prData.race_pace && Object.keys(prData.race_pace).length > 0) {
+        const sorted = Object.entries(prData.race_pace)
             .sort((a,b) => a[1].avg_race_pace - b[1].avg_race_pace);
 
         html += `
@@ -2562,7 +2580,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
     }
 
     // Pit Stops by Team
-    if (data && data.pitstops && data.pitstops.by_team && data.pitstops.by_team.length > 0) {
+    if (prData && prData.pitstops && prData.pitstops.by_team && prData.pitstops.by_team.length > 0) {
         html += `
         <div class="analysis-block collapsible">
             <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Pit Stop Performance <span class="collapse-icon">▼</span></h3>
@@ -2572,7 +2590,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
                     <th>#</th><th>Team</th><th class="num">Avg Time</th>
                     <th class="num">Best Time</th><th class="num">Stops</th>
                 </tr></thead>
-                <tbody>${data.pitstops.by_team.map((t, i) => `
+                <tbody>${prData.pitstops.by_team.map((t, i) => `
                     <tr>
                         <td>${i+1}</td>
                         <td><strong>${t.constructor_name}</strong></td>
@@ -2587,8 +2605,8 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
     }
 
     // Tyre Management
-    if (data && data.tyre_management && Object.keys(data.tyre_management).length > 0) {
-        const sorted = Object.entries(data.tyre_management)
+    if (prData && prData.tyre_management && Object.keys(prData.tyre_management).length > 0) {
+        const sorted = Object.entries(prData.tyre_management)
             .sort((a,b) => b[1].management_score - a[1].management_score);
 
         html += `
@@ -2615,17 +2633,17 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
     }
 
     // ── Sprint Weekend sections ──
-    if (data && data.is_sprint_weekend) {
+    if (prData && prData.is_sprint_weekend) {
         html += `<div class="sprint-divider"><span>🏁 Sprint Session</span></div>`;
 
         // Sprint Results
-        if (data.sprint_results && data.sprint_results.length > 0) {
+        if (prData.sprint_results && prData.sprint_results.length > 0) {
             html += `
             <div class="analysis-block collapsible">
                 <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Sprint Results <span class="collapse-icon">▼</span></h3>
                 <div class="collapsible-content">
                 <div class="postrace-cards">
-                    ${data.sprint_results.map(r => {
+                    ${prData.sprint_results.map(r => {
                         const team = TEAMS[r.constructor_id] || { name: r.constructor_id, color: '#666' };
                         const posChange = r.positions_gained || 0;
                         const changeClass = posChange > 0 ? 'positive' : posChange < 0 ? 'negative' : 'neutral';
@@ -2654,8 +2672,8 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
         }
 
         // Sprint Race Pace
-        if (data.sprint_pace && Object.keys(data.sprint_pace).length > 0) {
-            const sorted = Object.entries(data.sprint_pace)
+        if (prData.sprint_pace && Object.keys(prData.sprint_pace).length > 0) {
+            const sorted = Object.entries(prData.sprint_pace)
                 .sort((a,b) => a[1].avg_race_pace - b[1].avg_race_pace);
 
             html += `
@@ -2687,8 +2705,8 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
         }
 
         // Sprint Tyre Management
-        if (data.sprint_tyre_management && Object.keys(data.sprint_tyre_management).length > 0) {
-            const sorted = Object.entries(data.sprint_tyre_management)
+        if (prData.sprint_tyre_management && Object.keys(prData.sprint_tyre_management).length > 0) {
+            const sorted = Object.entries(prData.sprint_tyre_management)
                 .sort((a,b) => b[1].management_score - a[1].management_score);
 
             html += `
@@ -3130,10 +3148,13 @@ function renderSeason() {
                 const selector = document.getElementById('postRaceRound');
                 selector.value = roundNum;
 
-                // Load and render
-                const postRace = await loadPostRaceData(roundNum);
-                const predictions = await loadPredictionsData(roundNum);
-                const actual = await loadActualData(roundNum);
+                // Load and render (parallel fetch + stale-guard via selector value)
+                const [postRace, predictions, actual] = await Promise.all([
+                    loadPostRaceData(roundNum),
+                    loadPredictionsData(roundNum),
+                    loadActualData(roundNum),
+                ]);
+                if (selector.value !== roundNum) return; // user clicked another row
                 renderPostRace(postRace, predictions, actual, roundNum);
             });
         });
@@ -3313,7 +3334,7 @@ function populatePostRaceSelector() {
     // Don't re-populate if already has options beyond the placeholder
     if (selector.options.length > 1) return;
     selector.innerHTML = '<option value="">Select a round...</option>';
-    const currentRound = data ? data.round : 99;
+    const currentRound = data ? data.round : 0;
     seasonSummary.rounds
         .filter(r => r.has_post_race || r.has_predictions || r.has_actual || r.round <= currentRound)
         .forEach(r => {
