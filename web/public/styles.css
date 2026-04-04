@@ -879,6 +879,133 @@ select:focus, input:focus {
     margin-left: 8px;
 }
 
+/* Multi-week planner styles */
+.chip-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+.chip-check input:checked + span,
+.chip-check:has(input:checked) { color: var(--text-primary); }
+
+.mw-timeline {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    padding: 12px 0;
+    margin-bottom: 20px;
+}
+.mw-round-col {
+    flex: 1;
+    min-width: 160px;
+    max-width: 240px;
+    padding: 12px;
+    border-right: 1px solid var(--border);
+    position: relative;
+}
+.mw-round-col:last-child { border-right: none; }
+.mw-round-col.active-round { background: rgba(232, 6, 6, 0.05); }
+.mw-round-header {
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+.mw-round-circuit {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+.mw-round-sprint {
+    display: inline-block;
+    font-size: 0.65rem;
+    background: var(--accent);
+    color: #fff;
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-left: 4px;
+}
+.mw-round-action {
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    margin-top: 8px;
+}
+.mw-action-hold {
+    background: rgba(100, 100, 100, 0.15);
+    color: var(--text-secondary);
+}
+.mw-action-swap {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+.mw-action-chip {
+    background: rgba(232, 6, 6, 0.1);
+    border: 1px solid rgba(232, 6, 6, 0.3);
+}
+.mw-round-pts {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-top: 8px;
+}
+.mw-round-meta {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.mw-plan-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+.mw-plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+.mw-plan-rank {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+.mw-plan-total {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--green);
+}
+.mw-plan-stats {
+    display: flex;
+    gap: 20px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.mw-heatmap {
+    overflow-x: auto;
+    margin-top: 16px;
+}
+.mw-heatmap table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+.mw-heatmap th, .mw-heatmap td {
+    padding: 4px 8px;
+    text-align: center;
+    border: 1px solid var(--border);
+}
+.mw-heatmap th { font-weight: 600; font-size: 0.75rem; }
+.mw-heat-high { background: rgba(34, 197, 94, 0.25); }
+.mw-heat-mid { background: rgba(234, 179, 8, 0.15); }
+.mw-heat-low { background: rgba(239, 68, 68, 0.15); }
+
 .optimizer-controls {
     display: flex;
     gap: 16px;

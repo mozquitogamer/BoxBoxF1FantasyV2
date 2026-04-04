@@ -178,6 +178,7 @@
                 <div class="optimizer-mode-toggle">
                     <button class="mode-btn active" data-mode="fresh">Build Fresh Lineup</button>
                     <button class="mode-btn" data-mode="transfers">Transfer Advisor</button>
+                    <button class="mode-btn" data-mode="multiweek">Multi-Week Planner</button>
                 </div>
 
                 <!-- Fresh lineup mode controls -->
@@ -251,6 +252,55 @@
                             <button class="btn-primary" id="runTransferAdvisor">Find Best Transfers</button>
                         </div>
                     </div>
+                </div>
+
+                <!-- Multi-week planner mode controls -->
+                <div class="optimizer-mode hidden" id="mode-multiweek">
+                    <div class="my-team-section">
+                        <h3>Multi-Week Transfer Planner</h3>
+                        <p class="hint">Plan your transfers across the next 2-5 rounds. Uses track similarity to project future scores and finds optimal swap timing.</p>
+                        <div class="my-team-grid" id="myTeamGridMW"></div>
+                        <div class="my-team-controls">
+                            <div class="control-group">
+                                <label>Available Budget ($M)</label>
+                                <input type="number" id="mwBudget" value="100.0" step="0.1" min="0">
+                            </div>
+                            <div class="control-group">
+                                <label title="Free transfers available now (max bank: 5)">Free Transfers</label>
+                                <input type="number" id="mwFreeTransfers" value="2" step="1" min="0" max="5">
+                            </div>
+                            <div class="control-group">
+                                <label title="How many future rounds to plan ahead">Planning Horizon</label>
+                                <select id="mwHorizon">
+                                    <option value="2">2 Rounds</option>
+                                    <option value="3" selected>3 Rounds</option>
+                                    <option value="4">4 Rounds</option>
+                                    <option value="5">5 Rounds</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label>Strategy</label>
+                                <select id="mwStrategy">
+                                    <option value="max_points">Max Expected Points</option>
+                                    <option value="balanced">Balanced</option>
+                                    <option value="budget_gain">Budget Builder</option>
+                                </select>
+                            </div>
+                            <button class="btn-primary" id="runMultiWeekPlanner">Plan My Transfers</button>
+                        </div>
+                        <div class="mw-chips-section" style="margin-top:12px;">
+                            <label style="font-weight:600;font-size:0.9rem;margin-bottom:6px;display:block;">Available Chips (check those you still have):</label>
+                            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                                <label class="chip-check"><input type="checkbox" id="mwChipWildCard" value="wild_card"> Wild Card</label>
+                                <label class="chip-check"><input type="checkbox" id="mwChipLimitless" value="limitless"> Limitless</label>
+                                <label class="chip-check"><input type="checkbox" id="mwChip3xBoost" value="3x_boost"> 3x Boost</label>
+                                <label class="chip-check"><input type="checkbox" id="mwChipNoNeg" value="no_negative"> No Negative</label>
+                                <label class="chip-check"><input type="checkbox" id="mwChipAutopilot" value="autopilot"> Autopilot</label>
+                                <label class="chip-check"><input type="checkbox" id="mwChipFinalFix" value="final_fix"> Final Fix</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="mwResults" class="hidden" style="margin-top:20px;"></div>
                 </div>
 
                 <div class="optimizer-constraints">
@@ -507,6 +557,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" async></script>
-    <script src="app.js?v=39"></script>
+    <script src="app.js?v=40"></script>
 </body>
 </html>

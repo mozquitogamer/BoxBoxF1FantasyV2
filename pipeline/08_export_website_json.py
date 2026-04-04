@@ -36,6 +36,11 @@ from config.settings import (
     SPRINT_ROUNDS_2026,
     CANCELLED_ROUNDS_2026,
 )
+from config.track_classifications import (
+    TRACK_DATABASE,
+    TRACK_FEATURE_NAMES,
+    RACE_NAME_TO_CIRCUIT,
+)
 
 
 def load_race_info() -> dict:
@@ -352,6 +357,97 @@ def sync_official_points() -> None:
         print("  No official_fantasy_points.json seed file found, skipping")
 
 
+def build_track_data_json() -> dict:
+    """Export track classification data for frontend track similarity engine.
+
+    Exports the 9-dimensional feature vectors, race-to-circuit mapping, and
+    feature names for computing cosine similarity in the browser.
+    Only includes circuits on the 2026 calendar (not historical one-offs).
+    """
+    # Load race calendar to get active circuit IDs
+    with open(SEED_DIR / "races.json") as f:
+        races = json.load(f)["races"]
+
+    active_circuits = set()
+    race_circuit_map = {}
+    for race in races:
+        if race.get("cancelled"):
+            continue
+        race_name = race["name"].lower().strip()
+        circuit_id = RACE_NAME_TO_CIRCUIT.get(race_name, "unknown")
+        if circuit_id != "unknown":
+            active_circuits.add(circuit_id)
+            race_circuit_map[race["name"]] = circuit_id
+
+    # Export track features (only active circuits + some similar ones for similarity)
+    track_features = {}
+    for cid, features in TRACK_DATABASE.items():
+        if cid in active_circuits:
+            track_features[cid] = features
+
+    return {
+        "track_features": track_features,
+        "race_circuit_map": race_circuit_map,
+        "feature_names": TRACK_FEATURE_NAMES,
+        "sprint_rounds": SPRINT_ROUNDS_2026,
+    }
+
+
+def build_driver_history_json() -> dict:
+    """Export per-driver and per-constructor actual fantasy points by round.
+
+    Aggregates from actual_round{N}.json files in web data directory.
+    Used by the multi-week planner for track-affinity scoring.
+    """
+    race_info = load_race_info()
+    drivers = {}
+    constructors = {}
+
+    for rnd_num in range(1, 25):
+        if rnd_num in CANCELLED_ROUNDS_2026:
+            continue
+
+        actual_path = WEB_DATA_DIR / f"actual_round{rnd_num}.json"
+        if not actual_path.exists():
+            continue
+
+        with open(actual_path) as f:
+            actual = json.load(f)
+
+        race = race_info.get(rnd_num, {})
+        race_name = race.get("name", "").lower().strip()
+        circuit_id = RACE_NAME_TO_CIRCUIT.get(race_name, "unknown")
+
+        # Driver points
+        for d in actual.get("drivers", []):
+            did = d["driver_id"]
+            if did not in drivers:
+                drivers[did] = {"rounds": []}
+            drivers[did]["rounds"].append({
+                "round": rnd_num,
+                "circuit_id": circuit_id,
+                "points": d.get("total_points", 0),
+                "is_dnf": d.get("is_dnf", False),
+            })
+
+        # Constructor points
+        for c in actual.get("constructors", []):
+            cid = c["constructor_id"]
+            if cid not in constructors:
+                constructors[cid] = {"rounds": []}
+            constructors[cid]["rounds"].append({
+                "round": rnd_num,
+                "circuit_id": circuit_id,
+                "points": c.get("total_points", 0),
+            })
+
+    return {
+        "season": CURRENT_SEASON,
+        "drivers": drivers,
+        "constructors": constructors,
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description="Export website JSON data")
     parser.add_argument("--round", type=int, required=True)
@@ -394,6 +490,20 @@ def main():
     # 4. Analysis files
     print("[4] Copying analysis files...")
     copy_analysis_files(round_num)
+
+    # 5. Track data for multi-week planner
+    print("[5] Exporting track data...")
+    track_data = build_track_data_json()
+    with open(WEB_DATA_DIR / "track_data.json", "w") as f:
+        json.dump(track_data, f, indent=2)
+    print(f"  {len(track_data['track_features'])} circuits, {len(track_data['race_circuit_map'])} race mappings")
+
+    # 6. Driver history for multi-week planner
+    print("[6] Exporting driver history...")
+    history = build_driver_history_json()
+    with open(WEB_DATA_DIR / "driver_history.json", "w") as f:
+        json.dump(history, f, indent=2)
+    print(f"  {len(history['drivers'])} drivers, {len(history['constructors'])} constructors with history")
 
     print(f"\nAll data exported to {WEB_DATA_DIR}")
     print("=" * 70)

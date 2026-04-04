@@ -91,9 +91,12 @@ let tableSortAsc = true;
 let allLineups = [];
 let lineupsShown = 0;
 const LINEUPS_PER_PAGE = 10;
-// My Team state (for Transfer Advisor)
+// My Team state (for Transfer Advisor + Multi-Week Planner)
 let myTeamDrivers = [null, null, null, null, null];   // 5 driver_id slots
 let myTeamConstructors = [null, null];                  // 2 constructor_id slots
+// Multi-week planner data
+let trackData = null;
+let driverHistory = null;
 
 // -- F1 Fantasy Price Change Thresholds --
 // PPM = cumulative_season_points / current_price
@@ -614,6 +617,9 @@ function setupControls() {
 
     // Transfer advisor
     document.getElementById('runTransferAdvisor').addEventListener('click', runTransferAdvisor);
+
+    // Multi-week planner
+    document.getElementById('runMultiWeekPlanner').addEventListener('click', runMultiWeekPlanner);
 
     // Analysis panel toggle
     document.querySelectorAll('.analysis-btn').forEach(btn => {
@@ -1784,25 +1790,37 @@ function renderMyTeamGrid() {
     const totalCost = getMyTeamCost();
     if (totalCost > 0) {
         document.getElementById('transferBudget').value = totalCost.toFixed(1);
+        const mwBudgetEl = document.getElementById('mwBudget');
+        if (mwBudgetEl) mwBudgetEl.value = totalCost.toFixed(1);
     }
 
-    // Click handlers
-    grid.querySelectorAll('.my-team-slot').forEach(slot => {
-        slot.addEventListener('click', (e) => {
-            // If clicking the remove X, clear the slot
-            if (e.target.classList.contains('slot-remove')) {
-                const type = e.target.dataset.slot;
-                const idx = parseInt(e.target.dataset.index);
-                if (type === 'driver') myTeamDrivers[idx] = null;
-                else myTeamConstructors[idx] = null;
-                renderMyTeamGrid();
-                return;
-            }
-            const type = slot.dataset.slot;
-            const idx = parseInt(slot.dataset.index);
-            showSlotPicker(type, idx);
+    // Click handlers for this grid
+    function attachGridHandlers(gridEl) {
+        gridEl.querySelectorAll('.my-team-slot').forEach(slot => {
+            slot.addEventListener('click', (e) => {
+                if (e.target.classList.contains('slot-remove')) {
+                    const type = e.target.dataset.slot;
+                    const idx = parseInt(e.target.dataset.index);
+                    if (type === 'driver') myTeamDrivers[idx] = null;
+                    else myTeamConstructors[idx] = null;
+                    renderMyTeamGrid();
+                    return;
+                }
+                const type = slot.dataset.slot;
+                const idx = parseInt(slot.dataset.index);
+                showSlotPicker(type, idx);
+            });
         });
-    });
+    }
+
+    attachGridHandlers(grid);
+
+    // Also render into multi-week planner grid (shared state)
+    const mwGrid = document.getElementById('myTeamGridMW');
+    if (mwGrid) {
+        mwGrid.innerHTML = html;
+        attachGridHandlers(mwGrid);
+    }
 }
 
 function getMyTeamCost() {
@@ -2200,6 +2218,650 @@ function renderSwapRow(outItem, inItem, type) {
             <div class="transfer-pick-detail">${inPts} pts · ${inPrice}</div>
         </div>
     </div>`;
+}
+
+// ============================================================
+// Multi-Week Transfer Planner
+// ============================================================
+
+async function loadMultiWeekData() {
+    if (!trackData) {
+        try {
+            const res = await fetch('data/track_data.json');
+            trackData = await res.json();
+        } catch (e) { console.warn('Failed to load track_data.json:', e); }
+    }
+    if (!driverHistory) {
+        try {
+            const res = await fetch('data/driver_history.json');
+            driverHistory = await res.json();
+        } catch (e) { console.warn('Failed to load driver_history.json:', e); }
+    }
+}
+
+function cosineSimilarity(a, b) {
+    let dot = 0, magA = 0, magB = 0;
+    for (let i = 0; i < a.length; i++) {
+        dot += a[i] * b[i];
+        magA += a[i] * a[i];
+        magB += b[i] * b[i];
+    }
+    magA = Math.sqrt(magA);
+    magB = Math.sqrt(magB);
+    return (magA === 0 || magB === 0) ? 0 : dot / (magA * magB);
+}
+
+function getFeatureVector(circuitId) {
+    if (!trackData || !trackData.track_features[circuitId]) return null;
+    const feat = trackData.track_features[circuitId];
+    return trackData.feature_names.map(k => feat[k] || 0);
+}
+
+function projectScoresForRound(roundInfo, racesData) {
+    // Project fantasy scores for all drivers/constructors at a future round
+    // Uses: current form (from predictions.json) x track affinity x sprint multiplier
+    if (!data || !trackData) return { drivers: {}, constructors: {} };
+
+    const raceName = roundInfo.name;
+    const circuitId = trackData.race_circuit_map[raceName] || 'unknown';
+    const targetVec = getFeatureVector(circuitId);
+    const isSprint = (trackData.sprint_rounds || []).includes(roundInfo.round);
+    const sprintMult = isSprint ? 1.35 : 1.0;
+
+    const driverScores = {};
+    const constructorScores = {};
+
+    // Project driver scores
+    for (const d of data.drivers) {
+        const basePts = d.expected_points || 0;
+        let affinity = 1.0;
+
+        // Compute track affinity from driver history
+        if (driverHistory && driverHistory.drivers[d.driver_id] && targetVec) {
+            const hist = driverHistory.drivers[d.driver_id].rounds;
+            if (hist.length >= 2) {
+                let weightedPts = 0, weightSum = 0;
+                for (const h of hist) {
+                    const hVec = getFeatureVector(h.circuit_id);
+                    if (!hVec) continue;
+                    const sim = cosineSimilarity(targetVec, hVec);
+                    const w = Math.max(0, sim - 0.7) * 3.33; // Only count sim > 0.7
+                    weightedPts += h.points * w;
+                    weightSum += w;
+                }
+                if (weightSum > 0.5 && basePts !== 0) {
+                    const avgSimilarPts = weightedPts / weightSum;
+                    // Average of all rounds (overall form)
+                    const avgAllPts = hist.reduce((s, h) => s + h.points, 0) / hist.length;
+                    if (avgAllPts !== 0) {
+                        affinity = Math.max(0.6, Math.min(1.4, avgSimilarPts / avgAllPts));
+                    }
+                }
+            }
+        }
+
+        // Normalize sprint: if current round is sprint and target is not (or vice versa),
+        // adjust by sprint multiplier ratio
+        const currentIsSprint = data.is_sprint_weekend;
+        let sprintAdj = 1.0;
+        if (currentIsSprint && !isSprint) sprintAdj = 1.0 / 1.35;
+        else if (!currentIsSprint && isSprint) sprintAdj = 1.35;
+
+        driverScores[d.driver_id] = Math.round(basePts * affinity * sprintAdj * 10) / 10;
+    }
+
+    // Project constructor scores
+    for (const c of data.constructors) {
+        const basePts = c.expected_points || 0;
+        let affinity = 1.0;
+
+        if (driverHistory && driverHistory.constructors[c.constructor_id] && targetVec) {
+            const hist = driverHistory.constructors[c.constructor_id].rounds;
+            if (hist.length >= 2) {
+                let weightedPts = 0, weightSum = 0;
+                for (const h of hist) {
+                    const hVec = getFeatureVector(h.circuit_id);
+                    if (!hVec) continue;
+                    const sim = cosineSimilarity(targetVec, hVec);
+                    const w = Math.max(0, sim - 0.7) * 3.33;
+                    weightedPts += h.points * w;
+                    weightSum += w;
+                }
+                if (weightSum > 0.5 && basePts !== 0) {
+                    const avgSimilarPts = weightedPts / weightSum;
+                    const avgAllPts = hist.reduce((s, h) => s + h.points, 0) / hist.length;
+                    if (avgAllPts !== 0) {
+                        affinity = Math.max(0.6, Math.min(1.4, avgSimilarPts / avgAllPts));
+                    }
+                }
+            }
+        }
+
+        const currentIsSprint = data.is_sprint_weekend;
+        let sprintAdj = 1.0;
+        if (currentIsSprint && !isSprint) sprintAdj = 1.0 / 1.35;
+        else if (!currentIsSprint && isSprint) sprintAdj = 1.35;
+
+        constructorScores[c.constructor_id] = Math.round(basePts * affinity * sprintAdj * 10) / 10;
+    }
+
+    return { drivers: driverScores, constructors: constructorScores, isSprint, circuitId };
+}
+
+function getUpcomingRounds(currentRound, horizon) {
+    if (!seasonSummary || !seasonSummary.rounds) return [];
+    return seasonSummary.rounds
+        .filter(r => r.round > currentRound)
+        .slice(0, horizon);
+}
+
+function generateTransferCandidates(teamDrivers, teamConstructors, projDriverScores, projConScores, budget, maxSwaps) {
+    // Generate candidate team changes: 0, 1, or 2 swaps
+    const candidates = [];
+    const driverPrices = {};
+    const conPrices = {};
+    for (const d of data.drivers) driverPrices[d.driver_id] = d.current_price;
+    for (const c of data.constructors) conPrices[c.constructor_id] = c.current_price;
+
+    const teamDriverSet = new Set(teamDrivers.filter(Boolean));
+    const teamConSet = new Set(teamConstructors.filter(Boolean));
+
+    // Calculate current team cost
+    let currentCost = 0;
+    for (const did of teamDrivers) if (did) currentCost += driverPrices[did] || 0;
+    for (const cid of teamConstructors) if (cid) currentCost += conPrices[cid] || 0;
+
+    // Candidate 0: keep team (no changes)
+    candidates.push({
+        drivers: [...teamDrivers],
+        constructors: [...teamConstructors],
+        swaps: 0,
+        swapDetails: [],
+    });
+
+    if (maxSwaps === 0) return candidates;
+
+    // All non-team drivers and constructors
+    const availDrivers = data.drivers.filter(d => !teamDriverSet.has(d.driver_id));
+    const availCons = data.constructors.filter(c => !teamConSet.has(c.constructor_id));
+
+    // 1-swap candidates: replace one driver or one constructor
+    for (let i = 0; i < teamDrivers.length; i++) {
+        const outId = teamDrivers[i];
+        if (!outId) continue;
+        const outPrice = driverPrices[outId] || 0;
+        for (const avail of availDrivers) {
+            const inPrice = driverPrices[avail.driver_id] || 0;
+            const newCost = currentCost - outPrice + inPrice;
+            if (newCost > budget) continue;
+            const newDrivers = [...teamDrivers];
+            newDrivers[i] = avail.driver_id;
+            candidates.push({
+                drivers: newDrivers,
+                constructors: [...teamConstructors],
+                swaps: 1,
+                swapDetails: [{ type: 'driver', out: outId, in: avail.driver_id }],
+            });
+        }
+    }
+    for (let i = 0; i < teamConstructors.length; i++) {
+        const outId = teamConstructors[i];
+        if (!outId) continue;
+        const outPrice = conPrices[outId] || 0;
+        for (const avail of availCons) {
+            const inPrice = conPrices[avail.constructor_id] || 0;
+            const newCost = currentCost - outPrice + inPrice;
+            if (newCost > budget) continue;
+            const newCons = [...teamConstructors];
+            newCons[i] = avail.constructor_id;
+            candidates.push({
+                drivers: [...teamDrivers],
+                constructors: newCons,
+                swaps: 1,
+                swapDetails: [{ type: 'constructor', out: outId, in: avail.constructor_id }],
+            });
+        }
+    }
+
+    if (maxSwaps < 2) return candidates;
+
+    // 2-swap candidates: replace two drivers, or one driver + one constructor
+    // Limit search for performance: only swap to top-scoring available assets
+    const topAvailDrivers = availDrivers
+        .sort((a, b) => (projDriverScores[b.driver_id] || 0) - (projDriverScores[a.driver_id] || 0))
+        .slice(0, 8);
+    const topAvailCons = availCons
+        .sort((a, b) => (projConScores[b.constructor_id] || 0) - (projConScores[a.constructor_id] || 0))
+        .slice(0, 4);
+
+    // Two driver swaps
+    for (let i = 0; i < teamDrivers.length; i++) {
+        for (let j = i + 1; j < teamDrivers.length; j++) {
+            const out1 = teamDrivers[i], out2 = teamDrivers[j];
+            if (!out1 || !out2) continue;
+            const freed = (driverPrices[out1] || 0) + (driverPrices[out2] || 0);
+            for (const a1 of topAvailDrivers) {
+                for (const a2 of topAvailDrivers) {
+                    if (a1.driver_id === a2.driver_id) continue;
+                    const needed = (driverPrices[a1.driver_id] || 0) + (driverPrices[a2.driver_id] || 0);
+                    if (currentCost - freed + needed > budget) continue;
+                    const newD = [...teamDrivers];
+                    newD[i] = a1.driver_id;
+                    newD[j] = a2.driver_id;
+                    candidates.push({
+                        drivers: newD,
+                        constructors: [...teamConstructors],
+                        swaps: 2,
+                        swapDetails: [
+                            { type: 'driver', out: out1, in: a1.driver_id },
+                            { type: 'driver', out: out2, in: a2.driver_id },
+                        ],
+                    });
+                }
+            }
+        }
+    }
+    // One driver + one constructor swap
+    for (let i = 0; i < teamDrivers.length; i++) {
+        for (let j = 0; j < teamConstructors.length; j++) {
+            const outD = teamDrivers[i], outC = teamConstructors[j];
+            if (!outD || !outC) continue;
+            const freed = (driverPrices[outD] || 0) + (conPrices[outC] || 0);
+            for (const aD of topAvailDrivers) {
+                for (const aC of topAvailCons) {
+                    const needed = (driverPrices[aD.driver_id] || 0) + (conPrices[aC.constructor_id] || 0);
+                    if (currentCost - freed + needed > budget) continue;
+                    const newD = [...teamDrivers];
+                    newD[i] = aD.driver_id;
+                    const newC = [...teamConstructors];
+                    newC[j] = aC.constructor_id;
+                    candidates.push({
+                        drivers: newD,
+                        constructors: newC,
+                        swaps: 2,
+                        swapDetails: [
+                            { type: 'driver', out: outD, in: aD.driver_id },
+                            { type: 'constructor', out: outC, in: aC.constructor_id },
+                        ],
+                    });
+                }
+            }
+        }
+    }
+
+    return candidates;
+}
+
+function scoreTeam(drivers, constructors, driverScores, conScores) {
+    let total = 0;
+    for (const did of drivers) {
+        if (did) total += driverScores[did] || 0;
+    }
+    for (const cid of constructors) {
+        if (cid) total += conScores[cid] || 0;
+    }
+    return total;
+}
+
+async function runMultiWeekPlanner() {
+    await loadMultiWeekData();
+
+    if (!data || !seasonSummary || !trackData) {
+        alert('Data not loaded yet. Please wait for the page to finish loading.');
+        return;
+    }
+
+    const teamDrivers = [...myTeamDrivers];
+    const teamCons = [...myTeamConstructors];
+    const filledDrivers = teamDrivers.filter(Boolean).length;
+    const filledCons = teamCons.filter(Boolean).length;
+    if (filledDrivers < 5 || filledCons < 2) {
+        alert('Please select your full current team (5 drivers + 2 constructors) before planning.');
+        return;
+    }
+
+    const budget = parseFloat(document.getElementById('mwBudget').value);
+    const freeTransfers = parseInt(document.getElementById('mwFreeTransfers').value) || 2;
+    const horizon = parseInt(document.getElementById('mwHorizon').value) || 3;
+    const strategy = document.getElementById('mwStrategy').value;
+
+    // Get available chips
+    const availableChips = [];
+    document.querySelectorAll('.mw-chips-section input[type=checkbox]:checked').forEach(cb => {
+        availableChips.push(cb.value);
+    });
+
+    const currentRound = data.round || 0;
+
+    // Load race calendar from seasonSummary
+    const upcomingRounds = seasonSummary.rounds
+        .filter(r => r.round > currentRound)
+        .slice(0, horizon);
+
+    if (upcomingRounds.length === 0) {
+        document.getElementById('mwResults').innerHTML = '<p>No upcoming rounds found.</p>';
+        document.getElementById('mwResults').classList.remove('hidden');
+        return;
+    }
+
+    // Project scores for each upcoming round
+    const roundProjections = upcomingRounds.map(r => ({
+        ...r,
+        isSprint: (trackData.sprint_rounds || []).includes(r.round),
+        ...projectScoresForRound(r, seasonSummary.rounds),
+    }));
+
+    // === Beam Search ===
+    const BEAM_WIDTH = 60;
+    const TRANSFER_PENALTY = 10;
+
+    let beam = [{
+        drivers: [...teamDrivers],
+        constructors: [...teamCons],
+        budget: budget,
+        bankedTransfers: freeTransfers,
+        chipsUsed: [],
+        chipsAvailable: [...availableChips],
+        totalPoints: 0,
+        roundActions: [],
+    }];
+
+    for (let ri = 0; ri < roundProjections.length; ri++) {
+        const proj = roundProjections[ri];
+        const nextBeam = [];
+
+        for (const state of beam) {
+            // Transfers gained this round (1 per round, max 5 banked)
+            const transfersThisRound = Math.min(state.bankedTransfers + 1, 5);
+
+            // Generate candidates: 0, 1, or 2 swaps
+            const maxSwaps = Math.min(2, transfersThisRound);
+            const candidates = generateTransferCandidates(
+                state.drivers, state.constructors,
+                proj.drivers, proj.constructors,
+                state.budget, maxSwaps
+            );
+
+            // Also try wildcard if available
+            if (state.chipsAvailable.includes('wild_card')) {
+                // With wildcard: pick best 5 drivers + 2 constructors by projected score within budget
+                const sortedDrivers = data.drivers
+                    .map(d => ({ id: d.driver_id, pts: proj.drivers[d.driver_id] || 0, price: d.current_price }))
+                    .sort((a, b) => b.pts - a.pts);
+                const sortedCons = data.constructors
+                    .map(c => ({ id: c.constructor_id, pts: proj.constructors[c.constructor_id] || 0, price: c.current_price }))
+                    .sort((a, b) => b.pts - a.pts);
+
+                // Greedy: pick top scorers within budget
+                const wcDrivers = [];
+                const wcCons = [];
+                let wcCost = 0;
+                for (const c of sortedCons) {
+                    if (wcCons.length < 2) { wcCons.push(c.id); wcCost += c.price; }
+                }
+                for (const d of sortedDrivers) {
+                    if (wcDrivers.length < 5 && wcCost + d.price <= state.budget) {
+                        wcDrivers.push(d.id);
+                        wcCost += d.price;
+                    }
+                }
+                if (wcDrivers.length === 5) {
+                    const swapDetails = [];
+                    for (let i = 0; i < 5; i++) {
+                        if (wcDrivers[i] !== state.drivers[i]) {
+                            swapDetails.push({ type: 'driver', out: state.drivers[i], in: wcDrivers[i] });
+                        }
+                    }
+                    for (let i = 0; i < 2; i++) {
+                        if (wcCons[i] !== state.constructors[i]) {
+                            swapDetails.push({ type: 'constructor', out: state.constructors[i], in: wcCons[i] });
+                        }
+                    }
+                    candidates.push({
+                        drivers: wcDrivers,
+                        constructors: wcCons,
+                        swaps: swapDetails.length,
+                        swapDetails,
+                        useChip: 'wild_card',
+                    });
+                }
+            }
+
+            for (const cand of candidates) {
+                const pts = scoreTeam(cand.drivers, cand.constructors, proj.drivers, proj.constructors);
+                const usedChip = cand.useChip || null;
+
+                // Transfer penalty
+                let penalty = 0;
+                let remainingTransfers = transfersThisRound;
+                if (usedChip === 'wild_card') {
+                    remainingTransfers = transfersThisRound; // No transfers consumed
+                } else {
+                    const extraSwaps = Math.max(0, cand.swaps - transfersThisRound);
+                    penalty = extraSwaps * TRANSFER_PENALTY;
+                    remainingTransfers = Math.max(0, transfersThisRound - cand.swaps);
+                }
+
+                const netPts = pts - penalty;
+
+                // Strategy weighting
+                let score = netPts;
+                if (strategy === 'budget_gain') {
+                    // Add projected price appreciation
+                    let priceGain = 0;
+                    for (const did of cand.drivers) {
+                        const d = data.drivers.find(x => x.driver_id === did);
+                        if (d) {
+                            const ppm = (proj.drivers[did] || 0) / d.current_price;
+                            if (ppm >= 1.2) priceGain += d.current_price <= 18.5 ? 0.6 : 0.3;
+                            else if (ppm >= 0.9) priceGain += d.current_price <= 18.5 ? 0.2 : 0.1;
+                        }
+                    }
+                    score = netPts + priceGain * 50;
+                } else if (strategy === 'balanced') {
+                    // Mix points + value
+                    let totalPrice = 0;
+                    for (const did of cand.drivers) {
+                        const d = data.drivers.find(x => x.driver_id === did);
+                        if (d) totalPrice += d.current_price;
+                    }
+                    for (const cid of cand.constructors) {
+                        const c = data.constructors.find(x => x.constructor_id === cid);
+                        if (c) totalPrice += c.current_price;
+                    }
+                    const ppm = totalPrice > 0 ? netPts / totalPrice : 0;
+                    score = netPts * 0.7 + ppm * 30;
+                }
+
+                const newChipsAvail = usedChip
+                    ? state.chipsAvailable.filter(c => c !== usedChip)
+                    : [...state.chipsAvailable];
+
+                nextBeam.push({
+                    drivers: cand.drivers,
+                    constructors: cand.constructors,
+                    budget: state.budget, // Prices don't change mid-plan (simplified)
+                    bankedTransfers: remainingTransfers,
+                    chipsUsed: usedChip ? [...state.chipsUsed, { round: proj.round, chip: usedChip }] : [...state.chipsUsed],
+                    chipsAvailable: newChipsAvail,
+                    totalPoints: state.totalPoints + netPts,
+                    totalScore: (state.totalScore || 0) + score,
+                    roundActions: [...state.roundActions, {
+                        round: proj.round,
+                        name: proj.name,
+                        circuit: proj.circuit,
+                        isSprint: proj.isSprint,
+                        swaps: cand.swapDetails,
+                        points: Math.round(pts * 10) / 10,
+                        penalty,
+                        netPoints: Math.round(netPts * 10) / 10,
+                        chip: usedChip,
+                        bankedAfter: remainingTransfers,
+                        team: { drivers: [...cand.drivers], constructors: [...cand.constructors] },
+                    }],
+                });
+            }
+        }
+
+        // Prune beam: keep top BEAM_WIDTH by cumulative score
+        nextBeam.sort((a, b) => (b.totalScore || b.totalPoints) - (a.totalScore || a.totalPoints));
+
+        // Deduplicate by team composition
+        const seen = new Set();
+        beam = [];
+        for (const state of nextBeam) {
+            const key = state.drivers.sort().join(',') + '|' + state.constructors.sort().join(',');
+            if (!seen.has(key)) {
+                seen.add(key);
+                beam.push(state);
+            }
+            if (beam.length >= BEAM_WIDTH) break;
+        }
+    }
+
+    // Get top 5 plans
+    beam.sort((a, b) => b.totalPoints - a.totalPoints);
+    const topPlans = beam.slice(0, 5);
+
+    // Render results
+    displayMultiWeekResults(topPlans, roundProjections, currentRound);
+}
+
+function displayMultiWeekResults(plans, roundProjections, currentRound) {
+    const container = document.getElementById('mwResults');
+    if (!plans.length) {
+        container.innerHTML = '<p style="color:var(--text-secondary);">No valid plans found. Check your team selection and budget.</p>';
+        container.classList.remove('hidden');
+        return;
+    }
+
+    let html = '';
+
+    // Asset projection heatmap
+    html += renderProjectionHeatmap(roundProjections);
+
+    // Plan cards
+    html += '<h3 style="margin:20px 0 12px;">Recommended Plans</h3>';
+
+    for (let pi = 0; pi < plans.length; pi++) {
+        const plan = plans[pi];
+        const totalSwaps = plan.roundActions.reduce((s, r) => s + r.swaps.length, 0);
+        const chipsUsed = plan.chipsUsed.map(c => c.chip.replace(/_/g, ' ')).join(', ') || 'None';
+
+        html += `<div class="mw-plan-card">`;
+        html += `<div class="mw-plan-header">
+            <div>
+                <span class="mw-plan-rank">Plan ${pi + 1}</span>
+                <span class="mw-plan-stats" style="margin-left:16px;">
+                    ${totalSwaps} transfer${totalSwaps !== 1 ? 's' : ''} &middot;
+                    Chips: ${chipsUsed}
+                </span>
+            </div>
+            <div class="mw-plan-total">${plan.totalPoints.toFixed(1)} pts</div>
+        </div>`;
+
+        // Timeline
+        html += '<div class="mw-timeline">';
+        for (const action of plan.roundActions) {
+            const isSprint = action.isSprint;
+            const hasSwaps = action.swaps.length > 0;
+            const hasChip = action.chip;
+            const actionClass = hasChip ? 'mw-action-chip' : (hasSwaps ? 'mw-action-swap' : 'mw-action-hold');
+            const circuitId = trackData?.race_circuit_map?.[action.name] || '';
+
+            html += `<div class="mw-round-col">`;
+            html += `<div class="mw-round-header">R${action.round}${isSprint ? '<span class="mw-round-sprint">SPRINT</span>' : ''}</div>`;
+            html += `<div class="mw-round-circuit">${action.circuit || action.name}</div>`;
+
+            html += `<div class="mw-round-action ${actionClass}">`;
+            if (hasChip) {
+                html += `<strong>${action.chip.replace(/_/g, ' ').toUpperCase()}</strong><br>`;
+            }
+            if (hasSwaps) {
+                for (const swap of action.swaps) {
+                    const outName = swap.type === 'driver'
+                        ? (data.drivers.find(d => d.driver_id === swap.out)?.name?.split(' ').pop() || swap.out)
+                        : (data.constructors.find(c => c.constructor_id === swap.out)?.name || swap.out).toUpperCase();
+                    const inName = swap.type === 'driver'
+                        ? (data.drivers.find(d => d.driver_id === swap.in)?.name?.split(' ').pop() || swap.in)
+                        : (data.constructors.find(c => c.constructor_id === swap.in)?.name || swap.in).toUpperCase();
+                    html += `<span style="color:var(--red, #ef4444)">${outName}</span> → <span style="color:var(--green)">${inName}</span><br>`;
+                }
+            } else {
+                html += 'Hold (bank transfer)';
+            }
+            html += '</div>';
+
+            html += `<div class="mw-round-pts">${action.netPoints.toFixed(1)} pts</div>`;
+            html += `<div class="mw-round-meta">${action.penalty > 0 ? `-${action.penalty} penalty · ` : ''}${action.bankedAfter} FT banked</div>`;
+
+            html += '</div>';
+        }
+        html += '</div>';
+
+        html += '</div>';
+    }
+
+    container.innerHTML = html;
+    container.classList.remove('hidden');
+}
+
+function renderProjectionHeatmap(roundProjections) {
+    if (!data || !roundProjections.length) return '';
+
+    // Show top 10 drivers and top 5 constructors
+    const topDrivers = [...data.drivers]
+        .sort((a, b) => (b.expected_points || 0) - (a.expected_points || 0))
+        .slice(0, 12);
+    const topCons = [...data.constructors]
+        .sort((a, b) => (b.expected_points || 0) - (a.expected_points || 0))
+        .slice(0, 6);
+
+    let html = '<h3 style="margin-bottom:8px;">Projected Points by Circuit</h3>';
+    html += '<p class="hint" style="margin-bottom:12px;">Green = above average for that driver. Red = below. Based on track similarity.</p>';
+    html += '<div class="mw-heatmap"><table><thead><tr><th>Driver</th><th>Price</th>';
+    for (const rp of roundProjections) {
+        const isSprint = (trackData?.sprint_rounds || []).includes(rp.round);
+        html += `<th>R${rp.round}${isSprint ? '*' : ''}<br><span style="font-weight:400;font-size:0.65rem;">${rp.circuit || ''}</span></th>`;
+    }
+    html += '</tr></thead><tbody>';
+
+    // Driver rows
+    for (const d of topDrivers) {
+        const team = TEAMS[d.constructor] || { color: '#666' };
+        const scores = roundProjections.map(rp => rp.drivers[d.driver_id] || 0);
+        const avg = scores.reduce((s, v) => s + v, 0) / scores.length;
+
+        html += `<tr><td style="text-align:left;white-space:nowrap;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${team.color};margin-right:4px;"></span>${d.name.split(' ').pop()}</td>`;
+        html += `<td>$${d.current_price.toFixed(1)}M</td>`;
+        for (const s of scores) {
+            const cls = s > avg * 1.05 ? 'mw-heat-high' : (s < avg * 0.95 ? 'mw-heat-low' : 'mw-heat-mid');
+            html += `<td class="${cls}">${s.toFixed(0)}</td>`;
+        }
+        html += '</tr>';
+    }
+
+    // Separator
+    html += '<tr><td colspan="99" style="height:4px;background:var(--border);"></td></tr>';
+
+    // Constructor rows
+    for (const c of topCons) {
+        const team = TEAMS[c.constructor_id] || { color: '#666' };
+        const scores = roundProjections.map(rp => rp.constructors[c.constructor_id] || 0);
+        const avg = scores.reduce((s, v) => s + v, 0) / scores.length;
+
+        html += `<tr><td style="text-align:left;white-space:nowrap;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${team.color};margin-right:4px;"></span>${(c.name || c.constructor_id).toUpperCase()}</td>`;
+        html += `<td>$${c.current_price.toFixed(1)}M</td>`;
+        for (const s of scores) {
+            const cls = s > avg * 1.05 ? 'mw-heat-high' : (s < avg * 0.95 ? 'mw-heat-low' : 'mw-heat-mid');
+            html += `<td class="${cls}">${s.toFixed(0)}</td>`;
+        }
+        html += '</tr>';
+    }
+
+    html += '</tbody></table></div>';
+    html += '<p class="hint" style="margin-top:4px;">* = Sprint weekend</p>';
+    return html;
 }
 
 // ============================================================
