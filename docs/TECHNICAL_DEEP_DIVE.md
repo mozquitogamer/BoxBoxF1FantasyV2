@@ -334,8 +334,9 @@ For each driver:
 
 For each constructor:
 1. **Sum both drivers' qualifying + race points** (excluding DOTD — per official rules)
-2. **Qualifying bonus:** Based on which Q sessions both drivers reach
-3. **Pitstop bonus:** Based on estimated pitstop times
+2. **Qualifying bonus:** Based on which Q sessions both drivers reach (Both Q3=+10, One Q3=+5, Both Q2=+3, One Q2=+1, Neither=-1)
+3. **Expected pit stop points:** Analytically computed from team pit stop time priors (normal distribution over scoring brackets: <2.0s=20pts, 2.0-2.2s=10pts, 2.2-2.5s=5pts, 2.5-3.0s=2pts) plus fastest-stop bonus (1/N_teams chance × 5pts)
+4. **DNF impact:** Expected points lost from both drivers' DNF probabilities (shown in constructor card breakdown)
 
 ### Why DOTD Is Excluded from Constructors
 
@@ -648,14 +649,14 @@ Sprint weekends only have FP1 (60 minutes vs. 180 minutes of FP data on normal w
 
 ### High Priority (Next Up)
 
-1. **DNF/Reliability Modeling**
-   Predict per-driver DNF probability using team reliability rates + historical patterns. Apply negative expected points adjustment. Two-stage MC sampling: correlated incident events + independent mechanical failures.
+1. ~~**DNF/Reliability Modeling**~~ ✅
+   Per-driver DNF probability from blended historical + season data. Correlated DNF in MC (multi-car incidents + team failures). DNF % displayed on driver cards. Constructor DNF impact in scoring breakdown.
 
 2. **Sprint-Specific Predictions**
-   Dedicated sprint model trained on sprint-only data. Sprint dynamics differ from race (shorter distance, limited strategy, different scoring table).
+   Dedicated sprint model trained on sprint-only data. Sprint dynamics differ from race (shorter distance, limited strategy, different scoring table). Current sprint predictions use race model with adjustments (80% noise, 50% DNF).
 
-3. **Enhanced Constructor Scoring**
-   Currently constructors = sum of two drivers. Add: expected pit stop fantasy points (from team pit stop time distributions), qualifying teamwork bonus prediction, DNF penalty adjustment. Per-iteration constructor simulation in Monte Carlo.
+3. ~~**Enhanced Constructor Scoring**~~ ✅
+   Constructor scoring = drivers' points + qualifying bonus + expected pit stop points (analytical from team priors) - DNF impact. Per-iteration MC simulation with pit stop sampling. Scoring breakdown on constructor cards.
 
 4. **Grid Penalty Integration**
    Detect and automatically apply grid penalties (engine penalties, gearbox changes, pit lane starts). These dramatically affect fantasy scoring.

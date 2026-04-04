@@ -393,10 +393,14 @@ Visual representations of the entire system architecture, data flow, and race we
     │   │    Both Q3: +10  │  One Q3: +5  │  Both Q2: +3       │      │
     │   │    One Q2: +1    │  Neither: -1                       │      │
     │   │                    +                                  │      │
-    │   │  Pitstop Bonus:                                       │      │
+    │   │  Expected Pit Stop Points (from team priors):         │      │
     │   │    <2.0s: +20  │  2.0-2.19s: +10  │  2.2-2.49s: +5   │      │
     │   │    2.5-2.99s: +2  │  Fastest pit: +5                  │      │
     │   │    World record (<1.80s): +15                         │      │
+    │   │    (analytical EV from N(team_mean, team_std))        │      │
+    │   │                    -                                  │      │
+    │   │  DNF Impact (expected pts lost from DNF probability): │      │
+    │   │    Both drivers' dnf_prob × soft_penalty              │      │
     │   └──────────────────────────────────────────────────────┘      │
     │                          =                                      │
     │   TOTAL CONSTRUCTOR POINTS                                      │

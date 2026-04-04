@@ -196,24 +196,28 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 
 ---
 
-### Tier 4: Next Wave (Planned)
+### Tier 4: Next Wave
 
-#### 4.1 DNF/reliability modeling
-- Predict per-driver DNF probability using team reliability rates + historical data
-- Apply negative expected points adjustment to predicted scores
-- Two-stage MC sampling: incident events (first-lap pileups) + mechanical DNFs
-- Teammate correlation for shared team reliability
+#### 4.1 DNF/reliability modeling ✅ COMPLETED (2026-04-04)
+- Per-driver DNF probability calculated from blended historical rolling rates + current season actual DNF data
+- Dynamically weighted: early season uses more historical data, shifts to 80-90% current season as data accumulates
+- Capped at 13-50% depending on rounds completed, 2% floor for all drivers
+- Two-stage correlated DNF in MC: multi-car incidents (2% base) + team-correlated failures (30% teammate correlation)
+- Sprint DNF probability halved vs race
+- DNF probability displayed on driver cards (color-coded: green/yellow/red)
+- Constructor DNF impact shown in scoring breakdown
 
 #### 4.2 Sprint-specific predictions
-- Dedicated sprint model (shorter race, limited strategy, different scoring)
-- Currently sprint points derived from race model — sprint dynamics differ significantly
+- Sprint predictions already implemented: separate noise (80% of race), halved DNF probability, sprint-specific overtake calibration
+- Dedicated sprint model (shorter race, limited strategy, different scoring) — future improvement
+- Currently sprint positions derived from race model with sprint-specific adjustments
 
-#### 4.3 Enhanced constructor scoring
-- Constructor points currently = sum of two drivers' predictions
-- Add: expected pit stop points (from team pit stop time distributions)
-- Add: qualifying teamwork bonus prediction
-- Subtract: expected DNF penalty based on team reliability
-- Per-iteration constructor simulation in Monte Carlo
+#### 4.3 Enhanced constructor scoring ✅ COMPLETED (2026-04-04)
+- Constructor scoring now includes: sum of drivers' points + qualifying teamwork bonus + expected pit stop points - DNF impact
+- Expected pit stop points calculated analytically from team pit stop time distributions (normal distribution over scoring brackets)
+- Per-iteration constructor simulation in Monte Carlo with pit stop sampling
+- Scoring breakdown displayed on constructor cards: pit stop points, DNF probability, DNF impact, qualifying bonus
+- Fast teams (Red Bull, McLaren, Mercedes) earn ~14-15 expected pit stop pts; slower teams ~7-8 pts
 
 ---
 
@@ -229,14 +233,14 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 - ✅ 3.3 Optimal team selection (2026-04-03)
 - ✅ 3.4 Price change prediction (2026-04-01)
 - ✅ 3.5 Weather integration (2026-04-01)
+- ✅ 4.1 DNF/reliability modeling (2026-04-04)
+- ✅ 4.3 Enhanced constructor scoring (2026-04-04)
 
 **Next up:**
-- 4.1 DNF/reliability modeling
-- 4.2 Sprint-specific predictions
-- 4.3 Enhanced constructor scoring
+- 4.2 Sprint-specific predictions (dedicated sprint model)
 - 1.1 Gap-preserving noise model
-- 1.2 Teammate correlation
-- 1.4 Per-iteration constructor MC simulation
+- 1.2 Teammate correlation improvements
+- 1.4 Per-iteration constructor MC simulation improvements
 
 ## How to Validate Improvements
 
@@ -269,4 +273,4 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 
 **Our advantages over them:** FastF1 telemetry data, ML-based predictions, automated pipeline, free website.
 
-**Our disadvantages:** Simulation layer issues (quantile transform, missing pit stops, no correlation), less mature calibration.
+**Our disadvantages:** Simulation layer could be improved (gap-preserving noise model), less mature calibration, no betting odds integration yet.
