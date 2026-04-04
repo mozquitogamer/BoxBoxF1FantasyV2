@@ -200,11 +200,12 @@
                             <label title="Active chip for this gameweek">Chip</label>
                             <select id="chipSelect">
                                 <option value="none">No Chip</option>
-                                <option value="mega_driver" title="Triple points for one driver instead of 2x">Mega Driver (3x)</option>
-                                <option value="extra_drs" title="Extra driver slot: 6 drivers + 2 constructors">Extra DRS (+1 driver)</option>
-                                <option value="no_negative" title="All negative scores count as zero">No Negative</option>
                                 <option value="limitless" title="No budget cap for this gameweek">Limitless</option>
-                                <option value="wildcard" title="Unlimited free transfers (use Transfer Advisor mode)">Wildcard</option>
+                                <option value="3x_boost" title="Triple points for your boosted driver instead of 2x">3x Boost</option>
+                                <option value="wild_card" title="Unlimited free transfers (use Transfer Advisor mode)">Wild Card</option>
+                                <option value="no_negative" title="All negative scores count as zero">No Negative</option>
+                                <option value="autopilot" title="Highest scoring driver automatically gets the 2x boost">Autopilot</option>
+                                <option value="final_fix" title="Change your lineup after qualifying">Final Fix</option>
                             </select>
                         </div>
                         <button class="btn-primary" id="runOptimizer">Find Best Lineups</button>
@@ -239,11 +240,12 @@
                                 <label>Chip</label>
                                 <select id="transferChip">
                                     <option value="none">No Chip</option>
-                                    <option value="mega_driver">Mega Driver (3x)</option>
-                                    <option value="extra_drs">Extra DRS (+1 driver)</option>
-                                    <option value="no_negative">No Negative</option>
                                     <option value="limitless">Limitless</option>
-                                    <option value="wildcard">Wildcard (unlimited transfers)</option>
+                                    <option value="3x_boost">3x Boost</option>
+                                    <option value="wild_card">Wild Card</option>
+                                    <option value="no_negative">No Negative</option>
+                                    <option value="autopilot">Autopilot</option>
+                                    <option value="final_fix">Final Fix</option>
                                 </select>
                             </div>
                             <button class="btn-primary" id="runTransferAdvisor">Find Best Transfers</button>
@@ -333,6 +335,12 @@
                     <div class="season-section">
                         <h3>Driver Price Tracker</h3>
                         <div id="priceTracker"></div>
+                    </div>
+
+                    <!-- Constructor Price Tracker -->
+                    <div class="season-section">
+                        <h3>Constructor Price Tracker</h3>
+                        <div id="constructorPriceTracker"></div>
                     </div>
                 </div>
             </section>
@@ -499,6 +507,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" async></script>
-    <script src="app.js?v=37"></script>
+    <script src="app.js?v=38"></script>
 </body>
 </html>

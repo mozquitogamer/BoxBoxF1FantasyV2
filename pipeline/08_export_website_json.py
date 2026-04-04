@@ -289,11 +289,28 @@ def build_season_summary() -> dict:
                 "price_trend": "up" if change > 0.2 else ("down" if change < -0.2 else "stable"),
             }
 
+    # Constructor price data
+    constructor_price_data = {}
+    constructor_info = load_constructor_info()
+    if prices and "constructors" in prices:
+        for cid, p in prices["constructors"].items():
+            info = constructor_info.get(cid, {})
+            change = p["current_price"] - p["starting_price"]
+            constructor_price_data[cid] = {
+                "name": info.get("name", cid),
+                "full_name": info.get("full_name", cid),
+                "current_price": p["current_price"],
+                "starting_price": p["starting_price"],
+                "price_change": round(change, 1),
+                "price_trend": "up" if change > 0.2 else ("down" if change < -0.2 else "stable"),
+            }
+
     return {
         "season": CURRENT_SEASON,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "rounds": completed_rounds,
         "driver_prices": driver_prices,
+        "constructor_prices": constructor_price_data,
     }
 
 
@@ -368,7 +385,7 @@ def main():
     summary = build_season_summary()
     with open(WEB_DATA_DIR / "season_summary.json", "w") as f:
         json.dump(summary, f, indent=2)
-    print(f"  {len(summary['rounds'])} rounds, {len(summary['driver_prices'])} driver prices")
+    print(f"  {len(summary['rounds'])} rounds, {len(summary['driver_prices'])} driver prices, {len(summary.get('constructor_prices', {}))} constructor prices")
 
     # 3. Sync official fantasy points
     print("[3] Syncing official points...")

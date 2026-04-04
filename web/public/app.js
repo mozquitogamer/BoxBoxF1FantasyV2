@@ -1397,7 +1397,7 @@ function runOptimizer() {
     const budget = parseFloat(document.getElementById('budget').value);
     const strategy = document.getElementById('strategy').value;
     const chip = document.getElementById('chipSelect').value;
-    const numDriverSlots = chip === 'extra_drs' ? 6 : 5;
+    const numDriverSlots = 5;
     const effectiveBudget = chip === 'limitless' ? 999 : budget;
 
     // Score function
@@ -1469,12 +1469,12 @@ function runOptimizer() {
             const allDrivers = [...lockedDriverList, ...combo];
             const totalCost = cp.cost + lockedDriverCost + cost;
 
-            // Find highest scoring driver for boost
-            const boostMultiplier = chip === 'mega_driver' ? 3 : 2;
-            let boostedDriver = allDrivers[0];
-            for (const d of allDrivers) {
-                if (d.expected_points > boostedDriver.expected_points) boostedDriver = d;
-            }
+            // Sort drivers by expected points descending to find boost targets
+            const sortedDrivers = [...allDrivers].sort((a, b) => b.expected_points - a.expected_points);
+            const boostedDriver = sortedDrivers[0]; // highest scorer gets primary boost
+            // With 3x_boost chip: best driver gets 3x, second-best gets 2x
+            // Without: best driver gets 2x, no second boost
+            const secondBoostedDriver = (chip === '3x_boost' && sortedDrivers.length > 1) ? sortedDrivers[1] : null;
 
             // Total points with chip effects
             let driverPoints = 0;
@@ -1489,9 +1489,18 @@ function runOptimizer() {
                 if (chip === 'no_negative' && pts < 0) pts = 0;
                 constructorPoints += pts;
             }
+            // Primary boost: 3x if 3x_boost chip, 2x otherwise → add (mult-1) extra
             let boostedPts = boostedDriver.expected_points;
             if (chip === 'no_negative' && boostedPts < 0) boostedPts = 0;
-            const totalPoints = driverPoints + constructorPoints + boostedPts * (boostMultiplier - 1);
+            const primaryBoostExtra = boostedPts * (chip === '3x_boost' ? 2 : 1); // 3x-1=2 or 2x-1=1
+            // Secondary boost: 2x on second-best driver when 3x_boost is active
+            let secondBoostExtra = 0;
+            if (secondBoostedDriver) {
+                let secPts = secondBoostedDriver.expected_points;
+                if (chip === 'no_negative' && secPts < 0) secPts = 0;
+                secondBoostExtra = secPts; // 2x-1=1
+            }
+            const totalPoints = driverPoints + constructorPoints + primaryBoostExtra + secondBoostExtra;
 
             const baseScore = cp.score + lockedDriverScore + combo.reduce((s, d) => s + d._score, 0);
             const totalScore = (strategy === 'max_points') ? totalPoints : baseScore;
@@ -1503,6 +1512,7 @@ function runOptimizer() {
                 totalPoints,
                 totalScore,
                 boostedDriverId: boostedDriver.driver_id,
+                secondBoostedDriverId: secondBoostedDriver ? secondBoostedDriver.driver_id : null,
             });
         }
     }
@@ -1573,14 +1583,18 @@ function displayLineups(strategy) {
             totalExpChange += pc.expectedChange;
         });
 
-        // Find boosted driver name for summary
+        // Find boosted driver names for summary
         const boostedSummaryDriver = best.drivers.find(d => d.driver_id === best.boostedDriverId);
         const boostedSummaryName = boostedSummaryDriver ? boostedSummaryDriver.name.split(' ').pop() : '?';
+        const secondBoostedSummaryDriver = best.secondBoostedDriverId ? best.drivers.find(d => d.driver_id === best.secondBoostedDriverId) : null;
+        const boostSummaryText = secondBoostedSummaryDriver
+            ? `3x on ${boostedSummaryName}, 2x on ${secondBoostedSummaryDriver.name.split(' ').pop()}`
+            : `2x on ${boostedSummaryName}`;
 
         document.getElementById('lineupSummary').innerHTML = `
             <div class="lineup-stat">
                 <div class="big-num">${best.totalPoints.toFixed(1)}</div>
-                <div class="label" title="Sum of expected fantasy points including boost on ${boostedSummaryName}">Expected Points (incl boost)</div>
+                <div class="label" title="${boostSummaryText}">Expected Points (incl boost)</div>
             </div>
             <div class="lineup-stat">
                 <div class="big-num">$${best.totalCost.toFixed(1)}M</div>
@@ -1641,6 +1655,7 @@ function renderSingleLineup(lineup, index, strategy, budget) {
     });
 
     const boostedId = lineup.boostedDriverId;
+    const secondBoostedId = lineup.secondBoostedDriverId || null;
     const expandedClass = index === 0 ? ' expanded' : '';
     let html = `<div class="lineup-block${expandedClass}" style="margin-bottom:24px;" onclick="this.classList.toggle('expanded')">
         <div class="lineup-block-header">
@@ -1658,13 +1673,15 @@ function renderSingleLineup(lineup, index, strategy, budget) {
     lineup.drivers.forEach((d, i) => {
         const team = TEAMS[d.constructor] || { color: '#666', name: d.constructor };
         const locked = lockedDrivers.has(d.driver_id);
-        const isBoosted = d.driver_id === boostedId;
+        const isPrimaryBoosted = d.driver_id === boostedId;
+        const isSecondBoosted = d.driver_id === secondBoostedId;
         const pc = predictPriceChange(d, d.expected_points);
         const changeColor = pc.expectedChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)';
         const chipSel = document.getElementById('chipSelect');
         const activeChip = chipSel ? chipSel.value : 'none';
-        const boostMult = (isBoosted && activeChip === 'mega_driver') ? 3 : isBoosted ? 2 : 1;
+        const boostMult = (isPrimaryBoosted && activeChip === '3x_boost') ? 3 : (isPrimaryBoosted || isSecondBoosted) ? 2 : 1;
         const displayPts = (d.expected_points * boostMult).toFixed(1);
+        const isBoosted = isPrimaryBoosted || isSecondBoosted;
         const boostBadge = isBoosted ? `<span class="boost-badge">${boostMult}x</span>` : '';
         html += `
         <div class="lineup-pick-h${isBoosted ? ' boosted' : ''}" style="--team-color:${team.color}">
@@ -1863,7 +1880,7 @@ function runTransferAdvisor() {
         return;
     }
 
-    const isWildcard = chip === 'wildcard';
+    const isWildcard = chip === 'wild_card';
     const maxTransfers = isWildcard ? 7 : freeTransfers; // Wildcard = unlimited
     const transferPenalty = 10; // -10 pts per extra transfer
 
@@ -1879,15 +1896,17 @@ function runTransferAdvisor() {
     }
 
     // Apply chip modifiers to scoring
-    function chipAdjustedPoints(picks, boostedId) {
+    // With 3x_boost: boostedId gets 3x, secondBoostedId gets 2x
+    // Without: boostedId gets 2x
+    function chipAdjustedPoints(picks, boostedId, secondBoostedId) {
         let total = 0;
         for (const p of picks) {
             let pts = p.expected_points;
             if (chip === 'no_negative' && pts < 0) pts = 0;
             if (p.driver_id === boostedId) {
-                pts *= (chip === 'mega_driver' ? 3 : 2);
-            } else if (p.driver_id) {
-                // non-boosted drivers get normal points
+                pts *= (chip === '3x_boost' ? 3 : 2);
+            } else if (p.driver_id === secondBoostedId) {
+                pts *= 2;
             }
             total += pts;
         }
@@ -1897,7 +1916,7 @@ function runTransferAdvisor() {
     const allDrivers = data.drivers.filter(d => !excludedDrivers.has(d.driver_id));
     const allConstructors = data.constructors.filter(c => !excludedConstructors.has(c.constructor_id));
 
-    const numDriverSlots = chip === 'extra_drs' ? 6 : 5;
+    const numDriverSlots = 5;
     const effectiveBudget = chip === 'limitless' ? 999 : budget;
 
     // Generate all valid lineups and score them, tracking transfers needed
@@ -1945,25 +1964,15 @@ function runTransferAdvisor() {
             for (const did of currentDriverIds) {
                 if (!newDriverIds.has(did)) transfersNeeded++;
             }
-            // For extra_drs, the 6th driver is always "new" but doesn't cost a transfer
-            if (chip === 'extra_drs') {
-                // Only count transfers for the 5 original slots
-                const kept = combo.filter(d => currentDriverIds.includes(d.driver_id)).length;
-                transfersNeeded = currentDriverIds.length - kept + conTransfers;
-            }
-
             if (!isWildcard && transfersNeeded > maxTransfers + 3) continue; // cap search space
 
-            // Find best boost driver
-            let boostedDriver = combo[0];
-            for (const d of combo) {
-                const bpts = chip === 'mega_driver' ? d.expected_points * 3 : d.expected_points * 2;
-                const cpts = chip === 'mega_driver' ? boostedDriver.expected_points * 3 : boostedDriver.expected_points * 2;
-                if (bpts > cpts) boostedDriver = d;
-            }
+            // Find best boost drivers (sorted by expected points)
+            const sortedCombo = [...combo].sort((a, b) => b.expected_points - a.expected_points);
+            const boostedDriver = sortedCombo[0];
+            const secondBoostedDriver = (chip === '3x_boost' && sortedCombo.length > 1) ? sortedCombo[1] : null;
 
             const allPicks = [...combo, ...cp.items];
-            const totalPoints = chipAdjustedPoints(allPicks, boostedDriver.driver_id);
+            const totalPoints = chipAdjustedPoints(allPicks, boostedDriver.driver_id, secondBoostedDriver ? secondBoostedDriver.driver_id : null);
 
             // Penalty for extra transfers
             const extraTransfers = Math.max(0, transfersNeeded - freeTransfers);
@@ -1984,6 +1993,7 @@ function runTransferAdvisor() {
                 extraTransfers,
                 penalty,
                 boostedDriverId: boostedDriver.driver_id,
+                secondBoostedDriverId: secondBoostedDriver ? secondBoostedDriver.driver_id : null,
                 totalScore: finalScore,
             });
         }
@@ -2129,8 +2139,10 @@ function renderTransferCard(lineup, index, chip) {
     const sorted = [...lineup.drivers].sort((a, b) => b.expected_points - a.expected_points);
     sorted.forEach(d => {
         const team = TEAMS[d.constructor] || { color: '#666', name: d.constructor };
-        const isBoosted = d.driver_id === lineup.boostedDriverId;
-        const multiplier = isBoosted ? (chip === 'mega_driver' ? 3 : 2) : 1;
+        const isPrimaryBoosted = d.driver_id === lineup.boostedDriverId;
+        const isSecondBoosted = d.driver_id === (lineup.secondBoostedDriverId || null);
+        const multiplier = (isPrimaryBoosted && chip === '3x_boost') ? 3 : (isPrimaryBoosted || isSecondBoosted) ? 2 : 1;
+        const isBoosted = isPrimaryBoosted || isSecondBoosted;
         const displayPts = (d.expected_points * multiplier).toFixed(1);
         const boostBadge = isBoosted ? `<span class="boost-badge">${multiplier}x</span>` : '';
         const isNew = !currentDriverIds.includes(d.driver_id);
@@ -3212,6 +3224,40 @@ function renderSeason() {
         </table>`;
         priceEl.innerHTML = html;
         priceEl.querySelectorAll('table.sortable').forEach(makeTableSortable);
+    }
+
+    // Constructor Price Tracker
+    const cPriceEl = document.getElementById('constructorPriceTracker');
+    if (cPriceEl) {
+        if (!seasonSummary || !seasonSummary.constructor_prices || Object.keys(seasonSummary.constructor_prices).length === 0) {
+            cPriceEl.innerHTML = '<p class="no-data">No constructor price data available yet.</p>';
+        } else {
+            const sorted = Object.entries(seasonSummary.constructor_prices)
+                .sort((a,b) => b[1].price_change - a[1].price_change);
+
+            let cHtml = `<table class="data-table sortable">
+                <thead><tr>
+                    <th>Constructor</th><th class="num">Current</th>
+                    <th class="num">Starting</th><th class="num">Change</th><th>Trend</th>
+                </tr></thead>
+                <tbody>${sorted.map(([cid, c]) => {
+                    const team = TEAMS[cid] || { name: c.name, color: '#666' };
+                    const changeClass = c.price_change > 0 ? 'text-green' : c.price_change < 0 ? 'text-red' : '';
+                    const trendIcon = c.price_trend === 'up' ? '▲' : c.price_trend === 'down' ? '▼' : '—';
+                    return `
+                    <tr>
+                        <td><span class="team-dot" style="background:${team.color}"></span><strong>${c.name}</strong></td>
+                        <td class="num">$${c.current_price.toFixed(1)}M</td>
+                        <td class="num">$${c.starting_price.toFixed(1)}M</td>
+                        <td class="num ${changeClass}">${c.price_change > 0 ? '+' : ''}${c.price_change.toFixed(1)}</td>
+                        <td><span class="trend-${c.price_trend}">${trendIcon}</span></td>
+                    </tr>`;
+                }).join('')}
+                </tbody>
+            </table>`;
+            cPriceEl.innerHTML = cHtml;
+            cPriceEl.querySelectorAll('table.sortable').forEach(makeTableSortable);
+        }
     }
 
     // Cumulative Fantasy Standings (prefers official points when available)
