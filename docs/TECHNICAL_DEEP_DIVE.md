@@ -375,25 +375,34 @@ pipeline/08_monte_carlo_fantasy.py
 ```
 
 For each of 10,000 simulations:
-1. **Sample qualifying positions:** Add calibrated Gaussian noise to model scores, re-rank
-2. **Sample race positions:** Same approach, with grid position influence
-3. **Sample DNFs:** Each driver has a probability of DNF (from rolling 5-race history)
-4. **Sample overtakes:** Draw from calibrated distribution based on grid position
+1. **Sample qualifying positions:** Z-score normalize raw XGBRanker scores (preserving performance gaps), add team-correlated + individual Gaussian noise, re-rank
+2. **Sample DNFs:** Two-stage correlated sampling — multi-car incidents (2% base) + team-correlated mechanical failures (30% teammate correlation, 3x elevated probability)
+3. **Sample race positions:** Same gap-preserving approach as qualifying, with separate team shocks. DNF drivers assigned last position.
+4. **Sample overtakes:** Driver-specific history when available (blended with grid-bucket estimates), otherwise grid-bucket base + excess gains with stochastic variation
 5. **Sample fastest lap:** Weighted random selection based on finishing position
-6. **Sample DOTD:** Weighted random selection
-7. **Calculate full fantasy points** for this simulation
-8. After 10,000 runs, compute percentiles: P5, P25, P50, P75, P95
+6. **Sample DOTD:** Weighted random selection (position + positions gained)
+7. **Sample pit stops (constructors):** Per-team stop times from N(team_mean, team_std), scored per bracket, fastest-stop bonus awarded
+8. **Calculate full fantasy points** for this simulation
+9. After 10,000 runs, compute percentiles: P5, P25, P50, P75, P95
+
+### Noise Model
+
+Raw XGBRanker scores are z-score normalized (mean=0, std=1) to preserve the performance gaps the model predicted. Unlike the old quantile transform approach (which forced equal spacing), z-scoring means tightly-bunched midfield drivers swap positions frequently while a dominant leader rarely gets upset.
+
+**Teammate correlation (alpha=0.35):** Each simulation draws a shared team shock per constructor for qualifying and separately for race. ~35% of position variance is team-level (car setup, reliability), ~65% individual (driver skill, luck). This produces realistic team outcomes instead of independent sampling.
 
 ### Calibration (From Actual Data)
 
-All noise parameters are calibrated from R1+R2 actual results:
+All noise parameters are calibrated from R1-R3 actual results:
 
 | Parameter | Value | Source |
 |-----------|-------|--------|
-| Qualifying noise base | 1.4 positions | RMSE of quali predictions vs actual (R1) |
-| Race noise base | 1.6 positions | Typical race-day variance (incidents, strategy) |
+| Qualifying noise base | 0.3 (z-score units) | Calibrated for ~1-2 position swaps between adjacent drivers |
+| Race noise base | 0.3 (z-score units) | Same scale; z-normalization preserves actual model gaps |
+| Teammate correlation alpha | 0.35 | ~35% shared team variance from historical teammate correlation |
 | Confidence scaling | 1 + 1.5 × (100 - conf) / 50 | Higher confidence → tighter distribution |
-| DNF rate | 13.6% overall | 6/44 drivers DNF across R1+R2 |
+| DNF rate | Per-driver blended | Rolling 5-race historical + current season, dynamically weighted |
+| Team DNF correlation | 0.30 | If one teammate DNFs, other has elevated risk |
 | Overtake CV | 0.35 | Coefficient of variation from OpenF1 data |
 
 ### Sprint Weekend Adjustments

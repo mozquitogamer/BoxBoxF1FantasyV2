@@ -14,10 +14,10 @@ Our pipeline (Jolpica priors + FP telemetry → XGBoost → Monte Carlo) is a so
 
 | Issue | Impact | Where |
 |-------|--------|-------|
-| **Quantile transform destroys pace gaps** — forces all position gaps equal, making frontrunner predictions too noisy and midfield too stable | HIGH | `08_monte_carlo_fantasy.py:543-552` |
-| **No teammate correlation** — MC samples each driver independently, producing unrealistic team outcomes (e.g. P1 + P15 for same team) | HIGH | `08_monte_carlo_fantasy.py:266` |
-| **Pit stop points completely missing** — 15-50+ constructor pts/race left on table | HIGH | `07_calculate_fantasy.py`, `08_monte_carlo_fantasy.py` |
-| **Constructor MC is approximate** — sums driver means instead of per-iteration simulation | MEDIUM | `08_monte_carlo_fantasy.py:800-822` |
+| ~~**Quantile transform destroys pace gaps**~~ — ✅ Fixed: z-score normalization preserves performance gaps | ~~HIGH~~ | `08_monte_carlo_fantasy.py` |
+| ~~**No teammate correlation**~~ — ✅ Fixed: shared team shocks (alpha=0.35) + individual noise | ~~HIGH~~ | `08_monte_carlo_fantasy.py` |
+| ~~**Pit stop points completely missing**~~ — ✅ Fixed: analytical EV + per-iteration MC sampling | ~~HIGH~~ | `07_calculate_fantasy.py`, `08_monte_carlo_fantasy.py` |
+| ~~**Constructor MC is approximate**~~ — ✅ Fixed: per-iteration simulation with pit stops | ~~MEDIUM~~ | `08_monte_carlo_fantasy.py` |
 | ~~**Regression target treats positions as continuous**~~ — ✅ Fixed: switched to `rank:pairwise` (LambdaMART) | ~~MEDIUM~~ | `05_train_models.py` |
 | ~~**FP features mix tyre compounds**~~ — ✅ Fixed: compound-aware feature extraction | ~~MEDIUM~~ | `03_extract_features.py` |
 | ~~**No relative pace normalization**~~ — ✅ Fixed: session-relative delta features | ~~MEDIUM~~ | `03_extract_features.py` |
@@ -33,31 +33,23 @@ Our pipeline (Jolpica priors + FP telemetry → XGBoost → Monte Carlo) is a so
 
 These changes fix fundamental methodology issues in the simulation layer. No ML retraining needed.
 
-#### 1.1 Replace quantile transform with gap-preserving noise model
+#### 1.1 Replace quantile transform with gap-preserving noise model ✅ COMPLETED (2026-04-04)
 **File:** `08_monte_carlo_fantasy.py`
 
-**Current:** Raw XGBoost scores → quantile transform (evenly spaced) → add Gaussian noise → re-rank.
-**Problem:** If XGBoost says P1 is way ahead but P8-P12 are bunched, the quantile transform erases that — making upsets equally likely everywhere.
-
-**New approach:**
-- Keep raw XGBoost scores (which encode performance gaps)
-- Normalize scores to a standard scale per session (z-score)
-- Add calibrated noise proportional to driver-specific uncertainty:
-  - `noise_std = base_noise * (1 + position_uncertainty_factor)`
-  - `position_uncertainty_factor` derived from confidence score + position (backmarkers more variable)
+- Z-score normalization of raw XGBRanker scores preserves performance gaps (mean=0, std=1)
+- Gaussian noise added per driver, scaled by confidence: `multiplier = 1 + 1.5 * (100 - confidence) / 50`
 - Re-rank from noisy scores → natural position assignments
-- The performance gaps in the raw scores now determine swap probabilities: tightly-bunched drivers swap often, dominant drivers rarely upset
+- Tightly-bunched drivers swap often, dominant drivers rarely upset — gaps drive swap probability
+- Noise base calibrated at 0.3 (z-score units), matching ~1-2 position swaps for adjacent drivers
 
-#### 1.2 Add teammate correlation to MC sampling
+#### 1.2 Add teammate correlation to MC sampling ✅ COMPLETED (2026-04-04)
 **File:** `08_monte_carlo_fantasy.py`
 
-**Current:** Each driver's noise is independent.
-**New approach:**
-- Draw a **team-level shock** per team per simulation (shared component): `team_noise ~ N(0, team_sigma)`
-- Draw an **individual shock** per driver: `driver_noise ~ N(0, driver_sigma)`
-- Combined: `total_noise = alpha * team_noise + (1-alpha) * driver_noise`
-- `alpha ~ 0.3-0.4` (calibrate from historical teammate correlation data)
-- This naturally produces realistic team outcomes (both drivers up or both down together, with individual variation)
+- Team-level shock drawn per team per simulation: `team_noise ~ N(0, alpha * noise_base)`
+- Individual shock per driver: `individual_noise ~ N(0, (1-alpha) * noise_base) * confidence_multiplier`
+- `alpha = 0.35` (35% shared, 65% individual)
+- Separate team shocks for qualifying and race (independent draws)
+- Produces realistic team outcomes: both drivers shift together with individual variation
 
 #### 1.3 Add pit stop modeling for constructors
 **Files:** `07_calculate_fantasy.py`, `08_monte_carlo_fantasy.py`, `config/fantasy_scoring.py`
@@ -224,6 +216,8 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 ## Implementation Order
 
 **Completed:**
+- ✅ 1.1 Gap-preserving noise model (2026-04-04)
+- ✅ 1.2 Teammate correlation (2026-04-04)
 - ✅ 2.1 Ranking objective (2026-03-31)
 - ✅ 2.2 Tyre-compound features (2026-03-31)
 - ✅ 2.3 Relative pace normalization (2026-03-31)
@@ -238,9 +232,8 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 
 **Next up:**
 - 4.2 Sprint-specific predictions (dedicated sprint model)
-- 1.1 Gap-preserving noise model
-- 1.2 Teammate correlation improvements
-- 1.4 Per-iteration constructor MC simulation improvements
+- Confidence interval calibration
+- Multi-week transfer planning
 
 ## How to Validate Improvements
 
@@ -273,4 +266,4 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 
 **Our advantages over them:** FastF1 telemetry data, ML-based predictions, automated pipeline, free website.
 
-**Our disadvantages:** Simulation layer could be improved (gap-preserving noise model), less mature calibration, no betting odds integration yet.
+**Our disadvantages:** Less mature calibration (only 3 rounds of 2026 data), no betting odds integration.
