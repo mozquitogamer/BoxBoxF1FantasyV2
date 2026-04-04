@@ -254,6 +254,26 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 **Next up:**
 - (All planned features completed)
 
+---
+
+## Detailed Implementation Notes
+
+### Multi-Week Transfer Planning (Completed 2026-04-04)
+**Files:** `web/public/app.js`, `web/public/index.html`, `web/public/styles.css`, `pipeline/08_export_website_json.py`
+
+**Problem:** Single-round transfer advice is myopic — trading away a driver who's great for the next 3 tracks just to gain 5 points this week is suboptimal. Need to plan across multiple rounds while respecting transfer limits, budget constraints, and chip deployment.
+
+**Solution — Beam Search Optimization:**
+- **Score projection for future rounds:** Since ML predictions only exist for the current round, future rounds use `base_form × track_affinity × sprint_multiplier` where:
+  - `base_form` = rolling 3-round average of actual fantasy points
+  - `track_affinity` = cosine similarity-weighted performance at similar circuits (9D feature vectors, sim > 0.7 threshold, clamped 0.6-1.4)
+  - `sprint_multiplier` = 1.15x for sprint weekends
+- **Beam search:** Width 60, explores 0-2 swaps per round, transfer banking (max 5 banked), -10pts per extra transfer
+- **Three strategies:** Max Points (pure projected points), Balanced (0.7 pts + 0.3 value), Budget Gain (0.4 pts + 0.6 price appreciation)
+- **Chip support:** Wild Card, Limitless, 3x Boost, No Negative, Autopilot, Final Fix can be deployed on specific rounds
+- **New data exports:** `track_data.json` (22 circuits with 9D features, race-circuit mappings, sprint rounds) and `driver_history.json` (per-driver/constructor actual points per round with circuit_id)
+- **UI:** Mode toggle (Single Round / Transfer Advisor / Multi-Week Planner), projection heatmap (top 12 drivers + top 6 constructors), ranked plan cards with round-by-round timeline showing hold/swap/chip actions
+
 ## How to Validate Improvements
 
 1. **Backtest against R1-R3 actual results:** For each change, re-run predictions for completed 2026 races and compare fantasy point accuracy (MAE, ranking correlation)

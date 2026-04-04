@@ -83,17 +83,22 @@ Visual representations of the entire system architecture, data flow, and race we
 ║  ┌──────────────────── ML TRAINING ──────────────────────────────────────┐    ║
 ║  │                                                                       │    ║
 ║  │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐       │    ║
-║  │  │ QUALI MODEL     │  │ RACE MODEL      │  │ FP SIGNAL MODEL │       │    ║
-║  │  │ XGBoost         │  │ XGBoost         │  │ ExtraTrees      │       │    ║
-║  │  │ 1200 trees      │  │ 650 trees       │  │ 500 trees       │       │    ║
-║  │  │ depth=3, lr=.025│  │ depth=5, lr=.03 │  │ depth=6         │       │    ║
-║  │  │ target: quali   │  │ target: race    │  │ target: race    │       │    ║
-║  │  │ position        │  │ position        │  │ (FP rows only)  │       │    ║
+║  │  │ QUALI MODEL     │  │ RACE MODEL      │  │ SPRINT MODEL    │       │    ║
+║  │  │ XGBoost         │  │ XGBoost         │  │ XGBoost         │       │    ║
+║  │  │ 1200 trees      │  │ 650 trees       │  │ 400 trees       │       │    ║
+║  │  │ depth=3, lr=.025│  │ depth=5, lr=.03 │  │ depth=4, lr=.035│       │    ║
+║  │  │ target: quali   │  │ target: race    │  │ target: sprint  │       │    ║
+║  │  │ position        │  │ position        │  │ (501 rows)      │       │    ║
 ║  │  └────────┬────────┘  └────────┬────────┘  └────────┬────────┘       │    ║
 ║  │           │                    │                     │                │    ║
 ║  │           └────────────────────┼─────────────────────┘                │    ║
 ║  │                    Walk-forward validation                            │    ║
 ║  │             [2020..N] train → [N+1] test                             │    ║
+║  │                                                                       │    ║
+║  │  ┌─────────────────┐                                                 │    ║
+║  │  │ FP SIGNAL MODEL │  ExtraTrees, 500 trees, depth=6                 │    ║
+║  │  │ (confidence only)│  Used only for confidence scoring               │    ║
+║  │  └────────┬────────┘                                                 │    ║
 ║  │                                                                       │    ║
 ║  └────────────────────────┬──────────────────────────────────────────────┘    ║
 ║                           │                                                   ║
@@ -169,6 +174,8 @@ Visual representations of the entire system architecture, data flow, and race we
 ║  │  │  ├── actual_round{N}.json      (real results)           │          │    ║
 ║  │  │  ├── post_race_round{N}.json   (analysis)               │          │    ║
 ║  │  │  ├── fp_analysis.json          (FP breakdown)           │          │    ║
+║  │  │  ├── track_data.json           (circuit features/maps)  │          │    ║
+║  │  │  ├── driver_history.json       (actual pts history)     │          │    ║
 ║  │  │  └── pitstops_round{N}.json    (pit stop times)         │          │    ║
 ║  │  └─────────────────────┬───────────────────────────────────┘          │    ║
 ║  │                        │                                              │    ║
@@ -193,6 +200,9 @@ Visual representations of the entire system architecture, data flow, and race we
 ║  │  │  ├── Season standings & driver/constructor price     │              │    ║
 ║  │  │  │   trackers (current, starting, change, trend)    │              │    ║
 ║  │  │  ├── FP analysis (pace, degradation, sectors)       │              │    ║
+║  │  │  ├── Multi-week transfer planner (beam search)      │              │    ║
+║  │  │  ├── Accuracy dashboard (MAE, CI coverage)          │              │    ║
+║  │  │  ├── Head-to-head matchup predictions               │              │    ║
 ║  │  │  └── Countdown timer to lock deadline               │              │    ║
 ║  │  └─────────────────────────────────────────────────────┘              │    ║
 ║  │                                                                       │    ║
@@ -476,9 +486,17 @@ Visual representations of the entire system architecture, data flow, and race we
     │   ┌─────▼───┐ ┌──▼─────┐ ┌▼────────────┐                      │
     │   │08_monte │ │08_exp  │ │11_actual    │                      │
     │   │_carlo   │ │_web_json│ │_fantasy_pts │                      │
-    │   └─────────┘ └────────┘ └─────────────┘                      │
-    │                    │                                            │
-    │              ┌─────▼─────┐                                     │
+    │   └────▲────┘ └────────┘ └──────┬──────┘                      │
+    │        │                        │                              │
+    │        │  ┌─────────────────────▼──────┐                       │
+    │        │  │ calibrate_confidence.py    │                       │
+    │        │  │ (MC predictions vs actuals)│                       │
+    │        │  └─────────────┬─────────────┘                       │
+    │        │                │                                      │
+    │        │  mc_calibration.json                                   │
+    │        └────────────────┘                                      │
+    │                                                                │
+    │              ┌───────────┐                                     │
     │              │ git push  │                                     │
     │              │ → Vercel  │                                     │
     │              │ → LIVE    │                                     │

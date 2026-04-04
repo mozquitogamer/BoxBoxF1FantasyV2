@@ -17,8 +17,10 @@
 9. [Price Change Prediction](#9-price-change-prediction)
 10. [Lineup Optimizer](#10-lineup-optimizer)
 11. [Website & Deployment](#11-website--deployment)
-12. [Known Limitations](#12-known-limitations)
-13. [Future Feature Ideas](#13-future-feature-ideas)
+12. [Confidence Interval Calibration](#12-confidence-interval-calibration)
+13. [Multi-Week Transfer Planner](#13-multi-week-transfer-planner)
+14. [Known Limitations](#14-known-limitations)
+15. [Future Feature Ideas](#15-future-feature-ideas)
 
 ---
 
@@ -260,6 +262,21 @@ The ranking objective (`rank:pairwise`) uses LambdaMART, which optimizes for *co
 - Groups by race so the model learns relative performance within each event
 - Output is relevance scores (higher = better) which are ranked to produce positions
 - Better aligns with the downstream fantasy scoring where rank order determines points
+
+### Sprint Model (V2 — XGBRanker)
+
+```
+XGBRanker(n_estimators=400, learning_rate=0.035, max_depth=4,
+          objective="rank:pairwise", reg_lambda=1.5, subsample=0.85, colsample_bytree=0.85)
+```
+
+- **Target:** Relevance labels derived from sprint finishing position
+- **Training data:** 501 sprint-only rows (2021-2026) — sprints have different dynamics than full races
+- **Why dedicated model?** Sprints are shorter (1/3 race distance), have limited strategy (usually 0 pit stops), different scoring (P1=8 not 25), and less chaos. The race model was trained mostly on full-distance data and doesn't capture sprint-specific patterns well.
+- **Lighter regularization:** Fewer trees (400 vs 650), shallower depth (4 vs 5), higher learning rate (0.035 vs 0.03) — smaller dataset needs less complexity
+- **Walk-forward results:** MAE=3.696, Kendall's tau=0.492, Top-3 accuracy=63.3%
+- **Fallback:** If sprint model unavailable, MC simulation falls back to race model raw scores
+- **MC integration:** Sprint raw z-scores used with team-correlated noise at 0.8x race noise base
 
 ### FP Signal Model (ExtraTrees)
 
@@ -564,7 +581,7 @@ Combinations use a JavaScript generator function (`function*`) instead of buildi
 
 ### Technology Stack
 
-- **Frontend:** Vanilla JavaScript (no framework). Single `app.js` file (~4,000 lines).
+- **Frontend:** Vanilla JavaScript (no framework). Single `app.js` file (~5,500 lines).
 - **Styling:** Pure CSS with CSS custom properties for theming.
 - **Hosting:** Vercel (static file hosting, CDN).
 - **Deployment:** Push to GitHub → Vercel auto-deploys.
@@ -602,7 +619,91 @@ The lock deadline countdown uses a hardcoded `LOCK_DEADLINES` array with UTC tim
 
 ---
 
-## 12. Known Limitations
+## 12. Confidence Interval Calibration
+
+### The Problem
+
+Monte Carlo simulations produce confidence intervals (P5-P95), but there's no guarantee these intervals are well-calibrated. If the 90% CI only captures 70% of actual outcomes, users are getting a false sense of certainty.
+
+### The Solution: Empirical Calibration
+
+`pipeline/calibrate_confidence.py` analyzes MC predictions vs actual results across all completed rounds:
+
+1. **Coverage analysis:** For each driver prediction, check if actual points fell within the predicted P5-P95 interval (target: 90% coverage) and P25-P75 interval (target: 50% coverage)
+2. **PIT histogram:** Probability Integral Transform — maps each actual outcome to its percentile in the predicted distribution. A well-calibrated model produces a uniform histogram.
+3. **Per-tier analysis:** Breaks drivers into front-runners (predicted P1-P5), midfield (P6-P15), and back-markers (P16-P22). Back-markers are hardest to predict.
+4. **DNF impact:** DNF outcomes are poorly captured by CI (only ~40% in 90% CI) because DNFs produce extreme negative scores.
+5. **Noise multiplier:** Computes the scaling factor needed to achieve target coverage. If coverage is too narrow (86.4%), multiplier > 1.0 expands intervals.
+
+### Conservative Correction
+
+With limited data (<3 rounds), the noise multiplier is capped at ±10% adjustment to prevent overcorrection. With 6+ rounds, the cap is removed. The calibration saves to `data/seed/mc_calibration.json` and is auto-loaded by the MC simulation, scaling all noise bases by the multiplier.
+
+### Initial Results (2 rounds)
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| 90% CI coverage | 86.4% | 90% |
+| 50% CI coverage | 43.2% | 50% |
+| Noise multiplier | 1.1x | 1.0x |
+| Front-runner coverage | 90% | 90% |
+| Midfield coverage | 90% | 90% |
+| Back-marker coverage | 75% | 90% |
+
+---
+
+## 13. Multi-Week Transfer Planner
+
+### The Problem
+
+F1 Fantasy allows limited free transfers per round (typically 2-3). Extra transfers cost -10 points each. Planning transfers one round at a time is suboptimal — you might trade away a driver who's great for the next 3 tracks just to gain 5 points this week.
+
+### Architecture: Beam Search Over Transfer Sequences
+
+Since ML predictions only exist for the current round, future round scores are projected using track-similarity-weighted historical performance:
+
+```
+projected_score = base_form × track_affinity × sprint_multiplier
+```
+
+Where:
+- `base_form` = average of last 3 rounds' actual fantasy points (or predicted if fewer actuals)
+- `track_affinity` = similarity-weighted performance at similar circuits (cosine similarity of 9D feature vectors, threshold > 0.7, clamped 0.6-1.4)
+- `sprint_multiplier` = 1.15x for sprint rounds (extra scoring opportunity)
+
+### Beam Search Details
+
+- **Width:** 60 beams (top 60 states kept at each round)
+- **Candidates per state:** 0 swaps (hold) + all single swaps + top 2-swap combos (top 8 drivers × top 4 constructors by projected points)
+- **State tracking:** team composition, budget, banked transfers (max 5), chips used, cumulative score, transfer history
+- **Deduplication:** States with identical team composition are merged (keep highest score)
+- **Penalty:** -10 points per extra transfer beyond free allocation
+
+### Strategies
+
+| Strategy | Weight Formula |
+|----------|---------------|
+| Max Points | Pure projected fantasy points |
+| Balanced | 0.7 × points + 0.3 × value efficiency |
+| Budget Gain | 0.4 × points + 0.6 × price appreciation potential |
+
+### Chip Support
+
+The planner can deploy chips on specific rounds: Wild Card (unlimited free transfers), Limitless (no budget cap), 3x Boost, No Negative, Autopilot, Final Fix. Wild Card on a round eliminates transfer penalties for that round.
+
+### Data Requirements
+
+Requires two JSON files exported by `08_export_website_json.py`:
+- `track_data.json` — 22 circuits with 9D feature vectors, race-to-circuit mappings, sprint round list
+- `driver_history.json` — per-driver and per-constructor actual points for each completed round with circuit_id mapping
+
+### Display
+
+Results show a projection heatmap (top 12 drivers + top 6 constructors, color-coded by performance relative to average) and ranked plan cards with round-by-round timeline showing hold/swap/chip actions and projected points per round.
+
+---
+
+## 14. Known Limitations
 
 ### Overtake Accuracy
 Our overtake estimates are ~30% higher than official F1 Fantasy counts. OpenF1 data includes some pit-related position changes that we can't fully filter out. Until an official overtake data source exists, this remains an approximation.
@@ -624,7 +725,7 @@ Sprint weekends only have FP1 (60 minutes vs. 180 minutes of FP data on normal w
 
 ---
 
-## 13. Future Feature Ideas
+## 15. Future Feature Ideas
 
 ### High Priority (Immediate Value)
 
@@ -662,8 +763,8 @@ Sprint weekends only have FP1 (60 minutes vs. 180 minutes of FP data on normal w
 1. ~~**DNF/Reliability Modeling**~~ ✅
    Per-driver DNF probability from blended historical + season data. Correlated DNF in MC (multi-car incidents + team failures). DNF % displayed on driver cards. Constructor DNF impact in scoring breakdown.
 
-2. **Sprint-Specific Predictions**
-   Dedicated sprint model trained on sprint-only data. Sprint dynamics differ from race (shorter distance, limited strategy, different scoring table). Current sprint predictions use race model with adjustments (80% noise, 50% DNF).
+2. ~~**Sprint-Specific Predictions**~~ ✅
+   Dedicated XGBRanker sprint model trained on 501 sprint-only rows (2021-2026). Lighter params (400 trees, depth=4, lr=0.035). Walk-forward MAE=3.696, tau=0.492. MC uses sprint z-scores with 0.8x noise.
 
 3. ~~**Enhanced Constructor Scoring**~~ ✅
    Constructor scoring = drivers' points + qualifying bonus + expected pit stop points (analytical from team priors) - DNF impact. Per-iteration MC simulation with pit stop sampling. Scoring breakdown on constructor cards.
@@ -682,8 +783,8 @@ Sprint weekends only have FP1 (60 minutes vs. 180 minutes of FP data on normal w
 7. **Tyre Strategy Prediction**
    Predict likely tyre strategies (1-stop, 2-stop, 3-stop) based on FP degradation data and track characteristics.
 
-8. **Multi-Week Transfer Planning**
-   Forecast multiple rounds ahead for transfer planning — which drivers to buy now for future value growth.
+8. ~~**Multi-Week Transfer Planning**~~ ✅
+   Beam search (width 60) over 2-5 rounds using track-similarity-weighted score projections. Plans optimal transfer sequences with chip deployment, transfer banking, and -10pt penalty tracking. Three strategies: Max Points, Balanced, Budget Gain.
 
 9. **Betting Odds Integration**
    Fetch pre-race odds, convert to implied probabilities, use as ensemble signal in XGBoost.

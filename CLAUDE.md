@@ -57,17 +57,20 @@ BoxBoxF1FantasyV2/
 │       ├── drivers.json              # 22-driver roster with constructor mapping
 │       ├── constructors.json         # 11 constructors
 │       ├── races.json                # 2026 calendar
-│       └── official_fantasy_points.json # Official F1 Fantasy points (manually entered)
+│       ├── official_fantasy_points.json # Official F1 Fantasy points (manually entered)
+│       └── mc_calibration.json       # MC noise calibration from actual results
 ├── models/trained/                   # Saved XGBoost models (.json)
 ├── web/public/
 │   ├── index.html                    # Single-page app shell
-│   ├── app.js                        # All frontend logic (~4,800 lines)
+│   ├── app.js                        # All frontend logic (~5,500 lines)
 │   ├── styles.css                    # CSS with custom properties for theming
 │   └── data/                         # JSON files served to frontend
 │       ├── predictions.json          # Current round predictions
 │       ├── season_summary.json       # Rounds, driver/constructor prices
 │       ├── actual_round{N}.json      # Actual results per round
-│       └── official_fantasy_points.json
+│       ├── official_fantasy_points.json
+│       ├── track_data.json           # Circuit feature vectors + race-circuit mappings
+│       └── driver_history.json       # Per-driver/constructor actual points history
 ├── docs/                             # Technical documentation
 ├── dashboard/                        # Streamlit analytics dashboard
 └── vercel.json                       # Vercel deployment config
@@ -101,9 +104,13 @@ XGBoost's native NaN handling means: when FP data exists → model uses it to re
 
 ## Monte Carlo Simulation (08_monte_carlo_fantasy.py)
 
-10,000 iterations per driver. Each iteration: add calibrated noise to model scores → re-rank → sample DNFs (two-stage: multi-car incidents + team-correlated mechanical failures) → sample overtakes → sample fastest lap/DOTD → compute full fantasy points. Output: P5/P25/P50/P75/P95 percentiles.
+10,000 iterations per driver. Each iteration: add calibrated noise to model scores → re-rank → sample DNFs (two-stage: multi-car incidents + team-correlated mechanical failures) → sample overtakes → sample fastest lap/DOTD → compute full fantasy points. Noise bases auto-calibrated from `data/seed/mc_calibration.json` (computed by `calibrate_confidence.py`). Output: P5/P25/P50/P75/P95 percentiles.
 
 Constructors simulated per-iteration: sum both drivers' simulated points + qualifying bonus + sampled pit stop points.
+
+## Multi-Week Transfer Planner (web/public/app.js)
+
+Plans optimal transfer sequences across 2-5 upcoming rounds using beam search optimization. Since ML predictions only exist for the current round, future rounds use track-similarity-weighted historical performance as score projections (`base_form × track_affinity × sprint_multiplier`). Track affinity comes from cosine similarity between circuit 9D feature vectors (similarity > 0.7 threshold, clamped 0.6-1.4). Beam search (width 60) explores 0-2 swaps per round with transfer banking (max 5), -10pts/extra transfer penalty, and chip deployment. Three strategies: Max Points, Balanced, Budget Gain. Requires `track_data.json` and `driver_history.json` (exported by `08_export_website_json.py`).
 
 ## Website Frontend (web/public/app.js)
 
@@ -114,8 +121,10 @@ Key features:
 - **Lineup optimizer** — brute-force over C(22,5)xC(11,2)=1.4M combinations. 4 strategies (Max Points, Max Value, Budget Builder, Balanced). Lock/exclude picks.
 - **6 chips:** Limitless (no budget cap), 3x Boost (best driver 3x + second-best 2x), Wild Card (unlimited transfers), No Negative (negatives become 0), Autopilot (auto 2x on best), Final Fix (post-quali changes)
 - **Transfer Advisor** — given current team + budget + free transfers, finds optimal swaps with -10pts/extra transfer penalty
+- **Multi-Week Transfer Planner** — beam search (width 60) over 2-5 upcoming rounds, projects scores using track-similarity-weighted historical performance, plans optimal transfer sequences with chip deployment
 - **Price change prediction** — PPM rating system (Great/Good/Poor/Terrible) with A-tier (>$18.5M) and B-tier brackets
 - **Season Overview** — championship standings, driver and constructor price trackers, cumulative fantasy standings
+- **Accuracy dashboard** — per-round and per-driver MAE, scatter plots, 90% CI and 50% CI coverage metrics
 - **Lazy tab loading** — only active tab loads its data
 
 ## Data Flow
@@ -145,6 +154,9 @@ python pipeline/06_run_predictions.py --round N
 python pipeline/07_calculate_fantasy.py --round N
 python pipeline/08_monte_carlo_fantasy.py --round N
 python pipeline/08_export_website_json.py --round N
+
+# Calibration (run after adding actual results for completed rounds)
+python pipeline/calibrate_confidence.py
 ```
 
 ## Seed Data Updates
