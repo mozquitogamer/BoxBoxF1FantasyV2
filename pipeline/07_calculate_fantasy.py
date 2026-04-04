@@ -49,6 +49,8 @@ from config.fantasy_scoring import (
     SPRINT_DNF_DSQ_PENALTY,
     RACE_POSITIONS_GAINED_PER_POS,
     CONSTRUCTOR_QUALI_BONUSES,
+    PITSTOP_TIME_POINTS,
+    FASTEST_PITSTOP_BONUS,
     calc_qualifying_points_driver,
     calc_constructor_quali_bonus,
 )
@@ -175,6 +177,62 @@ def risk_label(rating: float) -> str:
         return "HIGH"
     else:
         return "VERY HIGH"
+
+
+# -- Pit stop expected value ---------------------------------------------------
+
+# Default pit stop priors per team (mean time in seconds, std)
+_DEFAULT_PITSTOP_PRIORS = {
+    "red_bull":       {"mean": 2.15, "std": 0.25, "stops_per_race": 1.5},
+    "mclaren":        {"mean": 2.20, "std": 0.25, "stops_per_race": 1.5},
+    "ferrari":        {"mean": 2.25, "std": 0.30, "stops_per_race": 1.5},
+    "mercedes":       {"mean": 2.20, "std": 0.25, "stops_per_race": 1.5},
+    "aston_martin":   {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5},
+    "alpine":         {"mean": 2.40, "std": 0.35, "stops_per_race": 1.5},
+    "williams":       {"mean": 2.45, "std": 0.35, "stops_per_race": 1.5},
+    "racing_bulls":   {"mean": 2.30, "std": 0.30, "stops_per_race": 1.5},
+    "haas":           {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5},
+    "audi":           {"mean": 2.55, "std": 0.40, "stops_per_race": 1.5},
+    "cadillac":       {"mean": 2.60, "std": 0.45, "stops_per_race": 1.5},
+}
+
+
+def _load_pitstop_priors() -> dict:
+    """Load pit stop priors from seed data or use defaults."""
+    path = SEED_DIR / "pit_stop_priors.json"
+    if path.exists():
+        with open(path) as f:
+            return json.load(f)
+    return _DEFAULT_PITSTOP_PRIORS
+
+
+def _expected_pitstop_points(mean: float, std: float, stops_per_race: float,
+                             n_teams: int = 11) -> float:
+    """Calculate expected pit stop points analytically from a normal distribution.
+
+    For each bracket (lower, upper, pts), compute the probability the stop time
+    falls in that bracket and multiply by points. Then account for expected
+    number of stops and the fastest-stop bonus (1/n_teams chance).
+    """
+    from scipy.stats import norm
+    dist = norm(loc=mean, scale=std)
+
+    # Expected points per single stop
+    pts_per_stop = 0.0
+    for lower, upper, pts in PITSTOP_TIME_POINTS:
+        # Clamp lower at 1.5 (minimum realistic pit stop time)
+        effective_lower = max(lower, 1.5)
+        prob = dist.cdf(upper) - dist.cdf(effective_lower)
+        pts_per_stop += prob * pts
+
+    # Expected number of stops
+    expected_stops = stops_per_race
+    total = pts_per_stop * expected_stops
+
+    # Fastest pit stop bonus: ~1/n_teams chance
+    total += FASTEST_PITSTOP_BONUS / n_teams
+
+    return round(total, 1)
 
 
 # -- Overtake estimation -------------------------------------------------------
@@ -393,6 +451,8 @@ def calculate_constructor_fantasy(
         constructor_drivers.setdefault(cid, []).append(d["driver_id"])
 
     is_sprint = round_num in SPRINT_ROUNDS_2026
+    pitstop_priors = _load_pitstop_priors()
+    n_teams = len(constructors)
     rows = []
 
     for constructor in constructors:
@@ -427,15 +487,33 @@ def calculate_constructor_fantasy(
         combined_pos_change = int(d_data["expected_positions_gained_lost"].sum())
         combined_overtakes = int(d_data["expected_overtakes"].sum())
 
+        # Expected pit stop points from team priors
+        prior = pitstop_priors.get(cid, {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5})
+        expected_pit_pts = _expected_pitstop_points(
+            prior["mean"], prior["std"], prior["stops_per_race"], n_teams
+        )
+
+        # DNF impact: how much DNF risk reduces the constructor's expected points
+        # (driver race pts already include DNF adjustment — calculate what the
+        # loss is relative to no-DNF scenario)
+        dnf_impact = 0.0
+        for _, d_row in d_data.iterrows():
+            dnf_prob = d_row.get("dnf_probability", 0.02)
+            # The soft penalty the driver's race pts already includes
+            soft_penalty = RACE_DNF_DSQ_PENALTY * 0.6
+            # Impact = probability * penalty (negative value)
+            dnf_impact += dnf_prob * soft_penalty
+
         # Sprint
         combined_sprint_quali = d_data["expected_sprint_quali_pts"].sum() if is_sprint else 0
         combined_sprint_race = d_data["expected_sprint_race_pts"].sum() if is_sprint else 0
 
-        total = total_quali + combined_race + combined_sprint_quali + combined_sprint_race
+        total = total_quali + combined_race + expected_pit_pts + combined_sprint_quali + combined_sprint_race
 
         price = constructor_prices.get(cid, 10.0)
         value_score = total / price if price > 0 else 0.0
         avg_risk = d_data["risk_rating"].mean()
+        avg_dnf_prob = d_data["dnf_probability"].mean() if "dnf_probability" in d_data.columns else 0.02
 
         rows.append({
             "constructor_id": cid,
@@ -445,6 +523,9 @@ def calculate_constructor_fantasy(
             "expected_quali_pts": round(total_quali, 1),
             "quali_bonus": quali_bonus,
             "expected_race_pts": round(combined_race, 1),
+            "expected_pit_stop_pts": round(expected_pit_pts, 1),
+            "expected_dnf_impact": round(dnf_impact, 1),
+            "dnf_probability": round(avg_dnf_prob, 2),
             "combined_positions_gained": combined_pos_change,
             "combined_overtakes": combined_overtakes,
             "expected_sprint_quali_pts": round(combined_sprint_quali, 1) if is_sprint else 0,

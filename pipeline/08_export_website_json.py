@@ -192,6 +192,9 @@ def build_predictions_json(round_num: int) -> dict | None:
             "expected_points": round(float(row["total_expected_fantasy_points"]), 1),
             "expected_points_quali": round(float(row.get("expected_quali_pts", 0)), 1),
             "expected_points_race": round(float(row.get("expected_race_pts", 0)), 1),
+            "expected_pit_stop_pts": round(float(row.get("expected_pit_stop_pts", 0)), 1),
+            "expected_dnf_impact": round(float(row.get("expected_dnf_impact", 0)), 1),
+            "dnf_probability": round(float(row.get("dnf_probability", 0.02)), 2),
             "quali_bonus": int(row.get("quali_bonus", 0)),
             "risk": row.get("risk_label", "MEDIUM"),
             "risk_rating": float(row.get("risk_rating", 15)),
@@ -214,8 +217,13 @@ def build_predictions_json(round_num: int) -> dict | None:
             entry["mc_total_std"] = round(mc_c.get("mc_total_std", 0), 1)
             entry["mc_total_p5"] = round(mc_c.get("mc_total_p5", 0), 1)
             entry["mc_total_p95"] = round(mc_c.get("mc_total_p95", 0), 1)
+            entry["mc_pit_stop_pts"] = round(mc_c.get("mc_pit_stop_pts", 0), 1)
+            entry["mc_dnf_prob"] = round(mc_c.get("mc_dnf_prob", 0.02), 3)
             # Use MC mean as primary expected_points
             entry["expected_points"] = round(mc_c.get("mc_total_mean", 0), 1)
+            # Override pit stop pts from MC if available
+            if mc_c.get("mc_pit_stop_pts", 0) > 0:
+                entry["expected_pit_stop_pts"] = round(mc_c["mc_pit_stop_pts"], 1)
             price = entry.get("current_price", 0)
             if price > 0:
                 entry["value_score"] = round(entry["expected_points"] / price, 2)

@@ -934,11 +934,13 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
         if sim_arrays is not None and d1_abbrev in abbrev_to_idx and d2_abbrev in abbrev_to_idx:
             all_total_pts = sim_arrays["all_total_pts"]
             all_quali_pos = sim_arrays["all_quali_pos"]
+            all_dnf = sim_arrays["all_dnf"]
 
             d1_idx = abbrev_to_idx[d1_abbrev]
             d2_idx = abbrev_to_idx[d2_abbrev]
 
             constructor_pts = np.zeros(n_sims)
+            pit_stop_pts_arr = np.zeros(n_sims)
             for sim in range(n_sims):
                 # Driver points (we approximate DOTD removal since we don't
                 # track which driver won DOTD per-sim; use expected DOTD pts)
@@ -985,11 +987,22 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
                     for _ in range(n_stops):
                         t = max(1.5, rng.normal(prior["mean"], prior["std"]))
                         pit_pts += score_pitstop(t)
+                    pit_stop_pts_arr[sim] = pit_pts
                     constructor_pts[sim] += pit_pts
                 # Note: fastest pit stop bonus requires comparing across all teams
                 # per-sim. For simplicity, estimate as expected value addition.
                 # With 11 teams, ~1/11 chance of being fastest each race.
-                constructor_pts += FASTEST_PITSTOP_BONUS / len(constructors_info)
+                fastest_bonus_ev = FASTEST_PITSTOP_BONUS / len(constructors_info)
+                constructor_pts += fastest_bonus_ev
+                pit_stop_pts_arr += fastest_bonus_ev
+
+            avg_pit_stop_pts = float(pit_stop_pts_arr.mean())
+
+            # DNF impact: average points lost due to DNF across simulations
+            # Compare driver pts in DNF sims vs non-DNF sims
+            d1_dnf_rate = float(all_dnf[:, d1_idx].mean())
+            d2_dnf_rate = float(all_dnf[:, d2_idx].mean())
+            avg_dnf_prob = (d1_dnf_rate + d2_dnf_rate) / 2
 
             combined_mean = float(constructor_pts.mean())
             combined_std = float(constructor_pts.std())
@@ -998,7 +1011,7 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
             # Compute mean quali bonus across sims for reporting
             avg_quali_bonus = float(constructor_pts.mean()) - float(
                 (all_total_pts[:, d1_idx] + all_total_pts[:, d2_idx]).mean()
-            )
+            ) - avg_pit_stop_pts
 
         else:
             # Fallback: approximate from summary stats (no sim arrays)
@@ -1037,6 +1050,8 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
             combined_p5 = combined_mean - 1.65 * combined_std
             combined_p95 = combined_mean + 1.65 * combined_std
             avg_quali_bonus = quali_bonus_est
+            avg_pit_stop_pts = 0.0
+            avg_dnf_prob = (d1.get("mc_dnf_rate", 0.02) + d2.get("mc_dnf_rate", 0.02)) / 2
 
         constructor_results.append({
             "constructor_id": cid,
@@ -1047,6 +1062,8 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
             "mc_total_std": round(combined_std, 1),
             "mc_total_p5": round(combined_p5, 1),
             "mc_total_p95": round(combined_p95, 1),
+            "mc_pit_stop_pts": round(avg_pit_stop_pts, 1),
+            "mc_dnf_prob": round(avg_dnf_prob, 3),
             "mc_value_score": round(combined_mean / c_price, 2) if c_price > 0 else 0.0,
             "price": c_price,
             "quali_bonus": round(avg_quali_bonus, 1),

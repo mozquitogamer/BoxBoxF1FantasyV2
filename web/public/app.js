@@ -1025,6 +1025,10 @@ function driverCard(d, i) {
                 <div class="stat-value">${posIcon}</div>
                 <div class="stat-label">Pos +/-</div>
             </div>
+            <div class="stat" title="DNF probability based on historical reliability and current season data">
+                <div class="stat-value" style="color:${(d.dnf_probability||0) > 0.08 ? 'var(--red, #ef4444)' : (d.dnf_probability||0) > 0.04 ? 'var(--yellow)' : 'var(--green)'}">${((d.dnf_probability||0) * 100).toFixed(0)}%</div>
+                <div class="stat-label">DNF</div>
+            </div>
         </div>
 
         <div class="card-meta">
@@ -1035,7 +1039,7 @@ function driverCard(d, i) {
                 </div>
                 <span>${d.confidence}%</span>
             </div>
-            <span class="risk-badge ${riskClass}" title="DNF risk based on rolling 5-race DNF probability. LOW = safe pick, HIGH = DNF-prone.">${d.risk}</span>
+            <span class="risk-badge ${riskClass}" title="DNF risk: ${((d.dnf_probability||0) * 100).toFixed(0)}% probability based on rolling 5-race DNF rate">${d.risk}</span>
             <span class="price-tag" title="Current F1 Fantasy price">$${d.current_price.toFixed(1)}M</span>
             <span class="value-tag" style="position:relative;cursor:help" title="PPM = Points Per Million. Expected Fantasy Points / Price ($M). Higher is better. Above 1.0 = good, above 2.0 = excellent.">${d.value_score.toFixed(2)} ppm<span class="value-tooltip">PPM = Points Per Million (Expected Fantasy Points &divide; Price). Higher is better. Above 1.0 = good, above 2.0 = excellent.</span></span>
         </div>
@@ -1099,6 +1103,19 @@ function constructorCard(c, i) {
 
     const pitHtml = getPitStopStatsHtml(c.constructor_id);
 
+    // Pit stop expected points and DNF impact
+    const pitPts = c.expected_pit_stop_pts || c.mc_pit_stop_pts || 0;
+    const dnfProb = c.dnf_probability || c.mc_dnf_prob || 0;
+    const dnfImpact = c.expected_dnf_impact || 0;
+
+    const scoringBreakdownHtml = (pitPts > 0 || dnfProb > 0) ? `
+        <div class="scoring-breakdown" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--text-secondary);display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;">
+            ${pitPts > 0 ? `<span title="Expected pit stop points from team pit stop speed">Pit stops: <strong style="color:var(--green)">+${pitPts.toFixed(1)}</strong></span>` : ''}
+            ${dnfProb > 0 ? `<span title="Average DNF probability across both drivers">DNF risk: <strong style="color:${dnfProb > 0.08 ? 'var(--red, #ef4444)' : 'var(--text)'}">${(dnfProb * 100).toFixed(0)}%</strong></span>` : ''}
+            ${dnfImpact < 0 ? `<span title="Expected points lost due to DNF probability (already factored into total)">DNF impact: <strong style="color:var(--red, #ef4444)">${dnfImpact.toFixed(1)}</strong></span>` : ''}
+            ${c.quali_bonus ? `<span title="Expected qualifying teamwork bonus">Quali bonus: <strong style="color:${c.quali_bonus > 0 ? 'var(--green)' : 'var(--red, #ef4444)'}">${c.quali_bonus > 0 ? '+' : ''}${typeof c.quali_bonus === 'number' ? c.quali_bonus.toFixed ? c.quali_bonus.toFixed(1) : c.quali_bonus : c.quali_bonus}</strong></span>` : ''}
+        </div>` : '';
+
     return `
     <div class="constructor-card" style="--team-color:${team.color};--i:${i}">
         <div class="constructor-header">
@@ -1129,6 +1146,7 @@ function constructorCard(c, i) {
             <span class="price-tag" title="Current F1 Fantasy price">$${c.current_price.toFixed(1)}M</span>
             <span class="value-tag" title="PPM = Points Per Million. Expected Points / Price ($M).">${c.value_score.toFixed(2)} ppm</span>
         </div>
+        ${scoringBreakdownHtml}
         ${pitHtml}
         ${renderPriceChangeBrackets(c)}
     </div>`;
