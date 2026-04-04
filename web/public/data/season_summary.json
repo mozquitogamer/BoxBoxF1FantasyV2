@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-04-04T05:23:10.270456+00:00",
+  "generated_at": "2026-04-04T11:52:48.229385+00:00",
   "rounds": [
     {
       "round": 1,
@@ -377,6 +377,96 @@
       "starting_price": 5.0,
       "price_change": -0.9,
       "price_trend": "down"
+    }
+  },
+  "constructor_prices": {
+    "mercedes": {
+      "name": "Mercedes",
+      "full_name": "Mercedes-AMG Petronas F1 Team",
+      "current_price": 30.2,
+      "starting_price": 29.3,
+      "price_change": 0.9,
+      "price_trend": "up"
+    },
+    "mclaren": {
+      "name": "McLaren",
+      "full_name": "McLaren F1 Team",
+      "current_price": 28.6,
+      "starting_price": 28.9,
+      "price_change": -0.3,
+      "price_trend": "down"
+    },
+    "red_bull": {
+      "name": "Red Bull",
+      "full_name": "Oracle Red Bull Racing",
+      "current_price": 29.1,
+      "starting_price": 28.2,
+      "price_change": 0.9,
+      "price_trend": "up"
+    },
+    "ferrari": {
+      "name": "Ferrari",
+      "full_name": "Scuderia Ferrari HP",
+      "current_price": 24.2,
+      "starting_price": 23.3,
+      "price_change": 0.9,
+      "price_trend": "up"
+    },
+    "alpine": {
+      "name": "Alpine",
+      "full_name": "BWT Alpine F1 Team",
+      "current_price": 14.3,
+      "starting_price": 12.5,
+      "price_change": 1.8,
+      "price_trend": "up"
+    },
+    "williams": {
+      "name": "Williams",
+      "full_name": "Williams Racing",
+      "current_price": 13.8,
+      "starting_price": 12.0,
+      "price_change": 1.8,
+      "price_trend": "up"
+    },
+    "aston_martin": {
+      "name": "Aston Martin",
+      "full_name": "Aston Martin Aramco F1 Team",
+      "current_price": 8.5,
+      "starting_price": 9.5,
+      "price_change": -1.0,
+      "price_trend": "down"
+    },
+    "haas": {
+      "name": "Haas",
+      "full_name": "MoneyGram Haas F1 Team",
+      "current_price": 9.2,
+      "starting_price": 8.0,
+      "price_change": 1.2,
+      "price_trend": "up"
+    },
+    "racing_bulls": {
+      "name": "Racing Bulls",
+      "full_name": "Visa Cash App Racing Bulls",
+      "current_price": 8.1,
+      "starting_price": 6.3,
+      "price_change": 1.8,
+      "price_trend": "up"
+    },
+    "audi": {
+      "name": "Audi",
+      "full_name": "Audi F1 Team",
+      "current_price": 5.6,
+      "starting_price": 5.5,
+      "price_change": 0.1,
+      "price_trend": "stable"
+    },
+    "cadillac": {
+      "name": "Cadillac",
+      "full_name": "Cadillac F1 Team",
+      "current_price": 5.0,
+      "starting_price": 5.0,
+      "price_change": 0.0,
+      "price_trend": "stable"
     }
   }
 }

@@ -440,14 +440,30 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
     confidence = calculate_confidence(pred_df, quali_raw, race_raw, fp_signal_pred)
     pred_df["confidence"] = confidence
 
-    # ---- Sprint predictions ----
+    # ---- Sprint predictions (dedicated sprint model) ----
     if is_sprint:
         print(f"\n[Sprint] Generating sprint predictions...")
-        if fp_signal_pred is not None:
-            sprint_ranks = pd.Series(fp_signal_pred).rank(method="first").astype(int)
+        sprint_model_path = TRAINED_DIR / "sprint_model.json"
+        sprint_feature_list = feature_cols_data.get("sprint_features", race_feature_list)
+
+        if sprint_model_path.exists():
+            print(f"  Using dedicated sprint model")
+            sprint_model = xgb.XGBRanker()
+            sprint_model.load_model(str(sprint_model_path))
+
+            for col in sprint_feature_list:
+                if col not in pred_df.columns:
+                    pred_df[col] = np.nan
+            X_s = pred_df[sprint_feature_list].copy()
+            sprint_raw = sprint_model.predict(X_s)
+            sprint_ranks = pd.Series(-sprint_raw).rank(method="first").astype(int)
+            pred_df["predicted_sprint_position"] = sprint_ranks.values
+            pred_df["predicted_sprint_raw"] = sprint_raw
         else:
-            sprint_ranks = pred_df["predicted_race_position"]
-        pred_df["predicted_sprint_position"] = sprint_ranks.values
+            print(f"  No sprint model found — falling back to race model")
+            pred_df["predicted_sprint_position"] = pred_df["predicted_race_position"].values
+            pred_df["predicted_sprint_raw"] = race_raw
+
         pred_df["predicted_sprint_quali_position"] = pred_df["predicted_quali_position"]
 
     # ---- Build output ----
@@ -461,7 +477,8 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
         "predicted_quali_raw", "predicted_race_raw",
     ]
     if is_sprint:
-        output_cols += ["predicted_sprint_position", "predicted_sprint_quali_position"]
+        output_cols += ["predicted_sprint_position", "predicted_sprint_quali_position",
+                        "predicted_sprint_raw"]
 
     # Add key features for transparency
     extra = ["best_lap_time", "avg_lap_time", "pace_rank", "long_run_avg",

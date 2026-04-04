@@ -1,7 +1,7 @@
 """
 Script 05 — Train Models (XGBoost + Walk-Forward Evaluation)
 
-Trains three models using the combined Jolpica priors + FP telemetry feature set:
+Trains four models using the combined Jolpica priors + FP telemetry feature set:
 
   1. Qualifying model  — XGBoost with rank:pairwise (LambdaMART)
      Ranks drivers within each race using all Jolpica priors, track, ratings, FP features.
@@ -11,6 +11,10 @@ Trains three models using the combined Jolpica priors + FP telemetry feature set
 
   3. FP signal model   — ExtraTrees (pace subset, confidence scoring)
      Trains only on rows with FP telemetry data.
+
+  4. Sprint model      — XGBoost with rank:pairwise (LambdaMART)
+     Dedicated model trained on sprint race data only (~500 rows).
+     Lighter regularization, uses race features + quali_position.
 
 Ranking models learn to ORDER drivers correctly within each race, rather than
 predicting exact position numbers. This better handles the nonlinear nature of
@@ -28,6 +32,7 @@ Input:
 Output:
     models/trained/quali_model.json
     models/trained/race_model.json
+    models/trained/sprint_model.json
     models/trained/fp_signal_model.pkl
     models/trained/model_metadata.json
     models/trained/feature_columns.json
@@ -602,12 +607,96 @@ def main() -> None:
         print(f"  Not enough FP data ({len(fp_df)} rows) — skipping FP signal model")
 
     # ==================================================================
+    # MODEL 4: Sprint Position — XGBoost (dedicated sprint model)
+    # ==================================================================
+    print(f"\n{'=' * 60}")
+    print("MODEL 4: Sprint Position — XGBoost (dedicated)")
+    print(f"{'=' * 60}")
+
+    # Sprint data: only rows from sprint weekends with valid sprint_position
+    sprint_filter = df["sprint_position"].notna()
+    sprint_df = df[sprint_filter].copy()
+    print(f"  Sprint rows available: {len(sprint_df):,}")
+    print(f"  Sprint seasons: {sorted(sprint_df['season'].unique())}")
+
+    # Sprint model uses same features as race model (including quali_position)
+    sprint_available = [c for c in race_feature_cols if c in sprint_df.columns]
+    sprint_wf_results = []
+    sprint_model = None
+    sprint_train_size = 0
+
+    if len(sprint_df) >= 60:  # Need enough data for meaningful model
+        def make_sprint_model():
+            return xgb.XGBRanker(
+                n_estimators=400,       # Fewer trees — smaller dataset
+                learning_rate=0.035,    # Slightly higher LR for smaller data
+                max_depth=4,            # Moderate depth
+                subsample=0.80,
+                colsample_bytree=0.80,
+                min_child_weight=5,     # Higher min child — prevent overfitting
+                reg_alpha=0.2,
+                reg_lambda=1.5,         # Stronger regularization for small data
+                tree_method="hist",
+                objective="rank:pairwise",
+                random_state=MODEL_RANDOM_STATE,
+                n_jobs=-1,
+                verbosity=0,
+            )
+
+        # Walk-forward validation (only test years with sprint data)
+        print("\n  Walk-forward validation:")
+        sprint_wf_results = walk_forward_validate(
+            sprint_df, race_feature_cols, "sprint_position", make_sprint_model, "Sprint",
+            use_ranking=True,
+        )
+
+        # Train final sprint model on all sprint data
+        print("\n  Training final sprint model on all sprint data...")
+        sprint_df = sort_by_race_groups(sprint_df)
+        X_s = sprint_df[sprint_available]
+        y_s_rel = position_to_relevance(sprint_df["sprint_position"])
+        w_s = sprint_df["sample_weight"].values if "sample_weight" in sprint_df.columns else None
+        s_groups = make_race_qids(sprint_df)
+
+        # Per-group weights
+        if w_s is not None:
+            s_group_weights = []
+            prev_qid = -1
+            for i, qid in enumerate(s_groups):
+                if qid != prev_qid:
+                    s_group_weights.append(w_s[i])
+                    prev_qid = qid
+            w_s_groups = np.array(s_group_weights)
+        else:
+            w_s_groups = None
+
+        sprint_model = make_sprint_model()
+        sprint_model.fit(X_s, y_s_rel, sample_weight=w_s_groups, qid=s_groups)
+        sprint_train_size = len(y_s_rel)
+
+        # Feature importances
+        s_importances = pd.Series(
+            sprint_model.feature_importances_, index=sprint_available
+        ).sort_values(ascending=False)
+        print(f"\n  Top 15 sprint features:")
+        for feat, imp in s_importances.head(15).items():
+            print(f"    {feat}: {imp:.4f}")
+
+        # Save XGBoost model as JSON
+        sprint_model.save_model(str(TRAINED_DIR / "sprint_model.json"))
+        print(f"  Saved -> models/trained/sprint_model.json")
+    else:
+        print(f"  Not enough sprint data ({len(sprint_df)} rows) — skipping sprint model")
+        print(f"  Sprint predictions will fall back to race model with adjustments")
+
+    # ==================================================================
     # Save Feature Columns
     # ==================================================================
     feature_columns_data = {
         "quali_features": quali_available,
         "race_features": race_available,
         "fp_signal_features": fp_available,
+        "sprint_features": sprint_available if sprint_model else race_available,
     }
     with open(TRAINED_DIR / "feature_columns.json", "w") as f:
         json.dump(feature_columns_data, f, indent=2)
@@ -677,6 +766,24 @@ def main() -> None:
             "training_samples": fp_train_size,
             "trained": fp_model is not None,
         },
+        "sprint_model": {
+            "algorithm": "XGBRanker (rank:pairwise)" if sprint_model else "N/A",
+            "save_format": "json",
+            "n_features": len(sprint_available) if sprint_model else 0,
+            "training_samples": sprint_train_size,
+            "trained": sprint_model is not None,
+            "params": {
+                "n_estimators": 400,
+                "learning_rate": 0.035,
+                "max_depth": 4,
+                "subsample": 0.80,
+                "colsample_bytree": 0.80,
+                "min_child_weight": 5,
+                "reg_alpha": 0.2,
+                "reg_lambda": 1.5,
+            } if sprint_model else {},
+            "walk_forward_results": sprint_wf_results if sprint_model else [],
+        },
     }
 
     with open(TRAINED_DIR / "model_metadata.json", "w") as f:
@@ -710,6 +817,18 @@ def main() -> None:
             print(f"      {r['test_year']}: MAE={r['mae']:.3f}, tau={r['kendall_tau']:.3f}, Top3={r['top3_accuracy']:.1%} (n={r['test_size']})")
     if fp_model is not None:
         print(f"  FP signal model:      {fp_train_size} samples, {len(fp_available)} features")
+    if sprint_model is not None:
+        sprint_avg_mae = float(np.mean([r["mae"] for r in sprint_wf_results])) if sprint_wf_results else None
+        sprint_avg_tau = float(np.mean([r["kendall_tau"] for r in sprint_wf_results])) if sprint_wf_results else None
+        sprint_avg_top3 = float(np.mean([r["top3_accuracy"] for r in sprint_wf_results])) if sprint_wf_results else None
+        print(f"  Sprint model (rank:pairwise):")
+        print(f"    Features:           {len(sprint_available)}")
+        if sprint_avg_mae:
+            print(f"    Walk-forward MAE:   {sprint_avg_mae:.3f}")
+            print(f"    Kendall's tau:      {sprint_avg_tau:.3f}")
+            print(f"    Top-3 accuracy:     {sprint_avg_top3:.1%}")
+        for r in sprint_wf_results:
+            print(f"      {r['test_year']}: MAE={r['mae']:.3f}, tau={r['kendall_tau']:.3f}, Top3={r['top3_accuracy']:.1%} (n={r['test_size']})")
     print()
     print(f"  Output directory:     {TRAINED_DIR}")
     print(f"  Files saved:")
@@ -717,6 +836,8 @@ def main() -> None:
     print(f"    - race_model.json")
     if fp_model is not None:
         print(f"    - fp_signal_model.pkl")
+    if sprint_model is not None:
+        print(f"    - sprint_model.json")
     print(f"    - model_metadata.json")
     print(f"    - feature_columns.json")
     print("=" * 70)

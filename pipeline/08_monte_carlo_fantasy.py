@@ -657,7 +657,19 @@ def run_simulations(
 
     quali_raw = normalize_scores(quali_raw)
     race_raw = normalize_scores(race_raw)
-    print(f"  Applied z-score normalization (preserving performance gaps)")
+
+    # Sprint raw scores: use dedicated sprint model scores when available
+    sprint_raw = None
+    if is_sprint:
+        if "predicted_sprint_raw" in pred_df.columns:
+            sprint_raw = normalize_scores(pred_df["predicted_sprint_raw"].values.astype(float))
+            print(f"  Applied z-score normalization (preserving performance gaps, incl dedicated sprint model)")
+        else:
+            # Fallback: use race raw scores for sprint
+            sprint_raw = race_raw.copy()
+            print(f"  Applied z-score normalization (sprint using race model fallback)")
+    else:
+        print(f"  Applied z-score normalization (preserving performance gaps)")
 
     confidences = pred_df["confidence"].values.astype(float)
 
@@ -757,9 +769,18 @@ def run_simulations(
         sprint_fl_idx = -1
 
         if is_sprint:
-            # Sprint uses quali positions as grid, with separate noise
-            sprint_positions = sample_positions(race_raw, RACE_NOISE_BASE * 0.8,
-                                                confidences, rng)
+            # Sprint uses dedicated sprint model scores (or race fallback)
+            # with separate team shocks and reduced noise (shorter race)
+            sprint_team_shocks = np.zeros(n_drivers)
+            sprint_shock_by_cid = {cid: rng.normal(0, TEAMMATE_CORRELATION_ALPHA * RACE_NOISE_BASE * 0.8)
+                                   for cid in unique_constructors}
+            for i in range(n_drivers):
+                sprint_team_shocks[i] = sprint_shock_by_cid[constructors[i]]
+
+            sprint_positions = sample_positions(sprint_raw, RACE_NOISE_BASE * 0.8,
+                                                confidences, rng,
+                                                constructor_ids=constructors,
+                                                team_shocks=sprint_team_shocks)
             sprint_dnf_mask = rng.random(n_drivers) < (dnf_probs * 0.5)  # Lower DNF in sprint
             sprint_positions[sprint_dnf_mask] = GRID_SIZE
             sprint_overtakes = sample_overtakes(
