@@ -249,9 +249,10 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 - ✅ 4.3 Enhanced constructor scoring (2026-04-04)
 
 - ✅ Confidence interval calibration (2026-04-04)
+- ✅ Multi-week transfer planning (2026-04-04)
 
 **Next up:**
-- Multi-week transfer planning
+- (All planned features completed)
 
 ## How to Validate Improvements
 
