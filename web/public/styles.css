@@ -2807,5 +2807,25 @@ table.sortable th.sort-desc::after {
     text-align: center; max-width: 800px; margin: 0 auto;
 }
 
+/* Tool explainer */
+.tool-explainer {
+    margin: 0 0 16px 0;
+    font-size: 0.85rem;
+}
+.tool-explainer summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-weight: 600;
+    padding: 8px 0;
+}
+.tool-explainer p, .tool-explainer li {
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+.tool-explainer ul {
+    padding-left: 20px;
+    margin-top: 8px;
+}
+
 /* About intro */
 .about-intro { color: var(--text-secondary); margin-bottom: 24px; font-size: 0.95rem; line-height: 1.6; }

@@ -1899,7 +1899,11 @@ function runTransferAdvisor() {
     }
 
     const isWildcard = chip === 'wild_card';
-    const maxTransfers = isWildcard ? 7 : freeTransfers; // Wildcard = unlimited
+    const maxExtraTransfers = parseInt(document.getElementById('maxExtraTransfers').value) || 0;
+    if (maxExtraTransfers >= 3) {
+        alert('Consider using Wild Card chip for 3+ extra transfers \u2014 it gives unlimited free transfers!');
+    }
+    const maxTransfers = isWildcard ? 7 : freeTransfers + maxExtraTransfers; // Wildcard = unlimited
     const transferPenalty = 10; // -10 pts per extra transfer
 
     // Score function
@@ -1941,15 +1945,34 @@ function runTransferAdvisor() {
     const results = [];
     const MAX_RESULTS = 200;
 
-    // Generate constructor pairs
+    // Generate constructor pairs (respecting locked constructors)
     const cPairs = [];
     for (let i = 0; i < allConstructors.length; i++) {
         for (let j = i + 1; j < allConstructors.length; j++) {
+            if (lockedConstructors.size > 0) {
+                const pair = new Set([allConstructors[i].constructor_id, allConstructors[j].constructor_id]);
+                let valid = true;
+                for (const lc of lockedConstructors) {
+                    if (!pair.has(lc)) { valid = false; break; }
+                }
+                if (!valid) continue;
+            }
             cPairs.push({
                 items: [allConstructors[i], allConstructors[j]],
                 cost: allConstructors[i].current_price + allConstructors[j].current_price,
             });
         }
+    }
+
+    // Pre-filter locked drivers — they must always be in the lineup
+    const lockedDriverList = allDrivers.filter(d => lockedDrivers.has(d.driver_id));
+    const freeDriverPool = allDrivers.filter(d => !lockedDrivers.has(d.driver_id));
+    const neededDrivers = numDriverSlots - lockedDriverList.length;
+    const lockedDriverCost = lockedDriverList.reduce((s, d) => s + d.current_price, 0);
+
+    if (neededDrivers < 0) {
+        alert(`You have locked more than ${numDriverSlots} drivers. Please unlock some.`);
+        return;
     }
 
     // Cap total iterations to prevent browser freeze (C(22,5)*C(11,2) = ~1.45M)
@@ -1966,30 +1989,35 @@ function runTransferAdvisor() {
             if (!newConIds.has(cid)) conTransfers++;
         }
         // If constructor transfers alone exceed limit, skip this pair
-        if (!isWildcard && conTransfers > maxTransfers + 3) continue;
+        if (!isWildcard && conTransfers > maxTransfers) continue;
 
-        const combos = combinations(allDrivers, numDriverSlots);
+        // Budget remaining after constructor pair and locked drivers
+        const remainBudget = effectiveBudget - cp.cost - lockedDriverCost;
+        if (remainBudget < 0) continue;
+
+        const combos = combinations(freeDriverPool, neededDrivers);
         for (const combo of combos) {
             if (++iterations > MAX_ITERATIONS) { hitCap = true; break; }
 
             const driverCost = combo.reduce((s, d) => s + d.current_price, 0);
-            const totalCost = cp.cost + driverCost;
-            if (totalCost > effectiveBudget) continue;
+            if (driverCost > remainBudget) continue;
+            const allDriversInLineup = [...lockedDriverList, ...combo];
+            const totalCost = cp.cost + lockedDriverCost + driverCost;
 
             // Count transfers needed
-            const newDriverIds = new Set(combo.map(d => d.driver_id));
+            const newDriverIds = new Set(allDriversInLineup.map(d => d.driver_id));
             let transfersNeeded = conTransfers;
             for (const did of currentDriverIds) {
                 if (!newDriverIds.has(did)) transfersNeeded++;
             }
-            if (!isWildcard && transfersNeeded > maxTransfers + 3) continue; // cap search space
+            if (!isWildcard && transfersNeeded > maxTransfers) continue; // cap search space
 
             // Find best boost drivers (sorted by expected points)
-            const sortedCombo = [...combo].sort((a, b) => b.expected_points - a.expected_points);
+            const sortedCombo = [...allDriversInLineup].sort((a, b) => b.expected_points - a.expected_points);
             const boostedDriver = sortedCombo[0];
             const secondBoostedDriver = (chip === '3x_boost' && sortedCombo.length > 1) ? sortedCombo[1] : null;
 
-            const allPicks = [...combo, ...cp.items];
+            const allPicks = [...allDriversInLineup, ...cp.items];
             const totalPoints = chipAdjustedPoints(allPicks, boostedDriver.driver_id, secondBoostedDriver ? secondBoostedDriver.driver_id : null);
 
             // Penalty for extra transfers
@@ -1998,11 +2026,11 @@ function runTransferAdvisor() {
             const netPoints = totalPoints - penalty;
 
             // Final score
-            const baseScore = [...combo, ...cp.items].reduce((s, x) => s + score(x), 0);
+            const baseScore = [...allDriversInLineup, ...cp.items].reduce((s, x) => s + score(x), 0);
             const finalScore = (strategy === 'max_points') ? netPoints : baseScore - penalty;
 
             results.push({
-                drivers: combo,
+                drivers: allDriversInLineup,
                 constructors: cp.items,
                 totalCost,
                 totalPoints,
@@ -2029,8 +2057,23 @@ function runTransferAdvisor() {
         return true;
     });
 
+    // Filter out pointless transfers: find the "keep current team" score and remove results that are worse or equal
+    const keepCurrentResult = unique.find(l => l.transfersNeeded === 0);
+    const keepCurrentPoints = keepCurrentResult ? keepCurrentResult.netPoints : -Infinity;
+    const filtered = unique.filter(l => {
+        // Always keep the "no transfers" option
+        if (l.transfersNeeded === 0) return true;
+        // Filter out lineups that don't improve on keeping current team
+        return l.netPoints > keepCurrentPoints;
+    });
+
     // Take top results
-    allLineups = unique.slice(0, MAX_RESULTS);
+    allLineups = filtered.slice(0, MAX_RESULTS);
+
+    // If the best option is "keep current team", highlight it
+    if (allLineups.length > 0 && allLineups[0].transfersNeeded === 0) {
+        allLineups[0]._isKeepCurrent = true;
+    }
 
     if (allLineups.length === 0) {
         const resultEl = document.getElementById('optimizerResult');
@@ -2119,11 +2162,12 @@ function renderTransferCard(lineup, index, chip) {
     const consIn = newConIds.filter(id => !currentConstructorIds.includes(id));
 
     const expandedClass = index === 0 ? ' expanded' : '';
+    const optionLabel = lineup._isKeepCurrent ? 'Keep Current Team' : `Option #${index + 1}`;
     let html = `<div class="lineup-block${expandedClass}" style="margin-bottom:16px;" onclick="this.classList.toggle('expanded')">
         <div class="lineup-block-header">
-            <h4><span class="lineup-expand-icon">▼</span> Option #${index + 1}</h4>
+            <h4><span class="lineup-expand-icon">\u25BC</span> ${optionLabel}</h4>
             <span class="lineup-block-stats">
-                ${lineup.netPoints.toFixed(1)} net pts · ${lineup.transfersNeeded} transfer${lineup.transfersNeeded !== 1 ? 's' : ''}
+                ${lineup.netPoints.toFixed(1)} net pts \u00b7 ${lineup.transfersNeeded} transfer${lineup.transfersNeeded !== 1 ? 's' : ''}
                 ${lineup.penalty > 0 ? ` · <span style="color:var(--red, #ef4444)">-${lineup.penalty} penalty</span>` : ''}
                 · $${lineup.totalCost.toFixed(1)}M
             </span>
@@ -2172,8 +2216,8 @@ function renderTransferCard(lineup, index, chip) {
             <div class="pick-h-team">${team.name}</div>
             <div class="pick-h-pts">${displayPts}<span class="pick-h-pts-label"> pts</span></div>
             <div class="pick-h-meta">
-                <span>$${d.current_price.toFixed(1)}M</span>
-                <span>P${d.predicted_quali}→P${d.predicted_finish}</span>
+                <span>$${d.current_price.toFixed(1)}M ${formatPriceChangeBadge(predictPriceChange(d, d.expected_points).expectedChange)}</span>
+                <span>P${d.predicted_quali}\u2192P${d.predicted_finish}</span>
             </div>
         </div>`;
     });
@@ -2187,7 +2231,7 @@ function renderTransferCard(lineup, index, chip) {
             <div class="pick-h-team">${c.driver_1} & ${c.driver_2}</div>
             <div class="pick-h-pts">${c.expected_points.toFixed(1)}<span class="pick-h-pts-label"> pts</span></div>
             <div class="pick-h-meta">
-                <span>$${c.current_price.toFixed(1)}M</span>
+                <span>$${c.current_price.toFixed(1)}M ${formatPriceChangeBadge(predictPriceChange(c, c.expected_points).expectedChange)}</span>
             </div>
         </div>`;
     });
@@ -2207,6 +2251,13 @@ function renderSwapRow(outItem, inItem, type) {
     const outPrice = outItem ? `$${outItem.current_price.toFixed(1)}M` : '';
     const inPrice = inItem ? `$${inItem.current_price.toFixed(1)}M` : '';
 
+    // Price change for incoming player
+    let inPriceChangeHtml = '';
+    if (inItem) {
+        const pc = predictPriceChange(inItem, inItem.expected_points);
+        inPriceChangeHtml = formatPriceChangeBadge(pc.expectedChange);
+    }
+
     return `<div class="transfer-swap">
         <div class="transfer-out" style="flex:1">
             <div class="transfer-pick-name">${outName}</div>
@@ -2214,10 +2265,16 @@ function renderSwapRow(outItem, inItem, type) {
         </div>
         <div class="transfer-arrow">→</div>
         <div class="transfer-in" style="flex:1">
-            <div class="transfer-pick-name">${inName}</div>
+            <div class="transfer-pick-name">${inName} ${inPriceChangeHtml}</div>
             <div class="transfer-pick-detail">${inPts} pts · ${inPrice}</div>
         </div>
     </div>`;
+}
+
+function formatPriceChangeBadge(change) {
+    if (change > 0) return `<span style="color:var(--green);font-size:0.75rem;font-weight:600;">\u2191 $${change.toFixed(1)}M</span>`;
+    if (change < 0) return `<span style="color:var(--red, #ef4444);font-size:0.75rem;font-weight:600;">\u2193 $${Math.abs(change).toFixed(1)}M</span>`;
+    return `<span style="color:var(--text-secondary);font-size:0.75rem;">\u2192 $0.0M</span>`;
 }
 
 // ============================================================
@@ -2351,7 +2408,7 @@ function projectScoresForRound(roundInfo, racesData) {
 function getUpcomingRounds(currentRound, horizon) {
     if (!seasonSummary || !seasonSummary.rounds) return [];
     return seasonSummary.rounds
-        .filter(r => r.round > currentRound)
+        .filter(r => r.round >= currentRound)
         .slice(0, horizon);
 }
 
@@ -2533,9 +2590,9 @@ async function runMultiWeekPlanner() {
 
     const currentRound = data.round || 0;
 
-    // Load race calendar from seasonSummary
+    // Load race calendar from seasonSummary (include current round since transfers haven't been made)
     const upcomingRounds = seasonSummary.rounds
-        .filter(r => r.round > currentRound)
+        .filter(r => r.round >= currentRound)
         .slice(0, horizon);
 
     if (upcomingRounds.length === 0) {
@@ -2545,11 +2602,31 @@ async function runMultiWeekPlanner() {
     }
 
     // Project scores for each upcoming round
-    const roundProjections = upcomingRounds.map(r => ({
-        ...r,
-        isSprint: (trackData.sprint_rounds || []).includes(r.round),
-        ...projectScoresForRound(r, seasonSummary.rounds),
-    }));
+    // For current round, use actual ML predictions; for future rounds, use track-similarity projections
+    const roundProjections = upcomingRounds.map(r => {
+        if (r.round === currentRound) {
+            // Use actual ML predictions for current round
+            const driverScores = {};
+            const constructorScores = {};
+            for (const d of data.drivers) {
+                driverScores[d.driver_id] = d.expected_points || 0;
+            }
+            for (const c of data.constructors) {
+                constructorScores[c.constructor_id] = c.expected_points || 0;
+            }
+            return {
+                ...r,
+                isSprint: (trackData.sprint_rounds || []).includes(r.round),
+                drivers: driverScores,
+                constructors: constructorScores,
+            };
+        }
+        return {
+            ...r,
+            isSprint: (trackData.sprint_rounds || []).includes(r.round),
+            ...projectScoresForRound(r, seasonSummary.rounds),
+        };
+    });
 
     // === Beam Search ===
     const BEAM_WIDTH = 60;
@@ -2572,7 +2649,8 @@ async function runMultiWeekPlanner() {
 
         for (const state of beam) {
             // Transfers gained this round (1 per round, max 5 banked)
-            const transfersThisRound = Math.min(state.bankedTransfers + 1, 5);
+            // For the current round (ri===0), use banked transfers as-is (no +1 since we haven't passed a round yet)
+            const transfersThisRound = ri === 0 ? state.bankedTransfers : Math.min(state.bankedTransfers + 1, 5);
 
             // Generate candidates: 0, 1, or 2 swaps
             const maxSwaps = Math.min(2, transfersThisRound);
@@ -2627,15 +2705,90 @@ async function runMultiWeekPlanner() {
                 }
             }
 
+            // Limitless chip: pick best team ignoring budget constraint
+            if (state.chipsAvailable.includes('limitless')) {
+                const sortedDrivers = data.drivers
+                    .map(d => ({ id: d.driver_id, pts: proj.drivers[d.driver_id] || 0, price: d.current_price }))
+                    .sort((a, b) => b.pts - a.pts);
+                const sortedCons = data.constructors
+                    .map(c => ({ id: c.constructor_id, pts: proj.constructors[c.constructor_id] || 0, price: c.current_price }))
+                    .sort((a, b) => b.pts - a.pts);
+                const llDrivers = sortedDrivers.slice(0, 5).map(d => d.id);
+                const llCons = sortedCons.slice(0, 2).map(c => c.id);
+                if (llDrivers.length === 5) {
+                    const swapDetails = [];
+                    for (let i = 0; i < 5; i++) {
+                        if (llDrivers[i] !== state.drivers[i]) {
+                            swapDetails.push({ type: 'driver', out: state.drivers[i], in: llDrivers[i] });
+                        }
+                    }
+                    for (let i = 0; i < 2; i++) {
+                        if (llCons[i] !== state.constructors[i]) {
+                            swapDetails.push({ type: 'constructor', out: state.constructors[i], in: llCons[i] });
+                        }
+                    }
+                    candidates.push({
+                        drivers: llDrivers,
+                        constructors: llCons,
+                        swaps: swapDetails.length,
+                        swapDetails,
+                        useChip: 'limitless',
+                    });
+                }
+            }
+
+            // 3x Boost, No Negative, Autopilot: use current best candidate team but with chip scoring
+            const chipOnlyTypes = ['3x_boost', 'no_negative', 'autopilot'];
+            for (const chipType of chipOnlyTypes) {
+                if (state.chipsAvailable.includes(chipType)) {
+                    // Use the no-swap candidate (current team) with chip applied
+                    candidates.push({
+                        drivers: [...state.drivers],
+                        constructors: [...state.constructors],
+                        swaps: 0,
+                        swapDetails: [],
+                        useChip: chipType,
+                    });
+                }
+            }
+
             for (const cand of candidates) {
-                const pts = scoreTeam(cand.drivers, cand.constructors, proj.drivers, proj.constructors);
+                let pts = scoreTeam(cand.drivers, cand.constructors, proj.drivers, proj.constructors);
                 const usedChip = cand.useChip || null;
+
+                // Apply chip scoring effects
+                if (usedChip === '3x_boost' || usedChip === 'autopilot') {
+                    // Find top scorer and apply boost
+                    const dScores = cand.drivers.map(did => ({ id: did, pts: proj.drivers[did] || 0 })).sort((a, b) => b.pts - a.pts);
+                    if (dScores.length > 0) {
+                        // autopilot = 2x on best; 3x_boost = 3x on best + 2x on second
+                        const primaryMult = usedChip === '3x_boost' ? 2 : 1; // extra multiplier (3x-1=2 or 2x-1=1)
+                        pts += dScores[0].pts * primaryMult;
+                        if (usedChip === '3x_boost' && dScores.length > 1) {
+                            pts += dScores[1].pts; // 2x-1=1
+                        }
+                    }
+                } else if (usedChip === 'no_negative') {
+                    // Recalculate with negative scores floored to 0
+                    pts = 0;
+                    for (const did of cand.drivers) {
+                        pts += Math.max(0, proj.drivers[did] || 0);
+                    }
+                    for (const cid of cand.constructors) {
+                        pts += Math.max(0, proj.constructors[cid] || 0);
+                    }
+                }
 
                 // Transfer penalty
                 let penalty = 0;
                 let remainingTransfers = transfersThisRound;
                 if (usedChip === 'wild_card') {
                     remainingTransfers = transfersThisRound; // No transfers consumed
+                } else if (usedChip === 'limitless') {
+                    // Limitless doesn't affect transfers, just budget
+                    const extraSwaps = Math.max(0, cand.swaps - transfersThisRound);
+                    penalty = extraSwaps * TRANSFER_PENALTY;
+                    remainingTransfers = Math.max(0, transfersThisRound - cand.swaps);
                 } else {
                     const extraSwaps = Math.max(0, cand.swaps - transfersThisRound);
                     penalty = extraSwaps * TRANSFER_PENALTY;

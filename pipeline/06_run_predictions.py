@@ -446,6 +446,73 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
         sprint_model_path = TRAINED_DIR / "sprint_model.json"
         sprint_feature_list = feature_cols_data.get("sprint_features", race_feature_list)
 
+        # === Load actual sprint qualifying grid ===
+        # For sprint weekends, sprint qualifying (Shootout) happens BEFORE our deadline.
+        # This is analogous to how quali_position feeds the race model.
+        sprint_grid_loaded = False
+
+        # Method 1: Check normalized sprint_results.csv (for completed sprint rounds)
+        sprint_csv = Path(JOLPICA_MODEL_ROWS_DIR).parent / "normalized" / str(year) / "sprint_results.csv"
+        if sprint_csv.exists():
+            sprint_res = pd.read_csv(sprint_csv)
+            sprint_res = sprint_res[sprint_res["round"] == target_round]
+            if not sprint_res.empty and "grid" in sprint_res.columns:
+                grid_map = dict(zip(sprint_res["driver_id"], sprint_res["grid"]))
+                pred_df["sprint_grid"] = pred_df["driver_id"].map(grid_map)
+                n_mapped = pred_df["sprint_grid"].notna().sum()
+                if n_mapped > 0:
+                    sprint_grid_loaded = True
+                    print(f"  Loaded sprint grid from sprint_results.csv: {n_mapped}/{len(pred_df)} drivers")
+
+        # Method 2: Try FastF1 Sprint Shootout / Sprint Qualifying session results
+        if not sprint_grid_loaded:
+            try:
+                import fastf1
+                for sq_name in ["Sprint Shootout", "Sprint Qualifying", "SQ"]:
+                    try:
+                        sq_session = fastf1.get_session(year, target_round, sq_name)
+                        sq_session.load(laps=False, telemetry=False, weather=False, messages=False)
+                        sq_results = sq_session.results
+                        if sq_results is not None and not sq_results.empty:
+                            # Map FastF1 abbreviation to our driver_id
+                            abbrev_to_jolpica, _ = load_driver_id_maps()
+                            # FastF1 results have 'Abbreviation' and 'Position' columns
+                            if "Abbreviation" in sq_results.columns and "Position" in sq_results.columns:
+                                for _, row in sq_results.iterrows():
+                                    abbrev = row["Abbreviation"]
+                                    pos = row["Position"]
+                                    # Find matching driver_id
+                                    did = abbrev_to_jolpica.get(abbrev)
+                                    if did is not None:
+                                        mask = pred_df["driver_id"] == did
+                                        pred_df.loc[mask, "sprint_grid"] = int(pos)
+                                n_mapped = pred_df["sprint_grid"].notna().sum()
+                                if n_mapped > 0:
+                                    sprint_grid_loaded = True
+                                    print(f"  Loaded sprint grid from FastF1 ({sq_name}): {n_mapped}/{len(pred_df)} drivers")
+                                    break
+                    except Exception:
+                        continue
+            except Exception as e:
+                print(f"  Could not load FastF1 sprint qualifying: {e}")
+
+        # Method 3: Fall back to predicted qualifying positions
+        if not sprint_grid_loaded:
+            print(f"  No sprint qualifying data available — using predicted qualifying as sprint grid proxy")
+            pred_df["sprint_grid"] = pred_df["predicted_quali_position"]
+
+        # Compute sprint-grid-derived features (same as training)
+        sg = pred_df["sprint_grid"]
+        pred_df["sprint_is_front_row"] = (sg <= 2).astype(int)
+        pred_df["sprint_is_top3"] = (sg <= 3).astype(int)
+        pred_df["sprint_is_top10"] = (sg <= 10).astype(int)
+        pred_df["sprint_grid_advantage"] = 1.0 / (sg + 0.5)
+        if "quali_position" in pred_df.columns:
+            pred_df["quali_to_sprint_grid_delta"] = pred_df["quali_position"] - sg
+
+        # Sprint qualifying position for display / fantasy scoring
+        pred_df["predicted_sprint_quali_position"] = pred_df["sprint_grid"].astype(int)
+
         if sprint_model_path.exists():
             print(f"  Using dedicated sprint model")
             sprint_model = xgb.XGBRanker()
@@ -463,8 +530,6 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
             print(f"  No sprint model found — falling back to race model")
             pred_df["predicted_sprint_position"] = pred_df["predicted_race_position"].values
             pred_df["predicted_sprint_raw"] = race_raw
-
-        pred_df["predicted_sprint_quali_position"] = pred_df["predicted_quali_position"]
 
     # ---- Build output ----
     # Map driver_id back to abbreviation for readability

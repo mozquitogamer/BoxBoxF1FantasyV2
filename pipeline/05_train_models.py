@@ -84,7 +84,7 @@ QUALI_EXCLUDE = {
     "is_classified", "is_dnf", "is_dns", "is_dsq",
     "dnf_mechanical", "dnf_collision", "dnf_driver_error",
     # Sprint
-    "sprint_position", "sprint_points",
+    "sprint_position", "sprint_points", "sprint_grid",
     # Weight
     "sample_weight",
     # Race-specific form features (used only in race model)
@@ -619,8 +619,33 @@ def main() -> None:
     print(f"  Sprint rows available: {len(sprint_df):,}")
     print(f"  Sprint seasons: {sorted(sprint_df['season'].unique())}")
 
-    # Sprint model uses same features as race model (including quali_position)
-    sprint_available = [c for c in race_feature_cols if c in sprint_df.columns]
+    # === Sprint grid features ===
+    # Sprint grid (from sprint qualifying/shootout) is the #1 feature for sprint predictions,
+    # just like quali_position is the #1 feature for race predictions.
+    # At prediction time, we have ACTUAL sprint qualifying results (deadline = sprint race start).
+    if "sprint_grid" in sprint_df.columns:
+        sg = sprint_df["sprint_grid"]
+        sprint_df["sprint_is_front_row"] = (sg <= 2).astype(int)
+        sprint_df["sprint_is_top3"] = (sg <= 3).astype(int)
+        sprint_df["sprint_is_top10"] = (sg <= 10).astype(int)
+        sprint_df["sprint_grid_advantage"] = 1.0 / (sg + 0.5)
+        # Delta between regular qualifying position and sprint qualifying position
+        if "quali_position" in sprint_df.columns:
+            sprint_df["quali_to_sprint_grid_delta"] = sprint_df["quali_position"] - sg
+        print(f"  Sprint grid feature coverage: {sg.notna().sum()}/{len(sprint_df)} rows")
+    else:
+        print(f"  WARNING: sprint_grid not available — sprint model will lack key feature")
+
+    # Sprint model uses race features PLUS sprint-grid-derived features
+    SPRINT_EXTRA_FEATURES = [
+        "sprint_grid", "sprint_is_front_row", "sprint_is_top3",
+        "sprint_is_top10", "sprint_grid_advantage", "quali_to_sprint_grid_delta",
+    ]
+    sprint_feature_cols = list(race_feature_cols)
+    for sf in SPRINT_EXTRA_FEATURES:
+        if sf in sprint_df.columns and sf not in sprint_feature_cols:
+            sprint_feature_cols.append(sf)
+    sprint_available = [c for c in sprint_feature_cols if c in sprint_df.columns]
     sprint_wf_results = []
     sprint_model = None
     sprint_train_size = 0
@@ -646,7 +671,7 @@ def main() -> None:
         # Walk-forward validation (only test years with sprint data)
         print("\n  Walk-forward validation:")
         sprint_wf_results = walk_forward_validate(
-            sprint_df, race_feature_cols, "sprint_position", make_sprint_model, "Sprint",
+            sprint_df, sprint_feature_cols, "sprint_position", make_sprint_model, "Sprint",
             use_ranking=True,
         )
 

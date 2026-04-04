@@ -696,6 +696,10 @@ def load_all_normalized_data() -> pd.DataFrame:
                 sprint_merge_cols.append("sprint_position")
             if "sprint_points" in sprint.columns:
                 sprint_merge_cols.append("sprint_points")
+            # Include sprint grid (from sprint qualifying/shootout) — critical feature
+            if "grid" in sprint.columns:
+                sprint["sprint_grid"] = ensure_int(sprint["grid"])
+                sprint_merge_cols.append("sprint_grid")
 
             sprint_small = sprint[[c for c in sprint_merge_cols if c in sprint.columns]].copy()
             df_year = df_year.merge(sprint_small, on=["season", "round", "driver_id"], how="left")

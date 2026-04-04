@@ -267,14 +267,16 @@ The ranking objective (`rank:pairwise`) uses LambdaMART, which optimizes for *co
 
 ```
 XGBRanker(n_estimators=400, learning_rate=0.035, max_depth=4,
-          objective="rank:pairwise", reg_lambda=1.5, subsample=0.85, colsample_bytree=0.85)
+          objective="rank:pairwise", reg_lambda=1.5, subsample=0.80, colsample_bytree=0.80)
 ```
 
 - **Target:** Relevance labels derived from sprint finishing position
 - **Training data:** 501 sprint-only rows (2021-2026) — sprints have different dynamics than full races
-- **Why dedicated model?** Sprints are shorter (1/3 race distance), have limited strategy (usually 0 pit stops), different scoring (P1=8 not 25), and less chaos. The race model was trained mostly on full-distance data and doesn't capture sprint-specific patterns well.
+- **Key insight:** For sprint weekends, the deadline is sprint race start. At that point, sprint qualifying (Shootout) has already happened, giving us actual sprint grid positions — a hugely informative signal, just like how regular qualifying feeds the race model.
+- **Sprint grid as #1 feature:** `sprint_grid` (importance=0.032) and `sprint_grid_advantage` (#2) are the top features. Derived features include `sprint_is_front_row`, `sprint_is_top3`, `sprint_is_top10`, and `quali_to_sprint_grid_delta` (how a driver's sprint qualifying compared to regular qualifying).
 - **Lighter regularization:** Fewer trees (400 vs 650), shallower depth (4 vs 5), higher learning rate (0.035 vs 0.03) — smaller dataset needs less complexity
-- **Walk-forward results:** MAE=3.696, Kendall's tau=0.492, Top-3 accuracy=63.3%
+- **Walk-forward results:** MAE=3.371, Kendall's tau=0.542, Top-3 accuracy=66.7%
+- **At prediction time:** Loads actual sprint qualifying results from normalized CSV or FastF1 session data; falls back to predicted qualifying positions if sprint qualifying hasn't happened yet
 - **Fallback:** If sprint model unavailable, MC simulation falls back to race model raw scores
 - **MC integration:** Sprint raw z-scores used with team-correlated noise at 0.8x race noise base
 
@@ -764,7 +766,7 @@ Sprint weekends only have FP1 (60 minutes vs. 180 minutes of FP data on normal w
    Per-driver DNF probability from blended historical + season data. Correlated DNF in MC (multi-car incidents + team failures). DNF % displayed on driver cards. Constructor DNF impact in scoring breakdown.
 
 2. ~~**Sprint-Specific Predictions**~~ ✅
-   Dedicated XGBRanker sprint model trained on 501 sprint-only rows (2021-2026). Lighter params (400 trees, depth=4, lr=0.035). Walk-forward MAE=3.696, tau=0.492. MC uses sprint z-scores with 0.8x noise.
+   Dedicated XGBRanker sprint model trained on 501 sprint-only rows (2021-2026). Sprint qualifying grid as #1 feature. Walk-forward MAE=3.371, tau=0.542, Top-3=66.7%. MC uses sprint z-scores with 0.8x noise.
 
 3. ~~**Enhanced Constructor Scoring**~~ ✅
    Constructor scoring = drivers' points + qualifying bonus + expected pit stop points (analytical from team priors) - DNF impact. Per-iteration MC simulation with pit stop sampling. Scoring breakdown on constructor cards.

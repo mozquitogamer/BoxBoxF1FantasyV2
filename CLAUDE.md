@@ -62,7 +62,7 @@ BoxBoxF1FantasyV2/
 ├── models/trained/                   # Saved XGBoost models (.json)
 ├── web/public/
 │   ├── index.html                    # Single-page app shell
-│   ├── app.js                        # All frontend logic (~5,500 lines)
+│   ├── app.js                        # All frontend logic (~5,500+ lines)
 │   ├── styles.css                    # CSS with custom properties for theming
 │   └── data/                         # JSON files served to frontend
 │       ├── predictions.json          # Current round predictions
@@ -71,7 +71,7 @@ BoxBoxF1FantasyV2/
 │       ├── official_fantasy_points.json
 │       ├── track_data.json           # Circuit feature vectors + race-circuit mappings
 │       └── driver_history.json       # Per-driver/constructor actual points history
-├── docs/                             # Technical documentation
+├── docs/                             # Technical documentation + user guide
 ├── dashboard/                        # Streamlit analytics dashboard
 └── vercel.json                       # Vercel deployment config
 ```
@@ -89,7 +89,7 @@ XGBoost's native NaN handling means: when FP data exists → model uses it to re
 
 - **Qualifying model:** `XGBRanker(n_estimators=1200, lr=0.025, depth=3, objective="rank:pairwise")`
 - **Race model:** `XGBRanker(n_estimators=650, lr=0.03, depth=5, objective="rank:pairwise")`
-- **Sprint model:** `XGBRanker(n_estimators=400, lr=0.035, depth=4, objective="rank:pairwise")` — trained on 501 sprint-only rows
+- **Sprint model:** `XGBRanker(n_estimators=400, lr=0.035, depth=4, objective="rank:pairwise")` — trained on 501 sprint-only rows, uses sprint qualifying grid as top feature
 - **FP signal model:** `ExtraTreesRegressor(n_estimators=500, depth=6)` — used only for confidence scoring, not direct predictions
 - Output is relevance scores ranked to produce predicted positions per race
 - **Calibration:** `calibrate_confidence.py` compares MC predictions vs actuals, saves noise multiplier to `data/seed/mc_calibration.json`, auto-loaded by MC simulation
@@ -118,9 +118,9 @@ Single-page vanilla JS app with tab-based navigation. Tabs: Drivers, Constructor
 
 Key features:
 - **Driver/Constructor cards** with predicted points, MC confidence intervals, price change brackets, scoring breakdowns
-- **Lineup optimizer** — brute-force over C(22,5)xC(11,2)=1.4M combinations. 4 strategies (Max Points, Max Value, Budget Builder, Balanced). Lock/exclude picks.
+- **Lineup optimizer** — brute-force over C(22,5)xC(11,2)=1.4M combinations. 4 strategies (Max Points, Max Value, Budget Builder, Balanced). Lock/exclude picks (left-click to lock, right-click to exclude).
 - **6 chips:** Limitless (no budget cap), 3x Boost (best driver 3x + second-best 2x), Wild Card (unlimited transfers), No Negative (negatives become 0), Autopilot (auto 2x on best), Final Fix (post-quali changes)
-- **Transfer Advisor** — given current team + budget + free transfers, finds optimal swaps with -10pts/extra transfer penalty
+- **Transfer Advisor** — given current team + budget + free transfers + max extra transfers (0-2), finds optimal swaps respecting locked/excluded picks. Shows expected price change for each recommendation. Filters out transfers worse than keeping current team.
 - **Multi-Week Transfer Planner** — beam search (width 60) over 2-5 upcoming rounds, projects scores using track-similarity-weighted historical performance, plans optimal transfer sequences with chip deployment
 - **Price change prediction** — PPM rating system (Great/Good/Poor/Terrible) with A-tier (>$18.5M) and B-tier brackets
 - **Season Overview** — championship standings, driver and constructor price trackers, cumulative fantasy standings

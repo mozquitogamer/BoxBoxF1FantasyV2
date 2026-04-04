@@ -51,7 +51,7 @@ MODEL_RANDOM_STATE: int = 42
 MIN_LONG_RUN_LAPS: int = 5
 
 # -- Sessions ------------------------------------------------------------------
-ALL_SESSIONS: list[str] = ["FP1", "FP2", "FP3", "Qualifying", "Race", "Sprint"]
+ALL_SESSIONS: list[str] = ["FP1", "FP2", "FP3", "Qualifying", "Race", "Sprint", "Sprint Shootout"]
 FP_SESSIONS: list[str] = ["FP1", "FP2", "FP3"]
 SPRINT_FP_SESSIONS: list[str] = ["FP1"]  # Sprint weekends only have FP1
 

@@ -199,10 +199,12 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 - DNF probability displayed on driver cards (color-coded: green/yellow/red)
 - Constructor DNF impact shown in scoring breakdown
 
-#### 4.2 Sprint-specific predictions ✅ COMPLETED (2026-04-04)
+#### 4.2 Sprint-specific predictions ✅ COMPLETED (2026-04-04, improved 2026-04-04)
 - Dedicated `XGBRanker` sprint model trained on 501 sprint-only rows (2021-2026)
 - Lighter regularization: 400 trees, depth=4, lr=0.035, reg_lambda=1.5
-- Walk-forward validation: MAE=3.696, tau=0.492, Top-3=63.3%
+- **Sprint qualifying grid as #1 feature:** Sprint grid (from Shootout) is now the top feature (importance=0.032), with derived features (sprint_grid_advantage, sprint_is_top3, sprint_is_front_row, quali_to_sprint_grid_delta)
+- Walk-forward validation: MAE=3.371, tau=0.542, Top-3=66.7% (improved from MAE=3.696/tau=0.492/Top3=63.3%)
+- At prediction time, loads actual sprint qualifying results from normalized data or FastF1
 - Sprint predictions use dedicated model raw scores (falls back to race model if unavailable)
 - MC simulation uses sprint raw z-scores with team-correlated noise (0.8x race noise)
 - Sprint DNF probability halved, sprint-specific overtake calibration retained
