@@ -583,6 +583,7 @@ Pipeline → .parquet files → 08_export_website_json.py → .json files → gi
 The export script also:
 - **Auto-syncs official fantasy points** from `data/seed/official_fantasy_points.json` to the web directory
 - **Overrides prices** in predictions with latest values from `data/seed/fantasy_prices.json`
+- **Exports driver and constructor price data** to `season_summary.json` for the price tracker tables (current price, starting price, change, trend)
 
 The website loads JSON files client-side. No server, no database, no API calls at runtime.
 
@@ -627,7 +628,7 @@ Sprint weekends only have FP1 (60 minutes vs. 180 minutes of FP data on normal w
    `pipeline/weather_forecast.py` pulls Open-Meteo forecasts. Per-session rain probability, temperature, wind speed. Weather widget on website.
 
 3. ~~**Chip Strategy Advisor**~~ ✅
-   All 5 chips supported in the lineup optimizer: Mega Driver (3x), Extra DRS (+1 driver), No Negative, Limitless, Wildcard.
+   All 6 chips supported in the lineup optimizer: Limitless, 3x Boost (3x on best driver + 2x on second-best), Wild Card, No Negative, Autopilot, Final Fix.
 
 4. ~~**Team Setup Integration / Transfer Advisor**~~ ✅
    Users input current team, budget, free transfers. Optimizer recommends optimal transfers with penalty calculation.

@@ -182,13 +182,16 @@ Visual representations of the entire system architecture, data flow, and race we
 ║  │  ┌─────────────────────────────────────────────────────┐              │    ║
 ║  │  │  WEBSITE FEATURES                                   │              │    ║
 ║  │  │  ├── Driver predictions (cards + table)             │              │    ║
-║  │  │  ├── Constructor predictions                        │              │    ║
+║  │  │  ├── Constructor predictions (with scoring breakdown)│             │    ║
 ║  │  │  ├── Lineup optimizer (brute-force, 1.4M combos)    │              │    ║
+║  │  │  ├── 6 chips: Limitless, 3x Boost, Wild Card,       │              │    ║
+║  │  │  │   No Negative, Autopilot, Final Fix              │              │    ║
 ║  │  │  ├── Lock/exclude picks                             │              │    ║
 ║  │  │  ├── Price change predictions (PPM-based)           │              │    ║
 ║  │  │  ├── Monte Carlo confidence intervals               │              │    ║
 ║  │  │  ├── Post-race comparison (predicted vs actual)     │              │    ║
-║  │  │  ├── Season standings & price tracker               │              │    ║
+║  │  │  ├── Season standings & driver/constructor price     │              │    ║
+║  │  │  │   trackers (current, starting, change, trend)    │              │    ║
 ║  │  │  ├── FP analysis (pace, degradation, sectors)       │              │    ║
 ║  │  │  └── Countdown timer to lock deadline               │              │    ║
 ║  │  └─────────────────────────────────────────────────────┘              │    ║

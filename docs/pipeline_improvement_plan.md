@@ -178,7 +178,7 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 - ~~Given predicted fantasy points + confidence intervals, solve for the optimal 5-driver + 2-constructor team under the $100M budget constraint~~
 - Brute-force optimizer checking C(22,5) x C(11,2) = ~1.4M combinations
 - Transfer advisor: given current team + budget + free transfers, find optimal swaps with -10pt penalty per extra transfer
-- All 5 chip types supported: Mega Driver (3x), Extra DRS (+1 driver), No Negative, Limitless, Wildcard
+- All 6 chip types supported: Limitless, 3x Boost (3x + 2x dual boost), Wild Card, No Negative, Autopilot, Final Fix
 - Lock/exclude picks: left-click to force into lineup, right-click to exclude
 - 4 strategies: Max Points, Max Value, Budget Builder, Balanced
 
