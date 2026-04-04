@@ -23,7 +23,7 @@ Our pipeline (Jolpica priors + FP telemetry → XGBoost → Monte Carlo) is a so
 | ~~**No relative pace normalization**~~ — ✅ Fixed: session-relative delta features | ~~MEDIUM~~ | `03_extract_features.py` |
 | **Independent DNF sampling** — misses correlated incidents (first-lap pileups, team reliability) | LOW-MED | `08_monte_carlo_fantasy.py` |
 | **No betting odds calibration** — missing a free, highly-informative signal | LOW-MED | Not implemented |
-| **Confidence intervals uncalibrated** — no validation that P5-P95 captures 90% of outcomes | LOW | `08_monte_carlo_fantasy.py` |
+| ~~**Confidence intervals uncalibrated**~~ — ✅ Fixed: auto-calibration from actual results, noise multiplier applied | ~~LOW~~ | `calibrate_confidence.py`, `08_monte_carlo_fantasy.py` |
 
 ---
 
@@ -199,10 +199,13 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 - DNF probability displayed on driver cards (color-coded: green/yellow/red)
 - Constructor DNF impact shown in scoring breakdown
 
-#### 4.2 Sprint-specific predictions
-- Sprint predictions already implemented: separate noise (80% of race), halved DNF probability, sprint-specific overtake calibration
-- Dedicated sprint model (shorter race, limited strategy, different scoring) — future improvement
-- Currently sprint positions derived from race model with sprint-specific adjustments
+#### 4.2 Sprint-specific predictions ✅ COMPLETED (2026-04-04)
+- Dedicated `XGBRanker` sprint model trained on 501 sprint-only rows (2021-2026)
+- Lighter regularization: 400 trees, depth=4, lr=0.035, reg_lambda=1.5
+- Walk-forward validation: MAE=3.696, tau=0.492, Top-3=63.3%
+- Sprint predictions use dedicated model raw scores (falls back to race model if unavailable)
+- MC simulation uses sprint raw z-scores with team-correlated noise (0.8x race noise)
+- Sprint DNF probability halved, sprint-specific overtake calibration retained
 
 #### 4.3 Enhanced constructor scoring ✅ COMPLETED (2026-04-04)
 - Constructor scoring now includes: sum of drivers' points + qualifying teamwork bonus + expected pit stop points - DNF impact
@@ -210,6 +213,20 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 - Per-iteration constructor simulation in Monte Carlo with pit stop sampling
 - Scoring breakdown displayed on constructor cards: pit stop points, DNF probability, DNF impact, qualifying bonus
 - Fast teams (Red Bull, McLaren, Mercedes) earn ~14-15 expected pit stop pts; slower teams ~7-8 pts
+
+#### Confidence interval calibration ✅ COMPLETED (2026-04-04)
+**Files:** `pipeline/calibrate_confidence.py`, `pipeline/08_monte_carlo_fantasy.py`
+
+- New `calibrate_confidence.py` script analyzes MC predictions vs actual results across all completed rounds
+- Computes empirical coverage at P5-P95 (target 90%) and P25-P75 (target 50%)
+- PIT (Probability Integral Transform) histogram checks for uniform distribution of outcomes
+- Per-tier analysis (front/midfield/back) and per-round breakdown
+- DNF impact analysis (DNF outcomes are hardest to capture in CI)
+- Computes noise multiplier: scales all noise bases to achieve target coverage
+- Conservative cap: ±10% adjustment with <3 rounds of data, uncapped with 6+ rounds
+- Saves calibration to `data/seed/mc_calibration.json`, auto-loaded by MC simulation
+- Website Accuracy tab now shows both 90% CI and 50% CI coverage metrics
+- Initial results (2 rounds): 90% CI=86.4% (slightly narrow), noise multiplier=1.1x
 
 ---
 
@@ -228,11 +245,12 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 - ✅ 3.4 Price change prediction (2026-04-01)
 - ✅ 3.5 Weather integration (2026-04-01)
 - ✅ 4.1 DNF/reliability modeling (2026-04-04)
+- ✅ 4.2 Sprint-specific predictions (2026-04-04)
 - ✅ 4.3 Enhanced constructor scoring (2026-04-04)
 
+- ✅ Confidence interval calibration (2026-04-04)
+
 **Next up:**
-- 4.2 Sprint-specific predictions (dedicated sprint model)
-- Confidence interval calibration
 - Multi-week transfer planning
 
 ## How to Validate Improvements

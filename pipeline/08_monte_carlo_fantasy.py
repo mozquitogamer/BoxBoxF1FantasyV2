@@ -152,6 +152,30 @@ INCIDENT_DNF_BOOST = 0.02   # Small base probability of multi-car incident per s
 
 
 # ==============================================================================
+# Calibration loading
+# ==============================================================================
+
+def load_calibration() -> dict:
+    """Load calibration parameters from data/seed/mc_calibration.json.
+
+    Returns dict with noise_multiplier (default 1.0) and optional bias correction.
+    The calibration is produced by calibrate_confidence.py which compares
+    MC predictions against actual results across completed rounds.
+    """
+    path = SEED_DIR / "mc_calibration.json"
+    if not path.exists():
+        return {"noise_multiplier": 1.0, "bias_correction": 0.0}
+    with open(path) as f:
+        cal = json.load(f)
+    return {
+        "noise_multiplier": cal.get("noise_multiplier", 1.0),
+        "bias_correction": cal.get("bias_correction", 0.0),
+        "n_rounds": cal.get("n_rounds", 0),
+        "coverage_90": cal.get("coverage_90", None),
+    }
+
+
+# ==============================================================================
 # Data loading
 # ==============================================================================
 
@@ -606,6 +630,7 @@ def run_simulations(
     n_sims: int = DEFAULT_SIMULATIONS,
     seed: int = DEFAULT_SEED,
     is_sprint: bool = False,
+    calibration: dict | None = None,
 ) -> dict:
     """Run Monte Carlo simulations and return aggregated results.
 
@@ -615,6 +640,8 @@ def run_simulations(
         n_sims: Number of simulations to run
         seed: Random seed for reproducibility
         is_sprint: Whether this is a sprint weekend
+        calibration: Dict with noise_multiplier and bias_correction from
+                     calibrate_confidence.py. If None, uses defaults.
 
     Returns:
         Dict with per-driver simulation statistics
@@ -673,6 +700,16 @@ def run_simulations(
 
     confidences = pred_df["confidence"].values.astype(float)
 
+    # Apply calibration noise multiplier
+    cal = calibration or {"noise_multiplier": 1.0, "bias_correction": 0.0}
+    noise_mult = cal.get("noise_multiplier", 1.0)
+    cal_quali_noise = QUALI_NOISE_BASE * noise_mult
+    cal_race_noise = RACE_NOISE_BASE * noise_mult
+    if noise_mult != 1.0:
+        cal_rounds = cal.get("n_rounds", "?")
+        print(f"  Calibration applied: noise x{noise_mult:.3f} "
+              f"(from {cal_rounds} rounds of data)")
+
     # DNF probabilities from fantasy_df (matched by driver_abbrev)
     dnf_probs = np.zeros(n_drivers)
     fp_lookup = fantasy_df.set_index("driver_abbrev")
@@ -712,12 +749,12 @@ def run_simulations(
         # 1. Sample qualifying positions (with teammate correlation)
         # Generate per-team shock for qualifying
         quali_team_shocks = np.zeros(n_drivers)
-        quali_shock_by_cid = {cid: rng.normal(0, TEAMMATE_CORRELATION_ALPHA * QUALI_NOISE_BASE)
+        quali_shock_by_cid = {cid: rng.normal(0, TEAMMATE_CORRELATION_ALPHA * cal_quali_noise)
                               for cid in unique_constructors}
         for i in range(n_drivers):
             quali_team_shocks[i] = quali_shock_by_cid[constructors[i]]
 
-        quali_positions = sample_positions(quali_raw, QUALI_NOISE_BASE, confidences, rng,
+        quali_positions = sample_positions(quali_raw, cal_quali_noise, confidences, rng,
                                            constructor_ids=constructors, team_shocks=quali_team_shocks)
 
         # 2. Correlated DNF sampling
@@ -744,12 +781,12 @@ def run_simulations(
 
         # 3. Sample race positions with teammate correlation (separate shocks from quali)
         race_team_shocks = np.zeros(n_drivers)
-        race_shock_by_cid = {cid: rng.normal(0, TEAMMATE_CORRELATION_ALPHA * RACE_NOISE_BASE)
+        race_shock_by_cid = {cid: rng.normal(0, TEAMMATE_CORRELATION_ALPHA * cal_race_noise)
                              for cid in unique_constructors}
         for i in range(n_drivers):
             race_team_shocks[i] = race_shock_by_cid[constructors[i]]
 
-        race_positions = sample_positions(race_raw, RACE_NOISE_BASE, confidences, rng,
+        race_positions = sample_positions(race_raw, cal_race_noise, confidences, rng,
                                           constructor_ids=constructors, team_shocks=race_team_shocks)
         # DNF drivers get position = grid_size (last)
         race_positions[dnf_mask] = GRID_SIZE
@@ -772,12 +809,12 @@ def run_simulations(
             # Sprint uses dedicated sprint model scores (or race fallback)
             # with separate team shocks and reduced noise (shorter race)
             sprint_team_shocks = np.zeros(n_drivers)
-            sprint_shock_by_cid = {cid: rng.normal(0, TEAMMATE_CORRELATION_ALPHA * RACE_NOISE_BASE * 0.8)
+            sprint_shock_by_cid = {cid: rng.normal(0, TEAMMATE_CORRELATION_ALPHA * cal_race_noise * 0.8)
                                    for cid in unique_constructors}
             for i in range(n_drivers):
                 sprint_team_shocks[i] = sprint_shock_by_cid[constructors[i]]
 
-            sprint_positions = sample_positions(sprint_raw, RACE_NOISE_BASE * 0.8,
+            sprint_positions = sample_positions(sprint_raw, cal_race_noise * 0.8,
                                                 confidences, rng,
                                                 constructor_ids=constructors,
                                                 team_shocks=sprint_team_shocks)
@@ -876,12 +913,16 @@ def run_simulations(
             "seed": seed,
             "quali_noise_base": QUALI_NOISE_BASE,
             "race_noise_base": RACE_NOISE_BASE,
+            "calibrated_quali_noise": round(cal_quali_noise, 4),
+            "calibrated_race_noise": round(cal_race_noise, 4),
+            "noise_multiplier": round(noise_mult, 4),
             "confidence_noise_factor": CONFIDENCE_NOISE_FACTOR,
             "overtake_cv": OVERTAKE_CV,
             "teammate_correlation_alpha": TEAMMATE_CORRELATION_ALPHA,
             "team_dnf_correlation": TEAM_DNF_CORRELATION,
             "incident_dnf_boost": INCIDENT_DNF_BOOST,
             "calibration_source": "OpenF1 R1+R2 actual data (2026)",
+            "calibration_rounds": cal.get("n_rounds", 0),
             "is_sprint_weekend": is_sprint,
         },
         # Return raw arrays for constructor per-iteration simulation
@@ -1278,6 +1319,14 @@ def main() -> None:
 
     print(f"  {len(pred_df)} drivers loaded")
 
+    # Load calibration (from calibrate_confidence.py)
+    calibration = load_calibration()
+    if calibration.get("noise_multiplier", 1.0) != 1.0:
+        cov = calibration.get("coverage_90")
+        cov_str = f", coverage_90={cov*100:.1f}%" if cov else ""
+        print(f"  Calibration loaded: noise_mult={calibration['noise_multiplier']:.3f}"
+              f" ({calibration.get('n_rounds', '?')} rounds{cov_str})")
+
     # Run simulations
     results = run_simulations(
         pred_df=pred_df,
@@ -1285,6 +1334,7 @@ def main() -> None:
         n_sims=args.simulations,
         seed=args.seed,
         is_sprint=is_sprint,
+        calibration=calibration,
     )
 
     # Load pitstop priors for constructor simulation

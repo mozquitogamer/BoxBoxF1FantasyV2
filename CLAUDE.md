@@ -35,6 +35,7 @@ BoxBoxF1FantasyV2/
 │   ├── 12_count_overtakes.py       # Overtakes from FastF1 sector data
 │   ├── 13_fetch_openf1_overtakes.py # Overtakes from OpenF1 API
 │   ├── 13_fetch_pitstop_stationary.py # Pit stop stationary times
+│   ├── calibrate_confidence.py      # CI calibration: MC predictions vs actuals
 │   ├── run_weekend.py              # Orchestrator: detects phase, runs pipeline
 │   ├── weather_forecast.py         # Open-Meteo weather forecasts
 │   ├── feature_engineering.py      # Cross-layer engineered features
@@ -85,8 +86,10 @@ XGBoost's native NaN handling means: when FP data exists → model uses it to re
 
 - **Qualifying model:** `XGBRanker(n_estimators=1200, lr=0.025, depth=3, objective="rank:pairwise")`
 - **Race model:** `XGBRanker(n_estimators=650, lr=0.03, depth=5, objective="rank:pairwise")`
+- **Sprint model:** `XGBRanker(n_estimators=400, lr=0.035, depth=4, objective="rank:pairwise")` — trained on 501 sprint-only rows
 - **FP signal model:** `ExtraTreesRegressor(n_estimators=500, depth=6)` — used only for confidence scoring, not direct predictions
 - Output is relevance scores ranked to produce predicted positions per race
+- **Calibration:** `calibrate_confidence.py` compares MC predictions vs actuals, saves noise multiplier to `data/seed/mc_calibration.json`, auto-loaded by MC simulation
 
 ## Fantasy Scoring (07_calculate_fantasy.py)
 
@@ -162,6 +165,7 @@ Before each round, update `data/seed/fantasy_prices.json` with current F1 Fantas
 | Update prices | Edit `data/seed/fantasy_prices.json`, add entry to `price_history` |
 | Retrain models | `python pipeline/05_train_models.py` (uses all historical data) |
 | Add official fantasy points | Edit `data/seed/official_fantasy_points.json`, run export |
+| Recalibrate MC intervals | `python pipeline/calibrate_confidence.py` (after adding actual results) |
 | Deploy to website | `git add`, `git commit`, `git push` (Vercel auto-deploys) |
 | Run local dev server | `python web/serve.py` (port 3000) |
 | Run Streamlit dashboard | `streamlit run dashboard/app.py` |

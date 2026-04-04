@@ -2798,6 +2798,8 @@ function renderComparison(predictions, actual) {
     let ptsCompared = 0;
     let inCI = 0;
     let ciTotal = 0;
+    let inCI50 = 0;
+    let ciTotal50 = 0;
     let within5pts = 0;
     let within10pts = 0;
 
@@ -2817,12 +2819,19 @@ function renderComparison(predictions, actual) {
         // MC data if available
         const mcMean = pred.mc_total_mean;
         const mcP5 = pred.mc_total_p5;
+        const mcP25 = pred.mc_total_p25;
+        const mcP75 = pred.mc_total_p75;
         const mcP95 = pred.mc_total_p95;
         const withinCI = (mcP5 != null && mcP95 != null) ? (actPts >= mcP5 && actPts <= mcP95) : null;
+        const withinCI50 = (mcP25 != null && mcP75 != null) ? (actPts >= mcP25 && actPts <= mcP75) : null;
 
         if (withinCI !== null) {
             ciTotal++;
             if (withinCI) inCI++;
+        }
+        if (withinCI50 !== null) {
+            ciTotal50++;
+            if (withinCI50) inCI50++;
         }
 
         const qualiDiff = actQuali != null && predQuali != null ? Math.abs(actQuali - predQuali) : null;
@@ -2872,6 +2881,7 @@ function renderComparison(predictions, actual) {
     const ptsMae = ptsCompared > 0 ? (totalPtsAbsError / ptsCompared) : 0;
     const within10Pct = ptsCompared > 0 ? (within10pts / ptsCompared * 100) : 0;
     const ciCoverage = ciTotal > 0 ? (inCI / ciTotal * 100) : null;
+    const ciCoverage50 = ciTotal50 > 0 ? (inCI50 / ciTotal50 * 100) : null;
 
     function posColorClass(diff) {
         if (diff == null) return '';
@@ -2915,6 +2925,11 @@ function renderComparison(predictions, actual) {
             <div class="accuracy-stat">
                 <div class="accuracy-value">${ciCoverage.toFixed(0)}%</div>
                 <div class="accuracy-label" title="Percentage of actual results falling within the Monte Carlo 90% confidence interval (p5 to p95). Target: 90%.">90% CI Coverage (${inCI}/${ciTotal})</div>
+            </div>` : ''}
+            ${ciCoverage50 !== null ? `
+            <div class="accuracy-stat">
+                <div class="accuracy-value">${ciCoverage50.toFixed(0)}%</div>
+                <div class="accuracy-label" title="Percentage of actual results falling within the Monte Carlo 50% confidence interval (p25 to p75). Target: 50%.">50% CI Coverage (${inCI50}/${ciTotal50})</div>
             </div>` : ''}
             <div class="accuracy-stat">
                 <div class="accuracy-value" style="font-size:1.2rem">${totalPredPts.toFixed(0)} → ${totalActualPts.toFixed(0)}</div>
