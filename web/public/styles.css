@@ -2827,5 +2827,65 @@ table.sortable th.sort-desc::after {
     margin-top: 8px;
 }
 
+/* Target team */
+.mw-target-section {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+/* Team evolution */
+.mw-team-evolution {
+    margin-top: 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+}
+.mw-team-evolution summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 4px 0;
+}
+.mw-team-round {
+    margin: 8px 0;
+    padding: 8px;
+    background: var(--bg-secondary, var(--bg));
+    border-radius: 6px;
+}
+.mw-team-round-header {
+    font-weight: 600;
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+}
+.mw-team-round-roster {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.mw-team-member {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: var(--card);
+    border-left: 3px solid var(--team-color, #666);
+}
+.mw-team-member.new {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: var(--green, #22c55e);
+}
+.mw-team-member.constructor {
+    font-weight: 700;
+    font-size: 0.7rem;
+}
+.mw-member-pts {
+    color: var(--text-secondary);
+    font-size: 0.65rem;
+}
+
 /* About intro */
 .about-intro { color: var(--text-secondary); margin-bottom: 24px; font-size: 0.95rem; line-height: 1.6; }

@@ -295,6 +295,7 @@
                                 <li><strong>Score projections:</strong> Future scores are estimated from recent form x track similarity (how similar the upcoming circuit is to tracks where each driver has performed well)</li>
                                 <li><strong>Transfer banking:</strong> Unused free transfers carry over (max 5). The planner finds the optimal timing.</li>
                                 <li><strong>Chips:</strong> Check the chips you still have &mdash; the planner will suggest when to deploy them</li>
+                                <li><strong>Target team:</strong> Optionally define a dream team you want to reach &mdash; the planner finds the optimal transfer path to get there</li>
                             </ul>
                         </details>
                     </div>
@@ -329,6 +330,15 @@
                                 </select>
                             </div>
                             <button class="btn-primary" id="runMultiWeekPlanner">Plan My Transfers</button>
+                        </div>
+                        <div class="mw-target-section" style="margin-top:16px;">
+                            <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:6px;">
+                                <input type="checkbox" id="mwUseTarget"> Plan toward a target team
+                            </label>
+                            <div id="mwTargetTeam" class="hidden" style="margin-top:8px;">
+                                <p class="hint">Select the team you want to reach. The planner will find the optimal transfer path from your current team to this target.</p>
+                                <div class="my-team-grid" id="myTeamGridTarget"></div>
+                            </div>
                         </div>
                         <div class="mw-chips-section" style="margin-top:12px;">
                             <label style="font-weight:600;font-size:0.9rem;margin-bottom:6px;display:block;">Available Chips (check those you still have):</label>
@@ -599,6 +609,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" async></script>
-    <script src="app.js?v=41"></script>
+    <script src="app.js?v=42"></script>
 </body>
 </html>

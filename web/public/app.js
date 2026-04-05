@@ -97,6 +97,11 @@ let myTeamConstructors = [null, null];                  // 2 constructor_id slot
 // Multi-week planner data
 let trackData = null;
 let driverHistory = null;
+// Target team state (for multi-week planner target mode)
+let targetTeamDrivers = [null, null, null, null, null];
+let targetTeamConstructors = [null, null];
+// Slot picker mode: 'myTeam' or 'targetTeam'
+let slotPickerTarget = 'myTeam';
 
 // -- F1 Fantasy Price Change Thresholds --
 // PPM = cumulative_season_points / current_price
@@ -195,6 +200,7 @@ async function renderTabIfNeeded(tabName) {
             break;
         case 'optimizer':
             renderMyTeamGrid();
+            renderTargetTeamGrid();
             renderLockGrid();
             // Optimizer renders on button click, just mark ready
             _tabRendered.optimizer = true;
@@ -620,6 +626,20 @@ function setupControls() {
 
     // Multi-week planner
     document.getElementById('runMultiWeekPlanner').addEventListener('click', runMultiWeekPlanner);
+
+    // Multi-week target team toggle
+    const mwUseTargetCb = document.getElementById('mwUseTarget');
+    if (mwUseTargetCb) {
+        mwUseTargetCb.addEventListener('change', () => {
+            const targetDiv = document.getElementById('mwTargetTeam');
+            if (mwUseTargetCb.checked) {
+                targetDiv.classList.remove('hidden');
+                renderTargetTeamGrid();
+            } else {
+                targetDiv.classList.add('hidden');
+            }
+        });
+    }
 
     // Analysis panel toggle
     document.querySelectorAll('.analysis-btn').forEach(btn => {
@@ -1808,6 +1828,7 @@ function renderMyTeamGrid() {
                 }
                 const type = slot.dataset.slot;
                 const idx = parseInt(slot.dataset.index);
+                slotPickerTarget = 'myTeam';
                 showSlotPicker(type, idx);
             });
         });
@@ -1839,9 +1860,13 @@ function getMyTeamCost() {
 }
 
 function showSlotPicker(type, index) {
+    const isTarget = slotPickerTarget === 'targetTeam';
+    const driverArr = isTarget ? targetTeamDrivers : myTeamDrivers;
+    const consArr = isTarget ? targetTeamConstructors : myTeamConstructors;
+
     const alreadySelected = type === 'driver'
-        ? new Set(myTeamDrivers.filter(Boolean))
-        : new Set(myTeamConstructors.filter(Boolean));
+        ? new Set(driverArr.filter(Boolean))
+        : new Set(consArr.filter(Boolean));
 
     const items = type === 'driver' ? data.drivers : data.constructors;
 
@@ -1870,10 +1895,84 @@ function showSlotPicker(type, index) {
     overlay.querySelectorAll('.slot-picker-item:not(.disabled)').forEach(el => {
         el.addEventListener('click', () => {
             const id = el.dataset.id;
-            if (type === 'driver') myTeamDrivers[index] = id;
-            else myTeamConstructors[index] = id;
+            if (type === 'driver') driverArr[index] = id;
+            else consArr[index] = id;
             overlay.remove();
-            renderMyTeamGrid();
+            if (isTarget) renderTargetTeamGrid();
+            else renderMyTeamGrid();
+        });
+    });
+}
+
+// ============================================================
+// Target Team Grid (Multi-Week Planner target mode)
+// ============================================================
+
+function renderTargetTeamGrid() {
+    if (!data) return;
+    const grid = document.getElementById('myTeamGridTarget');
+    if (!grid) return;
+
+    let html = '';
+    // 5 driver slots
+    for (let i = 0; i < 5; i++) {
+        const did = targetTeamDrivers[i];
+        const driver = did ? data.drivers.find(d => d.driver_id === did) : null;
+        if (driver) {
+            const team = TEAMS[driver.constructor] || { color: '#666' };
+            html += `<div class="my-team-slot filled" style="--team-color:${team.color}" data-slot="driver" data-index="${i}">
+                <div class="slot-label">Driver ${i + 1}</div>
+                <div class="slot-name">${driver.name.split(' ').pop()}</div>
+                <div class="slot-price">$${driver.current_price.toFixed(1)}M</div>
+                <span class="slot-remove" data-slot="driver" data-index="${i}">&times;</span>
+            </div>`;
+        } else {
+            html += `<div class="my-team-slot" data-slot="driver" data-index="${i}">
+                <div class="slot-label">Driver ${i + 1}</div>
+                <div class="slot-name" style="color:var(--text-secondary)">+ Select</div>
+            </div>`;
+        }
+    }
+    // 2 constructor slots
+    for (let i = 0; i < 2; i++) {
+        const cid = targetTeamConstructors[i];
+        const con = cid ? data.constructors.find(c => c.constructor_id === cid) : null;
+        if (con) {
+            const team = TEAMS[con.constructor_id] || { color: '#666' };
+            html += `<div class="my-team-slot filled" style="--team-color:${team.color}" data-slot="constructor" data-index="${i}">
+                <div class="slot-label">Constructor ${i + 1}</div>
+                <div class="slot-name">${(con.name || con.constructor_id).toUpperCase()}</div>
+                <div class="slot-price">$${con.current_price.toFixed(1)}M</div>
+                <span class="slot-remove" data-slot="constructor" data-index="${i}">&times;</span>
+            </div>`;
+        } else {
+            html += `<div class="my-team-slot" data-slot="constructor" data-index="${i}">
+                <div class="slot-label">Constructor ${i + 1}</div>
+                <div class="slot-name" style="color:var(--text-secondary)">+ Select</div>
+            </div>`;
+        }
+    }
+    grid.innerHTML = html;
+
+    // Attach handlers
+    attachTargetGridHandlers(grid);
+}
+
+function attachTargetGridHandlers(gridEl) {
+    gridEl.querySelectorAll('.my-team-slot').forEach(slot => {
+        slot.addEventListener('click', (e) => {
+            if (e.target.classList.contains('slot-remove')) {
+                const type = e.target.dataset.slot;
+                const idx = parseInt(e.target.dataset.index);
+                if (type === 'driver') targetTeamDrivers[idx] = null;
+                else targetTeamConstructors[idx] = null;
+                renderTargetTeamGrid();
+                return;
+            }
+            const type = slot.dataset.slot;
+            const idx = parseInt(slot.dataset.index);
+            slotPickerTarget = 'targetTeam';
+            showSlotPicker(type, idx);
         });
     });
 }
@@ -2588,6 +2687,21 @@ async function runMultiWeekPlanner() {
         availableChips.push(cb.value);
     });
 
+    // Target team mode
+    const useTargetTeam = document.getElementById('mwUseTarget')?.checked || false;
+    let targetDriverSet = null;
+    let targetConsSet = null;
+    if (useTargetTeam) {
+        const filledTargetD = targetTeamDrivers.filter(Boolean).length;
+        const filledTargetC = targetTeamConstructors.filter(Boolean).length;
+        if (filledTargetD < 5 || filledTargetC < 2) {
+            alert('Please select your full target team (5 drivers + 2 constructors) before planning.');
+            return;
+        }
+        targetDriverSet = new Set(targetTeamDrivers.filter(Boolean));
+        targetConsSet = new Set(targetTeamConstructors.filter(Boolean));
+    }
+
     const currentRound = data.round || 0;
 
     // Load race calendar from seasonSummary (include current round since transfers haven't been made)
@@ -2826,6 +2940,18 @@ async function runMultiWeekPlanner() {
                     score = netPts * 0.7 + ppm * 30;
                 }
 
+                // Target team bonus: on the last round of the horizon, heavily boost teams matching the target
+                if (useTargetTeam && targetDriverSet && targetConsSet && ri === roundProjections.length - 1) {
+                    let matchBonus = 0;
+                    for (const did of cand.drivers) {
+                        if (targetDriverSet.has(did)) matchBonus += 100;
+                    }
+                    for (const cid of cand.constructors) {
+                        if (targetConsSet.has(cid)) matchBonus += 100;
+                    }
+                    score += matchBonus;
+                }
+
                 const newChipsAvail = usedChip
                     ? state.chipsAvailable.filter(c => c !== usedChip)
                     : [...state.chipsAvailable];
@@ -2951,6 +3077,44 @@ function displayMultiWeekResults(plans, roundProjections, currentRound) {
             html += '</div>';
         }
         html += '</div>';
+
+        // Team evolution
+        html += '<details class="mw-team-evolution"><summary>View Team Evolution</summary>';
+        let prevDrivers = [...myTeamDrivers];
+        let prevCons = [...myTeamConstructors];
+        for (const action of plan.roundActions) {
+            const currDrivers = action.team.drivers;
+            const currCons = action.team.constructors;
+            // Find the matching round projection for per-member scores
+            const rp = roundProjections.find(r => r.round === action.round);
+            html += `<div class="mw-team-round">`;
+            html += `<div class="mw-team-round-header">R${action.round} — ${action.circuit || action.name}</div>`;
+            html += `<div class="mw-team-round-roster">`;
+            for (const did of currDrivers) {
+                const d = data.drivers.find(x => x.driver_id === did);
+                if (!d) continue;
+                const isNew = !prevDrivers.includes(did);
+                const team = TEAMS[d.constructor] || { color: '#666' };
+                const projPts = rp ? (rp.drivers[did] || 0) : 0;
+                html += `<span class="mw-team-member${isNew ? ' new' : ''}" style="--team-color:${team.color}">
+                    ${d.name.split(' ').pop()} <span class="mw-member-pts">${projPts.toFixed(0)}</span>
+                </span>`;
+            }
+            for (const cid of currCons) {
+                const c = data.constructors.find(x => x.constructor_id === cid);
+                if (!c) continue;
+                const isNew = !prevCons.includes(cid);
+                const team = TEAMS[cid] || { color: '#666' };
+                const projPts = rp ? (rp.constructors[cid] || 0) : 0;
+                html += `<span class="mw-team-member constructor${isNew ? ' new' : ''}" style="--team-color:${team.color}">
+                    ${(c.name || cid).toUpperCase()} <span class="mw-member-pts">${projPts.toFixed(0)}</span>
+                </span>`;
+            }
+            html += '</div></div>';
+            prevDrivers = [...currDrivers];
+            prevCons = [...currCons];
+        }
+        html += '</details>';
 
         html += '</div>';
     }

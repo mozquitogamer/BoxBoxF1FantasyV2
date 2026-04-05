@@ -109,7 +109,8 @@ Three powerful tools in one tab. Switch between them using the mode buttons at t
    - **Balanced** — mix of points and value efficiency
    - **Budget Builder** — prioritizes asset appreciation
 4. **Check available chips** — select the chips you still have. The planner will suggest when to deploy them.
-5. Click "Plan My Transfers"
+5. **Optional: Target Team** — check "Plan toward a target team" and select the 5 drivers + 2 constructors you want to end up with. The planner will steer transfers toward that team while still optimizing intermediate rounds.
+6. Click "Plan My Transfers"
 
 **Understanding results:**
 
@@ -134,6 +135,8 @@ The **Projection Heatmap** shows projected scores for the top drivers and constr
 - Sprint rounds (marked with a sprint badge) have higher projected points due to extra scoring opportunities
 - Bank transfers when the upcoming round doesn't benefit from a swap — use them later when a big upgrade is available
 - Plans that hold (make no changes) for a round mean your current team is already well-suited for that circuit
+- Use "Target Team" mode when you know which team you want but need help planning the transfer path to get there
+- Click "View Team Evolution" on any plan to see your full roster at each round, with new additions highlighted in green
 
 ---
 

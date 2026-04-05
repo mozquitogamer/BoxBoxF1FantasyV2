@@ -110,7 +110,7 @@ Constructors simulated per-iteration: sum both drivers' simulated points + quali
 
 ## Multi-Week Transfer Planner (web/public/app.js)
 
-Plans optimal transfer sequences across 2-5 upcoming rounds using beam search optimization. Since ML predictions only exist for the current round, future rounds use track-similarity-weighted historical performance as score projections (`base_form × track_affinity × sprint_multiplier`). Track affinity comes from cosine similarity between circuit 9D feature vectors (similarity > 0.7 threshold, clamped 0.6-1.4). Beam search (width 60) explores 0-2 swaps per round with transfer banking (max 5), -10pts/extra transfer penalty, and chip deployment. Three strategies: Max Points, Balanced, Budget Gain. Requires `track_data.json` and `driver_history.json` (exported by `08_export_website_json.py`).
+Plans optimal transfer sequences across 2-5 upcoming rounds using beam search optimization. Since ML predictions only exist for the current round, future rounds use track-similarity-weighted historical performance as score projections (`base_form × track_affinity × sprint_multiplier`). Track affinity comes from cosine similarity between circuit 9D feature vectors (similarity > 0.7 threshold, clamped 0.6-1.4). Beam search (width 60) explores 0-2 swaps per round with transfer banking (max 5), -10pts/extra transfer penalty, and chip deployment. Three strategies: Max Points, Balanced, Budget Gain. Optional "Target Team" mode steers the planner toward a user-defined dream team. Team evolution view shows full roster per round with new/held badges and projected points. Requires `track_data.json` and `driver_history.json` (exported by `08_export_website_json.py`).
 
 ## Website Frontend (web/public/app.js)
 
