@@ -188,6 +188,24 @@ Post-race analysis for completed rounds.
 
 ---
 
+## Videos Tab
+
+Curated F1 video content relevant to the current race weekend or season. Browse race highlights, analysis clips, and technical breakdowns.
+
+---
+
+## Articles Tab
+
+Generated articles with data-driven analysis. Covers race previews, post-race reviews, and season trends based on the prediction pipeline's data.
+
+---
+
+## About Tab
+
+Background on how BoxBoxF1Fantasy works — the ML pipeline, data sources, scoring methodology, and project credits.
+
+---
+
 ## General Tips
 
 1. **Run the pipeline after FP3** — predictions are most accurate when practice telemetry is included (confidence jumps from ~65% to ~90%)

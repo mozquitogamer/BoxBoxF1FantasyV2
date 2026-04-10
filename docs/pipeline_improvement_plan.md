@@ -51,39 +51,23 @@ These changes fix fundamental methodology issues in the simulation layer. No ML 
 - Separate team shocks for qualifying and race (independent draws)
 - Produces realistic team outcomes: both drivers shift together with individual variation
 
-#### 1.3 Add pit stop modeling for constructors
+#### 1.3 Add pit stop modeling for constructors ✅ COMPLETED (2026-04-04)
 **Files:** `07_calculate_fantasy.py`, `08_monte_carlo_fantasy.py`, `config/fantasy_scoring.py`
 
-**Current:** Pit stop points defined in config but never calculated.
-**Scoring at stake:** 2-20 pts per stop + 5 pts fastest stop + 15 pts world record. With 1-2 stops per race, this is 5-50+ pts/race per constructor.
+**Implemented:** Pit stop scoring uses analytical CDF over scoring brackets in deterministic calculation, and per-iteration sampling in Monte Carlo. Per-team mean/std pit stop times from `data/seed/pit_stop_priors.json`. Scoring brackets: <2.0s=20pts, 2.0-2.2s=10pts, 2.2-2.5s=5pts, 2.5-3.0s=2pts, 3.0s+=0pts, fastest stop bonus=+5pts.
 
-**Approach:**
-- Create `data/seed/pit_stop_priors.json` with per-team average pit stop time and std (from 2026 data + historical)
-- In MC: sample pit stop time per team per stop from `N(team_mean, team_std)`
-- Score each stop per the bracket thresholds (>3.0s = 0pts, 2.5-3.0s = 2pts, etc.)
-- Award fastest-stop bonus to the team with the lowest sampled time
-- In deterministic calc: use expected value based on team's distribution crossing each threshold
-
-#### 1.4 Simulate constructors per MC iteration (not approximate)
+#### 1.4 Simulate constructors per MC iteration (not approximate) ✅ COMPLETED (2026-04-04)
 **File:** `08_monte_carlo_fantasy.py`
 
-**Current:** Constructor points = sum of driver means minus estimated DOTD. P5/P95 uses Gaussian approximation.
-**New:** In each of the 10K iterations:
-- Sum both drivers' simulated fantasy points (excluding DOTD, per rules)
-- Add simulated qualifying teamwork bonus (based on both drivers' simulated quali positions)
-- Add simulated pit stop points (from 1.3)
-- Aggregate across iterations for true constructor distributions
+**Implemented:** Each of the 10K MC iterations now computes full constructor points: sum both drivers' simulated fantasy points (excluding DOTD) + simulated qualifying teamwork bonus + sampled pit stop points. Aggregated across iterations for true constructor distributions with proper P5/P25/P50/P75/P95 percentiles.
 
-This captures the full nonlinearity and correlations that the current approximation misses.
-
-#### 1.5 Correlated DNF modeling
+#### 1.5 Correlated DNF modeling ✅ COMPLETED (2026-04-04)
 **File:** `08_monte_carlo_fantasy.py`
 
-**Current:** Each driver has independent DNF probability.
-**New:** Two-stage DNF sampling:
-- **Stage 1 — Incident events:** Sample whether a first-lap incident occurs (probability ~15% per race). If yes, sample 2-4 involved drivers weighted by grid position (midfield/back more exposed).
-- **Stage 2 — Mechanical DNF:** Sample independently per driver using team-specific reliability rates.
-- This produces realistic DNF clustering (0 DNFs sometimes, 4+ DNFs sometimes) instead of the unrealistic binomial-like distribution from independent sampling.
+**Implemented:** Two-stage DNF sampling:
+- **Stage 1 — Incident events:** Sample whether a first-lap incident occurs (~15% probability). If yes, 2-4 involved drivers weighted by grid position (midfield/back more exposed).
+- **Stage 2 — Mechanical DNF:** Independent per-driver using team-specific reliability rates with team-correlated component.
+- Produces realistic DNF clustering instead of unrealistic independent binomial distribution.
 
 ---
 

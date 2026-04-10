@@ -570,8 +570,20 @@ This is small enough to enumerate exhaustively in JavaScript in ~1-2 seconds. No
 
 ### Lock & Exclude
 
-- **Lock (left-click):** Force a pick into the lineup. Reduces search space.
-- **Exclude (right-click):** Remove from consideration. Useful for ruling out players you don't own or don't want.
+- **Lock (left-click):** Force a pick into the lineup. Reduces search space. Locked picks are stored in `lockedDrivers`/`lockedConstructors` Sets.
+- **Exclude (right-click):** Remove from consideration. Stored in `excludedDrivers`/`excludedConstructors` Sets. Shows red border with strikethrough.
+
+Lock/exclude is enforced across all three optimizer modes:
+- **Lineup Optimizer:** Locked picks are pre-selected; remaining slots filled from non-excluded pool. Budget is reduced by locked picks' costs.
+- **Transfer Advisor:** Locked picks in your current team cannot be swapped out. Excluded picks cannot be swapped in. The advisor pre-filters the candidate pool before evaluating swaps.
+- **Multi-Week Planner:** Same filtering applied at each round's swap candidate generation.
+
+### Price Change Badges
+
+Transfer recommendations display expected price change for each incoming player. The `formatPriceChangeBadge()` function renders:
+- **Green ↑** badge for expected price increases (e.g., "↑ $0.3M")
+- **Red ↓** badge for expected price decreases
+- Based on the PPM (Points Per Million) rating system with A-tier (>$18.5M) and B-tier brackets
 
 ### Generator-Based Combinations
 
@@ -701,7 +713,27 @@ Requires two JSON files exported by `08_export_website_json.py`:
 
 ### Display
 
-Results show a projection heatmap (top 12 drivers + top 6 constructors, color-coded by performance relative to average) and ranked plan cards with round-by-round timeline showing hold/swap/chip actions and projected points per round.
+### Target Team Mode
+
+Optional "Plan toward a target team" mode. Users select their ideal 5 drivers + 2 constructors as a target. The beam search adds a target team bonus on the final planning round: **+100 points per matching member** in the team composition. This steers the optimizer toward the dream team while still optimizing intermediate rounds for maximum points.
+
+The slot picker is shared between current team and target team selection, with a `slotPickerTarget` global flag ('myTeam' vs 'targetTeam') routing picks to the correct array.
+
+### Max Extra Transfers
+
+Users select how many paid transfers they're willing to accept (0, 1, or 2). Each extra transfer costs -10 points. If a user selects 3+, a message suggests using Wild Card instead. The Transfer Advisor caps `maxTransfers = freeTransfers + maxExtra` and includes the penalty in net point calculations. Results worse than keeping the current team are filtered out.
+
+### Display
+
+Results show a **projection heatmap** (top 12 drivers + top 6 constructors, color-coded by performance relative to average) and **ranked plan cards** with round-by-round timeline showing hold/swap/chip actions and projected points per round.
+
+### Team Evolution View
+
+Each plan card includes a "View Team Evolution" expandable section showing the full roster at each round. Team members are displayed with:
+- Constructor-colored left border for visual identification
+- **NEW** badge (green) for players added that round
+- Projected points per member per round
+- Round headers with cumulative projected score
 
 ---
 
