@@ -96,7 +96,7 @@ XGBoost's native NaN handling means: when FP data exists → model uses it to re
 
 ## Fantasy Scoring (07_calculate_fantasy.py)
 
-**Drivers:** Qualifying position pts + race position pts + positions gained/lost + overtakes (+1 each) + fastest lap probability (10pts) + DOTD probability (10pts) - DNF risk (-20pts). Sprint weekends add sprint qualifying + sprint race.
+**Drivers:** Qualifying position pts + race position pts + positions gained/lost + overtakes (+1 each) + fastest lap probability (10pts) + DOTD probability (10pts) - DNF risk (-20pts). Sprint weekends add sprint qualifying + sprint race with sprint-specific overtake estimation (~50% of race bases) and sprint-position-based FL probability.
 
 **Constructors:** Sum of both drivers' qualifying + race pts (excl DOTD) + qualifying teamwork bonus (Both Q3=+10, ..., Neither Q2=-1) + expected pit stop points (analytical CDF over scoring brackets) - DNF impact. Constructor scoring uses **base driver scores only** — never boosted/multiplied values.
 

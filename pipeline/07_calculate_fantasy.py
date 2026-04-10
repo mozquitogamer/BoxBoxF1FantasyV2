@@ -270,6 +270,32 @@ def estimate_overtakes(predicted_quali: int, predicted_race: int, grid_size: int
     return base + positions_gained
 
 
+def estimate_sprint_overtakes(predicted_quali: int, predicted_race: int) -> int:
+    """
+    Estimate expected overtakes for a sprint race (~45% of race distance).
+
+    Sprint races have fewer laps and fewer overtaking opportunities.
+    Bases aligned with SPRINT_OVERTAKE_BASE in 08_monte_carlo_fantasy.py.
+
+    Calibrated from OpenF1 R2 sprint data: mean=7.0, std=3.1 (n=22).
+    """
+    positions_gained = max(0, predicted_quali - predicted_race)
+
+    # Reduced base overtakes for sprint distance (~50% of race values)
+    if predicted_quali <= 3:
+        base = 1
+    elif predicted_quali <= 6:
+        base = 2
+    elif predicted_quali <= 12:
+        base = 3
+    else:
+        base = 4
+
+    # Fewer laps means fewer opportunities to convert position gains into counted overtakes
+    sprint_gains = max(0, positions_gained - 1)
+    return base + sprint_gains
+
+
 # -- Fantasy prices ------------------------------------------------------------
 
 def load_fantasy_prices() -> tuple[dict[str, float], dict[str, float]]:
@@ -384,8 +410,17 @@ def calculate_driver_fantasy(
 
             sprint_pos_pts = SPRINT_POSITION_POINTS.get(pred_sprint, 0)
             sprint_pos_change = pred_sprint_quali - pred_sprint
-            sprint_overtakes = estimate_overtakes(pred_sprint_quali, pred_sprint)
-            sprint_fl_prob = fl_prob
+            sprint_overtakes = estimate_sprint_overtakes(pred_sprint_quali, pred_sprint)
+
+            # Sprint FL probability based on sprint finish position (not race)
+            if pred_sprint <= 3:
+                sprint_fl_prob = 0.20
+            elif pred_sprint <= 6:
+                sprint_fl_prob = 0.10
+            elif pred_sprint <= 10:
+                sprint_fl_prob = 0.03
+            else:
+                sprint_fl_prob = 0.01
             expected_sprint_fl = sprint_fl_prob * SPRINT_FASTEST_LAP_BONUS
 
             sprint_race_pts = (

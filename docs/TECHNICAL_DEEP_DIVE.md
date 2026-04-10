@@ -349,7 +349,7 @@ For each driver:
 5. **Fastest lap:** probability × 10pts (F1 Fantasy bonus, separate from championship FL which was removed in 2026)
 6. **Driver of the Day:** probability × 10pts
 7. **DNF risk:** probability × (-20pts)
-8. **Sprint (if applicable):** separate scoring (P1=8, ..., P8=1; FL=5pts; DNF=-10pts)
+8. **Sprint (if applicable):** separate scoring (P1=8, ..., P8=1; FL=5pts; DNF=-10pts) with sprint-specific overtake estimation (~50% of race bases) and sprint-position-based FL probability
 
 For each constructor:
 1. **Sum both drivers' qualifying + race points** (excluding DOTD — per official rules)
@@ -444,7 +444,7 @@ The spread indicates risk. A narrow CI = predictable outcome. A wide CI = high v
 
 Each overtake is worth +1 fantasy point. A midfield driver who gains 5 positions and makes 10 overtakes can outscore a frontrunner. This is one of the most impactful and hardest-to-predict components.
 
-### Current Approach
+### Race Overtakes
 
 ```
 Estimated overtakes = base_overtakes(grid_position) + max(0, positions_gained)
@@ -460,6 +460,21 @@ Estimated overtakes = base_overtakes(grid_position) + max(0, positions_gained)
 | P13-P22 | 7-10 | Back markers have many cars to pass |
 
 **Why positions_gained is added:** If a driver goes from P15 to P8, they gained 7 positions. Most of those involve overtakes, plus there may be additional overtakes from battles with cars they ultimately finished behind (re-passes, back-and-forth).
+
+### Sprint Overtakes
+
+Sprints are ~45% of race distance with fewer overtaking opportunities. A separate `estimate_sprint_overtakes()` function uses reduced base values:
+
+| Grid Position | Sprint Base | Race Base | Ratio |
+|---------------|------------|-----------|-------|
+| P1-P3 | 1 | 2 | 50% |
+| P4-P6 | 2 | 4 | 50% |
+| P7-P12 | 3 | 6 | 50% |
+| P13-P22 | 4 | 7 | 57% |
+
+Sprint gains conversion is also reduced: `sprint_gains = max(0, positions_gained - 1)`, reflecting fewer laps to convert position changes into counted overtakes. This aligns the deterministic scoring (script 07) with the MC simulation's `SPRINT_OVERTAKE_BASE` values.
+
+Sprint fastest lap probability is also calculated independently from the sprint predicted position (not reused from the race).
 
 ### Known Limitation
 

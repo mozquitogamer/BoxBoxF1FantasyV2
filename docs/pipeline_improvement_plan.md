@@ -21,7 +21,7 @@ Our pipeline (Jolpica priors + FP telemetry → XGBoost → Monte Carlo) is a so
 | ~~**Regression target treats positions as continuous**~~ — ✅ Fixed: switched to `rank:pairwise` (LambdaMART) | ~~MEDIUM~~ | `05_train_models.py` |
 | ~~**FP features mix tyre compounds**~~ — ✅ Fixed: compound-aware feature extraction | ~~MEDIUM~~ | `03_extract_features.py` |
 | ~~**No relative pace normalization**~~ — ✅ Fixed: session-relative delta features | ~~MEDIUM~~ | `03_extract_features.py` |
-| **Independent DNF sampling** — misses correlated incidents (first-lap pileups, team reliability) | LOW-MED | `08_monte_carlo_fantasy.py` |
+| ~~**Independent DNF sampling**~~ — ✅ Fixed: two-stage correlated DNF (incidents + team-correlated mechanical) | ~~LOW-MED~~ | `08_monte_carlo_fantasy.py` |
 | **No betting odds calibration** — missing a free, highly-informative signal | LOW-MED | Not implemented |
 | ~~**Confidence intervals uncalibrated**~~ — ✅ Fixed: auto-calibration from actual results, noise multiplier applied | ~~LOW~~ | `calibrate_confidence.py`, `08_monte_carlo_fantasy.py` |
 
