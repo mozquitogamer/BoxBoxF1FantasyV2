@@ -188,15 +188,17 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 - Lighter regularization: 400 trees, depth=4, lr=0.035, reg_lambda=1.5
 - **Sprint qualifying grid as #1 feature:** Sprint grid (from Shootout) is now the top feature (importance=0.032), with derived features (sprint_grid_advantage, sprint_is_top3, sprint_is_front_row, quali_to_sprint_grid_delta)
 - Walk-forward validation: MAE=3.371, tau=0.542, Top-3=66.7% (improved from MAE=3.696/tau=0.492/Top3=63.3%)
-- At prediction time, loads actual sprint qualifying results from normalized data or FastF1
+- At prediction time, loads actual sprint qualifying results from normalized data or FastF1 (bug fix 2026-04-10: `target_round` → `round_num` was preventing grid loading)
 - Sprint predictions use dedicated model raw scores (falls back to race model if unavailable)
 - MC simulation uses sprint raw z-scores with team-correlated noise (0.8x race noise)
-- Sprint DNF probability halved, sprint-specific overtake calibration retained
+- Sprint DNF probability halved, sprint-specific overtake calibration (separate `estimate_sprint_overtakes()` with ~50% bases)
+- Sprint fastest lap probability calculated from sprint finish position (not reused from race)
 
 #### 4.3 Enhanced constructor scoring ✅ COMPLETED (2026-04-04)
 - Constructor scoring now includes: sum of drivers' points + qualifying teamwork bonus + expected pit stop points - DNF impact
 - Expected pit stop points calculated analytically from team pit stop time distributions (normal distribution over scoring brackets)
-- Per-iteration constructor simulation in Monte Carlo with pit stop sampling
+- Per-iteration constructor simulation in Monte Carlo with pit stop sampling and exact DOTD subtraction (tracks `all_dotd_idx` per sim, bug fix 2026-04-10: replaced approximate `_est_dotd()`)
+- Constructor MC output now includes P5/P25/P75/P95 percentiles (bug fix 2026-04-10: P25/P75 were missing)
 - Scoring breakdown displayed on constructor cards: pit stop points, DNF probability, DNF impact, qualifying bonus
 - Fast teams (Red Bull, McLaren, Mercedes) earn ~14-15 expected pit stop pts; slower teams ~7-8 pts
 
