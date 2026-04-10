@@ -455,7 +455,7 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
         sprint_csv = Path(JOLPICA_MODEL_ROWS_DIR).parent / "normalized" / str(year) / "sprint_results.csv"
         if sprint_csv.exists():
             sprint_res = pd.read_csv(sprint_csv)
-            sprint_res = sprint_res[sprint_res["round"] == target_round]
+            sprint_res = sprint_res[sprint_res["round"] == round_num]
             if not sprint_res.empty and "grid" in sprint_res.columns:
                 grid_map = dict(zip(sprint_res["driver_id"], sprint_res["grid"]))
                 pred_df["sprint_grid"] = pred_df["driver_id"].map(grid_map)
@@ -470,7 +470,7 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
                 import fastf1
                 for sq_name in ["Sprint Shootout", "Sprint Qualifying", "SQ"]:
                     try:
-                        sq_session = fastf1.get_session(year, target_round, sq_name)
+                        sq_session = fastf1.get_session(year, round_num, sq_name)
                         sq_session.load(laps=False, telemetry=False, weather=False, messages=False)
                         sq_results = sq_session.results
                         if sq_results is not None and not sq_results.empty:

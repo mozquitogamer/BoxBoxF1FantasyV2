@@ -558,16 +558,16 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             if abbrev in detected_race_ot:
                 overtakes = min(detected_race_ot[abbrev], MAX_RACE_OVERTAKES)
             else:
-                # Fallback: calibrated estimate
+                # Fallback: calibrated estimate (aligned with 07_calculate_fantasy.py)
                 pos_gained = max(0, positions_gained)
                 if r["grid"] <= 3:
-                    ot_base = 1
-                elif r["grid"] <= 6:
                     ot_base = 2
-                elif r["grid"] <= 12:
-                    ot_base = 3
-                else:
+                elif r["grid"] <= 6:
                     ot_base = 4
+                elif r["grid"] <= 12:
+                    ot_base = 6
+                else:
+                    ot_base = 7
                 overtakes = min(ot_base + pos_gained, MAX_RACE_OVERTAKES)
 
             race_pts = calc_race_points_driver(
@@ -605,8 +605,17 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
                     sprint_overtakes = min(detected_sprint_ot[abbrev], MAX_SPRINT_OVERTAKES)
                 else:
                     sprint_pos_gained = max(0, sr["grid"] - sr["position"])
-                    sprint_ot_base = 1 if sr["grid"] <= 6 else 2
-                    sprint_overtakes = min(sprint_ot_base + sprint_pos_gained, MAX_SPRINT_OVERTAKES)
+                    # Sprint bases aligned with estimate_sprint_overtakes() in 07
+                    if sr["grid"] <= 3:
+                        sprint_ot_base = 1
+                    elif sr["grid"] <= 6:
+                        sprint_ot_base = 2
+                    elif sr["grid"] <= 12:
+                        sprint_ot_base = 3
+                    else:
+                        sprint_ot_base = 4
+                    sprint_gains = max(0, sprint_pos_gained - 1)
+                    sprint_overtakes = min(sprint_ot_base + sprint_gains, MAX_SPRINT_OVERTAKES)
                 sprint_pts = calc_sprint_points_driver(
                     finish_position=sr["position"],
                     grid_position=sr["grid"],

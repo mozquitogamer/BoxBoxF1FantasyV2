@@ -359,7 +359,7 @@ For each constructor:
 
 ### Why DOTD Is Excluded from Constructors
 
-This was a bug we caught in our audit. Official F1 Fantasy 2026 rules explicitly exclude Driver of the Day bonus from constructor point totals. Before fixing this, constructors were inflated by ~1-2 points per weekend.
+Official F1 Fantasy 2026 rules explicitly exclude Driver of the Day bonus from constructor point totals. In deterministic scoring (script 07), the expected DOTD contribution is subtracted from each driver's points before summing for the constructor. In Monte Carlo simulation (script 08), the actual DOTD winner index is tracked per-iteration (`all_dotd_idx`), and exactly 10 points are subtracted from whichever driver won DOTD in that simulation — giving precise per-iteration constructor scores.
 
 ### Fastest Lap Probability
 

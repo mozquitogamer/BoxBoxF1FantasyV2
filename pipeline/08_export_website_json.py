@@ -221,6 +221,8 @@ def build_predictions_json(round_num: int) -> dict | None:
             entry["mc_total_mean"] = round(mc_c.get("mc_total_mean", 0), 1)
             entry["mc_total_std"] = round(mc_c.get("mc_total_std", 0), 1)
             entry["mc_total_p5"] = round(mc_c.get("mc_total_p5", 0), 1)
+            entry["mc_total_p25"] = round(mc_c.get("mc_total_p25", 0), 1)
+            entry["mc_total_p75"] = round(mc_c.get("mc_total_p75", 0), 1)
             entry["mc_total_p95"] = round(mc_c.get("mc_total_p95", 0), 1)
             entry["mc_pit_stop_pts"] = round(mc_c.get("mc_pit_stop_pts", 0), 1)
             entry["mc_dnf_prob"] = round(mc_c.get("mc_dnf_prob", 0.02), 3)

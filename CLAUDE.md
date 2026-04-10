@@ -106,7 +106,7 @@ XGBoost's native NaN handling means: when FP data exists → model uses it to re
 
 10,000 iterations per driver. Each iteration: add calibrated noise to model scores → re-rank → sample DNFs (two-stage: multi-car incidents + team-correlated mechanical failures) → sample overtakes → sample fastest lap/DOTD → compute full fantasy points. Noise bases auto-calibrated from `data/seed/mc_calibration.json` (computed by `calibrate_confidence.py`). Output: P5/P25/P50/P75/P95 percentiles.
 
-Constructors simulated per-iteration: sum both drivers' simulated points + qualifying bonus + sampled pit stop points.
+Constructors simulated per-iteration: sum both drivers' simulated points (with exact per-sim DOTD subtraction) + qualifying bonus + sampled pit stop points. Constructor output includes P5/P25/P75/P95 percentiles.
 
 ## Multi-Week Transfer Planner (web/public/app.js)
 

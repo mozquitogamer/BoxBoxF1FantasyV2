@@ -739,6 +739,7 @@ def run_simulations(
     all_race_pos = np.zeros((n_sims, n_drivers), dtype=int)
     all_overtakes = np.zeros((n_sims, n_drivers), dtype=int)
     all_dnf = np.zeros((n_sims, n_drivers), dtype=bool)
+    all_dotd_idx = np.full(n_sims, -1, dtype=int)  # Track DOTD winner per sim
 
     print(f"  Running {n_sims:,} simulations for {n_drivers} drivers...")
 
@@ -798,6 +799,7 @@ def run_simulations(
         # 5. Sample fastest lap & DOTD
         fl_idx = sample_fastest_lap(race_positions, dnf_mask, rng)
         dotd_idx = sample_dotd(race_positions, quali_positions, dnf_mask, rng)
+        all_dotd_idx[sim] = dotd_idx
 
         # 6. Sprint simulation (if applicable)
         sprint_positions = np.zeros(n_drivers, dtype=int)
@@ -932,6 +934,7 @@ def run_simulations(
             "all_race_pts": all_race_pts,
             "all_quali_pos": all_quali_pos,
             "all_dnf": all_dnf,
+            "all_dotd_idx": all_dotd_idx,
             "abbrevs": abbrevs,
             "constructors": constructors,
         },
@@ -997,6 +1000,7 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
             all_total_pts = sim_arrays["all_total_pts"]
             all_quali_pos = sim_arrays["all_quali_pos"]
             all_dnf = sim_arrays["all_dnf"]
+            all_dotd_idx = sim_arrays.get("all_dotd_idx")
 
             d1_idx = abbrev_to_idx[d1_abbrev]
             d2_idx = abbrev_to_idx[d2_abbrev]
@@ -1004,21 +1008,17 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
             constructor_pts = np.zeros(n_sims)
             pit_stop_pts_arr = np.zeros(n_sims)
             for sim in range(n_sims):
-                # Driver points (we approximate DOTD removal since we don't
-                # track which driver won DOTD per-sim; use expected DOTD pts)
                 d1_pts = all_total_pts[sim, d1_idx]
                 d2_pts = all_total_pts[sim, d2_idx]
 
-                # Approximate DOTD subtraction (DOTD doesn't count for constructors)
-                # ~1/22 base chance, weighted by position
-                d1_race_pos_mean = d1.get("mc_race_pos_mean", 11)
-                d2_race_pos_mean = d2.get("mc_race_pos_mean", 11)
-                def _est_dotd(pos):
-                    if pos <= 5: return 10 * 0.07
-                    elif pos <= 10: return 10 * 0.05
-                    else: return 10 * 0.03
-                d1_pts -= _est_dotd(d1_race_pos_mean)
-                d2_pts -= _est_dotd(d2_race_pos_mean)
+                # Exact DOTD subtraction (DOTD doesn't count for constructors)
+                # Subtract the actual 10-pt bonus from whichever driver won it
+                if all_dotd_idx is not None:
+                    sim_dotd = all_dotd_idx[sim]
+                    if sim_dotd == d1_idx:
+                        d1_pts -= RACE_DRIVER_OF_THE_DAY_BONUS
+                    elif sim_dotd == d2_idx:
+                        d2_pts -= RACE_DRIVER_OF_THE_DAY_BONUS
 
                 # Quali teamwork bonus (from actual simulated positions)
                 q1 = all_quali_pos[sim, d1_idx]
@@ -1069,6 +1069,8 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
             combined_mean = float(constructor_pts.mean())
             combined_std = float(constructor_pts.std())
             combined_p5 = float(np.percentile(constructor_pts, 5))
+            combined_p25 = float(np.percentile(constructor_pts, 25))
+            combined_p75 = float(np.percentile(constructor_pts, 75))
             combined_p95 = float(np.percentile(constructor_pts, 95))
             # Compute mean quali bonus across sims for reporting
             avg_quali_bonus = float(constructor_pts.mean()) - float(
@@ -1110,6 +1112,8 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
             combined_std = float(np.sqrt(d1_std**2 + d2_std**2 +
                                          2 * correlation * d1_std * d2_std))
             combined_p5 = combined_mean - 1.65 * combined_std
+            combined_p25 = combined_mean - 0.675 * combined_std
+            combined_p75 = combined_mean + 0.675 * combined_std
             combined_p95 = combined_mean + 1.65 * combined_std
             avg_quali_bonus = quali_bonus_est
             avg_pit_stop_pts = 0.0
@@ -1123,6 +1127,8 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
             "mc_total_mean": round(combined_mean, 1),
             "mc_total_std": round(combined_std, 1),
             "mc_total_p5": round(combined_p5, 1),
+            "mc_total_p25": round(combined_p25, 1),
+            "mc_total_p75": round(combined_p75, 1),
             "mc_total_p95": round(combined_p95, 1),
             "mc_pit_stop_pts": round(avg_pit_stop_pts, 1),
             "mc_dnf_prob": round(avg_dnf_prob, 3),
@@ -1259,6 +1265,8 @@ def update_web_predictions(round_num: int, results: dict,
             constructor["mc_total_mean"] = mc_c["mc_total_mean"]
             constructor["mc_total_std"] = mc_c["mc_total_std"]
             constructor["mc_total_p5"] = mc_c["mc_total_p5"]
+            constructor["mc_total_p25"] = mc_c.get("mc_total_p25", 0)
+            constructor["mc_total_p75"] = mc_c.get("mc_total_p75", 0)
             constructor["mc_total_p95"] = mc_c["mc_total_p95"]
             constructor["mc_value_score"] = mc_c["mc_value_score"]
 
