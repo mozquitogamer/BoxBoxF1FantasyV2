@@ -351,6 +351,229 @@ def walk_forward_validate(
     return results
 
 
+def _evaluate_race_model_under_post_fp(
+    train_df: pd.DataFrame,
+    test_df: pd.DataFrame,
+    feature_cols: list[str],
+    target_col: str,
+    model_factory,
+) -> list[dict]:
+    """
+    Evaluate the CURRENT race model training recipe (actual-quali training)
+    under the post-FP scenario: trained on actual quali, tested on walk-forward
+    predicted quali.
+
+    For each test season N:
+      - Train on train_df[season < N] using ACTUAL quali_position (as currently)
+      - Test on test_df[season == N] which has predicted_quali already swapped in
+      - Compute MAE, Kendall tau, Top-3 accuracy
+
+    This isolates the distribution-shift penalty of the current model recipe
+    without changing training data.
+    """
+    available = [c for c in feature_cols if c in train_df.columns and c in test_df.columns]
+    test_years = [y for y in sorted(test_df["season"].unique()) if y >= 2022]
+    results = []
+
+    for test_year in test_years:
+        tr_mask = train_df["season"] < test_year
+        te_mask = test_df["season"] == test_year
+
+        tr = train_df[tr_mask & train_df[target_col].notna()].copy()
+        te = test_df[te_mask & test_df[target_col].notna()].copy()
+
+        if len(tr) < 50 or len(te) < 10:
+            continue
+
+        tr = sort_by_race_groups(tr)
+        te = sort_by_race_groups(te)
+
+        X_tr = tr[available].copy()
+        y_tr_rel = position_to_relevance(tr[target_col])
+        X_te = te[available].copy()
+        y_te = te[target_col]
+        tr_qids = make_race_qids(tr)
+
+        if "sample_weight" in tr.columns:
+            w_tr = tr["sample_weight"].values
+            group_weights = []
+            prev_qid = -1
+            for i, qid in enumerate(tr_qids):
+                if qid != prev_qid:
+                    group_weights.append(w_tr[i])
+                    prev_qid = qid
+            w_groups = np.array(group_weights)
+        else:
+            w_groups = None
+
+        model = model_factory()
+        model.fit(X_tr, y_tr_rel, sample_weight=w_groups, qid=tr_qids)
+        scores = model.predict(X_te)
+        y_pred_pos = scores_to_positions(scores, te)
+
+        mae = mean_absolute_error(y_te, y_pred_pos)
+        rmse = np.sqrt(mean_squared_error(y_te, y_pred_pos))
+
+        taus = []
+        top3_correct = 0
+        top3_total = 0
+        for (season, rnd), _ in te.groupby(["season", "round"]):
+            mask = (te["season"] == season) & (te["round"] == rnd)
+            idx = np.where(mask.values)[0]
+            actual = y_te.values[idx]
+            predicted = y_pred_pos[idx]
+            if len(actual) >= 3:
+                tau, _ = kendalltau(actual, predicted)
+                if not np.isnan(tau):
+                    taus.append(tau)
+                actual_top3 = set(np.argsort(actual)[:3])
+                pred_top3 = set(np.argsort(predicted)[:3])
+                top3_correct += len(actual_top3 & pred_top3)
+                top3_total += 3
+
+        avg_tau = float(np.mean(taus)) if taus else 0.0
+        top3_acc = top3_correct / top3_total if top3_total > 0 else 0.0
+
+        results.append({
+            "test_year": int(test_year),
+            "train_size": len(tr),
+            "test_size": len(te),
+            "mae": round(float(mae), 4),
+            "rmse": round(float(rmse), 4),
+            "kendall_tau": round(float(avg_tau), 4),
+            "top3_accuracy": round(float(top3_acc), 4),
+        })
+        print(f"    Fold: Train [<{int(test_year)}] ({len(tr):,}) -> "
+              f"Test {int(test_year)} ({len(te):,}): "
+              f"MAE={mae:.3f}, tau={avg_tau:.3f}, Top3={top3_acc:.1%}")
+
+    return results
+
+
+def generate_walk_forward_quali_predictions(
+    df: pd.DataFrame,
+    quali_features: list[str],
+    model_factory,
+) -> pd.Series:
+    """
+    Generate predicted qualifying positions for training data via walk-forward.
+
+    Rationale
+    ---------
+    The race model is trained with `quali_position` as a feature. At training
+    time this is the ACTUAL qualifying result. At inference time during the
+    post-FP phase (before qualifying happens), the race model instead receives
+    the PREDICTED qualifying position from the quali model, which has error
+    (MAE ~1.5 positions). This creates a train/inference distribution shift:
+    the race model learns to over-trust `quali_position`, then at inference it
+    is given a noisy version of it.
+
+    To remove the shift, we generate predicted quali positions for all training
+    rows via walk-forward: for each test season N (starting from the second),
+    train a quali model on seasons < N and predict season N's qualifying.
+    The first season falls back to actual quali (not enough prior data).
+
+    Returns a Series aligned to df.index with predicted quali positions (NaN
+    where the quali target itself is NaN).
+    """
+    available_features = [c for c in quali_features if c in df.columns]
+    result = pd.Series(np.nan, index=df.index, dtype=float)
+
+    seasons = sorted(df["season"].unique())
+    if len(seasons) < 2:
+        # Single-season dataset -- fall back to actual quali
+        mask = df["quali_position"].notna()
+        result.loc[mask] = df.loc[mask, "quali_position"].astype(float)
+        return result
+
+    # First season: fall back to actual (no earlier data to train on)
+    first_mask = (df["season"] == seasons[0]) & df["quali_position"].notna()
+    result.loc[first_mask] = df.loc[first_mask, "quali_position"].astype(float)
+
+    for test_year in seasons[1:]:
+        train_mask = (df["season"] < test_year) & df["quali_position"].notna()
+        test_mask_full = (df["season"] == test_year) & df["quali_position"].notna()
+
+        train_df = df[train_mask].copy()
+        test_df = df[test_mask_full].copy()
+
+        if len(train_df) < 50 or len(test_df) < 5:
+            # Not enough data -- fall back to actual quali for this season
+            result.loc[test_mask_full] = df.loc[test_mask_full, "quali_position"].astype(float)
+            continue
+
+        # Preserve original indices before sorting (sort_by_race_groups uses
+        # reset_index(drop=True), which would otherwise discard them).
+        # We stash the original indices as a column, then read them back after
+        # prediction to assign results to the right rows.
+        train_df = train_df.copy()
+        test_df = test_df.copy()
+        train_df["_orig_index"] = train_df.index
+        test_df["_orig_index"] = test_df.index
+
+        # Sort for XGBRanker: groups must be contiguous
+        train_df = sort_by_race_groups(train_df)
+        test_df = sort_by_race_groups(test_df)
+
+        X_train = train_df[available_features].copy()
+        y_train_rel = position_to_relevance(train_df["quali_position"])
+        X_test = test_df[available_features].copy()
+
+        train_qids = make_race_qids(train_df)
+
+        # Per-group weights
+        if "sample_weight" in train_df.columns:
+            w_train = train_df["sample_weight"].values
+            group_weights = []
+            prev_qid = -1
+            for i, qid in enumerate(train_qids):
+                if qid != prev_qid:
+                    group_weights.append(w_train[i])
+                    prev_qid = qid
+            w_groups = np.array(group_weights)
+        else:
+            w_groups = None
+
+        model = model_factory()
+        model.fit(X_train, y_train_rel, sample_weight=w_groups, qid=train_qids)
+
+        test_scores = model.predict(X_test)
+        predicted_positions = scores_to_positions(test_scores, test_df)
+
+        # Map back to original df indices via the stashed column
+        for orig_idx, pos in zip(test_df["_orig_index"].values, predicted_positions):
+            result.loc[orig_idx] = float(pos)
+
+        # Report progress
+        actual = test_df["quali_position"].values
+        mae_wf = float(np.mean(np.abs(actual - predicted_positions)))
+        print(f"    WF quali {test_year}: trained on {len(train_df):,} rows, "
+              f"predicted {len(test_df):,} rows, MAE={mae_wf:.3f}")
+
+    return result
+
+
+def rederive_quali_dependent_features(
+    df: pd.DataFrame, quali_col: str = "quali_position"
+) -> pd.DataFrame:
+    """
+    Recompute quali-dependent features from `quali_col`.
+
+    Formulas MUST match 03b_build_jolpica_features.py::add_race_model_features
+    to avoid train/inference distribution shift. This function is called after
+    overwriting `quali_position` with walk-forward predictions during training,
+    and also at inference when the race model gets predicted quali instead of
+    actual quali.
+    """
+    d = df.copy()
+    qp = d[quali_col].astype(float)
+    d["is_pole_position"] = (qp == 1).astype(int)
+    d["is_front_row"] = (qp <= 2).astype(int)
+    d["is_top10_quali"] = (qp <= 10).astype(int)
+    d["grid_advantage"] = 11.0 - qp  # must match 03b
+    return d
+
+
 # ============================================================
 # Main
 # ============================================================
@@ -469,6 +692,34 @@ def main() -> None:
     print(f"  Saved -> models/trained/quali_model.json")
 
     # ==================================================================
+    # Walk-forward predicted quali (for race_model_fp training)
+    # ==================================================================
+    # Generate walk-forward predicted qualifying positions for all training
+    # rows. These are the quali predictions the race model would have received
+    # at inference during the post-FP phase for each historical race.
+    #
+    # We use these to train a `race_model_fp.json` variant that has seen the
+    # same noise distribution in training as it will see at inference --
+    # eliminating the quali -> race distribution shift.
+    print(f"\n{'=' * 60}")
+    print("Walk-Forward Predicted Quali (for race_model_fp)")
+    print(f"{'=' * 60}")
+    print(f"  Generating walk-forward quali predictions for training data...")
+    wf_quali = generate_walk_forward_quali_predictions(
+        df, quali_feature_cols, make_quali_model
+    )
+    df["predicted_quali_wf"] = wf_quali
+
+    # Stats
+    wf_n = int(wf_quali.notna().sum())
+    actual_n = int(df["quali_position"].notna().sum())
+    print(f"  Walk-forward quali generated for {wf_n}/{actual_n} rows")
+    diff = (wf_quali - df["quali_position"]).abs()
+    if diff.notna().any():
+        wf_quali_mae = float(diff.mean())
+        print(f"  Walk-forward quali MAE vs actual: {wf_quali_mae:.3f} positions")
+
+    # ==================================================================
     # MODEL 2: Race Position — XGBoost
     # ==================================================================
     print(f"\n{'=' * 60}")
@@ -553,6 +804,136 @@ def main() -> None:
     # Save XGBoost model as JSON
     race_model.save_model(str(TRAINED_DIR / "race_model.json"))
     print(f"  Saved -> models/trained/race_model.json")
+
+    # ==================================================================
+    # MODEL 2B: Race Position (FP-phase) — XGBoost trained on WF quali
+    # ==================================================================
+    # The post-FP race model: trained with walk-forward predicted quali as the
+    # `quali_position` feature (and quali-derived features re-derived from it).
+    # This removes the train/inference distribution shift that happens when the
+    # post-FP race model is fed a noisy predicted-quali at inference but was
+    # trained on clean actual-quali.
+    print(f"\n{'=' * 60}")
+    print("MODEL 2B: Race Position (FP-phase) — WF predicted quali")
+    print(f"{'=' * 60}")
+
+    race_fp_model = None
+    race_fp_wf_results = []
+    race_fp_train_size = 0
+    r_fp_importances = pd.Series(dtype=float)
+    race_fp_post_fp_delta = None  # MAE improvement vs race_model under post-FP
+
+    if "predicted_quali_wf" not in df.columns:
+        print("  ERROR: predicted_quali_wf not found; skipping race_model_fp")
+    else:
+        # Start from same row filter as race_df, BUT also require WF quali
+        race_fp_df = df[race_filter & df["predicted_quali_wf"].notna()].copy()
+        # Swap in WF quali for quali_position and re-derive dependents
+        race_fp_df["quali_position"] = race_fp_df["predicted_quali_wf"].astype(float)
+        race_fp_df = rederive_quali_dependent_features(race_fp_df, "quali_position")
+
+        print(f"  Features: {len(race_available)}")
+        print(f"  Training samples: {len(race_fp_df):,} (WF quali available)")
+
+        # Walk-forward validation with WF quali at TEST time too
+        # (this simulates the real post-FP inference condition)
+        print("\n  Walk-forward validation (post-FP scenario):")
+        race_fp_wf_results = walk_forward_validate(
+            race_fp_df, race_feature_cols, "finish_position", make_race_model, "Race-FP",
+            use_ranking=True,
+        )
+
+        # ALSO run the current race_model through the post-FP scenario for
+        # apples-to-apples comparison. We take race_df (trained on ACTUAL quali)
+        # but feed it WF predicted quali at test time -- exactly what happens
+        # in production at post-FP.
+        print("\n  Walk-forward validation (current race_model under post-FP):")
+        # Build test set with WF quali for existing race_df rows
+        race_posfp_eval_df = race_df.copy()
+        # Match rows that have WF quali
+        wf_index_set = set(race_fp_df.index)
+        race_posfp_eval_df = race_posfp_eval_df[
+            race_posfp_eval_df.index.isin(wf_index_set)
+        ].copy()
+        race_posfp_eval_df["quali_position"] = df.loc[
+            race_posfp_eval_df.index, "predicted_quali_wf"
+        ].astype(float)
+        race_posfp_eval_df = rederive_quali_dependent_features(
+            race_posfp_eval_df, "quali_position"
+        )
+        # Use the EXISTING race_model factory (trained on actual quali),
+        # but test it on predicted quali. Walk-forward gives us the comparison.
+        # For proper comparison, we evaluate both:
+        #   (a) race_model.json trained on actual quali -> tested on predicted
+        #   (b) race_model_fp.json trained on predicted -> tested on predicted
+        # The training data for (a) MUST still use actual quali.
+        #
+        # We achieve this with a custom fold loop (not walk_forward_validate,
+        # which uses the same df for train and test).
+        current_race_posfp_results = _evaluate_race_model_under_post_fp(
+            train_df=race_df,
+            test_df=race_posfp_eval_df,
+            feature_cols=race_feature_cols,
+            target_col="finish_position",
+            model_factory=make_race_model,
+        )
+
+        # Summaries for comparison
+        if race_fp_wf_results and current_race_posfp_results:
+            fp_mae = float(np.mean([r["mae"] for r in race_fp_wf_results]))
+            fp_tau = float(np.mean([r["kendall_tau"] for r in race_fp_wf_results]))
+            fp_top3 = float(np.mean([r["top3_accuracy"] for r in race_fp_wf_results]))
+            cur_mae = float(np.mean([r["mae"] for r in current_race_posfp_results]))
+            cur_tau = float(np.mean([r["kendall_tau"] for r in current_race_posfp_results]))
+            cur_top3 = float(np.mean([r["top3_accuracy"] for r in current_race_posfp_results]))
+            race_fp_post_fp_delta = round(cur_mae - fp_mae, 4)
+            print(f"\n  === Post-FP scenario comparison ===")
+            print(f"  Current race_model (train=actual, test=predicted):")
+            print(f"    MAE={cur_mae:.3f}  tau={cur_tau:.3f}  Top3={cur_top3:.1%}")
+            print(f"  New race_model_fp (train=predicted, test=predicted):")
+            print(f"    MAE={fp_mae:.3f}  tau={fp_tau:.3f}  Top3={fp_top3:.1%}")
+            improvement = cur_mae - fp_mae
+            if improvement > 0:
+                print(f"  IMPROVEMENT: MAE reduced by {improvement:.3f} positions "
+                      f"({improvement/cur_mae:.1%})")
+            else:
+                print(f"  REGRESSION: MAE worse by {-improvement:.3f} positions")
+
+        # Train final race_fp_model on all data with WF quali
+        print("\n  Training final race_model_fp on all WF-quali data...")
+        race_fp_df = sort_by_race_groups(race_fp_df)
+        # Ensure all needed columns are available and aligned
+        X_r_fp = race_fp_df[race_available].copy()
+        y_r_fp = position_to_relevance(race_fp_df["finish_position"])
+        w_r_fp = race_fp_df["sample_weight"].values if "sample_weight" in race_fp_df.columns else None
+        r_fp_groups = make_race_qids(race_fp_df)
+
+        if w_r_fp is not None:
+            r_fp_group_weights = []
+            prev_qid = -1
+            for i, qid in enumerate(r_fp_groups):
+                if qid != prev_qid:
+                    r_fp_group_weights.append(w_r_fp[i])
+                    prev_qid = qid
+            w_r_fp_groups = np.array(r_fp_group_weights)
+        else:
+            w_r_fp_groups = None
+
+        race_fp_model = make_race_model()
+        race_fp_model.fit(X_r_fp, y_r_fp, sample_weight=w_r_fp_groups, qid=r_fp_groups)
+        race_fp_train_size = len(y_r_fp)
+
+        # Feature importances
+        r_fp_importances = pd.Series(
+            race_fp_model.feature_importances_, index=race_available
+        ).sort_values(ascending=False)
+        print(f"\n  Top 15 race_fp features:")
+        for feat, imp in r_fp_importances.head(15).items():
+            print(f"    {feat}: {imp:.4f}")
+
+        # Save
+        race_fp_model.save_model(str(TRAINED_DIR / "race_model_fp.json"))
+        print(f"  Saved -> models/trained/race_model_fp.json")
 
     # ==================================================================
     # MODEL 3: FP Signal — ExtraTrees (confidence scoring)
@@ -720,6 +1101,9 @@ def main() -> None:
     feature_columns_data = {
         "quali_features": quali_available,
         "race_features": race_available,
+        # race_fp shares the same feature list as race -- the only difference
+        # is the training recipe (WF predicted quali vs actual quali).
+        "race_fp_features": race_available if race_fp_model is not None else [],
         "fp_signal_features": fp_available,
         "sprint_features": sprint_available if sprint_model else race_available,
     }
@@ -770,6 +1154,8 @@ def main() -> None:
             "save_format": "json",
             "n_features": len(race_available),
             "training_samples": len(y_r_rel),
+            "trained_on": "actual quali_position",
+            "used_for": "post-quali inference (actual quali known)",
             "params": {
                 "n_estimators": 650,
                 "learning_rate": 0.03,
@@ -783,6 +1169,38 @@ def main() -> None:
             "walk_forward_mean_kendall_tau": round(race_avg_tau, 4) if race_avg_tau else None,
             "walk_forward_mean_top3_accuracy": round(race_avg_top3, 4) if race_avg_top3 else None,
             "top_features": {feat: round(float(imp), 4) for feat, imp in r_importances.head(15).items()},
+        },
+        "race_model_fp": {
+            "algorithm": "XGBRanker (rank:pairwise)" if race_fp_model is not None else "N/A",
+            "save_format": "json",
+            "n_features": len(race_available) if race_fp_model is not None else 0,
+            "training_samples": race_fp_train_size,
+            "trained": race_fp_model is not None,
+            "trained_on": "walk-forward predicted quali_position",
+            "used_for": "post-FP inference (predicted quali only)",
+            "params": {
+                "n_estimators": 650,
+                "learning_rate": 0.03,
+                "max_depth": 5,
+                "subsample": 0.85,
+                "colsample_bytree": 0.85,
+                "min_child_weight": 5,
+            } if race_fp_model is not None else {},
+            "walk_forward_results": race_fp_wf_results,
+            "walk_forward_mean_mae": round(
+                float(np.mean([r["mae"] for r in race_fp_wf_results])), 4
+            ) if race_fp_wf_results else None,
+            "walk_forward_mean_kendall_tau": round(
+                float(np.mean([r["kendall_tau"] for r in race_fp_wf_results])), 4
+            ) if race_fp_wf_results else None,
+            "walk_forward_mean_top3_accuracy": round(
+                float(np.mean([r["top3_accuracy"] for r in race_fp_wf_results])), 4
+            ) if race_fp_wf_results else None,
+            "post_fp_mae_delta_vs_race_model": race_fp_post_fp_delta,
+            "top_features": (
+                {feat: round(float(imp), 4) for feat, imp in r_fp_importances.head(15).items()}
+                if not r_fp_importances.empty else {}
+            ),
         },
         "fp_signal_model": {
             "algorithm": "ExtraTreesRegressor",
@@ -833,13 +1251,29 @@ def main() -> None:
         for r in quali_wf_results:
             print(f"      {r['test_year']}: MAE={r['mae']:.3f}, tau={r['kendall_tau']:.3f}, Top3={r['top3_accuracy']:.1%} (n={r['test_size']})")
     if race_wf_results:
-        print(f"  Race model (rank:pairwise):")
+        print(f"  Race model (post-quali, trained on actual quali):")
         print(f"    Features:           {len(race_available)}")
         print(f"    Walk-forward MAE:   {race_avg_mae:.3f}")
         print(f"    Kendall's tau:      {race_avg_tau:.3f}")
         print(f"    Top-3 accuracy:     {race_avg_top3:.1%}")
         for r in race_wf_results:
             print(f"      {r['test_year']}: MAE={r['mae']:.3f}, tau={r['kendall_tau']:.3f}, Top3={r['top3_accuracy']:.1%} (n={r['test_size']})")
+    if race_fp_model is not None and race_fp_wf_results:
+        fp_avg_mae = float(np.mean([r["mae"] for r in race_fp_wf_results]))
+        fp_avg_tau = float(np.mean([r["kendall_tau"] for r in race_fp_wf_results]))
+        fp_avg_top3 = float(np.mean([r["top3_accuracy"] for r in race_fp_wf_results]))
+        print(f"  Race FP model (post-FP, trained on WF predicted quali):")
+        print(f"    Features:           {len(race_available)}")
+        print(f"    Walk-forward MAE:   {fp_avg_mae:.3f} (vs predicted quali, post-FP scenario)")
+        print(f"    Kendall's tau:      {fp_avg_tau:.3f}")
+        print(f"    Top-3 accuracy:     {fp_avg_top3:.1%}")
+        for r in race_fp_wf_results:
+            print(f"      {r['test_year']}: MAE={r['mae']:.3f}, tau={r['kendall_tau']:.3f}, Top3={r['top3_accuracy']:.1%} (n={r['test_size']})")
+        if race_fp_post_fp_delta is not None:
+            if race_fp_post_fp_delta > 0:
+                print(f"    Delta vs race_model under post-FP: improved by {race_fp_post_fp_delta:.3f} MAE")
+            else:
+                print(f"    Delta vs race_model under post-FP: regressed by {-race_fp_post_fp_delta:.3f} MAE")
     if fp_model is not None:
         print(f"  FP signal model:      {fp_train_size} samples, {len(fp_available)} features")
     if sprint_model is not None:
@@ -859,6 +1293,8 @@ def main() -> None:
     print(f"  Files saved:")
     print(f"    - quali_model.json")
     print(f"    - race_model.json")
+    if race_fp_model is not None:
+        print(f"    - race_model_fp.json")
     if fp_model is not None:
         print(f"    - fp_signal_model.pkl")
     if sprint_model is not None:
