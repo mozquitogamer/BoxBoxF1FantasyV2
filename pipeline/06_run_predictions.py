@@ -184,6 +184,57 @@ def _resolve_circuit(round_num: int, year: int) -> str:
     return "unknown"
 
 
+def _load_actual_quali(
+    year: int, round_num: int, abbrev_to_jolpica: dict[str, str]
+) -> dict[str, int]:
+    """
+    Load actual qualifying positions for a completed round.
+
+    Returns a dict {jolpica_driver_id: quali_position} if available, empty dict
+    otherwise. Used to detect post-FP vs post-quali phase and, when available,
+    to feed actual quali positions into the race model.
+    """
+    # Method 1: normalized jolpica CSV
+    norm_path = JOLPICA_MODEL_ROWS_DIR.parent / "normalized" / str(year) / "qualifying_results.csv"
+    if norm_path.exists():
+        try:
+            df = pd.read_csv(norm_path)
+            df = df[df["round"] == round_num]
+            if not df.empty and "quali_position" in df.columns:
+                out = {}
+                for _, row in df.iterrows():
+                    did = row.get("driver_id")
+                    qp = row.get("quali_position")
+                    if pd.notna(did) and pd.notna(qp):
+                        out[str(did)] = int(qp)
+                if out:
+                    return out
+        except Exception:
+            pass
+
+    # Method 2: FastF1 qualifying session (fallback)
+    try:
+        import fastf1
+        session = fastf1.get_session(year, round_num, "Qualifying")
+        session.load(laps=False, telemetry=False, weather=False, messages=False)
+        results = session.results
+        if results is not None and not results.empty:
+            if "Abbreviation" in results.columns and "Position" in results.columns:
+                out = {}
+                for _, row in results.iterrows():
+                    abbrev = row["Abbreviation"]
+                    pos = row["Position"]
+                    did = abbrev_to_jolpica.get(abbrev)
+                    if did is not None and pd.notna(pos):
+                        out[str(did)] = int(pos)
+                if out:
+                    return out
+    except Exception:
+        pass
+
+    return {}
+
+
 def _recompute_sim_features(df: pd.DataFrame, target_circuit: str) -> pd.DataFrame:
     """
     Recompute similarity-weighted rolling features against the target circuit.
@@ -342,6 +393,7 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
 
     quali_path = TRAINED_DIR / "quali_model.json"
     race_path = TRAINED_DIR / "race_model.json"
+    race_fp_path = TRAINED_DIR / "race_model_fp.json"
     fp_model_path = TRAINED_DIR / "fp_signal_model.pkl"
     feature_cols_path = TRAINED_DIR / "feature_columns.json"
 
@@ -351,18 +403,38 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
             print("Run 05_train_models.py first.")
             return pd.DataFrame()
 
+    # ---- Detect phase: post-FP (no actual quali yet) vs post-quali ----
+    # Check if actual quali data exists for this (year, round). If so, we're
+    # in post-quali phase and can use both the actual quali + race_model.
+    # Otherwise we're in post-FP and should use race_model_fp.json if available.
+    actual_quali_map = _load_actual_quali(year, round_num, abbrev_to_jolpica)
+    is_post_quali = len(actual_quali_map) > 0
+
+    # Select race model: post-FP uses race_model_fp (trained on predicted quali)
+    # to match the distribution it sees at inference; post-quali uses race_model
+    # (trained on actual quali) since actual quali is known.
+    use_fp_race_model = (not is_post_quali) and race_fp_path.exists()
+
     # Load XGBoost ranking models from JSON format
     # Models trained with rank:pairwise — output relevance scores (higher = better)
     quali_model = xgb.XGBRanker()
     quali_model.load_model(str(quali_path))
     race_model = xgb.XGBRanker()
-    race_model.load_model(str(race_path))
+    if use_fp_race_model:
+        race_model.load_model(str(race_fp_path))
+        print(f"  Phase: post-FP (no actual quali) -> using race_model_fp.json")
+    else:
+        race_model.load_model(str(race_path))
+        phase_desc = "post-quali (actual quali known)" if is_post_quali else "post-FP (fallback; no race_model_fp.json)"
+        print(f"  Phase: {phase_desc} -> using race_model.json")
 
     # Load feature column lists
     with open(feature_cols_path) as f:
         feature_cols_data = json.load(f)
     quali_feature_list = feature_cols_data["quali_features"]
-    race_feature_list = feature_cols_data["race_features"]
+    race_feature_list = feature_cols_data.get("race_fp_features") if use_fp_race_model else None
+    if not race_feature_list:
+        race_feature_list = feature_cols_data["race_features"]
 
     # Load FP signal model (optional, pkl format)
     fp_info = joblib.load(fp_model_path) if fp_model_path.exists() else None
@@ -380,17 +452,34 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
     pred_df["predicted_quali_position"] = quali_ranks.values
     pred_df["predicted_quali_raw"] = quali_raw
 
-    # ---- Step 7: Build race features from predicted quali, then predict race ----
+    # ---- Step 7: Build race features, then predict race ----
+    # Use actual quali if post-quali (known), otherwise predicted quali.
+    # This is consistent with how each race model was trained:
+    #   race_model    -> trained on actual quali    -> post-quali inference
+    #   race_model_fp -> trained on predicted quali -> post-FP inference
     print(f"\n[Step 7] Predicting race positions...")
-    # Use predicted quali as the grid for race-specific features
-    pred_df["quali_position"] = pred_df["predicted_quali_position"]
-    pred_df["grid"] = pred_df["predicted_quali_position"]
+    if is_post_quali and not use_fp_race_model:
+        # Map actual quali onto pred_df by driver_id
+        pred_df["quali_position"] = pred_df["driver_id"].map(actual_quali_map)
+        # For any driver missing actual quali, fall back to predicted
+        missing = pred_df["quali_position"].isna()
+        if missing.any():
+            pred_df.loc[missing, "quali_position"] = pred_df.loc[missing, "predicted_quali_position"]
+            print(f"  Using actual quali for {(~missing).sum()}/{len(pred_df)} drivers (rest from predicted)")
+        else:
+            print(f"  Using actual quali for all {len(pred_df)} drivers")
+    else:
+        pred_df["quali_position"] = pred_df["predicted_quali_position"]
+        print(f"  Using predicted quali for all {len(pred_df)} drivers")
+    pred_df["grid"] = pred_df["quali_position"]
 
     # Recompute grid-dependent features
+    # NOTE: grid_advantage formula MUST match 03b_build_jolpica_features.py::add_race_model_features
+    # (training data) to avoid train/inference distribution mismatch.
     pred_df["is_pole_position"] = (pred_df["quali_position"] == 1).astype(int)
     pred_df["is_front_row"] = (pred_df["quali_position"] <= 2).astype(int)
     pred_df["is_top10_quali"] = (pred_df["quali_position"] <= 10).astype(int)
-    pred_df["grid_advantage"] = 1.0 / (pred_df["grid"] + 0.5)
+    pred_df["grid_advantage"] = 11.0 - pred_df["quali_position"].astype(float)
     pred_df["grid_penalty"] = 0  # No grid penalties at prediction time
 
     # Recompute interaction features if track data available

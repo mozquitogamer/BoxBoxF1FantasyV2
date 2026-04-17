@@ -88,10 +88,12 @@ XGBoost's native NaN handling means: when FP data exists → model uses it to re
 ## ML Models
 
 - **Qualifying model:** `XGBRanker(n_estimators=1200, lr=0.025, depth=3, objective="rank:pairwise")`
-- **Race model:** `XGBRanker(n_estimators=650, lr=0.03, depth=5, objective="rank:pairwise")`
+- **Race model (post-quali):** `XGBRanker(n_estimators=650, lr=0.03, depth=5, objective="rank:pairwise")` — trained on ACTUAL `quali_position`, used at inference when qualifying has happened
+- **Race-FP model (post-FP):** same hyperparams as race model but trained on WALK-FORWARD PREDICTED `quali_position` (each season's quali is predicted by a quali model trained on earlier seasons). Used at inference during the post-FP phase when qualifying hasn't happened yet. Eliminates the train/inference distribution shift that occurs when the race model is fed a noisy predicted quali at inference but was trained on clean actual quali.
 - **Sprint model:** `XGBRanker(n_estimators=400, lr=0.035, depth=4, objective="rank:pairwise")` — trained on 501 sprint-only rows, uses sprint qualifying grid as top feature
 - **FP signal model:** `ExtraTreesRegressor(n_estimators=500, depth=6)` — used only for confidence scoring, not direct predictions
 - Output is relevance scores ranked to produce predicted positions per race
+- **Phase-aware inference (06_run_predictions.py):** auto-detects whether actual qualifying data is available for the round. Post-quali → uses `race_model.json` with actual quali positions. Post-FP → uses `race_model_fp.json` with predicted quali positions.
 - **Calibration:** `calibrate_confidence.py` compares MC predictions vs actuals, saves noise multiplier to `data/seed/mc_calibration.json`, auto-loaded by MC simulation
 
 ## Fantasy Scoring (07_calculate_fantasy.py)
