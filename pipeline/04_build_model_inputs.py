@@ -239,6 +239,13 @@ def main() -> None:
         default=None,
         help="Exclude all rounds at or after this point. Format: YEAR:ROUND (e.g. 2026:1)",
     )
+    parser.add_argument(
+        "--force-include-current",
+        action="store_true",
+        help="Opt-in: allow current-season rows to remain in training data. "
+             "Without this flag, presence of current-season rows is a hard error to "
+             "prevent accidental leakage when predicting that season's upcoming rounds.",
+    )
     args = parser.parse_args()
 
     print("=" * 70)
@@ -273,12 +280,48 @@ def main() -> None:
     print(f"  Total columns after engineering: {model_rows.shape[1]}")
 
     # ---- Step 5: Add sample weights ------------------------------------------
+    # Round-aware ramp for regulation-change weight: with only a few rounds of
+    # current-season data, a flat 2.5x multiplier can over-weight noisy early
+    # rounds. We ramp from REGULATION_WEIGHT_START -> REGULATION_WEIGHT_MULTIPLIER
+    # as more rounds accumulate. Past-regulation seasons stay at 2.5x (they are
+    # the full-season reference used to calibrate the multiplier).
     print(f"\n[Step 5] Adding sample weights ...")
-    model_rows["sample_weight"] = np.where(
+
+    REGULATION_WEIGHT_START = 2.0
+    REGULATION_WEIGHT_FULL_THRESHOLD = 10  # rounds of current-reg data for full weight
+
+    current_reg_rows = model_rows[model_rows["season"] >= REGULATION_CHANGE_YEAR]
+    if len(current_reg_rows) > 0:
+        # Only the current (still-running) season ramps; past reg-era seasons are full.
+        active_season_rounds = (
+            current_reg_rows[current_reg_rows["season"] == CURRENT_SEASON]["round"].nunique()
+        )
+    else:
+        active_season_rounds = 0
+
+    if active_season_rounds >= REGULATION_WEIGHT_FULL_THRESHOLD or active_season_rounds == 0:
+        current_season_weight = REGULATION_WEIGHT_MULTIPLIER
+    else:
+        frac = active_season_rounds / REGULATION_WEIGHT_FULL_THRESHOLD
+        current_season_weight = REGULATION_WEIGHT_START + (
+            REGULATION_WEIGHT_MULTIPLIER - REGULATION_WEIGHT_START
+        ) * frac
+
+    # Apply weights:
+    #   - Past regulation-era seasons (>= REGULATION_CHANGE_YEAR, < CURRENT_SEASON): full multiplier
+    #   - Current season (== CURRENT_SEASON): ramped weight
+    #   - Older seasons: 1.0
+    conds = [
+        model_rows["season"] == CURRENT_SEASON,
         model_rows["season"] >= REGULATION_CHANGE_YEAR,
-        REGULATION_WEIGHT_MULTIPLIER,
-        1.0,
-    )
+    ]
+    choices = [current_season_weight, REGULATION_WEIGHT_MULTIPLIER]
+    model_rows["sample_weight"] = np.select(conds, choices, default=1.0)
+
+    print(f"  Current season rounds available: {active_season_rounds}")
+    print(f"  Current-season weight: {current_season_weight:.2f}x "
+          f"(ramp {REGULATION_WEIGHT_START}->{REGULATION_WEIGHT_MULTIPLIER} "
+          f"over {REGULATION_WEIGHT_FULL_THRESHOLD} rounds)")
 
     weight_counts = model_rows.groupby("sample_weight").size()
     for weight_val, count in weight_counts.items():
@@ -310,13 +353,28 @@ def main() -> None:
         print(f"  LEAKAGE GUARD: Excluded season {ex_year} round >= {ex_round}")
         print(f"  Rows: {before:,} -> {len(model_rows):,} ({removed} removed)")
 
-    # Automatic leakage detection warning
+    # Leakage guard: current-season rows are only safe when the caller has
+    # explicitly declared a cutoff (--exclude-after / --exclude-season-round)
+    # or has opted in with --force-include-current. Otherwise, accidentally
+    # leaving current-season data in the training set risks leaking future-round
+    # information when predicting upcoming rounds.
     current_season_rows = model_rows[model_rows["season"] == CURRENT_SEASON]
+    declared_cutoff = bool(args.exclude_after) or bool(args.exclude_season_round)
     if len(current_season_rows) > 0:
         rounds_present = sorted(current_season_rows["round"].unique())
-        print(f"\n  !! WARNING: Current season ({CURRENT_SEASON}) data in training set !!")
-        print(f"  !! Rounds present: {[int(r) for r in rounds_present]}")
-        print(f"  !! Use --exclude-after to prevent leakage when predicting these rounds !!")
+        if declared_cutoff:
+            print(f"  OK: Current season ({CURRENT_SEASON}) rounds retained under "
+                  f"explicit cutoff: {[int(r) for r in rounds_present]}")
+        elif args.force_include_current:
+            print(f"\n  NOTE: Current season ({CURRENT_SEASON}) data retained by "
+                  f"--force-include-current")
+            print(f"  Rounds present: {[int(r) for r in rounds_present]}")
+        else:
+            print(f"\n  ERROR: Current season ({CURRENT_SEASON}) data in training set "
+                  f"(rounds {[int(r) for r in rounds_present]}) with no declared cutoff.")
+            print(f"  This risks leaking future-round info. Pass --exclude-after "
+                  f"{CURRENT_SEASON}:N to cut off, or --force-include-current to override.")
+            sys.exit(2)
     else:
         print(f"  OK: No current season ({CURRENT_SEASON}) data in training set.")
 

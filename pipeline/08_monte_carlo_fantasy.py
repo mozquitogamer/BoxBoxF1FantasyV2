@@ -155,24 +155,51 @@ INCIDENT_DNF_BOOST = 0.02   # Small base probability of multi-car incident per s
 # Calibration loading
 # ==============================================================================
 
-def load_calibration() -> dict:
+def load_calibration(round_num: int | None = None) -> dict:
     """Load calibration parameters from data/seed/mc_calibration.json.
 
     Returns dict with noise_multiplier (default 1.0) and optional bias correction.
     The calibration is produced by calibrate_confidence.py which compares
     MC predictions against actual results across completed rounds.
+
+    When a round_num is supplied and per-round calibration is available for a
+    *similar* (not necessarily identical) round, the global multiplier is used
+    as the default but can be overridden by the per-round entry. For the target
+    round itself we never use its own calibration (that would leak future data),
+    so the lookup only matches rounds strictly earlier than round_num.
     """
     path = SEED_DIR / "mc_calibration.json"
     if not path.exists():
-        return {"noise_multiplier": 1.0, "bias_correction": 0.0}
+        return {"noise_multiplier": 1.0, "bias_correction": 0.0, "source": "default"}
     with open(path) as f:
         cal = json.load(f)
-    return {
+
+    result = {
         "noise_multiplier": cal.get("noise_multiplier", 1.0),
         "bias_correction": cal.get("bias_correction", 0.0),
         "n_rounds": cal.get("n_rounds", 0),
         "coverage_90": cal.get("coverage_90", None),
+        "source": "global",
     }
+
+    # If per-round calibration exists, average multipliers from rounds STRICTLY
+    # earlier than round_num. We never look up the target round's own entry
+    # because that would leak future-data calibration into its own prediction.
+    # Require at least MIN_EARLIER_ROUNDS entries before trusting the per-round
+    # estimate; otherwise stick with the global multiplier.
+    MIN_EARLIER_ROUNDS = 2
+    if round_num is not None and isinstance(cal.get("per_round"), list):
+        earlier = [
+            pr for pr in cal["per_round"]
+            if pr.get("noise_multiplier") is not None
+            and pr.get("round") is not None
+            and int(pr["round"]) < int(round_num)
+        ]
+        if len(earlier) >= MIN_EARLIER_ROUNDS:
+            mults = [float(pr["noise_multiplier"]) for pr in earlier]
+            result["noise_multiplier"] = round(sum(mults) / len(mults), 4)
+            result["source"] = f"per_round_mean(n={len(earlier)})"
+    return result
 
 
 # ==============================================================================
@@ -488,7 +515,10 @@ def sample_overtakes(grid_positions: np.ndarray, race_positions: np.ndarray,
             std = max(1.5, expected_ot * cv)
 
         sampled = rng.normal(expected_ot, std)
-        overtakes[i] = max(0, round(sampled))
+        # Cap at 30 as a safety bound — real-world per-race per-driver overtakes
+        # rarely exceed ~15 even in chaos races; 30 protects against noise tail
+        # samples from producing absurd fantasy point totals.
+        overtakes[i] = min(max(0, round(sampled)), 30)
 
     return overtakes
 
@@ -905,7 +935,7 @@ def run_simulations(
             "prob_top3": round(float((r_pos <= 3).mean()), 3),
             "prob_top5": round(float((r_pos <= 5).mean()), 3),
             "prob_top10": round(float((r_pos <= 10).mean()), 3),
-            "prob_points_finish": round(float((r_pos <= 10).mean() & ~dnf.any()), 3) if False else round(float(((r_pos <= 10) & ~dnf).mean()), 3),
+            "prob_points_finish": round(float(((r_pos <= 10) & ~dnf).mean()), 3),
         })
 
     return {
@@ -1327,13 +1357,15 @@ def main() -> None:
 
     print(f"  {len(pred_df)} drivers loaded")
 
-    # Load calibration (from calibrate_confidence.py)
-    calibration = load_calibration()
+    # Load calibration (from calibrate_confidence.py) — use per-round averaging
+    # of calibration from strictly-earlier rounds when available.
+    calibration = load_calibration(round_num=args.round)
     if calibration.get("noise_multiplier", 1.0) != 1.0:
         cov = calibration.get("coverage_90")
         cov_str = f", coverage_90={cov*100:.1f}%" if cov else ""
+        src = calibration.get("source", "global")
         print(f"  Calibration loaded: noise_mult={calibration['noise_multiplier']:.3f}"
-              f" ({calibration.get('n_rounds', '?')} rounds{cov_str})")
+              f" ({calibration.get('n_rounds', '?')} rounds{cov_str}, src={src})")
 
     # Run simulations
     results = run_simulations(

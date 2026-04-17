@@ -28,12 +28,18 @@
     {
       "round": 1,
       "coverage_90": 0.7273,
-      "coverage_50": 0.3636
+      "coverage_50": 0.3636,
+      "noise_multiplier": 1.5,
+      "bias": -7.82,
+      "n": 22
     },
     {
       "round": 3,
       "coverage_90": 1.0,
-      "coverage_50": 0.5
+      "coverage_50": 0.5,
+      "noise_multiplier": 0.8,
+      "bias": -2.88,
+      "n": 22
     }
   ],
   "pit_histogram": [

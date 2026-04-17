@@ -184,7 +184,7 @@ Examples:
     # Check models for prediction phases
     if args.phase in ("post_fp", "post_quali"):
         models_dir = PROJECT_ROOT / "models" / "trained"
-        required = ["quali_model.pkl", "race_model.pkl"]
+        required = ["quali_model.json", "race_model.json"]
         missing = [m for m in required if not (models_dir / m).exists()]
         if missing:
             print(f"\n  WARNING: Missing trained models: {', '.join(missing)}")

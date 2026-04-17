@@ -93,6 +93,35 @@ def compute_empirical_percentile(mc_row: dict, actual_pts: float) -> float:
     return 0.5  # Fallback
 
 
+def _compute_noise_multiplier(observed_coverage_90: float, n_samples: int) -> float:
+    """Compute a noise multiplier that would bring observed 90% CI coverage to target.
+
+    - Coverage < 0.88 -> intervals too narrow, multiplier > 1.0 to widen
+    - Coverage > 0.95 -> intervals too wide, multiplier < 1.0 to tighten
+    - Otherwise returns 1.0 (well-calibrated)
+
+    With fewer samples we clamp more tightly to avoid overfitting a single round.
+    """
+    if n_samples <= 0:
+        return 1.0
+    from scipy.stats import norm
+    target_z = norm.ppf(0.975)  # 1.96 for 90% CI
+    if observed_coverage_90 < 0.88:
+        effective_z = norm.ppf(0.5 + observed_coverage_90 / 2)
+        mult = target_z / effective_z if effective_z > 0 else 1.2
+        mult = min(mult, 1.5)
+    elif observed_coverage_90 > 0.95:
+        effective_z = norm.ppf(0.5 + observed_coverage_90 / 2)
+        mult = target_z / effective_z if effective_z > 0 else 0.95
+        mult = max(mult, 0.8)
+    else:
+        mult = 1.0
+    # With very few samples clamp tighter to avoid chasing noise.
+    if n_samples < 15:
+        mult = max(0.9, min(1.15, mult))
+    return float(mult)
+
+
 def analyze_calibration(verbose: bool = False) -> dict:
     """Analyze MC calibration across all completed rounds.
 
@@ -241,7 +270,7 @@ def analyze_calibration(verbose: bool = False) -> dict:
         print(f"    DNF drivers:     {dnf_in_90*100:5.1f}% in 90% CI (n={len(dnf_df)})")
         print(f"    Non-DNF drivers: {non_dnf_in_90*100:5.1f}% in 90% CI (n={len(non_dnf_df)})")
 
-    # 5. Per-round analysis
+    # 5. Per-round analysis (also compute per-round noise multipliers)
     print(f"\n  Per-Round Coverage (P5-P95):")
     round_coverages = []
     for rnd in sorted(df["round"].unique()):
@@ -252,10 +281,17 @@ def analyze_calibration(verbose: bool = False) -> dict:
                  (rdf["actual_pts"] <= rdf["mc_p75"])).mean()
         bias = rdf["error"].mean()
         rmse = np.sqrt((rdf["error"] ** 2).mean())
+        round_mult = _compute_noise_multiplier(float(in_90), len(rdf))
         print(f"    Round {rnd}: 90%CI={in_90*100:5.1f}%  50%CI={in_50*100:5.1f}%  "
-              f"bias={bias:+.1f}  RMSE={rmse:.1f}")
-        round_coverages.append({"round": int(rnd), "coverage_90": round(float(in_90), 4),
-                                "coverage_50": round(float(in_50), 4)})
+              f"bias={bias:+.1f}  RMSE={rmse:.1f}  noise_x{round_mult:.2f}")
+        round_coverages.append({
+            "round": int(rnd),
+            "coverage_90": round(float(in_90), 4),
+            "coverage_50": round(float(in_50), 4),
+            "noise_multiplier": round(float(round_mult), 4),
+            "bias": round(float(bias), 2),
+            "n": int(len(rdf)),
+        })
 
     # 6. Compute calibration adjustment
     # The noise multiplier scales all noise bases to achieve target coverage.

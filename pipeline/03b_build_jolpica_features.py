@@ -303,7 +303,7 @@ def compute_similarity_weighted_rolling(df: pd.DataFrame, window: int = 5) -> pd
                     # Raise similarity to power 2 to sharpen contrast
                     weight = sim * sim
                     weights.append(weight)
-                    valid_pts.append(p if pd.notna(p) else 0.0)
+                    valid_pts.append(p if pd.notna(p) else np.nan)
                     valid_fin.append(f if pd.notna(f) else np.nan)
                     valid_qua.append(q if pd.notna(q) else np.nan)
 
@@ -316,10 +316,16 @@ def compute_similarity_weighted_rolling(df: pd.DataFrame, window: int = 5) -> pd
                     w_sum = len(weights)
                     weights = [1.0] * len(weights)
 
-                # Weighted average for points (always valid)
-                df.at[i_global, f"sim_weighted_points_{w}"] = (
-                    sum(wt * v for wt, v in zip(weights, valid_pts)) / w_sum
-                )
+                # Weighted average for points (skip NaN entries, matches finish/quali
+                # treatment). Previously NaN points were coerced to 0.0 which biased the
+                # average downward for drivers whose similar-track history included
+                # unclassified / missed-race rows.
+                pts_pairs = [(wt, v) for wt, v in zip(weights, valid_pts) if pd.notna(v)]
+                if pts_pairs:
+                    ws, vs = zip(*pts_pairs)
+                    df.at[i_global, f"sim_weighted_points_{w}"] = sum(
+                        w_ * v_ for w_, v_ in zip(ws, vs)
+                    ) / sum(ws)
 
                 # Weighted average for finish (skip NaN entries)
                 fin_pairs = [(wt, v) for wt, v in zip(weights, valid_fin) if pd.notna(v)]
