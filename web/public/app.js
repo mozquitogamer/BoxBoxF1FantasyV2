@@ -2044,6 +2044,46 @@ function runTransferAdvisor() {
     const results = [];
     const MAX_RESULTS = 200;
 
+    // ---- Explicit "keep current team" baseline ----
+    // We compute and push the current team entry FIRST so it reliably exists
+    // as the comparison baseline in the later filter step. Relying on the
+    // combinatorial search to regenerate the exact current team is fragile:
+    // it can be skipped by the MAX_ITERATIONS cap, or excluded entirely if
+    // any current pick is in the excluded set. Without this explicit entry,
+    // the filter falls back to -Infinity and every bad transfer passes.
+    // Look up driver/constructor objects from full `data` (not `allDrivers`/
+    // `allConstructors`) so excluded current picks still count for baseline.
+    const currentDriverObjs = currentDriverIds
+        .map(id => data.drivers.find(d => d.driver_id === id))
+        .filter(Boolean);
+    const currentConstructorObjs = currentConstructorIds
+        .map(id => data.constructors.find(c => c.constructor_id === id))
+        .filter(Boolean);
+    if (currentDriverObjs.length === currentDriverIds.length &&
+        currentConstructorObjs.length === currentConstructorIds.length) {
+        const currentSorted = [...currentDriverObjs].sort((a, b) => b.expected_points - a.expected_points);
+        const curBoosted = currentSorted[0];
+        const curSecondBoosted = (chip === '3x_boost' && currentSorted.length > 1) ? currentSorted[1] : null;
+        const curAllPicks = [...currentDriverObjs, ...currentConstructorObjs];
+        const curTotalPoints = chipAdjustedPoints(curAllPicks, curBoosted.driver_id, curSecondBoosted ? curSecondBoosted.driver_id : null);
+        const curTotalCost = curAllPicks.reduce((s, x) => s + x.current_price, 0);
+        const curBaseScore = curAllPicks.reduce((s, x) => s + score(x), 0);
+        const curFinalScore = (strategy === 'max_points') ? curTotalPoints : curBaseScore;
+        results.push({
+            drivers: currentDriverObjs,
+            constructors: currentConstructorObjs,
+            totalCost: curTotalCost,
+            totalPoints: curTotalPoints,
+            netPoints: curTotalPoints, // zero transfers = zero penalty
+            transfersNeeded: 0,
+            extraTransfers: 0,
+            penalty: 0,
+            boostedDriverId: curBoosted.driver_id,
+            secondBoostedDriverId: curSecondBoosted ? curSecondBoosted.driver_id : null,
+            totalScore: curFinalScore,
+        });
+    }
+
     // Generate constructor pairs (respecting locked constructors)
     const cPairs = [];
     for (let i = 0; i < allConstructors.length; i++) {

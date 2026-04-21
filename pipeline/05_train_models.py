@@ -1096,6 +1096,172 @@ def main() -> None:
         print(f"  Sprint predictions will fall back to race model with adjustments")
 
     # ==================================================================
+    # MODEL 4B: Sprint Position (FP-phase) — XGBoost trained on WF quali
+    # ==================================================================
+    # Parallel to MODEL 2B for the race model. The post-FP sprint model:
+    # trained with walk-forward predicted quali as BOTH `quali_position` AND
+    # `sprint_grid` (because at post-FP inference for a sprint weekend, sprint
+    # qualifying hasn't happened yet and 06_run_predictions.py falls back to
+    # predicted_quali_position as a sprint_grid proxy). Quali-dependent and
+    # sprint-grid-dependent features are re-derived from these substitutions
+    # so training matches inference.
+    #
+    # Post-sprint-quali inference (sprint_grid is actual) still uses the
+    # existing sprint_model.json. A future PR could also refit sprint_model.json
+    # with WF-quali for quali_position (keeping sprint_grid actual) to close
+    # the remaining quali-position distribution shift in that phase.
+    print(f"\n{'=' * 60}")
+    print("MODEL 4B: Sprint Position (FP-phase) — WF predicted quali+grid")
+    print(f"{'=' * 60}")
+
+    sprint_fp_model = None
+    sprint_fp_wf_results = []
+    sprint_fp_train_size = 0
+    s_fp_importances = pd.Series(dtype=float)
+    sprint_fp_post_fp_delta = None
+
+    if sprint_model is None:
+        print("  Skipping sprint_model_fp (base sprint_model not trained)")
+    elif "predicted_quali_wf" not in df.columns:
+        print("  ERROR: predicted_quali_wf not found; skipping sprint_model_fp")
+    else:
+        # Start from same sprint filter, require WF quali available
+        sprint_fp_df = df[sprint_filter & df["predicted_quali_wf"].notna()].copy()
+        if len(sprint_fp_df) < 60:
+            print(f"  Not enough sprint data with WF quali ({len(sprint_fp_df)} rows) — skipping")
+        else:
+            # Substitute WF-predicted quali for both quali_position and sprint_grid
+            # (mirrors the post-FP inference condition exactly)
+            wf_quali_vals = sprint_fp_df["predicted_quali_wf"].astype(float)
+            sprint_fp_df["quali_position"] = wf_quali_vals
+            sprint_fp_df["sprint_grid"] = wf_quali_vals
+            # Re-derive quali-dependent features (is_pole_position etc.)
+            sprint_fp_df = rederive_quali_dependent_features(sprint_fp_df, "quali_position")
+            # Re-derive sprint-grid-dependent features (formulas MUST match the
+            # original sprint training block above AND 06_run_predictions.py)
+            sg_fp = sprint_fp_df["sprint_grid"]
+            sprint_fp_df["sprint_is_front_row"] = (sg_fp <= 2).astype(int)
+            sprint_fp_df["sprint_is_top3"] = (sg_fp <= 3).astype(int)
+            sprint_fp_df["sprint_is_top10"] = (sg_fp <= 10).astype(int)
+            sprint_fp_df["sprint_grid_advantage"] = 1.0 / (sg_fp + 0.5)
+            # delta is 0 by construction (both features are the same value at post-FP)
+            sprint_fp_df["quali_to_sprint_grid_delta"] = 0.0
+
+            sprint_fp_available = [c for c in sprint_feature_cols if c in sprint_fp_df.columns]
+            print(f"  Features: {len(sprint_fp_available)}")
+            print(f"  Training samples: {len(sprint_fp_df):,} (WF quali available)")
+
+            # Walk-forward validation (post-FP scenario: train/test both use WF quali)
+            print("\n  Walk-forward validation (post-FP scenario):")
+            sprint_fp_wf_results = walk_forward_validate(
+                sprint_fp_df, sprint_feature_cols, "sprint_position", make_sprint_model,
+                "Sprint-FP", use_ranking=True,
+            )
+
+            # Benchmark: current sprint_model recipe under post-FP scenario.
+            # Trained on actual (sprint_grid + quali_position), tested on WF-predicted.
+            # sprint_fp_df already has WF-substituted quali/sprint_grid, so we can
+            # pass it directly as test_df. We pull a fresh sprint_df with ACTUAL
+            # features for the train side (avoiding the mutated sprint_df in outer
+            # scope whose index was reset by sort_by_race_groups).
+            print("\n  Walk-forward validation (current sprint_model under post-FP):")
+            sprint_train_actual = df[sprint_filter].copy()
+            # Re-derive the sprint-grid features on this fresh copy (same formulas
+            # as the MODEL 4 training block above).
+            sg_train = sprint_train_actual["sprint_grid"]
+            sprint_train_actual["sprint_is_front_row"] = (sg_train <= 2).astype(int)
+            sprint_train_actual["sprint_is_top3"] = (sg_train <= 3).astype(int)
+            sprint_train_actual["sprint_is_top10"] = (sg_train <= 10).astype(int)
+            sprint_train_actual["sprint_grid_advantage"] = 1.0 / (sg_train + 0.5)
+            if "quali_position" in sprint_train_actual.columns:
+                sprint_train_actual["quali_to_sprint_grid_delta"] = (
+                    sprint_train_actual["quali_position"] - sg_train
+                )
+
+            current_sprint_posfp_results = _evaluate_race_model_under_post_fp(
+                train_df=sprint_train_actual,
+                test_df=sprint_fp_df,
+                feature_cols=sprint_feature_cols,
+                target_col="sprint_position",
+                model_factory=make_sprint_model,
+            )
+
+            if sprint_fp_wf_results and current_sprint_posfp_results:
+                fp_mae = float(np.mean([r["mae"] for r in sprint_fp_wf_results]))
+                fp_tau = float(np.mean([r["kendall_tau"] for r in sprint_fp_wf_results]))
+                fp_top3 = float(np.mean([r["top3_accuracy"] for r in sprint_fp_wf_results]))
+                cur_mae = float(np.mean([r["mae"] for r in current_sprint_posfp_results]))
+                cur_tau = float(np.mean([r["kendall_tau"] for r in current_sprint_posfp_results]))
+                cur_top3 = float(np.mean([r["top3_accuracy"] for r in current_sprint_posfp_results]))
+                sprint_fp_post_fp_delta = round(cur_mae - fp_mae, 4)
+                print(f"\n  === Post-FP scenario comparison (sprint) ===")
+                print(f"  Current sprint_model (train=actual, test=predicted):")
+                print(f"    MAE={cur_mae:.3f}  tau={cur_tau:.3f}  Top3={cur_top3:.1%}")
+                print(f"  New sprint_model_fp (train=predicted, test=predicted):")
+                print(f"    MAE={fp_mae:.3f}  tau={fp_tau:.3f}  Top3={fp_top3:.1%}")
+                improvement = cur_mae - fp_mae
+                if improvement > 0:
+                    pct = improvement / cur_mae if cur_mae > 0 else 0.0
+                    print(f"  IMPROVEMENT: MAE reduced by {improvement:.3f} positions "
+                          f"({pct:.1%})")
+                else:
+                    print(f"  REGRESSION: MAE worse by {-improvement:.3f} positions")
+
+            # Only train and save the final sprint_model_fp if the benchmark
+            # shows an actual improvement over the current sprint_model in the
+            # post-FP scenario. With only ~500 sprint rows total and thin
+            # early folds (60 rows), the walk-forward approach can be noisier
+            # than the actual-quali baseline. We'd rather fall back to the
+            # current sprint_model than ship a regression.
+            should_save_sprint_fp = (
+                sprint_fp_post_fp_delta is not None and sprint_fp_post_fp_delta > 0
+            )
+            # Remove any previous file to avoid 06_run_predictions.py silently
+            # picking up a stale model when we've decided not to ship one.
+            stale_fp_path = TRAINED_DIR / "sprint_model_fp.json"
+            if stale_fp_path.exists() and not should_save_sprint_fp:
+                stale_fp_path.unlink()
+                print(f"\n  No improvement over current sprint_model "
+                      f"(delta={sprint_fp_post_fp_delta}). Removed stale "
+                      f"sprint_model_fp.json; post-FP sprint inference will "
+                      f"fall back to sprint_model.json.")
+
+            if not should_save_sprint_fp:
+                print(f"  Skipping sprint_model_fp save (benchmark did not improve).")
+            else:
+                print("\n  Training final sprint_model_fp on all WF-quali sprint data...")
+                sprint_fp_df = sort_by_race_groups(sprint_fp_df)
+                X_s_fp = sprint_fp_df[sprint_fp_available].copy()
+                y_s_fp = position_to_relevance(sprint_fp_df["sprint_position"])
+                w_s_fp = sprint_fp_df["sample_weight"].values if "sample_weight" in sprint_fp_df.columns else None
+                s_fp_groups = make_race_qids(sprint_fp_df)
+
+                if w_s_fp is not None:
+                    s_fp_group_weights = []
+                    prev_qid = -1
+                    for i, qid in enumerate(s_fp_groups):
+                        if qid != prev_qid:
+                            s_fp_group_weights.append(w_s_fp[i])
+                            prev_qid = qid
+                    w_s_fp_groups = np.array(s_fp_group_weights)
+                else:
+                    w_s_fp_groups = None
+
+                sprint_fp_model = make_sprint_model()
+                sprint_fp_model.fit(X_s_fp, y_s_fp, sample_weight=w_s_fp_groups, qid=s_fp_groups)
+                sprint_fp_train_size = len(y_s_fp)
+
+                s_fp_importances = pd.Series(
+                    sprint_fp_model.feature_importances_, index=sprint_fp_available
+                ).sort_values(ascending=False)
+                print(f"\n  Top 10 sprint_fp features:")
+                for feat, imp in s_fp_importances.head(10).items():
+                    print(f"    {feat}: {imp:.4f}")
+
+                sprint_fp_model.save_model(str(TRAINED_DIR / "sprint_model_fp.json"))
+                print(f"  Saved -> models/trained/sprint_model_fp.json")
+
+    # ==================================================================
     # Save Feature Columns
     # ==================================================================
     feature_columns_data = {
@@ -1106,6 +1272,10 @@ def main() -> None:
         "race_fp_features": race_available if race_fp_model is not None else [],
         "fp_signal_features": fp_available,
         "sprint_features": sprint_available if sprint_model else race_available,
+        # sprint_fp shares the same feature list as sprint -- the only
+        # difference is the training recipe (WF predicted quali as both
+        # quali_position AND sprint_grid).
+        "sprint_fp_features": sprint_available if sprint_fp_model is not None else [],
     }
     with open(TRAINED_DIR / "feature_columns.json", "w") as f:
         json.dump(feature_columns_data, f, indent=2)
@@ -1215,6 +1385,8 @@ def main() -> None:
             "n_features": len(sprint_available) if sprint_model else 0,
             "training_samples": sprint_train_size,
             "trained": sprint_model is not None,
+            "trained_on": "actual quali_position + actual sprint_grid",
+            "used_for": "post-sprint-quali inference (sprint_grid known)",
             "params": {
                 "n_estimators": 400,
                 "learning_rate": 0.035,
@@ -1226,6 +1398,40 @@ def main() -> None:
                 "reg_lambda": 1.5,
             } if sprint_model else {},
             "walk_forward_results": sprint_wf_results if sprint_model else [],
+        },
+        "sprint_model_fp": {
+            "algorithm": "XGBRanker (rank:pairwise)" if sprint_fp_model is not None else "N/A",
+            "save_format": "json",
+            "n_features": len(sprint_available) if sprint_fp_model is not None else 0,
+            "training_samples": sprint_fp_train_size,
+            "trained": sprint_fp_model is not None,
+            "trained_on": "walk-forward predicted quali for both quali_position and sprint_grid",
+            "used_for": "post-FP inference on sprint weekends (pre-sprint-quali)",
+            "params": {
+                "n_estimators": 400,
+                "learning_rate": 0.035,
+                "max_depth": 4,
+                "subsample": 0.80,
+                "colsample_bytree": 0.80,
+                "min_child_weight": 5,
+                "reg_alpha": 0.2,
+                "reg_lambda": 1.5,
+            } if sprint_fp_model is not None else {},
+            "walk_forward_results": sprint_fp_wf_results,
+            "walk_forward_mean_mae": round(
+                float(np.mean([r["mae"] for r in sprint_fp_wf_results])), 4
+            ) if sprint_fp_wf_results else None,
+            "walk_forward_mean_kendall_tau": round(
+                float(np.mean([r["kendall_tau"] for r in sprint_fp_wf_results])), 4
+            ) if sprint_fp_wf_results else None,
+            "walk_forward_mean_top3_accuracy": round(
+                float(np.mean([r["top3_accuracy"] for r in sprint_fp_wf_results])), 4
+            ) if sprint_fp_wf_results else None,
+            "post_fp_mae_delta_vs_sprint_model": sprint_fp_post_fp_delta,
+            "top_features": (
+                {feat: round(float(imp), 4) for feat, imp in s_fp_importances.head(15).items()}
+                if not s_fp_importances.empty else {}
+            ),
         },
     }
 
@@ -1299,6 +1505,8 @@ def main() -> None:
         print(f"    - fp_signal_model.pkl")
     if sprint_model is not None:
         print(f"    - sprint_model.json")
+    if sprint_fp_model is not None:
+        print(f"    - sprint_model_fp.json")
     print(f"    - model_metadata.json")
     print(f"    - feature_columns.json")
     print("=" * 70)
