@@ -533,7 +533,11 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
     if is_sprint:
         print(f"\n[Sprint] Generating sprint predictions...")
         sprint_model_path = TRAINED_DIR / "sprint_model.json"
+        sprint_fp_model_path = TRAINED_DIR / "sprint_model_fp.json"
         sprint_feature_list = feature_cols_data.get("sprint_features", race_feature_list)
+        sprint_fp_feature_list = feature_cols_data.get(
+            "sprint_fp_features", sprint_feature_list
+        )
 
         # === Load actual sprint qualifying grid ===
         # For sprint weekends, sprint qualifying (Shootout) happens BEFORE our deadline.
@@ -590,7 +594,8 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
             print(f"  No sprint qualifying data available — using predicted qualifying as sprint grid proxy")
             pred_df["sprint_grid"] = pred_df["predicted_quali_position"]
 
-        # Compute sprint-grid-derived features (same as training)
+        # Compute sprint-grid-derived features (formulas MUST match
+        # 05_train_models.py sprint training block)
         sg = pred_df["sprint_grid"]
         pred_df["sprint_is_front_row"] = (sg <= 2).astype(int)
         pred_df["sprint_is_top3"] = (sg <= 3).astype(int)
@@ -602,15 +607,37 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
         # Sprint qualifying position for display / fantasy scoring
         pred_df["predicted_sprint_quali_position"] = pred_df["sprint_grid"].astype(int)
 
-        if sprint_model_path.exists():
-            print(f"  Using dedicated sprint model")
-            sprint_model = xgb.XGBRanker()
-            sprint_model.load_model(str(sprint_model_path))
+        # Phase-aware sprint model selection:
+        #   - Post-FP (pre-sprint-quali, sprint_grid is fallback proxy) -> sprint_model_fp.json
+        #     (trained with WF-predicted quali as both quali_position and sprint_grid)
+        #   - Post-sprint-quali (actual sprint_grid loaded)             -> sprint_model.json
+        use_fp_sprint_model = (not sprint_grid_loaded) and sprint_fp_model_path.exists()
+        if use_fp_sprint_model:
+            # For consistency with training: when the fp variant is chosen, the
+            # training data substituted sprint_grid == predicted_quali, so the
+            # quali_to_sprint_grid_delta feature is 0 by construction. Replicate
+            # that at inference so the feature distribution matches.
+            pred_df["quali_to_sprint_grid_delta"] = 0.0
 
-            for col in sprint_feature_list:
+        active_sprint_path = sprint_fp_model_path if use_fp_sprint_model else sprint_model_path
+        active_sprint_features = sprint_fp_feature_list if use_fp_sprint_model else sprint_feature_list
+
+        if active_sprint_path.exists():
+            if use_fp_sprint_model:
+                phase_label = "post-FP (pre-sprint-quali) -> sprint_model_fp.json"
+            elif sprint_grid_loaded:
+                phase_label = "post-sprint-quali (sprint_grid known) -> sprint_model.json"
+            else:
+                phase_label = ("post-FP (pre-sprint-quali) -> sprint_model.json "
+                               "(no sprint_model_fp.json available; falling back)")
+            print(f"  Phase: {phase_label}")
+            sprint_model = xgb.XGBRanker()
+            sprint_model.load_model(str(active_sprint_path))
+
+            for col in active_sprint_features:
                 if col not in pred_df.columns:
                     pred_df[col] = np.nan
-            X_s = pred_df[sprint_feature_list].copy()
+            X_s = pred_df[active_sprint_features].copy()
             sprint_raw = sprint_model.predict(X_s)
             sprint_ranks = pd.Series(-sprint_raw).rank(method="first").astype(int)
             pred_df["predicted_sprint_position"] = sprint_ranks.values
