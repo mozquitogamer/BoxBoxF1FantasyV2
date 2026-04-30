@@ -1,7 +1,14 @@
 {
-  "updated": "2026-04-29T11:55:24Z",
+  "updated": "2026-04-30T11:54:29Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "Jxm3rypGUxY",
+      "title": "Miami GP Preview & Thoughts  - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-04-29",
+      "thumbnail": "https://i.ytimg.com/vi/Jxm3rypGUxY/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=Jxm3rypGUxY"
+    },
     {
       "id": "rPm7-cxK3xY",
       "title": "F1 Fantasy is broken #f1fantasy #formula1 #automobile",
@@ -22,13 +29,6 @@
       "published": "2026-03-28",
       "thumbnail": "https://i.ytimg.com/vi/ANUm2rtpmJM/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=ANUm2rtpmJM"
-    },
-    {
-      "id": "jYzSmuMW9R4",
-      "title": "Final Thoughts Japanese GP - Piastri 2X Boost?  - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
-      "published": "2026-03-27",
-      "thumbnail": "https://i.ytimg.com/vi/jYzSmuMW9R4/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=jYzSmuMW9R4"
     }
   ]
 }
