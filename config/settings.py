@@ -98,6 +98,20 @@ SPRINT_ROUNDS_2026: list[int] = [2, 6, 7, 11, 14, 18]
 # -- Cancelled rounds for 2026 ------------------------------------------------
 CANCELLED_ROUNDS_2026: list[int] = [4, 5]
 
+
+def fastf1_round(internal_round: int, year: int = CURRENT_SEASON) -> int:
+    """Map internal round number → FastF1 round number.
+
+    FastF1's calendar omits cancelled races entirely, so its round numbering
+    skips them. Our internal `races.json` preserves original numbering. For
+    any internal round, the FastF1 equivalent is internal − (count of
+    cancelled rounds strictly before it).
+    """
+    if year != 2026:
+        return internal_round
+    skipped = sum(1 for r in CANCELLED_ROUNDS_2026 if r < internal_round)
+    return internal_round - skipped
+
 # -- Number of grid positions (11 teams × 2 drivers) --------------------------
 GRID_SIZE: int = 22
 NUM_CONSTRUCTORS: int = 11

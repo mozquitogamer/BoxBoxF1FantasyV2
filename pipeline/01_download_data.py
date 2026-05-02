@@ -36,6 +36,7 @@ from config.settings import (
     SEED_DIR,
     ALL_SESSIONS,
     CANCELLED_ROUNDS_2026,
+    fastf1_round,
 )
 
 
@@ -107,8 +108,9 @@ def download_fastf1_session(
     Returns:
         True if successful, False otherwise.
     """
+    ff1_round = fastf1_round(round_num, year)
     try:
-        session = fastf1.get_session(year, round_num, session_name)
+        session = fastf1.get_session(year, ff1_round, session_name)
         session.load(
             laps=True,
             telemetry=False,  # Telemetry is huge — load separately if needed

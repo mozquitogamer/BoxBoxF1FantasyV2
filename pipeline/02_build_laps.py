@@ -39,6 +39,7 @@ from config.settings import (
     CANCELLED_ROUNDS_2026,
     FP_SESSIONS,
     SPRINT_FP_SESSIONS,
+    fastf1_round,
 )
 
 
@@ -167,8 +168,9 @@ def process_fp_session(
     Returns:
         Cleaned DataFrame with standardized columns, or None if unavailable.
     """
+    ff1_round = fastf1_round(round_num, year)
     try:
-        session = fastf1.get_session(year, round_num, session_name)
+        session = fastf1.get_session(year, ff1_round, session_name)
         session.load(laps=True, telemetry=False, weather=True, messages=False)
         laps = session.laps
     except Exception as e:

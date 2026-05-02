@@ -42,6 +42,7 @@ from config.settings import (
     JOLPICA_MODEL_ROWS_DIR,
     SPRINT_ROUNDS_2026,
     CANCELLED_ROUNDS_2026,
+    fastf1_round,
 )
 from pipeline.feature_engineering import engineer_features
 from config.track_classifications import get_circuit_id_from_race_name
@@ -215,7 +216,8 @@ def _load_actual_quali(
     # Method 2: FastF1 qualifying session (fallback)
     try:
         import fastf1
-        session = fastf1.get_session(year, round_num, "Qualifying")
+        ff1_round = fastf1_round(round_num, year)
+        session = fastf1.get_session(year, ff1_round, "Qualifying")
         session.load(laps=False, telemetry=False, weather=False, messages=False)
         results = session.results
         if results is not None and not results.empty:
@@ -561,29 +563,56 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
         if not sprint_grid_loaded:
             try:
                 import fastf1
+                ff1_round = fastf1_round(round_num, year)
+                abbrev_to_jolpica, _ = load_driver_id_maps()
                 for sq_name in ["Sprint Shootout", "Sprint Qualifying", "SQ"]:
                     try:
-                        sq_session = fastf1.get_session(year, round_num, sq_name)
-                        sq_session.load(laps=False, telemetry=False, weather=False, messages=False)
+                        sq_session = fastf1.get_session(year, ff1_round, sq_name)
+                        # Load laps too — Ergast doesn't expose sprint-quali results,
+                        # so Position is often NaN even when timing data is available.
+                        # We fall back to ranking by each driver's fastest lap.
+                        sq_session.load(laps=True, telemetry=False, weather=False, messages=False)
                         sq_results = sq_session.results
                         if sq_results is not None and not sq_results.empty:
-                            # Map FastF1 abbreviation to our driver_id
-                            abbrev_to_jolpica, _ = load_driver_id_maps()
-                            # FastF1 results have 'Abbreviation' and 'Position' columns
-                            if "Abbreviation" in sq_results.columns and "Position" in sq_results.columns:
+                            # Path A: official Position column populated
+                            if (
+                                "Abbreviation" in sq_results.columns
+                                and "Position" in sq_results.columns
+                                and sq_results["Position"].notna().any()
+                            ):
                                 for _, row in sq_results.iterrows():
-                                    abbrev = row["Abbreviation"]
                                     pos = row["Position"]
-                                    # Find matching driver_id
-                                    did = abbrev_to_jolpica.get(abbrev)
+                                    if pd.isna(pos):
+                                        continue
+                                    did = abbrev_to_jolpica.get(row["Abbreviation"])
                                     if did is not None:
                                         mask = pred_df["driver_id"] == did
                                         pred_df.loc[mask, "sprint_grid"] = int(pos)
                                 n_mapped = pred_df["sprint_grid"].notna().sum()
                                 if n_mapped > 0:
                                     sprint_grid_loaded = True
-                                    print(f"  Loaded sprint grid from FastF1 ({sq_name}): {n_mapped}/{len(pred_df)} drivers")
+                                    print(f"  Loaded sprint grid from FastF1 {sq_name} results: {n_mapped}/{len(pred_df)} drivers")
                                     break
+
+                            # Path B: derive from fastest lap per driver
+                            laps = sq_session.laps
+                            if laps is not None and not laps.empty and "LapTime" in laps.columns:
+                                fastest = (
+                                    laps.dropna(subset=["LapTime"])
+                                        .groupby("Driver")["LapTime"].min()
+                                        .sort_values()
+                                )
+                                if len(fastest) > 0:
+                                    for rank, abbrev in enumerate(fastest.index, start=1):
+                                        did = abbrev_to_jolpica.get(abbrev)
+                                        if did is not None:
+                                            mask = pred_df["driver_id"] == did
+                                            pred_df.loc[mask, "sprint_grid"] = rank
+                                    n_mapped = pred_df["sprint_grid"].notna().sum()
+                                    if n_mapped > 0:
+                                        sprint_grid_loaded = True
+                                        print(f"  Loaded sprint grid from FastF1 {sq_name} fastest laps: {n_mapped}/{len(pred_df)} drivers")
+                                        break
                     except Exception:
                         continue
             except Exception as e:
