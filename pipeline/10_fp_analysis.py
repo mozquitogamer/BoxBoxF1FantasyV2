@@ -46,16 +46,21 @@ from config.settings import (
 # -- Load helpers --------------------------------------------------------------
 
 def load_fp_laps(round_num: int) -> pd.DataFrame | None:
-    """Load all FP session laps for a round."""
+    """Load all weekend session laps for a round.
+
+    Regular weekends pull FP1 + FP2 + FP3. Sprint weekends pull FP1 +
+    Sprint Qualifying — those are the only on-track sessions before the
+    Sunday quali/race deadline.
+    """
     round_dir = LAPS_DIR / f"round{round_num}"
     if not round_dir.exists():
         return None
 
     all_laps = []
-    for fp_file in sorted(round_dir.glob("all_laps_fp*.parquet")):
+    for lap_file in sorted(round_dir.glob("all_laps_*.parquet")):
         try:
-            df = pd.read_parquet(fp_file)
-            session = fp_file.stem.replace("all_laps_", "").upper()
+            df = pd.read_parquet(lap_file)
+            session = lap_file.stem.replace("all_laps_", "").upper()
             df["session"] = session
             all_laps.append(df)
         except Exception:

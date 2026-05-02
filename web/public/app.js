@@ -3474,21 +3474,30 @@ function renderFPAnalysis() {
         html += `</div>`;
     }
 
-    // Session Evolution
+    // Session Evolution — adapts to whichever sessions are present
+    // (FP1/FP2/FP3 on regular weekends, FP1 + Sprint Qualifying on sprint weekends).
     if (fpAnalysis.session_evolution && Object.keys(fpAnalysis.session_evolution).length > 0) {
-        const rows = Object.entries(fpAnalysis.session_evolution).map(([id, d]) => ({
-            id, fp1: d.sessions.FP1 || null, fp2: d.sessions.FP2 || null, fp3: d.sessions.FP3 || null,
-            improvement: d.improvement || 0, improved: d.improved
-        }));
-        const tbl = sortableTable('fpEvoTable', [
+        const sessionLabels = { FP1: 'FP1', FP2: 'FP2', FP3: 'FP3', SPRINT_QUALIFYING: 'Sprint Quali' };
+        const sessionOrder = ['FP1', 'FP2', 'FP3', 'SPRINT_QUALIFYING'];
+        const presentSessions = new Set();
+        Object.values(fpAnalysis.session_evolution).forEach(d => {
+            Object.keys(d.sessions || {}).forEach(s => presentSessions.add(s));
+        });
+        const cols = sessionOrder.filter(s => presentSessions.has(s));
+        const rows = Object.entries(fpAnalysis.session_evolution).map(([id, d]) => {
+            const r = { id, improvement: d.improvement || 0, improved: d.improved };
+            cols.forEach(s => { r[s] = d.sessions[s] || null; });
+            return r;
+        });
+        const colDefs = [
             { key: '_rank', label: '#', cls: 'num', fmt: (r, i) => i + 1 },
             { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
-            { key: 'fp1', label: 'FP1', cls: 'num', fmt: r => r.fp1 ? fmtTime(r.fp1) : '-' },
-            { key: 'fp2', label: 'FP2', cls: 'num', fmt: r => r.fp2 ? fmtTime(r.fp2) : '-' },
-            { key: 'fp3', label: 'FP3', cls: 'num', fmt: r => r.fp3 ? fmtTime(r.fp3) : '-' },
+            ...cols.map(s => ({ key: s, label: sessionLabels[s] || s, cls: 'num', fmt: r => r[s] ? fmtTime(r[s]) : '-' })),
             { key: 'improvement', label: 'Improvement', cls: 'num', title: 'Pace gain from first to last session. Negative = got faster.', fmt: r => `<span class="${r.improved ? 'text-green' : 'text-red'}">${r.improvement > 0 ? '-' : '+'}${Math.abs(r.improvement).toFixed(3)}s</span>` }
-        ], rows, 'improvement', false);
-        html += `<div class="analysis-block"><h3>Session Evolution (FP1 → FP2)</h3><p class="analysis-note">How drivers improved their pace across practice sessions. Larger improvement may indicate setup breakthroughs.</p>${tbl.getHtml()}</div>`;
+        ];
+        const tbl = sortableTable('fpEvoTable', colDefs, rows, 'improvement', false);
+        const headerLabel = cols.map(s => sessionLabels[s] || s).join(' → ');
+        html += `<div class="analysis-block"><h3>Session Evolution (${headerLabel})</h3><p class="analysis-note">How drivers improved their pace across on-track sessions. Negative number = got faster.</p>${tbl.getHtml()}</div>`;
         postRenderFns.push(tbl.renderTable);
     }
 

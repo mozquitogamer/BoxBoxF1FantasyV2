@@ -320,28 +320,36 @@ def main() -> None:
         print(f"Round {round_num} is cancelled.")
         return
 
-    # Determine which FP sessions to process
+    # Determine which sessions to process
+    # Sprint weekends: FP1 + Sprint Qualifying (no FP2/FP3 exist)
+    # Regular weekends: FP1 + FP2 + FP3
     is_sprint = round_num in SPRINT_ROUNDS_2026
-    fp_sessions = SPRINT_FP_SESSIONS if is_sprint else FP_SESSIONS
+    if is_sprint:
+        sessions_to_process = SPRINT_FP_SESSIONS + ["Sprint Qualifying"]
+    else:
+        sessions_to_process = FP_SESSIONS
 
     print(f"\nSprint weekend: {'Yes' if is_sprint else 'No'}")
-    print(f"FP sessions to process: {fp_sessions}")
+    print(f"Sessions to process: {sessions_to_process}")
 
     # Load ID mappings
     driver_map, constructor_map = load_id_mappings()
 
-    # Process each FP session
+    # Process each session
     output_dir = LAPS_DIR / f"round{round_num}"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    for session_name in fp_sessions:
+    for session_name in sessions_to_process:
         print(f"\nProcessing {session_name}...")
         df = process_fp_session(year, round_num, session_name, driver_map, constructor_map)
 
         if df is not None and not df.empty:
-            # FP1 -> fp1, FP2 -> fp2, etc.
-            fp_num = session_name.lower().replace("fp", "")
-            output_path = output_dir / f"all_laps_fp{fp_num}.parquet"
+            # FP1 -> all_laps_fp1.parquet, Sprint Qualifying -> all_laps_sprint_qualifying.parquet
+            file_suffix = session_name.lower().replace(" ", "_")
+            if file_suffix.startswith("fp"):
+                output_path = output_dir / f"all_laps_{file_suffix}.parquet"
+            else:
+                output_path = output_dir / f"all_laps_{file_suffix}.parquet"
             df.to_parquet(output_path, index=False, engine="pyarrow")
             print(f"  Saved: {output_path} ({len(df)} laps)")
             print(f"  Drivers: {sorted(df['driver_id'].unique())}")
