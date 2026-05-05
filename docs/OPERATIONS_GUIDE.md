@@ -298,6 +298,8 @@ git add web/public/data/ && git commit -m "Add FP analysis for Round 3" && git p
 **When:** After the race ends. Wait ~1 hour for data to be finalized.
 **Purpose:** Record actual results, compare predictions vs. reality, update the website.
 
+> **Jolpica/Ergast lag:** Race and sprint results often take a few hours to publish. If `data/raw/jolpica/year{Y}/round{N}/results.json` returns `Races: []`, the FastF1-derived analyses (race pace, tyre management, overtakes, FP analysis) will still populate, but `actual_round{N}.json` will be empty until you re-run after Jolpica catches up.
+
 ### Step 1: Download Race Results
 
 ```bash
@@ -474,6 +476,8 @@ Sprint weekends have a compressed schedule and additional scoring:
 
 ### Pipeline Differences
 - Run Phase 2 after FP1 only (less data, lower confidence)
+- `02_build_laps.py` saves both FP1 laps and Sprint Qualifying laps on sprint weekends. Sprint quali laps go to `all_laps_sprint_qualifying.parquet` and feed only the Deep Dive analysis (`10_fp_analysis.py`), NOT model training.
+- `06_run_predictions.py` derives `sprint_grid` from Sprint Qualifying fastest laps (Ergast doesn't expose Sprint Qualifying positions, so the Position field is NaN — fastest-lap ranking is the canonical fallback).
 - Sprint scoring is included automatically when `is_sprint_weekend=True` in predictions
 - Fantasy points calculation handles sprint separately (different point scale)
 - Monte Carlo simulates sprint + race independently

@@ -39,6 +39,7 @@ from config.settings import (
     CURRENT_SEASON,
     SEED_DIR,
     CANCELLED_ROUNDS_2026,
+    fastf1_round,
 )
 
 CACHE_DIR = PROJECT_ROOT / "data" / "fastf1_cache"
@@ -398,8 +399,9 @@ def count_overtakes_for_session(
 ) -> dict | None:
     """Load a session and count overtakes."""
     session_name = "Race" if session_type == "R" else "Sprint"
+    ff1_round = fastf1_round(round_num, year)
     try:
-        session = fastf1.get_session(year, round_num, session_type)
+        session = fastf1.get_session(year, ff1_round, session_type)
         session.load(
             laps=True,
             telemetry=False,

@@ -503,6 +503,11 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 76
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 0
         }
       ]
     },
@@ -522,6 +527,11 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 56
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 0
         }
       ]
     },
@@ -541,6 +551,11 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": -11
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 0
         }
       ]
     },
@@ -560,6 +575,11 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 20
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 0
         }
       ]
     },
@@ -579,6 +599,11 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 20
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 0
         }
       ]
     },
@@ -598,6 +623,11 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 21
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 0
         }
       ]
     },
@@ -617,6 +647,11 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 57
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 0
         }
       ]
     },
@@ -636,6 +671,11 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 8
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 0
         }
       ]
     },
@@ -655,6 +695,11 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 14
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 0
         }
       ]
     },
@@ -674,6 +719,11 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 13
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 0
         }
       ]
     },
@@ -693,6 +743,11 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": -11
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 0
         }
       ]
     }

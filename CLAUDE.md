@@ -18,7 +18,7 @@ F1 Fantasy prediction pipeline and website for the 2026 season. Predicts qualify
 BoxBoxF1FantasyV2/
 ├── pipeline/               # Numbered Python scripts, run in order
 │   ├── 01_download_data.py         # FastF1 telemetry + Jolpica API download
-│   ├── 02_build_laps.py            # Parse raw data into lap-level parquets
+│   ├── 02_build_laps.py            # Parse raw data into lap-level parquets (FP1+SQ on sprint, FP1/2/3 otherwise)
 │   ├── 03_extract_features.py      # FP telemetry features (40+ cols, sparse)
 │   ├── 03a_normalize_jolpica.py    # Normalize historical results
 │   ├── 03b_build_jolpica_features.py # Rolling features (91 cols, always available)
@@ -48,8 +48,8 @@ BoxBoxF1FantasyV2/
 │   ├── team_driver_ratings.py      # Manual skill ratings per team/driver
 │   └── circuit_coordinates.py      # Track GPS coordinates
 ├── data/
-│   ├── raw/fastf1/year{Y}/round{R}/ # FP1/2/3 parquets
-│   ├── raw/jolpica/year{Y}/round{R}/ # Results, qualifying, pitstops JSON
+│   ├── raw/fastf1/year{Y}/round{R}/ # FP1/2/3 + sprint quali parquets (sprint weekends)
+│   ├── raw/jolpica/year{Y}/round{R}/ # Results, qualifying, sprint, pitstops JSON
 │   ├── processed/                    # Intermediate: features, model inputs
 │   ├── predictions/round{N}/         # Per-round prediction parquets
 │   └── seed/                         # Manual data (prices, drivers, races, etc.)
@@ -84,6 +84,12 @@ The core design: two data layers merged for XGBoost, which handles NaN natively.
 - **Layer 2 — FP Telemetry (40+ features, sparse/NaN in training):** Lap times, sectors, degradation, long-run pace, compound-specific features (soft/medium/hard), relative pace deltas. Only ~160/2,600 training rows have this data.
 
 XGBoost's native NaN handling means: when FP data exists → model uses it to refine; when missing → model relies on priors. No imputation needed.
+
+Model features are extracted ONLY from FP sessions (`all_laps_fp*.parquet`). Sprint qualifying laps are saved separately and consumed only by `10_fp_analysis.py` for the Deep Dive page — they do not feed model training/inference. The model still picks up sprint qualifying as a grid input via `06_run_predictions.py` (the `sprint_grid` feature).
+
+## Calendar Mapping: Internal Round vs FastF1 Round
+
+`data/seed/races.json` preserves original 2026 numbering with `cancelled: true` markers (Bahrain R4, Saudi R5). FastF1's calendar omits cancelled races entirely, so its round numbers diverge after the first cancellation. Use `config.settings.fastf1_round(internal_round, year)` at every `fastf1.get_session(...)` boundary — it subtracts the count of cancelled rounds preceding the target round. The internal round number is preserved everywhere else (file paths, Jolpica calls, logging). Skipping this mapping leads to silently downloading the wrong race's data (e.g. internal R6 = Miami → FastF1 R6 = Monaco). All FastF1 callsites in `01_download_data.py`, `02_build_laps.py`, `06_run_predictions.py`, and `12_count_overtakes.py` apply this mapping.
 
 ## ML Models
 
@@ -146,8 +152,21 @@ APIs (FastF1, Jolpica, OpenF1, Open-Meteo)
 ## Running the Pipeline
 
 ```bash
-# Full weekend automation (detects phase: pre-FP, post-FP, post-quali, post-race)
-python pipeline/run_weekend.py --round N
+# Full weekend automation — pick the right phase for what's happened on track:
+python pipeline/run_weekend.py --phase post_fp    --round N   # FP1 (sprint) or FP1+FP2+FP3 (regular) done
+python pipeline/run_weekend.py --phase post_quali --round N   # Sat/Sun qualifying done
+python pipeline/run_weekend.py --phase post_race  --round N   # race done
+
+# What each phase runs (post_fp / post_quali):
+#   01_download_data → 02_build_laps → 03_extract_features →
+#   06_run_predictions → 07_calculate_fantasy → 08_monte_carlo_fantasy →
+#   10_fp_analysis → 08_export_website_json
+#
+# What post_race runs:
+#   01_download_data → 09_post_race_analysis → 11_actual_fantasy_points →
+#   12_count_overtakes → 13_fetch_openf1_overtakes → 08_export_website_json
+# (Jolpica/Ergast typically publishes results within a few hours of the race;
+# if results.json is empty, wait and re-run.)
 
 # Or individual steps:
 python pipeline/01_download_data.py --round N
@@ -193,3 +212,7 @@ Before each round, update `data/seed/fantasy_prices.json` with current F1 Fantas
 - Price data in `fantasy_prices.json` has both `drivers` and `constructors` sections, plus `price_history` keyed by round number
 - Cache version in `index.html` (`app.js?v=N`) must be bumped when `app.js` changes
 - The website has no build step — edit `web/public/app.js` and `web/public/styles.css` directly
+- **Calendar mapping is mandatory at every FastF1 boundary.** Always wrap `fastf1.get_session(year, round, ...)` calls with `fastf1_round(round, year)` from `config.settings`. Without it, cancelled-round offsets cause silently wrong sessions to load (e.g. internal R6 = Miami → FastF1 R6 = Monaco).
+- **Sprint quali laps are saved separately** as `data/processed/laps/round{N}/all_laps_sprint_qualifying.parquet`. They are consumed only by `10_fp_analysis.py` (Deep Dive page). Model feature extraction (`03_extract_features.py`) only globs `all_laps_fp*.parquet`, keeping FP-only training inputs.
+- **Sprint quali grid in 06_run_predictions.py:** Ergast doesn't expose Sprint Qualifying results, so FastF1's `Position`/`Q1`-`Q3` fields are NaN. The loader falls back to ranking by each driver's fastest lap when the official Position field is empty. This populates `sprint_grid` and switches inference from `sprint_model_fp.json` to `sprint_model.json`.
+- **Jolpica/Ergast lag:** Race and sprint results typically publish a few hours after the session. If `data/raw/jolpica/year{Y}/round{N}/results.json` returns `Races: []`, wait and re-run `post_race`. FastF1-derived outputs (race pace, tyre management, overtakes, FP analysis) populate independently of Jolpica.

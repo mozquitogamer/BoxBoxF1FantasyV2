@@ -122,13 +122,14 @@
 
 ### FastF1 (Free Practice Telemetry)
 
-**What:** Lap-by-lap timing data from FP1, FP2, FP3 sessions.
+**What:** Lap-by-lap timing data from FP1, FP2, FP3 sessions. Sprint weekends additionally save Sprint Qualifying laps for the Deep Dive analysis (not for model training).
 **Why:** Free practice is the only real-world data available before qualifying and the race. It tells us how fast each car actually is on the current track in current conditions.
 **Data includes:** Lap times, sector times (3 sectors per lap), tyre compound, pit in/out flags, deleted lap flags, weather conditions.
 **Limitations:**
 - Data availability: ~30 min delay after session ends
 - Teams sandbag (don't show true pace) in FP — we mitigate by looking at consistency and long-run pace, not just headline lap times
-- Sprint weekends only have FP1
+- Sprint weekends only have FP1 (plus Sprint Qualifying, which feeds `sprint_grid` and the Deep Dive page but not the FP feature extractor)
+- FastF1's 2026 calendar omits cancelled rounds (Bahrain R4, Saudi R5), so callers must use `config.settings.fastf1_round(internal_round)` to translate from internal numbering before any `fastf1.get_session(...)` call
 
 ### Jolpica API (Historical Results)
 
@@ -276,7 +277,7 @@ XGBRanker(n_estimators=400, learning_rate=0.035, max_depth=4,
 - **Sprint grid as #1 feature:** `sprint_grid` (importance=0.032) and `sprint_grid_advantage` (#2) are the top features. Derived features include `sprint_is_front_row`, `sprint_is_top3`, `sprint_is_top10`, and `quali_to_sprint_grid_delta` (how a driver's sprint qualifying compared to regular qualifying).
 - **Lighter regularization:** Fewer trees (400 vs 650), shallower depth (4 vs 5), higher learning rate (0.035 vs 0.03) — smaller dataset needs less complexity
 - **Walk-forward results:** MAE=3.371, Kendall's tau=0.542, Top-3 accuracy=66.7%
-- **At prediction time:** Loads actual sprint qualifying results from normalized CSV or FastF1 session data; falls back to predicted qualifying positions if sprint qualifying hasn't happened yet
+- **At prediction time:** Loads actual sprint qualifying results from normalized CSV or FastF1 session data. Because Ergast doesn't expose Sprint Qualifying results (Position/Q1/Q2/Q3 are NaN), the loader ranks drivers by their fastest lap in the Sprint Qualifying session as a fallback. Falls back to predicted qualifying positions if sprint qualifying hasn't happened yet.
 - **Fallback:** If sprint model unavailable, MC simulation falls back to race model raw scores
 - **MC integration:** Sprint raw z-scores used with team-correlated noise at 0.8x race noise base
 
