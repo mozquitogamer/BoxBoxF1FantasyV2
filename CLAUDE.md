@@ -170,7 +170,8 @@ python pipeline/run_weekend.py --phase post_race  --round N   # race done
 #
 # What post_race runs:
 #   01_download_data → 09_post_race_analysis → 11_actual_fantasy_points →
-#   12_count_overtakes → 13_fetch_openf1_overtakes → 08_export_website_json
+#   11_race_deep_dive → 12_count_overtakes → 13_fetch_openf1_overtakes →
+#   13_fetch_pitstop_stationary → 08_export_website_json
 # (Jolpica/Ergast typically publishes results within a few hours of the race;
 # if results.json is empty, wait and re-run.)
 
