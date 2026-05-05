@@ -3365,18 +3365,24 @@ function renderFPAnalysis() {
     // Fuel-Corrected Pace
     if (fpAnalysis.fuel_corrected_pace && Object.keys(fpAnalysis.fuel_corrected_pace).length > 0) {
         const rows = Object.entries(fpAnalysis.fuel_corrected_pace).map(([id, d]) => ({
-            id, corrected_pace: d.avg_corrected_pace || d.corrected_pace, raw_pace: d.avg_raw_pace || d.raw_pace,
-            fuel_effect: d.fuel_effect || d.correction, laps: d.laps || d.total_laps,
+            id,
+            avg_pace: d.fuel_corrected_avg ?? d.avg_corrected_pace ?? d.corrected_pace,
+            best_pace: d.fuel_corrected_best,
+            median_pace: d.fuel_corrected_median,
+            laps: d.laps_used ?? d.laps ?? d.total_laps,
+            correction: d.fuel_correction_per_lap ?? d.fuel_effect ?? d.correction,
             gap: d.gap_to_fastest || 0
         }));
         const tbl = sortableTable('fpFuelTable', [
             { key: '_rank', label: '#', cls: 'num', fmt: (r, i) => i + 1 },
             { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
-            { key: 'corrected_pace', label: 'Corrected Pace', cls: 'num', title: 'Lap time adjusted for estimated fuel load (removes fuel weight advantage of late-stint laps)', fmt: r => r.corrected_pace ? fmtTime(r.corrected_pace) : '-' },
-            { key: 'raw_pace', label: 'Raw Pace', cls: 'num', title: 'Unadjusted average lap time', fmt: r => r.raw_pace ? fmtTime(r.raw_pace) : '-' },
-            { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to fastest fuel-corrected pace', fmt: r => r.gap === 0 ? '<span class="text-green">Leader</span>' : '+' + (r.gap || 0).toFixed(3) },
-            { key: 'laps', label: 'Laps', cls: 'num' }
-        ], rows, 'corrected_pace', true);
+            { key: 'avg_pace', label: 'Avg (Corrected)', cls: 'num', title: 'Average lap time after fuel correction (lower = stronger underlying pace)', fmt: r => r.avg_pace ? fmtTime(r.avg_pace) : '-' },
+            { key: 'best_pace', label: 'Best (Corrected)', cls: 'num', title: 'Best fuel-corrected lap', fmt: r => r.best_pace ? fmtTime(r.best_pace) : '-' },
+            { key: 'median_pace', label: 'Median', cls: 'num', title: 'Median fuel-corrected lap', fmt: r => r.median_pace ? fmtTime(r.median_pace) : '-' },
+            { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to fastest fuel-corrected average pace', fmt: r => r.gap === 0 ? '<span class="text-green">Leader</span>' : '+' + (r.gap || 0).toFixed(3) },
+            { key: 'laps', label: 'Laps', cls: 'num', title: 'Laps used after outlier filtering' },
+            { key: 'correction', label: 'Fuel/Lap', cls: 'num', title: 'Estimated seconds of fuel-weight effect removed per lap', fmt: r => r.correction ? r.correction.toFixed(3) + 's' : '-' }
+        ], rows, 'avg_pace', true);
         html += `<div class="analysis-block"><h3>Fuel-Corrected Pace</h3><p class="analysis-note">Lap times adjusted for estimated fuel load to give a truer picture of underlying pace.</p>${tbl.getHtml()}</div>`;
         postRenderFns.push(tbl.renderTable);
     }
@@ -3411,14 +3417,23 @@ function renderFPAnalysis() {
 
     // Stint Breakdown
     if (fpAnalysis.stint_breakdown && Object.keys(fpAnalysis.stint_breakdown).length > 0) {
+        const sessionLabels = { FP1: 'FP1', FP2: 'FP2', FP3: 'FP3', SPRINT_QUALIFYING: 'Sprint Q' };
         const rows = [];
-        Object.entries(fpAnalysis.stint_breakdown).forEach(([id, stints]) => {
-            (Array.isArray(stints) ? stints : Object.values(stints)).forEach(s => {
+        Object.entries(fpAnalysis.stint_breakdown).forEach(([id, payload]) => {
+            // payload is either { stints: [...], total_stints, avg_degradation } or a raw array (older shape)
+            const stints = Array.isArray(payload) ? payload : (payload && Array.isArray(payload.stints) ? payload.stints : []);
+            stints.forEach(s => {
                 rows.push({
-                    id, stint: s.stint || s.stint_number || 0, compound: s.compound || '?',
-                    laps: s.laps || s.lap_count || 0, avg_pace: s.avg_pace || s.avg_time || 0,
-                    first_lap: s.first_lap_pace || s.first_lap || 0, last_lap: s.last_lap_pace || s.last_lap || 0,
-                    deg: s.degradation || s.deg_rate || 0
+                    id,
+                    stint: s.stint || s.stint_number || 0,
+                    session: s.session || '',
+                    compound: s.compound || '?',
+                    laps: s.total_laps ?? s.laps ?? s.lap_count ?? 0,
+                    avg_pace: s.avg_pace ?? s.avg_time ?? 0,
+                    best_pace: s.best_pace ?? 0,
+                    first_lap: s.first_lap_pace ?? s.first_lap ?? 0,
+                    last_lap: s.last_lap_pace ?? s.last_lap ?? 0,
+                    deg: s.degradation_rate ?? s.degradation ?? s.deg_rate ?? 0
                 });
             });
         });
@@ -3426,12 +3441,14 @@ function renderFPAnalysis() {
             const tbl = sortableTable('fpStintTable', [
                 { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
                 { key: 'stint', label: 'Stint', cls: 'num', title: 'Stint number within the session' },
+                { key: 'session', label: 'Session', title: 'Session this stint was run in', fmt: r => sessionLabels[r.session] || r.session || '-' },
                 { key: 'compound', label: 'Tyre', title: 'Tyre compound used', fmt: r => `<span class="compound-badge ${r.compound.toLowerCase()}">${r.compound}</span>` },
                 { key: 'laps', label: 'Laps', cls: 'num' },
                 { key: 'avg_pace', label: 'Avg Pace', cls: 'num', title: 'Average lap time across the stint', fmt: r => r.avg_pace ? fmtTime(r.avg_pace) : '-' },
+                { key: 'best_pace', label: 'Best', cls: 'num', title: 'Best lap in the stint', fmt: r => r.best_pace ? fmtTime(r.best_pace) : '-' },
                 { key: 'first_lap', label: 'First Lap', cls: 'num', title: 'Pace of first timed lap in stint', fmt: r => r.first_lap ? fmtTime(r.first_lap) : '-' },
                 { key: 'last_lap', label: 'Last Lap', cls: 'num', title: 'Pace of last lap in stint', fmt: r => r.last_lap ? fmtTime(r.last_lap) : '-' },
-                { key: 'deg', label: 'Deg (s/lap)', cls: 'num', title: 'Degradation rate: seconds lost per lap of tyre age', fmt: r => r.deg ? (r.deg >= 0 ? '+' : '') + r.deg.toFixed(4) : '-' }
+                { key: 'deg', label: 'Deg (s/lap)', cls: 'num', title: 'Degradation rate: seconds lost per lap of tyre age (linear fit)', fmt: r => r.deg ? (r.deg >= 0 ? '+' : '') + r.deg.toFixed(4) : '-' }
             ], rows, 'avg_pace', true);
             html += `<div class="analysis-block"><h3>Stint Breakdown</h3><p class="analysis-note">Detailed per-stint data showing pace evolution and tyre degradation within each run.</p>${tbl.getHtml()}</div>`;
             postRenderFns.push(tbl.renderTable);
