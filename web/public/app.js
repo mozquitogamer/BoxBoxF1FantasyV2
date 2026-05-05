@@ -1417,6 +1417,38 @@ function predictPriceChange(item, predictedPts) {
 
 // -- Lineup Optimizer --
 // F1 Fantasy rules: 5 drivers + 2 constructors within budget
+
+// Strategy-aware lineup score. `totalPoints` should already include chip-boost
+// effects from the caller, so every strategy benefits from the chip.
+// - max_points: just the chip-adjusted total
+// - max_value:  lineup-level points-per-dollar (rewards the best ratio across
+//               the WHOLE lineup, not the sum of per-pick value scores)
+// - budget_gain: projected price appreciation across all picks, weighted with points
+// - balanced:   blend of points and lineup-level value
+function lineupScore(strategy, totalPoints, totalCost, allDrivers, constructorsList) {
+    if (strategy === 'max_points') return totalPoints;
+    if (strategy === 'max_value') {
+        return totalCost > 0 ? totalPoints / totalCost : 0;
+    }
+    if (strategy === 'budget_gain') {
+        let priceGain = 0;
+        for (const d of allDrivers) {
+            const pc = predictPriceChange(d, d.expected_points);
+            priceGain += pc.expectedChange;
+        }
+        for (const c of constructorsList) {
+            const pc = predictPriceChange(c, c.expected_points);
+            priceGain += pc.expectedChange;
+        }
+        // Mix price appreciation (heavy) with points (light) so we don't pick
+        // a team that gains cash but scores zero.
+        return priceGain * 100 + totalPoints * 0.1;
+    }
+    // balanced
+    const value = totalCost > 0 ? totalPoints / totalCost : 0;
+    return totalPoints * 0.6 + value * 50;
+}
+
 function runOptimizer() {
     if (!data) return;
 
@@ -1426,7 +1458,8 @@ function runOptimizer() {
     const numDriverSlots = 5;
     const effectiveBudget = chip === 'limitless' ? 999 : budget;
 
-    // Score function
+    // Per-pick score — used only for initial sort order, not for ranking.
+    // Lineup-level ranking goes through lineupScore(...) which is chip-aware.
     function score(item) {
         if (strategy === 'max_points') return item.expected_points;
         if (strategy === 'max_value') return item.value_score;
@@ -1464,7 +1497,6 @@ function runOptimizer() {
             cPairs.push({
                 items: [constructors[i], constructors[j]],
                 cost: constructors[i].current_price + constructors[j].current_price,
-                score: constructors[i]._score + constructors[j]._score,
             });
         }
     }
@@ -1473,7 +1505,6 @@ function runOptimizer() {
     const freeDrivers = drivers.filter(d => !lockedDrivers.has(d.driver_id));
     const neededDrivers = numDriverSlots - lockedDriverList.length;
     const lockedDriverCost = lockedDriverList.reduce((s, d) => s + d.current_price, 0);
-    const lockedDriverScore = lockedDriverList.reduce((s, d) => s + d._score, 0);
 
     if (neededDrivers < 0) {
         alert(`You have locked more than ${numDriverSlots} drivers. Please unlock some.`);
@@ -1528,8 +1559,8 @@ function runOptimizer() {
             }
             const totalPoints = driverPoints + constructorPoints + primaryBoostExtra + secondBoostExtra;
 
-            const baseScore = cp.score + lockedDriverScore + combo.reduce((s, d) => s + d._score, 0);
-            const totalScore = (strategy === 'max_points') ? totalPoints : baseScore;
+            // Strategy-aware ranking using chip-adjusted totalPoints
+            const totalScore = lineupScore(strategy, totalPoints, totalCost, allDrivers, cp.items);
 
             allLineups.push({
                 drivers: allDrivers,
@@ -1999,9 +2030,7 @@ function runTransferAdvisor() {
 
     const isWildcard = chip === 'wild_card';
     const maxExtraTransfers = parseInt(document.getElementById('maxExtraTransfers').value) || 0;
-    if (maxExtraTransfers >= 3) {
-        alert('Consider using Wild Card chip for 3+ extra transfers \u2014 it gives unlimited free transfers!');
-    }
+    const showWildcardHint = maxExtraTransfers >= 3 && !isWildcard;
     const maxTransfers = isWildcard ? 7 : freeTransfers + maxExtraTransfers; // Wildcard = unlimited
     const transferPenalty = 10; // -10 pts per extra transfer
 
@@ -2067,8 +2096,8 @@ function runTransferAdvisor() {
         const curAllPicks = [...currentDriverObjs, ...currentConstructorObjs];
         const curTotalPoints = chipAdjustedPoints(curAllPicks, curBoosted.driver_id, curSecondBoosted ? curSecondBoosted.driver_id : null);
         const curTotalCost = curAllPicks.reduce((s, x) => s + x.current_price, 0);
-        const curBaseScore = curAllPicks.reduce((s, x) => s + score(x), 0);
-        const curFinalScore = (strategy === 'max_points') ? curTotalPoints : curBaseScore;
+        // Strategy-aware lineup-level score (chip-adjusted via curTotalPoints)
+        const curFinalScore = lineupScore(strategy, curTotalPoints, curTotalCost, currentDriverObjs, currentConstructorObjs);
         results.push({
             drivers: currentDriverObjs,
             constructors: currentConstructorObjs,
@@ -2164,9 +2193,9 @@ function runTransferAdvisor() {
             const penalty = isWildcard ? 0 : extraTransfers * transferPenalty;
             const netPoints = totalPoints - penalty;
 
-            // Final score
-            const baseScore = [...allDriversInLineup, ...cp.items].reduce((s, x) => s + score(x), 0);
-            const finalScore = (strategy === 'max_points') ? netPoints : baseScore - penalty;
+            // Strategy-aware lineup-level score (chip-adjusted), minus transfer penalty
+            const lineupVal = lineupScore(strategy, totalPoints, totalCost, allDriversInLineup, cp.items);
+            const finalScore = lineupVal - penalty;
 
             results.push({
                 drivers: allDriversInLineup,
@@ -2229,10 +2258,10 @@ function runTransferAdvisor() {
     }
 
     lineupsShown = 0;
-    displayTransferResults(strategy, chip);
+    displayTransferResults(strategy, chip, showWildcardHint);
 }
 
-function displayTransferResults(strategy, chip) {
+function displayTransferResults(strategy, chip, showWildcardHint) {
     const resultEl = document.getElementById('optimizerResult');
     resultEl.classList.remove('hidden');
 
@@ -2261,7 +2290,10 @@ function displayTransferResults(strategy, chip) {
                 <div class="label">Gross Points (incl boost)</div>
             </div>
         `;
-        document.getElementById('lineupCards').innerHTML = '';
+        const hintHtml = showWildcardHint
+            ? `<div class="optimizer-hint" style="grid-column:1/-1;background:rgba(245,158,11,0.08);border:1px solid var(--orange,#f59e0b);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text-secondary);">Tip: Wild Card chip gives unlimited free transfers — consider it instead of taking penalties for 3+ extra transfers.</div>`
+            : '';
+        document.getElementById('lineupCards').innerHTML = hintHtml;
         document.getElementById('lineupCounter').textContent = `${total} option${total !== 1 ? 's' : ''} found`;
     }
 
@@ -2317,20 +2349,21 @@ function renderTransferCard(lineup, index, chip) {
     if (driversOut.length === 0 && consOut.length === 0) {
         html += '<p style="color:var(--green);font-weight:600;margin-bottom:12px;">No transfers needed — keep your current team!</p>';
     } else {
+        // Pair out↔in deterministically by expected_points (descending) so the
+        // top-impact swap is shown first. The raw filter order is arbitrary,
+        // which made multi-swap rows show nonsensical pairings.
+        const sortByEp = (a, b) => (b?.expected_points || 0) - (a?.expected_points || 0);
+        const outDrivers = driversOut.map(id => data.drivers.find(d => d.driver_id === id)).filter(Boolean).sort(sortByEp);
+        const inDrivers  = driversIn.map(id => data.drivers.find(d => d.driver_id === id)).filter(Boolean).sort(sortByEp);
+        const outCons = consOut.map(id => data.constructors.find(c => c.constructor_id === id)).filter(Boolean).sort(sortByEp);
+        const inCons  = consIn.map(id => data.constructors.find(c => c.constructor_id === id)).filter(Boolean).sort(sortByEp);
+
         html += '<div style="margin-bottom:12px;">';
-        for (let i = 0; i < Math.max(driversOut.length, driversIn.length); i++) {
-            const outId = driversOut[i];
-            const inId = driversIn[i];
-            const outDriver = outId ? data.drivers.find(d => d.driver_id === outId) : null;
-            const inDriver = inId ? data.drivers.find(d => d.driver_id === inId) : null;
-            html += renderSwapRow(outDriver, inDriver, 'driver');
+        for (let i = 0; i < Math.max(outDrivers.length, inDrivers.length); i++) {
+            html += renderSwapRow(outDrivers[i] || null, inDrivers[i] || null, 'driver');
         }
-        for (let i = 0; i < Math.max(consOut.length, consIn.length); i++) {
-            const outId = consOut[i];
-            const inId = consIn[i];
-            const outCon = outId ? data.constructors.find(c => c.constructor_id === outId) : null;
-            const inCon = inId ? data.constructors.find(c => c.constructor_id === inId) : null;
-            html += renderSwapRow(outCon, inCon, 'constructor');
+        for (let i = 0; i < Math.max(outCons.length, inCons.length); i++) {
+            html += renderSwapRow(outCons[i] || null, inCons[i] || null, 'constructor');
         }
         html += '</div>';
     }
@@ -2549,6 +2582,29 @@ function getUpcomingRounds(currentRound, horizon) {
     return seasonSummary.rounds
         .filter(r => r.round >= currentRound)
         .slice(0, horizon);
+}
+
+// Set-diff swap detector. Use whenever the new team can come back in any order
+// (wildcard, limitless) — positional comparison reports phantom swaps when slot
+// order shifts across rounds.
+function computeSwapDetails(prevDrivers, prevCons, newDrivers, newCons) {
+    const newDriverSet = new Set(newDrivers);
+    const prevDriverSet = new Set(prevDrivers);
+    const driversOut = prevDrivers.filter(id => !newDriverSet.has(id));
+    const driversIn = newDrivers.filter(id => !prevDriverSet.has(id));
+    const newConSet = new Set(newCons);
+    const prevConSet = new Set(prevCons);
+    const consOut = prevCons.filter(id => !newConSet.has(id));
+    const consIn = newCons.filter(id => !prevConSet.has(id));
+
+    const swapDetails = [];
+    for (let i = 0; i < Math.max(driversOut.length, driversIn.length); i++) {
+        swapDetails.push({ type: 'driver', out: driversOut[i] || null, in: driversIn[i] || null });
+    }
+    for (let i = 0; i < Math.max(consOut.length, consIn.length); i++) {
+        swapDetails.push({ type: 'constructor', out: consOut[i] || null, in: consIn[i] || null });
+    }
+    return { swaps: swapDetails.length, swapDetails };
 }
 
 function generateTransferCandidates(teamDrivers, teamConstructors, projDriverScores, projConScores, budget, maxSwaps) {
@@ -2838,22 +2894,10 @@ async function runMultiWeekPlanner() {
                     }
                 }
                 if (wcDrivers.length === 5) {
-                    const swapDetails = [];
-                    for (let i = 0; i < 5; i++) {
-                        if (wcDrivers[i] !== state.drivers[i]) {
-                            swapDetails.push({ type: 'driver', out: state.drivers[i], in: wcDrivers[i] });
-                        }
-                    }
-                    for (let i = 0; i < 2; i++) {
-                        if (wcCons[i] !== state.constructors[i]) {
-                            swapDetails.push({ type: 'constructor', out: state.constructors[i], in: wcCons[i] });
-                        }
-                    }
                     candidates.push({
                         drivers: wcDrivers,
                         constructors: wcCons,
-                        swaps: swapDetails.length,
-                        swapDetails,
+                        ...computeSwapDetails(state.drivers, state.constructors, wcDrivers, wcCons),
                         useChip: 'wild_card',
                     });
                 }
@@ -2870,41 +2914,29 @@ async function runMultiWeekPlanner() {
                 const llDrivers = sortedDrivers.slice(0, 5).map(d => d.id);
                 const llCons = sortedCons.slice(0, 2).map(c => c.id);
                 if (llDrivers.length === 5) {
-                    const swapDetails = [];
-                    for (let i = 0; i < 5; i++) {
-                        if (llDrivers[i] !== state.drivers[i]) {
-                            swapDetails.push({ type: 'driver', out: state.drivers[i], in: llDrivers[i] });
-                        }
-                    }
-                    for (let i = 0; i < 2; i++) {
-                        if (llCons[i] !== state.constructors[i]) {
-                            swapDetails.push({ type: 'constructor', out: state.constructors[i], in: llCons[i] });
-                        }
-                    }
                     candidates.push({
                         drivers: llDrivers,
                         constructors: llCons,
-                        swaps: swapDetails.length,
-                        swapDetails,
+                        ...computeSwapDetails(state.drivers, state.constructors, llDrivers, llCons),
                         useChip: 'limitless',
                     });
                 }
             }
 
-            // 3x Boost, No Negative, Autopilot: use current best candidate team but with chip scoring
+            // 3x Boost, No Negative, Autopilot: chips that apply on top of any swap pattern.
+            // Augment every swap candidate (including the 0-swap "keep current") with each
+            // available chip, so combos like "swap A→B AND fire 3x Boost on the new driver"
+            // are explored. The original chip-only-current-team case is just swaps=0+chip.
             const chipOnlyTypes = ['3x_boost', 'no_negative', 'autopilot'];
+            const baseSwapCount = candidates.filter(c => !c.useChip).length;
+            const chipAugmented = [];
             for (const chipType of chipOnlyTypes) {
-                if (state.chipsAvailable.includes(chipType)) {
-                    // Use the no-swap candidate (current team) with chip applied
-                    candidates.push({
-                        drivers: [...state.drivers],
-                        constructors: [...state.constructors],
-                        swaps: 0,
-                        swapDetails: [],
-                        useChip: chipType,
-                    });
+                if (!state.chipsAvailable.includes(chipType)) continue;
+                for (let bi = 0; bi < baseSwapCount; bi++) {
+                    chipAugmented.push({ ...candidates[bi], useChip: chipType });
                 }
             }
+            candidates.push(...chipAugmented);
 
             for (const cand of candidates) {
                 let pts = scoreTeam(cand.drivers, cand.constructors, proj.drivers, proj.constructors);
@@ -3029,7 +3061,9 @@ async function runMultiWeekPlanner() {
         const seen = new Set();
         beam = [];
         for (const state of nextBeam) {
-            const key = state.drivers.sort().join(',') + '|' + state.constructors.sort().join(',');
+            // Don't mutate state.drivers / state.constructors — slot order matters for
+            // downstream swap-detection in subsequent rounds and rendering.
+            const key = [...state.drivers].sort().join(',') + '|' + [...state.constructors].sort().join(',');
             if (!seen.has(key)) {
                 seen.add(key);
                 beam.push(state);
@@ -3038,8 +3072,10 @@ async function runMultiWeekPlanner() {
         }
     }
 
-    // Get top 5 plans
-    beam.sort((a, b) => b.totalPoints - a.totalPoints);
+    // Get top 5 plans — keep ranking by the strategy-weighted totalScore that
+    // drove the beam search; sorting by raw totalPoints here would discard the
+    // strategy weighting (e.g. budget_gain plans get re-ranked by raw points).
+    beam.sort((a, b) => (b.totalScore || b.totalPoints) - (a.totalScore || a.totalPoints));
     const topPlans = beam.slice(0, 5);
 
     // Render results
