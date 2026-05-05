@@ -245,17 +245,23 @@ def download_jolpica_year(year: int) -> None:
 
 
 def download_jolpica_round(year: int, round_num: int) -> None:
-    """Download Jolpica data for a single round."""
+    """Download Jolpica data for a single round.
+
+    Jolpica/Ergast omits cancelled rounds from its numbering (same as FastF1),
+    so we translate internal -> API round for the URL but keep the file path
+    on internal numbering. e.g. internal R6 (Miami) -> Jolpica R4 in 2026.
+    """
     round_dir = JOLPICA_RAW_DIR / f"year{year}" / f"round{round_num}"
     round_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"\n  Jolpica API — {year} Round {round_num}")
+    api_round = fastf1_round(round_num, year)
+    print(f"\n  Jolpica API — {year} Round {round_num} (API round {api_round})")
 
     endpoints = {
-        "results.json": f"{year}/{round_num}/results.json",
-        "qualifying.json": f"{year}/{round_num}/qualifying.json",
-        "sprint.json": f"{year}/{round_num}/sprint.json",
-        "pitstops.json": f"{year}/{round_num}/pitstops.json?limit=100",
+        "results.json": f"{year}/{api_round}/results.json",
+        "qualifying.json": f"{year}/{api_round}/qualifying.json",
+        "sprint.json": f"{year}/{api_round}/sprint.json",
+        "pitstops.json": f"{year}/{api_round}/pitstops.json?limit=100",
     }
 
     for filename, endpoint in endpoints.items():

@@ -20,6 +20,12 @@
           "circuit_id": "suzuka",
           "points": 13,
           "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 30,
+          "is_dnf": false
         }
       ]
     },
@@ -41,6 +47,12 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 20,
+          "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 35,
           "is_dnf": false
         }
       ]
@@ -64,6 +76,12 @@
           "circuit_id": "suzuka",
           "points": 46,
           "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 41,
+          "is_dnf": false
         }
       ]
     },
@@ -85,6 +103,12 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 26,
+          "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 22,
           "is_dnf": false
         }
       ]
@@ -108,6 +132,12 @@
           "circuit_id": "suzuka",
           "points": 15,
           "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 20,
+          "is_dnf": false
         }
       ]
     },
@@ -129,6 +159,12 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 18,
+          "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 53,
           "is_dnf": false
         }
       ]
@@ -152,6 +188,12 @@
           "circuit_id": "suzuka",
           "points": -20,
           "is_dnf": true
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 7,
+          "is_dnf": false
         }
       ]
     },
@@ -173,6 +215,12 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 0,
+          "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": -4,
           "is_dnf": false
         }
       ]
@@ -196,6 +244,12 @@
           "circuit_id": "suzuka",
           "points": 13,
           "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": -15,
+          "is_dnf": true
         }
       ]
     },
@@ -217,6 +271,12 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 1,
+          "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 7,
           "is_dnf": false
         }
       ]
@@ -240,6 +300,12 @@
           "circuit_id": "suzuka",
           "points": 1,
           "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 15,
+          "is_dnf": false
         }
       ]
     },
@@ -261,6 +327,12 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 8,
+          "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 13,
           "is_dnf": false
         }
       ]
@@ -284,6 +356,12 @@
           "circuit_id": "suzuka",
           "points": 3,
           "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 8,
+          "is_dnf": false
         }
       ]
     },
@@ -305,6 +383,12 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 8,
+          "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 12,
           "is_dnf": false
         }
       ]
@@ -328,6 +412,12 @@
           "circuit_id": "suzuka",
           "points": 6,
           "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 13,
+          "is_dnf": false
         }
       ]
     },
@@ -350,6 +440,12 @@
           "circuit_id": "suzuka",
           "points": -20,
           "is_dnf": true
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 13,
+          "is_dnf": false
         }
       ]
     },
@@ -372,6 +468,12 @@
           "circuit_id": "suzuka",
           "points": 15,
           "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": -18,
+          "is_dnf": true
         }
       ]
     },
@@ -394,6 +496,12 @@
           "circuit_id": "suzuka",
           "points": 2,
           "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": -18,
+          "is_dnf": true
         }
       ]
     },
@@ -415,6 +523,12 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 29,
+          "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 37,
           "is_dnf": false
         }
       ]
@@ -438,6 +552,12 @@
           "circuit_id": "suzuka",
           "points": 10,
           "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 20,
+          "is_dnf": false
         }
       ]
     },
@@ -459,6 +579,12 @@
           "round": 3,
           "circuit_id": "suzuka",
           "points": 6,
+          "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 8,
           "is_dnf": false
         }
       ]
@@ -482,6 +608,12 @@
           "circuit_id": "suzuka",
           "points": 8,
           "is_dnf": false
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": -29,
+          "is_dnf": true
         }
       ]
     }
@@ -507,7 +639,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 0
+          "points": 86
         }
       ]
     },
@@ -531,7 +663,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 0
+          "points": 52
         }
       ]
     },
@@ -555,7 +687,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 0
+          "points": 23
         }
       ]
     },
@@ -579,7 +711,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 0
+          "points": -21
         }
       ]
     },
@@ -603,7 +735,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 0
+          "points": 22
         }
       ]
     },
@@ -627,7 +759,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 0
+          "points": 3
         }
       ]
     },
@@ -651,7 +783,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 0
+          "points": 100
         }
       ]
     },
@@ -675,7 +807,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 0
+          "points": 31
         }
       ]
     },
@@ -699,7 +831,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 0
+          "points": -21
         }
       ]
     },
@@ -723,7 +855,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 0
+          "points": 24
         }
       ]
     },
@@ -747,7 +879,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 0
+          "points": 32
         }
       ]
     }

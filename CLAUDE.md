@@ -87,9 +87,15 @@ XGBoost's native NaN handling means: when FP data exists → model uses it to re
 
 Model features are extracted ONLY from FP sessions (`all_laps_fp*.parquet`). Sprint qualifying laps are saved separately and consumed only by `10_fp_analysis.py` for the Deep Dive page — they do not feed model training/inference. The model still picks up sprint qualifying as a grid input via `06_run_predictions.py` (the `sprint_grid` feature).
 
-## Calendar Mapping: Internal Round vs FastF1 Round
+## Calendar Mapping: Internal Round vs External APIs
 
-`data/seed/races.json` preserves original 2026 numbering with `cancelled: true` markers (Bahrain R4, Saudi R5). FastF1's calendar omits cancelled races entirely, so its round numbers diverge after the first cancellation. Use `config.settings.fastf1_round(internal_round, year)` at every `fastf1.get_session(...)` boundary — it subtracts the count of cancelled rounds preceding the target round. The internal round number is preserved everywhere else (file paths, Jolpica calls, logging). Skipping this mapping leads to silently downloading the wrong race's data (e.g. internal R6 = Miami → FastF1 R6 = Monaco). All FastF1 callsites in `01_download_data.py`, `02_build_laps.py`, `06_run_predictions.py`, and `12_count_overtakes.py` apply this mapping.
+`data/seed/races.json` preserves original 2026 numbering with `cancelled: true` markers (Bahrain R4, Saudi R5). **Both FastF1 AND Jolpica/Ergast omit cancelled races from their numbering**, so external round numbers diverge from internal after the first cancellation. Use `config.settings.fastf1_round(internal_round, year)` at every external API boundary — it subtracts the count of cancelled rounds preceding the target round. (The helper is named `fastf1_round` for historical reasons but applies to Jolpica too — both APIs compress identically.)
+
+The internal round number is preserved in file paths and logging, so we still write Miami to `data/raw/jolpica/year2026/round6/` even though the request URL is `2026/4/results.json`. Skipping this mapping leads to silently downloading the wrong race's data (e.g. internal R6 = Miami → FastF1 R6 = Monaco) or empty Jolpica responses (Jolpica has no round 6 yet — only 4 races run in their numbering).
+
+Callsites that apply this mapping:
+- FastF1: `01_download_data.py`, `02_build_laps.py`, `06_run_predictions.py`, `12_count_overtakes.py`
+- Jolpica: `01_download_data.py` (`download_jolpica_round`)
 
 ## ML Models
 

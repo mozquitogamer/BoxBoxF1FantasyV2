@@ -1,27 +1,27 @@
 {
-  "noise_multiplier": 1.1,
-  "bias_correction": -5.35,
-  "n_rounds": 2,
-  "n_samples": 44,
-  "coverage_90": 0.864,
-  "coverage_50": 0.432,
-  "overall_rmse": 11.82,
-  "overall_bias": -5.35,
+  "noise_multiplier": 1.4183,
+  "bias_correction": -6.28,
+  "n_rounds": 3,
+  "n_samples": 66,
+  "coverage_90": 0.833,
+  "coverage_50": 0.47,
+  "overall_rmse": 14.36,
+  "overall_bias": -6.28,
   "per_tier": {
     "front": {
       "coverage_90": 1.0,
-      "bias": -2.34,
-      "n": 10
+      "bias": -4.35,
+      "n": 15
     },
     "midfield": {
-      "coverage_90": 0.9286,
-      "bias": -2.84,
-      "n": 14
+      "coverage_90": 0.8095,
+      "bias": -5.76,
+      "n": 21
     },
     "back": {
-      "coverage_90": 0.75,
-      "bias": -8.62,
-      "n": 20
+      "coverage_90": 0.7667,
+      "bias": -7.61,
+      "n": 30
     }
   },
   "per_round": [
@@ -36,18 +36,26 @@
     {
       "round": 3,
       "coverage_90": 1.0,
-      "coverage_50": 0.5,
+      "coverage_50": 0.5455,
       "noise_multiplier": 0.8,
-      "bias": -2.88,
+      "bias": -3.23,
+      "n": 22
+    },
+    {
+      "round": 6,
+      "coverage_90": 0.7727,
+      "coverage_50": 0.5,
+      "noise_multiplier": 1.5,
+      "bias": -7.79,
       "n": 22
     }
   ],
   "pit_histogram": [
-    12,
-    16,
-    9,
-    4,
-    3
+    20,
+    24,
+    13,
+    5,
+    4
   ],
-  "pit_chi2": 13.5
+  "pit_chi2": 23.85
 }
