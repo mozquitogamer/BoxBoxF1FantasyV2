@@ -237,6 +237,77 @@ def _load_actual_quali(
     return {}
 
 
+def _recompute_circuit_features(df: pd.DataFrame, target_circuit: str) -> pd.DataFrame:
+    """
+    Recompute circuit-specific historical features against the target circuit.
+
+    The priors carry driver_circuit_exp / driver_circuit_roll_3 / constructor_circuit_exp
+    values computed against each driver's LAST race circuit (because the stub row
+    inherits everything from the most recent completed race). For a prediction at
+    a different circuit, these are wrong — they encode "VER's avg quali at Miami",
+    not "VER's avg quali at Montreal".
+
+    For Canada (R7) specifically, VER has won 3 of the last 4 GPs there. That
+    history exists in all_model_rows but isn't flowing to the model unless we
+    explicitly recompute these features for the target circuit.
+
+    Definitions match 03b_build_jolpica_features.py::add_jolpica_features:
+      - driver_circuit_exp:    expanding mean of driver's prior quali_position at this circuit
+      - driver_circuit_roll_3: rolling-3 mean of driver's prior quali_position at this circuit
+      - constructor_circuit_exp: expanding mean of constructor's prior quali_position at this circuit
+
+    Drivers/constructors with no history at the target circuit are left unchanged
+    (XGBoost handles NaN, but inheriting Miami's value is misleading; we set to NaN).
+    """
+    model_rows_path = JOLPICA_MODEL_ROWS_DIR / "all_model_rows.parquet"
+    if not model_rows_path.exists():
+        return df
+
+    all_rows = pd.read_parquet(model_rows_path)
+    if "circuit_id" not in all_rows.columns:
+        return df
+
+    # Filter to target circuit only, sorted chronologically
+    at_circuit = all_rows[all_rows["circuit_id"] == target_circuit].copy()
+    if at_circuit.empty:
+        # No history at this circuit (e.g. brand-new track) — set to NaN
+        for col in ("driver_circuit_exp", "driver_circuit_roll_3", "constructor_circuit_exp"):
+            if col in df.columns:
+                df[col] = np.nan
+        # Also stamp the circuit_id so downstream code knows
+        df["circuit_id"] = target_circuit
+        return df
+
+    at_circuit = at_circuit.sort_values(["season", "round"])
+
+    for i, row in df.iterrows():
+        driver = row["driver_id"]
+        constructor = row.get("constructor_id")
+
+        # Driver history at this circuit
+        d_hist = at_circuit[at_circuit["driver_id"] == driver]
+        d_qualis = pd.to_numeric(d_hist["quali_position"], errors="coerce").dropna().tolist()
+        if d_qualis:
+            df.at[i, "driver_circuit_exp"] = float(np.mean(d_qualis))
+            df.at[i, "driver_circuit_roll_3"] = float(np.mean(d_qualis[-3:]))
+        else:
+            df.at[i, "driver_circuit_exp"] = np.nan
+            df.at[i, "driver_circuit_roll_3"] = np.nan
+
+        # Constructor history at this circuit
+        if constructor is not None and pd.notna(constructor):
+            c_hist = at_circuit[at_circuit["constructor_id"] == constructor]
+            c_qualis = pd.to_numeric(c_hist["quali_position"], errors="coerce").dropna().tolist()
+            if c_qualis:
+                df.at[i, "constructor_circuit_exp"] = float(np.mean(c_qualis))
+            else:
+                df.at[i, "constructor_circuit_exp"] = np.nan
+
+    # Stamp the target circuit so any downstream check is accurate
+    df["circuit_id"] = target_circuit
+    return df
+
+
 def _recompute_sim_features(df: pd.DataFrame, target_circuit: str) -> pd.DataFrame:
     """
     Recompute similarity-weighted rolling features against the target circuit.
@@ -329,13 +400,15 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
     priors_df = build_live_priors(round_num, year)
     print(f"  Prior rows: {len(priors_df)} drivers")
 
-    # ---- Step 1b: Recompute track-similarity features for target circuit ----
+    # ---- Step 1b: Recompute track-similarity AND circuit-specific features ----
     target_circuit = _resolve_circuit(round_num, year)
     if target_circuit and target_circuit != "unknown":
         print(f"  Recomputing similarity features for target circuit: {target_circuit}")
         priors_df = _recompute_sim_features(priors_df, target_circuit)
+        print(f"  Recomputing circuit-specific features for target circuit: {target_circuit}")
+        priors_df = _recompute_circuit_features(priors_df, target_circuit)
     else:
-        print(f"  Could not resolve target circuit — using prior similarity features as-is")
+        print(f"  Could not resolve target circuit — using prior circuit/similarity features as-is")
 
     # ---- Step 2: Load FP features ----
     print(f"\n[Step 2] Loading FP telemetry features...")
