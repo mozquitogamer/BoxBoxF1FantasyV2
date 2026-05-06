@@ -149,7 +149,19 @@
         "HUL": -29,
         "STR": 17
       },
-      "constructors": {}
+      "constructors": {
+        "mercedes": 104,
+        "ferrari": 57,
+        "mclaren": 110,
+        "red_bull": 31,
+        "haas": 23,
+        "alpine": 17,
+        "racing_bulls": 2,
+        "williams": 42,
+        "cadillac": 24,
+        "audi": -27,
+        "aston_martin": 38
+      }
     }
   }
 }

@@ -4837,6 +4837,7 @@ let accuracyDataLoaded = false;
 let accuracyPairs = [];
 let accuracyMissingNote = '';
 let accuracySelectedRounds = new Set();
+let accuracyEntityType = 'drivers'; // 'drivers' | 'constructors'
 
 async function renderAccuracy() {
     if (!data) return;
@@ -4886,31 +4887,41 @@ async function renderAccuracy() {
 
 function renderAccuracyWithFilters(container) {
     const activePairs = accuracyPairs.filter(p => accuracySelectedRounds.has(p.round));
+    const isDrivers = accuracyEntityType === 'drivers';
+    const idField = isDrivers ? 'driver_id' : 'constructor_id';
+    const listKey = isDrivers ? 'drivers' : 'constructors';
 
     // Compute all metrics
     const scatterPoints = [];
     const roundStats = [];
-    const driverAccum = {};
+    const entityAccum = {};
     let totalPtsMAE = 0, totalPosMAE = 0, totalCIHits = 0, totalCITotal = 0, totalComparisons = 0, totalPosComparisons = 0;
+    let roundsWithMissingOfficial = [];
 
-    // Track latest round for per-driver latest race columns
+    // Track latest round for per-entity latest race columns
     const latestRound = activePairs.length > 0 ? Math.max(...activePairs.map(p => p.round)) : null;
 
     activePairs.forEach(({ round, name, pred, act }) => {
         const predMap = {};
-        if (pred.drivers) pred.drivers.forEach(d => { predMap[d.driver_id] = d; });
+        const predList = pred[listKey] || [];
+        predList.forEach(d => { predMap[d[idField]] = d; });
         const actMap = {};
-        if (act.drivers) act.drivers.forEach(d => { actMap[d.driver_id] = d; });
+        const actList = act[listKey] || [];
+        actList.forEach(d => { actMap[d[idField]] = d; });
 
         let rPtsMAE = 0, rPosMAE = 0, rCIHits = 0, rCITotal = 0, rCount = 0, rPosCount = 0;
-        let bestErr = Infinity, worstErr = 0, bestDriver = '', worstDriver = '';
+        let bestErr = Infinity, worstErr = 0, bestName = '', worstName = '';
+
+        // For constructors: track if official exists this round (for accuracy-confidence note)
+        let roundHasAnyOfficial = false;
 
         const allIds = [...new Set([...Object.keys(predMap), ...Object.keys(actMap)])];
         allIds.forEach(id => {
             const p = predMap[id], a = actMap[id];
             if (!p || !a) return;
             const predPts = p.expected_points || 0;
-            const offScore = getOfficialScore(round, id, true);
+            const offScore = getOfficialScore(round, id, isDrivers);
+            if (offScore && offScore.source === 'official') roundHasAnyOfficial = true;
             const actPts = offScore ? offScore.points : (a.total_points || 0);
             const ptsErr = Math.abs(predPts - actPts);
             rPtsMAE += ptsErr;
@@ -4918,17 +4929,21 @@ function renderAccuracyWithFilters(container) {
             totalPtsMAE += ptsErr;
             totalComparisons++;
 
-            if (ptsErr < bestErr) { bestErr = ptsErr; bestDriver = p.name || id; }
-            if (ptsErr > worstErr) { worstErr = ptsErr; worstDriver = p.name || id; }
+            const labelName = p.name || a.name || id;
+            if (ptsErr < bestErr) { bestErr = ptsErr; bestName = labelName; }
+            if (ptsErr > worstErr) { worstErr = ptsErr; worstName = labelName; }
 
-            const predFinish = p.predicted_finish;
-            const actFinish = a.race_position;
-            if (predFinish != null && actFinish != null) {
-                const posErr = Math.abs(predFinish - actFinish);
-                rPosMAE += posErr;
-                rPosCount++;
-                totalPosMAE += posErr;
-                totalPosComparisons++;
+            // Position MAE applies to drivers only
+            if (isDrivers) {
+                const predFinish = p.predicted_finish;
+                const actFinish = a.race_position;
+                if (predFinish != null && actFinish != null) {
+                    const posErr = Math.abs(predFinish - actFinish);
+                    rPosMAE += posErr;
+                    rPosCount++;
+                    totalPosMAE += posErr;
+                    totalPosComparisons++;
+                }
             }
 
             if (p.mc_total_p5 != null && p.mc_total_p95 != null) {
@@ -4940,35 +4955,39 @@ function renderAccuracyWithFilters(container) {
                 }
             }
 
+            // Constructor color resolution: id IS the constructor for the constructors view
+            const constructorId = isDrivers ? (p.constructor || a.constructor) : id;
             scatterPoints.push({
-                pred: predPts, actual: actPts, driver_id: id,
-                constructor: p.constructor || a.constructor, round, name: p.name || id
+                pred: predPts, actual: actPts, entity_id: id,
+                constructor: constructorId, round, name: labelName
             });
 
-            // Accumulate per-driver
-            if (!driverAccum[id]) {
-                driverAccum[id] = { name: p.name || id, constructor: p.constructor || a.constructor, totalPred: 0, totalActual: 0, totalErr: 0, rounds: 0, latestPred: null, latestActual: null };
+            if (!entityAccum[id]) {
+                entityAccum[id] = { name: labelName, constructor: constructorId, totalPred: 0, totalActual: 0, totalErr: 0, rounds: 0, latestPred: null, latestActual: null };
             }
-            driverAccum[id].totalPred += predPts;
-            driverAccum[id].totalActual += actPts;
-            driverAccum[id].totalErr += ptsErr;
-            driverAccum[id].rounds++;
+            entityAccum[id].totalPred += predPts;
+            entityAccum[id].totalActual += actPts;
+            entityAccum[id].totalErr += ptsErr;
+            entityAccum[id].rounds++;
 
-            // Track latest race data
             if (round === latestRound) {
-                driverAccum[id].latestPred = predPts;
-                driverAccum[id].latestActual = actPts;
-                driverAccum[id].latestRound = round;
+                entityAccum[id].latestPred = predPts;
+                entityAccum[id].latestActual = actPts;
+                entityAccum[id].latestRound = round;
             }
         });
+
+        if (!isDrivers && !roundHasAnyOfficial && rCount > 0) {
+            roundsWithMissingOfficial.push(round);
+        }
 
         roundStats.push({
             round, name,
             ptsMAE: rCount > 0 ? (rPtsMAE / rCount).toFixed(1) : '-',
-            posMAE: rPosCount > 0 ? (rPosMAE / rPosCount).toFixed(1) : '-',
+            posMAE: isDrivers ? (rPosCount > 0 ? (rPosMAE / rPosCount).toFixed(1) : '-') : '-',
             ciCoverage: rCITotal > 0 ? ((rCIHits / rCITotal) * 100).toFixed(0) + '%' : '-',
-            best: bestDriver + ' (' + bestErr.toFixed(1) + ')',
-            worst: worstDriver + ' (' + worstErr.toFixed(1) + ')'
+            best: bestName + ' (' + bestErr.toFixed(1) + ')',
+            worst: worstName + ' (' + worstErr.toFixed(1) + ')'
         });
     });
 
@@ -4990,6 +5009,16 @@ function renderAccuracyWithFilters(container) {
         </div>
     </div>`;
 
+    // Entity toggle (Drivers / Constructors)
+    const entityToggleHTML = `
+    <div class="accuracy-filter" style="margin-bottom:8px;">
+        <span class="accuracy-filter-label">View:</span>
+        <div class="accuracy-filter-buttons">
+            <button class="accuracy-filter-btn${isDrivers ? ' active' : ''}" data-entity="drivers">Drivers</button>
+            <button class="accuracy-filter-btn${!isDrivers ? ' active' : ''}" data-entity="constructors">Constructors</button>
+        </div>
+    </div>`;
+
     // Race filter toggle buttons
     const filterHTML = `
     <div class="accuracy-filter">
@@ -5002,15 +5031,25 @@ function renderAccuracyWithFilters(container) {
         </div>
     </div>`;
 
+    // Constructor-specific note when no official points yet for selected rounds
+    let constructorNote = '';
+    if (!isDrivers && roundsWithMissingOfficial.length > 0) {
+        const list = roundsWithMissingOfficial.map(r => 'R' + r).join(', ');
+        constructorNote = `<div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.25);color:#eab308;padding:8px 14px;border-radius:8px;font-size:0.8rem;margin:8px 0 16px;">
+            ${list}: Official constructor points not entered yet — using pipeline-calculated actuals (may differ from official).
+        </div>`;
+    }
+
     // Per-round table
+    const posMAEHeader = isDrivers ? '<th class="num">Pos MAE</th>' : '';
     const roundTableRows = roundStats.map(r => `<tr>
         <td>R${r.round}</td><td>${r.name}</td><td class="num">${r.ptsMAE}</td>
-        <td class="num">${r.posMAE}</td><td class="num">${r.ciCoverage}</td>
+        ${isDrivers ? `<td class="num">${r.posMAE}</td>` : ''}<td class="num">${r.ciCoverage}</td>
         <td>${r.best}</td><td>${r.worst}</td>
     </tr>`).join('');
 
-    // Per-driver table with latest race columns
-    const driverRows = Object.values(driverAccum)
+    // Per-entity table with latest race columns
+    const entityRows = Object.values(entityAccum)
         .map(d => ({
             ...d,
             avgPred: d.totalPred / d.rounds,
@@ -5021,17 +5060,22 @@ function renderAccuracyWithFilters(container) {
         .sort((a, b) => b.avgErr - a.avgErr);
 
     const latestRoundLabel = latestRound ? `R${latestRound}` : 'Latest';
+    const entityLabel = isDrivers ? 'Driver' : 'Constructor';
 
-    const driverTableRows = driverRows.map(d => {
+    const entityTableRows = entityRows.map(d => {
         const team = TEAMS[d.constructor] || { name: d.constructor, color: '#666' };
         const biasClass = d.bias > 2 ? 'bias-over' : d.bias < -2 ? 'bias-under' : '';
         const biasSign = d.bias >= 0 ? '+' : '';
         const lPred = d.latestPred != null ? d.latestPred.toFixed(1) : '-';
         const lActual = d.latestActual != null ? d.latestActual.toFixed(0) : '-';
         const lErr = (d.latestPred != null && d.latestActual != null) ? Math.abs(d.latestPred - d.latestActual).toFixed(1) : '-';
+        // For constructors, the entity name IS the team — collapse the team col
+        const teamCell = isDrivers
+            ? `<td style="color:${team.color}">${team.name}</td>`
+            : `<td style="color:${team.color}">—</td>`;
         return `<tr>
             <td>${d.name}</td>
-            <td style="color:${team.color}">${team.name}</td>
+            ${teamCell}
             <td class="num">${lPred}</td>
             <td class="num">${lActual}</td>
             <td class="num">${lErr}</td>
@@ -5044,17 +5088,19 @@ function renderAccuracyWithFilters(container) {
     }).join('');
 
     container.innerHTML = accuracyMissingNote + `
+    ${entityToggleHTML}
     ${filterHTML}
+    ${constructorNote}
 
     <div class="accuracy-stats">
         <div class="accuracy-stat-card">
             <div class="accuracy-stat-value">${overallPtsMAE}</div>
             <div class="accuracy-stat-label">Points MAE</div>
         </div>
-        <div class="accuracy-stat-card">
+        ${isDrivers ? `<div class="accuracy-stat-card">
             <div class="accuracy-stat-value">${overallPosMAE}</div>
             <div class="accuracy-stat-label">Position MAE</div>
-        </div>
+        </div>` : ''}
         <div class="accuracy-stat-card">
             <div class="accuracy-stat-value">${overallCICov}%</div>
             <div class="accuracy-stat-label">90% CI Coverage</div>
@@ -5078,7 +5124,7 @@ function renderAccuracyWithFilters(container) {
             <table class="data-table accuracy-round-table sortable">
                 <thead><tr>
                     <th>Rd</th><th>Race</th><th class="num">Pts MAE</th>
-                    <th class="num">Pos MAE</th><th class="num">CI Coverage</th>
+                    ${posMAEHeader}<th class="num">CI Coverage</th>
                     <th>Best Prediction</th><th>Worst Prediction</th>
                 </tr></thead>
                 <tbody>${roundTableRows}</tbody>
@@ -5087,28 +5133,32 @@ function renderAccuracyWithFilters(container) {
     </div>
 
     <div class="accuracy-section">
-        <h3>Per-Driver Accuracy</h3>
+        <h3>Per-${entityLabel} Accuracy</h3>
         <div class="table-wrapper">
             <table class="data-table accuracy-driver-table sortable">
                 <thead><tr>
-                    <th>Driver</th><th>Team</th>
+                    <th>${entityLabel}</th><th>Team</th>
                     <th class="num">${latestRoundLabel} Pred</th><th class="num">${latestRoundLabel} Actual</th><th class="num">${latestRoundLabel} Err</th>
                     <th class="num">Avg Pred</th><th class="num">Avg Actual</th><th class="num">Avg Error</th>
                     <th class="num">Bias</th><th class="num">Rounds</th>
                 </tr></thead>
-                <tbody>${driverTableRows}</tbody>
+                <tbody>${entityTableRows}</tbody>
             </table>
         </div>
     </div>`;
 
-    // Wire up filter buttons
+    // Wire up filter buttons (race filter + entity toggle)
     container.querySelectorAll('.accuracy-filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            const round = parseInt(btn.dataset.round);
-            if (accuracySelectedRounds.has(round)) {
-                accuracySelectedRounds.delete(round);
-            } else {
-                accuracySelectedRounds.add(round);
+            if (btn.dataset.entity) {
+                accuracyEntityType = btn.dataset.entity;
+            } else if (btn.dataset.round != null) {
+                const round = parseInt(btn.dataset.round);
+                if (accuracySelectedRounds.has(round)) {
+                    accuracySelectedRounds.delete(round);
+                } else {
+                    accuracySelectedRounds.add(round);
+                }
             }
             renderAccuracyWithFilters(container);
         });
@@ -5140,8 +5190,9 @@ function buildScatterPlot(dataPoints) {
     // Points
     dataPoints.forEach(d => {
         const color = TEAMS[d.constructor]?.color || '#666';
+        const label = d.entity_id || d.driver_id || '';
         svg += `<circle cx="${sx(d.pred)}" cy="${sy(d.actual)}" r="5" fill="${color}" opacity="0.8">
-            <title>${d.driver_id} R${d.round}: Pred ${d.pred.toFixed(1)}, Actual ${d.actual}</title>
+            <title>${label} R${d.round}: Pred ${d.pred.toFixed(1)}, Actual ${d.actual}</title>
         </circle>`;
     });
     // Axis labels
