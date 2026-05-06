@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-05-05T21:55:17.837288+00:00",
+  "generated_at": "2026-05-06T08:44:26.732251+00:00",
   "rounds": [
     {
       "round": 1,
@@ -43,7 +43,7 @@
       "name": "Canadian Grand Prix",
       "circuit": "Montreal",
       "date": "2026-05-24",
-      "has_predictions": false,
+      "has_predictions": true,
       "has_post_race": false,
       "has_actual": false
     },
