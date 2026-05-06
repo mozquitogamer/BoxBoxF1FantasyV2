@@ -52,7 +52,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 35,
+          "points": 37,
           "is_dnf": false
         }
       ]
@@ -80,7 +80,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 41,
+          "points": 40,
           "is_dnf": false
         }
       ]
@@ -108,7 +108,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 22,
+          "points": 23,
           "is_dnf": false
         }
       ]
@@ -164,7 +164,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 53,
+          "points": 54,
           "is_dnf": false
         }
       ]
@@ -192,7 +192,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 7,
+          "points": 6,
           "is_dnf": false
         }
       ]
@@ -248,7 +248,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": -15,
+          "points": -13,
           "is_dnf": true
         }
       ]
@@ -304,7 +304,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 15,
+          "points": 19,
           "is_dnf": false
         }
       ]
@@ -332,7 +332,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 13,
+          "points": 14,
           "is_dnf": false
         }
       ]
@@ -360,7 +360,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 8,
+          "points": 13,
           "is_dnf": false
         }
       ]
@@ -388,7 +388,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 12,
+          "points": 16,
           "is_dnf": false
         }
       ]
@@ -416,7 +416,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 13,
+          "points": 18,
           "is_dnf": false
         }
       ]
@@ -444,7 +444,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 13,
+          "points": 16,
           "is_dnf": false
         }
       ]
@@ -472,7 +472,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": -18,
+          "points": -16,
           "is_dnf": true
         }
       ]
@@ -500,7 +500,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": -18,
+          "points": -17,
           "is_dnf": true
         }
       ]
@@ -528,7 +528,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 37,
+          "points": 40,
           "is_dnf": false
         }
       ]
@@ -584,7 +584,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 8,
+          "points": 4,
           "is_dnf": false
         }
       ]
@@ -639,7 +639,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 86
+          "points": 87
         }
       ]
     },
@@ -663,7 +663,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 52
+          "points": 53
         }
       ]
     },
@@ -711,7 +711,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": -21
+          "points": -19
         }
       ]
     },
@@ -735,7 +735,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 22
+          "points": 23
         }
       ]
     },
@@ -759,7 +759,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 3
+          "points": 10
         }
       ]
     },
@@ -783,7 +783,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 100
+          "points": 104
         }
       ]
     },
@@ -807,7 +807,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 31
+          "points": 40
         }
       ]
     },
@@ -879,7 +879,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 32
+          "points": 35
         }
       ]
     }

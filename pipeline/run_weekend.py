@@ -96,6 +96,18 @@ PHASES = {
             ("05_train_models.py", []),
         ],
     },
+    "pre_fp_predict": {
+        "description": "Pre-FP predictions for upcoming round using priors only (no FP telemetry)",
+        "steps": [
+            ("01_download_data.py", ["--mode", "current", "--round", "{round}"]),
+            ("03a_normalize_jolpica.py", ["--all"]),
+            ("03b_build_jolpica_features.py", ["--all"]),
+            ("06_run_predictions.py", ["--round", "{round}"]),
+            ("07_calculate_fantasy.py", ["--round", "{round}"]),
+            ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),
+            ("08_export_website_json.py", ["--round", "{round}"]),
+        ],
+    },
     "post_fp": {
         "description": "After free practice - generate predictions from FP data",
         "steps": [
@@ -144,14 +156,16 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Phases:
-  pre_fp      Prepare for the weekend (download historical, train models)
-  post_fp     After free practice (build laps, extract features, predict)
-  post_quali  After qualifying (re-run predictions with updated data)
-  post_race   After the race (actuals, analysis, overtakes)
+  pre_fp           Prepare for the weekend (download historical, train models)
+  pre_fp_predict   Pre-FP predictions using priors only (no FP telemetry yet)
+  post_fp          After free practice (build laps, extract features, predict)
+  post_quali       After qualifying (re-run predictions with updated data)
+  post_race        After the race (actuals, analysis, overtakes)
 
 Examples:
-  python pipeline/run_weekend.py --phase post_fp
-  python pipeline/run_weekend.py --phase post_race --round 3
+  python pipeline/run_weekend.py --phase pre_fp_predict --round 7
+  python pipeline/run_weekend.py --phase post_fp --round 7
+  python pipeline/run_weekend.py --phase post_race --round 6
   python pipeline/run_weekend.py --phase post_fp --dry-run
         """,
     )
@@ -238,6 +252,8 @@ Examples:
     if successes == len(results) and not args.dry_run:
         if args.phase in ("post_fp", "post_quali"):
             print(f"\n  [OK] Website data updated! Check web/public/data/predictions.json")
+        elif args.phase == "pre_fp_predict":
+            print(f"\n  [OK] Pre-FP predictions ready (priors only). Check web/public/data/predictions.json")
         elif args.phase == "post_race":
             print(f"\n  [OK] Post-race analysis complete! Check web/public/data/")
 

@@ -36,6 +36,7 @@ from config.settings import (
     WEB_DATA_DIR,
     SPRINT_ROUNDS_2026,
     CANCELLED_ROUNDS_2026,
+    fastf1_round,
 )
 from config.fantasy_scoring import (
     calc_qualifying_points_driver,
@@ -165,6 +166,53 @@ def load_detected_overtakes(year: int, round_num: int) -> tuple[dict, dict]:
     if "sprint" in sessions:
         for d in sessions["sprint"].get("drivers", []):
             sprint_ot[d["driver"]] = d["overtakes"]
+
+    return race_ot, sprint_ot
+
+
+def load_seed_overtakes(year: int, internal_round: int) -> tuple[dict, dict]:
+    """Load manual overtake counts from data/seed/overtakes.csv if available.
+
+    The seed CSV is the user's manually-maintained record of F1 Fantasy's
+    OFFICIAL overtake counts (which sometimes differ from FastF1's
+    telemetry-derived count). When present, these override detected counts so
+    our actuals match the in-game scoring.
+
+    The CSV uses sequential race numbering (skipping cancelled rounds — same
+    compression FastF1 and Jolpica use), so we translate via fastf1_round().
+    Driver IDs in the CSV are Jolpica-style (e.g. "max_verstappen", "russell")
+    and are mapped to abbreviations via driver_ids.json.
+
+    Returns (race_ot, sprint_ot) keyed by driver abbreviation, empty dicts if
+    the CSV doesn't have data for this round.
+    """
+    import pandas as pd
+    path = SEED_DIR / "overtakes.csv"
+    if not path.exists():
+        return {}, {}
+
+    seed_round = fastf1_round(internal_round, year)
+
+    with open(SEED_DIR / "driver_ids.json") as f:
+        ids = json.load(f)
+    j2a = {m["jolpica"]: m["abbrev"] for m in ids["mappings"]}
+
+    df = pd.read_csv(path)
+    df = df[df["round"] == seed_round].dropna(subset=["overtakes_made"])
+    if df.empty:
+        return {}, {}
+
+    race_ot = {}
+    sprint_ot = {}
+    for _, row in df.iterrows():
+        abbrev = j2a.get(row["driver_id"])
+        if not abbrev:
+            continue
+        race_ot[abbrev] = int(row["overtakes_made"])
+        if "sprint_overtakes" in df.columns:
+            sp = row.get("sprint_overtakes")
+            if sp is not None and not (isinstance(sp, float) and sp != sp):  # not NaN
+                sprint_ot[abbrev] = int(sp)
 
     return race_ot, sprint_ot
 
@@ -468,6 +516,14 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
         print(f"  Using detected overtakes for race ({len(detected_race_ot)} drivers)")
     if detected_sprint_ot:
         print(f"  Using detected overtakes for sprint ({len(detected_sprint_ot)} drivers)")
+    # -- Manual overtakes.csv overrides detected counts when present --
+    seed_race_ot, seed_sprint_ot = load_seed_overtakes(year, round_num)
+    if seed_race_ot:
+        print(f"  Manual overtakes.csv override for race ({len(seed_race_ot)} drivers)")
+        detected_race_ot = {**detected_race_ot, **seed_race_ot}
+    if seed_sprint_ot:
+        print(f"  Manual overtakes.csv override for sprint ({len(seed_sprint_ot)} drivers)")
+        detected_sprint_ot = {**detected_sprint_ot, **seed_sprint_ot}
 
     # -- Build constructor -> pitstop times mapping --
     constructor_pitstops: dict[str, list[float]] = {}
@@ -813,6 +869,14 @@ def calculate_from_post_race_analysis(
     detected_race_ot, detected_sprint_ot = load_detected_overtakes(year, round_num)
     if detected_race_ot:
         print(f"  Using detected overtakes for race ({len(detected_race_ot)} drivers)")
+    # Manual overtakes.csv overrides detected counts when present
+    seed_race_ot, seed_sprint_ot = load_seed_overtakes(year, round_num)
+    if seed_race_ot:
+        print(f"  Manual overtakes.csv override for race ({len(seed_race_ot)} drivers)")
+        detected_race_ot = {**detected_race_ot, **seed_race_ot}
+    if seed_sprint_ot:
+        print(f"  Manual overtakes.csv override for sprint ({len(seed_sprint_ot)} drivers)")
+        detected_sprint_ot = {**detected_sprint_ot, **seed_sprint_ot}
 
     driver_outputs = []
     driver_points_by_abbrev = {}

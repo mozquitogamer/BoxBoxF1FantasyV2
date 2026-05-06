@@ -159,11 +159,19 @@ APIs (FastF1, Jolpica, OpenF1, Open-Meteo)
 
 ```bash
 # Full weekend automation — pick the right phase for what's happened on track:
-python pipeline/run_weekend.py --phase post_fp    --round N   # FP1 (sprint) or FP1+FP2+FP3 (regular) done
-python pipeline/run_weekend.py --phase post_quali --round N   # Sat/Sun qualifying done
-python pipeline/run_weekend.py --phase post_race  --round N   # race done
+python pipeline/run_weekend.py --phase pre_fp_predict --round N   # Before FP1 — priors-only predictions
+python pipeline/run_weekend.py --phase post_fp        --round N   # FP1 (sprint) or FP1+FP2+FP3 (regular) done
+python pipeline/run_weekend.py --phase post_quali     --round N   # Sat/Sun qualifying done
+python pipeline/run_weekend.py --phase post_race      --round N   # race done
 
-# What each phase runs (post_fp / post_quali):
+# What pre_fp_predict runs (priors only, before any FP telemetry):
+#   01_download_data → 03a_normalize_jolpica → 03b_build_jolpica_features →
+#   06_run_predictions → 07_calculate_fantasy → 08_monte_carlo_fantasy →
+#   08_export_website_json
+# (06_run_predictions falls back to "priors only" path when no FP features exist;
+# Layer-2 telemetry features are NaN and XGBoost handles them natively.)
+#
+# What post_fp / post_quali runs:
 #   01_download_data → 02_build_laps → 03_extract_features →
 #   06_run_predictions → 07_calculate_fantasy → 08_monte_carlo_fantasy →
 #   10_fp_analysis → 08_export_website_json
