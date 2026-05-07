@@ -619,6 +619,15 @@ Reads `predictions.parquet`, applies F1 Fantasy 2026 scoring rules. Outputs `fan
 
 Bundles all parquets/JSONs into `web/public/data/*.json`. Auto-syncs official fantasy points and overrides prices from seed files.
 
+> **GOTCHA: `--round N` always rewrites `predictions.json` to round N's predictions.** The website's home page reads `predictions.json` to know which round is "current". If you re-export an old round (e.g. backfilling actuals after a fix — `--round 6` to refresh Miami's pit stop data), you'll clobber the current round's predictions on the front page.
+>
+> **Workflow:** when re-exporting a previous round, always follow up with a re-export of the current round to restore it as the active one:
+> ```bash
+> python pipeline/08_export_website_json.py --round 6   # refresh old round's actuals
+> python pipeline/08_export_website_json.py --round 7   # restore current round to predictions.json
+> ```
+> Round-specific files (`predictions_round{N}.json`, `actual_round{N}.json`, etc.) are not affected — only the unsuffixed `predictions.json` is at risk.
+
 ### `pipeline/09_post_race_analysis.py` — Predicted vs actual (orchestrated)
 
 ```
