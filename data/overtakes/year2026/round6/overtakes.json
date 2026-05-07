@@ -1,0 +1,373 @@
+{
+  "year": 2026,
+  "round": 6,
+  "method": "openf1",
+  "sessions": {
+    "race": {
+      "session": "Race",
+      "event": "Miami",
+      "year": 2026,
+      "round": 6,
+      "method": "openf1",
+      "session_key": 11280,
+      "total_overtakes": 183,
+      "include_pitstops": false,
+      "drivers": [
+        {
+          "driver": "VER",
+          "driver_number": 3,
+          "overtakes": 19
+        },
+        {
+          "driver": "ALO",
+          "driver_number": 14,
+          "overtakes": 13
+        },
+        {
+          "driver": "PER",
+          "driver_number": 11,
+          "overtakes": 13
+        },
+        {
+          "driver": "RUS",
+          "driver_number": 63,
+          "overtakes": 13
+        },
+        {
+          "driver": "LEC",
+          "driver_number": 16,
+          "overtakes": 12
+        },
+        {
+          "driver": "BOR",
+          "driver_number": 5,
+          "overtakes": 12
+        },
+        {
+          "driver": "PIA",
+          "driver_number": 81,
+          "overtakes": 10
+        },
+        {
+          "driver": "SAI",
+          "driver_number": 55,
+          "overtakes": 9
+        },
+        {
+          "driver": "LIN",
+          "driver_number": 41,
+          "overtakes": 9
+        },
+        {
+          "driver": "BEA",
+          "driver_number": 87,
+          "overtakes": 7
+        },
+        {
+          "driver": "ALB",
+          "driver_number": 23,
+          "overtakes": 7
+        },
+        {
+          "driver": "BOT",
+          "driver_number": 77,
+          "overtakes": 7
+        },
+        {
+          "driver": "LAW",
+          "driver_number": 30,
+          "overtakes": 6
+        },
+        {
+          "driver": "COL",
+          "driver_number": 43,
+          "overtakes": 6
+        },
+        {
+          "driver": "OCO",
+          "driver_number": 31,
+          "overtakes": 6
+        },
+        {
+          "driver": "STR",
+          "driver_number": 18,
+          "overtakes": 6
+        },
+        {
+          "driver": "HUL",
+          "driver_number": 27,
+          "overtakes": 5
+        },
+        {
+          "driver": "ANT",
+          "driver_number": 12,
+          "overtakes": 5
+        },
+        {
+          "driver": "NOR",
+          "driver_number": 1,
+          "overtakes": 5
+        },
+        {
+          "driver": "HAD",
+          "driver_number": 6,
+          "overtakes": 5
+        },
+        {
+          "driver": "GAS",
+          "driver_number": 10,
+          "overtakes": 4
+        },
+        {
+          "driver": "HAM",
+          "driver_number": 44,
+          "overtakes": 4
+        }
+      ]
+    },
+    "sprint": {
+      "session": "Sprint",
+      "event": "Miami",
+      "year": 2026,
+      "round": 6,
+      "method": "openf1",
+      "session_key": 11275,
+      "total_overtakes": 68,
+      "include_pitstops": false,
+      "drivers": [
+        {
+          "driver": "ALO",
+          "driver_number": 14,
+          "overtakes": 8
+        },
+        {
+          "driver": "STR",
+          "driver_number": 18,
+          "overtakes": 7
+        },
+        {
+          "driver": "OCO",
+          "driver_number": 31,
+          "overtakes": 6
+        },
+        {
+          "driver": "PER",
+          "driver_number": 11,
+          "overtakes": 6
+        },
+        {
+          "driver": "ALB",
+          "driver_number": 23,
+          "overtakes": 6
+        },
+        {
+          "driver": "SAI",
+          "driver_number": 55,
+          "overtakes": 5
+        },
+        {
+          "driver": "LAW",
+          "driver_number": 30,
+          "overtakes": 5
+        },
+        {
+          "driver": "RUS",
+          "driver_number": 63,
+          "overtakes": 3
+        },
+        {
+          "driver": "HAM",
+          "driver_number": 44,
+          "overtakes": 3
+        },
+        {
+          "driver": "BEA",
+          "driver_number": 87,
+          "overtakes": 3
+        },
+        {
+          "driver": "VER",
+          "driver_number": 3,
+          "overtakes": 3
+        },
+        {
+          "driver": "HAD",
+          "driver_number": 6,
+          "overtakes": 3
+        },
+        {
+          "driver": "GAS",
+          "driver_number": 10,
+          "overtakes": 2
+        },
+        {
+          "driver": "BOT",
+          "driver_number": 77,
+          "overtakes": 2
+        },
+        {
+          "driver": "ANT",
+          "driver_number": 12,
+          "overtakes": 2
+        },
+        {
+          "driver": "BOR",
+          "driver_number": 5,
+          "overtakes": 2
+        },
+        {
+          "driver": "PIA",
+          "driver_number": 81,
+          "overtakes": 1
+        },
+        {
+          "driver": "LEC",
+          "driver_number": 16,
+          "overtakes": 1
+        }
+      ]
+    }
+  },
+  "pitstops": {
+    "source": "openf1",
+    "session_key": 11280,
+    "total_stops": 19,
+    "fastest_stop": {
+      "driver": "ANT",
+      "lap": 26,
+      "stop_duration": 2.2,
+      "lane_duration": 22.128
+    },
+    "by_driver": {
+      "HUL": [
+        {
+          "lap": 1,
+          "stop_duration": 12.7,
+          "lane_duration": 33.71
+        }
+      ],
+      "VER": [
+        {
+          "lap": 6,
+          "stop_duration": 2.4,
+          "lane_duration": 22.547
+        }
+      ],
+      "BOT": [
+        {
+          "lap": 6,
+          "stop_duration": 3.0,
+          "lane_duration": 23.529
+        },
+        {
+          "lap": 21,
+          "stop_duration": 3.3,
+          "lane_duration": 23.827
+        }
+      ],
+      "LEC": [
+        {
+          "lap": 21,
+          "stop_duration": 3.7,
+          "lane_duration": 23.386
+        }
+      ],
+      "STR": [
+        {
+          "lap": 21,
+          "stop_duration": 2.8,
+          "lane_duration": 22.63
+        },
+        {
+          "lap": 37,
+          "stop_duration": 2.8,
+          "lane_duration": 22.09
+        }
+      ],
+      "ANT": [
+        {
+          "lap": 26,
+          "stop_duration": 2.2,
+          "lane_duration": 22.128
+        }
+      ],
+      "BEA": [
+        {
+          "lap": 26,
+          "stop_duration": 4.6,
+          "lane_duration": 23.474
+        }
+      ],
+      "NOR": [
+        {
+          "lap": 27,
+          "stop_duration": 2.8,
+          "lane_duration": 22.565
+        }
+      ],
+      "HAM": [
+        {
+          "lap": 27,
+          "stop_duration": 3.8,
+          "lane_duration": 23.779
+        }
+      ],
+      "ALB": [
+        {
+          "lap": 27,
+          "stop_duration": 3.3,
+          "lane_duration": 23.016
+        }
+      ],
+      "PIA": [
+        {
+          "lap": 28,
+          "stop_duration": 3.4,
+          "lane_duration": 23.024
+        }
+      ],
+      "SAI": [
+        {
+          "lap": 28,
+          "stop_duration": 4.2,
+          "lane_duration": 23.595
+        }
+      ],
+      "LIN": [
+        {
+          "lap": 28,
+          "stop_duration": 2.5,
+          "lane_duration": 22.731
+        }
+      ],
+      "COL": [
+        {
+          "lap": 31,
+          "stop_duration": 2.9,
+          "lane_duration": 23.093
+        }
+      ],
+      "OCO": [
+        {
+          "lap": 31,
+          "stop_duration": 3.9,
+          "lane_duration": 24.027
+        }
+      ],
+      "BOR": [
+        {
+          "lap": 32,
+          "stop_duration": 3.1,
+          "lane_duration": 23.986
+        }
+      ],
+      "ALO": [
+        {
+          "lap": 41,
+          "stop_duration": 3.1,
+          "lane_duration": 23.16
+        }
+      ]
+    }
+  }
+}

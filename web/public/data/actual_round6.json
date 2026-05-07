@@ -697,10 +697,10 @@
       "quali_bonus": 10,
       "race_points": 61,
       "sprint_points": 22,
-      "pitstop_points": 0,
-      "total_points": 104,
+      "pitstop_points": 2,
+      "total_points": 106,
       "price": 28.6,
-      "ppm": 3.64
+      "ppm": 3.71
     },
     {
       "constructor_id": "mercedes",
@@ -711,10 +711,10 @@
       "quali_bonus": 10,
       "race_points": 52,
       "sprint_points": 9,
-      "pitstop_points": 0,
-      "total_points": 87,
+      "pitstop_points": 10,
+      "total_points": 97,
       "price": 30.2,
-      "ppm": 2.88
+      "ppm": 3.21
     },
     {
       "constructor_id": "ferrari",
@@ -753,24 +753,10 @@
       "quali_bonus": -1,
       "race_points": 17,
       "sprint_points": 19,
-      "pitstop_points": 0,
-      "total_points": 35,
+      "pitstop_points": 4,
+      "total_points": 39,
       "price": 8.5,
-      "ppm": 4.12
-    },
-    {
-      "constructor_id": "cadillac",
-      "name": "Cadillac",
-      "driver_1": "PER",
-      "driver_2": "BOT",
-      "quali_points": 0,
-      "quali_bonus": -1,
-      "race_points": 15,
-      "sprint_points": 5,
-      "pitstop_points": 5,
-      "total_points": 24,
-      "price": 5.0,
-      "ppm": 4.8
+      "ppm": 4.59
     },
     {
       "constructor_id": "red_bull",
@@ -781,10 +767,10 @@
       "quali_bonus": 10,
       "race_points": -5,
       "sprint_points": 9,
-      "pitstop_points": 0,
-      "total_points": 23,
+      "pitstop_points": 5,
+      "total_points": 28,
       "price": 29.1,
-      "ppm": 0.79
+      "ppm": 0.96
     },
     {
       "constructor_id": "haas",
@@ -801,6 +787,20 @@
       "ppm": 2.5
     },
     {
+      "constructor_id": "cadillac",
+      "name": "Cadillac",
+      "driver_1": "PER",
+      "driver_2": "BOT",
+      "quali_points": 0,
+      "quali_bonus": -1,
+      "race_points": 15,
+      "sprint_points": 5,
+      "pitstop_points": 0,
+      "total_points": 19,
+      "price": 5.0,
+      "ppm": 3.8
+    },
+    {
       "constructor_id": "alpine",
       "name": "Alpine",
       "driver_1": "GAS",
@@ -809,10 +809,10 @@
       "quali_bonus": 10,
       "race_points": -8,
       "sprint_points": 3,
-      "pitstop_points": 0,
-      "total_points": 10,
+      "pitstop_points": 2,
+      "total_points": 12,
       "price": 14.3,
-      "ppm": 0.7
+      "ppm": 0.84
     },
     {
       "constructor_id": "racing_bulls",
@@ -823,10 +823,10 @@
       "quali_bonus": 1,
       "race_points": -14,
       "sprint_points": -6,
-      "pitstop_points": 0,
-      "total_points": -19,
+      "pitstop_points": 2,
+      "total_points": -17,
       "price": 8.1,
-      "ppm": -2.35
+      "ppm": -2.1
     },
     {
       "constructor_id": "audi",

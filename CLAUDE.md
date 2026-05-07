@@ -97,6 +97,8 @@ Callsites that apply this mapping:
 - FastF1: `01_download_data.py`, `02_build_laps.py`, `06_run_predictions.py`, `12_count_overtakes.py`
 - Jolpica: `01_download_data.py` (`download_jolpica_round`)
 
+**OpenF1 is different — no mapping needed.** OpenF1 preserves the ORIGINAL 2026 calendar with cancelled-round sessions still listed (Bahrain at position 4, Saudi at position 5). So internal round N maps 1:1 to the Nth race session in OpenF1's date-sorted list. Applying a cancelled-round offset to OpenF1 returns the wrong session — internal R6 (Miami) was previously resolving to Sakhir's session_key in `13_fetch_openf1_overtakes.py` until this was fixed.
+
 ## ML Models
 
 - **Qualifying model:** `XGBRanker(n_estimators=1200, lr=0.025, depth=3, objective="rank:pairwise")`

@@ -92,8 +92,11 @@ def get_sessions(year: int) -> list[dict]:
 def get_session_key(year: int, round_num: int, session_type: str = "Race") -> Optional[int]:
     """Find the OpenF1 session key for a given round and session type.
 
-    Maps our round numbers to OpenF1 session keys by matching the Nth race
-    event in the calendar.
+    Unlike FastF1/Jolpica (which omit cancelled rounds and compress the
+    numbering), OpenF1 keeps the ORIGINAL 2026 calendar — Bahrain (R4) and
+    Saudi (R5) are still present as session entries even though they were
+    cancelled. So our internal round number maps 1:1 to the Nth race session
+    in OpenF1's date-sorted list — no offset needed.
 
     Note: OpenF1 classifies Sprints as session_type="Race" with
     session_name="Sprint", so we use session_name to distinguish.
@@ -104,29 +107,19 @@ def get_session_key(year: int, round_num: int, session_type: str = "Race") -> Op
 
     # OpenF1 uses session_type="Race" for both Sprint and Race.
     # Distinguish via session_name: "Race" vs "Sprint".
-    # For the main race: session_name="Race" AND session_type="Race"
-    # For sprint: session_name="Sprint" AND session_type="Race"
     race_sessions = [
         s for s in sessions
         if s.get("session_type") == "Race" and s.get("session_name") == "Race"
     ]
     race_sessions.sort(key=lambda s: s.get("date_start", ""))
 
-    # Walk through race sessions to find the Nth round (accounting for cancellations)
-    active_round = 0
-    target_meeting_key = None
-    for rs in race_sessions:
-        active_round += 1
-        while active_round in CANCELLED_ROUNDS_2026:
-            active_round += 1
-        if active_round == round_num:
-            target_meeting_key = rs.get("meeting_key")
-            if session_type == "Race":
-                return rs.get("session_key")
-            break
-
-    if target_meeting_key is None:
+    # Direct 1:1 indexing — OpenF1's Nth race session == internal round N.
+    if round_num < 1 or round_num > len(race_sessions):
         return None
+    rs = race_sessions[round_num - 1]
+    target_meeting_key = rs.get("meeting_key")
+    if session_type == "Race":
+        return rs.get("session_key")
 
     # For Sprint, find the sprint session in the same meeting
     if session_type == "Sprint":

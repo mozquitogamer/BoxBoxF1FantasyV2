@@ -139,10 +139,15 @@ PHASES = {
         "steps": [
             ("01_download_data.py", ["--mode", "current", "--round", "{round}"]),
             ("09_post_race_analysis.py", ["--round", "{round}"]),
+            # Fetch OpenF1 overtakes + pit stop stationary times BEFORE actual_fantasy_points
+            # so the constructor pit stop scoring uses real wheels-up times (stop_duration),
+            # not Jolpica's pit lane transit duration (~22s, all in the >3s zero-points bracket).
+            # Note: OpenF1 may not have stop_duration populated immediately after the race.
+            # If `pitstops` key is missing in overtakes.json, re-run this phase a day later.
+            ("13_fetch_openf1_overtakes.py", ["--year", str(CURRENT_SEASON), "--round", "{round}"]),
             ("11_actual_fantasy_points.py", ["--round", "{round}"]),
             ("11_race_deep_dive.py", ["--round", "{round}"]),
             ("12_count_overtakes.py", ["--round", "{round}"]),
-            ("13_fetch_openf1_overtakes.py", ["--year", str(CURRENT_SEASON), "--round", "{round}"]),
             ("13_fetch_pitstop_stationary.py", ["--year", str(CURRENT_SEASON), "--round", "{round}"]),
             ("08_export_website_json.py", ["--round", "{round}"]),
         ],

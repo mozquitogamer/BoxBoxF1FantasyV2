@@ -10,7 +10,7 @@
       "round": 1,
       "method": "openf1",
       "session_key": 11234,
-      "total_overtakes": 252,
+      "total_overtakes": 264,
       "include_pitstops": false,
       "drivers": [
         {
@@ -24,29 +24,29 @@
           "overtakes": 19
         },
         {
+          "driver": "COL",
+          "driver_number": 43,
+          "overtakes": 19
+        },
+        {
           "driver": "BEA",
           "driver_number": 87,
+          "overtakes": 18
+        },
+        {
+          "driver": "GAS",
+          "driver_number": 10,
+          "overtakes": 18
+        },
+        {
+          "driver": "BOT",
+          "driver_number": 77,
           "overtakes": 18
         },
         {
           "driver": "VER",
           "driver_number": 3,
           "overtakes": 18
-        },
-        {
-          "driver": "GAS",
-          "driver_number": 10,
-          "overtakes": 17
-        },
-        {
-          "driver": "COL",
-          "driver_number": 43,
-          "overtakes": 17
-        },
-        {
-          "driver": "BOT",
-          "driver_number": 77,
-          "overtakes": 17
         },
         {
           "driver": "ALB",
@@ -56,22 +56,22 @@
         {
           "driver": "OCO",
           "driver_number": 31,
-          "overtakes": 14
-        },
-        {
-          "driver": "PER",
-          "driver_number": 11,
-          "overtakes": 13
+          "overtakes": 15
         },
         {
           "driver": "BOR",
           "driver_number": 5,
-          "overtakes": 13
+          "overtakes": 15
+        },
+        {
+          "driver": "PER",
+          "driver_number": 11,
+          "overtakes": 14
         },
         {
           "driver": "LAW",
           "driver_number": 30,
-          "overtakes": 12
+          "overtakes": 13
         },
         {
           "driver": "STR",
@@ -81,7 +81,7 @@
         {
           "driver": "LIN",
           "driver_number": 41,
-          "overtakes": 9
+          "overtakes": 10
         },
         {
           "driver": "HAM",
@@ -99,19 +99,162 @@
           "overtakes": 6
         },
         {
+          "driver": "HAD",
+          "driver_number": 6,
+          "overtakes": 6
+        },
+        {
           "driver": "NOR",
           "driver_number": 1,
           "overtakes": 6
         },
         {
-          "driver": "HAD",
-          "driver_number": 6,
-          "overtakes": 4
-        },
-        {
           "driver": "RUS",
           "driver_number": 63,
           "overtakes": 4
+        }
+      ]
+    }
+  },
+  "pitstops": {
+    "source": "openf1",
+    "session_key": 11234,
+    "total_stops": 20,
+    "fastest_stop": {
+      "driver": "LEC",
+      "lap": 18,
+      "stop_duration": 2.2,
+      "lane_duration": 17.664
+    },
+    "by_driver": {
+      "ALO": [
+        {
+          "lap": 11,
+          "stop_duration": 10.0,
+          "lane_duration": 25.895
+        }
+      ],
+      "STR": [
+        {
+          "lap": 11,
+          "stop_duration": 16.9,
+          "lane_duration": 36.686
+        },
+        {
+          "lap": 18,
+          "stop_duration": 16.4,
+          "lane_duration": 33.182
+        },
+        {
+          "lap": 46,
+          "stop_duration": 5.6,
+          "lane_duration": 22.469
+        }
+      ],
+      "RUS": [
+        {
+          "lap": 12,
+          "stop_duration": 2.3,
+          "lane_duration": 17.794
+        }
+      ],
+      "ANT": [
+        {
+          "lap": 12,
+          "stop_duration": 2.5,
+          "lane_duration": 20.985
+        }
+      ],
+      "ALB": [
+        {
+          "lap": 12,
+          "stop_duration": 2.7,
+          "lane_duration": 18.118
+        },
+        {
+          "lap": 33,
+          "stop_duration": 2.5,
+          "lane_duration": 18.404
+        }
+      ],
+      "BOT": [
+        {
+          "lap": 12,
+          "stop_duration": 12.5,
+          "lane_duration": 30.387
+        }
+      ],
+      "LIN": [
+        {
+          "lap": 18,
+          "stop_duration": 2.4,
+          "lane_duration": 18.506
+        }
+      ],
+      "BEA": [
+        {
+          "lap": 18,
+          "stop_duration": 3.3,
+          "lane_duration": 18.774
+        }
+      ],
+      "BOR": [
+        {
+          "lap": 18,
+          "stop_duration": 5.2,
+          "lane_duration": 22.619
+        }
+      ],
+      "PER": [
+        {
+          "lap": 18,
+          "stop_duration": 5.5,
+          "lane_duration": 21.371
+        },
+        {
+          "lap": 43,
+          "stop_duration": 3.2,
+          "lane_duration": 18.951
+        }
+      ],
+      "LEC": [
+        {
+          "lap": 18,
+          "stop_duration": 2.2,
+          "lane_duration": 17.664
+        }
+      ],
+      "HAM": [
+        {
+          "lap": 18,
+          "stop_duration": 2.3,
+          "lane_duration": 17.741
+        }
+      ],
+      "LAW": [
+        {
+          "lap": 33,
+          "stop_duration": 2.8,
+          "lane_duration": 18.19
+        }
+      ],
+      "SAI": [
+        {
+          "lap": 33,
+          "stop_duration": 8.0,
+          "lane_duration": 25.939
+        },
+        {
+          "lap": 45,
+          "stop_duration": 19.8,
+          "lane_duration": 34.615
+        }
+      ],
+      "COL": [
+        {
+          "lap": 46,
+          "stop_duration": 2.9,
+          "lane_duration": 18.561
         }
       ]
     }

@@ -1,0 +1,195 @@
+{
+  "year": 2026,
+  "round": 6,
+  "method": "hf",
+  "sessions": {
+    "race": {
+      "session": "Race",
+      "event": "Miami Grand Prix",
+      "year": 2026,
+      "round": 6,
+      "method": "hf",
+      "total_overtakes": 115,
+      "drivers": [
+        {
+          "driver": "VER",
+          "overtakes": 14
+        },
+        {
+          "driver": "RUS",
+          "overtakes": 10
+        },
+        {
+          "driver": "LEC",
+          "overtakes": 9
+        },
+        {
+          "driver": "BOR",
+          "overtakes": 8
+        },
+        {
+          "driver": "ALO",
+          "overtakes": 8
+        },
+        {
+          "driver": "ANT",
+          "overtakes": 6
+        },
+        {
+          "driver": "BOT",
+          "overtakes": 6
+        },
+        {
+          "driver": "PIA",
+          "overtakes": 6
+        },
+        {
+          "driver": "STR",
+          "overtakes": 5
+        },
+        {
+          "driver": "OCO",
+          "overtakes": 5
+        },
+        {
+          "driver": "ALB",
+          "overtakes": 5
+        },
+        {
+          "driver": "HAD",
+          "overtakes": 5
+        },
+        {
+          "driver": "BEA",
+          "overtakes": 5
+        },
+        {
+          "driver": "PER",
+          "overtakes": 5
+        },
+        {
+          "driver": "LIN",
+          "overtakes": 4
+        },
+        {
+          "driver": "SAI",
+          "overtakes": 4
+        },
+        {
+          "driver": "NOR",
+          "overtakes": 3
+        },
+        {
+          "driver": "HUL",
+          "overtakes": 3
+        },
+        {
+          "driver": "HAM",
+          "overtakes": 3
+        },
+        {
+          "driver": "GAS",
+          "overtakes": 1
+        },
+        {
+          "driver": "COL",
+          "overtakes": 0
+        },
+        {
+          "driver": "LAW",
+          "overtakes": 0
+        }
+      ]
+    },
+    "sprint": {
+      "session": "Sprint",
+      "event": "Miami Grand Prix",
+      "year": 2026,
+      "round": 6,
+      "method": "hf",
+      "total_overtakes": 28,
+      "drivers": [
+        {
+          "driver": "ALO",
+          "overtakes": 5
+        },
+        {
+          "driver": "ALB",
+          "overtakes": 4
+        },
+        {
+          "driver": "STR",
+          "overtakes": 3
+        },
+        {
+          "driver": "OCO",
+          "overtakes": 2
+        },
+        {
+          "driver": "VER",
+          "overtakes": 2
+        },
+        {
+          "driver": "HAD",
+          "overtakes": 2
+        },
+        {
+          "driver": "SAI",
+          "overtakes": 2
+        },
+        {
+          "driver": "HAM",
+          "overtakes": 2
+        },
+        {
+          "driver": "PER",
+          "overtakes": 2
+        },
+        {
+          "driver": "RUS",
+          "overtakes": 1
+        },
+        {
+          "driver": "LAW",
+          "overtakes": 1
+        },
+        {
+          "driver": "ANT",
+          "overtakes": 1
+        },
+        {
+          "driver": "BOT",
+          "overtakes": 1
+        },
+        {
+          "driver": "COL",
+          "overtakes": 0
+        },
+        {
+          "driver": "BOR",
+          "overtakes": 0
+        },
+        {
+          "driver": "GAS",
+          "overtakes": 0
+        },
+        {
+          "driver": "NOR",
+          "overtakes": 0
+        },
+        {
+          "driver": "BEA",
+          "overtakes": 0
+        },
+        {
+          "driver": "LEC",
+          "overtakes": 0
+        },
+        {
+          "driver": "PIA",
+          "overtakes": 0
+        }
+      ]
+    }
+  }
+}
