@@ -1,871 +1,998 @@
 # BoxBoxF1Fantasy — Technical Deep Dive
 
-**How the system works, why decisions were made, and where it's heading.**
+**Architecture and design rationale.** Read this when you need to understand *why* something is the way it is, or when modifying the pipeline.
+
+For *how to operate* the system day-to-day (run phases, CLI args, troubleshooting), see [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md).
+For end-user UI documentation, see [USER_GUIDE.md](USER_GUIDE.md).
 
 ---
 
 ## Table of Contents
 
 1. [System Architecture Overview](#1-system-architecture-overview)
-2. [Data Sources & Why Each Was Chosen](#2-data-sources)
-3. [The Two-Layer Feature System](#3-the-two-layer-feature-system)
-4. [Machine Learning Models](#4-machine-learning-models)
-5. [Fantasy Scoring Engine](#5-fantasy-scoring-engine)
-6. [Monte Carlo Simulation](#6-monte-carlo-simulation)
-7. [Overtake Estimation](#7-overtake-estimation)
-8. [Risk & Confidence System](#8-risk--confidence-system)
-9. [Price Change Prediction](#9-price-change-prediction)
-10. [Lineup Optimizer](#10-lineup-optimizer)
-11. [Website & Deployment](#11-website--deployment)
-12. [Confidence Interval Calibration](#12-confidence-interval-calibration)
-13. [Multi-Week Transfer Planner](#13-multi-week-transfer-planner)
-14. [Known Limitations](#14-known-limitations)
-15. [Future Feature Ideas](#15-future-feature-ideas)
+2. [Repository Layout](#2-repository-layout)
+3. [Data Sources](#3-data-sources)
+4. [The 2026 Calendar Mapping](#4-the-2026-calendar-mapping)
+5. [The Two-Layer Feature System](#5-the-two-layer-feature-system)
+6. [Machine Learning Models](#6-machine-learning-models)
+7. [Phase-Aware Inference](#7-phase-aware-inference)
+8. [Predict-Time Feature Recomputation](#8-predict-time-feature-recomputation)
+9. [Fantasy Scoring Engine](#9-fantasy-scoring-engine)
+10. [Monte Carlo Simulation](#10-monte-carlo-simulation)
+11. [Overtake Estimation](#11-overtake-estimation)
+12. [Risk & Confidence System](#12-risk--confidence-system)
+13. [Price Change Prediction](#13-price-change-prediction)
+14. [Lineup Optimizer](#14-lineup-optimizer)
+15. [Multi-Week Transfer Planner](#15-multi-week-transfer-planner)
+16. [Confidence Interval Calibration](#16-confidence-interval-calibration)
+17. [Website Architecture](#17-website-architecture)
+18. [Known Limitations](#18-known-limitations)
+19. [Future Feature Ideas](#19-future-feature-ideas)
 
 ---
 
 ## 1. System Architecture Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        DATA COLLECTION                              │
-│                                                                     │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐          │
-│  │   FastF1     │    │  Jolpica API │    │  OpenF1 API  │          │
-│  │  (Telemetry) │    │ (Historical) │    │ (Overtakes)  │          │
-│  └──────┬───────┘    └──────┬───────┘    └──────┬───────┘          │
-│         │                   │                    │                  │
-└─────────┼───────────────────┼────────────────────┼──────────────────┘
-          │                   │                    │
-          ▼                   ▼                    │
-┌─────────────────────────────────────────────┐    │
-│              FEATURE ENGINEERING            │    │
-│                                             │    │
-│  ┌─────────────────┐  ┌──────────────────┐  │    │
-│  │  Layer 1:       │  │  Layer 2:        │  │    │
-│  │  Jolpica Priors │  │  FP Telemetry    │  │    │
-│  │  (91 features,  │  │  (23 features,   │  │    │
-│  │   always avail) │  │   sparse/NaN)    │  │    │
-│  └────────┬────────┘  └────────┬─────────┘  │    │
-│           │                    │             │    │
-│           └────────┬───────────┘             │    │
-│                    ▼                         │    │
-│           ┌────────────────┐                 │    │
-│           │ Merged Dataset │                 │    │
-│           │ ~100 features  │                 │    │
-│           └────────┬───────┘                 │    │
-│                    │                         │    │
-└────────────────────┼─────────────────────────┘    │
-                     │                              │
-                     ▼                              │
-┌─────────────────────────────────────────────┐     │
-│              ML PREDICTIONS                 │     │
-│                                             │     │
-│  ┌─────────────┐    ┌─────────────┐         │     │
-│  │ XGBoost     │───▶│ XGBoost     │         │     │
-│  │ Quali Model │    │ Race Model  │         │     │
-│  │ (1200 trees)│    │ (650 trees) │         │     │
-│  └─────────────┘    └──────┬──────┘         │     │
-│                            │                │     │
-│  ┌─────────────┐           │                │     │
-│  │ ExtraTrees  │──(confidence scoring)──┐   │     │
-│  │ FP Model    │                        │   │     │
-│  └─────────────┘                        │   │     │
-│                                         │   │     │
-└─────────────────────────────────────────┼───┘     │
-                                         │         │
-                     ┌───────────────────┘          │
-                     ▼                              │
-┌─────────────────────────────────────────────┐     │
-│           FANTASY SCORING                   │     │
-│                                             │     │
-│  Predicted positions → Fantasy points       │     │
-│  + Overtake estimation ◄────────────────────┼─────┘
-│  + DNF risk adjustment                      │
-│  + Fastest lap / DOTD probability           │
-│  + Sprint scoring (if applicable)           │
-│  + Constructor aggregation & pit stops      │
-│                                             │
-└────────────────────┬────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────┐
-│         MONTE CARLO SIMULATION              │
-│                                             │
-│  10,000 simulations per driver              │
-│  → P5/P25/P50/P75/P95 percentiles          │
-│  → Upside/downside risk                    │
-│  → Position probabilities (top 3/5/10)     │
-│                                             │
-└────────────────────┬────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────┐
-│              WEB EXPORT                     │
-│                                             │
-│  predictions.json + season_summary.json     │
-│  + actual_round{N}.json + post_race data    │
-│         │                                   │
-│         ▼                                   │
-│  ┌─────────────┐    ┌──────────────┐        │
-│  │  Vercel CDN │    │ Local Dev    │        │
-│  │ (Production)│    │ (serve.py)   │        │
-│  └─────────────┘    └──────────────┘        │
-│                                             │
-│  boxboxf1fantasy.com                        │
-└─────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────┐
+│                          DATA COLLECTION                                  │
+│  FastF1 (telemetry)    Jolpica/Ergast (results)    OpenF1 (overtakes)    │
+│       │                       │                           │              │
+└───────┼───────────────────────┼───────────────────────────┼──────────────┘
+        │                       │                           │
+        ▼                       ▼                           │
+┌──────────────────────┬──────────────────────────┐         │
+│  Layer 1: Jolpica    │  Layer 2: FP Telemetry   │         │
+│  priors (91 cols,    │  (40+ cols, sparse —     │         │
+│  always present)     │  ~160/2,679 rows have    │         │
+│                      │  data in training)       │         │
+└──────────┬───────────┴──────────┬───────────────┘         │
+           │                      │                         │
+           └──────────┬───────────┘                         │
+                      ▼                                     │
+            ┌──────────────────┐                            │
+            │  Merged dataset  │                            │
+            │  ~2,679 rows     │                            │
+            │  XGBoost native  │                            │
+            │  NaN handling    │                            │
+            └────────┬─────────┘                            │
+                     │                                      │
+                     ▼                                      │
+┌─────────────────────────────────────────────────┐         │
+│                ML PREDICTIONS                   │         │
+│                                                 │         │
+│  Quali Model      Race Models (2)   Sprint     │         │
+│  XGBRanker        XGBRanker          XGBRanker │         │
+│  85 features      101 features       107 feats │         │
+│  1200 trees       650 trees          400 trees │         │
+│  depth=3          depth=5            depth=4   │         │
+│                                                 │         │
+│  Phase-aware: race_model.json (post-quali)      │         │
+│  vs race_model_fp.json (post-FP, pre-quali)     │         │
+└────────────────────────┬────────────────────────┘         │
+                         │                                  │
+                         ▼                                  │
+┌─────────────────────────────────────────────────┐         │
+│                FANTASY SCORING                  │         │
+│   Predicted positions → Fantasy points          │         │
+│   + Overtake estimation ◄───────────────────────┼─────────┘
+│   + DNF risk + FL prob + DOTD prob              │
+│   + Sprint scoring (sprint weekends)            │
+│   + Constructor aggregation + pit stops         │
+└────────────────────────┬────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────┐
+│            MONTE CARLO SIMULATION               │
+│   10,000 simulations per driver                 │
+│   → P5/P25/P50/P75/P95 percentiles              │
+│   → DNF + overtake + FL + DOTD sampling         │
+│   → Constructor pit-stop simulation             │
+│   → Calibrated noise from mc_calibration.json   │
+└────────────────────────┬────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────┐
+│              JSON EXPORT → Vercel               │
+│   web/public/data/*.json → boxboxf1fantasy.com  │
+└─────────────────────────────────────────────────┘
+```
+
+The pipeline is a **directed sequence of numbered Python scripts** (01 through 13) plus a few unnumbered utilities. Each script reads from upstream artifacts (parquets, JSON) and writes to downstream artifacts. Nothing in the pipeline is interactive at runtime — `pipeline/run_weekend.py` orchestrates the right subset of scripts for each weekend phase.
+
+---
+
+## 2. Repository Layout
+
+```
+BoxBoxF1FantasyV2/
+├── pipeline/                       # Numbered Python scripts + utilities
+│   ├── 01_download_data.py         # FastF1 + Jolpica downloader
+│   ├── 02_build_laps.py            # Raw → cleaned lap parquets (FP1+SQ on sprint, FP1/2/3 otherwise)
+│   ├── 03_extract_features.py      # FP telemetry features (40+ cols, sparse)
+│   ├── 03a_normalize_jolpica.py    # Raw Jolpica JSON → normalized CSVs
+│   ├── 03b_build_jolpica_features.py # Layer-1 rolling features (91 cols)
+│   ├── 04_build_model_inputs.py    # Merge Layer 1 + Layer 2 → training_data.parquet
+│   ├── 05_train_models.py          # Train 5 models (quali, race, race_fp, sprint, fp_signal)
+│   ├── 05b_experiment_models.py    # Algorithm/hyperparam experiments (informational)
+│   ├── 06_run_predictions.py       # Inference (phase-aware, recomputes circuit/sim features)
+│   ├── 07_calculate_fantasy.py     # Fantasy points (deterministic)
+│   ├── 08_monte_carlo_fantasy.py   # 10K-iteration MC
+│   ├── 08_export_website_json.py   # Parquets → JSON for website
+│   ├── 09_post_race_analysis.py    # Predicted vs actual comparison
+│   ├── 10_fp_analysis.py           # FP & sprint quali analytics (Race Deep Dive page)
+│   ├── 11_actual_fantasy_points.py # Real fantasy points from race results (uses overtakes.csv override)
+│   ├── 11_race_deep_dive.py        # Detailed race analysis (pace, tyre, stints, fuel-corrected)
+│   ├── 12_count_overtakes.py       # FastF1 sector-method overtake detection
+│   ├── 12_official_fantasy_points.py # CLI manager for official_fantasy_points.json
+│   ├── 13_fetch_openf1_overtakes.py # OpenF1 API overtake counts (filters pit stops)
+│   ├── 13_fetch_pitstop_stationary.py # Pit stop stationary times (the actual scoring metric)
+│   ├── calibrate_confidence.py     # MC interval calibration (MC predictions vs actuals)
+│   ├── run_weekend.py              # Phase orchestrator (pre_fp / pre_fp_predict / post_fp / post_quali / post_race)
+│   ├── weather_forecast.py         # Open-Meteo forecasts
+│   ├── feature_engineering.py      # Cross-layer engineered features (library, no CLI)
+│   ├── build_articles.py           # Articles JSON builder
+│   ├── youtube_videos.py           # Video curation
+│   ├── download_helper.py          # Programmatic download wrapper
+│   └── download_fp_missing.py      # Backfill missing FP sessions
+├── config/
+│   ├── settings.py                 # All paths, season constants, FEATURE_COLUMNS, fastf1_round() helper
+│   ├── fantasy_scoring.py          # 2026 official scoring rules (lookup tables, brackets)
+│   ├── track_classifications.py    # 9-dim circuit feature vectors (TRACK_DATABASE) + race-name mapping
+│   ├── track_similarity.py         # Cosine similarity over 9D vectors
+│   ├── team_driver_ratings.py      # Manual skill ratings (tyre management, overtaking, wet, etc.)
+│   └── circuit_coordinates.py      # Track GPS for weather lookup
+├── data/
+│   ├── raw/
+│   │   ├── fastf1/year{Y}/round{R}/   # FP/race/quali/sprint parquets
+│   │   └── jolpica/year{Y}/round{R}/  # results, qualifying, sprint, pitstops JSON
+│   ├── processed/
+│   │   ├── laps/round{N}/             # all_laps_fp{1,2,3}.parquet (+ sprint_qualifying on sprint weekends)
+│   │   ├── features/round{N}/         # FP feature parquets
+│   │   ├── jolpica/
+│   │   │   ├── normalized/{year}/     # CSVs from 03a
+│   │   │   └── model_rows/            # all_model_rows.parquet (Layer-1 features for 2020-2026)
+│   │   ├── model_inputs/              # training_data.parquet
+│   │   ├── deep_dive/round{N}/        # Race deep dive JSON
+│   │   ├── fp_analysis/round{N}/      # FP analysis JSON
+│   │   ├── pitstops/year{Y}/round{N}/ # Pit stop stationary times
+│   │   └── post_race/                 # Predicted vs actual JSON
+│   ├── predictions/round{N}/          # predictions.parquet, fantasy_points.parquet, MC outputs
+│   ├── actuals/round{N}/              # actual_fantasy.parquet (from script 11)
+│   ├── overtakes/year{Y}/round{N}/    # overtakes.json (OpenF1 + FastF1 detection results)
+│   └── seed/                          # Manually-maintained reference data (see OPERATIONS_GUIDE §10)
+├── models/
+│   ├── trained/                       # Production XGBoost models (.json)
+│   │   ├── quali_model.json
+│   │   ├── race_model.json            # Trained on actual quali — used in post-quali phase
+│   │   ├── race_model_fp.json         # Trained on walk-forward predicted quali — used in post-FP phase
+│   │   ├── sprint_model.json
+│   │   ├── fp_signal_model.pkl        # ExtraTreesRegressor (confidence only)
+│   │   ├── feature_columns.json       # Feature lists per model (quali=85, race=101, sprint=107)
+│   │   └── model_metadata.json        # Training timestamp, row counts, val metrics
+│   └── trained_v1_baseline/           # Legacy XGBRegressor models (kept for reference)
+├── web/
+│   ├── public/
+│   │   ├── index.html                 # SPA shell (cache version: app.js?v=N)
+│   │   ├── app.js                     # All frontend logic (~5,800 lines)
+│   │   ├── styles.css                 # CSS with custom properties for theming
+│   │   ├── articles/*.md              # Article content
+│   │   └── data/*.json                # All website data (predictions, actuals, etc.)
+│   └── serve.py                       # Local dev server (port 3000)
+├── docs/
+│   ├── OPERATIONS_GUIDE.md            # ← How to run the system
+│   ├── TECHNICAL_DEEP_DIVE.md         # ← This file
+│   ├── SYSTEM_DIAGRAM.md              # Visual diagrams
+│   ├── USER_GUIDE.md                  # End-user UI documentation
+│   └── pipeline_improvement_plan.md
+├── dashboard/                         # Streamlit analytics dashboard (internal use)
+├── .github/workflows/
+│   └── weather-update.yml             # Automated weather forecast every 6 hours
+├── vercel.json                        # Vercel deployment config
+├── requirements.txt                   # Python dependencies
+└── CLAUDE.md                          # AI-agent context file (system overview)
 ```
 
 ---
 
-## 2. Data Sources
+## 3. Data Sources
 
-### FastF1 (Free Practice Telemetry)
+### FastF1 (Free Practice + Race Telemetry)
 
-**What:** Lap-by-lap timing data from FP1, FP2, FP3 sessions. Sprint weekends additionally save Sprint Qualifying laps for the Deep Dive analysis (not for model training).
-**Why:** Free practice is the only real-world data available before qualifying and the race. It tells us how fast each car actually is on the current track in current conditions.
-**Data includes:** Lap times, sector times (3 sectors per lap), tyre compound, pit in/out flags, deleted lap flags, weather conditions.
-**Limitations:**
-- Data availability: ~30 min delay after session ends
-- Teams sandbag (don't show true pace) in FP — we mitigate by looking at consistency and long-run pace, not just headline lap times
-- Sprint weekends only have FP1 (plus Sprint Qualifying, which feeds `sprint_grid` and the Deep Dive page but not the FP feature extractor)
-- FastF1's 2026 calendar omits cancelled rounds (Bahrain R4, Saudi R5), so callers must use `config.settings.fastf1_round(internal_round)` to translate from internal numbering before any `fastf1.get_session(...)` call
+- **What:** Lap-by-lap timing data from FP1, FP2, FP3, Qualifying, Sprint Qualifying, Sprint Race, and Race sessions. Also race results when available.
+- **Why:** Free practice is the only real-world data we have *before* qualifying. Tells us the actual pace of each car this weekend.
+- **Coverage:** Lap times, sector times (3 sectors), tyre compound, pit in/out flags, deleted-lap flags, weather conditions.
+- **Latency:** ~30 minutes after session ends.
+- **Calendar quirk:** FastF1's 2026 calendar omits cancelled rounds (Bahrain R4, Saudi R5). Always use `fastf1_round(internal_round, year)` from `config/settings.py` before any `fastf1.get_session(...)` call.
+- **Limitations:** Teams sandbag in FP. Mitigated partially by emphasizing consistency, long-run pace, and compound-relative deltas.
 
-### Jolpica API (Historical Results)
+### Jolpica/Ergast (Historical Results)
 
-**What:** Race results, qualifying results, standings, pit stops for every F1 race since 1950. Successor to the Ergast API.
-**Why:** Historical performance is the backbone of predictions. A driver's rolling average over the last 3-5 races is one of the strongest predictors of future performance.
-**Data includes:** Finishing positions, grid positions, lap counts, pit stops (count + duration), constructor results, driver standings.
-**Why not just FastF1 for history?** FastF1 telemetry is only reliably available from ~2019 onward. Jolpica provides structured result data going back decades, and we use 2020-2025 for training.
+- **What:** Race results, qualifying results, standings, pit stops for every F1 race since 1950. Successor to the discontinued Ergast API.
+- **Why:** Historical performance is the backbone of predictions. A driver's rolling 3-5 race average is one of the strongest predictors of future performance.
+- **Coverage:** Finishing positions, grid positions, lap counts, pit stops (count + duration), constructor results, standings.
+- **Why not FastF1 for history?** FastF1 telemetry is reliably available only from ~2019. Jolpica gives structured result data going back decades. We train on 2020-2026.
+- **Calendar quirk:** Same as FastF1 — Jolpica/Ergast also omits cancelled rounds. The `download_jolpica_round` function in `01_download_data.py` translates internal → API numbering at the request URL while preserving internal numbering in file paths.
+- **Latency:** Race results typically publish within a few hours of the chequered flag, but sprint sometimes lags longer. Sprint Qualifying Position/Q1-Q3 fields are NOT exposed (see §6 Sprint Model).
 
-### OpenF1 API (Overtakes)
+### OpenF1 API (Overtake Counts)
 
-**What:** Real-time position tracking data from official F1 timing.
-**Why:** Overtakes are worth +1 point each in F1 Fantasy, but they're hard to predict and measure. OpenF1 provides official position change data.
-**Limitations:** Overcounts due to pit stop position swaps (we filter these out with a 30-second window). Still slightly higher than official F1 Fantasy counts (~18 vs 13 for Verstappen R1).
+- **What:** Position-tracking data from official F1 timing.
+- **Why:** Overtakes = +1 fantasy point each. Important and hard to predict.
+- **Coverage:** Per-driver overtake counts per session.
+- **Latency:** ~1-2 hours after race.
+- **Limitations:** Slightly overcounts due to pit stop position changes. The 30-second window filter in `13_fetch_openf1_overtakes.py` removes most. Official F1 Fantasy counts are still typically lower — when official counts are known, they're entered manually into `data/seed/overtakes.csv` and override detected counts via `load_seed_overtakes()` in `11_actual_fantasy_points.py`.
 
-### Seed Data (Manual/Static)
+### Open-Meteo (Weather Forecasts)
 
-**What:** Fantasy prices, driver roster, calendar, track classifications.
-**Why:** Some data doesn't come from APIs — fantasy prices are set by F1 and need manual updates. Track characteristics (street circuit, overtaking difficulty) are expert-curated because they capture track DNA that raw data alone can't.
+- **What:** Per-session rain probability, temperature, wind speed.
+- **Why:** Wet/dry can flip race outcomes. Used for the weather widget on the website.
+- **Latency:** Real-time forecast API. Auto-updated every 6 hours via GitHub Actions.
+
+### Manual / Seed Data
+
+- **What:** Fantasy prices, official points, DOTD winners, overtake corrections, calendar.
+- **Why:** Some data has no API source — F1 Fantasy prices and official overtake counts need manual entry.
 
 ---
 
-## 3. The Two-Layer Feature System
+## 4. The 2026 Calendar Mapping
 
-This is the core architectural decision of the project. Understanding it is key to understanding everything else.
+This is the single most error-prone part of the codebase, so it deserves its own section.
+
+### The Setup
+
+`data/seed/races.json` preserves *original* 2026 numbering: 24 races, with `round: 4` (Bahrain) and `round: 5` (Saudi Arabian) marked `cancelled: true`.
+
+### The Problem
+
+**Both FastF1 AND Jolpica/Ergast omit cancelled races from their numbering.** Their 2026 calendars are 22 races, not 24. So:
+
+| Race | Internal round | FastF1/Jolpica round |
+|------|---------------|----------------------|
+| Australia | 1 | 1 |
+| China | 2 | 2 |
+| Japan | 3 | 3 |
+| Bahrain | 4 (cancelled) | — |
+| Saudi | 5 (cancelled) | — |
+| Miami | 6 | 4 |
+| Canada | 7 | 5 |
+| Monaco | 8 | 6 |
+| ... | ... | ... |
+
+### The Fix
+
+`config/settings.py::fastf1_round(internal_round, year)` returns the external round number. It subtracts the count of cancelled rounds *strictly before* the target.
+
+```python
+def fastf1_round(internal_round: int, year: int = CURRENT_SEASON) -> int:
+    if year != 2026:
+        return internal_round
+    skipped = sum(1 for r in CANCELLED_ROUNDS_2026 if r < internal_round)
+    return internal_round - skipped
+```
+
+### Where it's used
+
+Mandatory at every external API boundary:
+- **FastF1:** `01_download_data.py`, `02_build_laps.py`, `06_run_predictions.py`, `12_count_overtakes.py`, `11_race_deep_dive.py`, etc.
+- **Jolpica:** `01_download_data.py::download_jolpica_round()`. The internal round is used for the file path (`data/raw/jolpica/year2026/round6/`) but the URL uses the translated round (`2026/4/results.json`).
+
+### Why we keep internal numbering everywhere else
+
+1. **Consistency with the seed `races.json`** — original 2026 schedule preservation.
+2. **Logging legibility** — humans recognize "Miami" as round 6, not round 4.
+3. **Future-proofing** — if F1 retroactively reinstates a round, the schedule entries don't shift.
+4. **Audit trail** — file paths preserve which race the data is *for*, regardless of API quirks.
+
+The cost: every external API boundary needs the translation. Skipping it leads to:
+- FastF1 silently loading the wrong race (e.g. requesting `(2026, 6, 'Race')` returns Monaco, not Miami)
+- Jolpica returning empty `Races: []` (their round 6 hasn't run yet — only 4 races in their numbering)
+
+---
+
+## 5. The Two-Layer Feature System
+
+The core architectural decision. Understanding this is key to understanding everything downstream.
 
 ### The Problem
 
 We have two very different data sources:
-1. **Historical data (Jolpica):** Available for every race 2020-2025 (~2,600 rows). Always available at prediction time.
-2. **FP telemetry (FastF1):** Only available for ~160 of those rows in training. Available at prediction time if we run the pipeline after FP.
 
-A model trained only on FP telemetry has just ~160 training samples — not enough.
-A model trained only on historical data misses the crucial "how fast is the car THIS weekend" signal.
+1. **Historical (Jolpica):** Available for every race 2020-2026. Always present at prediction time. Total: ~2,679 rows in training.
+2. **FP telemetry (FastF1):** Only available for ~160 of those rows in training (most pre-2023 races don't have parsable FP telemetry in our processing pipeline). Available at prediction time IF we run after FP sessions.
 
-### The Solution: Two-Layer Merge
+A model trained only on FP telemetry has ~160 training samples — not enough.
+A model trained only on historicals misses the "how fast is the car *this weekend*" signal.
 
-**Layer 1 — Jolpica Priors (always available, 91 features):**
-- Rolling qualifying averages (last 1, 3, 5 races)
-- Rolling race finishing averages
-- Rolling points scored
-- Season averages and medians
-- Circuit-specific experience (how does this driver do at THIS track?)
-- Constructor performance trends
-- Teammate delta (gap to teammate)
-- DNF rates (overall, mechanical, collision, driver error — all on 5-race rolling windows)
-- Recent form: wins, podiums, points rate over last 5 races
-- Form trend (improving or declining)
-- Track features (9 dimensions from track_classifications.py)
-- Team/driver skill ratings (strategy, tyre management, overtaking, etc.)
-- Season progress (early vs. late season dynamics)
+### The Solution: Two Layers, One Merged Dataset
 
-**Layer 2 — FP Telemetry (sparse, 40+ features):**
-- Average, best, median lap times
-- Best 3/5/10 lap averages
-- Consistency (standard deviation, coefficient of variation)
-- Degradation rate (linear regression of lap times across longest stint)
-- Long-run pace (average over stints >= 5 laps)
-- Short-run pace (best of first 3 laps)
-- Sector-level best and average times (3 sectors)
-- **Compound-specific features (Tier 2):** soft_best_lap, soft_avg_lap, medium_long_run_avg, hard_long_run_avg, medium_degradation, hard_degradation — separates qualifying sim pace (soft) from race sim pace (medium/hard)
-- **Relative pace normalization (Tier 2):** pace_delta_to_fastest, pace_delta_to_median, avg_pace_delta_to_median, race_pace_delta_to_median, sector_N_delta_to_fastest, long_run_delta_to_median — these transfer across circuits (a 0.5s advantage means the same at Monaco and Monza)
+#### Layer 1 — Jolpica Priors (always populated, ~91 columns)
 
-**Why XGBoost handles this perfectly:**
-XGBoost's `tree_method="hist"` handles NaN (missing values) natively. When an FP feature is NaN (no FP data for that row), XGBoost learns a default split direction. This means:
-- In training on 2020-2024 rows without FP data, XGBoost relies on Jolpica priors
-- When FP data IS present, XGBoost can use it to refine predictions
-- No imputation needed, no two separate models needed
+Rolling stats with `.shift(1)` to prevent leakage:
+- **Driver rolling avg:** quali_last, quali_roll_3, quali_roll_5 (per-driver)
+- **Race rolling avg:** roll_finishpos_3, roll_finishpos_5
+- **Points rolling:** roll_points_3, roll_points_5
+- **Sim-weighted rolling:** sim_weighted_quali_3/5, sim_weighted_finishpos_3/5, sim_weighted_points_3/5 (track-similarity weighted; recomputed per target circuit at predict time — see §8)
+- **Constructor stats:** constructor_quali_last, constructor_roll_quali_3/5, constructor_season_avg
+- **Teammate delta:** team_delta_last, team_delta_roll_3/5
+- **Circuit experience:** driver_circuit_exp, driver_circuit_roll_3, constructor_circuit_exp (recomputed per target circuit at predict time — see §8)
+- **DNF rates:** roll_dnf_rate_5, roll_mech_dnf_rate_5_driver, roll_mech_dnf_rate_5_constructor, roll_collision_dnf_rate_5_driver, roll_drivererror_dnf_rate_5_driver
+- **Form trend:** form_trend, hot_streak indicators
+- **Track features (9D):** is_street, overtaking_difficulty, avg_corner_speed, straight_line_importance, downforce_level, turn1_incident_risk, safety_car_probability, track_evolution, grip_level
+- **Skill ratings:** tyre_management, wet_weather, overtaking, team_strategy (manual from `team_driver_ratings.py`)
+- **Race-model only:** is_pole_position, is_front_row, is_top10_quali, grid_advantage (depend on `quali_position` — known at race-prediction time)
 
-**Engineered Cross-Layer Features:**
-- `prior_vs_fp_rank`: Gap between Jolpica prior qualifying prediction and FP pace rank. If a driver's historical data says "P5" but FP pace says "P2", that's a strong signal of improvement.
-- `soft_medium_gap`, `medium_hard_gap`, `soft_vs_overall_best`: Compound-based interaction features that capture qualifying vs race pace tradeoffs.
+Built in `pipeline/03b_build_jolpica_features.py`.
 
-### Why Shift(1) Matters
+#### Layer 2 — FP Telemetry (sparse, 40+ columns)
+
+- **Pace:** avg_lap_time, best_lap_time, median_lap_time, best_3_lap_avg, best_5_lap_avg, best_10_lap_avg, p50_to_p95_avg
+- **Consistency:** lap_time_std, lap_time_variance, coefficient of variation
+- **Degradation:** degradation_rate (linear regression slope across longest stint)
+- **Long run / short run:** long_run_avg, long_run_rank, short_run_best
+- **Sectors:** avg_sector_{1,2,3}, best_sector_{1,2,3}
+- **Compound-specific:** soft_best_lap, soft_avg_lap, medium_long_run_avg, hard_long_run_avg, medium_degradation, hard_degradation — separates qualifying-sim pace (soft) from race-sim pace (medium/hard)
+- **Pace deltas:** pace_delta_to_fastest, pace_delta_to_median, race_pace_delta_to_median, sector_N_delta_to_fastest, long_run_delta_to_median — **circuit-portable** features (a 0.5s gap means the same at Monaco and Monza)
+
+Built in `pipeline/03_extract_features.py`. Features extracted **only** from `all_laps_fp*.parquet`. Sprint qualifying laps are saved separately (`all_laps_sprint_qualifying.parquet`) and feed only the Race Deep Dive page (`10_fp_analysis.py`), not model training.
+
+#### Engineered cross-layer features
+
+In `pipeline/feature_engineering.py`, applied at predict time:
+- `prior_vs_fp_rank`: Gap between Jolpica prior quali rank and FP pace rank. If history says "P5" but FP says "P2", that's a strong signal of weekend-specific improvement.
+- `soft_medium_gap`, `medium_hard_gap`, `soft_vs_overall_best`: Compound interaction features capturing quali-vs-race tradeoffs.
+
+### Why XGBoost Handles This Perfectly
+
+XGBoost's `tree_method="hist"` handles NaN natively. When a Layer-2 feature is NaN (no FP data for that historical row), XGBoost learns a default split direction. So:
+- During training on 2020-2024 rows without FP data, XGBoost relies on Layer-1 priors.
+- When FP data IS present (some 2024 rows, all 2026 post-FP rows), XGBoost can use it to refine.
+- **No imputation needed. No two separate models needed.**
+
+### Why `.shift(1)` Matters
 
 All rolling features use `.shift(1)` — the current race's result is NOT included in its own features. This prevents data leakage. When computing "driver's rolling 3-race average" for Round 5, we use Rounds 2, 3, 4 (not 3, 4, 5).
 
 ---
 
-## 4. Machine Learning Models
+## 6. Machine Learning Models
 
 ### Why XGBoost?
 
-We tested multiple algorithms (see `05b_experiment_models.py`): XGBoost, LightGBM, Random Forest, Gradient Boosting, ExtraTrees, stacking ensembles, voting ensembles.
+We tested LightGBM, Random Forest, Gradient Boosting, ExtraTrees, stacking ensembles, voting ensembles in `05b_experiment_models.py`. XGBoost won because:
 
-XGBoost won because:
-1. **Native NaN handling** — critical for our two-layer system
-2. **Strong with sparse features** — FP features are sparse (90%+ NaN in training)
-3. **Good regularization** — prevents overfitting on 2,600 rows
+1. **Native NaN handling** — critical for the two-layer system
+2. **Strong with sparse features** — Layer 2 is 90%+ NaN in training
+3. **Good regularization** — prevents overfitting on 2,679 rows
 4. **Fast training** — important for experimentation
 
-### Model Evolution
+### Model Generations
 
-The models have gone through two generations:
+- **V1 baseline:** XGBRegressor with `reg:squarederror`. Treated positions as continuous numbers (P1=1, P22=22). Simple but doesn't capture the nonlinear gap (P1→P2 matters more than P15→P16). Preserved in `models/trained_v1_baseline/` for reference.
+- **V2 (current):** XGBRanker with `rank:pairwise` (LambdaMART). Learns to rank drivers *within each race* correctly. Output is relevance scores; positions come from ranking.
 
-**V1 (Baseline):** XGBRegressor with `reg:squarederror` objective. Treated positions as continuous numbers (P1=1, P22=22). Simple and effective but doesn't capture the fact that the gap between P1 and P2 matters more than P15 and P16.
+### The Five Models
 
-**V2 (Current — Tier 2):** XGBRanker with `rank:pairwise` (LambdaMART) objective. Learns to rank drivers *within each race* correctly rather than predicting exact position numbers. This better handles the nonlinear nature of positions and fantasy scoring. Old V1 models are preserved in `models/trained_v1_baseline/` for reference.
+#### Qualifying Model — `quali_model.json`
 
-### Qualifying Model (V2 — XGBRanker)
-
-```
+```python
 XGBRanker(n_estimators=1200, learning_rate=0.025, max_depth=3,
           objective="rank:pairwise", subsample=0.85, colsample_bytree=0.85)
 ```
 
-- **Target:** Relevance labels derived from qualifying_position (P1 → label 21, P22 → label 0)
-- **Group key:** (season, round) — each race is a ranking group with its own qid
-- **Features:** ~62 (Jolpica priors + track + ratings + FP pace + relative pace features)
-- **Why depth=3?** Qualifying is relatively predictable from historical data. Shallow trees prevent overfitting.
-- **Walk-forward results:** MAE=3.26, Kendall's tau=0.536, Top-3 accuracy=57.3%
+- **Target:** Relevance labels derived from `qualifying_position` (P1 → label 21, P22 → label 0)
+- **Group key:** `(season, round)` — each race is one ranking group
+- **Features:** 85 (Layer-1 priors + track features + skill ratings + Layer-2 pace + relative pace deltas)
+- **Why depth=3:** Qualifying is relatively predictable from historical data. Shallow trees prevent overfitting.
 
-### Race Model (V2 — XGBRanker)
+#### Race Model — `race_model.json` (post-quali phase)
 
-```
+```python
 XGBRanker(n_estimators=650, learning_rate=0.03, max_depth=5,
           objective="rank:pairwise", subsample=0.85, colsample_bytree=0.85)
 ```
 
-- **Target:** Relevance labels derived from finish_position (clean finishers only)
-- **Group key:** (season, round) — per-group weights (2026 samples weighted 2.5x)
-- **Features:** ~85 (all quali features + grid position + race-specific + compound features)
-- **Key input:** Predicted qualifying position feeds in as a feature
-- **Why depth=5?** Races have more complex interactions than qualifying: safety cars, strategy, tyre degradation, traffic.
-- **Walk-forward results:** MAE=2.20, Kendall's tau=0.647, Top-3 accuracy=67.2%
-- **2026-specific fold:** MAE=1.586, tau=0.741, Top-3=83.3%
+- **Target:** Relevance labels from `finish_position` (clean finishers only — DNFs handled separately)
+- **Group key:** `(season, round)`. Per-group sample weight: 2.5x for 2026 rows.
+- **Features:** 101 (all quali features + grid_advantage + race-specific + compound features). Trained with **actual** `quali_position` as a feature.
+- **Why depth=5:** Races have more complex interactions than qualifying — safety cars, strategy, tyre degradation, traffic.
+- **Used:** When actual qualifying data is available (post-quali phase).
 
-### Why Ranking Objective Over Regression?
+#### Race-FP Model — `race_model_fp.json` (post-FP phase, before quali)
 
-The ranking objective (`rank:pairwise`) uses LambdaMART, which optimizes for *correct ordering* rather than exact position numbers. Benefits:
-- Naturally handles the nonlinear gap between positions (P1→P2 matters more than P15→P16)
-- Groups by race so the model learns relative performance within each event
-- Output is relevance scores (higher = better) which are ranked to produce positions
-- Better aligns with the downstream fantasy scoring where rank order determines points
+Same hyperparameters as the race model, **but trained on walk-forward predicted `quali_position`**: each season's quali is predicted by a quali model trained on earlier seasons, and that predicted value is fed into the race model during training.
 
-### Sprint Model (V2 — XGBRanker)
+- **Why two race models?** Eliminates train/inference distribution shift. The original race model was trained on clean actual quali but at post-FP inference time, we feed it noisy *predicted* quali — that's a covariate shift the model wasn't optimized for. The FP variant is trained on the same noisy predicted-quali distribution it sees at inference time.
+- **Used:** Post-FP phase, before qualifying happens.
+- **Switching logic:** `06_run_predictions.py::_load_actual_quali()` detects whether actual quali exists. If yes → race_model.json. If no → race_model_fp.json.
 
-```
+#### Sprint Model — `sprint_model.json`
+
+```python
 XGBRanker(n_estimators=400, learning_rate=0.035, max_depth=4,
           objective="rank:pairwise", reg_lambda=1.5, subsample=0.80, colsample_bytree=0.80)
 ```
 
-- **Target:** Relevance labels derived from sprint finishing position
-- **Training data:** 501 sprint-only rows (2021-2026) — sprints have different dynamics than full races
-- **Key insight:** For sprint weekends, the deadline is sprint race start. At that point, sprint qualifying (Shootout) has already happened, giving us actual sprint grid positions — a hugely informative signal, just like how regular qualifying feeds the race model.
-- **Sprint grid as #1 feature:** `sprint_grid` (importance=0.032) and `sprint_grid_advantage` (#2) are the top features. Derived features include `sprint_is_front_row`, `sprint_is_top3`, `sprint_is_top10`, and `quali_to_sprint_grid_delta` (how a driver's sprint qualifying compared to regular qualifying).
-- **Lighter regularization:** Fewer trees (400 vs 650), shallower depth (4 vs 5), higher learning rate (0.035 vs 0.03) — smaller dataset needs less complexity
-- **Walk-forward results:** MAE=3.371, Kendall's tau=0.542, Top-3 accuracy=66.7%
-- **At prediction time:** Loads actual sprint qualifying results from normalized CSV or FastF1 session data. Because Ergast doesn't expose Sprint Qualifying results (Position/Q1/Q2/Q3 are NaN), the loader ranks drivers by their fastest lap in the Sprint Qualifying session as a fallback. Falls back to predicted qualifying positions if sprint qualifying hasn't happened yet.
-- **Fallback:** If sprint model unavailable, MC simulation falls back to race model raw scores
-- **MC integration:** Sprint raw z-scores used with team-correlated noise at 0.8x race noise base
+- **Training data:** 501 sprint-only rows (2021-2026). Sprints have different dynamics than full races.
+- **Top feature:** `sprint_grid` (importance ~0.032). Derived: `sprint_grid_advantage`, `sprint_is_front_row`, `sprint_is_top3`, `sprint_is_top10`, `quali_to_sprint_grid_delta`.
+- **Why lighter regularization:** Smaller dataset (501 rows vs 2,679) — fewer trees, shallower depth, higher learning rate.
+- **At prediction time:** Loads actual sprint qualifying results from normalized CSV or FastF1 session. **Critical fallback:** Ergast doesn't expose Sprint Qualifying results (Position/Q1/Q2/Q3 are NaN), so the loader ranks drivers by their fastest SQ lap as the canonical fallback. Falls back to predicted qualifying if sprint qualifying hasn't happened yet.
 
-### FP Signal Model (ExtraTrees)
+#### FP Signal Model — `fp_signal_model.pkl`
 
-```
+```python
 ExtraTreesRegressor(n_estimators=500, max_depth=6, random_state=42)
 ```
 
-- **Purpose:** NOT for direct predictions. Used for confidence scoring.
+- **Purpose:** NOT for direct predictions. Used **only** for confidence scoring.
 - **How:** Measures how much FP pace data alone can predict race outcomes. When this model agrees with the XGBoost models, confidence is higher.
-- **Why ExtraTrees?** More robust to noise than XGBoost for this smaller dataset. We only have ~160 rows with FP features.
+- **Why ExtraTrees:** More robust to noise on the smaller FP-only dataset.
 
 ### Walk-Forward Validation
 
-**Why not standard cross-validation?**
-F1 data is time-series. Using 2024 data to predict 2022 would be cheating — regulations change, teams evolve, drivers switch. Walk-forward respects this:
+F1 data is time-series — using 2024 to predict 2022 would be cheating (regulations change, teams evolve, drivers switch). Walk-forward respects this:
 
 ```
 Fold 1: Train [2020-2021] → Test 2022
 Fold 2: Train [2020-2022] → Test 2023
 Fold 3: Train [2020-2023] → Test 2024
 Fold 4: Train [2020-2024] → Test 2025
-Fold 5: Train [2020-2025] → Test 2026 (R1-R3)
+Fold 5: Train [2020-2025] → Test 2026
 ```
 
-**Metrics (V2 Tier 2 models):**
-- **Qualifying:** MAE=3.26, Kendall's tau=0.536, Top-3 accuracy=57.3%
-- **Race:** MAE=2.20, Kendall's tau=0.647, Top-3 accuracy=67.2%
-- **2026-only fold:** Race MAE=1.586, tau=0.741, Top-3=83.3%
-
-**Backtest results (2026 R1 Australian GP):**
-- Race MAE=2.71, Kendall's tau=0.853, Top-3=3/3 (predicted RUS, ANT, LEC correctly)
-
-**Backtest results (2026 R3 Japanese GP):**
-- Race MAE=2.55, Kendall's tau=0.695, Top-3=1/3 (predicted ANT correct)
-
-For the ranking models, we report Kendall's tau (rank correlation) and top-3 accuracy alongside MAE, since ranking quality matters more than exact position numbers for fantasy scoring.
+For the race-FP model specifically, the walk-forward also includes a *nested* walk-forward to generate the predicted-quali feature for each season.
 
 ### Sample Weighting
 
-2026 has new regulations (ground effect changes, new tyres). Data from 2020-2025 under old regulations is still useful (driver skill, track characteristics persist) but less relevant. We weight 2026 samples 2.5x to ensure the models prioritize current-regulation patterns.
-
-For XGBRanker, sample weights must be per-group (one weight per race), not per-sample. All drivers in the same race share the same weight based on the season's regulation relevance.
+2026 has new regulations (ground effect changes, new tyres, new aero). Data from 2020-2025 under old regulations is still useful (driver skill, track characteristics persist) but less relevant. We weight 2026 rows **2.5x** in training (`config/settings.py::REGULATION_WEIGHT_MULTIPLIER`). For XGBRanker, weights must be per-group (one weight per race, applied to all 22 driver rows in that race).
 
 ---
 
-## 5. Fantasy Scoring Engine
+## 7. Phase-Aware Inference
 
-### Why Not Just Predict Positions?
+`pipeline/06_run_predictions.py` is the entry point for prediction. Its phase awareness is what lets the pipeline serve `pre_fp_predict`, `post_fp`, and `post_quali` from the same script.
 
-F1 Fantasy scoring is **highly nonlinear**:
-- P1 = 25pts, P2 = 18pts (7-point gap)
-- P10 = 1pt, P11 = 0pts (1-point cliff)
-- P20 with 5 overtakes = 5pts (position is irrelevant, overtakes carry the value)
+### Detection
 
-This means small position changes have vastly different point impacts depending on WHERE in the grid they happen. A model that's "off by 2 positions" performs very differently if it predicts P1 vs P3 (7pts off) or P10 vs P12 (1pt off).
-
-### How Fantasy Points Are Calculated
-
+```python
+actual_quali = _load_actual_quali(year, round_num, abbrev_to_jolpica)
+phase = "post-quali" if actual_quali else "post-FP"
+race_model_path = "race_model.json" if actual_quali else "race_model_fp.json"
 ```
-pipeline/07_calculate_fantasy.py
+
+`_load_actual_quali()` checks two sources in order:
+1. Normalized Jolpica CSV: `data/processed/jolpica/normalized/{year}/qualifying_results.csv`
+2. FastF1 qualifying session (loaded with telemetry off for speed)
+
+### Pre-FP path
+
+If neither FP features nor actual quali exist, the script:
+1. Loads `data/processed/features/round{N}/features.parquet` if present (it won't be in pre-FP).
+2. Falls back to "priors only" — Layer-2 columns in the feature DataFrame are all NaN.
+3. Uses `race_model_fp.json` (since no quali exists).
+4. XGBoost handles NaN natively — no failure.
+
+### Post-FP path
+
+1. FP features parquet exists → merged in.
+2. No actual quali → uses `race_model_fp.json`.
+3. Predicted quali is generated first, then fed into the race model.
+
+### Post-quali path
+
+1. FP features exist (almost always — quali only happens after FP3).
+2. Actual quali exists → uses `race_model.json` with real quali positions.
+3. The model is operating in-distribution (trained on actual quali, inferred with actual quali).
+
+### Sprint inference
+
+When `is_sprint_weekend == True`:
+- `predicted_sprint_quali_position`: from FastF1 SQ session (with fastest-lap fallback) if SQ has happened, else equal to `predicted_qualifying_position`.
+- `predicted_sprint_position`: from `sprint_model.json` if actual SQ grid is available, else from a fallback path that uses the sprint model with predicted quali as proxy.
+
+---
+
+## 8. Predict-Time Feature Recomputation
+
+A subtle but important detail: when generating predictions for an upcoming round, the "stub row" we feed the model is built from each driver's *most recent completed race* (their latest priors). But some features need to be **recomputed for the target circuit** before scoring.
+
+### `_recompute_sim_features` (track-similarity weighted)
+
+The Layer-1 features `sim_weighted_quali_3`, `sim_weighted_quali_5`, `sim_weighted_finishpos_3`, etc. are computed during feature-build (`03b`) by weighting each driver's recent races by similarity to *that race's circuit*. For a stub row whose latest race was Miami, those values are weighted toward Miami-similar tracks.
+
+But for predicting Canada, we want them weighted toward *Canada-similar tracks*. So `_recompute_sim_features(priors_df, target_circuit)`:
+1. Loads `all_model_rows.parquet`.
+2. For each driver, takes their last 3 (and 5) races.
+3. Computes `weight = similarity(target_circuit, race_circuit)²` for each.
+4. Recomputes `sim_weighted_*` as the weighted average.
+
+### `_recompute_circuit_features` (circuit-specific history)
+
+Added recently to fix a bug where `driver_circuit_exp`, `driver_circuit_roll_3`, and `constructor_circuit_exp` were inheriting their values from the most recent race. For a Canada prediction, VER's `driver_circuit_exp` was showing 9.5 (his Miami quali avg) instead of 1.5 (his actual Canada quali avg across 4 starts).
+
+The fix:
+1. Filters `all_model_rows.parquet` to rows where `circuit_id == target_circuit`.
+2. For each driver in the prediction set, computes:
+   - `driver_circuit_exp` = expanding mean of their prior quali_positions at this circuit
+   - `driver_circuit_roll_3` = rolling-3 mean of same
+3. For each constructor, similarly computes `constructor_circuit_exp`.
+4. Drivers/constructors with no history at the target circuit get NaN (rather than inheriting an unrelated track's value, which was actively misleading).
+
+### Why this matters
+
+Both recomputations live in `06_run_predictions.py` and are called immediately after building the prior stub:
+
+```python
+priors_df = build_live_priors(round_num, year)
+if target_circuit and target_circuit != "unknown":
+    priors_df = _recompute_sim_features(priors_df, target_circuit)
+    priors_df = _recompute_circuit_features(priors_df, target_circuit)
 ```
+
+Without these, the model is fed misleading "history at this circuit" features. With them, the model gets accurate per-circuit signals — every driver at every circuit. The biggest impact is mid-pack drivers where a circuit is genuinely informative; for top runners, rolling-3 form often dominates the model's learned weights regardless.
+
+### Note on constructors not changing the rank
+
+The fix corrects feature inputs but does NOT change the model's *learned weights*. If the trained model heavily weights rolling-3 form vs circuit history, that ratio stays the same — we're just feeding it correct circuit-history values. To shift the ratio, we'd retrain.
+
+---
+
+## 9. Fantasy Scoring Engine
+
+### Why Predicting Positions Isn't Enough
+
+F1 Fantasy 2026 scoring is **highly nonlinear**:
+- P1 = 25 pts, P2 = 18 pts (7-point gap)
+- P10 = 1 pt, P11 = 0 pts (1-point cliff)
+- P20 with 5 overtakes = 5 pts (position is irrelevant, overtakes carry the value)
+
+Small position errors have vastly different impact depending on where they happen. A model "off by 2" performs very differently between P1↔P3 (7 pts off) and P10↔P12 (1 pt off).
+
+### Driver Scoring (`pipeline/07_calculate_fantasy.py`)
 
 For each driver:
-1. **Qualifying points:** Lookup table (P1=10, P2=9, ..., P10=1, P11+=0)
-2. **Race points:** Lookup table (P1=25, P2=18, ..., P10=1, P11+=0)
-3. **Positions gained/lost:** (grid_position - finish_position) × 1pt
-4. **Overtakes:** estimated_overtakes × 1pt
-5. **Fastest lap:** probability × 10pts (F1 Fantasy bonus, separate from championship FL which was removed in 2026)
-6. **Driver of the Day:** probability × 10pts
-7. **DNF risk:** probability × (-20pts)
-8. **Sprint (if applicable):** separate scoring (P1=8, ..., P8=1; FL=5pts; DNF=-10pts) with sprint-specific overtake estimation (~50% of race bases) and sprint-position-based FL probability
+1. **Qualifying points:** Lookup table P1=10, P2=9, ..., P10=1, P11+=0; DSQ/no time = -5
+2. **Race points:** P1=25, P2=18, P3=15, P4=12, P5=10, P6=8, P7=6, P8=4, P9=2, P10=1, P11+=0
+3. **Positions gained/lost:** `(grid_position - finish_position) × 1pt`
+4. **Overtakes:** `estimated_overtakes × 1pt`
+5. **Fastest lap probability:** `prob × 10pts` (F1 Fantasy bonus, separate from championship FL which was removed in 2026)
+6. **DOTD probability:** `prob × 10pts`
+7. **DNF risk:** `prob × (-20pts)`
+8. **Sprint scoring** (if sprint weekend): see §6 Sprint Model. Sprint DNF = -10 pts (vs -20 main race in 2026).
 
-For each constructor:
-1. **Sum both drivers' qualifying + race points** (excluding DOTD — per official rules)
-2. **Qualifying bonus:** Based on which Q sessions both drivers reach (Both Q3=+10, One Q3=+5, Both Q2=+3, One Q2=+1, Neither=-1)
-3. **Expected pit stop points:** Analytically computed from team pit stop time priors (normal distribution over scoring brackets: <2.0s=20pts, 2.0-2.2s=10pts, 2.2-2.5s=5pts, 2.5-3.0s=2pts) plus fastest-stop bonus (1/N_teams chance × 5pts)
-4. **DNF impact:** Expected points lost from both drivers' DNF probabilities (shown in constructor card breakdown)
+### Constructor Scoring
 
-### Why DOTD Is Excluded from Constructors
+1. **Sum both drivers' qualifying + race points**, **excluding DOTD** (per official 2026 rules)
+2. **Qualifying teamwork bonus:** Both Q3 = +10, One Q3 = +5, Both Q2 = +3, One Q2 = +1, Neither = -1
+3. **Expected pit stop points:** Analytically computed from team pit-stop time priors using a normal distribution over scoring brackets:
+   - <2.0s: +20 pts
+   - 2.0-2.19s: +10 pts
+   - 2.2-2.49s: +5 pts
+   - 2.5-2.99s: +2 pts
+   - 3.0s+: 0 pts
+   - World record (<1.80s): +15 (rare)
+   - Fastest stop bonus: +5 pts (1/N_teams probability)
+4. **DNF impact:** Expected points lost from both drivers' DNF probabilities
 
-Official F1 Fantasy 2026 rules explicitly exclude Driver of the Day bonus from constructor point totals. In deterministic scoring (script 07), the expected DOTD contribution is subtracted from each driver's points before summing for the constructor. In Monte Carlo simulation (script 08), the actual DOTD winner index is tracked per-iteration (`all_dotd_idx`), and exactly 10 points are subtracted from whichever driver won DOTD in that simulation — giving precise per-iteration constructor scores.
+Constructor scoring uses **base driver scores only** — never the boosted/multiplied values from chip plays. Chip multipliers are a frontend/optimizer concept; the underlying expected_points is the constructor's input.
+
+### Why DOTD is Excluded from Constructors
+
+Official 2026 rules. In deterministic scoring (script 07), the expected DOTD contribution is subtracted from each driver's points before summing for the constructor. In MC simulation (script 08), the actual DOTD winner index is tracked per-iteration and exactly 10 points are subtracted from whichever driver won DOTD in that simulation — giving precise per-iteration constructor scores.
 
 ### Fastest Lap Probability
 
-Weighted by predicted finishing position:
-- P1-P3: Higher probability (they're more likely to pit for fresh tyres at the end)
-- P4-P10: Medium probability
-- P11+: Low probability
+Weighted by predicted finishing position (P1-P3 highest — they pit for fresh tyres at the end; P11+ lowest).
 
 ### DOTD Probability
 
-Currently uses a simple estimate based on positions gained and finishing position. Drivers who gain the most positions and finish well tend to win DOTD.
+Estimate based on positions gained and finishing position. Drivers gaining the most positions while finishing well tend to win DOTD.
 
 ---
 
-## 6. Monte Carlo Simulation
+## 10. Monte Carlo Simulation
 
 ### Why Monte Carlo?
 
-**The fundamental problem:** `E[fantasy_points(position)] ≠ fantasy_points(E[position])`
+`E[fantasy_points(position)] ≠ fantasy_points(E[position])`.
 
-Example: If a driver has a 50% chance of P1 and 50% chance of P11:
-- Expected position = P6
-- Fantasy points at P6 = 8pts
-- But actual expected points = 0.5 × 25 + 0.5 × 0 = 12.5pts
+Example: 50% chance of P1, 50% chance of P11 → expected position = P6, fantasy points at P6 = 8. Actual expected points = 0.5×25 + 0.5×0 = 12.5. The deterministic scoring underestimates the upside.
 
-Monte Carlo captures this by simulating thousands of possible outcomes.
-
-### How It Works
-
-```
-pipeline/08_monte_carlo_fantasy.py
-```
+### Simulation Loop (`pipeline/08_monte_carlo_fantasy.py`)
 
 For each of 10,000 simulations:
-1. **Sample qualifying positions:** Z-score normalize raw XGBRanker scores (preserving performance gaps), add team-correlated + individual Gaussian noise, re-rank
-2. **Sample DNFs:** Two-stage correlated sampling — multi-car incidents (2% base) + team-correlated mechanical failures (30% teammate correlation, 3x elevated probability)
-3. **Sample race positions:** Same gap-preserving approach as qualifying, with separate team shocks. DNF drivers assigned last position.
-4. **Sample overtakes:** Driver-specific history when available (blended with grid-bucket estimates), otherwise grid-bucket base + excess gains with stochastic variation
-5. **Sample fastest lap:** Weighted random selection based on finishing position
-6. **Sample DOTD:** Weighted random selection (position + positions gained)
-7. **Sample pit stops (constructors):** Per-team stop times from N(team_mean, team_std), scored per bracket, fastest-stop bonus awarded
-8. **Calculate full fantasy points** for this simulation
-9. After 10,000 runs, compute percentiles: P5, P25, P50, P75, P95
+
+1. **Sample qualifying positions:** Z-score normalize raw XGBRanker scores (preserving model gaps), add team-correlated + individual Gaussian noise, re-rank.
+2. **Sample DNFs:** Two-stage correlated sampling — multi-car incidents (~2% base) + team-correlated mechanical failures (30% teammate correlation, 3x elevated probability when one teammate has already DNF'd).
+3. **Sample race positions:** Same gap-preserving approach as quali, with separate team shocks. DNF drivers assigned last position.
+4. **Sample overtakes:** Driver-specific history when available (blended with grid-bucket estimates), otherwise grid-bucket base + excess gains, with stochastic variation.
+5. **Sample fastest lap:** Weighted random selection by finishing position.
+6. **Sample DOTD:** Weighted random selection (position + positions gained).
+7. **Sample pit stops (constructors):** Per-team stop times from `N(team_mean, team_std)`, scored per bracket; fastest-stop bonus awarded.
+8. **Compute full fantasy points** for this simulation.
+
+After 10,000 runs, compute percentiles: P5, P25, P50, P75, P95.
 
 ### Noise Model
 
-Raw XGBRanker scores are z-score normalized (mean=0, std=1) to preserve the performance gaps the model predicted. Unlike the old quantile transform approach (which forced equal spacing), z-scoring means tightly-bunched midfield drivers swap positions frequently while a dominant leader rarely gets upset.
+Z-score normalization of raw XGBRanker scores preserves the performance gaps the model predicted. Tightly-bunched midfield drivers swap positions frequently; a dominant leader rarely gets upset. (Old quantile-transform approach forced equal spacing — replaced.)
 
-**Teammate correlation (alpha=0.35):** Each simulation draws a shared team shock per constructor for qualifying and separately for race. ~35% of position variance is team-level (car setup, reliability), ~65% individual (driver skill, luck). This produces realistic team outcomes instead of independent sampling.
+**Teammate correlation (alpha=0.35):** Each simulation draws a shared team shock per constructor for quali and separately for race. ~35% of position variance is team-level (car setup, reliability), ~65% individual (driver skill, luck).
 
-### Calibration (From Actual Data)
+### Calibration (from actual data)
 
-All noise parameters are calibrated from R1-R3 actual results:
+Auto-loaded from `data/seed/mc_calibration.json` (output of `calibrate_confidence.py`):
 
 | Parameter | Value | Source |
 |-----------|-------|--------|
-| Qualifying noise base | 0.3 (z-score units) | Calibrated for ~1-2 position swaps between adjacent drivers |
-| Race noise base | 0.3 (z-score units) | Same scale; z-normalization preserves actual model gaps |
-| Teammate correlation alpha | 0.35 | ~35% shared team variance from historical teammate correlation |
-| Confidence scaling | 1 + 1.5 × (100 - conf) / 50 | Higher confidence → tighter distribution |
+| Quali noise base | ~0.3 (z-score units) | Calibrated per round |
+| Race noise base | ~0.3 | Same |
+| Teammate correlation alpha | 0.35 | Historical teammate correlation |
+| Confidence scaling | `1 + 1.5 × (100 - conf) / 50` | Lower confidence → wider distribution |
 | DNF rate | Per-driver blended | Rolling 5-race historical + current season, dynamically weighted |
 | Team DNF correlation | 0.30 | If one teammate DNFs, other has elevated risk |
 | Overtake CV | 0.35 | Coefficient of variation from OpenF1 data |
 
-### Sprint Weekend Adjustments
+### Sprint Adjustments
+
 - Sprint noise = 80% of race noise (shorter race, less chaos)
 - Sprint DNF = 50% of race DNF (fewer laps = less attrition)
-- Sprint overtakes = 45% of race overtakes (fewer laps, fewer chances)
+- Sprint overtakes = ~45% of race overtakes (fewer laps, fewer chances)
 
-### Output: What Users See
+### Output
 
-On driver cards: **MC 90% CI: -10 — 53 pts**
-This means: "In 90% of our 10,000 simulations, this driver scored between -10 and 53 fantasy points."
+Per driver: P5/P25/P50/P75/P95, prob_top_3, prob_top_5, prob_top_10, mean, std, mc_overtakes_mean, mc_quali_pts_mean, mc_race_pts_mean, mc_dnf_rate.
+Per constructor: P5/P25/P50/P75/P95 with per-iteration DOTD subtraction and pit-stop sampling.
 
-The spread indicates risk. A narrow CI = predictable outcome. A wide CI = high variance (could score big or flop).
+On the website: "MC 90% CI: -10 — 53 pts" means "in 90% of our 10K simulations, this driver scored between -10 and 53 fantasy points." Wide CI = high variance, narrow CI = predictable.
 
 ---
 
-## 7. Overtake Estimation
+## 11. Overtake Estimation
 
-### Why Overtakes Matter
+Each overtake = +1 fantasy point. A midfield driver gaining 5 positions and making 10 overtakes can outscore a frontrunner. Hard to predict.
 
-Each overtake is worth +1 fantasy point. A midfield driver who gains 5 positions and makes 10 overtakes can outscore a frontrunner. This is one of the most impactful and hardest-to-predict components.
-
-### Race Overtakes
+### Race Overtakes Formula
 
 ```
-Estimated overtakes = base_overtakes(grid_position) + max(0, positions_gained)
+estimated_overtakes = base_overtakes(grid_position) + max(0, positions_gained)
 ```
 
-**Base overtakes by grid position (calibrated from R1+R2 actual data):**
+Base overtakes by grid bucket (calibrated from R1-R3 actuals):
 
-| Grid Position | Base Overtakes | Reasoning |
-|---------------|---------------|-----------|
+| Grid | Base | Reasoning |
+|------|------|-----------|
 | P1-P3 | 2-3 | Front runners mostly defend, occasional re-passes |
-| P4-P6 | 3-4 | Some wheel-to-wheel racing |
+| P4-P6 | 3-4 | Some wheel-to-wheel |
 | P7-P12 | 5-7 | Midfield chaos, lots of battles |
 | P13-P22 | 7-10 | Back markers have many cars to pass |
 
-**Why positions_gained is added:** If a driver goes from P15 to P8, they gained 7 positions. Most of those involve overtakes, plus there may be additional overtakes from battles with cars they ultimately finished behind (re-passes, back-and-forth).
+`positions_gained` is added because most position gains involve overtakes, plus there may be additional overtakes from re-passes / back-and-forth battles.
 
 ### Sprint Overtakes
 
-Sprints are ~45% of race distance with fewer overtaking opportunities. A separate `estimate_sprint_overtakes()` function uses reduced base values:
+Sprints are ~45% of race distance. `estimate_sprint_overtakes()` uses reduced base values (~50% of race base) and `sprint_gains = max(0, positions_gained - 1)` to reflect fewer laps to convert position changes.
 
-| Grid Position | Sprint Base | Race Base | Ratio |
-|---------------|------------|-----------|-------|
-| P1-P3 | 1 | 2 | 50% |
-| P4-P6 | 2 | 4 | 50% |
-| P7-P12 | 3 | 6 | 50% |
-| P13-P22 | 4 | 7 | 57% |
+### Detection (post-race)
 
-Sprint gains conversion is also reduced: `sprint_gains = max(0, positions_gained - 1)`, reflecting fewer laps to convert position changes into counted overtakes. This aligns the deterministic scoring (script 07) with the MC simulation's `SPRINT_OVERTAKE_BASE` values.
+Two paths:
+1. **OpenF1** (`13_fetch_openf1_overtakes.py`): Official position tracking with 30s pit-stop window filter. Generally most reliable.
+2. **FastF1 sector method** (`12_count_overtakes.py`): Detects overtakes from sector-by-sector position changes. Less accurate but works when OpenF1 is unavailable.
 
-Sprint fastest lap probability is also calculated independently from the sprint predicted position (not reused from the race).
+Both detected counts are saved for reference. The actual fantasy scoring uses `data/seed/overtakes.csv` if entries exist (manual override for the official F1 Fantasy count, which sometimes differs from auto-detected).
 
 ### Known Limitation
 
-Our R1 prediction for Verstappen was 18 overtakes vs. 13 actual. OpenF1 tends to slightly overcount (pit stop position changes). The official F1 Fantasy count is lower. We haven't found a reliable source for the exact F1 Fantasy overtake numbers — this is a known gap.
-
-### Data Sources for Overtakes
-
-1. **OpenF1 API** (`13_fetch_openf1_overtakes.py`): Official position tracking, filters pit stops with 30s window
-2. **FastF1 sector times** (`12_count_overtakes.py`): Detects overtakes from sector-by-sector position changes. Less accurate but works when OpenF1 is unavailable.
+Auto-detected counts are typically 20-30% higher than F1 Fantasy's official numbers. Until an authoritative source for the F1 Fantasy count exists, manual entry into `overtakes.csv` is the only way to ensure scoring matches the game exactly.
 
 ---
 
-## 8. Risk & Confidence System
+## 12. Risk & Confidence System
 
-### Confidence Score (0-100%)
+### Confidence Score (0-100)
 
-**What it represents:** How much data we have and how much our models agree.
+How much data we have and how much our models agree.
 
-**Components:**
-1. **Data completeness:** Is FP data available? (Big boost: +20-25%)
-2. **Historical data availability:** How many prior races for this driver/track combo?
-3. **Model agreement:** Do the XGBoost model and FP signal model predict similar positions?
+Components (computed in `06_run_predictions.py::calculate_confidence`):
+1. **Data completeness:** FP laps available (+0 to +20), FP sessions count (+0 to +10).
+2. **Prior data richness:** Non-NaN Jolpica priors (+0 to +10).
+3. **Model agreement:** Rank correlation between race XGBoost output and FP signal model output (+0 to +10).
 
-**Typical values:**
-- With FP data: 85-95%
-- Without FP data: 60-75%
-
-**How it's used:**
-- Displayed on driver cards
-- Scales Monte Carlo noise (low confidence → wider uncertainty bands)
-- Factored into optimizer recommendations
+Base 50, maximum 100. Typical: ~85-95% with FP data, ~60-75% without.
 
 ### Risk Rating
 
-**What it represents:** DNF probability based on recent history.
+Based on DNF probability (rolling 5-race DNF rate from Jolpica, blended with current season actuals):
 
-**Calculation:** Rolling 5-race DNF rate from Jolpica data, capped at 25%.
+| Label | DNF probability |
+|-------|-----------------|
+| LOW | ≤ 10% |
+| MEDIUM | 11-25% |
+| HIGH | 26-50% |
+| VERY HIGH | > 50% (rare) |
 
-**Labels:**
-- LOW: ≤ 10% (most reliable drivers)
-- MEDIUM: 11-25% (some reliability concerns)
-- HIGH: 26-50% (significant DNF risk)
-- VERY HIGH: > 50% (rare — e.g., driver with 3+ DNFs in last 5 races)
-
-**How it's used:**
-- Displayed as color-coded badge on driver cards
-- Drives DNF probability in Monte Carlo simulation
-- Factored into expected fantasy points (risk-adjusted scoring)
+Drives the DNF probability used in MC simulation and the deterministic scoring's DNF penalty.
 
 ---
 
-## 9. Price Change Prediction
+## 13. Price Change Prediction
 
 ### How F1 Fantasy Prices Work
 
-F1 Fantasy adjusts player prices after each race based on performance (Points Per Million ratio). The exact algorithm isn't public, but community research has established thresholds.
+F1 Fantasy adjusts prices after each race based on a Points-Per-Million (PPM) ratio. The exact algorithm isn't public; community research established the thresholds we use.
 
-### Our PPM Rating System
+### PPM Computation
 
 ```javascript
 PPM = avg_fantasy_points_last_3_rounds / current_price
 ```
 
-We compute PPM using a rolling window of the last 2 actual scores plus the predicted score for the upcoming race (window of 3). The website's price change bracket display shows exactly how many points are needed this round to reach each threshold.
+We compute PPM using a rolling window of the last 2 actual scores plus the predicted score for the upcoming race (window of 3).
 
-**Thresholds:**
+### Thresholds
 
-| Rating | PPM | Expected Change (A-tier, >$18.5M) | Expected Change (B-tier, ≤$18.5M) |
-|--------|-----|----------------------------------|----------------------------------|
+| Rating | PPM | A-tier (>$18.5M) | B-tier (≤$18.5M) |
+|--------|-----|------------------|------------------|
 | Great | ≥ 1.2 | +$0.3M | +$0.6M |
 | Good | ≥ 0.9 | +$0.1M | +$0.2M |
 | Poor | ≥ 0.6 | -$0.1M | -$0.2M |
 | Terrible | < 0.6 | -$0.3M | -$0.6M |
 
-**Why two tiers?** Expensive drivers (A-tier, >$18.5M) have smaller price swings. Budget drivers (B-tier) swing more aggressively. This matches observed F1 Fantasy behavior.
+**Why two tiers:** Expensive drivers swing in smaller dollar amounts. Budget drivers swing more aggressively.
 
-**Data sources:** Price change calculations use official F1 Fantasy points (from `data/seed/official_fantasy_points.json`) when available, falling back to pipeline-calculated actuals. The export pipeline auto-syncs official points to the web directory.
+### Data sources
 
-### Application in Optimizer
+Price change calculations use official F1 Fantasy points (from `data/seed/official_fantasy_points.json`) when available, falling back to pipeline-calculated actuals. The export pipeline auto-syncs official points to the web directory.
 
-The "Budget Builder" strategy uses predicted price changes to recommend lineups that maximize asset appreciation. This is useful for players who want to build budget for later in the season.
+### Application in optimizer
+
+The "Budget Builder" strategy uses predicted price changes to recommend lineups maximizing asset appreciation.
 
 ---
 
-## 10. Lineup Optimizer
+## 14. Lineup Optimizer
 
 ### The Constraint
 
-F1 Fantasy lineup: 5 drivers + 2 constructors, total cost ≤ budget cap (default $100M).
+5 drivers + 2 constructors, total cost ≤ budget cap (default $100M).
 
-### Brute-Force Approach
+### Search
 
-**Why brute force?** With 22 drivers and 11 constructors:
-- C(22, 5) = 26,334 driver combinations
-- C(11, 2) = 55 constructor combinations
-- Total: 26,334 × 55 = **1,448,370 combinations**
+C(22, 5) × C(11, 2) = 26,334 × 55 = **1,448,370** combinations. Small enough for brute force in JavaScript with budget pruning.
 
-This is small enough to enumerate exhaustively in JavaScript in ~1-2 seconds. No heuristics or approximations needed — we check every valid lineup.
+The current implementation uses iterative branch-and-bound with budget pruning (`searchCombosWithPruning` in `app.js`):
+1. Driver pool sorted by current_price.
+2. Pre-computed price-suffix sums for "minimum remaining cost" pruning.
+3. Recursion stops as soon as `current_cost + min_remaining_cost > remaining_budget`.
 
 ### Strategies
 
-| Strategy | Scoring Function | Use Case |
-|----------|-----------------|----------|
-| Max Points | Sum of expected_points | Maximize this week's score |
-| Max Value | Sum of value_scores | Best points per dollar |
-| Budget Builder | price_change × 100 + value × 5 | Maximize asset appreciation |
-| Balanced | 0.6 × points + 0.4 × value × 10 | Balanced approach |
+| Strategy | Scoring (lineupScore) | Use case |
+|----------|----------------------|----------|
+| Max Points | Sum of expected_points (chip-aware) | Maximize this week's score |
+| Max Value | total_points / total_cost | Best points per dollar |
+| Budget Gain | predictPriceChange × 100 + total_points × 0.1 | Maximize asset appreciation |
+| Balanced | total_points × 0.6 + (points/cost) × 50 | Mix |
+
+`lineupScore` is chip-aware — when a chip like 3x Boost is selected, the boosted points are passed in (best driver × 3 + second-best × 2) so the strategy ranks lineups according to the realistic post-chip score.
 
 ### Lock & Exclude
 
-- **Lock (left-click):** Force a pick into the lineup. Reduces search space. Locked picks are stored in `lockedDrivers`/`lockedConstructors` Sets.
-- **Exclude (right-click):** Remove from consideration. Stored in `excludedDrivers`/`excludedConstructors` Sets. Shows red border with strikethrough.
+- **Lock (left-click):** Force a pick into the lineup. Stored in `lockedDrivers`/`lockedConstructors` Sets.
+- **Exclude (right-click):** Remove from consideration. Stored in `excludedDrivers`/`excludedConstructors` Sets.
 
-Lock/exclude is enforced across all three optimizer modes:
-- **Lineup Optimizer:** Locked picks are pre-selected; remaining slots filled from non-excluded pool. Budget is reduced by locked picks' costs.
-- **Transfer Advisor:** Locked picks in your current team cannot be swapped out. Excluded picks cannot be swapped in. The advisor pre-filters the candidate pool before evaluating swaps.
-- **Multi-Week Planner:** Same filtering applied at each round's swap candidate generation.
+Enforced across all three optimizer modes (Lineup, Transfer Advisor, Multi-Week Planner).
 
-### Price Change Badges
+### The 6 Chips
 
-Transfer recommendations display expected price change for each incoming player. The `formatPriceChangeBadge()` function renders:
-- **Green ↑** badge for expected price increases (e.g., "↑ $0.3M")
-- **Red ↓** badge for expected price decreases
-- Based on the PPM (Points Per Million) rating system with A-tier (>$18.5M) and B-tier brackets
-
-### Generator-Based Combinations
-
-Combinations use a JavaScript generator function (`function*`) instead of building arrays. This means we never hold all 1.4M lineups in memory — we stream through them and keep only the top 200.
+1. **Limitless:** No budget cap.
+2. **3x Boost:** Best driver scores 3x, second-best scores 2x.
+3. **Wild Card:** Unlimited free transfers (no penalties).
+4. **No Negative:** Negative scores become 0.
+5. **Autopilot:** Auto 2x on best driver.
+6. **Final Fix:** Post-quali roster changes.
 
 ---
 
-## 11. Website & Deployment
+## 15. Multi-Week Transfer Planner
 
-### Technology Stack
+### Problem
 
-- **Frontend:** Vanilla JavaScript (no framework). Single `app.js` file (~5,500 lines).
-- **Styling:** Pure CSS with CSS custom properties for theming.
-- **Hosting:** Vercel (static file hosting, CDN).
-- **Deployment:** Push to GitHub → Vercel auto-deploys.
-- **Data:** Static JSON files served from `web/public/data/`.
-
-**Why no framework?** The site is a single-page data dashboard. React/Vue would add complexity without benefit. The data is pre-computed — the frontend just renders it. Vanilla JS keeps it fast, simple, and dependency-free.
-
-### Performance: Lazy Tab Loading
-
-The site uses lazy tab loading to minimize time-to-interactive:
-
-1. **Phase 1 (blocking):** Fetch `predictions.json` + `season_summary.json` (2 requests)
-2. **Phase 2 (immediate):** Render the Drivers tab (hero, cards/table)
-3. **Phase 3 (background):** Deferred loads for weather, official points, actual round data
-4. **Phase 4 (on-demand):** Each tab renders on first click, with a loading spinner while data loads
-
-Tabs like Accuracy, Season, Deep Dive, Videos, and Articles only fetch their data when the user navigates to them. This brings initial page load from ~5s to ~1s.
-
-### Data Flow to Website
-
-```
-Pipeline → .parquet files → 08_export_website_json.py → .json files → git push → Vercel → CDN
-```
-
-The export script also:
-- **Auto-syncs official fantasy points** from `data/seed/official_fantasy_points.json` to the web directory
-- **Overrides prices** in predictions with latest values from `data/seed/fantasy_prices.json`
-- **Exports driver and constructor price data** to `season_summary.json` for the price tracker tables (current price, starting price, change, trend)
-
-The website loads JSON files client-side. No server, no database, no API calls at runtime.
-
-### Countdown Timer
-
-The lock deadline countdown uses a hardcoded `LOCK_DEADLINES` array with UTC timestamps for each round's qualifying start. It computes the diff against the user's device time and updates every second.
-
----
-
-## 12. Confidence Interval Calibration
-
-### The Problem
-
-Monte Carlo simulations produce confidence intervals (P5-P95), but there's no guarantee these intervals are well-calibrated. If the 90% CI only captures 70% of actual outcomes, users are getting a false sense of certainty.
-
-### The Solution: Empirical Calibration
-
-`pipeline/calibrate_confidence.py` analyzes MC predictions vs actual results across all completed rounds:
-
-1. **Coverage analysis:** For each driver prediction, check if actual points fell within the predicted P5-P95 interval (target: 90% coverage) and P25-P75 interval (target: 50% coverage)
-2. **PIT histogram:** Probability Integral Transform — maps each actual outcome to its percentile in the predicted distribution. A well-calibrated model produces a uniform histogram.
-3. **Per-tier analysis:** Breaks drivers into front-runners (predicted P1-P5), midfield (P6-P15), and back-markers (P16-P22). Back-markers are hardest to predict.
-4. **DNF impact:** DNF outcomes are poorly captured by CI (only ~40% in 90% CI) because DNFs produce extreme negative scores.
-5. **Noise multiplier:** Computes the scaling factor needed to achieve target coverage. If coverage is too narrow (86.4%), multiplier > 1.0 expands intervals.
-
-### Conservative Correction
-
-With limited data (<3 rounds), the noise multiplier is capped at ±10% adjustment to prevent overcorrection. With 6+ rounds, the cap is removed. The calibration saves to `data/seed/mc_calibration.json` and is auto-loaded by the MC simulation, scaling all noise bases by the multiplier.
-
-### Initial Results (2 rounds)
-
-| Metric | Value | Target |
-|--------|-------|--------|
-| 90% CI coverage | 86.4% | 90% |
-| 50% CI coverage | 43.2% | 50% |
-| Noise multiplier | 1.1x | 1.0x |
-| Front-runner coverage | 90% | 90% |
-| Midfield coverage | 90% | 90% |
-| Back-marker coverage | 75% | 90% |
-
----
-
-## 13. Multi-Week Transfer Planner
-
-### The Problem
-
-F1 Fantasy allows limited free transfers per round (typically 2-3). Extra transfers cost -10 points each. Planning transfers one round at a time is suboptimal — you might trade away a driver who's great for the next 3 tracks just to gain 5 points this week.
+F1 Fantasy allows 2-3 free transfers per round; extra transfers cost -10 pts each. Planning one round at a time is suboptimal — you might trade away a driver who's great for the next 3 tracks just to gain 5 points this week.
 
 ### Architecture: Beam Search Over Transfer Sequences
 
-Since ML predictions only exist for the current round, future round scores are projected using track-similarity-weighted historical performance:
+ML predictions only exist for the current round. Future rounds are projected using:
 
 ```
 projected_score = base_form × track_affinity × sprint_multiplier
 ```
 
 Where:
-- `base_form` = average of last 3 rounds' actual fantasy points (or predicted if fewer actuals)
-- `track_affinity` = similarity-weighted performance at similar circuits (cosine similarity of 9D feature vectors, threshold > 0.7, clamped 0.6-1.4)
-- `sprint_multiplier` = 1.15x for sprint rounds (extra scoring opportunity)
+- `base_form` = avg of last 3 rounds' actual fantasy points (or predicted if fewer actuals)
+- `track_affinity` = similarity-weighted performance at similar circuits (cosine on 9D feature vectors, threshold > 0.7, clamped 0.6-1.4)
+- `sprint_multiplier` = 1.15x for sprint rounds
 
 ### Beam Search Details
 
 - **Width:** 60 beams (top 60 states kept at each round)
 - **Candidates per state:** 0 swaps (hold) + all single swaps + top 2-swap combos (top 8 drivers × top 4 constructors by projected points)
 - **State tracking:** team composition, budget, banked transfers (max 5), chips used, cumulative score, transfer history
-- **Deduplication:** States with identical team composition are merged (keep highest score)
-- **Penalty:** -10 points per extra transfer beyond free allocation
+- **Deduplication:** States with identical team composition merged (keep highest score). Uses **non-mutating** `[...arr].sort()` — earlier bug where sorting mutated state arrays caused incorrect dedup.
+- **Penalty:** -10 pts per extra transfer beyond free allocation.
 
 ### Strategies
 
-| Strategy | Weight Formula |
-|----------|---------------|
+| Strategy | Weight |
+|----------|--------|
 | Max Points | Pure projected fantasy points |
 | Balanced | 0.7 × points + 0.3 × value efficiency |
 | Budget Gain | 0.4 × points + 0.6 × price appreciation potential |
 
 ### Chip Support
 
-The planner can deploy chips on specific rounds: Wild Card (unlimited free transfers), Limitless (no budget cap), 3x Boost, No Negative, Autopilot, Final Fix. Wild Card on a round eliminates transfer penalties for that round.
-
-### Data Requirements
-
-Requires two JSON files exported by `08_export_website_json.py`:
-- `track_data.json` — 22 circuits with 9D feature vectors, race-to-circuit mappings, sprint round list
-- `driver_history.json` — per-driver and per-constructor actual points for each completed round with circuit_id mapping
-
-### Display
+The planner can deploy each of the 6 chips on specific rounds. Wild Card on a round eliminates transfer penalties for that round.
 
 ### Target Team Mode
 
-Optional "Plan toward a target team" mode. Users select their ideal 5 drivers + 2 constructors as a target. The beam search adds a target team bonus on the final planning round: **+100 points per matching member** in the team composition. This steers the optimizer toward the dream team while still optimizing intermediate rounds for maximum points.
+Optional. Users select an ideal 5+2 team. The beam search adds **+100 pts per matching team member** as a bonus on the final planning round, steering the planner toward the dream team while still optimizing intermediate rounds.
 
-The slot picker is shared between current team and target team selection, with a `slotPickerTarget` global flag ('myTeam' vs 'targetTeam') routing picks to the correct array.
+### Data Requirements
 
-### Max Extra Transfers
-
-Users select how many paid transfers they're willing to accept (0, 1, or 2). Each extra transfer costs -10 points. If a user selects 3+, a message suggests using Wild Card instead. The Transfer Advisor caps `maxTransfers = freeTransfers + maxExtra` and includes the penalty in net point calculations. Results worse than keeping the current team are filtered out.
+Two JSON files (exported by `08_export_website_json.py`):
+- `track_data.json` — 22 circuits, 9D feature vectors, race-to-circuit mapping, sprint round list
+- `driver_history.json` — per-driver and per-constructor actual points per completed round with circuit_id mapping
 
 ### Display
 
-Results show a **projection heatmap** (top 12 drivers + top 6 constructors, color-coded by performance relative to average) and **ranked plan cards** with round-by-round timeline showing hold/swap/chip actions and projected points per round.
-
-### Team Evolution View
-
-Each plan card includes a "View Team Evolution" expandable section showing the full roster at each round. Team members are displayed with:
-- Constructor-colored left border for visual identification
-- **NEW** badge (green) for players added that round
-- Projected points per member per round
-- Round headers with cumulative projected score
+- **Projection heatmap:** Top 12 drivers + top 6 constructors × planning rounds, color-coded by performance vs average.
+- **Plan cards:** Top 5 strategies. Each card shows hold/swap/chip per round, total projected points, transfer banking.
+- **Team Evolution view:** Expandable per plan card. Full roster at each round with NEW badges and per-member projected points.
 
 ---
 
-## 14. Known Limitations
+## 16. Confidence Interval Calibration
+
+### The problem
+
+MC simulations produce CIs (P5-P95). No guarantee these are well-calibrated. If the 90% CI only captures 70% of actual outcomes, we're giving false certainty.
+
+### The solution
+
+`pipeline/calibrate_confidence.py` empirically calibrates by analyzing MC predictions vs actuals across all completed rounds.
+
+1. **Coverage analysis:** For each driver prediction, check if actual points fell within P5-P95 (target 90%) and P25-P75 (target 50%).
+2. **PIT histogram:** Probability Integral Transform — maps each actual outcome to its percentile in the predicted distribution. Well-calibrated → uniform histogram.
+3. **Per-tier analysis:** Front-runners (P1-P5), midfield (P6-P15), back-markers (P16-P22). Back-markers are hardest to predict.
+4. **Noise multiplier:** Computes scaling factor to achieve target coverage. If too narrow (e.g. 86%), multiplier > 1.0 expands intervals.
+
+### Conservative correction
+
+With limited data (<3 rounds), multiplier capped at ±10%. With 6+ rounds, the cap is removed. Saved to `data/seed/mc_calibration.json`, auto-loaded by MC simulation.
+
+---
+
+## 17. Website Architecture
+
+### Stack
+
+- **Frontend:** Vanilla JavaScript (no framework). Single `app.js` (~5,800 lines).
+- **Styling:** Pure CSS with custom properties.
+- **Hosting:** Vercel (static file hosting, CDN).
+- **Deployment:** `git push` → GitHub → Vercel auto-deploys.
+- **Data:** Static JSON files served from `web/public/data/`.
+
+**No build step.** Edit `app.js` directly. Bump `app.js?v=N` in `index.html` to bust browser cache.
+
+### Lazy Tab Loading
+
+1. **Phase 1 (blocking):** Fetch `predictions.json` + `season_summary.json`.
+2. **Phase 2 (immediate):** Render Drivers tab.
+3. **Phase 3 (background):** Deferred loads for weather, official points, actuals.
+4. **Phase 4 (on-demand):** Each tab renders on first click with a loading spinner.
+
+Tabs: Drivers, Constructors, Optimizer, Season, H2H, Accuracy, Race Deep Dive, Videos, Articles, About.
+
+### Data Flow
+
+```
+Pipeline → .parquet → 08_export_website_json.py → .json → git push → Vercel → CDN
+```
+
+The export script also:
+- **Auto-syncs official points** from `data/seed/official_fantasy_points.json` to `web/public/data/official_points.json`
+- **Overrides prices** in predictions with latest values from `data/seed/fantasy_prices.json`
+- **Exports driver/constructor price history** to `season_summary.json` for the price tracker tables
+
+### Countdown Timer
+
+Lock deadline countdown uses a hardcoded `LOCK_DEADLINES` array of UTC timestamps for each round's qualifying start. Computed against the user's device time.
+
+---
+
+## 18. Known Limitations
 
 ### Overtake Accuracy
-Our overtake estimates are ~30% higher than official F1 Fantasy counts. OpenF1 data includes some pit-related position changes that we can't fully filter out. Until an official overtake data source exists, this remains an approximation.
+
+Auto-detected overtake counts are ~20-30% higher than F1 Fantasy's official numbers. Mitigated by `data/seed/overtakes.csv` manual override, but this requires operator effort post-race.
 
 ### New Driver/Team Performance
-2026 has new regulations and a new team (Cadillac). Historical data may not capture the true performance shift. The 2.5x sample weight for 2026 data helps, but early-season predictions for new entities (Cadillac, rookies like Antonelli/Lindblad/Bortoleto) have higher uncertainty.
+
+2026 has new regulations and a new team (Cadillac). Historical data may not capture the true performance shift. The 2.5x sample weight helps, but early-season predictions for new entities (Cadillac, rookies like Antonelli/Lindblad/Bortoleto) have higher uncertainty. The `_recompute_circuit_features` fix sets these to NaN at unfamiliar circuits rather than inheriting irrelevant track values.
 
 ### Sandbag Detection
-Teams deliberately hide pace in FP sessions ("sandbagging"). Our features (best lap, consistency, long-run pace) partially mitigate this, but a team doing all their running on hard tyres in FP while planning to use softs in qualifying will appear slower than they are.
 
-### Q-Session Qualifying Progression
-The qualifying bonus for constructors depends on which Q sessions each driver reaches (Q1/Q2/Q3). We currently estimate this from predicted qualifying position rather than modeling Q-session elimination directly.
+Teams deliberately hide pace in FP. Compound-specific features and consistency/long-run metrics partially mitigate, but a team running only hard tyres in FP while planning to use softs in qualifying will appear slower than they are.
+
+### Q-Session Progression
+
+The constructor qualifying bonus depends on which Q sessions both drivers reach (Q1/Q2/Q3). We currently estimate this from predicted qualifying positions, not modeled directly.
 
 ### Weather Impact
-The current model doesn't explicitly model wet weather. FP features captured in dry conditions may not reflect wet race performance. Wet weather is rare but dramatically changes outcomes.
+
+The current model doesn't explicitly model wet weather. FP captured in dry won't reflect wet race performance. Wet weather is rare but dramatically changes outcomes.
 
 ### Sprint Weekend Data Scarcity
-Sprint weekends only have FP1 (60 minutes vs. 180 minutes of FP data on normal weekends). Predictions for sprint weekends have inherently lower confidence.
+
+Sprint weekends only have FP1 (60 minutes vs 180). Lower-confidence predictions inherently.
+
+### Model weights vs corrected features
+
+The `_recompute_circuit_features` fix corrects feature inputs but doesn't change the model's learned weights. If the trained model heavily weights rolling-3 form vs circuit history, that ratio stays — we're just feeding correct circuit values now. Shifting the ratio requires retraining.
 
 ---
 
-## 15. Future Feature Ideas
-
-### High Priority (Immediate Value)
+## 19. Future Feature Ideas
 
 ### Recently Completed
 
-1. ~~**Automated Pipeline Runner**~~ ✅
-   `pipeline/run_weekend.py` detects current race weekend phase and runs appropriate pipeline steps automatically.
-
-2. ~~**Weather Integration**~~ ✅
-   `pipeline/weather_forecast.py` pulls Open-Meteo forecasts. Per-session rain probability, temperature, wind speed. Weather widget on website.
-
-3. ~~**Chip Strategy Advisor**~~ ✅
-   All 6 chips supported in the lineup optimizer: Limitless, 3x Boost (3x on best driver + 2x on second-best), Wild Card, No Negative, Autopilot, Final Fix.
-
-4. ~~**Team Setup Integration / Transfer Advisor**~~ ✅
-   Users input current team, budget, free transfers. Optimizer recommends optimal transfers with penalty calculation.
-
-5. ~~**Head-to-Head Matchup Predictions**~~ ✅
-   Dedicated H2H tab with win probabilities (normal CDF on MC distributions), stat comparisons, historical record, and pick recommendation.
-
-6. ~~**Historical Accuracy Dashboard**~~ ✅
-   Dedicated Accuracy tab with per-round and per-driver MAE, scatter plots, CI coverage analysis, and round filter toggles.
-
-7. ~~**Track Similarity Weighting**~~ ✅
-   9-dimensional circuit feature vectors with cosine similarity. Produces 6 similarity-weighted rolling features in the ML pipeline.
-
-8. ~~**Price Change Prediction**~~ ✅
-   PPM-based A/B tier system with bracket displays showing points needed for each price change threshold.
-
-9. ~~**Fuel-Corrected Practice Pace**~~ ✅
-   Race deep dive applies ~0.035s/lap fuel correction for normalized pace comparisons.
+✅ Automated phase-aware pipeline runner (`run_weekend.py`)
+✅ Weather integration (`weather_forecast.py` + GH Action)
+✅ Chip strategy advisor (all 6 chips in optimizer)
+✅ Transfer Advisor with penalty calculation
+✅ Head-to-Head matchup predictions
+✅ Historical accuracy dashboard (per-round + per-driver MAE, scatter, CI coverage)
+✅ Track similarity weighting (9D cosine, 6 sim-weighted features)
+✅ Price change prediction (PPM-based A/B tier system)
+✅ Fuel-corrected practice pace (Race Deep Dive)
+✅ DNF/Reliability modeling (per-driver blended; correlated DNF in MC)
+✅ Sprint-specific predictions (`sprint_model.json`)
+✅ Enhanced constructor scoring (qualifying bonus, expected pit stops, DNF impact)
+✅ Multi-week transfer planner (beam search, 2-5 rounds, target team mode)
+✅ Constructor accuracy dashboard (toggle in Accuracy tab)
+✅ Predict-time circuit feature recomputation (`_recompute_circuit_features`)
 
 ### High Priority (Next Up)
 
-1. ~~**DNF/Reliability Modeling**~~ ✅
-   Per-driver DNF probability from blended historical + season data. Correlated DNF in MC (multi-car incidents + team failures). DNF % displayed on driver cards. Constructor DNF impact in scoring breakdown.
+1. **Versioned model artifacts + validation gate before promotion**
+   Currently `05_train_models.py` overwrites in place. Add timestamped subdirectories (`models/trained/v_2026-05-06_pre-canada/`) and a pointer file selecting active version. Promotion gated by walk-forward MAE comparison vs current production.
 
-2. ~~**Sprint-Specific Predictions**~~ ✅
-   Dedicated XGBRanker sprint model trained on 501 sprint-only rows (2021-2026). Sprint qualifying grid as #1 feature. Walk-forward MAE=3.371, tau=0.542, Top-3=66.7%. MC uses sprint z-scores with 0.8x noise.
+2. **Grid Penalty Integration**
+   Auto-detect and apply engine/gearbox penalties. Dramatic fantasy impact.
 
-3. ~~**Enhanced Constructor Scoring**~~ ✅
-   Constructor scoring = drivers' points + qualifying bonus + expected pit stop points (analytical from team priors) - DNF impact. Per-iteration MC simulation with pit stop sampling. Scoring breakdown on constructor cards.
+3. **Q-Session Progression Model**
+   Classifier predicting Q1/Q2/Q3 progression for each driver, improving constructor qualifying bonus estimates.
 
-4. **Grid Penalty Integration**
-   Detect and automatically apply grid penalties (engine penalties, gearbox changes, pit lane starts). These dramatically affect fantasy scoring.
+4. **Sharper track similarity**
+   Current 9D cosine gives most circuit pairs ≥ 0.95 similarity, making the weighting nearly uniform. Consider rank-transforming track features per dimension, weighted Euclidean, or Mahalanobis distance.
 
-5. **Q-Session Progression Model**
-   Build a classifier to predict Q1/Q2/Q3 progression for each driver, improving constructor qualifying bonus estimates.
+5. **Fix overtake count gap**
+   Find authoritative F1 Fantasy overtake source or build a heuristic that matches their numbers consistently. Removes manual `overtakes.csv` step.
 
-### Medium Priority (Season Enhancement)
+### Medium Priority
 
-6. **Track-Specific Model Tuning**
-   Train specialized models for different track types (street circuits, power tracks, high-downforce tracks).
+6. Track-specific model tuning (street vs power vs high-DF)
+7. Tyre strategy prediction (1-stop / 2-stop / 3-stop)
+8. Betting odds as ensemble signal
+9. Live race tracking (real-time fantasy point updates)
+10. Multi-season backtesting
 
-7. **Tyre Strategy Prediction**
-   Predict likely tyre strategies (1-stop, 2-stop, 3-stop) based on FP degradation data and track characteristics.
+### Lower Priority / Technical
 
-8. ~~**Multi-Week Transfer Planning**~~ ✅
-   Beam search (width 60) over 2-5 rounds using track-similarity-weighted score projections. Plans optimal transfer sequences with chip deployment, transfer banking, and -10pt penalty tracking. Three strategies: Max Points, Balanced, Budget Gain.
-
-9. **Betting Odds Integration**
-   Fetch pre-race odds, convert to implied probabilities, use as ensemble signal in XGBoost.
-
-### Lower Priority (Future Season)
-
-10. **Live Race Tracking**
-    Real-time fantasy point tracking during the race using live timing data.
-
-11. **Social/Community Features**
-    Let users share and compare lineups. Leaderboard for prediction accuracy.
-
-12. **Push Notifications**
-    Alert when predictions are updated, lock deadline approaches, or grid penalties announced.
-
-13. **Multi-Season Backtesting**
-    Run the full pipeline on 2022-2025 seasons as if predicting in real-time.
-
-14. **Natural Language Race Previews**
-    Auto-generate written race previews from prediction data.
-
-### Technical Improvements
-
-15. **Incremental Model Updates**
-    Use XGBoost's `process_type='update'` to incrementally add new race data.
-
-16. **Bayesian Optimization for Hyperparameters**
-    Replace manual tuning with Optuna or similar.
-
-17. **Ensemble of Specialized Models**
-    Separate models for wet/dry, sprint/standard, street/permanent circuits.
-
-18. **Telemetry-Based Features**
-    Use FastF1 car telemetry (throttle %, brake %, speed traces, DRS activation) for richer FP features.
+11. Incremental model updates (XGBoost `process_type='update'`)
+12. Bayesian hyperparameter optimization (Optuna)
+13. Specialized model ensembles (wet/dry, sprint/standard)
+14. Telemetry-based features (throttle, brake, speed traces, DRS)
+15. Push notifications (lineup lock approaching, predictions updated)
+16. Natural-language race previews
