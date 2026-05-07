@@ -1581,6 +1581,31 @@ table.sortable th.sort-desc::after {
     line-height: 1.7;
 }
 
+.about-section-intro {
+    margin-bottom: 16px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.about-quirks li {
+    line-height: 1.6;
+    padding: 10px 12px 10px 28px;
+    background: var(--bg-card);
+    border-radius: 6px;
+    border-left: 2px solid var(--accent);
+}
+
+.about-quirks li::before {
+    left: 10px;
+    top: 10px;
+}
+
+.about-quirks li strong {
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 4px;
+}
+
 .about-footer {
     border-top: 1px solid var(--border);
     padding-top: 24px;

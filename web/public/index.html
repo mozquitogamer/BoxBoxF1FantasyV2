@@ -520,59 +520,55 @@
             <section class="tab-content" id="tab-about">
                 <div class="about-content">
                     <h2>How It Works</h2>
-                    <p class="about-intro">BoxBoxF1Fantasy uses a multi-stage machine learning pipeline to predict F1 race outcomes and convert them into fantasy point projections. Here's the full process from raw data to your lineup recommendations.</p>
+                    <p class="about-intro">BoxBoxF1Fantasy turns raw F1 data into fantasy point projections through a machine learning pipeline. Here's the high-level picture of what happens between a session ending and the numbers appearing on this site.</p>
 
                     <div class="about-grid">
                         <div class="about-card">
                             <div class="about-icon">📊</div>
-                            <h3>1. Data Collection</h3>
-                            <p>We pull from two sources: <strong>FastF1</strong> for live telemetry (lap times, sectors, tyre compounds, weather, track status) and the <strong>Jolpica API</strong> for historical results, qualifying, and championship standings from 2020-2026.</p>
+                            <h3>1. Data</h3>
+                            <p>We pull telemetry, results, and historical data from public F1 data sources covering 2020 onward. New data ingests after each session — practice, qualifying, sprint, and race.</p>
                         </div>
                         <div class="about-card">
                             <div class="about-icon">⚙️</div>
-                            <h3>2. Feature Engineering</h3>
-                            <p>Two feature layers are built. <strong>Layer 1:</strong> Jolpica historical priors — rolling 3/5/10-race averages, team strategy ratings, driver skill ratings, and track classification features (always available). <strong>Layer 2:</strong> Free practice telemetry — 27+ engineered features including pace, consistency, degradation, long-run performance, and sector analysis (when FP data is available).</p>
+                            <h3>2. Features</h3>
+                            <p>Each driver and constructor gets a feature vector blending historical form, recent results, track-specific patterns, team and driver skill ratings, and free practice pace when available.</p>
                         </div>
                         <div class="about-card">
                             <div class="about-icon">🤖</div>
                             <h3>3. ML Predictions</h3>
-                            <p>Three XGBoost models are trained with walk-forward temporal validation on 2,600+ historical rows. The qualifying model predicts grid positions, which feed into the race model for finish predictions. A third model scores confidence based on data completeness and model agreement.</p>
+                            <p>Gradient-boosted ranking models predict qualifying and race finish positions. The race model takes the qualifying prediction as input. Predictions sharpen as the weekend progresses and more data becomes available.</p>
                         </div>
                         <div class="about-card">
                             <div class="about-icon">🎲</div>
-                            <h3>4. Monte Carlo Simulation</h3>
-                            <p>10,000 race simulations sample from prediction distributions with calibrated noise — stochastically modelling DNFs, overtakes, fastest laps, and DOTD. Because fantasy scoring is nonlinear, the expected points of a distribution differ from points of the expected position.</p>
+                            <h3>4. Monte Carlo</h3>
+                            <p>10,000 simulations per round add calibrated noise to the predictions and sample DNFs, overtakes, fastest laps, and Driver of the Day. This produces the 90% confidence intervals you see on driver cards.</p>
                         </div>
                         <div class="about-card">
                             <div class="about-icon">🏆</div>
                             <h3>5. Fantasy Points</h3>
-                            <p>Monte Carlo outputs are aggregated into mean, median, P5-P95 percentile ranges. Combined with driver prices to compute PPM (Points Per Million) value scores. The lineup optimizer then finds the best team combinations within your budget.</p>
+                            <p>Simulated outcomes are converted to fantasy points using the official 2026 F1 Fantasy scoring rules — including chips, sprint scoring, constructor pit stop bonuses, and the qualifying teamwork bonus.</p>
                         </div>
                         <div class="about-card">
                             <div class="about-icon">🔍</div>
                             <h3>6. Post-Race Analysis</h3>
-                            <p>After each race, the deep dive pipeline processes full telemetry: fuel-corrected lap times, sector breakdowns, tyre degradation curves, dirty-air effects, race momentum phases, and speed trap data — all viewable in the Race Deep Dive tab.</p>
+                            <p>After each race the deep-dive pipeline processes full lap data — fuel-corrected pace, tyre stints, sector analysis, real wheels-up pit stop times, and overtake counts — viewable in the Race Deep Dive tab.</p>
                         </div>
                     </div>
 
                     <div class="about-section">
-                        <h3>Model Details</h3>
-                        <ul>
-                            <li><strong>Qualifying model:</strong> XGBoost (1200 trees, lr=0.025, depth=3) — predicts qualifying position from historical priors + FP telemetry</li>
-                            <li><strong>Race model:</strong> XGBoost (650 trees, lr=0.03, depth=5) — predicts finish position using predicted quali as input feature</li>
-                            <li><strong>Confidence model:</strong> ExtraTrees classifier trained on FP-available rows, scoring prediction reliability 0-100</li>
-                            <li><strong>Monte Carlo:</strong> 10,000 simulations with calibrated noise, DNF sampling (rolling 5-race probability, capped at 25%), stochastic overtake/fastest-lap/DOTD assignment</li>
-                            <li><strong>Walk-forward validation:</strong> Models are only ever trained on past data — no future leakage. Jolpica features use shift(1) before rolling to prevent look-ahead bias</li>
-                            <li><strong>Feature count:</strong> 136 features total across both layers, with XGBoost handling missing FP data natively via histogram-based tree method</li>
-                        </ul>
-                    </div>
-
-                    <div class="about-section">
-                        <h3>Pipeline Automation</h3>
-                        <ul>
-                            <li><strong>Weekend orchestration:</strong> Automated phases — pre-FP (download + train), post-FP (features + predict), post-quali (re-predict with quali data), post-race (actuals + analysis)</li>
-                            <li><strong>Weather updates:</strong> Open-Meteo forecasts every 6 hours via GitHub Actions, showing rain probability for Friday/Saturday/Sunday</li>
-                            <li><strong>Deep dive generation:</strong> 7-step data cleaning (null removal, accuracy filter, pit/lap-1/safety-car exclusion, fuel correction, outlier removal) then 10+ analysis modules</li>
+                        <h3>Known Limitations &amp; Quirks</h3>
+                        <p class="about-section-intro">Some things you might notice that look odd at first — they're working as intended.</p>
+                        <ul class="about-quirks">
+                            <li><strong>Wide confidence intervals are honest, not noisy.</strong> A 90% CI of "8 — 53 pts" reflects real F1 volatility (DNFs, safety cars, weather, strategy). When the model is genuinely uncertain, it says so rather than pretending otherwise. A narrow CI on a leader and a wide CI on a midfielder is usually correct, not a bug.</li>
+                            <li><strong>Predictions shift across the weekend.</strong> Pre-FP predictions rely on historical patterns only (~65% confidence). Once practice data lands, telemetry sharpens the picture (~90% confidence). Qualifying then locks in the grid and tightens the race forecast further. If a driver moves up or down between Friday and Sunday, that's the model integrating new evidence.</li>
+                            <li><strong>Sprint weekends have less data to work with.</strong> Sprint weekends compress practice into a single FP1 session before sprint qualifying. Less telemetry means slightly lower confidence and wider intervals than a regular weekend.</li>
+                            <li><strong>The Multi-Week Planner's future rounds use heuristics, not real ML.</strong> Only the current round has full model predictions. Future rounds (2-5 weeks ahead) project using recent form weighted by track similarity to past circuits. Treat them as directional, not precise.</li>
+                            <li><strong>New teams lean conservative.</strong> Cadillac has no 2020-2025 history to learn from, so their priors fall back toward grid averages. As 2026 results accumulate, their predictions will sharpen and reflect their actual pace.</li>
+                            <li><strong>2026 has fewer historical signals than usual.</strong> New regulations (active aero, redesigned ground effect, new power units) mean older data is partially out-of-distribution. The model weights 2026 races more heavily than older seasons, but early-season predictions carry more uncertainty than they would mid-season under stable rules.</li>
+                            <li><strong>The calendar skips R4 and R5.</strong> Bahrain (R4) and Saudi Arabia (R5) were cancelled from the 2026 calendar but their round numbers are preserved. Miami is R6, Canada is R7, etc. — Round 4 and 5 just aren't shown.</li>
+                            <li><strong>Constructor scoring never includes driver boost multipliers.</strong> Per official F1 Fantasy rules, the 2x/3x boosts (Autopilot, Final Fix, 3x Boost) only apply to driver scoring, never constructor scoring. Optimizer and predictions follow this rule.</li>
+                            <li><strong>DNF probability blends history and current season.</strong> A driver's reliability rating is a mix of their rolling 5-race DNF rate and their team's 2026 reliability so far. Small sample sizes early in the year can produce DNF estimates that look high; they self-correct as more races run.</li>
+                            <li><strong>Pit stop points may update a day after the race.</strong> Constructor pit stop scoring uses real wheels-up stationary times from public data feeds. Those feeds occasionally lag 24-48h post-race. If pit stop points look low immediately after the race, check back the next day — the numbers refresh automatically.</li>
                         </ul>
                     </div>
 
@@ -582,7 +578,6 @@
                     </div>
 
                     <div class="about-footer">
-                        <p>Built with Python, XGBoost, FastF1, Jolpica API & Monte Carlo simulation</p>
                         <p class="generated-at" id="generatedAt"></p>
                     </div>
                 </div>
