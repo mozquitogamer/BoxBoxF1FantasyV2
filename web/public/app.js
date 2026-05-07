@@ -194,6 +194,7 @@ async function renderTabIfNeeded(tabName) {
             break;
         case 'constructors':
             showTabSpinner(tabId);
+            await ensureLoaded('pitstops', loadPitstopData);
             renderConstructors();
             removeTabSpinner(tabId);
             _tabRendered.constructors = true;
@@ -359,26 +360,84 @@ function showFallbackBanner() {
 }
 
 async function loadPitstopData() {
-    // Load pit stop stationary times from pitstop JSON files
-    window._pitstopData = {};
+    // Load pit stop stationary times from pitstop JSON files, keyed by round
+    // so we can compute "last race" vs "season" stats separately.
+    // Shape: window._pitstopData = {
+    //   by_constructor: { [cid]: [{round, times: [...]}, ...] },
+    //   rounds: [1, 2, 3, 6],          // rounds we have stationary data for
+    //   last_round: 6                   // most recent round with data
+    // }
+    window._pitstopData = { by_constructor: {}, rounds: [], last_round: null };
 
     if (!seasonSummary || !seasonSummary.rounds) return;
     for (const r of seasonSummary.rounds) {
         if (!r.has_actual) continue;
-        // Pitstop data
         try {
             const resp = await fetch(cacheBust(`data/pitstops_round${r.round}.json`));
             if (resp.ok) {
                 const psData = await resp.json();
                 if (psData && psData.by_constructor) {
+                    let roundHasData = false;
                     for (const [cid, times] of Object.entries(psData.by_constructor)) {
-                        if (!window._pitstopData[cid]) window._pitstopData[cid] = [];
-                        window._pitstopData[cid].push(...times);
+                        if (!times || times.length === 0) continue;
+                        if (!window._pitstopData.by_constructor[cid]) {
+                            window._pitstopData.by_constructor[cid] = [];
+                        }
+                        window._pitstopData.by_constructor[cid].push({
+                            round: r.round,
+                            times: [...times],
+                        });
+                        roundHasData = true;
                     }
+                    if (roundHasData) window._pitstopData.rounds.push(r.round);
                 }
             }
         } catch (e) { /* no pitstop data for this round */ }
     }
+    if (window._pitstopData.rounds.length > 0) {
+        window._pitstopData.last_round = Math.max(...window._pitstopData.rounds);
+    }
+}
+
+// Compute pit stop stats for one constructor, broken out by scope.
+// Returns null if no data available.
+function getConstructorPitStats(constructorId) {
+    const ps = window._pitstopData;
+    if (!ps || !ps.by_constructor || !ps.by_constructor[constructorId]) return null;
+    const rounds = ps.by_constructor[constructorId];
+    if (rounds.length === 0) return null;
+
+    const allTimes = rounds.flatMap(r => r.times);
+    if (allTimes.length === 0) return null;
+
+    const sorted = [...allTimes].sort((a, b) => a - b);
+    const median = sorted.length % 2 === 0
+        ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+        : sorted[Math.floor(sorted.length / 2)];
+    const mean = allTimes.reduce((a, b) => a + b, 0) / allTimes.length;
+    const seasonFastest = sorted[0];
+    const slowest = sorted[sorted.length - 1];
+    const slowCount = allTimes.filter(t => t > 3.5).length;
+
+    // Find which round the season-best stop happened in
+    let seasonFastestRound = null;
+    for (const r of rounds) {
+        if (r.times.includes(seasonFastest)) { seasonFastestRound = r.round; break; }
+    }
+
+    // Last-race-only stats (most recent round this team had a stop)
+    const lastRound = rounds[rounds.length - 1];
+    const lastTimes = lastRound ? lastRound.times : [];
+    const lastFastest = lastTimes.length ? Math.min(...lastTimes) : null;
+    const lastRoundNum = lastRound ? lastRound.round : null;
+
+    return {
+        seasonFastest, seasonFastestRound,
+        lastFastest, lastRoundNum,
+        median, mean, slowest, slowCount,
+        totalStops: allTimes.length,
+        roundsWithData: rounds.length,
+    };
 }
 
 function cacheBust(url) {
@@ -1116,6 +1175,128 @@ function renderConstructors() {
 
     const grid = document.getElementById('constructorCards');
     grid.innerHTML = constructors.map((c, i) => constructorCard(c, i)).join('');
+
+    renderPitstopPanel();
+}
+
+// Render the all-teams pit stop comparison panel above constructor cards.
+// Sortable by any column, default sort: season best (fastest first).
+function renderPitstopPanel() {
+    const body = document.getElementById('pitstopPanelBody');
+    if (!body || !data) return;
+
+    const ps = window._pitstopData;
+    if (!ps || !ps.last_round) {
+        body.innerHTML = '<p class="no-data">No pit stop data yet — comes online after the first race of the season.</p>';
+        return;
+    }
+
+    // Build per-team rows (only teams with stops)
+    const rows = [];
+    for (const c of data.constructors) {
+        const s = getConstructorPitStats(c.constructor_id);
+        if (!s) continue;
+        const team = TEAMS[c.constructor_id] || { name: c.name, color: '#666' };
+        rows.push({
+            id: c.constructor_id,
+            name: c.full_name || c.name || team.name,
+            color: team.color,
+            ...s,
+        });
+    }
+
+    if (rows.length === 0) {
+        body.innerHTML = '<p class="no-data">No pit stop data yet — comes online after the first race of the season.</p>';
+        return;
+    }
+
+    // Compute global season best for highlighting
+    const globalBest = Math.min(...rows.map(r => r.seasonFastest));
+    const lastRoundOverall = ps.last_round;
+    const lastRoundBest = Math.min(
+        ...rows.filter(r => r.lastRoundNum === lastRoundOverall && r.lastFastest != null)
+              .map(r => r.lastFastest)
+    );
+
+    let sortKey = 'seasonFastest';
+    let sortAsc = true;
+
+    function fmtTime(v) { return v != null ? `${v.toFixed(2)}s` : '—'; }
+
+    function render() {
+        const sorted = [...rows].sort((a, b) => {
+            const av = a[sortKey] ?? Infinity;
+            const bv = b[sortKey] ?? Infinity;
+            if (typeof av === 'string') {
+                return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+            }
+            return sortAsc ? av - bv : bv - av;
+        });
+
+        const cols = [
+            { key: 'name',           label: 'Team',           cls: 'pit-tbl-team' },
+            { key: 'lastFastest',    label: `Best in last race (R${lastRoundOverall})`, fmt: r => {
+                if (r.lastFastest == null) return '—';
+                const isBest = r.lastFastest === lastRoundBest && r.lastRoundNum === lastRoundOverall;
+                return `<span style="color:${isBest ? 'var(--green)' : 'var(--text)'};font-weight:${isBest ? '700' : '500'};">${fmtTime(r.lastFastest)}</span>` +
+                       (r.lastRoundNum !== lastRoundOverall ? ` <span style="color:var(--text-muted);font-size:0.9em;">(R${r.lastRoundNum})</span>` : '');
+            }},
+            { key: 'seasonFastest',  label: 'Season best',    fmt: r => {
+                const isBest = r.seasonFastest === globalBest;
+                return `<span style="color:${isBest ? 'var(--green)' : 'var(--text)'};font-weight:${isBest ? '700' : '500'};">${fmtTime(r.seasonFastest)}</span> <span style="color:var(--text-muted);font-size:0.9em;">R${r.seasonFastestRound}</span>`;
+            }},
+            { key: 'median',         label: 'Season median',  fmt: r => fmtTime(r.median) },
+            { key: 'mean',           label: 'Season avg',     fmt: r => fmtTime(r.mean) },
+            { key: 'slowCount',      label: 'Slow (>3.5s)',   fmt: r => {
+                const ratio = `${r.slowCount}/${r.totalStops}`;
+                if (r.slowCount === 0) return `<span style="color:var(--green);">0/${r.totalStops}</span>`;
+                if (r.slowCount / r.totalStops > 0.25) return `<span style="color:var(--red, #ef4444);">${ratio}</span>`;
+                return ratio;
+            }},
+            { key: 'totalStops',     label: 'Stops',          fmt: r => r.totalStops },
+        ];
+
+        const thead = cols.map(c => {
+            const arrow = c.key === sortKey ? (sortAsc ? ' ▲' : ' ▼') : '';
+            const cls = c.cls ? ` class="${c.cls}"` : '';
+            return `<th${cls} data-sortkey="${c.key}" style="cursor:pointer">${c.label}${arrow}</th>`;
+        }).join('');
+
+        const tbody = sorted.map(r => {
+            const cells = cols.map(c => {
+                const cls = c.cls ? ` class="${c.cls}"` : '';
+                const val = c.fmt ? c.fmt(r) : (r[c.key] ?? '—');
+                return `<td${cls}>${val}</td>`;
+            }).join('');
+            return `<tr><td class="pit-tbl-color" style="background:${r.color};"></td>${cells}</tr>`;
+        }).join('');
+
+        body.innerHTML = `
+            <div class="pit-tbl-wrap">
+                <table class="pit-tbl">
+                    <thead><tr><th class="pit-tbl-color"></th>${thead}</tr></thead>
+                    <tbody>${tbody}</tbody>
+                </table>
+            </div>
+            <p class="hint" style="margin-top:8px;">
+                <strong>Stationary time</strong> = wheels-up service time, the metric F1 Fantasy uses for constructor pit stop scoring.
+                Brackets: <span style="color:var(--green);">&lt;2.0s = 20 pts</span> · 2.0–2.2s = 10 · 2.2–2.5s = 5 · 2.5–3.0s = 2 · <span style="color:var(--red, #ef4444);">&gt;3.0s = 0</span>.
+                Fastest stop of the race = +5 bonus, sub-1.80s world record = +15.
+                Data refreshes 24–48h post-race when public feeds catch up.
+            </p>
+        `;
+
+        body.querySelectorAll('thead th[data-sortkey]').forEach(th => {
+            th.onclick = () => {
+                const k = th.dataset.sortkey;
+                if (k === sortKey) sortAsc = !sortAsc;
+                else { sortKey = k; sortAsc = (k === 'name'); }
+                render();
+            };
+        });
+    }
+
+    render();
 }
 
 function constructorCard(c, i) {
@@ -3353,38 +3534,31 @@ function renderProjectionHeatmap(roundProjections) {
 // ============================================================
 
 function getPitStopStatsHtml(constructorId) {
-    // Aggregate pit stop stationary times from all cached actual data
-    const stops = [];
-    if (window._pitstopData && window._pitstopData[constructorId]) {
-        stops.push(...window._pitstopData[constructorId]);
-    }
+    const s = getConstructorPitStats(constructorId);
+    if (!s) return '';
 
-    if (stops.length === 0) return '';
-
-    stops.sort((a, b) => a - b);
-
-    const median = stops.length % 2 === 0
-        ? (stops[stops.length / 2 - 1] + stops[stops.length / 2]) / 2
-        : stops[Math.floor(stops.length / 2)];
-    const avg = stops.reduce((a, b) => a + b, 0) / stops.length;
-    const fastest = stops[0];
-    const slowest = stops[stops.length - 1];
-    const slowCount = stops.filter(t => t > 3.5).length;
-
-    const slowNote = slowCount > 0
-        ? `<span style="color:var(--red, #ef4444);" title="Pit stops over 3.5s stationary">Slow (>3.5s): <strong>${slowCount}</strong></span>`
-        : `<span style="color:var(--green);" title="No pit stops over 3.5s">Slow (>3.5s): <strong>0</strong></span>`;
+    const lastRaceLine = s.lastFastest != null
+        ? `<span title="Fastest stationary stop in the most recent race (R${s.lastRoundNum})">Last race best: <strong style="color:var(--text)">${s.lastFastest.toFixed(2)}s</strong> <span style="color:var(--text-muted);font-size:0.95em;">R${s.lastRoundNum}</span></span>`
+        : '';
+    const seasonLine = s.seasonFastest != null
+        ? `<span title="Team's fastest stationary stop across all completed rounds this season">Season best: <strong style="color:var(--green)">${s.seasonFastest.toFixed(2)}s</strong> <span style="color:var(--text-muted);font-size:0.95em;">R${s.seasonFastestRound}</span></span>`
+        : '';
+    const medianLine = `<span title="Median stationary time across all of this team's stops this season">Season median: <strong>${s.median.toFixed(2)}s</strong></span>`;
+    const slowLine = s.slowCount > 0
+        ? `<span style="color:var(--red, #ef4444);" title="Stops over 3.5s stationary (typically 0 fantasy points)">Slow stops: <strong>${s.slowCount}</strong>/${s.totalStops}</span>`
+        : `<span style="color:var(--green);" title="No stops over 3.5s stationary this season">Slow stops: <strong>0</strong>/${s.totalStops}</span>`;
 
     return `
     <div class="pit-stats" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--text-secondary);">
-        <div style="font-weight:600;margin-bottom:4px;" title="Stationary pit stop times (wheels up to wheels down). All stops included.">Pit Stops (stationary)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px 8px;">
-            <span>Median: <strong style="color:var(--text)">${median.toFixed(2)}s</strong></span>
-            <span>Fast: <strong style="color:var(--green)">${fastest.toFixed(2)}s</strong></span>
-            <span>Slow: <strong style="color:var(--red, #ef4444)">${slowest.toFixed(2)}s</strong></span>
-            <span>Mean: ${avg.toFixed(2)}s</span>
-            ${slowNote}
-            <span>Count: ${stops.length}</span>
+        <div style="font-weight:600;margin-bottom:4px;display:flex;justify-content:space-between;align-items:baseline;">
+            <span title="Stationary pit stop time = wheels up to wheels down (the F1 Fantasy scoring metric)">Pit stop performance — stationary times</span>
+            <span style="font-weight:400;color:var(--text-muted);font-size:0.95em;">${s.roundsWithData} rounds</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 8px;">
+            ${lastRaceLine}
+            ${seasonLine}
+            ${medianLine}
+            ${slowLine}
         </div>
     </div>`;
 }

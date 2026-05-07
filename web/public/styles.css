@@ -634,6 +634,112 @@ select:focus, input:focus {
     vertical-align: middle;
 }
 
+/* ---- Pit Stop Performance Panel ---- */
+.pitstop-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.pitstop-panel summary {
+    cursor: pointer;
+    padding: 12px 16px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    user-select: none;
+    list-style: none;
+}
+
+.pitstop-panel summary::-webkit-details-marker { display: none; }
+
+.pitstop-panel summary::before {
+    content: '▸';
+    color: var(--accent);
+    font-size: 0.9em;
+    margin-right: 8px;
+    transition: transform 0.15s;
+    display: inline-block;
+}
+
+.pitstop-panel[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.pitstop-panel summary:hover {
+    background: var(--bg-card-hover);
+}
+
+.pitstop-panel-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.pitstop-panel-hint {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+#pitstopPanelBody {
+    padding: 0 16px 16px 16px;
+    border-top: 1px solid var(--border);
+}
+
+.pit-tbl-wrap {
+    overflow-x: auto;
+    margin-top: 12px;
+}
+
+.pit-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.pit-tbl thead th {
+    text-align: left;
+    padding: 8px 10px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    background: var(--bg-secondary);
+    position: sticky;
+    top: 0;
+}
+
+.pit-tbl thead th:hover {
+    color: var(--accent);
+}
+
+.pit-tbl tbody td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.pit-tbl tbody tr:hover {
+    background: var(--bg-card-hover);
+}
+
+.pit-tbl-color {
+    width: 4px;
+    padding: 0 !important;
+    border-bottom: none !important;
+}
+
+.pit-tbl-team {
+    color: var(--text-primary) !important;
+    font-weight: 500;
+}
+
 /* ---- Constructor Cards ---- */
 .constructor-grid {
     display: grid;
