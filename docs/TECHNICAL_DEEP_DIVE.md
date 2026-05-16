@@ -491,6 +491,42 @@ When `is_sprint_weekend == True`:
 - `predicted_sprint_quali_position`: from FastF1 SQ session (with fastest-lap fallback) if SQ has happened, else equal to `predicted_qualifying_position`.
 - `predicted_sprint_position`: from `sprint_model.json` if actual SQ grid is available, else from a fallback path that uses the sprint model with predicted quali as proxy.
 
+### Persisting the phase: `prediction_metadata.json` sidecar
+
+After determining the phase, `06_run_predictions.py` writes a small sidecar to `data/predictions/round{N}/prediction_metadata.json` recording:
+
+```json
+{
+  "round": 7, "year": 2026,
+  "phase": "pre_fp",
+  "generated_at": "2026-05-16T07:00:00+00:00",
+  "is_post_quali": false,
+  "used_fp_features": false,
+  "race_model_used": "race_model_fp.json",
+  "quali_model_sha256_16": "351e624720117624",
+  "race_model_sha256_16": "bea91f44ad9dcb80"
+}
+```
+
+This is the **source of truth** for phase labelling. `08_export_website_json.py` reads it via `detect_phase()` to tag the per-round archive (`predictions_round{N}_{phase}.json`) — never inferring from current data state, which can drift over time. The model hashes let any downstream tool verify it's looking at predictions from a specific trained model.
+
+### Race-completed guards
+
+`06_run_predictions.py`, `07_calculate_fantasy.py`, `08_monte_carlo_fantasy.py`, and `08_export_website_json.py` all consult `config.settings.is_race_completed(round_num)` (which reads `races.json`) before writing. If the race is in the past and the output already exists, the write is refused with a `[SKIP]` message. `--force` overrides.
+
+The pollution problem this fixes: re-running predictions for a race that already happened, using a model that's been retrained on the very data being "predicted" — producing artificially-perfect accuracy. See [Audit Log](#audit-log) below for the recovery story.
+
+### Audit Log
+
+Every successful export from `08_export_website_json.py` appends to two places under `data/audit/`:
+
+- `predictions_log.jsonl` — one JSON object per line: timestamp, round, phase, MAE vs actuals (if known), git HEAD SHA, model hashes, snapshot path. Append-only.
+- `snapshots/round{N}/{ISO}_{phase}.json` — full immutable snapshot of the exported predictions payload, plus the sidecar metadata. Filenames are timestamped so older snapshots are never overwritten.
+
+This is the safety net: if a per-round archive in `web/public/data/` is corrupted or accidentally clobbered, you can recover from the audit snapshot. It's also the historical record of how the algorithm has evolved — each prediction is stamped with the git SHA + model hashes that produced it.
+
+The audit module is `pipeline/audit.py`. The hook is in `08_export_website_json.py:main()`. Disable with `--no-audit` (rarely needed). Tag entries with `--audit-label "..."` for filtering later.
+
 ---
 
 ## 8. Predict-Time Feature Recomputation

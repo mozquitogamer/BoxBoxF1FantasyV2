@@ -188,11 +188,19 @@ Compare any two drivers or constructors side-by-side.
 Predicted vs actual analysis for completed rounds.
 
 - **Drivers / Constructors toggle** at the top — switch view between driver-level and constructor-level accuracy
+- **Phase toggle** — Latest / Pre-FP / Post-FP / Post-Quali. Switches which snapshot of the prediction is being measured:
+  - **Latest** — the canonical prediction (usually the most-informed forecast we made before the race)
+  - **Pre-FP** — what the model predicted *before* any free practice ran (priors only, no telemetry)
+  - **Post-FP** — what the model predicted *after* free practice but *before* qualifying
+  - **Post-Quali** — what the model predicted *after* qualifying, using the actual grid
+  - Phases without archives for any round are greyed out. Each button shows a count of how many rounds have that phase available.
 - **Per-round MAE** — average prediction error for each completed round
 - **90% CI coverage** — what % of actual outcomes fell within our 90% CI (target: 90%)
 - **50% CI coverage** — narrower band check (target: 50%)
 - **Per-driver / per-constructor scatter** — predicted vs actual points
 - **Race filter** — toggle individual rounds in/out of the stats
+
+When you see a purple banner mentioning **"reconstructed"** archives, that means the original predictions for those rounds were lost (the early pipeline allowed re-predictions after the race, which polluted the archive). We walk-forward retrained the model with those rounds *excluded* and re-predicted on raw pre-race data to produce an honest reconstruction. These are flagged transparently so you know what you're looking at.
 
 When constructor official points haven't been entered for a round, an amber note appears: "Official constructor points not entered yet — using pipeline-calculated actuals."
 

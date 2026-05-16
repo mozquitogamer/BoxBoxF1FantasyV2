@@ -587,18 +587,27 @@ No CLI args. Tests alternative algorithms and hyperparams. Output is information
 ```
 --round N      (required)
 --year YYYY    (default: 2026)
+--force        (override the race-completed guard)
+--no-fp        (ignore FP feature parquets — priors-only prediction)
 ```
 
-Phase-aware: auto-detects whether actual quali exists for the round. Recomputes track-similarity + circuit-specific features for the target circuit. Outputs to `data/predictions/round{N}/predictions.parquet`.
+Phase-aware: auto-detects whether actual quali exists for the round, picks `race_model.json` vs `race_model_fp.json` accordingly. Recomputes track-similarity + circuit-specific features for the target circuit.
+
+**Outputs:**
+- `data/predictions/round{N}/predictions.parquet`
+- `data/predictions/round{N}/prediction_metadata.json` — **sidecar**, the definitive record of the phase this prediction ran in (read by `detect_phase` in `08_export_website_json.py`). Includes model SHA-256 hashes, the `--no-fp`/`--force` flags, timestamp, and which race model was used.
+
+**Race-completed guard:** refuses to overwrite `predictions.parquet` if the race has already happened and the parquet exists. Pass `--force` to override (only legitimate use case: the recovery script).
 
 ### `pipeline/07_calculate_fantasy.py` — Fantasy point calculator (orchestrated)
 
 ```
 --round N      (required)
 --year YYYY    (default: 2026)
+--force        (override the race-completed guard)
 ```
 
-Reads `predictions.parquet`, applies F1 Fantasy 2026 scoring rules. Outputs `fantasy_points.parquet` + `fantasy_points_constructors.parquet`.
+Reads `predictions.parquet`, applies F1 Fantasy 2026 scoring rules. Outputs `fantasy_points.parquet` + `fantasy_points_constructors.parquet`. Race-completed-guarded like 06.
 
 ### `pipeline/08_monte_carlo_fantasy.py` — MC simulator (orchestrated)
 
@@ -607,24 +616,34 @@ Reads `predictions.parquet`, applies F1 Fantasy 2026 scoring rules. Outputs `fan
 --year YYYY         (default: 2026)
 --simulations N     (default: 10000)
 --seed N            (default: 42)
+--force             (override the race-completed guard)
 ```
 
-10K-iteration simulation with calibrated noise. Auto-loads `data/seed/mc_calibration.json` if present. Outputs `monte_carlo_fantasy.json` + `.parquet`.
+10K-iteration simulation with calibrated noise. Auto-loads `data/seed/mc_calibration.json` if present. Outputs `monte_carlo_fantasy.json` + `.parquet`. Race-completed-guarded like 06.
 
 ### `pipeline/08_export_website_json.py` — Website exporter (orchestrated)
 
 ```
 --round N                              (required)
---phase {auto, pre_fp, post_fp, post_quali}   (default: auto-detect)
+--phase {auto, pre_fp, post_fp, post_quali}   (default: auto — reads sidecar)
 --force                                (override the race-completed guard)
 --reconstructed                        (mark this export as a post-hoc reconstruction; sets reconstructed=true in JSON)
+--audit-label "..."                    (free-form note attached to the audit log entry)
+--no-audit                             (skip writing an audit log entry; rarely needed)
 ```
 
-Bundles all parquets/JSONs into `web/public/data/*.json`. Auto-syncs official fantasy points and overrides prices from seed files.
+Bundles all parquets/JSONs into `web/public/data/*.json`. Auto-syncs official fantasy points and overrides prices from seed files. **Writes an immutable audit log entry on every run** (see [Audit Log section below](#audit-log--source-of-truth)).
+
+**Phase resolution priority:**
+1. Explicit `--phase pre_fp|post_fp|post_quali` argument
+2. `data/predictions/round{N}/prediction_metadata.json` sidecar (written by 06_run_predictions — the source of truth)
+3. Data-state inference fallback (only when sidecar missing)
 
 **Per-round outputs:**
 - `predictions_round{N}_{phase}.json` — **phase-tagged archive**, always written. Records what we predicted at this specific phase (pre-FP, post-FP, post-quali). The accuracy tab uses these to show how the forecast improved as more data arrived.
 - `predictions_round{N}.json` — **canonical archive**. Race-completed-guarded: refuses to overwrite if the race has already happened and the archive exists, unless `--force` is passed. This is the "first honest forecast" snapshot.
+- `data/audit/predictions_log.jsonl` — one-line audit entry appended.
+- `data/audit/snapshots/round{N}/{ISO}_{phase}.json` — full immutable snapshot.
 
 > **GOTCHA #1: `--round N` always rewrites `predictions.json` to round N's predictions.** The website's home page reads `predictions.json` to know which round is "current". If you re-export an old round, you'll clobber the current round's predictions on the front page.
 >
@@ -639,6 +658,77 @@ Bundles all parquets/JSONs into `web/public/data/*.json`. Auto-syncs official fa
 > All four scripts now refuse to overwrite outputs for past rounds unless `--force` is passed. The phase-tagged archive (`predictions_round{N}_{phase}.json`) is always written and is the source of truth — the canonical archive is preserved frozen.
 >
 > **Recovery:** If you suspect old archives are polluted, run `python pipeline/recover_archives.py --rounds 1,2,3` to walk-forward retrain models with `--exclude-after 2026:{N}` and reconstruct honest pre-FP / post-FP archives tagged `reconstructed: true`.
+
+### Audit Log — Source of Truth
+
+Every prediction export writes to an append-only audit log under `data/audit/`. This is the immutable history of what the pipeline produced and when. It survives accidental overwrites of `web/public/data/*.json` and gives you a recovery path if anything in the live website data gets corrupted.
+
+**Two files per event:**
+
+```
+data/audit/
+├── predictions_log.jsonl                                   # one line per event, grep-friendly
+└── snapshots/
+    └── round{N}/
+        └── {ISO-timestamp}_{phase}.json                    # full snapshot, never overwritten
+```
+
+**Each log line contains:**
+- `ts` — UTC timestamp
+- `round`, `phase`, `event_label` (e.g. "recovery", "manual_rerun")
+- `reconstructed` — true if this was a post-hoc reconstruction
+- `race_pos_mae`, `race_pos_mae_n` — MAE vs actuals (if known)
+- `git_head` — short SHA of git HEAD at the time
+- `model_hash_quali`, `model_hash_race` — SHA-256 prefixes of the model files
+- `race_model_used` — filename of the race model (`race_model.json` for post-quali, `race_model_fp.json` for pre-quali)
+- `snapshot` — relative path to the full snapshot file
+
+**Common queries:**
+
+```bash
+# Every prediction event for round 3:
+jq 'select(.round==3)' data/audit/predictions_log.jsonl
+
+# MAE evolution by phase for round 3:
+jq 'select(.round==3) | {phase, race_pos_mae, ts}' data/audit/predictions_log.jsonl
+
+# Find when a model changed (different hash):
+jq '.model_hash_race' data/audit/predictions_log.jsonl | sort -u
+
+# Most recent prediction per round:
+jq -s 'group_by(.round) | map(max_by(.ts))' data/audit/predictions_log.jsonl
+```
+
+**Recovering a lost archive from a snapshot:**
+
+```bash
+# Find the snapshot you want:
+ls data/audit/snapshots/round3/
+
+# Extract just the predictions payload back to the live data dir:
+jq '.predictions' data/audit/snapshots/round3/2026-05-16T06-29-46Z_pre_fp.json \
+    > web/public/data/predictions_round3.json
+```
+
+**Backfill scripts (one-shot tools):**
+
+- `python pipeline/backfill_audit.py` — seeds the audit log with all existing archives in `web/public/data/`. Run after pulling fresh from a teammate who didn't have the audit system.
+- `python pipeline/backfill_sidecars.py [--round N]` — writes `prediction_metadata.json` for rounds whose parquets predate the sidecar mechanism. Includes hand-curated "known phase" overrides for historical rounds.
+
+### Restore Points (git tags)
+
+Two named restore points are kept on the remote:
+
+- `backup/pre-audit-system` — state immediately *before* the audit infrastructure was added
+- `backup/post-audit-system` — state immediately *after* the audit infrastructure was added (full reproducibility from clean clone)
+
+```bash
+git tag -l 'backup/*'                              # list restore points
+git show backup/post-audit-system:CLAUDE.md         # peek at a file at that tag
+git reset --hard backup/post-audit-system           # revert working tree (destructive)
+```
+
+The trained models (`models/trained/*.json`, `fp_signal_model.pkl`), the historical baseline models (`models/trained_v1_baseline/`), and the feature data (`data/processed/jolpica/model_rows/*.parquet`) are **tracked in git** as of May 2026, so a clean checkout can predict immediately without retraining.
 
 ### `pipeline/09_post_race_analysis.py` — Predicted vs actual (orchestrated)
 
@@ -723,6 +813,30 @@ Convenience wrapper around `data/seed/official_fantasy_points.json`. You can als
 ```
 
 Run after every 1-2 races once 3+ rounds of actuals exist. Updates `data/seed/mc_calibration.json`.
+
+### `pipeline/recover_archives.py` — Walk-forward archive reconstruction
+
+```
+--rounds 1,2,3       (required — comma-separated rounds to reconstruct)
+--skip-pre-fp        (only do post-FP reconstruction)
+--skip-post-fp       (only do pre-FP reconstruction)
+```
+
+For each round R: builds model inputs with `--exclude-after 2026:R`, retrains models, then re-predicts with both priors-only (pre_fp) and priors+FP (post_fp). Writes phase archives tagged `reconstructed: true`. Polluted parquets backed up to `data/predictions/_polluted_backup/`.
+
+**WARNING:** Replaces the trained model on disk. After running, retrain with the full dataset before next live use:
+```bash
+python pipeline/04_build_model_inputs.py --exclude-after 2026:{next_round}
+python pipeline/05_train_models.py
+```
+
+### `pipeline/audit.py` — Audit log library (imported, not run directly)
+
+Exposes `record_prediction_event(round, phase, predictions_json, ...)` which appends to `data/audit/predictions_log.jsonl` and writes a full immutable snapshot. Called automatically by `08_export_website_json.py`.
+
+### `pipeline/backfill_audit.py` / `pipeline/backfill_sidecars.py` — One-shot backfills
+
+See [Audit Log section](#audit-log--source-of-truth).
 
 ### `pipeline/weather_forecast.py` — Open-Meteo weather
 
