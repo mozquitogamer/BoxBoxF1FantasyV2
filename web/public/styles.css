@@ -2480,6 +2480,12 @@ table.sortable th.sort-desc::after {
     color: #fff;
     font-weight: 600;
 }
+.accuracy-filter-btn:disabled,
+.accuracy-filter-btn[disabled] {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+}
 
 .accuracy-round-table,
 .accuracy-driver-table {

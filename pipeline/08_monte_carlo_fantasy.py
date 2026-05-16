@@ -50,6 +50,7 @@ from config.settings import (
     SPRINT_ROUNDS_2026,
     CANCELLED_ROUNDS_2026,
     GRID_SIZE,
+    is_race_completed,
 )
 from config.fantasy_scoring import (
     QUALIFYING_POSITION_POINTS,
@@ -1310,9 +1311,11 @@ def update_web_predictions(round_num: int, results: dict,
         json.dump(web_data, f, indent=2)
     print(f"  Updated -> {web_path} (with MC confidence intervals)")
 
-    # Also update the per-round archive file
+    # Also update the per-round archive file — but ONLY if the race hasn't happened yet.
+    # If the race is past, the canonical archive is frozen as the pre-race prediction
+    # (see 08_export_website_json.py write_archive_safely). Skip silently here.
     archive_path = WEB_DATA_DIR / f"predictions_round{round_num}.json"
-    if archive_path.exists():
+    if archive_path.exists() and not is_race_completed(round_num):
         with open(archive_path, "w") as f:
             json.dump(web_data, f, indent=2)
         print(f"  Updated -> {archive_path} (with MC confidence intervals)")
@@ -1332,10 +1335,21 @@ def main() -> None:
                         help=f"Number of simulations (default: {DEFAULT_SIMULATIONS:,})")
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED,
                         help=f"Random seed (default: {DEFAULT_SEED})")
+    parser.add_argument("--force", action="store_true",
+                        help="Override the race-completed guard (overwrite existing MC outputs)")
     args = parser.parse_args()
 
     if args.round in CANCELLED_ROUNDS_2026:
         print(f"Round {args.round} is cancelled.")
+        return
+
+    # Race-completed guard: don't overwrite MC outputs for a past race.
+    mc_path = PREDICTIONS_DIR / f"round{args.round}" / "monte_carlo_fantasy.parquet"
+    if not args.force and is_race_completed(args.round, args.year) and mc_path.exists():
+        print(f"\n  [SKIP] Race for round {args.round} has already happened and "
+              f"monte_carlo_fantasy.parquet exists.")
+        print(f"  Refusing to overwrite — this would pollute the accuracy archive.")
+        print(f"  Pass --force to override.")
         return
 
     is_sprint = args.round in SPRINT_ROUNDS_2026

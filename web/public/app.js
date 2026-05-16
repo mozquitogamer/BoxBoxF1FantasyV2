@@ -537,6 +537,21 @@ async function loadPredictionsData(roundNum) {
     } catch(e) { return null; }
 }
 
+// Load a phase-tagged prediction archive (pre_fp, post_fp, post_quali).
+// Returns null if the phase archive doesn't exist for this round.
+async function loadPredictionsForPhase(roundNum, phase) {
+    if (phase === 'latest' || phase === 'canonical') return loadPredictionsData(roundNum);
+    const cacheKey = `${roundNum}__${phase}`;
+    if (predictionsCache[cacheKey]) return predictionsCache[cacheKey];
+    try {
+        const resp = await fetch(cacheBust(`data/predictions_round${roundNum}_${phase}.json`));
+        if (!resp.ok) return null;
+        const d = await resp.json();
+        predictionsCache[cacheKey] = d;
+        return d;
+    } catch(e) { return null; }
+}
+
 async function loadActualData(roundNum) {
     if (actualCache[roundNum]) return actualCache[roundNum];
     try {
@@ -5012,6 +5027,10 @@ let accuracyPairs = [];
 let accuracyMissingNote = '';
 let accuracySelectedRounds = new Set();
 let accuracyEntityType = 'drivers'; // 'drivers' | 'constructors'
+let accuracyPhase = 'latest';       // 'latest' | 'pre_fp' | 'post_fp' | 'post_quali'
+// Cache of all loaded archives, keyed by `${round}__${phase}`. Used to swap phases
+// without re-fetching. Built lazily by ensureAccuracyDataForPhase.
+let accuracyByPhase = {}; // phase -> [{ round, name, pred, act, archivePhase }]
 
 async function renderAccuracy() {
     if (!data) return;
@@ -5019,7 +5038,7 @@ async function renderAccuracy() {
     const container = document.getElementById('accuracyContent');
     if (!container) return;
 
-    // Load data once, then re-render on filter changes
+    // Load data once for the default phase, then re-render on filter changes.
     if (!accuracyDataLoaded) {
         const roundsWithBoth = seasonSummary.rounds.filter(r => r.has_predictions && r.has_actual);
         const roundsActualOnly = seasonSummary.rounds.filter(r => !r.has_predictions && r.has_actual);
@@ -5037,13 +5056,30 @@ async function renderAccuracy() {
 
         container.innerHTML = accuracyMissingNote + '<p class="no-data">Analyzing prediction accuracy...</p>';
 
-        accuracyPairs = [];
+        // Load all phase archives + canonical + actuals in parallel
+        const phases = ['latest', 'pre_fp', 'post_fp', 'post_quali'];
+        for (const ph of phases) accuracyByPhase[ph] = [];
+
         for (const r of roundsWithBoth) {
-            const [pred, act] = await Promise.all([
-                loadPredictionsData(r.round),
-                loadActualData(r.round)
+            const [actual, latestArc, preFp, postFp, postQuali] = await Promise.all([
+                loadActualData(r.round),
+                loadPredictionsForPhase(r.round, 'latest'),
+                loadPredictionsForPhase(r.round, 'pre_fp'),
+                loadPredictionsForPhase(r.round, 'post_fp'),
+                loadPredictionsForPhase(r.round, 'post_quali'),
             ]);
-            if (pred && act) accuracyPairs.push({ round: r.round, name: r.name, pred, act });
+            if (!actual) continue;
+            if (latestArc)   accuracyByPhase['latest']    .push({ round: r.round, name: r.name, pred: latestArc, act: actual });
+            if (preFp)       accuracyByPhase['pre_fp']    .push({ round: r.round, name: r.name, pred: preFp,     act: actual });
+            if (postFp)      accuracyByPhase['post_fp']   .push({ round: r.round, name: r.name, pred: postFp,    act: actual });
+            if (postQuali)   accuracyByPhase['post_quali'].push({ round: r.round, name: r.name, pred: postQuali, act: actual });
+        }
+
+        // Initial pairs = chosen phase
+        accuracyPairs = accuracyByPhase[accuracyPhase] || [];
+        if (accuracyPairs.length === 0 && accuracyByPhase['latest'].length > 0) {
+            accuracyPhase = 'latest';
+            accuracyPairs = accuracyByPhase['latest'];
         }
 
         if (accuracyPairs.length === 0) {
@@ -5193,6 +5229,38 @@ function renderAccuracyWithFilters(container) {
         </div>
     </div>`;
 
+    // Phase toggle (Latest / Pre-FP / Post-FP / Post-Quali). Buttons for phases
+    // with no archives available are disabled with a count badge.
+    const phaseDefs = [
+        { key: 'latest',     label: 'Latest' },
+        { key: 'pre_fp',     label: 'Pre-FP' },
+        { key: 'post_fp',    label: 'Post-FP' },
+        { key: 'post_quali', label: 'Post-Quali' },
+    ];
+    const phaseButtons = phaseDefs.map(p => {
+        const count = (accuracyByPhase[p.key] || []).length;
+        const disabled = count === 0;
+        const active = p.key === accuracyPhase;
+        return `<button class="accuracy-filter-btn${active ? ' active' : ''}"
+                   data-phase="${p.key}" ${disabled ? 'disabled' : ''}
+                   title="${disabled ? 'No archives available for this phase' : `${count} round${count===1?'':'s'} have this phase archived`}">
+            ${p.label} <span style="opacity:0.6;font-size:0.85em">(${count})</span>
+        </button>`;
+    }).join('');
+    // Count reconstructed archives in the current view
+    const reconstructedCount = activePairs.filter(p => p.pred && p.pred.reconstructed).length;
+    const reconstructedNote = reconstructedCount > 0
+        ? `<div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.25);color:#a5b4fc;padding:8px 14px;border-radius:8px;font-size:0.78rem;margin:8px 0 12px;">
+              ${reconstructedCount} of these archives are <strong>reconstructed</strong> — the model was walk-forward retrained with <code>--exclude-after</code> set to the target round, then used to re-predict on raw pre-race data. These are honest reconstructions, not the original predictions (which were lost when the pipeline re-ran post-race before guards were added).
+          </div>`
+        : '';
+    const phaseToggleHTML = `
+    <div class="accuracy-filter" style="margin-bottom:8px;">
+        <span class="accuracy-filter-label">Phase:</span>
+        <div class="accuracy-filter-buttons">${phaseButtons}</div>
+    </div>
+    ${reconstructedNote}`;
+
     // Race filter toggle buttons
     const filterHTML = `
     <div class="accuracy-filter">
@@ -5263,6 +5331,7 @@ function renderAccuracyWithFilters(container) {
 
     container.innerHTML = accuracyMissingNote + `
     ${entityToggleHTML}
+    ${phaseToggleHTML}
     ${filterHTML}
     ${constructorNote}
 
@@ -5321,11 +5390,17 @@ function renderAccuracyWithFilters(container) {
         </div>
     </div>`;
 
-    // Wire up filter buttons (race filter + entity toggle)
+    // Wire up filter buttons (race filter + entity toggle + phase toggle)
     container.querySelectorAll('.accuracy-filter-btn').forEach(btn => {
+        if (btn.disabled) return;
         btn.addEventListener('click', () => {
             if (btn.dataset.entity) {
                 accuracyEntityType = btn.dataset.entity;
+            } else if (btn.dataset.phase) {
+                accuracyPhase = btn.dataset.phase;
+                accuracyPairs = accuracyByPhase[accuracyPhase] || [];
+                // Reset the round filter to "all rounds in this phase"
+                accuracySelectedRounds = new Set(accuracyPairs.map(p => p.round));
             } else if (btn.dataset.round != null) {
                 const round = parseInt(btn.dataset.round);
                 if (accuracySelectedRounds.has(round)) {

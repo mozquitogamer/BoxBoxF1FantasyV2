@@ -105,7 +105,7 @@ PHASES = {
             ("06_run_predictions.py", ["--round", "{round}"]),
             ("07_calculate_fantasy.py", ["--round", "{round}"]),
             ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),
-            ("08_export_website_json.py", ["--round", "{round}"]),
+            ("08_export_website_json.py", ["--round", "{round}", "--phase", "pre_fp"]),
         ],
     },
     "post_fp": {
@@ -118,7 +118,7 @@ PHASES = {
             ("07_calculate_fantasy.py", ["--round", "{round}"]),
             ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),
             ("10_fp_analysis.py", ["--round", "{round}"]),
-            ("08_export_website_json.py", ["--round", "{round}"]),
+            ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_fp"]),
         ],
     },
     "post_quali": {
@@ -131,7 +131,7 @@ PHASES = {
             ("07_calculate_fantasy.py", ["--round", "{round}"]),
             ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),
             ("10_fp_analysis.py", ["--round", "{round}"]),
-            ("08_export_website_json.py", ["--round", "{round}"]),
+            ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_quali"]),
         ],
     },
     "post_race": {

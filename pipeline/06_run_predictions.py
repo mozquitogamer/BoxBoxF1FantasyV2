@@ -43,6 +43,7 @@ from config.settings import (
     SPRINT_ROUNDS_2026,
     CANCELLED_ROUNDS_2026,
     fastf1_round,
+    is_race_completed,
 )
 from pipeline.feature_engineering import engineer_features
 from config.track_classifications import get_circuit_id_from_race_name
@@ -379,7 +380,12 @@ def _recompute_sim_features(df: pd.DataFrame, target_circuit: str) -> pd.DataFra
 
 # -- Main prediction pipeline -------------------------------------------------
 
-def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
+def run_predictions(
+    round_num: int,
+    year: int = CURRENT_SEASON,
+    force: bool = False,
+    skip_fp: bool = False,
+) -> pd.DataFrame:
     """Generate predictions for a specific round."""
     print("=" * 70)
     print(f"BoxBoxF1Fantasy — Predictions for {year} Round {round_num}")
@@ -388,6 +394,17 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
     if year == 2026 and round_num in CANCELLED_ROUNDS_2026:
         print(f"Round {round_num} is cancelled.")
         return pd.DataFrame()
+
+    # Race-completed guard: refuse to re-predict for a past race (would pollute
+    # the accuracy archive with hindsight). Pass --force to override (e.g. when
+    # rebuilding for the recovery script).
+    output_path = PREDICTIONS_DIR / f"round{round_num}" / "predictions.parquet"
+    if not force and is_race_completed(round_num, year) and output_path.exists():
+        print(f"\n  [SKIP] Race for round {round_num} has already happened and "
+              f"predictions.parquet exists.")
+        print(f"  Refusing to overwrite — this would pollute the accuracy archive.")
+        print(f"  Pass --force to override.")
+        return pd.read_parquet(output_path)
 
     is_sprint = (year == 2026 and round_num in SPRINT_ROUNDS_2026)
     print(f"Sprint weekend: {'Yes' if is_sprint else 'No'}")
@@ -414,7 +431,9 @@ def run_predictions(round_num: int, year: int = CURRENT_SEASON) -> pd.DataFrame:
     print(f"\n[Step 2] Loading FP telemetry features...")
     fp_path = FEATURES_DIR / f"round{round_num}" / "features.parquet"
     fp_df = None
-    if fp_path.exists():
+    if skip_fp:
+        print(f"  --no-fp set: ignoring FP features (priors-only prediction)")
+    elif fp_path.exists():
         fp_df = pd.read_parquet(fp_path)
         print(f"  Loaded FP features for {len(fp_df)} drivers from {fp_path}")
     else:
@@ -807,9 +826,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run F1 predictions for a round")
     parser.add_argument("--round", type=int, required=True, help="Round number")
     parser.add_argument("--year", type=int, default=CURRENT_SEASON, help="Season year")
+    parser.add_argument("--force", action="store_true",
+                        help="Override the race-completed guard (overwrite existing predictions)")
+    parser.add_argument("--no-fp", dest="no_fp", action="store_true",
+                        help="Ignore FP feature parquets even if present (priors-only prediction)")
     args = parser.parse_args()
 
-    run_predictions(args.round, args.year)
+    run_predictions(args.round, args.year, force=args.force, skip_fp=args.no_fp)
 
 
 if __name__ == "__main__":

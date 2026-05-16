@@ -33,14 +33,76 @@ from config.settings import (
     PREDICTIONS_DIR,
     WEB_DATA_DIR,
     SEED_DIR,
+    RAW_DIR,
+    FEATURES_DIR,
     SPRINT_ROUNDS_2026,
     CANCELLED_ROUNDS_2026,
+    is_race_completed,
 )
 from config.track_classifications import (
     TRACK_DATABASE,
     TRACK_FEATURE_NAMES,
     RACE_NAME_TO_CIRCUIT,
 )
+
+
+VALID_PHASES = ("pre_fp", "post_fp", "post_quali")
+
+
+def detect_phase(round_num: int, year: int = CURRENT_SEASON) -> str:
+    """Detect which pipeline phase produced the current predictions.
+
+    Used to tag the prediction archive (predictions_round{N}_{phase}.json) so
+    the accuracy page can show how the forecast evolved as data arrived.
+
+    NOTE: This is best-effort based on CURRENT data state. It labels by what's
+    available now, not necessarily what was available when the prediction was
+    made. For new predictions from run_weekend.py, --phase is passed explicitly
+    and this auto-detection is bypassed.
+
+    Detection heuristic (in priority order):
+      - post_quali: jolpica/qualifying.json has QualifyingResults for this round
+      - post_fp:    FP-derived feature parquets exist for this round
+      - pre_fp:     otherwise (priors-only prediction)
+    """
+    # Post-quali check: does Jolpica have qualifying results for this round?
+    quali_path = RAW_DIR / "jolpica" / f"year{year}" / f"round{round_num}" / "qualifying.json"
+    if quali_path.exists():
+        try:
+            with open(quali_path) as f:
+                data = json.load(f)
+            races = data.get("MRData", {}).get("RaceTable", {}).get("Races", [])
+            if races and races[0].get("QualifyingResults"):
+                return "post_quali"
+        except Exception:
+            pass
+
+    # Post-FP check: do FP-derived feature parquets exist?
+    fp_features_dir = FEATURES_DIR / f"round{round_num}"
+    if fp_features_dir.exists() and any(fp_features_dir.glob("*.parquet")):
+        return "post_fp"
+
+    return "pre_fp"
+
+
+def write_archive_safely(
+    archive_path: Path,
+    payload: dict,
+    round_num: int,
+    label: str,
+    force: bool = False,
+) -> None:
+    """Write a per-round archive, refusing to overwrite a past-race archive
+    unless force=True. This is the second line of defense against accidentally
+    polluting the accuracy archive.
+    """
+    if archive_path.exists() and is_race_completed(round_num) and not force:
+        print(f"  [SKIP] {label}: race for round {round_num} has happened and "
+              f"archive exists — refusing to overwrite (use --force to override)")
+        return
+    with open(archive_path, "w") as f:
+        json.dump(payload, f, indent=2)
+    print(f"  Wrote -> {archive_path}")
 
 
 def load_race_info() -> dict:
@@ -453,6 +515,13 @@ def build_driver_history_json() -> dict:
 def main():
     parser = argparse.ArgumentParser(description="Export website JSON data")
     parser.add_argument("--round", type=int, required=True)
+    parser.add_argument("--phase", choices=("auto", *VALID_PHASES), default="auto",
+                        help="Pipeline phase that produced this prediction "
+                             "(pre_fp/post_fp/post_quali). Default 'auto' detects from data state.")
+    parser.add_argument("--force", action="store_true",
+                        help="Override race-completed guards (overwrite existing per-round archives)")
+    parser.add_argument("--reconstructed", action="store_true",
+                        help="Mark this export as a post-hoc reconstruction (sets reconstructed=true in JSON)")
     args = parser.parse_args()
 
     round_num = args.round
@@ -464,18 +533,42 @@ def main():
         print(f"Round {round_num} is cancelled.")
         return
 
+    # Resolve phase
+    phase = args.phase if args.phase != "auto" else detect_phase(round_num)
+    print(f"  Phase: {phase}{' (auto-detected)' if args.phase == 'auto' else ''}")
+
     WEB_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     # 1. Current round predictions
     print("\n[1] Exporting predictions...")
     predictions = build_predictions_json(round_num)
     if predictions:
-        # Current round
+        # Tag the payload with phase + reconstruction info
+        predictions["phase"] = phase
+        predictions["exported_at"] = datetime.now(timezone.utc).isoformat()
+        if args.reconstructed:
+            predictions["reconstructed"] = True
+
+        # Current-round live file: always written (this is what the homepage shows)
         with open(WEB_DATA_DIR / "predictions.json", "w") as f:
             json.dump(predictions, f, indent=2)
-        # Archive copy
-        with open(WEB_DATA_DIR / f"predictions_round{round_num}.json", "w") as f:
+
+        # Phase-tagged archive: always written (this is the historical record
+        # of "what we predicted at phase X")
+        phase_archive = WEB_DATA_DIR / f"predictions_round{round_num}_{phase}.json"
+        with open(phase_archive, "w") as f:
             json.dump(predictions, f, indent=2)
+        print(f"  Wrote phase archive -> {phase_archive}")
+
+        # Canonical archive: guarded against post-race overwrite
+        canonical_archive = WEB_DATA_DIR / f"predictions_round{round_num}.json"
+        write_archive_safely(
+            canonical_archive,
+            predictions,
+            round_num,
+            label="canonical archive",
+            force=args.force,
+        )
         print(f"  {len(predictions['drivers'])} drivers, {len(predictions['constructors'])} constructors")
 
     # 2. Season summary

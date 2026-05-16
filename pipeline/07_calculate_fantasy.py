@@ -36,6 +36,7 @@ from config.settings import (
     SEED_DIR,
     SPRINT_ROUNDS_2026,
     CANCELLED_ROUNDS_2026,
+    is_race_completed,
 )
 from config.fantasy_scoring import (
     QUALIFYING_POSITION_POINTS,
@@ -582,6 +583,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Calculate F1 Fantasy points")
     parser.add_argument("--round", type=int, required=True, help="Round number")
     parser.add_argument("--year", type=int, default=CURRENT_SEASON, help="Season year")
+    parser.add_argument("--force", action="store_true",
+                        help="Override the race-completed guard (overwrite existing fantasy_points)")
     args = parser.parse_args()
 
     round_num = args.round
@@ -591,6 +594,15 @@ def main() -> None:
 
     if round_num in CANCELLED_ROUNDS_2026:
         print(f"Round {round_num} is cancelled.")
+        return
+
+    # Race-completed guard: don't overwrite fantasy_points for a past race.
+    fantasy_path = PREDICTIONS_DIR / f"round{round_num}" / "fantasy_points.parquet"
+    if not args.force and is_race_completed(round_num, args.year) and fantasy_path.exists():
+        print(f"\n  [SKIP] Race for round {round_num} has already happened and "
+              f"fantasy_points.parquet exists.")
+        print(f"  Refusing to overwrite — this would pollute the accuracy archive.")
+        print(f"  Pass --force to override.")
         return
 
     # Load predictions

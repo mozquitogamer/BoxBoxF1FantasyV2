@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-05-07T07:26:32.636998+00:00",
+  "generated_at": "2026-05-16T05:12:23.353111+00:00",
   "rounds": [
     {
       "round": 1,
@@ -16,7 +16,7 @@
       "name": "Chinese Grand Prix",
       "circuit": "Shanghai",
       "date": "2026-03-15",
-      "has_predictions": false,
+      "has_predictions": true,
       "has_post_race": true,
       "has_actual": true
     },

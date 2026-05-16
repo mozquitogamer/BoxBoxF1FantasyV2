@@ -112,6 +112,41 @@ def fastf1_round(internal_round: int, year: int = CURRENT_SEASON) -> int:
     skipped = sum(1 for r in CANCELLED_ROUNDS_2026 if r < internal_round)
     return internal_round - skipped
 
+
+def is_race_completed(round_num: int, year: int = CURRENT_SEASON) -> bool:
+    """Return True if the race date for the given round is in the past.
+
+    Used by prediction scripts to refuse to overwrite archived predictions
+    for races that have already happened (which would pollute the accuracy
+    archive with hindsight). Reads race date from data/seed/races.json.
+
+    Returns False if the round is not found, is cancelled, or has no date.
+    """
+    import json
+    from datetime import datetime
+    races_path = SEED_DIR / "races.json"
+    if not races_path.exists():
+        return False
+    try:
+        with open(races_path) as f:
+            races = json.load(f).get("races", [])
+    except Exception:
+        return False
+    for r in races:
+        if r.get("round") != round_num:
+            continue
+        if r.get("cancelled"):
+            return False
+        date_str = r.get("date")
+        if not date_str:
+            return False
+        try:
+            race_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            return False
+        return race_date < datetime.now().date()
+    return False
+
 # -- Number of grid positions (11 teams × 2 drivers) --------------------------
 GRID_SIZE: int = 22
 NUM_CONSTRUCTORS: int = 11
