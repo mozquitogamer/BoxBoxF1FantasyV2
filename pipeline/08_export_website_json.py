@@ -44,6 +44,11 @@ from config.track_classifications import (
     TRACK_FEATURE_NAMES,
     RACE_NAME_TO_CIRCUIT,
 )
+from pipeline.audit import (
+    record_prediction_event,
+    load_prediction_metadata,
+    load_actuals,
+)
 
 
 VALID_PHASES = ("pre_fp", "post_fp", "post_quali")
@@ -55,17 +60,29 @@ def detect_phase(round_num: int, year: int = CURRENT_SEASON) -> str:
     Used to tag the prediction archive (predictions_round{N}_{phase}.json) so
     the accuracy page can show how the forecast evolved as data arrived.
 
-    NOTE: This is best-effort based on CURRENT data state. It labels by what's
-    available now, not necessarily what was available when the prediction was
-    made. For new predictions from run_weekend.py, --phase is passed explicitly
-    and this auto-detection is bypassed.
-
-    Detection heuristic (in priority order):
-      - post_quali: jolpica/qualifying.json has QualifyingResults for this round
-      - post_fp:    FP-derived feature parquets exist for this round
-      - pre_fp:     otherwise (priors-only prediction)
+    PRIORITY ORDER:
+      1. **prediction_metadata.json sidecar** — written by 06_run_predictions
+         at predict time. Definitive: records the phase the predictor actually
+         ran in, including whether it loaded FP features and whether actual
+         quali was available. This is the source of truth when present.
+      2. Data-state inference (legacy fallback) — best-effort lookup based on
+         what's available now. Less reliable: current data state can differ
+         from what was available when the prediction was made.
     """
-    # Post-quali check: does Jolpica have qualifying results for this round?
+    # Source of truth: the sidecar written by 06_run_predictions.
+    sidecar = PREDICTIONS_DIR / f"round{round_num}" / "prediction_metadata.json"
+    if sidecar.exists():
+        try:
+            with open(sidecar) as f:
+                meta = json.load(f)
+            phase = meta.get("phase")
+            if phase in VALID_PHASES:
+                return phase
+        except Exception:
+            pass
+
+    # Legacy fallback: infer from data files. Only used when the sidecar is
+    # missing (e.g. for archives generated before the sidecar mechanism existed).
     quali_path = RAW_DIR / "jolpica" / f"year{year}" / f"round{round_num}" / "qualifying.json"
     if quali_path.exists():
         try:
@@ -77,7 +94,6 @@ def detect_phase(round_num: int, year: int = CURRENT_SEASON) -> str:
         except Exception:
             pass
 
-    # Post-FP check: do FP-derived feature parquets exist?
     fp_features_dir = FEATURES_DIR / f"round{round_num}"
     if fp_features_dir.exists() and any(fp_features_dir.glob("*.parquet")):
         return "post_fp"
@@ -522,6 +538,10 @@ def main():
                         help="Override race-completed guards (overwrite existing per-round archives)")
     parser.add_argument("--reconstructed", action="store_true",
                         help="Mark this export as a post-hoc reconstruction (sets reconstructed=true in JSON)")
+    parser.add_argument("--audit-label", type=str, default=None,
+                        help="Free-form note to attach to the audit log entry (e.g. 'recovery', 'manual_rerun')")
+    parser.add_argument("--no-audit", action="store_true",
+                        help="Skip writing an audit log entry (use sparingly; defeats the safety net)")
     args = parser.parse_args()
 
     round_num = args.round
@@ -570,6 +590,23 @@ def main():
             force=args.force,
         )
         print(f"  {len(predictions['drivers'])} drivers, {len(predictions['constructors'])} constructors")
+
+        # Append-only audit log: record this prediction event with a full snapshot
+        # in data/audit/. Survives canonical-archive overwrites and gives us a
+        # recovery path if web/public/data/ files get corrupted.
+        if not args.no_audit:
+            try:
+                audit_result = record_prediction_event(
+                    round_num=round_num,
+                    phase=phase,
+                    predictions_json=predictions,
+                    prediction_metadata=load_prediction_metadata(round_num),
+                    actuals_json=load_actuals(round_num),
+                    event_label=args.audit_label or ("reconstructed" if args.reconstructed else None),
+                )
+                print(f"  Audit -> {audit_result['snapshot_path']}")
+            except Exception as e:
+                print(f"  WARNING: audit logging failed: {e}")
 
     # 2. Season summary
     print("[2] Building season summary...")

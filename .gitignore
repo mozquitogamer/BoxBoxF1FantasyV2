@@ -20,12 +20,29 @@ env/
 
 # Data (too large for git — stored locally/OneDrive)
 data/raw/
-data/processed/
 data/predictions/
 
+# data/processed/ is mostly too large too, but we keep model_rows in git
+# for reproducibility (the trained models depend on this feature data).
+data/processed/features/
+data/processed/laps/
+data/processed/model_inputs/
+data/processed/jolpica/normalized/
+data/processed/jolpica/circuit_features/
+# (data/processed/jolpica/model_rows/ is intentionally NOT excluded)
+
 # Models (regenerated via training pipeline)
-models/trained/
+# Keep trained models in git so the predictions are reproducible from a
+# clean checkout. Most .pkl files are legacy/unused — exclude those, but
+# keep fp_signal_model.pkl since 06_run_predictions still loads it.
+models/**/fp_model.pkl
+models/**/quali_model.pkl
+models/**/race_model.pkl
 models/training_data/
+
+# Audit log + snapshots — append-only history of every prediction event.
+# Tracked in git for cross-machine durability.
+# (data/audit/ is intentionally NOT excluded)
 
 # FastF1 cache
 data/raw/fastf1/cache/

@@ -1,0 +1,402 @@
+{
+  "trained_at": "2026-05-16T07:15:16.318882",
+  "current_season": 2026,
+  "training_data": "D:\\OneDrive\\BoxBoxF1FantasyV2\\models\\training_data\\all_training_data.parquet",
+  "total_rows": 2701,
+  "seasons": [
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "fp_coverage": "41/2701 (1.5%)",
+  "qualifying_model": {
+    "algorithm": "XGBRanker (rank:pairwise)",
+    "save_format": "json",
+    "n_features": 85,
+    "training_samples": 2701,
+    "params": {
+      "n_estimators": 1200,
+      "learning_rate": 0.025,
+      "max_depth": 3,
+      "subsample": 0.85,
+      "colsample_bytree": 0.85,
+      "min_child_weight": 3,
+      "reg_alpha": 0.1,
+      "reg_lambda": 1.0
+    },
+    "walk_forward_results": [
+      {
+        "test_year": 2022,
+        "train_size": 779,
+        "test_size": 440,
+        "mae": 3.0682,
+        "rmse": 4.0726,
+        "kendall_tau": 0.5842,
+        "top3_accuracy": 0.6667
+      },
+      {
+        "test_year": 2023,
+        "train_size": 1219,
+        "test_size": 440,
+        "mae": 3.6705,
+        "rmse": 4.8816,
+        "kendall_tau": 0.4859,
+        "top3_accuracy": 0.5303
+      },
+      {
+        "test_year": 2024,
+        "train_size": 1659,
+        "test_size": 479,
+        "mae": 3.3194,
+        "rmse": 4.429,
+        "kendall_tau": 0.5366,
+        "top3_accuracy": 0.5139
+      },
+      {
+        "test_year": 2025,
+        "train_size": 2138,
+        "test_size": 478,
+        "mae": 3.3682,
+        "rmse": 4.4852,
+        "kendall_tau": 0.5285,
+        "top3_accuracy": 0.6806
+      },
+      {
+        "test_year": 2026,
+        "train_size": 2616,
+        "test_size": 85,
+        "mae": 3.4353,
+        "rmse": 4.6526,
+        "kendall_tau": 0.5351,
+        "top3_accuracy": 0.4167
+      }
+    ],
+    "walk_forward_mean_mae": 3.3723,
+    "walk_forward_mean_kendall_tau": 0.5341,
+    "walk_forward_mean_top3_accuracy": 0.5616,
+    "top_features": {
+      "sim_weighted_points_5": 0.0402,
+      "driver_vs_field_season": 0.0381,
+      "driver_season_med_quali": 0.0255,
+      "constructor_season_avg_quali": 0.0248,
+      "constructor_vs_field_season": 0.0235,
+      "driver_season_avg_quali": 0.0225,
+      "sim_weighted_quali_5": 0.0216,
+      "sector_2_delta": 0.019,
+      "driver_roll_quali_5": 0.0173,
+      "constructor_roll_quali_5": 0.017,
+      "top5_vs_top10": 0.0168,
+      "sim_weighted_quali_3": 0.0156,
+      "quali_skill": 0.0156,
+      "sim_weighted_finishpos_5": 0.0156,
+      "prior_vs_fp_rank": 0.0147
+    }
+  },
+  "race_model": {
+    "algorithm": "XGBRanker (rank:pairwise)",
+    "save_format": "json",
+    "n_features": 101,
+    "training_samples": 2314,
+    "trained_on": "actual quali_position",
+    "used_for": "post-quali inference (actual quali known)",
+    "params": {
+      "n_estimators": 650,
+      "learning_rate": 0.03,
+      "max_depth": 5,
+      "subsample": 0.85,
+      "colsample_bytree": 0.85,
+      "min_child_weight": 5
+    },
+    "walk_forward_results": [
+      {
+        "test_year": 2022,
+        "train_size": 663,
+        "test_size": 366,
+        "mae": 2.4153,
+        "rmse": 3.315,
+        "kendall_tau": 0.5997,
+        "top3_accuracy": 0.7121
+      },
+      {
+        "test_year": 2023,
+        "train_size": 1029,
+        "test_size": 374,
+        "mae": 2.3583,
+        "rmse": 3.1926,
+        "kendall_tau": 0.6193,
+        "top3_accuracy": 0.5758
+      },
+      {
+        "test_year": 2024,
+        "train_size": 1403,
+        "test_size": 425,
+        "mae": 2.2118,
+        "rmse": 3.0417,
+        "kendall_tau": 0.6587,
+        "top3_accuracy": 0.6389
+      },
+      {
+        "test_year": 2025,
+        "train_size": 1828,
+        "test_size": 419,
+        "mae": 2.463,
+        "rmse": 3.3762,
+        "kendall_tau": 0.6041,
+        "top3_accuracy": 0.7639
+      },
+      {
+        "test_year": 2026,
+        "train_size": 2247,
+        "test_size": 67,
+        "mae": 1.8806,
+        "rmse": 2.5275,
+        "kendall_tau": 0.7098,
+        "top3_accuracy": 0.5833
+      }
+    ],
+    "walk_forward_mean_mae": 2.2658,
+    "walk_forward_mean_kendall_tau": 0.6383,
+    "walk_forward_mean_top3_accuracy": 0.6548,
+    "top_features": {
+      "grid_advantage": 0.0589,
+      "quali_position": 0.0334,
+      "best_3_lap_avg": 0.0276,
+      "constructor_season_avg_quali": 0.0188,
+      "sim_weighted_points_5": 0.0181,
+      "total_laps": 0.0169,
+      "is_top10_quali": 0.0169,
+      "avg_lap_time": 0.0147,
+      "best_sector_1": 0.0145,
+      "sim_weighted_quali_5": 0.0132,
+      "is_pole_position": 0.013,
+      "driver_season_med_quali": 0.0129,
+      "short_run_best": 0.0127,
+      "constructor_vs_field_season": 0.0125,
+      "driver_vs_field_season": 0.0123
+    }
+  },
+  "race_model_fp": {
+    "algorithm": "XGBRanker (rank:pairwise)",
+    "save_format": "json",
+    "n_features": 101,
+    "training_samples": 2314,
+    "trained": true,
+    "trained_on": "walk-forward predicted quali_position",
+    "used_for": "post-FP inference (predicted quali only)",
+    "params": {
+      "n_estimators": 650,
+      "learning_rate": 0.03,
+      "max_depth": 5,
+      "subsample": 0.85,
+      "colsample_bytree": 0.85,
+      "min_child_weight": 5
+    },
+    "walk_forward_results": [
+      {
+        "test_year": 2022,
+        "train_size": 663,
+        "test_size": 366,
+        "mae": 2.7869,
+        "rmse": 3.7859,
+        "kendall_tau": 0.5255,
+        "top3_accuracy": 0.6061
+      },
+      {
+        "test_year": 2023,
+        "train_size": 1029,
+        "test_size": 374,
+        "mae": 2.8663,
+        "rmse": 3.6717,
+        "kendall_tau": 0.541,
+        "top3_accuracy": 0.4091
+      },
+      {
+        "test_year": 2024,
+        "train_size": 1403,
+        "test_size": 425,
+        "mae": 2.7059,
+        "rmse": 3.6622,
+        "kendall_tau": 0.5827,
+        "top3_accuracy": 0.5833
+      },
+      {
+        "test_year": 2025,
+        "train_size": 1828,
+        "test_size": 419,
+        "mae": 2.9785,
+        "rmse": 3.9604,
+        "kendall_tau": 0.5312,
+        "top3_accuracy": 0.6667
+      },
+      {
+        "test_year": 2026,
+        "train_size": 2247,
+        "test_size": 67,
+        "mae": 2.4776,
+        "rmse": 3.0174,
+        "kendall_tau": 0.6089,
+        "top3_accuracy": 0.5833
+      }
+    ],
+    "walk_forward_mean_mae": 2.763,
+    "walk_forward_mean_kendall_tau": 0.5579,
+    "walk_forward_mean_top3_accuracy": 0.5697,
+    "post_fp_mae_delta_vs_race_model": 0.9251,
+    "top_features": {
+      "sim_weighted_points_5": 0.0258,
+      "grid_advantage": 0.0257,
+      "median_lap_time": 0.0239,
+      "driver_vs_field_season": 0.0227,
+      "avg_sector_1": 0.0226,
+      "quali_position": 0.0199,
+      "driver_season_med_quali": 0.019,
+      "constructor_vs_field_season": 0.0176,
+      "lap_time_std": 0.0175,
+      "tire_mgmt": 0.0155,
+      "driver_season_avg_quali": 0.0152,
+      "sim_weighted_quali_5": 0.0151,
+      "sector_2_delta": 0.0151,
+      "constructor_season_avg_quali": 0.0149,
+      "roll_points_5": 0.0139
+    }
+  },
+  "fp_signal_model": {
+    "algorithm": "ExtraTreesRegressor",
+    "save_format": "pkl",
+    "n_features": 11,
+    "training_samples": 41,
+    "trained": true
+  },
+  "sprint_model": {
+    "algorithm": "XGBRanker (rank:pairwise)",
+    "save_format": "json",
+    "n_features": 107,
+    "training_samples": 523,
+    "trained": true,
+    "trained_on": "actual quali_position + actual sprint_grid",
+    "used_for": "post-sprint-quali inference (sprint_grid known)",
+    "params": {
+      "n_estimators": 400,
+      "learning_rate": 0.035,
+      "max_depth": 4,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "min_child_weight": 5,
+      "reg_alpha": 0.2,
+      "reg_lambda": 1.5
+    },
+    "walk_forward_results": [
+      {
+        "test_year": 2022,
+        "train_size": 60,
+        "test_size": 60,
+        "mae": 3.5,
+        "rmse": 4.5971,
+        "kendall_tau": 0.5158,
+        "top3_accuracy": 0.8889
+      },
+      {
+        "test_year": 2023,
+        "train_size": 120,
+        "test_size": 120,
+        "mae": 3.3833,
+        "rmse": 4.4272,
+        "kendall_tau": 0.5298,
+        "top3_accuracy": 0.5556
+      },
+      {
+        "test_year": 2024,
+        "train_size": 240,
+        "test_size": 120,
+        "mae": 2.7167,
+        "rmse": 3.8579,
+        "kendall_tau": 0.6158,
+        "top3_accuracy": 0.7778
+      },
+      {
+        "test_year": 2025,
+        "train_size": 360,
+        "test_size": 119,
+        "mae": 3.9664,
+        "rmse": 5.4186,
+        "kendall_tau": 0.4487,
+        "top3_accuracy": 0.7222
+      },
+      {
+        "test_year": 2026,
+        "train_size": 479,
+        "test_size": 44,
+        "mae": 3.2273,
+        "rmse": 4.3537,
+        "kendall_tau": 0.5844,
+        "top3_accuracy": 0.5
+      }
+    ]
+  },
+  "sprint_model_fp": {
+    "algorithm": "N/A",
+    "save_format": "json",
+    "n_features": 0,
+    "training_samples": 0,
+    "trained": false,
+    "trained_on": "walk-forward predicted quali for both quali_position and sprint_grid",
+    "used_for": "post-FP inference on sprint weekends (pre-sprint-quali)",
+    "params": {},
+    "walk_forward_results": [
+      {
+        "test_year": 2022,
+        "train_size": 60,
+        "test_size": 60,
+        "mae": 4.1333,
+        "rmse": 5.4955,
+        "kendall_tau": 0.4035,
+        "top3_accuracy": 0.7778
+      },
+      {
+        "test_year": 2023,
+        "train_size": 120,
+        "test_size": 120,
+        "mae": 3.6167,
+        "rmse": 4.7258,
+        "kendall_tau": 0.4895,
+        "top3_accuracy": 0.3333
+      },
+      {
+        "test_year": 2024,
+        "train_size": 240,
+        "test_size": 120,
+        "mae": 3.2667,
+        "rmse": 4.4328,
+        "kendall_tau": 0.5404,
+        "top3_accuracy": 0.6667
+      },
+      {
+        "test_year": 2025,
+        "train_size": 360,
+        "test_size": 119,
+        "mae": 4.5042,
+        "rmse": 6.0335,
+        "kendall_tau": 0.3327,
+        "top3_accuracy": 0.6667
+      },
+      {
+        "test_year": 2026,
+        "train_size": 479,
+        "test_size": 44,
+        "mae": 4.5,
+        "rmse": 5.6367,
+        "kendall_tau": 0.4286,
+        "top3_accuracy": 0.1667
+      }
+    ],
+    "walk_forward_mean_mae": 4.0042,
+    "walk_forward_mean_kendall_tau": 0.4389,
+    "walk_forward_mean_top3_accuracy": 0.5222,
+    "post_fp_mae_delta_vs_sprint_model": -0.1465,
+    "top_features": {}
+  }
+}

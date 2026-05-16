@@ -801,6 +801,47 @@ def run_predictions(
     output_path = output_dir / "predictions.parquet"
     output_df.to_parquet(output_path, index=False, engine="pyarrow")
 
+    # Write prediction metadata sidecar — the DEFINITIVE record of what phase
+    # this prediction ran in. Read by 08_export_website_json.py instead of
+    # inferring from data state (which can drift). The sidecar is the source
+    # of truth.
+    from datetime import datetime, timezone
+    import hashlib
+    has_fp = (fp_df is not None) and (not fp_df.empty) and (not skip_fp)
+    if is_post_quali:
+        resolved_phase = "post_quali"
+    elif has_fp:
+        resolved_phase = "post_fp"
+    else:
+        resolved_phase = "pre_fp"
+
+    # Hash the model file we actually used so anyone can verify reproducibility.
+    def _file_sha256(p):
+        try:
+            with open(p, "rb") as f:
+                return hashlib.sha256(f.read()).hexdigest()[:16]
+        except Exception:
+            return None
+
+    race_model_used = race_fp_path if use_fp_race_model else race_path
+    metadata = {
+        "round": round_num,
+        "year": year,
+        "phase": resolved_phase,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "is_post_quali": is_post_quali,
+        "used_fp_features": has_fp,
+        "skip_fp_flag": skip_fp,
+        "force_flag": force,
+        "race_model_used": race_model_used.name,
+        "quali_model_sha256_16": _file_sha256(quali_path),
+        "race_model_sha256_16": _file_sha256(race_model_used),
+    }
+    metadata_path = output_dir / "prediction_metadata.json"
+    with open(metadata_path, "w") as f:
+        json.dump(metadata, f, indent=2)
+    print(f"Saved -> {metadata_path}  (phase={resolved_phase})")
+
     # Pretty print
     print(f"\n{'=' * 70}")
     print(f"PREDICTIONS — {year} Round {round_num}")
