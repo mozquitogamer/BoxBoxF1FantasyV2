@@ -234,7 +234,19 @@ Generated data-driven articles. Race previews, post-race reviews, season trends.
 
 ## About Tab
 
-Background on how BoxBoxF1Fantasy works — the ML pipeline, data sources, scoring methodology, project credits.
+Background on how BoxBoxF1Fantasy works — the ML pipeline (high-level), data sources, scoring methodology, known limitations, and project credits.
+
+It also has a **Support BoxBox** card with Ko-fi and PayPal links if you want to chip in. The site is free and stays free at this baseline; tips help cover hosting and keep the development time funded. (A subscription tier for advanced features may launch later — when it does, it'll be clearly delineated and the existing features remain free.)
+
+---
+
+## Footer (every page)
+
+Below the main content on every page:
+
+- **Social:** X, YouTube, TikTok
+- **Support:** Ko-fi (☕) and PayPal — same links as the About tab card, just always within reach
+- **Disclaimer:** the standard "not affiliated with F1/FIA/etc." legalese
 
 ---
 

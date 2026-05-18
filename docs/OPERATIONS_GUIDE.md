@@ -431,23 +431,39 @@ Update after each race once F1 Fantasy publishes new prices.
 ```json
 {
   "drivers": {
-    "VER": 28.2,
-    "RUS": 30.1,
+    "VER": { "current_price": 28.2, "starting_price": 27.7 },
+    "RUS": { "current_price": 28.6, "starting_price": 27.4 },
     ...
   },
   "constructors": {
-    "mercedes": 30.2,
+    "mercedes": { "current_price": 30.5, "starting_price": 29.3 },
     ...
   },
   "price_history": {
-    "1": { "drivers": { ... }, "constructors": { ... } },
-    "2": { ... },
-    ...
-  }
+    "0": { "note": "Season start", "drivers": { ... }, "constructors": { ... } },
+    "1": { "note": "After Australian Grand Prix", "drivers": { ... }, "constructors": { ... } },
+    "3": { ... },
+    "6": { ... }
+  },
+  "last_updated": "2026-05-16",
+  "price_after_round": 6
 }
 ```
 
-The top-level `drivers` and `constructors` are the *current* prices used for the upcoming round. `price_history.{N}` stores prices snapshotted *after round N's price update* (i.e. the prices for round N+1). The website's price tracker reads both.
+The top-level `drivers.{ABBREV}.current_price` and `constructors.{ID}.current_price` are the *current* prices used for the upcoming round. `price_history.{N}` stores the prices that were in effect *for round N+1* (i.e. snapshotted after round N's price update). Keys are strings of round numbers; cancelled rounds are skipped (so 2026 jumps `0, 1, 2, 3, 6, 7, ...`). The website's price tracker reads both.
+
+Also bump `last_updated` and `price_after_round` when you update.
+
+> **Stale-price guard:** `08_export_website_json.py` now prints a loud warning if `season_summary.rounds` has completed-race actuals for rounds beyond the latest `price_history` entry. If you see this banner:
+> ```
+> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+> ! WARNING: prices in fantasy_prices.json look stale.
+> !   - latest price_history entry: round X
+> !   - highest completed race:     round Y
+> ! ...
+> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+> ```
+> ...stop, update `fantasy_prices.json` with the latest race's prices, then re-run the export. Otherwise every price-change bracket, PPM rating, value score, and the optimizer's `budget_gain` strategy will silently use pre-race prices and produce wrong answers.
 
 ### `data/seed/official_fantasy_points.json`
 
@@ -932,6 +948,17 @@ When you change `web/public/app.js`, bump the version in `web/public/index.html`
 ```
 
 The data JSONs are fetched with timestamp query params (`?t=Date.now()`) automatically, so they don't need versioning.
+
+### Donation links (Ko-fi + PayPal)
+
+Hard-coded in `web/public/index.html` in two places:
+
+- **Footer:** lines ~613-619 (`<a href="https://ko-fi.com/..." class="social-link support-link support-link-kofi">` and the PayPal equivalent immediately below)
+- **About tab Support card:** lines ~593-605 (the `<a href="..." class="support-btn support-btn-kofi">` and PayPal equivalent inside `<div class="about-section support-section">`)
+
+Currently set to `https://ko-fi.com/boxboxf1fantasy` and `https://paypal.me/boxboxf1fantasy`. To change them, edit both copies in `index.html` (footer + About tab) so they stay in sync. Styles are in `web/public/styles.css` under `--- Footer support links` and `--- About tab support card` comments.
+
+No backend, no third-party widgets — just static anchor links opening in new tabs. To add a third link (e.g., a Buy Me a Coffee or Wise payment link later), clone one of the existing `<a>` blocks and update the href + title + class. The CSS already has `.support-btn` as the base class so you'd just need brand-color overrides for the new platform.
 
 ---
 
