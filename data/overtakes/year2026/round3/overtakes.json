@@ -129,7 +129,9 @@
   "pitstops": {
     "source": "openf1",
     "session_key": 11253,
-    "total_stops": 20,
+    "total_stops": 29,
+    "stops_with_stationary": 20,
+    "stops_missing_stationary": 9,
     "fastest_stop": {
       "driver": "HAM",
       "lap": 22,
@@ -142,6 +144,14 @@
           "lap": 16,
           "stop_duration": 2.5,
           "lane_duration": 23.316
+        }
+      ],
+      "BEA": [
+        {
+          "lap": 16,
+          "stop_duration": null,
+          "lane_duration": 25.0,
+          "stationary_missing": true
         }
       ],
       "LEC": [
@@ -163,6 +173,14 @@
           "lap": 18,
           "stop_duration": 2.4,
           "lane_duration": 23.444
+        }
+      ],
+      "LIN": [
+        {
+          "lap": 18,
+          "stop_duration": null,
+          "lane_duration": 26.3,
+          "stationary_missing": true
         }
       ],
       "OCO": [
@@ -217,6 +235,12 @@
           "lap": 21,
           "stop_duration": 4.3,
           "lane_duration": 26.458
+        },
+        {
+          "lap": 23,
+          "stop_duration": null,
+          "lane_duration": 24.014,
+          "stationary_missing": true
         }
       ],
       "ANT": [
@@ -247,6 +271,14 @@
           "lane_duration": 24.49
         }
       ],
+      "LAW": [
+        {
+          "lap": 22,
+          "stop_duration": null,
+          "lane_duration": 24.1,
+          "stationary_missing": true
+        }
+      ],
       "BOR": [
         {
           "lap": 22,
@@ -271,6 +303,38 @@
           "lap": 45,
           "stop_duration": 2.7,
           "lane_duration": 23.072
+        },
+        {
+          "lap": 46,
+          "stop_duration": null,
+          "lane_duration": 24.1,
+          "stationary_missing": true
+        },
+        {
+          "lap": 47,
+          "stop_duration": null,
+          "lane_duration": 26.0,
+          "stationary_missing": true
+        },
+        {
+          "lap": 48,
+          "stop_duration": null,
+          "lane_duration": 32.7,
+          "stationary_missing": true
+        },
+        {
+          "lap": 49,
+          "stop_duration": null,
+          "lane_duration": 24.3,
+          "stationary_missing": true
+        }
+      ],
+      "HUL": [
+        {
+          "lap": 23,
+          "stop_duration": null,
+          "lane_duration": 23.9,
+          "stationary_missing": true
         }
       ]
     }

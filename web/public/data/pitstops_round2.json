@@ -2,43 +2,138 @@
   "round": 2,
   "by_constructor": {
     "red_bull": [
-      2.7,
-      5.7,
-      3.4
+      {
+        "lap": 1,
+        "stationary": 2.7,
+        "lane": 23.1,
+        "stationary_missing": false
+      },
+      {
+        "lap": 10,
+        "stationary": 5.7,
+        "lane": 25.7,
+        "stationary_missing": false
+      },
+      {
+        "lap": 9,
+        "stationary": 3.4,
+        "lane": 23.7,
+        "stationary_missing": false
+      }
     ],
     "racing_bulls": [
-      2.5,
-      2.9
+      {
+        "lap": 9,
+        "stationary": 2.5,
+        "lane": 22.7,
+        "stationary_missing": false
+      },
+      {
+        "lap": 42,
+        "stationary": 2.9,
+        "lane": 23.3,
+        "stationary_missing": false
+      }
     ],
     "williams": [
-      3.1
+      {
+        "lap": 9,
+        "stationary": 3.1,
+        "lane": 23.1,
+        "stationary_missing": false
+      }
     ],
     "mercedes": [
-      2.9,
-      3.2
+      {
+        "lap": 10,
+        "stationary": 2.9,
+        "lane": 23.0,
+        "stationary_missing": false
+      },
+      {
+        "lap": 10,
+        "stationary": 3.2,
+        "lane": 23.4,
+        "stationary_missing": false
+      }
     ],
     "ferrari": [
-      2.4,
-      3.5
+      {
+        "lap": 10,
+        "stationary": 2.4,
+        "lane": 22.4,
+        "stationary_missing": false
+      },
+      {
+        "lap": 10,
+        "stationary": 3.5,
+        "lane": 25.6,
+        "stationary_missing": false
+      }
     ],
     "alpine": [
-      2.8,
-      2.6
+      {
+        "lap": 10,
+        "stationary": 2.8,
+        "lane": 23.5,
+        "stationary_missing": false
+      },
+      {
+        "lap": 32,
+        "stationary": 2.6,
+        "lane": 23.2,
+        "stationary_missing": false
+      }
     ],
     "haas": [
-      2.8,
-      5.7,
-      26.9
+      {
+        "lap": 10,
+        "stationary": null,
+        "lane": 23.0,
+        "stationary_missing": true
+      },
+      {
+        "lap": 29,
+        "stationary": 5.7,
+        "lane": 26.0,
+        "stationary_missing": false
+      },
+      {
+        "lap": 46,
+        "stationary": 26.9,
+        "lane": 47.1,
+        "stationary_missing": false
+      }
     ],
     "cadillac": [
-      7.4,
-      5.5
+      {
+        "lap": 10,
+        "stationary": 7.4,
+        "lane": 27.8,
+        "stationary_missing": false
+      },
+      {
+        "lap": 11,
+        "stationary": 5.5,
+        "lane": 26.2,
+        "stationary_missing": false
+      }
     ],
     "aston_martin": [
-      2.8
+      {
+        "lap": 31,
+        "stationary": 2.8,
+        "lane": 23.3,
+        "stationary_missing": false
+      }
     ],
     "audi": [
-      16.1
+      {
+        "lap": 35,
+        "stationary": 16.1,
+        "lane": 37.4,
+        "stationary_missing": false
+      }
     ]
   }
 }

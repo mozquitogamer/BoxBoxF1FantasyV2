@@ -10,22 +10,27 @@
       "round": 6,
       "method": "openf1",
       "session_key": 11280,
-      "total_overtakes": 183,
+      "total_overtakes": 197,
       "include_pitstops": false,
       "drivers": [
         {
           "driver": "VER",
           "driver_number": 3,
-          "overtakes": 19
+          "overtakes": 21
         },
         {
           "driver": "ALO",
           "driver_number": 14,
-          "overtakes": 13
+          "overtakes": 14
         },
         {
           "driver": "PER",
           "driver_number": 11,
+          "overtakes": 14
+        },
+        {
+          "driver": "BOR",
+          "driver_number": 5,
           "overtakes": 13
         },
         {
@@ -39,11 +44,6 @@
           "overtakes": 12
         },
         {
-          "driver": "BOR",
-          "driver_number": 5,
-          "overtakes": 12
-        },
-        {
           "driver": "PIA",
           "driver_number": 81,
           "overtakes": 10
@@ -51,7 +51,7 @@
         {
           "driver": "SAI",
           "driver_number": 55,
-          "overtakes": 9
+          "overtakes": 10
         },
         {
           "driver": "LIN",
@@ -59,18 +59,33 @@
           "overtakes": 9
         },
         {
+          "driver": "ALB",
+          "driver_number": 23,
+          "overtakes": 9
+        },
+        {
+          "driver": "BOT",
+          "driver_number": 77,
+          "overtakes": 8
+        },
+        {
+          "driver": "OCO",
+          "driver_number": 31,
+          "overtakes": 7
+        },
+        {
           "driver": "BEA",
           "driver_number": 87,
           "overtakes": 7
         },
         {
-          "driver": "ALB",
-          "driver_number": 23,
+          "driver": "STR",
+          "driver_number": 18,
           "overtakes": 7
         },
         {
-          "driver": "BOT",
-          "driver_number": 77,
+          "driver": "HAD",
+          "driver_number": 6,
           "overtakes": 7
         },
         {
@@ -84,14 +99,9 @@
           "overtakes": 6
         },
         {
-          "driver": "OCO",
-          "driver_number": 31,
-          "overtakes": 6
-        },
-        {
-          "driver": "STR",
-          "driver_number": 18,
-          "overtakes": 6
+          "driver": "GAS",
+          "driver_number": 10,
+          "overtakes": 5
         },
         {
           "driver": "HUL",
@@ -107,16 +117,6 @@
           "driver": "NOR",
           "driver_number": 1,
           "overtakes": 5
-        },
-        {
-          "driver": "HAD",
-          "driver_number": 6,
-          "overtakes": 5
-        },
-        {
-          "driver": "GAS",
-          "driver_number": 10,
-          "overtakes": 4
         },
         {
           "driver": "HAM",
@@ -231,7 +231,9 @@
   "pitstops": {
     "source": "openf1",
     "session_key": 11280,
-    "total_stops": 19,
+    "total_stops": 22,
+    "stops_with_stationary": 19,
+    "stops_missing_stationary": 3,
     "fastest_stop": {
       "driver": "ANT",
       "lap": 26,
@@ -263,6 +265,20 @@
           "lap": 21,
           "stop_duration": 3.3,
           "lane_duration": 23.827
+        },
+        {
+          "lap": 30,
+          "stop_duration": null,
+          "lane_duration": 17.1,
+          "stationary_missing": true
+        }
+      ],
+      "RUS": [
+        {
+          "lap": 20,
+          "stop_duration": null,
+          "lane_duration": 22.0,
+          "stationary_missing": true
         }
       ],
       "LEC": [
@@ -338,6 +354,14 @@
           "lap": 28,
           "stop_duration": 2.5,
           "lane_duration": 22.731
+        }
+      ],
+      "PER": [
+        {
+          "lap": 29,
+          "stop_duration": null,
+          "lane_duration": 23.2,
+          "stationary_missing": true
         }
       ],
       "COL": [

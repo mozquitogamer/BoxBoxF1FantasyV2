@@ -218,11 +218,17 @@ def load_seed_overtakes(year: int, internal_round: int) -> tuple[dict, dict]:
 
 
 def load_openf1_pitstops(year: int, round_num: int) -> Optional[dict]:
-    """Load OpenF1 pit stop stationary times (stop_duration).
+    """Load OpenF1 pit stop stationary times (stop_duration) for scoring.
 
     Returns dict mapping driver abbreviation -> list of stop_duration floats,
     or None if not available. These are the actual "wheels up" service times
     (2-4 seconds) used for F1 Fantasy constructor pit stop scoring.
+
+    Stops where OpenF1 didn't record a stationary time (safety car, retirements,
+    drive-through penalties, sensor dropouts) are EXCLUDED from scoring — F1
+    Fantasy scoring needs a real wheels-up time. They are still counted in the
+    website display via 13_fetch_pitstop_stationary.py with a "stationary_missing"
+    flag, so the constructor pit stop count reflects reality.
     """
     path = DATA_DIR / "overtakes" / f"year{year}" / f"round{round_num}" / "overtakes.json"
     if not path.exists():
@@ -235,10 +241,12 @@ def load_openf1_pitstops(year: int, round_num: int) -> Optional[dict]:
     if not pitstops or not pitstops.get("by_driver"):
         return None
 
-    # Convert to driver_abbrev -> list of stop_duration
+    # Convert to driver_abbrev -> list of stop_duration (filter out nulls — can't score them)
     result = {}
     for abbrev, stops in pitstops["by_driver"].items():
-        result[abbrev] = [s["stop_duration"] for s in stops if s.get("stop_duration")]
+        scored = [s["stop_duration"] for s in stops if s.get("stop_duration") is not None]
+        if scored:
+            result[abbrev] = scored
 
     return result
 

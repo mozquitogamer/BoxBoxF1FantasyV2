@@ -822,6 +822,8 @@ Convenience wrapper around `data/seed/official_fantasy_points.json`. You can als
 --year YYYY                    (default: 2026)
 ```
 
+**Pit stop counts vs scoring:** OpenF1 returns two timing fields per stop — `lane_duration` (pit lane traversal, ~20-25s) and `stop_duration` (stationary wheels-up time, ~2-4s, the F1 Fantasy scoring metric). `stop_duration` is sometimes null when the timing system can't isolate a stationary moment: stops during safety car / VSC, cars pitting to retire, drive-through / stop-go penalties, sensor dropouts. We KEEP every record with either timing field — the constructor pit stop count must reflect reality — but the per-stop output marks `stationary_missing: true` when `stop_duration` is null. Constructor pit stop SCORING (`11_actual_fantasy_points.py::load_openf1_pitstops`) filters out stops with null stationary times since there's nothing to score; they still appear in the website's stop count and tooltip as "n/a" entries. The `pitstops_round{N}.json` output shape is `{ by_constructor: { cid: [{ lap, stationary, lane, stationary_missing }] } }`.
+
 ### `pipeline/calibrate_confidence.py` — MC interval calibrator
 
 ```

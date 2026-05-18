@@ -107,7 +107,7 @@
     },
     "sprint": {
       "session": "Sprint",
-      "event": "Shanghai",
+      "event": "Unknown",
       "year": 2026,
       "round": 2,
       "method": "openf1",
@@ -232,6 +232,8 @@
     "source": "openf1",
     "session_key": 11245,
     "total_stops": 19,
+    "stops_with_stationary": 18,
+    "stops_missing_stationary": 1,
     "fastest_stop": {
       "driver": "HAM",
       "lap": 10,
@@ -310,8 +312,9 @@
       "BEA": [
         {
           "lap": 10,
-          "stop_duration": 2.8,
-          "lane_duration": 22.967
+          "stop_duration": null,
+          "lane_duration": 22.967,
+          "stationary_missing": true
         }
       ],
       "BOT": [

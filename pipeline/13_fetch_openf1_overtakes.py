@@ -294,54 +294,75 @@ def process_session(session_key: int, session_type: str, year: int, round_num: i
 
 
 def fetch_pitstop_times(session_key: int, drivers_map: dict[int, str]) -> Optional[dict]:
-    """Fetch pit stop stationary times (stop_duration) from OpenF1.
+    """Fetch pit stop times from OpenF1.
 
     OpenF1 provides both lane_duration (pit entry to exit, ~18-25s) and
-    stop_duration (stationary "wheels up" time, ~2-4s). The stop_duration
-    is what F1 Fantasy uses for constructor pit stop scoring.
+    stop_duration (stationary "wheels up" time, ~2-4s). F1 Fantasy scores
+    on stop_duration, but we keep every pit stop record we can see — even
+    when stop_duration is missing — so the constructor pit stop count
+    reflects reality.
 
-    Returns dict with per-driver and per-constructor stop times, or None
-    if stop_duration data isn't available.
+    OpenF1's stop_duration goes null in cases like:
+      - Stops during safety car / VSC (sensors lose precision)
+      - Cars pitting to retire (no clean wheels-up moment)
+      - Drive-through or stop-go penalties where the car never fully stops
+      - Sensor failures
+
+    We DO NOT estimate stop_duration when missing. Such stops are flagged
+    with stationary_missing=True so downstream consumers can show them as
+    "n/a" in stationary-time displays but still include them in stop counts.
+
+    Returns dict with per-driver stop records, or None if no pit data at all.
     """
-    print(f"  Fetching pit stop stationary times (session_key={session_key})...")
+    print(f"  Fetching pit stop times (session_key={session_key})...")
     pit_stops = get_pit_stops(session_key)
     if not pit_stops:
         print(f"    No pit stop data available")
         return None
 
-    # Check if stop_duration is populated
-    has_stop_duration = any(ps.get("stop_duration") is not None for ps in pit_stops)
-    if not has_stop_duration:
-        print(f"    stop_duration not available (only lane_duration)")
-        return None
-
     by_driver: dict[str, list[dict]] = {}
+    n_with_stationary = 0
+    n_missing_stationary = 0
+    n_skipped_no_driver = 0
     for ps in pit_stops:
         driver_num = ps.get("driver_number")
+        if driver_num is None:
+            n_skipped_no_driver += 1
+            continue
+
         stop_dur = ps.get("stop_duration")
         lane_dur = ps.get("lane_duration")
         lap = ps.get("lap_number")
 
-        if driver_num is None or stop_dur is None:
-            continue
-
         abbrev = drivers_map.get(driver_num, f"#{driver_num}")
-        by_driver.setdefault(abbrev, []).append({
+        record = {
             "lap": lap,
-            "stop_duration": round(stop_dur, 3),
-            "lane_duration": round(lane_dur, 3) if lane_dur else None,
-        })
+            "stop_duration": round(stop_dur, 3) if stop_dur is not None else None,
+            "lane_duration": round(lane_dur, 3) if lane_dur is not None else None,
+        }
+        if stop_dur is None:
+            record["stationary_missing"] = True
+            n_missing_stationary += 1
+        else:
+            n_with_stationary += 1
+        by_driver.setdefault(abbrev, []).append(record)
 
-    # Find fastest stop
-    all_stops = []
-    for abbrev, stops in by_driver.items():
-        for s in stops:
-            all_stops.append({"driver": abbrev, **s})
+    if n_with_stationary == 0 and n_missing_stationary == 0:
+        print(f"    No usable pit stop records")
+        return None
 
-    fastest = min(all_stops, key=lambda x: x["stop_duration"]) if all_stops else None
-    total_stops = len(all_stops)
+    # Find fastest stop (only among stops with stationary times)
+    all_with_stationary = [
+        {"driver": abbrev, **s}
+        for abbrev, stops in by_driver.items()
+        for s in stops
+        if s.get("stop_duration") is not None
+    ]
+    fastest = min(all_with_stationary, key=lambda x: x["stop_duration"]) if all_with_stationary else None
 
-    print(f"    {total_stops} pit stops with stationary times")
+    total_stops = n_with_stationary + n_missing_stationary
+    print(f"    {total_stops} pit stops total ({n_with_stationary} with stationary time, "
+          f"{n_missing_stationary} stationary missing)")
     if fastest:
         print(f"    Fastest: {fastest['driver']} {fastest['stop_duration']:.3f}s (lap {fastest['lap']})")
 
@@ -349,6 +370,8 @@ def fetch_pitstop_times(session_key: int, drivers_map: dict[int, str]) -> Option
         "source": "openf1",
         "session_key": session_key,
         "total_stops": total_stops,
+        "stops_with_stationary": n_with_stationary,
+        "stops_missing_stationary": n_missing_stationary,
         "fastest_stop": fastest,
         "by_driver": by_driver,
     }

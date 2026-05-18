@@ -45,8 +45,12 @@ def load_driver_to_constructor() -> dict:
 def load_overtakes_pitstops(year: int, round_num: int) -> dict | None:
     """Load the `pitstops.by_driver` block from the OpenF1 overtakes file.
 
-    Returns dict mapping driver_abbrev -> [list of stop_duration floats],
+    Returns dict mapping driver_abbrev -> [list of stop record dicts],
     or None if the file or pitstops block doesn't exist.
+
+    Each stop record has shape:
+        {"lap": int|None, "stationary": float|None, "lane": float|None,
+         "stationary_missing": bool}
     """
     path = DATA_DIR / "overtakes" / f"year{year}" / f"round{round_num}" / "overtakes.json"
     if not path.exists():
@@ -57,30 +61,55 @@ def load_overtakes_pitstops(year: int, round_num: int) -> dict | None:
     if not pitstops or not pitstops.get("by_driver"):
         return None
 
-    result: dict[str, list[float]] = {}
+    result: dict[str, list[dict]] = {}
     for abbrev, stops in pitstops["by_driver"].items():
-        times = [s["stop_duration"] for s in stops if s.get("stop_duration") is not None]
-        if times:
-            result[abbrev] = times
+        cleaned: list[dict] = []
+        for s in stops:
+            stat = s.get("stop_duration")
+            lane = s.get("lane_duration")
+            # Need at least one timing field to be useful
+            if stat is None and lane is None:
+                continue
+            cleaned.append({
+                "lap": s.get("lap"),
+                "stationary": round(stat, 1) if stat is not None else None,
+                "lane": round(lane, 1) if lane is not None else None,
+                "stationary_missing": stat is None,
+            })
+        if cleaned:
+            result[abbrev] = cleaned
     return result
 
 
 def by_driver_to_by_constructor(
-    by_driver: dict[str, list[float]],
+    by_driver: dict[str, list[dict]],
     driver_to_constructor: dict[str, str],
-) -> dict[str, list[float]]:
-    """Aggregate stationary times by constructor."""
-    by_constructor: dict[str, list[float]] = {}
-    for abbrev, times in by_driver.items():
+) -> dict[str, list[dict]]:
+    """Aggregate stop records by constructor."""
+    by_constructor: dict[str, list[dict]] = {}
+    for abbrev, stops in by_driver.items():
         cid = driver_to_constructor.get(abbrev)
         if not cid:
             continue
-        by_constructor.setdefault(cid, []).extend(round(t, 1) for t in times)
+        by_constructor.setdefault(cid, []).extend(stops)
     return by_constructor
 
 
 def save_pitstop_file(round_num: int, by_constructor: dict) -> Path:
-    """Save pitstop data to web data directory."""
+    """Save pitstop data to web data directory.
+
+    Output shape:
+        {
+          "round": N,
+          "by_constructor": {
+            "<cid>": [
+              {"lap": int|null, "stationary": float|null,
+               "lane": float|null, "stationary_missing": bool},
+              ...
+            ]
+          }
+        }
+    """
     output = {
         "round": round_num,
         "by_constructor": by_constructor,
@@ -113,11 +142,24 @@ def process_round(round_num: int, year: int = CURRENT_SEASON) -> bool:
 
     # Summary
     total_stops = sum(len(v) for v in by_constructor.values())
-    print(f"    {total_stops} stops across {len(by_constructor)} constructors")
-    for cid, times in sorted(by_constructor.items(), key=lambda x: min(x[1])):
-        best = min(times)
-        avg = sum(times) / len(times)
-        print(f"      {cid:<18s} best={best:.1f}s avg={avg:.1f}s stops={len(times)}")
+    total_missing = sum(1 for stops in by_constructor.values()
+                       for s in stops if s.get("stationary_missing"))
+    print(f"    {total_stops} stops across {len(by_constructor)} constructors "
+          f"({total_missing} without stationary time)")
+    # Sort teams by best stationary time (treating teams with no measured stops last)
+    def team_sort_key(item):
+        stops_with_stat = [s["stationary"] for s in item[1] if s.get("stationary") is not None]
+        return min(stops_with_stat) if stops_with_stat else 999.0
+    for cid, stops in sorted(by_constructor.items(), key=team_sort_key):
+        stats = [s["stationary"] for s in stops if s.get("stationary") is not None]
+        n_missing = sum(1 for s in stops if s.get("stationary_missing"))
+        if stats:
+            best = min(stats)
+            avg = sum(stats) / len(stats)
+            missing_str = f", {n_missing} n/a" if n_missing else ""
+            print(f"      {cid:<18s} best={best:.1f}s avg={avg:.1f}s stops={len(stops)}{missing_str}")
+        else:
+            print(f"      {cid:<18s} stops={len(stops)} (all without stationary time)")
 
     return True
 

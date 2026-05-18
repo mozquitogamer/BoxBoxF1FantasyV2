@@ -119,7 +119,9 @@
   "pitstops": {
     "source": "openf1",
     "session_key": 11234,
-    "total_stops": 20,
+    "total_stops": 36,
+    "stops_with_stationary": 20,
+    "stops_missing_stationary": 16,
     "fastest_stop": {
       "driver": "LEC",
       "lap": 18,
@@ -127,11 +129,91 @@
       "lane_duration": 17.664
     },
     "by_driver": {
+      "COL": [
+        {
+          "lap": 9,
+          "stop_duration": null,
+          "lane_duration": 27.7,
+          "stationary_missing": true
+        },
+        {
+          "lap": 46,
+          "stop_duration": 2.9,
+          "lane_duration": 18.561
+        }
+      ],
+      "NOR": [
+        {
+          "lap": 11,
+          "stop_duration": null,
+          "lane_duration": 18.2,
+          "stationary_missing": true
+        },
+        {
+          "lap": 34,
+          "stop_duration": null,
+          "lane_duration": 17.6,
+          "stationary_missing": true
+        }
+      ],
+      "OCO": [
+        {
+          "lap": 11,
+          "stop_duration": null,
+          "lane_duration": 18.5,
+          "stationary_missing": true
+        }
+      ],
+      "GAS": [
+        {
+          "lap": 11,
+          "stop_duration": null,
+          "lane_duration": 18.6,
+          "stationary_missing": true
+        }
+      ],
+      "SAI": [
+        {
+          "lap": 11,
+          "stop_duration": null,
+          "lane_duration": 19.8,
+          "stationary_missing": true
+        },
+        {
+          "lap": 33,
+          "stop_duration": 8.0,
+          "lane_duration": 25.939
+        },
+        {
+          "lap": 45,
+          "stop_duration": 19.8,
+          "lane_duration": 34.615
+        }
+      ],
+      "LAW": [
+        {
+          "lap": 11,
+          "stop_duration": null,
+          "lane_duration": 19.1,
+          "stationary_missing": true
+        },
+        {
+          "lap": 33,
+          "stop_duration": 2.8,
+          "lane_duration": 18.19
+        }
+      ],
       "ALO": [
         {
           "lap": 11,
           "stop_duration": 10.0,
           "lane_duration": 25.895
+        },
+        {
+          "lap": 13,
+          "stop_duration": null,
+          "lane_duration": 972.3,
+          "stationary_missing": true
         }
       ],
       "STR": [
@@ -141,9 +223,27 @@
           "lane_duration": 36.686
         },
         {
+          "lap": 26,
+          "stop_duration": null,
+          "lane_duration": 33.1,
+          "stationary_missing": true
+        },
+        {
           "lap": 18,
           "stop_duration": 16.4,
           "lane_duration": 33.182
+        },
+        {
+          "lap": 34,
+          "stop_duration": null,
+          "lane_duration": 1081.5,
+          "stationary_missing": true
+        },
+        {
+          "lap": 39,
+          "stop_duration": null,
+          "lane_duration": 22.4,
+          "stationary_missing": true
         },
         {
           "lap": 46,
@@ -191,6 +291,20 @@
           "lane_duration": 18.506
         }
       ],
+      "VER": [
+        {
+          "lap": 18,
+          "stop_duration": null,
+          "lane_duration": 19.07,
+          "stationary_missing": true
+        },
+        {
+          "lap": 41,
+          "stop_duration": null,
+          "lane_duration": 18.0,
+          "stationary_missing": true
+        }
+      ],
       "BEA": [
         {
           "lap": 18,
@@ -203,6 +317,12 @@
           "lap": 18,
           "stop_duration": 5.2,
           "lane_duration": 22.619
+        },
+        {
+          "lap": 33,
+          "stop_duration": null,
+          "lane_duration": 22.6,
+          "stationary_missing": true
         }
       ],
       "PER": [
@@ -219,6 +339,12 @@
       ],
       "LEC": [
         {
+          "lap": 25,
+          "stop_duration": null,
+          "lane_duration": 17.6,
+          "stationary_missing": true
+        },
+        {
           "lap": 18,
           "stop_duration": 2.2,
           "lane_duration": 17.664
@@ -226,35 +352,15 @@
       ],
       "HAM": [
         {
+          "lap": 28,
+          "stop_duration": null,
+          "lane_duration": 17.7,
+          "stationary_missing": true
+        },
+        {
           "lap": 18,
           "stop_duration": 2.3,
           "lane_duration": 17.741
-        }
-      ],
-      "LAW": [
-        {
-          "lap": 33,
-          "stop_duration": 2.8,
-          "lane_duration": 18.19
-        }
-      ],
-      "SAI": [
-        {
-          "lap": 33,
-          "stop_duration": 8.0,
-          "lane_duration": 25.939
-        },
-        {
-          "lap": 45,
-          "stop_duration": 19.8,
-          "lane_duration": 34.615
-        }
-      ],
-      "COL": [
-        {
-          "lap": 46,
-          "stop_duration": 2.9,
-          "lane_duration": 18.561
         }
       ]
     }

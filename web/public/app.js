@@ -360,12 +360,17 @@ function showFallbackBanner() {
 }
 
 async function loadPitstopData() {
-    // Load pit stop stationary times from pitstop JSON files, keyed by round
-    // so we can compute "last race" vs "season" stats separately.
+    // Load pit stop records from pitstop JSON files, keyed by round so we can
+    // compute "last race" vs "season" stats separately. Each stop is an object
+    // {lap, stationary, lane, stationary_missing} — stationary may be null when
+    // OpenF1 didn't record a wheels-up time (SC/VSC, retirements, penalties).
+    //
     // Shape: window._pitstopData = {
-    //   by_constructor: { [cid]: [{round, times: [...]}, ...] },
-    //   rounds: [1, 2, 3, 6],          // rounds we have stationary data for
-    //   last_round: 6                   // most recent round with data
+    //   by_constructor: {
+    //     [cid]: [{ round, stops: [{lap, stationary, lane, stationary_missing}, ...] }, ...]
+    //   },
+    //   rounds: [1, 2, 3, 6],
+    //   last_round: 6
     // }
     window._pitstopData = { by_constructor: {}, rounds: [], last_round: null };
 
@@ -378,14 +383,27 @@ async function loadPitstopData() {
                 const psData = await resp.json();
                 if (psData && psData.by_constructor) {
                     let roundHasData = false;
-                    for (const [cid, times] of Object.entries(psData.by_constructor)) {
-                        if (!times || times.length === 0) continue;
+                    for (const [cid, stops] of Object.entries(psData.by_constructor)) {
+                        if (!stops || stops.length === 0) continue;
+                        // Back-compat: legacy files were arrays of floats.
+                        // New shape is array of objects with stationary/lane/lap fields.
+                        const normalized = stops.map(s => {
+                            if (typeof s === 'number') {
+                                return { lap: null, stationary: s, lane: null, stationary_missing: false };
+                            }
+                            return {
+                                lap: s.lap ?? null,
+                                stationary: s.stationary ?? null,
+                                lane: s.lane ?? null,
+                                stationary_missing: !!s.stationary_missing,
+                            };
+                        });
                         if (!window._pitstopData.by_constructor[cid]) {
                             window._pitstopData.by_constructor[cid] = [];
                         }
                         window._pitstopData.by_constructor[cid].push({
                             round: r.round,
-                            times: [...times],
+                            stops: normalized,
                         });
                         roundHasData = true;
                     }
@@ -400,15 +418,36 @@ async function loadPitstopData() {
 }
 
 // Compute pit stop stats for one constructor, broken out by scope.
-// Returns null if no data available.
+// Returns null if no data available. Stops with missing stationary time are
+// counted in totalStops/missingStops but excluded from min/median/mean/slow
+// calculations (no time to score against).
 function getConstructorPitStats(constructorId) {
     const ps = window._pitstopData;
     if (!ps || !ps.by_constructor || !ps.by_constructor[constructorId]) return null;
     const rounds = ps.by_constructor[constructorId];
     if (rounds.length === 0) return null;
 
-    const allTimes = rounds.flatMap(r => r.times);
-    if (allTimes.length === 0) return null;
+    const allStops = rounds.flatMap(r => r.stops);
+    if (allStops.length === 0) return null;
+
+    const allTimes = allStops
+        .filter(s => s.stationary != null)
+        .map(s => s.stationary);
+    const missingStops = allStops.filter(s => s.stationary_missing).length;
+
+    // If literally every stop has a missing stationary, return a degenerate stat
+    // bundle so the team still shows up with their stop count.
+    if (allTimes.length === 0) {
+        const lastRound = rounds[rounds.length - 1];
+        return {
+            seasonFastest: null, seasonFastestRound: null,
+            lastFastest: null, lastRoundNum: lastRound ? lastRound.round : null,
+            median: null, mean: null, slowest: null, slowCount: 0,
+            totalStops: allStops.length,
+            missingStops,
+            roundsWithData: rounds.length,
+        };
+    }
 
     const sorted = [...allTimes].sort((a, b) => a - b);
     const median = sorted.length % 2 === 0
@@ -422,12 +461,17 @@ function getConstructorPitStats(constructorId) {
     // Find which round the season-best stop happened in
     let seasonFastestRound = null;
     for (const r of rounds) {
-        if (r.times.includes(seasonFastest)) { seasonFastestRound = r.round; break; }
+        if (r.stops.some(s => s.stationary === seasonFastest)) {
+            seasonFastestRound = r.round;
+            break;
+        }
     }
 
     // Last-race-only stats (most recent round this team had a stop)
     const lastRound = rounds[rounds.length - 1];
-    const lastTimes = lastRound ? lastRound.times : [];
+    const lastTimes = lastRound
+        ? lastRound.stops.filter(s => s.stationary != null).map(s => s.stationary)
+        : [];
     const lastFastest = lastTimes.length ? Math.min(...lastTimes) : null;
     const lastRoundNum = lastRound ? lastRound.round : null;
 
@@ -435,7 +479,8 @@ function getConstructorPitStats(constructorId) {
         seasonFastest, seasonFastestRound,
         lastFastest, lastRoundNum,
         median, mean, slowest, slowCount,
-        totalStops: allTimes.length,
+        totalStops: allStops.length,
+        missingStops,
         roundsWithData: rounds.length,
     };
 }
@@ -1257,18 +1302,24 @@ function renderPitstopPanel() {
                        (r.lastRoundNum !== lastRoundOverall ? ` <span style="color:var(--text-muted);font-size:0.9em;">(R${r.lastRoundNum})</span>` : '');
             }},
             { key: 'seasonFastest',  label: 'Season best',    fmt: r => {
+                if (r.seasonFastest == null) return '—';
                 const isBest = r.seasonFastest === globalBest;
                 return `<span style="color:${isBest ? 'var(--green)' : 'var(--text)'};font-weight:${isBest ? '700' : '500'};">${fmtTime(r.seasonFastest)}</span> <span style="color:var(--text-muted);font-size:0.9em;">R${r.seasonFastestRound}</span>`;
             }},
             { key: 'median',         label: 'Season median',  fmt: r => fmtTime(r.median) },
             { key: 'mean',           label: 'Season avg',     fmt: r => fmtTime(r.mean) },
             { key: 'slowCount',      label: 'Slow (>3.5s)',   fmt: r => {
-                const ratio = `${r.slowCount}/${r.totalStops}`;
-                if (r.slowCount === 0) return `<span style="color:var(--green);">0/${r.totalStops}</span>`;
-                if (r.slowCount / r.totalStops > 0.25) return `<span style="color:var(--red, #ef4444);">${ratio}</span>`;
+                const denom = r.totalStops - (r.missingStops || 0);
+                const ratio = `${r.slowCount}/${denom}`;
+                if (denom === 0) return '<span style="color:var(--text-muted);">—</span>';
+                if (r.slowCount === 0) return `<span style="color:var(--green);">0/${denom}</span>`;
+                if (r.slowCount / denom > 0.25) return `<span style="color:var(--red, #ef4444);">${ratio}</span>`;
                 return ratio;
             }},
-            { key: 'totalStops',     label: 'Stops',          fmt: r => r.totalStops },
+            { key: 'totalStops',     label: 'Stops',          fmt: r => {
+                if (!r.missingStops) return r.totalStops;
+                return `${r.totalStops} <span style="color:var(--text-muted);font-size:0.9em;" title="${r.missingStops} stop(s) without recorded stationary time — typically during safety car / VSC, retirements, or penalty stops">(${r.missingStops} n/a)</span>`;
+            }},
         ];
 
         const thead = cols.map(c => {
@@ -3552,16 +3603,25 @@ function getPitStopStatsHtml(constructorId) {
     const s = getConstructorPitStats(constructorId);
     if (!s) return '';
 
+    const measuredStops = s.totalStops - (s.missingStops || 0);
+    const missingNote = s.missingStops
+        ? ` <span style="color:var(--text-muted);" title="${s.missingStops} stop(s) without recorded stationary time — typically during safety car / VSC, retirements, or penalty stops">(${s.missingStops} n/a)</span>`
+        : '';
+
     const lastRaceLine = s.lastFastest != null
         ? `<span title="Fastest stationary stop in the most recent race (R${s.lastRoundNum})">Last race best: <strong style="color:var(--text)">${s.lastFastest.toFixed(2)}s</strong> <span style="color:var(--text-muted);font-size:0.95em;">R${s.lastRoundNum}</span></span>`
-        : '';
+        : `<span style="color:var(--text-muted);">Last race best: —</span>`;
     const seasonLine = s.seasonFastest != null
         ? `<span title="Team's fastest stationary stop across all completed rounds this season">Season best: <strong style="color:var(--green)">${s.seasonFastest.toFixed(2)}s</strong> <span style="color:var(--text-muted);font-size:0.95em;">R${s.seasonFastestRound}</span></span>`
-        : '';
-    const medianLine = `<span title="Median stationary time across all of this team's stops this season">Season median: <strong>${s.median.toFixed(2)}s</strong></span>`;
-    const slowLine = s.slowCount > 0
-        ? `<span style="color:var(--red, #ef4444);" title="Stops over 3.5s stationary (typically 0 fantasy points)">Slow stops: <strong>${s.slowCount}</strong>/${s.totalStops}</span>`
-        : `<span style="color:var(--green);" title="No stops over 3.5s stationary this season">Slow stops: <strong>0</strong>/${s.totalStops}</span>`;
+        : `<span style="color:var(--text-muted);">Season best: —</span>`;
+    const medianLine = s.median != null
+        ? `<span title="Median stationary time across this team's measured stops">Season median: <strong>${s.median.toFixed(2)}s</strong></span>`
+        : `<span style="color:var(--text-muted);">Season median: —</span>`;
+    const slowLine = measuredStops > 0
+        ? (s.slowCount > 0
+            ? `<span style="color:var(--red, #ef4444);" title="Stops over 3.5s stationary (typically 0 fantasy points)">Slow stops: <strong>${s.slowCount}</strong>/${measuredStops}${missingNote}</span>`
+            : `<span style="color:var(--green);" title="No stops over 3.5s stationary this season">Slow stops: <strong>0</strong>/${measuredStops}${missingNote}</span>`)
+        : `<span style="color:var(--text-muted);">Stops: <strong>${s.totalStops}</strong>${missingNote}</span>`;
 
     return `
     <div class="pit-stats" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--text-secondary);">
