@@ -3026,3 +3026,80 @@ table.sortable th.sort-desc::after {
 
 /* About intro */
 .about-intro { color: var(--text-secondary); margin-bottom: 24px; font-size: 0.95rem; line-height: 1.6; }
+
+/* --- Footer support links (Ko-fi, PayPal) ----------------------------- */
+.footer-divider {
+    display: inline-block;
+    width: 1px;
+    height: 18px;
+    background: var(--border);
+    margin: 0 6px;
+    vertical-align: middle;
+    opacity: 0.6;
+}
+.social-link.support-link {
+    transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.social-link.support-link:hover {
+    transform: translateY(-1px);
+}
+.social-link.support-link-kofi:hover {
+    color: #ff5e5b;
+    border-color: #ff5e5b;
+}
+.social-link.support-link-paypal:hover {
+    color: #003087;
+    border-color: #003087;
+}
+
+/* --- About tab support card ------------------------------------------- */
+.about-section.support-section {
+    border-left: 3px solid var(--accent, #6366f1);
+    background: rgba(99, 102, 241, 0.04);
+    padding: 18px 22px;
+    border-radius: var(--radius-md, 8px);
+    margin-bottom: 20px;
+}
+.about-section.support-section h3 {
+    margin-top: 0;
+}
+.about-section.support-section .support-tagline {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+.support-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+.support-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--radius-md, 8px);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+    color: #fff;
+    border: 1px solid transparent;
+}
+.support-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.support-btn-kofi {
+    background: #ff5e5b;
+}
+.support-btn-paypal {
+    background: #003087;
+}
+@media (max-width: 480px) {
+    .support-buttons { flex-direction: column; }
+    .support-btn { justify-content: center; }
+}
