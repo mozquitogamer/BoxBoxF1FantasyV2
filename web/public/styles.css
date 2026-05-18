@@ -3103,3 +3103,58 @@ table.sortable th.sort-desc::after {
     .support-buttons { flex-direction: column; }
     .support-btn { justify-content: center; }
 }
+
+/* --- Bottom-of-page support strip (visible below every tab) ----------- */
+.page-support-strip {
+    margin-top: 48px;
+    margin-bottom: 24px;
+    padding: 18px 22px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent, #6366f1);
+    background: rgba(99, 102, 241, 0.04);
+    border-radius: var(--radius-md, 8px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.page-support-text {
+    flex: 1;
+    min-width: 220px;
+}
+.page-support-text strong {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 3px;
+    color: var(--text);
+}
+.page-support-text span {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+.page-support-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.page-support-buttons .support-btn {
+    padding: 9px 16px;
+    font-size: 0.85rem;
+}
+@media (max-width: 600px) {
+    .page-support-strip {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px 18px;
+    }
+    .page-support-buttons {
+        width: 100%;
+    }
+    .page-support-buttons .support-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
