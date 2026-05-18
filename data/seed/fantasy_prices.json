@@ -1,112 +1,343 @@
 {
   "season": 2026,
-  "last_updated": "2026-03-31",
-  "price_after_round": 3,
+  "last_updated": "2026-05-16",
+  "price_after_round": 6,
   "currency": "USD_millions",
   "drivers": {
-    "RUS": {"current_price": 28.3, "starting_price": 27.4},
-    "VER": {"current_price": 28.2, "starting_price": 27.7},
-    "NOR": {"current_price": 26.5, "starting_price": 27.2},
-    "PIA": {"current_price": 24.6, "starting_price": 25.5},
-    "ANT": {"current_price": 24.1, "starting_price": 23.2},
-    "LEC": {"current_price": 23.7, "starting_price": 22.8},
-    "HAM": {"current_price": 23.2, "starting_price": 22.5},
-    "HAD": {"current_price": 13.3, "starting_price": 15.1},
-    "GAS": {"current_price": 13.0, "starting_price": 12.0},
-    "SAI": {"current_price": 12.4, "starting_price": 12.0},
-    "ALB": {"current_price": 10.2, "starting_price": 10.5},
-    "ALO": {"current_price": 8.2, "starting_price": 10.0},
-    "BEA": {"current_price": 9.2, "starting_price": 7.4},
-    "OCO": {"current_price": 9.1, "starting_price": 8.0},
-    "LIN": {"current_price": 7.6, "starting_price": 7.0},
-    "COL": {"current_price": 7.6, "starting_price": 6.2},
-    "LAW": {"current_price": 7.5, "starting_price": 7.0},
-    "STR": {"current_price": 6.2, "starting_price": 7.0},
-    "BOR": {"current_price": 5.8, "starting_price": 6.5},
-    "PER": {"current_price": 7.0, "starting_price": 7.0},
-    "HUL": {"current_price": 5.0, "starting_price": 6.0},
-    "BOT": {"current_price": 4.1, "starting_price": 5.0}
+    "RUS": {
+      "current_price": 28.6,
+      "starting_price": 27.4
+    },
+    "VER": {
+      "current_price": 28.3,
+      "starting_price": 27.7
+    },
+    "NOR": {
+      "current_price": 26.4,
+      "starting_price": 27.2
+    },
+    "PIA": {
+      "current_price": 24.7,
+      "starting_price": 25.5
+    },
+    "ANT": {
+      "current_price": 24.4,
+      "starting_price": 23.2
+    },
+    "LEC": {
+      "current_price": 24.0,
+      "starting_price": 22.8
+    },
+    "HAM": {
+      "current_price": 23.5,
+      "starting_price": 22.5
+    },
+    "HAD": {
+      "current_price": 12.7,
+      "starting_price": 15.1
+    },
+    "GAS": {
+      "current_price": 12.8,
+      "starting_price": 12.0
+    },
+    "SAI": {
+      "current_price": 13.0,
+      "starting_price": 12.0
+    },
+    "ALB": {
+      "current_price": 9.6,
+      "starting_price": 10.5
+    },
+    "ALO": {
+      "current_price": 8.0,
+      "starting_price": 10.0
+    },
+    "BEA": {
+      "current_price": 9.4,
+      "starting_price": 7.4
+    },
+    "OCO": {
+      "current_price": 9.7,
+      "starting_price": 8.0
+    },
+    "LIN": {
+      "current_price": 7.0,
+      "starting_price": 7.0
+    },
+    "COL": {
+      "current_price": 8.2,
+      "starting_price": 6.2
+    },
+    "LAW": {
+      "current_price": 8.1,
+      "starting_price": 7.0
+    },
+    "STR": {
+      "current_price": 5.6,
+      "starting_price": 7.0
+    },
+    "BOR": {
+      "current_price": 5.2,
+      "starting_price": 6.5
+    },
+    "PER": {
+      "current_price": 7.6,
+      "starting_price": 7.0
+    },
+    "HUL": {
+      "current_price": 4.4,
+      "starting_price": 6.0
+    },
+    "BOT": {
+      "current_price": 3.9,
+      "starting_price": 5.0
+    }
   },
   "constructors": {
-    "mercedes": {"current_price": 30.2, "starting_price": 29.3},
-    "mclaren": {"current_price": 28.6, "starting_price": 28.9},
-    "red_bull": {"current_price": 29.1, "starting_price": 28.2},
-    "ferrari": {"current_price": 24.2, "starting_price": 23.3},
-    "alpine": {"current_price": 14.3, "starting_price": 12.5},
-    "williams": {"current_price": 13.8, "starting_price": 12.0},
-    "aston_martin": {"current_price": 8.5, "starting_price": 9.5},
-    "haas": {"current_price": 9.2, "starting_price": 8.0},
-    "racing_bulls": {"current_price": 8.1, "starting_price": 6.3},
-    "audi": {"current_price": 5.6, "starting_price": 5.5},
-    "cadillac": {"current_price": 5.0, "starting_price": 5.0}
+    "mercedes": {
+      "current_price": 30.5,
+      "starting_price": 29.3
+    },
+    "mclaren": {
+      "current_price": 28.9,
+      "starting_price": 28.9
+    },
+    "red_bull": {
+      "current_price": 29.2,
+      "starting_price": 28.2
+    },
+    "ferrari": {
+      "current_price": 24.5,
+      "starting_price": 23.3
+    },
+    "alpine": {
+      "current_price": 14.9,
+      "starting_price": 12.5
+    },
+    "williams": {
+      "current_price": 14.4,
+      "starting_price": 12.0
+    },
+    "aston_martin": {
+      "current_price": 7.9,
+      "starting_price": 9.5
+    },
+    "haas": {
+      "current_price": 9.8,
+      "starting_price": 8.0
+    },
+    "racing_bulls": {
+      "current_price": 8.7,
+      "starting_price": 6.3
+    },
+    "audi": {
+      "current_price": 5.0,
+      "starting_price": 5.5
+    },
+    "cadillac": {
+      "current_price": 5.6,
+      "starting_price": 5.0
+    }
   },
   "price_history": {
     "0": {
       "note": "Season start prices (pre-round 1)",
       "drivers": {
-        "RUS": 27.4, "VER": 27.7, "NOR": 27.2, "PIA": 25.5,
-        "ANT": 23.2, "LEC": 22.8, "HAM": 22.5, "HAD": 15.1,
-        "GAS": 12.0, "SAI": 12.0, "ALB": 10.5, "ALO": 10.0,
-        "BEA": 7.4, "OCO": 8.0, "LIN": 7.0, "COL": 6.2,
-        "LAW": 7.0, "STR": 7.0, "BOR": 6.5, "PER": 7.0,
-        "HUL": 6.0, "BOT": 5.0
+        "RUS": 27.4,
+        "VER": 27.7,
+        "NOR": 27.2,
+        "PIA": 25.5,
+        "ANT": 23.2,
+        "LEC": 22.8,
+        "HAM": 22.5,
+        "HAD": 15.1,
+        "GAS": 12.0,
+        "SAI": 12.0,
+        "ALB": 10.5,
+        "ALO": 10.0,
+        "BEA": 7.4,
+        "OCO": 8.0,
+        "LIN": 7.0,
+        "COL": 6.2,
+        "LAW": 7.0,
+        "STR": 7.0,
+        "BOR": 6.5,
+        "PER": 7.0,
+        "HUL": 6.0,
+        "BOT": 5.0
       },
       "constructors": {
-        "mercedes": 29.3, "mclaren": 28.9, "red_bull": 28.2,
-        "ferrari": 23.3, "alpine": 12.5, "williams": 12.0,
-        "aston_martin": 9.5, "haas": 8.0, "racing_bulls": 6.3,
-        "audi": 5.5, "cadillac": 5.0
+        "mercedes": 29.3,
+        "mclaren": 28.9,
+        "red_bull": 28.2,
+        "ferrari": 23.3,
+        "alpine": 12.5,
+        "williams": 12.0,
+        "aston_martin": 9.5,
+        "haas": 8.0,
+        "racing_bulls": 6.3,
+        "audi": 5.5,
+        "cadillac": 5.0
       }
     },
     "1": {
       "note": "After Australian Grand Prix",
       "drivers": {
-        "RUS": 28.0, "VER": 28.1, "NOR": 26.8, "PIA": 24.9,
-        "ANT": 23.8, "LEC": 23.4, "HAM": 22.9, "HAD": 13.9,
-        "GAS": 12.8, "SAI": 12.2, "ALB": 10.8, "ALO": 8.8,
-        "BEA": 8.6, "OCO": 8.5, "LIN": 7.4, "COL": 7.0,
-        "LAW": 6.9, "STR": 6.8, "BOR": 6.4, "PER": 6.4,
-        "HUL": 5.6, "BOT": 4.7
+        "RUS": 28.0,
+        "VER": 28.1,
+        "NOR": 26.8,
+        "PIA": 24.9,
+        "ANT": 23.8,
+        "LEC": 23.4,
+        "HAM": 22.9,
+        "HAD": 13.9,
+        "GAS": 12.8,
+        "SAI": 12.2,
+        "ALB": 10.8,
+        "ALO": 8.8,
+        "BEA": 8.6,
+        "OCO": 8.5,
+        "LIN": 7.4,
+        "COL": 7.0,
+        "LAW": 6.9,
+        "STR": 6.8,
+        "BOR": 6.4,
+        "PER": 6.4,
+        "HUL": 5.6,
+        "BOT": 4.7
       },
       "constructors": {
-        "mercedes": 29.9, "mclaren": 28.5, "red_bull": 28.8,
-        "ferrari": 23.9, "alpine": 13.7, "williams": 13.2,
-        "aston_martin": 9.1, "haas": 8.6, "racing_bulls": 7.5,
-        "audi": 5.4, "cadillac": 5.2
+        "mercedes": 29.9,
+        "mclaren": 28.5,
+        "red_bull": 28.8,
+        "ferrari": 23.9,
+        "alpine": 13.7,
+        "williams": 13.2,
+        "aston_martin": 9.1,
+        "haas": 8.6,
+        "racing_bulls": 7.5,
+        "audi": 5.4,
+        "cadillac": 5.2
       }
     },
     "2": {
       "note": "After Chinese Grand Prix",
       "drivers": {
-        "RUS": 28.0, "VER": 28.1, "NOR": 26.8, "PIA": 24.9,
-        "ANT": 23.8, "LEC": 23.4, "HAM": 22.9, "HAD": 13.9,
-        "GAS": 12.8, "SAI": 12.2, "ALB": 10.8, "ALO": 8.8,
-        "BEA": 8.6, "OCO": 8.5, "LIN": 7.4, "COL": 7.0,
-        "LAW": 6.9, "STR": 6.8, "BOR": 6.4, "PER": 6.4,
-        "HUL": 5.6, "BOT": 4.7
+        "RUS": 28.0,
+        "VER": 28.1,
+        "NOR": 26.8,
+        "PIA": 24.9,
+        "ANT": 23.8,
+        "LEC": 23.4,
+        "HAM": 22.9,
+        "HAD": 13.9,
+        "GAS": 12.8,
+        "SAI": 12.2,
+        "ALB": 10.8,
+        "ALO": 8.8,
+        "BEA": 8.6,
+        "OCO": 8.5,
+        "LIN": 7.4,
+        "COL": 7.0,
+        "LAW": 6.9,
+        "STR": 6.8,
+        "BOR": 6.4,
+        "PER": 6.4,
+        "HUL": 5.6,
+        "BOT": 4.7
       },
       "constructors": {
-        "mercedes": 29.9, "mclaren": 28.5, "red_bull": 28.8,
-        "ferrari": 23.9, "alpine": 13.7, "williams": 13.2,
-        "aston_martin": 9.1, "haas": 8.6, "racing_bulls": 7.5,
-        "audi": 5.4, "cadillac": 5.2
+        "mercedes": 29.9,
+        "mclaren": 28.5,
+        "red_bull": 28.8,
+        "ferrari": 23.9,
+        "alpine": 13.7,
+        "williams": 13.2,
+        "aston_martin": 9.1,
+        "haas": 8.6,
+        "racing_bulls": 7.5,
+        "audi": 5.4,
+        "cadillac": 5.2
       }
     },
     "3": {
       "note": "After Japanese Grand Prix",
       "drivers": {
-        "RUS": 28.3, "VER": 28.2, "NOR": 26.5, "PIA": 24.6,
-        "ANT": 24.1, "LEC": 23.7, "HAM": 23.2, "HAD": 13.3,
-        "GAS": 13.0, "SAI": 12.4, "ALB": 10.2, "ALO": 8.2,
-        "BEA": 9.2, "OCO": 9.1, "LIN": 7.6, "COL": 7.6,
-        "LAW": 7.5, "STR": 6.2, "BOR": 5.8, "PER": 7.0,
-        "HUL": 5.0, "BOT": 4.1
+        "RUS": 28.3,
+        "VER": 28.2,
+        "NOR": 26.5,
+        "PIA": 24.6,
+        "ANT": 24.1,
+        "LEC": 23.7,
+        "HAM": 23.2,
+        "HAD": 13.3,
+        "GAS": 13.0,
+        "SAI": 12.4,
+        "ALB": 10.2,
+        "ALO": 8.2,
+        "BEA": 9.2,
+        "OCO": 9.1,
+        "LIN": 7.6,
+        "COL": 7.6,
+        "LAW": 7.5,
+        "STR": 6.2,
+        "BOR": 5.8,
+        "PER": 7.0,
+        "HUL": 5.0,
+        "BOT": 4.1
       },
       "constructors": {
-        "mercedes": 30.2, "mclaren": 28.6, "red_bull": 29.1,
-        "ferrari": 24.2, "alpine": 14.3, "williams": 13.8,
-        "aston_martin": 8.5, "haas": 9.2, "racing_bulls": 8.1,
-        "audi": 5.6, "cadillac": 5.0
+        "mercedes": 30.2,
+        "mclaren": 28.6,
+        "red_bull": 29.1,
+        "ferrari": 24.2,
+        "alpine": 14.3,
+        "williams": 13.8,
+        "aston_martin": 8.5,
+        "haas": 9.2,
+        "racing_bulls": 8.1,
+        "audi": 5.6,
+        "cadillac": 5.0
+      }
+    },
+    "6": {
+      "note": "After Miami Grand Prix",
+      "drivers": {
+        "ANT": 24.4,
+        "RUS": 28.6,
+        "HAM": 23.5,
+        "LEC": 24.0,
+        "PIA": 24.7,
+        "NOR": 26.4,
+        "VER": 28.3,
+        "HAD": 12.7,
+        "GAS": 12.8,
+        "COL": 8.2,
+        "BEA": 9.4,
+        "SAI": 13.0,
+        "HUL": 4.4,
+        "BOR": 5.2,
+        "LAW": 8.1,
+        "LIN": 7.0,
+        "PER": 7.6,
+        "BOT": 3.9,
+        "ALO": 8.0,
+        "STR": 5.6,
+        "OCO": 9.7,
+        "ALB": 9.6
+      },
+      "constructors": {
+        "mercedes": 30.5,
+        "ferrari": 24.5,
+        "mclaren": 28.9,
+        "red_bull": 29.2,
+        "alpine": 14.9,
+        "racing_bulls": 8.7,
+        "haas": 9.8,
+        "audi": 5.0,
+        "williams": 14.4,
+        "aston_martin": 7.9,
+        "cadillac": 5.6
       }
     }
   }

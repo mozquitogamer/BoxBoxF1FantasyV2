@@ -140,6 +140,59 @@ def load_constructor_info() -> dict:
         return {c["constructor_id"]: c for c in json.load(f)["constructors"]}
 
 
+def _warn_if_prices_stale() -> None:
+    """Print a loud warning if completed-race actuals exist for rounds beyond
+    the latest entry in fantasy_prices.json::price_history.
+
+    Without this check, you can run a whole prediction phase with stale prices
+    and silently produce wrong price-change brackets, wrong value scores, and a
+    wrong PPM rating — exactly the trap that hit us at Miami (R6).
+    """
+    prices_path = SEED_DIR / "fantasy_prices.json"
+    races_path = SEED_DIR / "races.json"
+    actuals_dir = SEED_DIR.parent / "predictions"
+    if not prices_path.exists() or not races_path.exists():
+        return
+    try:
+        with open(prices_path) as f:
+            prices = json.load(f)
+        with open(races_path) as f:
+            races = json.load(f).get("races", [])
+    except Exception:
+        return
+
+    price_history = prices.get("price_history", {})
+    if not price_history:
+        return
+    latest_priced_round = max(int(k) for k in price_history.keys())
+
+    # Find the highest completed round (has actual_fantasy_points.json on disk)
+    highest_actual = 0
+    for r in races:
+        rnd = r.get("round", 0)
+        if r.get("cancelled"):
+            continue
+        actual_path = actuals_dir / f"round{rnd}" / "actual_fantasy_points.json"
+        if actual_path.exists():
+            highest_actual = max(highest_actual, rnd)
+
+    if highest_actual > latest_priced_round:
+        print()
+        print("  " + "!" * 78)
+        print(f"  ! WARNING: prices in fantasy_prices.json look stale.")
+        print(f"  !   - latest price_history entry: round {latest_priced_round}")
+        print(f"  !   - highest completed race:     round {highest_actual}")
+        print(f"  !")
+        print(f"  ! Every downstream value (price-change brackets, PPM ratings, ")
+        print(f"  ! value scores, optimizer 'budget_gain' strategy) is being computed ")
+        print(f"  ! with prices from BEFORE round {highest_actual}.")
+        print(f"  !")
+        print(f"  ! Fix: update data/seed/fantasy_prices.json with the post-round-")
+        print(f"  ! {highest_actual} prices for every driver and constructor, then re-run.")
+        print("  " + "!" * 78)
+        print()
+
+
 def load_fantasy_prices() -> dict:
     """Load current fantasy prices."""
     path = SEED_DIR / "fantasy_prices.json"
@@ -556,6 +609,12 @@ def main():
     # Resolve phase
     phase = args.phase if args.phase != "auto" else detect_phase(round_num)
     print(f"  Phase: {phase}{' (auto-detected)' if args.phase == 'auto' else ''}")
+
+    # Stale-price-check: warn if seasonSummary has more actuals than fantasy_prices
+    # has price_history entries. After each race, prices in F1 Fantasy update — if
+    # we forget to record the new prices in fantasy_prices.json, every downstream
+    # calculation (price-change brackets, value scores, PPM) uses stale prices.
+    _warn_if_prices_stale()
 
     WEB_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
