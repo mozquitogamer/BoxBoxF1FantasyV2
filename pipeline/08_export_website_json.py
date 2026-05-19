@@ -628,9 +628,31 @@ def main():
         if args.reconstructed:
             predictions["reconstructed"] = True
 
-        # Current-round live file: always written (this is what the homepage shows)
-        with open(WEB_DATA_DIR / "predictions.json", "w") as f:
-            json.dump(predictions, f, indent=2)
+        # Current-round live file: this is what the homepage shows. Guard against
+        # accidentally overwriting it with a past round's data — that happens when
+        # you re-run --round N on a completed round to refresh derived data (e.g.
+        # post-race pit stop corrections). The fix is to only overwrite the live
+        # file when this round is genuinely the current/next upcoming round.
+        live_path = WEB_DATA_DIR / "predictions.json"
+        live_round = None
+        if live_path.exists():
+            try:
+                with open(live_path) as f:
+                    live_round = json.load(f).get("round")
+            except (json.JSONDecodeError, OSError):
+                live_round = None
+
+        # If the current live file is for a LATER round than the one we're
+        # exporting, the user is doing a backfill/refresh — don't downgrade
+        # the homepage. The phase archive + canonical archive still get written.
+        if (live_round is not None and isinstance(live_round, int)
+                and round_num < live_round and not args.force):
+            print(f"  [SKIP] live predictions.json: file shows round {live_round}, "
+                  f"refusing to overwrite with older round {round_num} "
+                  f"(use --force to override)")
+        else:
+            with open(live_path, "w") as f:
+                json.dump(predictions, f, indent=2)
 
         # Phase-tagged archive: always written (this is the historical record
         # of "what we predicted at phase X")
