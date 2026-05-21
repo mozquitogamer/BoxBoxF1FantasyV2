@@ -3178,6 +3178,93 @@ async function runMultiWeekPlanner() {
         };
     });
 
+    // === P2: Target-team feasibility pre-check ===
+    // When the user has set a target team, decide BEFORE running beam search
+    // whether it's even reachable. Three states:
+    //   - reachable now: targetCost <= currentBudget
+    //   - possibly reachable: targetCost <= currentBudget + horizonAppreciation
+    //   - unreachable: targetCost > both. Plan will be a "best partial match".
+    //
+    // Horizon appreciation is computed as if the user holds the CURRENT team
+    // throughout the horizon (this is the best-case ceiling — they could swap
+    // earlier and let target picks appreciate instead, but that requires
+    // affording target's transition cost up-front, which is chicken-and-egg).
+    // It's an upper bound: if even this estimate falls short of targetCost,
+    // target is definitively unreachable.
+    let feasibilityInfo = null;
+    if (useTargetTeam) {
+        const targetDriverObjs = targetTeamDrivers.filter(Boolean)
+            .map(id => data.drivers.find(d => d.driver_id === id))
+            .filter(Boolean);
+        const targetConObjs = targetTeamConstructors.filter(Boolean)
+            .map(id => data.constructors.find(c => c.constructor_id === id))
+            .filter(Boolean);
+        const targetPicks = [...targetDriverObjs, ...targetConObjs];
+        const targetCost = targetPicks.reduce((s, p) => s + (p.current_price || 0), 0);
+
+        const currentDriverObjs = teamDrivers
+            .map(id => data.drivers.find(d => d.driver_id === id))
+            .filter(Boolean);
+        const currentConObjs = teamCons
+            .map(id => data.constructors.find(c => c.constructor_id === id))
+            .filter(Boolean);
+
+        // Sum predicted appreciation across the horizon for currently-held picks.
+        // Uses the same per-round projected scores as the beam search (so this is
+        // consistent with P1's in-loop budget propagation).
+        let horizonAppreciation = 0;
+        for (const proj of roundProjections) {
+            for (const d of currentDriverObjs) {
+                const pc = predictPriceChange(d, proj.drivers[d.driver_id] || 0);
+                horizonAppreciation += pc.expectedChange;
+            }
+            for (const c of currentConObjs) {
+                const pc = predictPriceChange(c, proj.constructors[c.constructor_id] || 0);
+                horizonAppreciation += pc.expectedChange;
+            }
+        }
+
+        const projectedCeiling = budget + horizonAppreciation;
+        const isReachableNow = targetCost <= budget;
+        const isPossiblyReachable = targetCost <= projectedCeiling;
+        const shortfall = Math.max(0, targetCost - projectedCeiling);
+
+        // Identify the most expensive target picks (helps the user revise target
+        // if it's unreachable). Top 2 by current_price.
+        const priciest = [...targetPicks]
+            .sort((a, b) => (b.current_price || 0) - (a.current_price || 0))
+            .slice(0, 2)
+            .map(p => ({
+                name: p.name || p.constructor_id || p.driver_id,
+                price: p.current_price || 0,
+                isDriver: !!p.driver_id,
+            }));
+
+        // Identify which target picks the user already owns (held picks) — these
+        // don't need to be "acquired" so they don't contribute to transition cost.
+        const currentDriverIds = new Set(teamDrivers.filter(Boolean));
+        const currentConIds = new Set(teamCons.filter(Boolean));
+        const heldTargetCount = targetDriverObjs.filter(d => currentDriverIds.has(d.driver_id)).length +
+                                targetConObjs.filter(c => currentConIds.has(c.constructor_id)).length;
+        const transfersNeeded = targetPicks.length - heldTargetCount;
+
+        feasibilityInfo = {
+            useTargetTeam: true,
+            targetCost: Math.round(targetCost * 100) / 100,
+            currentBudget: Math.round(budget * 100) / 100,
+            horizonAppreciation: Math.round(horizonAppreciation * 100) / 100,
+            projectedCeiling: Math.round(projectedCeiling * 100) / 100,
+            isReachableNow,
+            isPossiblyReachable,
+            isUnreachable: !isPossiblyReachable,
+            shortfall: Math.round(shortfall * 100) / 100,
+            priciestTargetPicks: priciest,
+            heldTargetCount,
+            transfersNeeded,
+            horizonRounds: roundProjections.length,
+        };
+    }
+
     // === Beam Search ===
     const BEAM_WIDTH = 60;
     const TRANSFER_PENALTY = 10;
@@ -3368,10 +3455,41 @@ async function runMultiWeekPlanner() {
                     ? state.chipsAvailable.filter(c => c !== usedChip)
                     : [...state.chipsAvailable];
 
+                // --- P1: Propagate budget across rounds ---
+                // Each held pick gains/loses its projected price change after this
+                // round's race. Their increased sellable value (or decreased value)
+                // shifts next round's spending ceiling. Without this, frozen-budget
+                // beam search rejects target teams that ARE reachable via held-asset
+                // appreciation across the horizon.
+                //
+                // predictPriceChange uses last-3-round avg PPM vs price thresholds
+                // and returns expectedChange in $M. We apply it across drivers AND
+                // constructors of the post-transfer team (cand.drivers/constructors)
+                // because that's who you hold INTO this round's race.
+                let roundAppreciation = 0;
+                for (const did of cand.drivers) {
+                    const d = data.drivers.find(x => x.driver_id === did);
+                    if (d) {
+                        const projPts = proj.drivers[did] || 0;
+                        const pc = predictPriceChange(d, projPts);
+                        roundAppreciation += pc.expectedChange;
+                    }
+                }
+                for (const cid of cand.constructors) {
+                    const c = data.constructors.find(x => x.constructor_id === cid);
+                    if (c) {
+                        const projPts = proj.constructors[cid] || 0;
+                        const pc = predictPriceChange(c, projPts);
+                        roundAppreciation += pc.expectedChange;
+                    }
+                }
+                const budgetBefore = state.budget;
+                const budgetAfter = Math.round((state.budget + roundAppreciation) * 100) / 100;
+
                 nextBeam.push({
                     drivers: cand.drivers,
                     constructors: cand.constructors,
-                    budget: state.budget, // Prices don't change mid-plan (simplified)
+                    budget: budgetAfter, // P1: budget now propagates with projected appreciation
                     bankedTransfers: remainingTransfers,
                     chipsUsed: usedChip ? [...state.chipsUsed, { round: proj.round, chip: usedChip }] : [...state.chipsUsed],
                     chipsAvailable: newChipsAvail,
@@ -3388,6 +3506,10 @@ async function runMultiWeekPlanner() {
                         netPoints: Math.round(netPts * 10) / 10,
                         chip: usedChip,
                         bankedAfter: remainingTransfers,
+                        // P1: track budget evolution for later display (P4)
+                        budgetBefore: Math.round(budgetBefore * 100) / 100,
+                        appreciation: Math.round(roundAppreciation * 100) / 100,
+                        budgetAfter,
                         team: { drivers: [...cand.drivers], constructors: [...cand.constructors] },
                     }],
                 });
@@ -3419,18 +3541,74 @@ async function runMultiWeekPlanner() {
     const topPlans = beam.slice(0, 5);
 
     // Render results
-    displayMultiWeekResults(topPlans, roundProjections, currentRound);
+    displayMultiWeekResults(topPlans, roundProjections, currentRound, feasibilityInfo);
 }
 
-function displayMultiWeekResults(plans, roundProjections, currentRound) {
+// P2: Render the target-team feasibility report. Surfaces whether the target is
+// reachable now, possibly reachable via projected appreciation, or definitively
+// unreachable (with shortfall). Always renders the beam-search plans below;
+// when unreachable, those plans represent the best partial match given the
+// budget constraint.
+function renderFeasibilityCard(info) {
+    if (!info || !info.useTargetTeam) return '';
+
+    let statusLabel, statusColor, statusIcon, statusDetail;
+    if (info.isReachableNow) {
+        statusLabel = 'Target team is affordable now';
+        statusColor = 'var(--green)';
+        statusIcon = '✓';
+        statusDetail = `You can buy the full target team this round (cost $${info.targetCost.toFixed(1)}M ≤ budget $${info.currentBudget.toFixed(1)}M). Plans below stage the transfers across the horizon.`;
+    } else if (info.isPossiblyReachable) {
+        statusLabel = 'Target team possibly reachable via projected appreciation';
+        statusColor = 'var(--orange, #f59e0b)';
+        statusIcon = '⚠';
+        statusDetail = `Target costs $${info.targetCost.toFixed(1)}M but your starting budget is $${info.currentBudget.toFixed(1)}M. Projected horizon appreciation (+$${info.horizonAppreciation.toFixed(1)}M) brings the ceiling to $${info.projectedCeiling.toFixed(1)}M. Reachability depends on the transfer path the planner finds.`;
+    } else {
+        statusLabel = `Target team unreachable — short by $${info.shortfall.toFixed(1)}M`;
+        statusColor = 'var(--red, #ef4444)';
+        statusIcon = '✗';
+        statusDetail = `Target costs $${info.targetCost.toFixed(1)}M but even with $${info.horizonAppreciation.toFixed(1)}M projected appreciation across ${info.horizonRounds} round${info.horizonRounds !== 1 ? 's' : ''}, the budget ceiling is only $${info.projectedCeiling.toFixed(1)}M. Plans below show the best partial match.`;
+    }
+
+    let priciestHtml = '';
+    if (info.isUnreachable && info.priciestTargetPicks.length) {
+        const picks = info.priciestTargetPicks.map(p =>
+            `<strong>${p.name}</strong> ($${p.price.toFixed(1)}M)`
+        ).join(', ');
+        priciestHtml = `<p style="margin:8px 0 0;font-size:0.88rem;color:var(--text-secondary);">Most expensive target picks: ${picks}. Consider replacing one with a cheaper alternative to bring target within reach.</p>`;
+    }
+
+    return `<div class="feasibility-card" style="background:var(--card);border:2px solid ${statusColor};border-radius:10px;padding:16px 20px;margin-bottom:20px;">
+        <h3 style="color:${statusColor};margin:0 0 8px;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:1.3em;">${statusIcon}</span> ${statusLabel}
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:12px 0;font-size:0.92rem;">
+            <div><div style="color:var(--text-secondary);font-size:0.78rem;">Target cost</div><div style="font-weight:600;">$${info.targetCost.toFixed(1)}M</div></div>
+            <div><div style="color:var(--text-secondary);font-size:0.78rem;">Current budget</div><div style="font-weight:600;">$${info.currentBudget.toFixed(1)}M</div></div>
+            <div><div style="color:var(--text-secondary);font-size:0.78rem;">Proj. appreciation</div><div style="font-weight:600;color:${info.horizonAppreciation >= 0 ? 'var(--green)' : 'var(--red, #ef4444)'};">${info.horizonAppreciation >= 0 ? '+' : ''}$${info.horizonAppreciation.toFixed(1)}M</div></div>
+            <div><div style="color:var(--text-secondary);font-size:0.78rem;">Horizon ceiling</div><div style="font-weight:600;">$${info.projectedCeiling.toFixed(1)}M</div></div>
+            <div><div style="color:var(--text-secondary);font-size:0.78rem;">Picks already held</div><div style="font-weight:600;">${info.heldTargetCount}/7</div></div>
+            <div><div style="color:var(--text-secondary);font-size:0.78rem;">Transfers needed</div><div style="font-weight:600;">${info.transfersNeeded}</div></div>
+        </div>
+        <p style="margin:0;font-size:0.88rem;color:var(--text-secondary);">${statusDetail}</p>
+        ${priciestHtml}
+    </div>`;
+}
+
+function displayMultiWeekResults(plans, roundProjections, currentRound, feasibilityInfo) {
     const container = document.getElementById('mwResults');
     if (!plans.length) {
-        container.innerHTML = '<p style="color:var(--text-secondary);">No valid plans found. Check your team selection and budget.</p>';
+        // Still show feasibility card if target was set — explains why no plans
+        const feasHtml = renderFeasibilityCard(feasibilityInfo);
+        container.innerHTML = feasHtml + '<p style="color:var(--text-secondary);">No valid plans found. Check your team selection and budget.</p>';
         container.classList.remove('hidden');
         return;
     }
 
     let html = '';
+
+    // P2: Target-team feasibility card (renders only if useTargetTeam was set)
+    html += renderFeasibilityCard(feasibilityInfo);
 
     // Asset projection heatmap
     html += renderProjectionHeatmap(roundProjections);
