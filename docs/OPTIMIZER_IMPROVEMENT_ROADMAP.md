@@ -11,7 +11,7 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 | P1 | Propagate budget across rounds | **done** |
 | P2 | Target-team feasibility pre-check | **done** |
 | P3 | Continuous target-distance objective (replace last-round cliff) | **done** |
-| P4 | Render budget evolution in results UI | pending |
+| P4 | Render budget evolution in results UI | **done** |
 | P5 | Replace greedy Wildcard/Limitless with real optimizer | pending |
 | P6 | Beam dedupe key includes chip/bank state | pending |
 | P7 | Annotate penalty trade-offs in rendering | pending |
@@ -51,6 +51,12 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 **Problem:** budget changes (and now P1's appreciation) are invisible to the user.
 
 **Fix:** per-round line in plan card: `Budget: $X → $Y (+$Z appreciation, -$W transfer spend)`.
+
+**Implementation (app.js v56):** Two additions to `displayMultiWeekResults`:
+1. **Plan header** gets a horizon budget summary: `Budget: $110.0M → $115.4M (+$5.4M)`, color-coded by sign.
+2. **Each round column in the timeline** gets a dashed-bordered budget block below the existing pts/meta lines: `$110.0M → $112.2M` (before/after) with `+$2.2M apprec` underneath. Color-coded green/red. Renders only when `budgetBefore/After/appreciation` are present on the action (graceful fallback for legacy plans).
+
+**Transfer spend deliberately omitted:** in this model, `state.budget` is the spending ceiling (held team value + bank). Transfers preserve the ceiling — you sell at price X, buy at price Y, so ceiling shifts only via appreciation between rounds. The actual bank value would require tracking per-round bank explicitly, which adds complexity for a number that's already implicit in the team-cost-vs-ceiling delta. May revisit if users want it.
 
 ## P5 — Replace greedy Wildcard/Limitless
 

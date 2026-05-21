@@ -3643,6 +3643,22 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
         const totalSwaps = plan.roundActions.reduce((s, r) => s + r.swaps.length, 0);
         const chipsUsed = plan.chipsUsed.map(c => c.chip.replace(/_/g, ' ')).join(', ') || 'None';
 
+        // P4: Horizon budget summary (initial → final, total appreciation).
+        // Pulls from the first/last roundAction's budgetBefore/After (set by P1).
+        // Falls back gracefully if a legacy plan lacks these fields.
+        let horizonBudgetHtml = '';
+        const firstAction = plan.roundActions[0];
+        const lastAction = plan.roundActions[plan.roundActions.length - 1];
+        if (firstAction && lastAction && typeof firstAction.budgetBefore === 'number' && typeof lastAction.budgetAfter === 'number') {
+            const totalAppr = lastAction.budgetAfter - firstAction.budgetBefore;
+            const apprColor = totalAppr >= 0 ? 'var(--green)' : 'var(--red, #ef4444)';
+            const apprSign = totalAppr >= 0 ? '+' : '';
+            horizonBudgetHtml = `<span class="mw-plan-stats" style="margin-left:16px;">
+                Budget: $${firstAction.budgetBefore.toFixed(1)}M → $${lastAction.budgetAfter.toFixed(1)}M
+                <span style="color:${apprColor};font-weight:600;">(${apprSign}$${totalAppr.toFixed(1)}M)</span>
+            </span>`;
+        }
+
         html += `<div class="mw-plan-card">`;
         html += `<div class="mw-plan-header">
             <div>
@@ -3651,6 +3667,7 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
                     ${totalSwaps} transfer${totalSwaps !== 1 ? 's' : ''} &middot;
                     Chips: ${chipsUsed}
                 </span>
+                ${horizonBudgetHtml}
             </div>
             <div class="mw-plan-total">${plan.totalPoints.toFixed(1)} pts</div>
         </div>`;
@@ -3689,6 +3706,18 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
 
             html += `<div class="mw-round-pts">${action.netPoints.toFixed(1)} pts</div>`;
             html += `<div class="mw-round-meta">${action.penalty > 0 ? `-${action.penalty} penalty · ` : ''}${action.bankedAfter} FT banked</div>`;
+
+            // P4: Per-round budget evolution. budgetBefore/After/appreciation
+            // are populated by P1's beam-search budget propagation. Renders
+            // only if those fields exist (legacy plans without them skip).
+            if (typeof action.budgetAfter === 'number' && typeof action.budgetBefore === 'number') {
+                const apprColor = action.appreciation >= 0 ? 'var(--green)' : 'var(--red, #ef4444)';
+                const apprSign = action.appreciation >= 0 ? '+' : '';
+                html += `<div class="mw-round-budget" style="font-size:0.7rem;color:var(--text-secondary);margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);line-height:1.4;">
+                    <div>$${action.budgetBefore.toFixed(1)}M → $${action.budgetAfter.toFixed(1)}M</div>
+                    <div style="color:${apprColor};">${apprSign}$${action.appreciation.toFixed(1)}M apprec</div>
+                </div>`;
+            }
 
             html += '</div>';
         }
