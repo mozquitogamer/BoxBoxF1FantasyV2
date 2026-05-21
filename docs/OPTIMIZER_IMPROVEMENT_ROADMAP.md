@@ -10,7 +10,7 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 |---|---|---|
 | P1 | Propagate budget across rounds | **done** |
 | P2 | Target-team feasibility pre-check | **done** |
-| P3 | Continuous target-distance objective (replace last-round cliff) | pending |
+| P3 | Continuous target-distance objective (replace last-round cliff) | **done** |
 | P4 | Render budget evolution in results UI | pending |
 | P5 | Replace greedy Wildcard/Limitless with real optimizer | pending |
 | P6 | Beam dedupe key includes chip/bank state | pending |
@@ -43,6 +43,8 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 **Problem:** target bonus (+100/match) only applied on last round. Intermediate rounds optimize purely for points, ignoring the target until the cliff.
 
 **Fix:** add `targetDistance × weight × (roundsRemaining + 1)` cost to every state's score. Near-term still favors points; late rounds heavily penalize being off-target.
+
+**Implementation (app.js v55):** Replaced the last-round-only `+100/match` bonus block with a per-round distance penalty applied to every candidate's score: `distance × TARGET_WEIGHT × (ri+1)/horizon` where `distance` is the count of target picks NOT in the candidate (0..7) and `TARGET_WEIGHT = 30`. For a 3-round horizon this gives round-by-round weights of (10, 20, 30) per off-target pick — the final round still dominates (matching original behavior) but intermediate rounds now actively path-find toward target. Calibrated so 30 pts/off-target on the final round is meaningful relative to a typical ~25 pts/round driver projection (planner won't trade target match for <30 raw pts on last round) but doesn't force wildly suboptimal swaps when full convergence is impossible.
 
 ## P4 — Render budget evolution
 

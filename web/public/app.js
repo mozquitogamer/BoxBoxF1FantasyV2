@@ -3439,16 +3439,38 @@ async function runMultiWeekPlanner() {
                     score = netPts * 0.7 + ppm * 30;
                 }
 
-                // Target team bonus: on the last round of the horizon, heavily boost teams matching the target
-                if (useTargetTeam && targetDriverSet && targetConsSet && ri === roundProjections.length - 1) {
-                    let matchBonus = 0;
+                // P3: Continuous target-distance objective.
+                // Previously: +100/match bonus only on the LAST round. Intermediate
+                // rounds optimized purely for points and ignored the target, then
+                // the final-round cliff was supposed to force convergence — but
+                // could be outweighed by a points-rich detour. Near-target plans
+                // were passed over for slightly-higher-points plans even when the
+                // user explicitly asked for target convergence.
+                //
+                // New: every round contributes a target-distance penalty weighted
+                // by recency. Distance = number of target picks NOT in candidate
+                // (range 0..7). Per-round penalty = distance * weight * (ri+1) /
+                // horizon, so the final round penalizes ~3x as much as the first
+                // round in a 3-round horizon. Intermediate rounds actively
+                // path-find toward target while still permitting early-round
+                // points-chasing when far from the goal.
+                //
+                // TARGET_WEIGHT calibration: 30 pts per off-target pick on the
+                // final round is meaningful versus a typical driver projection
+                // of ~25 pts/round (i.e. the planner won't trade a target match
+                // for <30 pts of raw points on the last round) but won't force
+                // wildly suboptimal swaps when convergence is impossible.
+                if (useTargetTeam && targetDriverSet && targetConsSet) {
+                    let distance = 0;
                     for (const did of cand.drivers) {
-                        if (targetDriverSet.has(did)) matchBonus += 100;
+                        if (!targetDriverSet.has(did)) distance++;
                     }
                     for (const cid of cand.constructors) {
-                        if (targetConsSet.has(cid)) matchBonus += 100;
+                        if (!targetConsSet.has(cid)) distance++;
                     }
-                    score += matchBonus;
+                    const TARGET_WEIGHT = 30;
+                    const roundProgress = (ri + 1) / roundProjections.length;
+                    score -= distance * TARGET_WEIGHT * roundProgress;
                 }
 
                 const newChipsAvail = usedChip
