@@ -385,7 +385,18 @@ def run_predictions(
     year: int = CURRENT_SEASON,
     force: bool = False,
     skip_fp: bool = False,
+    output_suffix: str = "",
 ) -> pd.DataFrame:
+    """
+    Generate predictions for a specific round.
+
+    output_suffix (P9): when non-empty, results go to
+        data/predictions/round{N}/predictions_{suffix}.parquet
+        data/predictions/round{N}/prediction_metadata_{suffix}.json
+    instead of the canonical predictions.parquet. Used by predict_horizon.py
+    to compute priors-only future-round projections without clobbering the
+    canonical current-round predictions or polluting the accuracy archive.
+    """
     """Generate predictions for a specific round."""
     print("=" * 70)
     print(f"BoxBoxF1Fantasy — Predictions for {year} Round {round_num}")
@@ -398,8 +409,11 @@ def run_predictions(
     # Race-completed guard: refuse to re-predict for a past race (would pollute
     # the accuracy archive with hindsight). Pass --force to override (e.g. when
     # rebuilding for the recovery script).
-    output_path = PREDICTIONS_DIR / f"round{round_num}" / "predictions.parquet"
-    if not force and is_race_completed(round_num, year) and output_path.exists():
+    # P9: when output_suffix is set we're writing to a non-canonical file, so the
+    # archive-pollution concern doesn't apply — the guard is skipped for suffixed runs.
+    out_filename = f"predictions_{output_suffix}.parquet" if output_suffix else "predictions.parquet"
+    output_path = PREDICTIONS_DIR / f"round{round_num}" / out_filename
+    if not force and not output_suffix and is_race_completed(round_num, year) and output_path.exists():
         print(f"\n  [SKIP] Race for round {round_num} has already happened and "
               f"predictions.parquet exists.")
         print(f"  Refusing to overwrite — this would pollute the accuracy archive.")
@@ -798,7 +812,8 @@ def run_predictions(
     # Save
     output_dir = PREDICTIONS_DIR / f"round{round_num}"
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / "predictions.parquet"
+    # P9: same suffix convention as the guard above
+    output_path = output_dir / out_filename
     output_df.to_parquet(output_path, index=False, engine="pyarrow")
 
     # Write prediction metadata sidecar — the DEFINITIVE record of what phase
@@ -837,7 +852,9 @@ def run_predictions(
         "quali_model_sha256_16": _file_sha256(quali_path),
         "race_model_sha256_16": _file_sha256(race_model_used),
     }
-    metadata_path = output_dir / "prediction_metadata.json"
+    # P9: suffix the metadata file alongside the predictions parquet
+    meta_filename = f"prediction_metadata_{output_suffix}.json" if output_suffix else "prediction_metadata.json"
+    metadata_path = output_dir / meta_filename
     with open(metadata_path, "w") as f:
         json.dump(metadata, f, indent=2)
     print(f"Saved -> {metadata_path}  (phase={resolved_phase})")

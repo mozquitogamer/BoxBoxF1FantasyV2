@@ -97,6 +97,9 @@ let myTeamConstructors = [null, null];                  // 2 constructor_id slot
 // Multi-week planner data
 let trackData = null;
 let driverHistory = null;
+// P9: ML-based projections for future rounds, populated by pipeline/predict_horizon.py.
+// When present, projectScoresForRound prefers these over the affinity heuristic.
+let horizonProjections = null;
 // Target team state (for multi-week planner target mode)
 let targetTeamDrivers = [null, null, null, null, null];
 let targetTeamConstructors = [null, null];
@@ -2897,6 +2900,16 @@ async function loadMultiWeekData() {
             driverHistory = await res.json();
         } catch (e) { console.warn('Failed to load driver_history.json:', e); }
     }
+    // P9: ML-based future-round projections. Optional — falls back to the
+    // track-similarity heuristic if the file is missing or stale.
+    if (!horizonProjections) {
+        try {
+            const res = await fetch('data/horizon_projections.json');
+            if (res.ok) {
+                horizonProjections = await res.json();
+            }
+        } catch (e) { /* optional file — fail silently */ }
+    }
 }
 
 function cosineSimilarity(a, b) {
@@ -2964,8 +2977,11 @@ function computeAffinityWithConfidence(hist, targetVec, basePts) {
 }
 
 function projectScoresForRound(roundInfo, racesData) {
-    // Project fantasy scores for all drivers/constructors at a future round
-    // Uses: current form (from predictions.json) x track affinity x sprint multiplier
+    // Project fantasy scores for all drivers/constructors at a future round.
+    // Preferred source (P9): horizon_projections.json, populated by
+    //   pipeline/predict_horizon.py — actual ML predictions converted to
+    //   simplified expected fantasy points.
+    // Fallback: current form (from predictions.json) × track affinity (P8a).
     if (!data || !trackData) return { drivers: {}, constructors: {}, driverConfidence: {}, constructorConfidence: {} };
 
     const raceName = roundInfo.name;
@@ -2978,14 +2994,42 @@ function projectScoresForRound(roundInfo, racesData) {
     const driverConfidence = {};      // P8: per-pick confidence for UI flagging
     const constructorConfidence = {};
 
+    // P9: prefer ML-based projection from horizon_projections.json if it exists
+    // for this round. Each driver in our roster has a `driver_id` (abbrev like
+    // 'VER'); horizon JSON keys drivers by the same abbreviation.
+    const horizonRound = horizonProjections?.rounds?.[String(roundInfo.round)];
+    if (horizonRound) {
+        for (const d of data.drivers) {
+            const hp = horizonRound.drivers?.[d.driver_id];
+            if (hp && typeof hp.expected_points === 'number') {
+                driverScores[d.driver_id] = hp.expected_points;
+                driverConfidence[d.driver_id] = 0.95; // ML pred — full confidence
+            } else {
+                // Fall through: no ML projection for this driver, use heuristic below.
+                driverScores[d.driver_id] = null;
+            }
+        }
+        for (const c of data.constructors) {
+            const hp = horizonRound.constructors?.[c.constructor_id];
+            if (hp && typeof hp.expected_points === 'number') {
+                constructorScores[c.constructor_id] = hp.expected_points;
+                constructorConfidence[c.constructor_id] = 0.95;
+            } else {
+                constructorScores[c.constructor_id] = null;
+            }
+        }
+    }
+
     // Sprint adjustment factor — same for all picks in this round
     const currentIsSprint = data.is_sprint_weekend;
     let sprintAdj = 1.0;
     if (currentIsSprint && !isSprint) sprintAdj = 1.0 / 1.35;
     else if (!currentIsSprint && isSprint) sprintAdj = 1.35;
 
-    // Project driver scores
+    // Project driver scores via affinity heuristic — only for picks not
+    // already filled by the P9 ML projection (driverScores[id] === null).
     for (const d of data.drivers) {
+        if (driverScores[d.driver_id] != null) continue; // ML projection used
         const basePts = d.expected_points || 0;
         const hist = (driverHistory && driverHistory.drivers[d.driver_id])
             ? driverHistory.drivers[d.driver_id].rounds
@@ -2995,8 +3039,9 @@ function projectScoresForRound(roundInfo, racesData) {
         driverConfidence[d.driver_id] = confidence;
     }
 
-    // Project constructor scores
+    // Project constructor scores — same heuristic fallback rule.
     for (const c of data.constructors) {
+        if (constructorScores[c.constructor_id] != null) continue;
         const basePts = c.expected_points || 0;
         const hist = (driverHistory && driverHistory.constructors[c.constructor_id])
             ? driverHistory.constructors[c.constructor_id].rounds
@@ -3696,13 +3741,22 @@ async function runMultiWeekPlanner() {
         // Prune beam: keep top BEAM_WIDTH by cumulative score
         nextBeam.sort((a, b) => (b.totalScore || b.totalPoints) - (a.totalScore || a.totalPoints));
 
-        // Deduplicate by team composition
+        // P6: Deduplicate by team + chips-available + banked-transfers.
+        // Previously the key was just team composition, which collapsed two
+        // states with the same persistent team but different remaining chips
+        // or different banked-FT counts. The worse one would win first-seen
+        // even though the better one represented a strictly better future.
+        // Including chipsAvailable and bankedTransfers preserves those
+        // strictly-better paths through the horizon.
         const seen = new Set();
         beam = [];
         for (const state of nextBeam) {
             // Don't mutate state.drivers / state.constructors — slot order matters for
             // downstream swap-detection in subsequent rounds and rendering.
-            const key = [...state.drivers].sort().join(',') + '|' + [...state.constructors].sort().join(',');
+            const key = [...state.drivers].sort().join(',') + '|'
+                + [...state.constructors].sort().join(',') + '|'
+                + [...state.chipsAvailable].sort().join(',') + '|'
+                + state.bankedTransfers;
             if (!seen.has(key)) {
                 seen.add(key);
                 beam.push(state);

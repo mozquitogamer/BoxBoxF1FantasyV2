@@ -13,11 +13,11 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 | P3 | Continuous target-distance objective (replace last-round cliff) | **done** |
 | P4 | Render budget evolution in results UI | **done** |
 | P5 | Replace greedy Wildcard with real optimizer (Limitless already optimal) | **done** |
-| P6 | Beam dedupe key includes chip/bank state | pending |
 | P7 | Annotate penalty trade-offs in rendering | **done** |
 | P8a | Confidence-weighted affinity (rookies/cold-start) | **done** |
 | P8 | UI flag for low-confidence projections | **done** |
-| P9 | (future) ML predictions for future-round projections | parked |
+| P6 | Beam dedupe key includes chip/bank state | **done** |
+| P9 | ML predictions for future-round projections | **done** |
 
 ## P1 — Propagate budget across rounds
 
@@ -127,6 +127,33 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 
 Current round (ML predictions) is hard-coded to confidence = 1.0 so it never shows the indicator. Legend below the heatmap explains the cell decorations.
 
-## P9 — ML for future rounds (parked)
+## P6 — Beam dedupe key (app.js v61)
 
-**Goal:** replace `projectScoresForRound`'s track-similarity heuristic with actual ML predictions for future rounds (priors-only, since FP data doesn't exist yet). Requires running `06_run_predictions.py` for each upcoming round with `--phase pre_fp_predict` and consuming those outputs from the planner. Revisit after P1-P8 land.
+**Problem:** dedup key was just team composition. Two states with the same team but different remaining chips or different banked-FT counts collapsed — the first-seen one won even when the other represented a strictly better future.
+
+**Fix:** key = `team-sorted | constructors-sorted | chipsAvailable-sorted | bankedTransfers`. Strictly-better paths now survive dedup.
+
+## P9 — ML for future rounds (app.js v62, pipeline)
+
+**Goal:** replace `projectScoresForRound`'s track-similarity heuristic with actual ML predictions for upcoming rounds.
+
+**Implementation:**
+
+1. **`pipeline/06_run_predictions.py`** gains an `output_suffix` parameter. When non-empty, predictions land in `data/predictions/round{N}/predictions_{suffix}.parquet` and `prediction_metadata_{suffix}.json` instead of the canonical files. The race-completed guard is also bypassed for suffixed runs (since they don't touch the accuracy archive). This lets us run priors-only predictions for future rounds without clobbering the canonical current-round files.
+
+2. **`pipeline/predict_horizon.py`** is a new orchestrator. It calls `run_predictions(round, skip_fp=True, force=True, output_suffix="horizon")` for each round in `[current_round+1, current_round+horizon]` (skipping cancelled rounds), then converts the predicted positions into simplified expected fantasy points using the same scoring formulas as `07_calculate_fantasy.py` (minus the per-driver risk-rating lookup — uses a fixed 8% league-average DNF probability for projection purposes). Constructors aggregate as `sum(driver_pts excl DOTD)`. Output: `web/public/data/horizon_projections.json`.
+
+3. **`web/public/app.js`** gains a `horizonProjections` global. `loadMultiWeekData()` fetches the file (optional — falls back silently if missing or stale). `projectScoresForRound()` prefers the ML projection for any driver/constructor present in the horizon JSON; falls back to the affinity heuristic only when ML data is missing. ML-projected cells get `confidence = 0.95` so they render as full-signal in the heatmap.
+
+**Usage:**
+```
+python pipeline/predict_horizon.py --current-round 7 --horizon 5
+```
+
+Should be run after `06_run_predictions.py` (for the current round) in the weekly pipeline. Cadence: each `post_fp` / `post_quali` cycle should re-run it so the planner sees fresh ML projections for future rounds whenever current-round data changes.
+
+**Trade-offs of the simplified scoring in `predict_horizon.py`:**
+- Uses fixed DNF probability (8% league avg) instead of per-driver risk ratings (which require loading recent results + price data — too heavy for the projection script).
+- Doesn't apply pitstop bonuses or quali-tier bonuses to constructors (too noisy to project two weekends ahead).
+- Caps the "positions gained" overtake estimate to keep extreme-jump scenarios from inflating projections.
+- These approximations are intentional: future-round projections are inherently noisy, and the goal is "much better than the affinity heuristic" not "as exact as the current-round fantasy calc."
