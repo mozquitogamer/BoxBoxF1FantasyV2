@@ -12,7 +12,7 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 | P2 | Target-team feasibility pre-check | **done** |
 | P3 | Continuous target-distance objective (replace last-round cliff) | **done** |
 | P4 | Render budget evolution in results UI | **done** |
-| P5 | Replace greedy Wildcard/Limitless with real optimizer | pending |
+| P5 | Replace greedy Wildcard with real optimizer (Limitless already optimal) | **done** |
 | P6 | Beam dedupe key includes chip/bank state | pending |
 | P7 | Annotate penalty trade-offs in rendering | **done** |
 | P8 | Cadillac / cold-start handling in projections | pending |
@@ -58,11 +58,15 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 
 **Transfer spend deliberately omitted:** in this model, `state.budget` is the spending ceiling (held team value + bank). Transfers preserve the ceiling — you sell at price X, buy at price Y, so ceiling shifts only via appreciation between rounds. The actual bank value would require tracking per-round bank explicitly, which adds complexity for a number that's already implicit in the team-cost-vs-ceiling delta. May revisit if users want it.
 
-## P5 — Replace greedy Wildcard/Limitless
+## P5 — Replace greedy Wildcard with real optimizer
 
-**Problem:** chip-fired team is picked greedily (sort by score, take top-N within budget). Misses dominated lineups.
+**Problem:** Wildcard-fired team is picked greedily (sort constructors by score → take top 2 regardless of price → fill drivers by score within remaining budget). Misses dominated lineups where a cheaper constructor would free budget for a much better driver.
 
-**Fix:** call into `searchCombosWithPruning` (the same optimizer the single-round advisor uses) to find the optimal chip-fired team.
+**Fix:** call into `searchCombosWithPruning` (the same optimizer the single-round advisor uses) to find the optimal chip-fired team. Limitless is unchanged — with unlimited budget, top-5 + top-2 by score IS already optimal.
+
+**Implementation (app.js v58):** New top-level `findOptimalWildcardTeam(budget, proj)` helper next to `searchCombosWithPruning`. Builds top-15 driver pool by projected score, sorts ascending by price for branch-and-bound pruning, enumerates all C(11,2)=55 constructor pairs, and runs `searchCombosWithPruning` for each pair to find best 5-driver combo within remaining budget. Returns `{drivers, constructors, cost, score}` or null.
+
+**Performance:** the brute-force search is ~10-50× more work than the old greedy. To keep beam search responsive, `runMultiWeekPlanner` memoizes results in a `wildcardCache` map keyed by `(roundIndex, budget_bucket_0.1M)`. Wildcard's optimal team depends only on those two inputs (it ignores current team), so 60 beam states with similar budgets share one search. Without the cache, a 3-round 60-state beam would run 180 brute-force searches; with it, typically 3-10.
 
 ## P6 — Beam dedupe key
 

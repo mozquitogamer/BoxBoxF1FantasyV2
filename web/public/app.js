@@ -1740,6 +1740,69 @@ function searchCombosWithPruning(freeDrivers, priceSum, kLeft, remainBudget, onC
     recurse(0, 0, kLeft);
 }
 
+// P5: Find the optimal 5-driver + 2-constructor team within `budget` that
+// maximizes projected score for a single round. Replaces the previous greedy
+// "sort by score, pick top within budget" heuristic used for Wildcard chip
+// candidates in the multi-week planner — that approach picked constructors
+// first by score regardless of price, often leaving no room for high-value
+// drivers, and missed combinations where a slightly-lower-score driver
+// enables a much better complementary pick.
+//
+// Uses the same brute-force lineup search as the single-round advisor
+// (top-N pool sorted by price + branch-and-bound pruning + full constructor
+// pair enumeration). Returns the best lineup as { drivers: [ids], constructors:
+// [ids], cost, score } or null if nothing fits the budget.
+//
+// `proj` is { drivers: {id: score}, constructors: {id: score} } for the round.
+// `data` is read from outer scope (globals).
+function findOptimalWildcardTeam(budget, proj) {
+    // Pool of top-N drivers by projected score (matches single-round advisor's
+    // FREE_POOL=15). Larger pool = better optimality but slower search.
+    const FREE_POOL = 15;
+    const annotated = data.drivers.map(d => ({
+        ...d,
+        _score: proj.drivers[d.driver_id] || 0,
+    }));
+    annotated.sort((a, b) => b._score - a._score);
+    const driverPool = annotated.slice(0, FREE_POOL)
+        .sort((a, b) => a.current_price - b.current_price); // ascending price for pruning
+    const priceSum = [0];
+    for (const d of driverPool) priceSum.push(priceSum[priceSum.length - 1] + d.current_price);
+
+    let bestScore = -Infinity;
+    let bestTeam = null;
+
+    const allConstructors = data.constructors;
+    for (let i = 0; i < allConstructors.length; i++) {
+        for (let j = i + 1; j < allConstructors.length; j++) {
+            const c1 = allConstructors[i];
+            const c2 = allConstructors[j];
+            const conCost = (c1.current_price || 0) + (c2.current_price || 0);
+            const conScore = (proj.constructors[c1.constructor_id] || 0) + (proj.constructors[c2.constructor_id] || 0);
+            const remainBudget = budget - conCost;
+            if (remainBudget < 0) continue;
+
+            searchCombosWithPruning(driverPool, priceSum, 5, remainBudget, (combo, comboCost) => {
+                let driverScore = 0;
+                for (const d of combo) driverScore += (proj.drivers[d.driver_id] || 0);
+                const totalScore = driverScore + conScore;
+                if (totalScore > bestScore) {
+                    bestScore = totalScore;
+                    // Snapshot ids — comboArr is mutated by the caller after this returns
+                    bestTeam = {
+                        drivers: combo.map(d => d.driver_id),
+                        constructors: [c1.constructor_id, c2.constructor_id],
+                        cost: comboCost + conCost,
+                        score: totalScore,
+                    };
+                }
+            });
+        }
+    }
+
+    return bestTeam;
+}
+
 // Wrap an expensive sync task with a "Computing…" button state. setTimeout(0)
 // gives the browser one paint cycle to update the button before the loop locks
 // the main thread, so the user sees feedback instead of an apparent freeze.
@@ -3269,6 +3332,15 @@ async function runMultiWeekPlanner() {
     const BEAM_WIDTH = 60;
     const TRANSFER_PENALTY = 10;
 
+    // P5: Memoize optimal wildcard teams per (budget bucket, round index).
+    // The optimal wildcard team depends only on the budget ceiling and the
+    // round's projections (it ignores current team — wildcard can swap freely).
+    // Beam states with similar budgets converge to the same wildcard team, so
+    // bucketing by $0.1M lets all 60 beam states share one search per round.
+    // Without this cache, a 60-state × 3-round horizon would run the brute-force
+    // search 180 times; with it, ~3-10 times.
+    const wildcardCache = new Map();
+
     let beam = [{
         drivers: [...teamDrivers],
         constructors: [...teamCons],
@@ -3300,31 +3372,22 @@ async function runMultiWeekPlanner() {
             // Also try wildcard if available
             if (state.chipsAvailable.includes('wild_card')) {
                 // With wildcard: pick best 5 drivers + 2 constructors by projected score within budget
-                const sortedDrivers = data.drivers
-                    .map(d => ({ id: d.driver_id, pts: proj.drivers[d.driver_id] || 0, price: d.current_price }))
-                    .sort((a, b) => b.pts - a.pts);
-                const sortedCons = data.constructors
-                    .map(c => ({ id: c.constructor_id, pts: proj.constructors[c.constructor_id] || 0, price: c.current_price }))
-                    .sort((a, b) => b.pts - a.pts);
-
-                // Greedy: pick top scorers within budget
-                const wcDrivers = [];
-                const wcCons = [];
-                let wcCost = 0;
-                for (const c of sortedCons) {
-                    if (wcCons.length < 2) { wcCons.push(c.id); wcCost += c.price; }
+                // P5: Use brute-force optimizer instead of greedy by-score-within-budget.
+                // Memoized by (round_index, budget_bucket) so beam states with similar
+                // budgets share the search. See wildcardCache declaration above.
+                const wcCacheKey = `${ri}|${Math.round(state.budget * 10)}`;
+                let wcOptimal;
+                if (wildcardCache.has(wcCacheKey)) {
+                    wcOptimal = wildcardCache.get(wcCacheKey);
+                } else {
+                    wcOptimal = findOptimalWildcardTeam(state.budget, proj);
+                    wildcardCache.set(wcCacheKey, wcOptimal);
                 }
-                for (const d of sortedDrivers) {
-                    if (wcDrivers.length < 5 && wcCost + d.price <= state.budget) {
-                        wcDrivers.push(d.id);
-                        wcCost += d.price;
-                    }
-                }
-                if (wcDrivers.length === 5) {
+                if (wcOptimal) {
                     candidates.push({
-                        drivers: wcDrivers,
-                        constructors: wcCons,
-                        ...computeSwapDetails(state.drivers, state.constructors, wcDrivers, wcCons),
+                        drivers: wcOptimal.drivers,
+                        constructors: wcOptimal.constructors,
+                        ...computeSwapDetails(state.drivers, state.constructors, wcOptimal.drivers, wcOptimal.constructors),
                         useChip: 'wild_card',
                     });
                 }
