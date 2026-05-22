@@ -1,7 +1,21 @@
 {
-  "updated": "2026-05-21T13:33:25Z",
+  "updated": "2026-05-22T12:35:54Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "AInvmGGBfoE",
+      "title": "F1 Fantasy Deadline Stream - CANADIAN Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
+      "published": "2026-05-22",
+      "thumbnail": "https://i.ytimg.com/vi/AInvmGGBfoE/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=AInvmGGBfoE"
+    },
+    {
+      "id": "7WSeL1mGIKg",
+      "title": "Should you play the WILD CARD? Canadian GP Preview - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-05-21",
+      "thumbnail": "https://i.ytimg.com/vi/7WSeL1mGIKg/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=7WSeL1mGIKg"
+    },
     {
       "id": "qMMgyS7E30M",
       "title": "F1 Fantasy Deadline Stream - Miami Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
@@ -15,20 +29,6 @@
       "published": "2026-05-03",
       "thumbnail": "https://i.ytimg.com/vi/xWosYN1ua_o/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=xWosYN1ua_o"
-    },
-    {
-      "id": "q3M2L3gM1R0",
-      "title": "Miami GP Final Thoughts  - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
-      "published": "2026-05-02",
-      "thumbnail": "https://i.ytimg.com/vi/q3M2L3gM1R0/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=q3M2L3gM1R0"
-    },
-    {
-      "id": "Jxm3rypGUxY",
-      "title": "Miami GP Preview & Thoughts  - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
-      "published": "2026-04-29",
-      "thumbnail": "https://i.ytimg.com/vi/Jxm3rypGUxY/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=Jxm3rypGUxY"
     }
   ]
 }
