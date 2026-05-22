@@ -58,6 +58,24 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 
 **Transfer spend deliberately omitted:** in this model, `state.budget` is the spending ceiling (held team value + bank). Transfers preserve the ceiling — you sell at price X, buy at price Y, so ceiling shifts only via appreciation between rounds. The actual bank value would require tracking per-round bank explicitly, which adds complexity for a number that's already implicit in the team-cost-vs-ceiling delta. May revisit if users want it.
 
+## P5b — Limitless revert + chips respect target (app.js v59)
+
+**Two bugs caught after P5 deploy:**
+
+1. **Limitless was being treated as a permanent team change.** F1 Fantasy rule: Limitless is a one-round dream team; your real team is untouched. Pre-fix, firing Limitless consumed banked free transfers, applied a -10pt penalty per "extra swap" in the dream team, propagated the dream team to subsequent rounds, and compounded the dream team's projected appreciation into next round's budget. All wrong.
+
+2. **Chips ignored the target team.** Wildcard's `findOptimalWildcardTeam` picked the max-points team within budget regardless of target. The P3 distance penalty was applied later in the score loop, but there was no alternative wildcard team to fall back to — the search had already locked in the highest-points team. Same architectural issue applied (less severely) to Limitless's distance penalty being measured against the dream team rather than the persistent team.
+
+**Implementation:**
+- `findOptimalWildcardTeam(budget, proj, targetInfo)` now takes optional `targetInfo = { driverSet, conSet, distanceWeight }` and incorporates the distance penalty directly into its objective. Driver pool is augmented with any target picks not already in the top-15 by score so they're considered. When target is set, the search natively picks the best balance of points and target-alignment.
+- New per-round `roundTargetInfo` in the beam loop carries the per-round distance weight (`TARGET_WEIGHT * (ri+1) / horizon`, matching P3's main-loop calculation).
+- New `isLimitless` flag drives a clean split between **dream team** (used for this round's `pts` calculation) and **persistent team** (used for state propagation, appreciation calc, distance penalty, strategy weighting, and carry-forward into next round).
+- Limitless: `penalty = 0`, `remainingTransfers = transfersThisRound` (no consumption), `state.drivers/constructors` stay as pre-limitless.
+- New `persistedTeam` field on `roundActions[]` records the team that carries into the next round. Used by team-evolution and P7 trade-off rendering so the round AFTER a limitless doesn't paint reverted-back picks as "NEW".
+- Display: chip label gets `(reverts after round)` suffix for limitless.
+
+**Limitless target distance:** intentionally measured against persistent team, not dream team. The dream team is temporary so its target match doesn't contribute to actual target convergence across the horizon. Limitless contributes only this round's score boost — it doesn't affect target progress in either direction.
+
 ## P5 — Replace greedy Wildcard with real optimizer
 
 **Problem:** Wildcard-fired team is picked greedily (sort constructors by score → take top 2 regardless of price → fill drivers by score within remaining budget). Misses dominated lineups where a cheaper constructor would free budget for a much better driver.

@@ -1755,21 +1755,32 @@ function searchCombosWithPruning(freeDrivers, priceSum, kLeft, remainBudget, onC
 //
 // `proj` is { drivers: {id: score}, constructors: {id: score} } for the round.
 // `data` is read from outer scope (globals).
-function findOptimalWildcardTeam(budget, proj) {
+function findOptimalWildcardTeam(budget, proj, targetInfo) {
     // Pool of top-N drivers by projected score (matches single-round advisor's
-    // FREE_POOL=15). Larger pool = better optimality but slower search.
+    // FREE_POOL=15). When a target team is set, augment the pool with any
+    // target drivers that didn't make the top-N — otherwise the wildcard
+    // search couldn't consider them even when target-aware.
     const FREE_POOL = 15;
     const annotated = data.drivers.map(d => ({
         ...d,
         _score: proj.drivers[d.driver_id] || 0,
     }));
     annotated.sort((a, b) => b._score - a._score);
-    const driverPool = annotated.slice(0, FREE_POOL)
-        .sort((a, b) => a.current_price - b.current_price); // ascending price for pruning
+    let pool = annotated.slice(0, FREE_POOL);
+    if (targetInfo && targetInfo.driverSet) {
+        const poolIds = new Set(pool.map(d => d.driver_id));
+        for (const did of targetInfo.driverSet) {
+            if (!poolIds.has(did)) {
+                const tgt = annotated.find(x => x.driver_id === did);
+                if (tgt) pool.push(tgt);
+            }
+        }
+    }
+    const driverPool = pool.sort((a, b) => a.current_price - b.current_price); // ascending price for pruning
     const priceSum = [0];
     for (const d of driverPool) priceSum.push(priceSum[priceSum.length - 1] + d.current_price);
 
-    let bestScore = -Infinity;
+    let bestObjective = -Infinity;
     let bestTeam = null;
 
     const allConstructors = data.constructors;
@@ -1785,15 +1796,32 @@ function findOptimalWildcardTeam(budget, proj) {
             searchCombosWithPruning(driverPool, priceSum, 5, remainBudget, (combo, comboCost) => {
                 let driverScore = 0;
                 for (const d of combo) driverScore += (proj.drivers[d.driver_id] || 0);
-                const totalScore = driverScore + conScore;
-                if (totalScore > bestScore) {
-                    bestScore = totalScore;
+                const rawScore = driverScore + conScore;
+
+                // P5b: When target team is set, incorporate the target-distance
+                // penalty into the wildcard's objective. Without this, the search
+                // picks the max-points team and the planner's later distance
+                // penalty has no alternative to fall back to. With it, the
+                // wildcard naturally prefers target-aligned teams when the
+                // points trade-off is acceptable.
+                let targetPenalty = 0;
+                if (targetInfo) {
+                    let dist = 0;
+                    for (const d of combo) if (!targetInfo.driverSet.has(d.driver_id)) dist++;
+                    if (!targetInfo.conSet.has(c1.constructor_id)) dist++;
+                    if (!targetInfo.conSet.has(c2.constructor_id)) dist++;
+                    targetPenalty = dist * targetInfo.distanceWeight;
+                }
+
+                const objective = rawScore - targetPenalty;
+                if (objective > bestObjective) {
+                    bestObjective = objective;
                     // Snapshot ids — comboArr is mutated by the caller after this returns
                     bestTeam = {
                         drivers: combo.map(d => d.driver_id),
                         constructors: [c1.constructor_id, c2.constructor_id],
                         cost: comboCost + conCost,
-                        score: totalScore,
+                        score: rawScore, // raw projected points, NOT penalty-adjusted
                     };
                 }
             });
@@ -3356,6 +3384,20 @@ async function runMultiWeekPlanner() {
         const proj = roundProjections[ri];
         const nextBeam = [];
 
+        // P5b: Per-round target info for chip-aware optimization (Wildcard uses this).
+        // Distance weight matches P3's main-loop calculation so wildcard search and
+        // post-search scoring are consistent.
+        const TARGET_WEIGHT = 30;
+        const roundProgress = (ri + 1) / roundProjections.length;
+        let roundTargetInfo = null;
+        if (useTargetTeam && targetDriverSet && targetConsSet) {
+            roundTargetInfo = {
+                driverSet: targetDriverSet,
+                conSet: targetConsSet,
+                distanceWeight: TARGET_WEIGHT * roundProgress,
+            };
+        }
+
         for (const state of beam) {
             // Transfers gained this round (1 per round, max 5 banked)
             // For the current round (ri===0), use banked transfers as-is (no +1 since we haven't passed a round yet)
@@ -3375,12 +3417,14 @@ async function runMultiWeekPlanner() {
                 // P5: Use brute-force optimizer instead of greedy by-score-within-budget.
                 // Memoized by (round_index, budget_bucket) so beam states with similar
                 // budgets share the search. See wildcardCache declaration above.
+                // Cache key includes ri (so per-round target weight is captured) and budget bucket.
+                // targetDriverSet/targetConsSet are constants throughout a planner run, so no need to key on them.
                 const wcCacheKey = `${ri}|${Math.round(state.budget * 10)}`;
                 let wcOptimal;
                 if (wildcardCache.has(wcCacheKey)) {
                     wcOptimal = wildcardCache.get(wcCacheKey);
                 } else {
-                    wcOptimal = findOptimalWildcardTeam(state.budget, proj);
+                    wcOptimal = findOptimalWildcardTeam(state.budget, proj, roundTargetInfo);
                     wildcardCache.set(wcCacheKey, wcOptimal);
                 }
                 if (wcOptimal) {
@@ -3432,6 +3476,19 @@ async function runMultiWeekPlanner() {
                 let pts = scoreTeam(cand.drivers, cand.constructors, proj.drivers, proj.constructors);
                 const usedChip = cand.useChip || null;
 
+                // P5b: Limitless is a ONE-ROUND dream team. The user's real team
+                // is untouched — no transfers happen, no team change persists,
+                // no held-asset appreciation applies (because the dream team is
+                // not actually held), and target convergence is measured against
+                // the persistent team (not the dream). The dream team is purely
+                // a scoring boost for one round.
+                //
+                // Wildcard, by contrast, IS a permanent set of transfers
+                // (unlimited count, no penalty) — its team persists forward.
+                const isLimitless = usedChip === 'limitless';
+                const persistedDrivers = isLimitless ? state.drivers : cand.drivers;
+                const persistedCons = isLimitless ? state.constructors : cand.constructors;
+
                 // Apply chip scoring effects
                 if (usedChip === '3x_boost' || usedChip === 'autopilot') {
                     // Find top scorer and apply boost
@@ -3459,12 +3516,15 @@ async function runMultiWeekPlanner() {
                 let penalty = 0;
                 let remainingTransfers = transfersThisRound;
                 if (usedChip === 'wild_card') {
-                    remainingTransfers = transfersThisRound; // No transfers consumed
-                } else if (usedChip === 'limitless') {
-                    // Limitless doesn't affect transfers, just budget
-                    const extraSwaps = Math.max(0, cand.swaps - transfersThisRound);
-                    penalty = extraSwaps * TRANSFER_PENALTY;
-                    remainingTransfers = Math.max(0, transfersThisRound - cand.swaps);
+                    remainingTransfers = transfersThisRound; // Unlimited transfers, none consumed
+                } else if (isLimitless) {
+                    // P5b: Limitless reverts after the round — no transfers used,
+                    // no penalty regardless of how different the dream team is.
+                    // Previously this was treating cand.swaps as real transfers,
+                    // which incorrectly consumed banked FTs and could apply a
+                    // -10pt penalty per "extra" dream-team-position. Both wrong.
+                    penalty = 0;
+                    remainingTransfers = transfersThisRound;
                 } else {
                     const extraSwaps = Math.max(0, cand.swaps - transfersThisRound);
                     penalty = extraSwaps * TRANSFER_PENALTY;
@@ -3474,11 +3534,17 @@ async function runMultiWeekPlanner() {
                 const netPts = pts - penalty;
 
                 // Strategy weighting
+                // P5b: for Limitless rounds, strategy calcs use the PERSISTED team
+                // (not dream team). budget_gain measures appreciation of held
+                // assets — dream team isn't held. balanced measures team ppm —
+                // dream team isn't the user's actual team.
+                const strategyDrivers = isLimitless ? state.drivers : cand.drivers;
+                const strategyCons = isLimitless ? state.constructors : cand.constructors;
                 let score = netPts;
                 if (strategy === 'budget_gain') {
                     // Add projected price appreciation
                     let priceGain = 0;
-                    for (const did of cand.drivers) {
+                    for (const did of strategyDrivers) {
                         const d = data.drivers.find(x => x.driver_id === did);
                         if (d) {
                             const ppm = (proj.drivers[did] || 0) / d.current_price;
@@ -3490,11 +3556,11 @@ async function runMultiWeekPlanner() {
                 } else if (strategy === 'balanced') {
                     // Mix points + value
                     let totalPrice = 0;
-                    for (const did of cand.drivers) {
+                    for (const did of strategyDrivers) {
                         const d = data.drivers.find(x => x.driver_id === did);
                         if (d) totalPrice += d.current_price;
                     }
-                    for (const cid of cand.constructors) {
+                    for (const cid of strategyCons) {
                         const c = data.constructors.find(x => x.constructor_id === cid);
                         if (c) totalPrice += c.current_price;
                     }
@@ -3524,16 +3590,18 @@ async function runMultiWeekPlanner() {
                 // for <30 pts of raw points on the last round) but won't force
                 // wildly suboptimal swaps when convergence is impossible.
                 if (useTargetTeam && targetDriverSet && targetConsSet) {
+                    // P5b: For Limitless, measure distance against the PERSISTED
+                    // team (state's pre-limitless), not the dream team — the
+                    // dream team is temporary so its target-distance doesn't
+                    // contribute to actual target convergence across the horizon.
                     let distance = 0;
-                    for (const did of cand.drivers) {
+                    for (const did of persistedDrivers) {
                         if (!targetDriverSet.has(did)) distance++;
                     }
-                    for (const cid of cand.constructors) {
+                    for (const cid of persistedCons) {
                         if (!targetConsSet.has(cid)) distance++;
                     }
-                    const TARGET_WEIGHT = 30;
-                    const roundProgress = (ri + 1) / roundProjections.length;
-                    score -= distance * TARGET_WEIGHT * roundProgress;
+                    score -= distance * (roundTargetInfo ? roundTargetInfo.distanceWeight : 0);
                 }
 
                 const newChipsAvail = usedChip
@@ -3551,8 +3619,13 @@ async function runMultiWeekPlanner() {
                 // and returns expectedChange in $M. We apply it across drivers AND
                 // constructors of the post-transfer team (cand.drivers/constructors)
                 // because that's who you hold INTO this round's race.
+                // P5b: For Limitless, the dream team is not actually held — the
+                // user reverts to their real team. So appreciation must be
+                // computed on the PERSISTED team, not the dream team. Without
+                // this, firing Limitless would boost next-round budget by the
+                // dream team's appreciation (which the user never owned).
                 let roundAppreciation = 0;
-                for (const did of cand.drivers) {
+                for (const did of persistedDrivers) {
                     const d = data.drivers.find(x => x.driver_id === did);
                     if (d) {
                         const projPts = proj.drivers[did] || 0;
@@ -3560,7 +3633,7 @@ async function runMultiWeekPlanner() {
                         roundAppreciation += pc.expectedChange;
                     }
                 }
-                for (const cid of cand.constructors) {
+                for (const cid of persistedCons) {
                     const c = data.constructors.find(x => x.constructor_id === cid);
                     if (c) {
                         const projPts = proj.constructors[cid] || 0;
@@ -3572,8 +3645,11 @@ async function runMultiWeekPlanner() {
                 const budgetAfter = Math.round((state.budget + roundAppreciation) * 100) / 100;
 
                 nextBeam.push({
-                    drivers: cand.drivers,
-                    constructors: cand.constructors,
+                    // P5b: carry PERSISTED team forward (= state's for limitless,
+                    // = cand's for everything else). The dream team is stored in
+                    // roundActions[].team for display but doesn't affect state.
+                    drivers: persistedDrivers,
+                    constructors: persistedCons,
                     budget: budgetAfter, // P1: budget now propagates with projected appreciation
                     bankedTransfers: remainingTransfers,
                     chipsUsed: usedChip ? [...state.chipsUsed, { round: proj.round, chip: usedChip }] : [...state.chipsUsed],
@@ -3595,7 +3671,13 @@ async function runMultiWeekPlanner() {
                         budgetBefore: Math.round(budgetBefore * 100) / 100,
                         appreciation: Math.round(roundAppreciation * 100) / 100,
                         budgetAfter,
+                        // P5b: 'team' = dream team played THIS round (for display).
+                        // 'persistedTeam' = team carried into NEXT round (= team
+                        // for non-limitless; = pre-limitless team for limitless).
+                        // Rendering uses persistedTeam to detect NEW picks in
+                        // the round AFTER a limitless without false positives.
                         team: { drivers: [...cand.drivers], constructors: [...cand.constructors] },
+                        persistedTeam: { drivers: [...persistedDrivers], constructors: [...persistedCons] },
                     }],
                 });
             }
@@ -3757,7 +3839,13 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
 
             html += `<div class="mw-round-action ${actionClass}">`;
             if (hasChip) {
-                html += `<strong>${action.chip.replace(/_/g, ' ').toUpperCase()}</strong><br>`;
+                html += `<strong>${action.chip.replace(/_/g, ' ').toUpperCase()}</strong>`;
+                // P5b: Limitless is a one-round dream team; team reverts next round.
+                // Surfacing this prevents the user from assuming the dream team becomes their new team.
+                if (action.chip === 'limitless') {
+                    html += ` <span style="font-size:0.65rem;font-weight:400;color:var(--text-secondary);" title="Limitless gives you a dream team for one round only. Your real team is unchanged.">(reverts after round)</span>`;
+                }
+                html += '<br>';
             }
             if (hasSwaps) {
                 for (const swap of action.swaps) {
@@ -3831,7 +3919,10 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
 
             // P7: Advance the trade-off baseline so next round compares against
             // THIS round's chosen team, not the original starting team.
-            prevTeamForTradeoff = action.team;
+            // P5b: For limitless, use persistedTeam (which reverts to pre-limitless),
+            // not the dream team. Otherwise the next round's "vs hold" would
+            // wrongly compare against the limitless dream team.
+            prevTeamForTradeoff = action.persistedTeam || action.team;
         }
         html += '</div>';
 
@@ -3868,8 +3959,12 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
                 </span>`;
             }
             html += '</div></div>';
-            prevDrivers = [...currDrivers];
-            prevCons = [...currCons];
+            // P5b: advance prev using persistedTeam so the round AFTER a Limitless
+            // doesn't paint reverted-back picks as "NEW" (they were already held
+            // before the temporary dream team).
+            const carriedTeam = action.persistedTeam || action.team;
+            prevDrivers = [...carriedTeam.drivers];
+            prevCons = [...carriedTeam.constructors];
         }
         html += '</details>';
 
