@@ -124,26 +124,41 @@ The brute-force evaluates ~1.4M combinations with budget pruning, returns top 20
    - **Max Expected Points** — pure performance
    - **Balanced** — mix of points and value
    - **Budget Builder** — prioritizes asset appreciation
+
+   The dropdown only affects how the planner **ranks** plans — the points totals on each plan card are always raw projected net points (after transfer penalties + chip effects).
 4. **Check available chips** — the planner suggests when to deploy them
-5. **Optional: Target Team** — check "Plan toward a target team" to lock in your dream 5+2; the planner steers transfers toward it while still optimizing each round
+5. **Optional: Target Team** — check "Plan toward a target team" to lock in your dream 5+2; the planner steers transfers toward it while still optimizing each round. Pick a **Target intensity**:
+   - **Loose** — planner will trade target convergence for ~10 pts/pick
+   - **Balanced** *(default)* — won't trade target for less than ~30 pts/pick on the final round
+   - **Strict** — forces convergence even at significant point cost
 6. Click "Plan My Transfers"
 
 **Results:**
-- **Projection Heatmap** — top drivers/constructors × upcoming rounds, color-coded
-- **Plan Cards** — top 5 transfer sequences with hold/swap/chip per round
+- **Feasibility card** *(target mode only)* — green/orange/red banner telling you whether the target team is affordable now, possibly reachable via projected appreciation, or definitively unreachable (with shortfall and which target picks are too expensive)
+- **Projection Heatmap** — top drivers/constructors × upcoming rounds, color-coded. Cells with little historical signal at similar tracks (rookies, Cadillac) are italicised + dotted-underlined with a tooltip explaining confidence
+- **Plan Cards** — top 5 transfer sequences with hold/swap/chip per round. Each plan card shows:
+  - Total raw projected net points
+  - Horizon budget summary (starting → final, with appreciation delta)
+  - Per-round budget evolution under each timeline cell
+  - "vs hold" trade-off line on swap rounds showing whether an extra-transfer penalty actually paid off
 - **Team Evolution** — expandable view showing your full roster at each round with NEW badges and projected points
 
 **How future-round projections work:**
 - Current round: actual ML predictions
-- Future rounds: `recent form × track similarity × sprint multiplier`
+- Future rounds: priors-only ML predictions from `predict_horizon.py` if available, falling back to `recent form × confidence-weighted track similarity × sprint multiplier`
 - Track similarity uses 9 circuit characteristics (downforce, overtaking difficulty, corner speed, etc.)
+
+**Chip handling:**
+- **Wild Card** — a true brute-force optimal-team search runs at every beam state, target-aware when target mode is on
+- **Limitless** — one-round dream team only; the planner correctly reverts your real team afterwards (no transfers consumed, no penalty, no carry-forward)
+- All 6 chips are also offered on top of any 0/1/2-swap pattern (so "swap A→B and fire 3x Boost on the new driver" combinations are explored)
 
 **Tips:**
 - Check "Wild Card" if available — the planner finds the optimal round to deploy it
 - Sprint rounds have +15% projected points (extra scoring opportunity)
 - Bank transfers when the upcoming round doesn't benefit from a swap (max 5 banked)
 - "Hold" entries mean your current team is already well-suited for that circuit
-- Use "Target Team" mode when you have a roster you want to end up with but need help planning the path
+- Use "Target Team" mode when you have a roster you want to end up with but need help planning the path; start with Balanced intensity and switch to Strict if you really want to force the convergence regardless of point cost
 
 ---
 

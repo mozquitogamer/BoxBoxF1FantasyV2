@@ -839,52 +839,87 @@ F1 Fantasy allows 2-3 free transfers per round; extra transfers cost -10 pts eac
 
 ### Architecture: Beam Search Over Transfer Sequences
 
-ML predictions only exist for the current round. Future rounds are projected using:
+ML predictions exist for the current round; future rounds are projected in two layers:
 
-```
-projected_score = base_form × track_affinity × sprint_multiplier
-```
+1. **Preferred — `horizon_projections.json` (P9):** populated by `pipeline/predict_horizon.py`, which runs priors-only ML predictions for the upcoming 5 rounds at the end of every prediction phase. When this file exists and contains the round, the planner uses real ML expected-points (full confidence).
+2. **Fallback — confidence-weighted track-affinity heuristic:**
 
-Where:
-- `base_form` = avg of last 3 rounds' actual fantasy points (or predicted if fewer actuals)
-- `track_affinity` = similarity-weighted performance at similar circuits (cosine on 9D feature vectors, threshold > 0.7, clamped 0.6-1.4)
-- `sprint_multiplier` = 1.15x for sprint rounds
+   ```
+   projected_score = base_form × affinity × sprint_multiplier
+   affinity        = 1 + confidence × (rawAffinity − 1)   [clamped to 0.6–1.4]
+   ```
+
+   - `base_form` = each pick's `expected_points` from the current ML prediction
+   - `rawAffinity` = `Σ(history_pts × weight) / Σ(weight) / hist_average`, where `weight = max(0, cos_sim − 0.5) × 2` against the 9D circuit feature vector
+   - `confidence ∈ [0,1]` = `min(1, Σweight / 1.0)` — relaxes the old hard-gate (≥2 races, sim > 0.7) so cold-start picks (rookies, Cadillac) get a dampened partial signal instead of being silently defaulted to 1.0
+   - `sprint_multiplier` = 1.35× for sprint rounds (relative)
 
 ### Beam Search Details
 
-- **Width:** 60 beams (top 60 states kept at each round)
-- **Candidates per state:** 0 swaps (hold) + all single swaps + top 2-swap combos (top 8 drivers × top 4 constructors by projected points)
-- **State tracking:** team composition, budget, banked transfers (max 5), chips used, cumulative score, transfer history
-- **Deduplication:** States with identical team composition merged (keep highest score). Uses **non-mutating** `[...arr].sort()` — earlier bug where sorting mutated state arrays caused incorrect dedup.
-- **Penalty:** -10 pts per extra transfer beyond free allocation.
+- **Width:** 60 beams (top 60 states kept at each round). See `MW_TUNABLES.beamWidth`.
+- **Candidates per state:** 0 swaps (hold) + every single swap + 2-swap combos (driver+driver, driver+constructor, constructor+constructor) + Wild Card optimal team + Limitless dream team + each "chip on top of swap" augmentation.
+- **2-swap pool (P11):** `(top-N by raw projected score) ∪ (top-N by PPM)` for both drivers and constructors. PPM pool surfaces cheap high-value picks that enable budget-relief swaps. Defaults: 8+8 drivers, 4+3 constructors (deduped).
+- **State tracking:** team composition, budget, banked transfers (max 5), chips used + remaining, cumulative score, transfer history, per-round budget evolution.
+- **Budget propagation (P1):** after each round, `state.budget` advances by `Σ predictPriceChange(pick).expectedChange` across the persisted team, so the next round's transfer search sees the appreciated spending ceiling.
+- **Deduplication (P6):** key = `sorted(drivers) | sorted(constructors) | sorted(chipsAvailable) | bankedTransfers`. Earlier version collapsed states with same team but different chip/FT portfolios, silently losing strictly-better futures.
+- **Penalty:** -10 pts per extra transfer beyond free allocation (`MW_TUNABLES.transferPenalty`).
 
 ### Strategies
 
-| Strategy | Weight |
-|----------|--------|
-| Max Points | Pure projected fantasy points |
-| Balanced | 0.7 × points + 0.3 × value efficiency |
-| Budget Gain | 0.4 × points + 0.6 × price appreciation potential |
+The Strategy dropdown re-ranks plans via a weighted internal score that is **not displayed**. Every plan card always shows raw net projected points so plans can be compared across strategies (P14 hint surfaces this in the UI).
+
+| Strategy | Internal score |
+|----------|---|
+| Max Points | Pure `netPts` (`pts − penalty`) |
+| Balanced | `0.7 × netPts + 30 × ppm` (weights from `MW_TUNABLES.balancedPointsWeight/PpmWeight`) |
+| Budget Gain | `netPts + 50 × priceGain` (PPM bracket scoring on each held pick) |
 
 ### Chip Support
 
-The planner can deploy each of the 6 chips on specific rounds. Wild Card on a round eliminates transfer penalties for that round.
+- **Wild Card:** at every beam state, `findOptimalWildcardTeam` runs a true brute-force search (constructor-pair × driver-combo with branch-and-bound pruning). Memoized per `(round_index, budget_bucket)` so the ~60-state × 3-round horizon performs the search ~3–10 times instead of 180.
+- **Limitless (P5b):** one-round dream team. The planner correctly carries the persisted (pre-Limitless) team forward — no transfers consumed, no penalty, no held-asset appreciation on the dream team, target distance measured against the persistent team. Greedy top-N selection is provably optimal here because Limitless ignores the budget constraint entirely.
+- **3x Boost / No Negative / Autopilot / Final Fix:** layered on top of any 0/1/2-swap candidate during beam expansion so combinations like "swap A→B AND fire 3x Boost on the new driver" are explored.
 
 ### Target Team Mode
 
-Optional. Users select an ideal 5+2 team. The beam search adds **+100 pts per matching team member** as a bonus on the final planning round, steering the planner toward the dream team while still optimizing intermediate rounds.
+Optional. Users select an ideal 5+2 team and a **target intensity** (P13). The beam search applies a continuous per-round distance penalty (P3):
+
+```
+penalty_for_round = distance × TARGET_WEIGHT × (ri + 1) / horizon
+```
+
+- `distance` = count of target picks not in the candidate team (0..7), measured against the **persisted** team (so Limitless dream teams don't earn false convergence credit).
+- `TARGET_WEIGHT` is set by the dropdown — Loose=10, Balanced=30 *(default)*, Strict=80 — via `MW_TUNABLES.targetIntensity`.
+- The `(ri+1)/horizon` factor ramps recency so late rounds penalize more than early ones, but early rounds still actively path-find toward the target instead of waiting for a final-round cliff.
+
+`findOptimalWildcardTeam` is also target-aware when target mode is on — its internal objective subtracts the same distance × weight × roundProgress so Wild Card converges on the target naturally rather than defaulting to max-points.
+
+### Feasibility Card (P2)
+
+Before the beam search runs, when target mode is active the planner emits a `feasibilityInfo` object summarizing reachability:
+- `targetCost` vs `currentBudget` vs `currentBudget + horizonAppreciation` (with `horizonAppreciation` = sum of projected price changes if the user holds their CURRENT team across the whole horizon — an upper-bound ceiling)
+- Classification: `isReachableNow` (green), `isPossiblyReachable` (orange), or `isUnreachable` (red, with explicit shortfall and the 2 most expensive target picks called out)
+- Held-target-count + transfers needed
+
+Rendered as a colour-coded card above the plan grid via `renderFeasibilityCard`.
+
+### Tunables (P10)
+
+All planner constants live in a single `MW_TUNABLES` block at the top of the multi-week section in `app.js`. Covers beam width, transfer penalty, max banked FT, target weight + intensity map, candidate pool sizes, wildcard pool, strategy weights, PPM bracket thresholds, and affinity heuristic parameters (similarity floor, full-confidence weight, clamp range). Single-spot tuning + clear comments per constant.
 
 ### Data Requirements
 
-Two JSON files (exported by `08_export_website_json.py`):
+Three JSON files (all exported by pipeline scripts):
 - `track_data.json` — 22 circuits, 9D feature vectors, race-to-circuit mapping, sprint round list
 - `driver_history.json` — per-driver and per-constructor actual points per completed round with circuit_id mapping
+- `horizon_projections.json` *(optional)* — priors-only ML projections for the next 5 rounds from `predict_horizon.py`; planner falls back to the affinity heuristic when missing
 
 ### Display
 
-- **Projection heatmap:** Top 12 drivers + top 6 constructors × planning rounds, color-coded by performance vs average.
-- **Plan cards:** Top 5 strategies. Each card shows hold/swap/chip per round, total projected points, transfer banking.
-- **Team Evolution view:** Expandable per plan card. Full roster at each round with NEW badges and per-member projected points.
+- **Feasibility card:** green/orange/red status banner with target cost, current budget, projected appreciation, ceiling, shortfall (if any), and priciest target picks
+- **Projection heatmap:** top 12 drivers + top 6 constructors × planning rounds, color-coded by performance vs row average. Low-confidence cells (P8) get italic styling + dotted underline + tooltip
+- **Plan cards:** top 5 plans. Each card shows raw net projected points, horizon budget summary, hold/swap/chip per round, per-round budget evolution (`budgetBefore → budgetAfter`, appreciation), and a "vs hold" tradeoff line on swap rounds showing whether the extra-transfer penalty paid off (P7)
+- **Team Evolution view:** expandable per plan card. Full roster at each round with NEW badges and per-member projected points. After a Limitless round, the next-round NEW badges are computed against the persisted team (not the dream team) to avoid false positives
 
 ---
 
