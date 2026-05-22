@@ -1763,7 +1763,8 @@ function findOptimalWildcardTeam(budget, proj, targetInfo) {
     // FREE_POOL=15). When a target team is set, augment the pool with any
     // target drivers that didn't make the top-N — otherwise the wildcard
     // search couldn't consider them even when target-aware.
-    const FREE_POOL = 15;
+    // P10: pulled from MW_TUNABLES.
+    const FREE_POOL = MW_TUNABLES.wildcardFreePool;
     const annotated = data.drivers.map(d => ({
         ...d,
         _score: proj.drivers[d.driver_id] || 0,
@@ -2887,6 +2888,50 @@ function formatPriceChangeBadge(change) {
 // Multi-Week Transfer Planner
 // ============================================================
 
+// P10: Centralised tunables. All numeric constants used by the multi-week
+// planner live here so they can be reviewed, tweaked, and sensitivity-tested
+// in one place. Behaviour notes per constant — modify with care, the planner
+// is sensitive to relative weightings.
+const MW_TUNABLES = {
+    // --- Beam search ---
+    beamWidth: 60,                  // # of states kept per round. Higher = more thorough but slower (quadratic-ish). Sweet spot 40-80.
+    transferPenalty: 10,            // Points deducted per extra (non-banked) transfer. F1 Fantasy official rule = 10.
+    maxBankedTransfers: 5,          // Max banked FT. F1 Fantasy official rule = 5.
+
+    // --- Target team ---
+    targetWeight: 30,               // Default points-per-off-target-pick penalty (final round). Overridden by intensity dropdown.
+    targetIntensity: {              // Maps the Target Intensity dropdown to a TARGET_WEIGHT.
+        loose:    10,               // Planner will trade target convergence for ~10 pts/pick.
+        balanced: 30,               // Default — won't trade target for <30 pts/pick on final round.
+        strict:   80,               // Forces convergence even at significant point cost.
+    },
+
+    // --- Candidate pool sizes (generateTransferCandidates) ---
+    driverPoolByScore: 8,           // Top-N drivers by raw projected score for 2-swap exploration.
+    driverPoolByPpm:   8,           // Top-N drivers by ppm (proj_score / current_price) — adds cheap high-PPM picks to enable budget-relief swaps.
+    conPoolByScore:    4,           // Top-N constructors by raw projected score.
+    conPoolByPpm:      3,           // Top-N constructors by ppm.
+
+    // --- Wildcard optimiser ---
+    wildcardFreePool: 15,           // Top-N drivers fed into the brute-force wildcard search.
+
+    // --- Strategy weighting (beam-search ranking only, not displayed) ---
+    budgetGainWeight: 50,           // priceGain * this — added to net points for the budget_gain strategy.
+    balancedPointsWeight: 0.7,      // pts coefficient in balanced strategy
+    balancedPpmWeight: 30,          // ppm coefficient in balanced strategy
+
+    // --- PPM bracket thresholds (price-change estimation in beam score) ---
+    ppmHighThreshold: 1.2,          // PPM ≥ this earns top tier price-gain credit.
+    ppmMidThreshold: 0.9,           // PPM ≥ this earns middle tier.
+    priceBracketSplit: 18.5,        // A-tier vs B-tier driver price cutoff (matches predictPriceChange brackets).
+
+    // --- Affinity heuristic (computeAffinityWithConfidence) ---
+    affinitySimilarityFloor: 0.5,   // Below this cosine sim, a historical race contributes 0 weight.
+    affinityFullConfidence: 1.0,    // weightSum ≥ this → confidence = 1.0.
+    affinityClampMin: 0.6,
+    affinityClampMax: 1.4,
+};
+
 async function loadMultiWeekData() {
     if (!trackData) {
         try {
@@ -2952,13 +2997,20 @@ function getFeatureVector(circuitId) {
 function computeAffinityWithConfidence(hist, targetVec, basePts) {
     if (!hist || hist.length < 1 || !targetVec) return { affinity: 1.0, confidence: 0 };
 
+    // P10: tunables hoisted to MW_TUNABLES.
+    const SIM_FLOOR = MW_TUNABLES.affinitySimilarityFloor;
+    const FULL_CONF_WEIGHT = MW_TUNABLES.affinityFullConfidence;
+    const CLAMP_MIN = MW_TUNABLES.affinityClampMin;
+    const CLAMP_MAX = MW_TUNABLES.affinityClampMax;
+
     let weightedPts = 0, weightSum = 0;
     for (const h of hist) {
         const hVec = getFeatureVector(h.circuit_id);
         if (!hVec) continue;
         const sim = cosineSimilarity(targetVec, hVec);
-        // Softened weight: starts contributing at sim > 0.5, full weight at sim = 1.0
-        const w = Math.max(0, sim - 0.5) * 2.0;
+        // Softened weight: starts contributing at sim > SIM_FLOOR, full weight at sim = 1.0
+        // (2.0 = 1 / (1.0 - SIM_FLOOR) when SIM_FLOOR = 0.5)
+        const w = Math.max(0, sim - SIM_FLOOR) * (1 / (1 - SIM_FLOOR));
         weightedPts += h.points * w;
         weightSum += w;
     }
@@ -2970,9 +3022,9 @@ function computeAffinityWithConfidence(hist, targetVec, basePts) {
     if (avgAllPts === 0) return { affinity: 1.0, confidence: 0 };
 
     const rawAffinity = avgSimilarPts / avgAllPts;
-    const confidence = Math.min(1.0, weightSum / 1.0); // weightSum=1.0 → full confidence
+    const confidence = Math.min(1.0, weightSum / FULL_CONF_WEIGHT);
     const blended = 1.0 + confidence * (rawAffinity - 1.0);
-    const affinity = Math.max(0.6, Math.min(1.4, blended));
+    const affinity = Math.max(CLAMP_MIN, Math.min(CLAMP_MAX, blended));
     return { affinity, confidence };
 }
 
@@ -3155,13 +3207,53 @@ function generateTransferCandidates(teamDrivers, teamConstructors, projDriverSco
     if (maxSwaps < 2) return candidates;
 
     // 2-swap candidates: replace two drivers, or one driver + one constructor
-    // Limit search for performance: only swap to top-scoring available assets
-    const topAvailDrivers = availDrivers
+    // P11: pool the candidates by RAW SCORE ∪ PPM — without PPM-ranked picks
+    // the search misses cheap high-value players who'd enable budget-relief
+    // swaps (down-trade an expensive driver + up-trade a cheap one). Raw-score
+    // pool covers high-ceiling absolute picks; PPM pool covers
+    // bang-for-the-buck. Union dedupes via Set, so total candidate count is
+    // ≤ poolByScore + poolByPpm.
+    const driverPoolByScore = availDrivers
+        .slice()
         .sort((a, b) => (projDriverScores[b.driver_id] || 0) - (projDriverScores[a.driver_id] || 0))
-        .slice(0, 8);
-    const topAvailCons = availCons
+        .slice(0, MW_TUNABLES.driverPoolByScore);
+    const driverPoolByPpm = availDrivers
+        .slice()
+        .sort((a, b) => {
+            const ppmA = (projDriverScores[a.driver_id] || 0) / (a.current_price || 1e-6);
+            const ppmB = (projDriverScores[b.driver_id] || 0) / (b.current_price || 1e-6);
+            return ppmB - ppmA;
+        })
+        .slice(0, MW_TUNABLES.driverPoolByPpm);
+    const driverPoolIds = new Set();
+    const topAvailDrivers = [];
+    for (const d of [...driverPoolByScore, ...driverPoolByPpm]) {
+        if (!driverPoolIds.has(d.driver_id)) {
+            driverPoolIds.add(d.driver_id);
+            topAvailDrivers.push(d);
+        }
+    }
+
+    const conPoolByScore = availCons
+        .slice()
         .sort((a, b) => (projConScores[b.constructor_id] || 0) - (projConScores[a.constructor_id] || 0))
-        .slice(0, 4);
+        .slice(0, MW_TUNABLES.conPoolByScore);
+    const conPoolByPpm = availCons
+        .slice()
+        .sort((a, b) => {
+            const ppmA = (projConScores[a.constructor_id] || 0) / (a.current_price || 1e-6);
+            const ppmB = (projConScores[b.constructor_id] || 0) / (b.current_price || 1e-6);
+            return ppmB - ppmA;
+        })
+        .slice(0, MW_TUNABLES.conPoolByPpm);
+    const conPoolIds = new Set();
+    const topAvailCons = [];
+    for (const c of [...conPoolByScore, ...conPoolByPpm]) {
+        if (!conPoolIds.has(c.constructor_id)) {
+            conPoolIds.add(c.constructor_id);
+            topAvailCons.push(c);
+        }
+    }
 
     // Two driver swaps
     for (let i = 0; i < teamDrivers.length; i++) {
@@ -3218,6 +3310,32 @@ function generateTransferCandidates(teamDrivers, teamConstructors, projDriverSco
         }
     }
 
+    // P12: Constructor+constructor 2-swap (replace BOTH constructors).
+    // Previously absent — the planner could only ever change one constructor
+    // per round even with 2 free transfers, even when swapping both was
+    // strictly better. Only one unique pair exists (i=0, j=1) since there are
+    // exactly 2 constructor slots.
+    if (teamConstructors.length >= 2 && teamConstructors[0] && teamConstructors[1]) {
+        const out1 = teamConstructors[0], out2 = teamConstructors[1];
+        const freed = (conPrices[out1] || 0) + (conPrices[out2] || 0);
+        for (const a1 of topAvailCons) {
+            for (const a2 of topAvailCons) {
+                if (a1.constructor_id === a2.constructor_id) continue;
+                const needed = (conPrices[a1.constructor_id] || 0) + (conPrices[a2.constructor_id] || 0);
+                if (currentCost - freed + needed > budget) continue;
+                candidates.push({
+                    drivers: [...teamDrivers],
+                    constructors: [a1.constructor_id, a2.constructor_id],
+                    swaps: 2,
+                    swapDetails: [
+                        { type: 'constructor', out: out1, in: a1.constructor_id },
+                        { type: 'constructor', out: out2, in: a2.constructor_id },
+                    ],
+                });
+            }
+        }
+    }
+
     return candidates;
 }
 
@@ -3264,6 +3382,10 @@ async function runMultiWeekPlanner() {
     const useTargetTeam = document.getElementById('mwUseTarget')?.checked || false;
     let targetDriverSet = null;
     let targetConsSet = null;
+    // P13: Target intensity → TARGET_WEIGHT lookup. Defaults to balanced when
+    // the dropdown isn't present (legacy support) or target mode is off.
+    const intensityValue = document.getElementById('mwTargetIntensity')?.value || 'balanced';
+    const targetWeight = MW_TUNABLES.targetIntensity[intensityValue] ?? MW_TUNABLES.targetWeight;
     if (useTargetTeam) {
         const filledTargetD = targetTeamDrivers.filter(Boolean).length;
         const filledTargetC = targetTeamConstructors.filter(Boolean).length;
@@ -3412,8 +3534,9 @@ async function runMultiWeekPlanner() {
     }
 
     // === Beam Search ===
-    const BEAM_WIDTH = 60;
-    const TRANSFER_PENALTY = 10;
+    // P10: pulled from MW_TUNABLES; aliased locally for readability in the loop.
+    const BEAM_WIDTH = MW_TUNABLES.beamWidth;
+    const TRANSFER_PENALTY = MW_TUNABLES.transferPenalty;
 
     // P5: Memoize optimal wildcard teams per (budget bucket, round index).
     // The optimal wildcard team depends only on the budget ceiling and the
@@ -3442,7 +3565,9 @@ async function runMultiWeekPlanner() {
         // P5b: Per-round target info for chip-aware optimization (Wildcard uses this).
         // Distance weight matches P3's main-loop calculation so wildcard search and
         // post-search scoring are consistent.
-        const TARGET_WEIGHT = 30;
+        // P13: TARGET_WEIGHT now driven by the Target Intensity dropdown — see
+        // resolution at the top of runMultiWeekPlanner.
+        const TARGET_WEIGHT = targetWeight;
         const roundProgress = (ri + 1) / roundProjections.length;
         let roundTargetInfo = null;
         if (useTargetTeam && targetDriverSet && targetConsSet) {
@@ -3456,7 +3581,7 @@ async function runMultiWeekPlanner() {
         for (const state of beam) {
             // Transfers gained this round (1 per round, max 5 banked)
             // For the current round (ri===0), use banked transfers as-is (no +1 since we haven't passed a round yet)
-            const transfersThisRound = ri === 0 ? state.bankedTransfers : Math.min(state.bankedTransfers + 1, 5);
+            const transfersThisRound = ri === 0 ? state.bankedTransfers : Math.min(state.bankedTransfers + 1, MW_TUNABLES.maxBankedTransfers);
 
             // Generate candidates: 0, 1, or 2 swaps
             const maxSwaps = Math.min(2, transfersThisRound);
@@ -3597,19 +3722,19 @@ async function runMultiWeekPlanner() {
                 const strategyCons = isLimitless ? state.constructors : cand.constructors;
                 let score = netPts;
                 if (strategy === 'budget_gain') {
-                    // Add projected price appreciation
+                    // Add projected price appreciation. P10: thresholds/weights from MW_TUNABLES.
                     let priceGain = 0;
                     for (const did of strategyDrivers) {
                         const d = data.drivers.find(x => x.driver_id === did);
                         if (d) {
                             const ppm = (proj.drivers[did] || 0) / d.current_price;
-                            if (ppm >= 1.2) priceGain += d.current_price <= 18.5 ? 0.6 : 0.3;
-                            else if (ppm >= 0.9) priceGain += d.current_price <= 18.5 ? 0.2 : 0.1;
+                            if (ppm >= MW_TUNABLES.ppmHighThreshold) priceGain += d.current_price <= MW_TUNABLES.priceBracketSplit ? 0.6 : 0.3;
+                            else if (ppm >= MW_TUNABLES.ppmMidThreshold) priceGain += d.current_price <= MW_TUNABLES.priceBracketSplit ? 0.2 : 0.1;
                         }
                     }
-                    score = netPts + priceGain * 50;
+                    score = netPts + priceGain * MW_TUNABLES.budgetGainWeight;
                 } else if (strategy === 'balanced') {
-                    // Mix points + value
+                    // Mix points + value. P10: weights from MW_TUNABLES.
                     let totalPrice = 0;
                     for (const did of strategyDrivers) {
                         const d = data.drivers.find(x => x.driver_id === did);
@@ -3620,7 +3745,7 @@ async function runMultiWeekPlanner() {
                         if (c) totalPrice += c.current_price;
                     }
                     const ppm = totalPrice > 0 ? netPts / totalPrice : 0;
-                    score = netPts * 0.7 + ppm * 30;
+                    score = netPts * MW_TUNABLES.balancedPointsWeight + ppm * MW_TUNABLES.balancedPpmWeight;
                 }
 
                 // P3: Continuous target-distance objective.
@@ -3845,7 +3970,13 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
     html += renderProjectionHeatmap(roundProjections);
 
     // Plan cards
-    html += '<h3 style="margin:20px 0 12px;">Recommended Plans</h3>';
+    // P14: Surface that the strategy dropdown influences RANKING only — the
+    // displayed total is raw net projected points (transfer penalties applied,
+    // chip effects applied, but no strategy-weight bonus). Without this hint,
+    // users wonder why Budget Builder shows fewer points than Max Points even
+    // though it's "their pick".
+    html += '<h3 style="margin:20px 0 4px;">Recommended Plans</h3>';
+    html += '<p class="hint" style="margin:0 0 12px;font-size:0.82rem;color:var(--text-secondary);">Totals show raw projected net points (after transfer penalties + chip effects). The Strategy dropdown re-ranks plans but does not alter the displayed totals.</p>';
 
     for (let pi = 0; pi < plans.length; pi++) {
         const plan = plans[pi];

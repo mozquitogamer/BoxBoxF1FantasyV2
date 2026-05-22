@@ -18,6 +18,11 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 | P8 | UI flag for low-confidence projections | **done** |
 | P6 | Beam dedupe key includes chip/bank state | **done** |
 | P9 | ML predictions for future-round projections | **done** |
+| P10 | Hoist magic numbers into `MW_TUNABLES` | **done** |
+| P11 | PPM-aware 2-swap candidate pool (raw score ∪ PPM) | **done** |
+| P12 | Constructor+constructor 2-swap candidate | **done** |
+| P13 | Target intensity dropdown (Loose / Balanced / Strict) | **done** |
+| P14 | Clarify strategy score is internal-only ranking signal | **done** |
 
 ## P1 — Propagate budget across rounds
 
@@ -157,3 +162,43 @@ Should be run after `06_run_predictions.py` (for the current round) in the weekl
 - Doesn't apply pitstop bonuses or quali-tier bonuses to constructors (too noisy to project two weekends ahead).
 - Caps the "positions gained" overtake estimate to keep extreme-jump scenarios from inflating projections.
 - These approximations are intentional: future-round projections are inherently noisy, and the goal is "much better than the affinity heuristic" not "as exact as the current-round fantasy calc."
+
+## P10 — Hoist magic numbers into MW_TUNABLES
+
+**Problem:** Beam width (60), transfer penalty (10), target weight (30), pool sizes, similarity thresholds, strategy weights — scattered across 200+ lines. No central spot to tweak or sensitivity-test.
+
+**Fix:** Single `MW_TUNABLES = { ... }` block at the top of the Multi-Week Planner section in `app.js`. Every magic number now references it. Comments explain role + sensible range per constant.
+
+**Implementation (app.js v63):** Added `MW_TUNABLES` covering beam search (beamWidth, transferPenalty, maxBankedTransfers), target team (targetWeight + intensity map), candidate pool sizes (driverPoolByScore/Ppm, conPoolByScore/Ppm), wildcard pool, strategy weights (budgetGainWeight, balancedPointsWeight, balancedPpmWeight), PPM bracket thresholds, and affinity heuristic params (sim floor, full-confidence weight, clamp range). Existing constants in `runMultiWeekPlanner`, `findOptimalWildcardTeam`, `computeAffinityWithConfidence`, `generateTransferCandidates` now read from this block. No behaviour change at default values.
+
+## P11 — PPM-aware 2-swap candidate pool
+
+**Problem:** `generateTransferCandidates` 2-swap pool was top-8 drivers / top-4 cons by raw projected score. Missed cheap high-PPM picks that enable budget-relief swaps (down-trade an expensive driver + up-trade a cheap high-value one).
+
+**Fix:** Build two pools — top-N by raw score + top-N by PPM (proj / current_price) — then dedupe via Set. Raw-score pool covers high-ceiling absolute picks; PPM pool covers bang-for-the-buck.
+
+**Implementation (app.js v63):** `topAvailDrivers` and `topAvailCons` constructed as the union of `driverPoolByScore` and `driverPoolByPpm` (likewise for cons). Defaults: 8+8 drivers, 4+3 cons; typical union ~10-12 drivers, ~5-6 cons (sets overlap substantially at the top). Cost impact: ~50% more 2-swap combos generated but still bounded — multi-week planner stays sub-second.
+
+## P12 — Constructor+constructor 2-swap candidate
+
+**Problem:** `generateTransferCandidates` only had driver+driver and driver+constructor 2-swaps. Asymmetric coverage — the planner could never swap both constructors at once, even when doing so was strictly better.
+
+**Fix:** Add a constructor+constructor 2-swap branch. Only one unique pair (the 2 constructor slots), so it's a single `[i=0, j=1]` loop over `topAvailCons` × `topAvailCons`.
+
+**Implementation (app.js v63):** ~15-line addition at the end of `generateTransferCandidates`. Uses the same `topAvailCons` pool from P11 (so it picks up the PPM-aware ranking). Skips when either constructor slot is empty.
+
+## P13 — Target intensity dropdown
+
+**Problem:** `TARGET_WEIGHT = 30` was hardcoded. Users had no way to say "get me close to this team but optimize freely" (loose) vs "force convergence even at point cost" (strict).
+
+**Fix:** Add a Loose/Balanced/Strict dropdown next to the target team checkbox, wired to `MW_TUNABLES.targetIntensity` (10 / 30 / 80).
+
+**Implementation (app.js v63 + index.html):** New `<select id="mwTargetIntensity">` in the target team panel (HTML lines ~352-358). `runMultiWeekPlanner` reads the value and resolves `targetWeight` from the lookup before the beam loop. `TARGET_WEIGHT` inside the loop now references the resolved value instead of a literal. Backward compatible: missing dropdown defaults to balanced (30).
+
+## P14 — Strategy score is internal-only ranking signal
+
+**Problem:** The strategy dropdown (Max Points / Balanced / Budget Builder) re-ranks plans via a weighted internal score, but the displayed plan total is the raw net projected points. Users wondered why "Budget Builder" showed fewer points than "Max Points" even though it was "their pick".
+
+**Fix:** Add a hint above the plans grid clarifying that totals are raw projected net points and the Strategy dropdown only affects ordering.
+
+**Implementation (app.js v63):** One-line hint added under the "Recommended Plans" heading in `displayMultiWeekResults`. No score-calculation change — `plan.totalPoints` was already the raw value; only the explanation was missing.

@@ -349,6 +349,14 @@
                             </label>
                             <div id="mwTargetTeam" class="hidden" style="margin-top:8px;">
                                 <p class="hint">Select the team you want to reach. The planner will find the optimal transfer path from your current team to this target.</p>
+                                <div style="display:flex;align-items:center;gap:8px;margin:8px 0 12px;">
+                                    <label for="mwTargetIntensity" style="font-size:0.85rem;font-weight:600;">Target intensity</label>
+                                    <select id="mwTargetIntensity" style="font-size:0.85rem;">
+                                        <option value="loose">Loose — trade target for ~10 pts/pick</option>
+                                        <option value="balanced" selected>Balanced — won't trade for &lt;30 pts/pick</option>
+                                        <option value="strict">Strict — force convergence at point cost</option>
+                                    </select>
+                                </div>
                                 <div class="my-team-grid" id="myTeamGridTarget"></div>
                             </div>
                         </div>
@@ -659,6 +667,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
             integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
             crossorigin="anonymous" async></script>
-    <script src="app.js?v=62"></script>
+    <script src="app.js?v=63"></script>
 </body>
 </html>
