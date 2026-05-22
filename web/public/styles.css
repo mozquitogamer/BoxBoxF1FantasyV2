@@ -96,21 +96,6 @@ body {
     padding: 0 20px;
 }
 
-/* ---- Dev Banner ---- */
-.dev-banner {
-    background: linear-gradient(to right, var(--accent), #1c1f2e);
-    font-size: 12px;
-    text-align: center;
-    padding: 6px 12px;
-    color: rgba(255,255,255,0.9);
-    font-weight: 500;
-    letter-spacing: 0.03em;
-}
-
-.dev-banner-icon {
-    margin: 0 6px;
-}
-
 /* ---- Header ---- */
 .header {
     background: var(--bg-secondary);
