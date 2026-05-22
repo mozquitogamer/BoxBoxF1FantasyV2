@@ -683,13 +683,21 @@ function setupTabs() {
         });
     });
 
-    // Deep-link: activate tab from URL hash on load
+    // Deep-link visual activation (sets the active class on .tab and
+    // .tab-content). The actual data load + render is awaited by Phase 4
+    // in DOMContentLoaded — calling switchTab() here would double-trigger
+    // renderTabIfNeeded(), which used to race on the accuracy tab and
+    // double-populate accuracyByPhase (drivers/rounds showed up twice).
     const hash = location.hash.replace('#', '');
     if (hash && document.getElementById(`tab-${hash}`)) {
-        switchTab(hash);
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelector(`.tab[data-tab="${hash}"]`)?.classList.add('active');
+        document.getElementById(`tab-${hash}`)?.classList.add('active');
     }
 
-    // Handle browser back/forward
+    // Handle browser back/forward — fine to use switchTab here; the page
+    // has finished initial load by the time the user navigates.
     window.addEventListener('hashchange', () => {
         const h = location.hash.replace('#', '');
         if (h && document.getElementById(`tab-${h}`)) switchTab(h);
@@ -5759,6 +5767,10 @@ let accuracyPhase = 'latest';       // 'latest' | 'pre_fp' | 'post_fp' | 'post_q
 // Cache of all loaded archives, keyed by `${round}__${phase}`. Used to swap phases
 // without re-fetching. Built lazily by ensureAccuracyDataForPhase.
 let accuracyByPhase = {}; // phase -> [{ round, name, pred, act, archivePhase }]
+// In-flight loading promise — shared across concurrent renderAccuracy() calls
+// so two deep-link triggers (or any future double-fire) don't both blow away
+// accuracyByPhase and re-push, producing 2× entries per phase.
+let _accuracyLoadingPromise = null;
 
 async function renderAccuracy() {
     if (!data) return;
@@ -5768,56 +5780,68 @@ async function renderAccuracy() {
 
     // Load data once for the default phase, then re-render on filter changes.
     if (!accuracyDataLoaded) {
-        const roundsWithBoth = seasonSummary.rounds.filter(r => r.has_predictions && r.has_actual);
-        const roundsActualOnly = seasonSummary.rounds.filter(r => !r.has_predictions && r.has_actual);
-        if (roundsWithBoth.length === 0) {
-            container.innerHTML = '<p class="no-data">No rounds with both predictions and actuals available yet. Check back after a completed race weekend.</p>';
-            return;
+        // If another caller is already loading, await their promise — don't
+        // restart the load (the old code did, which races the array resets and
+        // doubles every push). Single producer per page load.
+        if (_accuracyLoadingPromise) {
+            await _accuracyLoadingPromise;
+        } else {
+            _accuracyLoadingPromise = (async () => {
+                const roundsWithBoth = seasonSummary.rounds.filter(r => r.has_predictions && r.has_actual);
+                const roundsActualOnly = seasonSummary.rounds.filter(r => !r.has_predictions && r.has_actual);
+                if (roundsWithBoth.length === 0) {
+                    container.innerHTML = '<p class="no-data">No rounds with both predictions and actuals available yet. Check back after a completed race weekend.</p>';
+                    return { aborted: true };
+                }
+
+                if (roundsActualOnly.length > 0) {
+                    const names = roundsActualOnly.map(r => `R${r.round} (${r.name})`).join(', ');
+                    accuracyMissingNote = `<div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.25);color:#eab308;padding:8px 14px;border-radius:8px;font-size:0.8rem;margin-bottom:16px;">
+                        ${names}: Predictions were not generated before the race, so accuracy cannot be measured for ${roundsActualOnly.length === 1 ? 'this round' : 'these rounds'}.
+                    </div>`;
+                }
+
+                container.innerHTML = accuracyMissingNote + '<p class="no-data">Analyzing prediction accuracy...</p>';
+
+                // Load all phase archives + canonical + actuals in parallel
+                const phases = ['latest', 'pre_fp', 'post_fp', 'post_quali'];
+                for (const ph of phases) accuracyByPhase[ph] = [];
+
+                for (const r of roundsWithBoth) {
+                    const [actual, latestArc, preFp, postFp, postQuali] = await Promise.all([
+                        loadActualData(r.round),
+                        loadPredictionsForPhase(r.round, 'latest'),
+                        loadPredictionsForPhase(r.round, 'pre_fp'),
+                        loadPredictionsForPhase(r.round, 'post_fp'),
+                        loadPredictionsForPhase(r.round, 'post_quali'),
+                    ]);
+                    if (!actual) continue;
+                    if (latestArc)   accuracyByPhase['latest']    .push({ round: r.round, name: r.name, pred: latestArc, act: actual });
+                    if (preFp)       accuracyByPhase['pre_fp']    .push({ round: r.round, name: r.name, pred: preFp,     act: actual });
+                    if (postFp)      accuracyByPhase['post_fp']   .push({ round: r.round, name: r.name, pred: postFp,    act: actual });
+                    if (postQuali)   accuracyByPhase['post_quali'].push({ round: r.round, name: r.name, pred: postQuali, act: actual });
+                }
+
+                // Initial pairs = chosen phase
+                accuracyPairs = accuracyByPhase[accuracyPhase] || [];
+                if (accuracyPairs.length === 0 && accuracyByPhase['latest'].length > 0) {
+                    accuracyPhase = 'latest';
+                    accuracyPairs = accuracyByPhase['latest'];
+                }
+
+                if (accuracyPairs.length === 0) {
+                    container.innerHTML = '<p class="no-data">Could not load prediction/actual data pairs.</p>';
+                    return { aborted: true };
+                }
+
+                // Default: all rounds selected
+                accuracySelectedRounds = new Set(accuracyPairs.map(p => p.round));
+                accuracyDataLoaded = true;
+                return { aborted: false };
+            })();
+            const result = await _accuracyLoadingPromise;
+            if (result && result.aborted) return;
         }
-
-        if (roundsActualOnly.length > 0) {
-            const names = roundsActualOnly.map(r => `R${r.round} (${r.name})`).join(', ');
-            accuracyMissingNote = `<div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.25);color:#eab308;padding:8px 14px;border-radius:8px;font-size:0.8rem;margin-bottom:16px;">
-                ${names}: Predictions were not generated before the race, so accuracy cannot be measured for ${roundsActualOnly.length === 1 ? 'this round' : 'these rounds'}.
-            </div>`;
-        }
-
-        container.innerHTML = accuracyMissingNote + '<p class="no-data">Analyzing prediction accuracy...</p>';
-
-        // Load all phase archives + canonical + actuals in parallel
-        const phases = ['latest', 'pre_fp', 'post_fp', 'post_quali'];
-        for (const ph of phases) accuracyByPhase[ph] = [];
-
-        for (const r of roundsWithBoth) {
-            const [actual, latestArc, preFp, postFp, postQuali] = await Promise.all([
-                loadActualData(r.round),
-                loadPredictionsForPhase(r.round, 'latest'),
-                loadPredictionsForPhase(r.round, 'pre_fp'),
-                loadPredictionsForPhase(r.round, 'post_fp'),
-                loadPredictionsForPhase(r.round, 'post_quali'),
-            ]);
-            if (!actual) continue;
-            if (latestArc)   accuracyByPhase['latest']    .push({ round: r.round, name: r.name, pred: latestArc, act: actual });
-            if (preFp)       accuracyByPhase['pre_fp']    .push({ round: r.round, name: r.name, pred: preFp,     act: actual });
-            if (postFp)      accuracyByPhase['post_fp']   .push({ round: r.round, name: r.name, pred: postFp,    act: actual });
-            if (postQuali)   accuracyByPhase['post_quali'].push({ round: r.round, name: r.name, pred: postQuali, act: actual });
-        }
-
-        // Initial pairs = chosen phase
-        accuracyPairs = accuracyByPhase[accuracyPhase] || [];
-        if (accuracyPairs.length === 0 && accuracyByPhase['latest'].length > 0) {
-            accuracyPhase = 'latest';
-            accuracyPairs = accuracyByPhase['latest'];
-        }
-
-        if (accuracyPairs.length === 0) {
-            container.innerHTML = '<p class="no-data">Could not load prediction/actual data pairs.</p>';
-            return;
-        }
-
-        // Default: all rounds selected
-        accuracySelectedRounds = new Set(accuracyPairs.map(p => p.round));
-        accuracyDataLoaded = true;
     }
 
     renderAccuracyWithFilters(container);
