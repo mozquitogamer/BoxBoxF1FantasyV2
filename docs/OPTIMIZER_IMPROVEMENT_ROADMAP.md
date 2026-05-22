@@ -15,7 +15,8 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 | P5 | Replace greedy Wildcard with real optimizer (Limitless already optimal) | **done** |
 | P6 | Beam dedupe key includes chip/bank state | pending |
 | P7 | Annotate penalty trade-offs in rendering | **done** |
-| P8 | Cadillac / cold-start handling in projections | pending |
+| P8a | Confidence-weighted affinity (rookies/cold-start) | **done** |
+| P8 | UI flag for low-confidence projections | **done** |
 | P9 | (future) ML predictions for future-round projections | parked |
 
 ## P1 — Propagate budget across rounds
@@ -104,11 +105,27 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 
 **Chip caveat:** hold-alternative uses raw `scoreTeam` without chip multipliers, so when the round fires a chip the comparison is directional rather than exact. Flagged with `*` and a `title` tooltip on the trade-off line.
 
-## P8 — Cold-start handling
+## P8a — Confidence-weighted affinity (app.js v60)
 
-**Problem:** drivers with no history (Cadillac in 2026) silently get affinity = 1.0, projected = base. UI doesn't disclose this.
+**Problem:** the old affinity code used a hard cliff: drivers had to have ≥2 total races AND cumulative similar-track weight ≥0.5 (sim>0.7 threshold) to escape affinity=1.0. Rookies and drivers without races at specialist circuits (Monaco, etc.) were silently locked at 1.0 even when partial signal existed — making veterans with strong track-specific history look disproportionately better at those tracks. Real example: Antonelli (strong current form, no Monaco history) vs Hamilton (weaker form, strong Monaco history) → Hamilton's affinity 1.4 vs Antonelli's silent 1.0 made the planner prefer Hamilton at Monaco even when Antonelli's base points were higher.
 
-**Fix:** flag such picks in projection rendering ("naive form-only projection — no historical signal").
+**Fix:** extracted the affinity calc into `computeAffinityWithConfidence(hist, targetVec, basePts)`. Three changes:
+1. **Threshold relaxation:** `hist.length >= 1` (was 2), `weightSum > 0.1` (was 0.5). Any race-history driver now gets a chance to contribute signal.
+2. **Softened similarity cliff:** `w = max(0, sim - 0.5) * 2.0` (was `(sim - 0.7) * 3.33`). Moderately-similar tracks contribute with lower weight instead of being ignored.
+3. **Confidence-weighted blend:** `affinity = 1.0 + confidence * (rawAffinity - 1.0)` where `confidence = min(1, weightSum / 1.0)`. Low-data drivers get a dampened signal (closer to 1.0 baseline); high-data drivers get the full affinity. Smooth gradient instead of binary on/off.
+
+`projectScoresForRound` now also returns `driverConfidence` and `constructorConfidence` dictionaries (per-pick confidence values in [0, 1]) for the UI to consume.
+
+## P8 — UI flag for low-confidence projections (app.js v60)
+
+**Problem:** even with P8a's smooth affinity blending, the user can't tell which heatmap cells are confident projections vs naive form-only estimates.
+
+**Fix:** in `renderProjectionHeatmap`, each cell now reads `driverConfidence`/`constructorConfidence` from the round projection and applies one of three visual treatments:
+- **Confidence > 0.5:** plain cell (full signal — historical data validates the projection).
+- **Confidence 0.01-0.5:** dotted bottom border + slight opacity reduction + hover tooltip ("Limited historical signal (X% confidence)").
+- **Confidence ≤ 0.01:** italic text + dotted border + stronger opacity reduction + tooltip ("No historical signal at similar tracks — naive form-only projection").
+
+Current round (ML predictions) is hard-coded to confidence = 1.0 so it never shows the indicator. Legend below the heatmap explains the cell decorations.
 
 ## P9 — ML for future rounds (parked)
 

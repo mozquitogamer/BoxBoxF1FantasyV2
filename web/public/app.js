@@ -2917,95 +2917,96 @@ function getFeatureVector(circuitId) {
     return trackData.feature_names.map(k => feat[k] || 0);
 }
 
+// P8a: Compute the affinity multiplier + confidence for one pick at one circuit.
+// Replaces the previous all-or-nothing gate (history >= 2 && weightSum > 0.5)
+// with a confidence-weighted blend toward 1.0. Low-data drivers get a partial
+// signal instead of being silently defaulted to 1.0, but their signal is
+// dampened in proportion to how much data is available.
+//
+// Returns { affinity, confidence } where:
+//   - affinity is clamped to [0.6, 1.4]
+//   - confidence is in [0, 1]: 0 = no historical signal (affinity defaulted to 1.0),
+//     1 = full signal (one very-similar race or several moderately-similar races).
+//
+// Changes vs old version:
+//   - Threshold gates relaxed: hist.length >= 1 (was 2), weightSum > 0.1 (was 0.5).
+//   - Similarity cliff softened: w = max(0, sim - 0.5) * 2.0 (was (sim - 0.7) * 3.33)
+//     so moderately-similar tracks contribute with lower weight instead of being
+//     ignored entirely.
+//   - Confidence-weighted blend: affinity = 1.0 + confidence * (rawAffinity - 1.0).
+//     A driver with weightSum=0.4 (previously below threshold, would get 1.0)
+//     now gets 1.0 + 0.4 * (raw - 1.0). Smooth gradient instead of cliff.
+function computeAffinityWithConfidence(hist, targetVec, basePts) {
+    if (!hist || hist.length < 1 || !targetVec) return { affinity: 1.0, confidence: 0 };
+
+    let weightedPts = 0, weightSum = 0;
+    for (const h of hist) {
+        const hVec = getFeatureVector(h.circuit_id);
+        if (!hVec) continue;
+        const sim = cosineSimilarity(targetVec, hVec);
+        // Softened weight: starts contributing at sim > 0.5, full weight at sim = 1.0
+        const w = Math.max(0, sim - 0.5) * 2.0;
+        weightedPts += h.points * w;
+        weightSum += w;
+    }
+
+    if (weightSum <= 0.1 || basePts === 0) return { affinity: 1.0, confidence: 0 };
+
+    const avgSimilarPts = weightedPts / weightSum;
+    const avgAllPts = hist.reduce((s, h) => s + h.points, 0) / hist.length;
+    if (avgAllPts === 0) return { affinity: 1.0, confidence: 0 };
+
+    const rawAffinity = avgSimilarPts / avgAllPts;
+    const confidence = Math.min(1.0, weightSum / 1.0); // weightSum=1.0 → full confidence
+    const blended = 1.0 + confidence * (rawAffinity - 1.0);
+    const affinity = Math.max(0.6, Math.min(1.4, blended));
+    return { affinity, confidence };
+}
+
 function projectScoresForRound(roundInfo, racesData) {
     // Project fantasy scores for all drivers/constructors at a future round
     // Uses: current form (from predictions.json) x track affinity x sprint multiplier
-    if (!data || !trackData) return { drivers: {}, constructors: {} };
+    if (!data || !trackData) return { drivers: {}, constructors: {}, driverConfidence: {}, constructorConfidence: {} };
 
     const raceName = roundInfo.name;
     const circuitId = trackData.race_circuit_map[raceName] || 'unknown';
     const targetVec = getFeatureVector(circuitId);
     const isSprint = (trackData.sprint_rounds || []).includes(roundInfo.round);
-    const sprintMult = isSprint ? 1.35 : 1.0;
 
     const driverScores = {};
     const constructorScores = {};
+    const driverConfidence = {};      // P8: per-pick confidence for UI flagging
+    const constructorConfidence = {};
+
+    // Sprint adjustment factor — same for all picks in this round
+    const currentIsSprint = data.is_sprint_weekend;
+    let sprintAdj = 1.0;
+    if (currentIsSprint && !isSprint) sprintAdj = 1.0 / 1.35;
+    else if (!currentIsSprint && isSprint) sprintAdj = 1.35;
 
     // Project driver scores
     for (const d of data.drivers) {
         const basePts = d.expected_points || 0;
-        let affinity = 1.0;
-
-        // Compute track affinity from driver history
-        if (driverHistory && driverHistory.drivers[d.driver_id] && targetVec) {
-            const hist = driverHistory.drivers[d.driver_id].rounds;
-            if (hist.length >= 2) {
-                let weightedPts = 0, weightSum = 0;
-                for (const h of hist) {
-                    const hVec = getFeatureVector(h.circuit_id);
-                    if (!hVec) continue;
-                    const sim = cosineSimilarity(targetVec, hVec);
-                    const w = Math.max(0, sim - 0.7) * 3.33; // Only count sim > 0.7
-                    weightedPts += h.points * w;
-                    weightSum += w;
-                }
-                if (weightSum > 0.5 && basePts !== 0) {
-                    const avgSimilarPts = weightedPts / weightSum;
-                    // Average of all rounds (overall form)
-                    const avgAllPts = hist.reduce((s, h) => s + h.points, 0) / hist.length;
-                    if (avgAllPts !== 0) {
-                        affinity = Math.max(0.6, Math.min(1.4, avgSimilarPts / avgAllPts));
-                    }
-                }
-            }
-        }
-
-        // Normalize sprint: if current round is sprint and target is not (or vice versa),
-        // adjust by sprint multiplier ratio
-        const currentIsSprint = data.is_sprint_weekend;
-        let sprintAdj = 1.0;
-        if (currentIsSprint && !isSprint) sprintAdj = 1.0 / 1.35;
-        else if (!currentIsSprint && isSprint) sprintAdj = 1.35;
-
+        const hist = (driverHistory && driverHistory.drivers[d.driver_id])
+            ? driverHistory.drivers[d.driver_id].rounds
+            : null;
+        const { affinity, confidence } = computeAffinityWithConfidence(hist, targetVec, basePts);
         driverScores[d.driver_id] = Math.round(basePts * affinity * sprintAdj * 10) / 10;
+        driverConfidence[d.driver_id] = confidence;
     }
 
     // Project constructor scores
     for (const c of data.constructors) {
         const basePts = c.expected_points || 0;
-        let affinity = 1.0;
-
-        if (driverHistory && driverHistory.constructors[c.constructor_id] && targetVec) {
-            const hist = driverHistory.constructors[c.constructor_id].rounds;
-            if (hist.length >= 2) {
-                let weightedPts = 0, weightSum = 0;
-                for (const h of hist) {
-                    const hVec = getFeatureVector(h.circuit_id);
-                    if (!hVec) continue;
-                    const sim = cosineSimilarity(targetVec, hVec);
-                    const w = Math.max(0, sim - 0.7) * 3.33;
-                    weightedPts += h.points * w;
-                    weightSum += w;
-                }
-                if (weightSum > 0.5 && basePts !== 0) {
-                    const avgSimilarPts = weightedPts / weightSum;
-                    const avgAllPts = hist.reduce((s, h) => s + h.points, 0) / hist.length;
-                    if (avgAllPts !== 0) {
-                        affinity = Math.max(0.6, Math.min(1.4, avgSimilarPts / avgAllPts));
-                    }
-                }
-            }
-        }
-
-        const currentIsSprint = data.is_sprint_weekend;
-        let sprintAdj = 1.0;
-        if (currentIsSprint && !isSprint) sprintAdj = 1.0 / 1.35;
-        else if (!currentIsSprint && isSprint) sprintAdj = 1.35;
-
+        const hist = (driverHistory && driverHistory.constructors[c.constructor_id])
+            ? driverHistory.constructors[c.constructor_id].rounds
+            : null;
+        const { affinity, confidence } = computeAffinityWithConfidence(hist, targetVec, basePts);
         constructorScores[c.constructor_id] = Math.round(basePts * affinity * sprintAdj * 10) / 10;
+        constructorConfidence[c.constructor_id] = confidence;
     }
 
-    return { drivers: driverScores, constructors: constructorScores, isSprint, circuitId };
+    return { drivers: driverScores, constructors: constructorScores, isSprint, circuitId, driverConfidence, constructorConfidence };
 }
 
 function getUpcomingRounds(currentRound, horizon) {
@@ -3246,20 +3247,29 @@ async function runMultiWeekPlanner() {
     // For current round, use actual ML predictions; for future rounds, use track-similarity projections
     const roundProjections = upcomingRounds.map(r => {
         if (r.round === currentRound) {
-            // Use actual ML predictions for current round
+            // Use actual ML predictions for current round.
+            // P8: ML preds are full-confidence (model handled the round directly,
+            // no track-affinity heuristic involved). Set all confidences to 1.0
+            // so heatmap doesn't flag these cells.
             const driverScores = {};
             const constructorScores = {};
+            const driverConfidence = {};
+            const constructorConfidence = {};
             for (const d of data.drivers) {
                 driverScores[d.driver_id] = d.expected_points || 0;
+                driverConfidence[d.driver_id] = 1.0;
             }
             for (const c of data.constructors) {
                 constructorScores[c.constructor_id] = c.expected_points || 0;
+                constructorConfidence[c.constructor_id] = 1.0;
             }
             return {
                 ...r,
                 isSprint: (trackData.sprint_rounds || []).includes(r.round),
                 drivers: driverScores,
                 constructors: constructorScores,
+                driverConfidence,
+                constructorConfidence,
             };
         }
         return {
@@ -3986,6 +3996,30 @@ function renderProjectionHeatmap(roundProjections) {
         .sort((a, b) => (b.expected_points || 0) - (a.expected_points || 0))
         .slice(0, 6);
 
+    // P8: per-cell confidence styling. Cells where the affinity model had little
+    // or no historical signal (e.g. rookies at first-of-season tracks, or Cadillac
+    // drivers/constructors with no 2026 history) get a visual cue + tooltip so the
+    // user knows the projection is naive form-only rather than data-validated.
+    function styleCell(score, confidence) {
+        const avg = arguments[2]; // not used, kept for sig parity if expanded later
+        if (typeof confidence !== 'number') return { extra: '', title: '' };
+        if (confidence <= 0.01) {
+            // No historical signal at all — naive form-only projection
+            return {
+                extra: 'font-style:italic;opacity:0.7;border-bottom:1.5px dotted currentColor;',
+                title: 'No historical signal at similar tracks — naive form-only projection',
+            };
+        }
+        if (confidence < 0.5) {
+            // Partial signal — projection blended toward 1.0 default
+            return {
+                extra: 'border-bottom:1.5px dotted currentColor;opacity:0.92;',
+                title: `Limited historical signal (${Math.round(confidence * 100)}% confidence)`,
+            };
+        }
+        return { extra: '', title: '' };
+    }
+
     let html = '<h3 style="margin-bottom:8px;">Projected Points by Circuit</h3>';
     html += '<p class="hint" style="margin-bottom:12px;">Green = above average for that driver. Red = below. Based on track similarity.</p>';
     html += '<div class="mw-heatmap"><table><thead><tr><th>Driver</th><th>Price</th>';
@@ -3999,13 +4033,19 @@ function renderProjectionHeatmap(roundProjections) {
     for (const d of topDrivers) {
         const team = TEAMS[d.constructor] || { color: '#666' };
         const scores = roundProjections.map(rp => rp.drivers[d.driver_id] || 0);
+        const confidences = roundProjections.map(rp => rp.driverConfidence?.[d.driver_id]);
         const avg = scores.reduce((s, v) => s + v, 0) / scores.length;
 
         html += `<tr><td style="text-align:left;white-space:nowrap;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${team.color};margin-right:4px;"></span>${d.name.split(' ').pop()}</td>`;
         html += `<td>$${d.current_price.toFixed(1)}M</td>`;
-        for (const s of scores) {
+        for (let i = 0; i < scores.length; i++) {
+            const s = scores[i];
+            const conf = confidences[i];
             const cls = s > avg * 1.05 ? 'mw-heat-high' : (s < avg * 0.95 ? 'mw-heat-low' : 'mw-heat-mid');
-            html += `<td class="${cls}">${s.toFixed(0)}</td>`;
+            const { extra, title } = styleCell(s, conf, avg);
+            const titleAttr = title ? ` title="${title}"` : '';
+            const styleAttr = extra ? ` style="${extra}"` : '';
+            html += `<td class="${cls}"${styleAttr}${titleAttr}>${s.toFixed(0)}</td>`;
         }
         html += '</tr>';
     }
@@ -4017,19 +4057,26 @@ function renderProjectionHeatmap(roundProjections) {
     for (const c of topCons) {
         const team = TEAMS[c.constructor_id] || { color: '#666' };
         const scores = roundProjections.map(rp => rp.constructors[c.constructor_id] || 0);
+        const confidences = roundProjections.map(rp => rp.constructorConfidence?.[c.constructor_id]);
         const avg = scores.reduce((s, v) => s + v, 0) / scores.length;
 
         html += `<tr><td style="text-align:left;white-space:nowrap;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${team.color};margin-right:4px;"></span>${(c.name || c.constructor_id).toUpperCase()}</td>`;
         html += `<td>$${c.current_price.toFixed(1)}M</td>`;
-        for (const s of scores) {
+        for (let i = 0; i < scores.length; i++) {
+            const s = scores[i];
+            const conf = confidences[i];
             const cls = s > avg * 1.05 ? 'mw-heat-high' : (s < avg * 0.95 ? 'mw-heat-low' : 'mw-heat-mid');
-            html += `<td class="${cls}">${s.toFixed(0)}</td>`;
+            const { extra, title } = styleCell(s, conf, avg);
+            const titleAttr = title ? ` title="${title}"` : '';
+            const styleAttr = extra ? ` style="${extra}"` : '';
+            html += `<td class="${cls}"${styleAttr}${titleAttr}>${s.toFixed(0)}</td>`;
         }
         html += '</tr>';
     }
 
     html += '</tbody></table></div>';
-    html += '<p class="hint" style="margin-top:4px;">* = Sprint weekend</p>';
+    // P8: legend explaining the cell decorations
+    html += '<p class="hint" style="margin-top:4px;">* = Sprint weekend &nbsp;·&nbsp; <span style="font-style:italic;opacity:0.7;border-bottom:1.5px dotted currentColor;">italic+dotted</span> = no historical signal (naive form-only) &nbsp;·&nbsp; <span style="border-bottom:1.5px dotted currentColor;">dotted</span> = partial signal (low confidence)</p>';
     return html;
 }
 
