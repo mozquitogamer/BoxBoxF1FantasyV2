@@ -53,17 +53,24 @@ def detect_current_round():
     return None, None
 
 
-def run_step(script_name, args_list, step_num, total, dry_run=False):
-    """Run a pipeline script as subprocess."""
+def run_step(script_name, args_list, step_num, total, dry_run=False, non_fatal=False):
+    """Run a pipeline script as subprocess.
+
+    non_fatal: if True, a failure prints a warning but does NOT abort the
+    weekend pipeline. Used for optional steps like predict_horizon.py where
+    a downstream failure (e.g. missing model file for a far-future round)
+    shouldn't undo the rest of the weekend's work.
+    """
     script_path = PIPELINE_DIR / script_name
     if not script_path.exists():
         print(f"  [X] Script not found: {script_path}")
-        return False
+        return non_fatal  # treat missing-script as success when non-fatal
 
     cmd = [sys.executable, str(script_path)] + args_list
     cmd_str = " ".join(cmd)
 
-    print(f"\n  [{step_num}/{total}] {script_name} {' '.join(args_list)}")
+    tag = " (optional)" if non_fatal else ""
+    print(f"\n  [{step_num}/{total}] {script_name}{tag} {' '.join(args_list)}")
 
     if dry_run:
         print(f"         -> {cmd_str}")
@@ -77,11 +84,13 @@ def run_step(script_name, args_list, step_num, total, dry_run=False):
             print(f"         [OK] Done ({elapsed:.1f}s)")
             return True
         else:
-            print(f"         [FAIL] Failed (exit code {result.returncode}, {elapsed:.1f}s)")
-            return False
+            level = "WARN" if non_fatal else "FAIL"
+            print(f"         [{level}] Failed (exit code {result.returncode}, {elapsed:.1f}s)")
+            return non_fatal  # non-fatal: pretend it succeeded so loop continues
     except Exception as e:
-        print(f"         [FAIL] Error: {e}")
-        return False
+        level = "WARN" if non_fatal else "FAIL"
+        print(f"         [{level}] Error: {e}")
+        return non_fatal
 
 
 # Phase definitions
@@ -106,6 +115,11 @@ PHASES = {
             ("07_calculate_fantasy.py", ["--round", "{round}"]),
             ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),
             ("08_export_website_json.py", ["--round", "{round}", "--phase", "pre_fp"]),
+            # P9: refresh ML projections for the next 5 rounds so the
+            # multi-week planner sees fresh future-round data alongside the
+            # updated current-round predictions. Non-fatal if it fails — the
+            # planner falls back to the affinity heuristic.
+            ("predict_horizon.py", ["--current-round", "{round}", "--horizon", "5"], {"non_fatal": True}),
         ],
     },
     "post_fp": {
@@ -119,6 +133,7 @@ PHASES = {
             ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),
             ("10_fp_analysis.py", ["--round", "{round}"]),
             ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_fp"]),
+            ("predict_horizon.py", ["--current-round", "{round}", "--horizon", "5"], {"non_fatal": True}),
         ],
     },
     "post_quali": {
@@ -132,6 +147,7 @@ PHASES = {
             ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),
             ("10_fp_analysis.py", ["--round", "{round}"]),
             ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_quali"]),
+            ("predict_horizon.py", ["--current-round", "{round}", "--horizon", "5"], {"non_fatal": True}),
         ],
     },
     "post_race": {
@@ -228,10 +244,17 @@ Examples:
     results = []
     start_total = time.time()
 
-    for i, (script, step_args) in enumerate(steps, 1):
+    for i, step in enumerate(steps, 1):
+        # Steps are (script, args) or (script, args, options_dict)
+        if len(step) == 3:
+            script, step_args, opts = step
+        else:
+            script, step_args = step
+            opts = {}
+        non_fatal = bool(opts.get("non_fatal", False))
         # Replace {round} and {year} placeholders
         resolved_args = [a.replace("{round}", str(round_num)).replace("{year}", str(CURRENT_SEASON)) for a in step_args]
-        success = run_step(script, resolved_args, i, total, dry_run=args.dry_run)
+        success = run_step(script, resolved_args, i, total, dry_run=args.dry_run, non_fatal=non_fatal)
         results.append((script, success))
         if not success and not args.dry_run:
             print(f"\n  Pipeline stopped at step {i}. Fix the issue and re-run.")

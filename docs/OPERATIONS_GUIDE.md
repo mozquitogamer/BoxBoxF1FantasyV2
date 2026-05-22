@@ -188,6 +188,7 @@ These are encoded in `run_weekend.py::PHASES`. Re-printed here so you can see wh
 07_calculate_fantasy.py  --round {round}
 08_monte_carlo_fantasy.py  --round {round}
 08_export_website_json.py  --round {round}
+predict_horizon.py  --current-round {round} --horizon 5    (optional, non-fatal)
 ```
 
 #### `post_fp`
@@ -200,10 +201,20 @@ These are encoded in `run_weekend.py::PHASES`. Re-printed here so you can see wh
 08_monte_carlo_fantasy.py  --round {round}
 10_fp_analysis.py  --round {round}
 08_export_website_json.py  --round {round}
+predict_horizon.py  --current-round {round} --horizon 5    (optional, non-fatal)
 ```
 
 #### `post_quali`
-Same step list as `post_fp` — `06_run_predictions.py` is phase-aware: when actual qualifying data is available it auto-switches to `race_model.json` (trained on real quali) instead of `race_model_fp.json` (trained on predicted quali).
+Same step list as `post_fp` — `06_run_predictions.py` is phase-aware: when actual qualifying data is available it auto-switches to `race_model.json` (trained on real quali) instead of `race_model_fp.json` (trained on predicted quali). `predict_horizon.py` also runs at the end (optional, non-fatal).
+
+#### About `predict_horizon.py` (P9)
+This is the last step of each prediction phase. It runs **priors-only** ML predictions for the next 5 rounds and exports `web/public/data/horizon_projections.json`. The multi-week transfer planner consumes that file instead of its older track-similarity heuristic, so future-round projections are now real ML predictions (same XGBoost models used for the current round, just rolled forward without FP telemetry).
+
+It's tagged `non_fatal` in `run_weekend.py`: a failure prints a `[WARN]` but doesn't abort the pipeline. If it fails, the planner silently falls back to the affinity heuristic. To run it manually outside of the weekend pipeline:
+
+```
+python pipeline/predict_horizon.py --current-round 7 --horizon 5
+```
 
 #### `post_race`
 ```

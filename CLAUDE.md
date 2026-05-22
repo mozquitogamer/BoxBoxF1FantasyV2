@@ -37,6 +37,7 @@ BoxBoxF1FantasyV2/
 │   ├── 13_fetch_pitstop_stationary.py # Pit stop stationary times
 │   ├── calibrate_confidence.py      # CI calibration: MC predictions vs actuals
 │   ├── run_weekend.py              # Orchestrator: detects phase, runs pipeline
+│   ├── predict_horizon.py          # Priors-only ML predictions for upcoming rounds (multi-week planner input)
 │   ├── weather_forecast.py         # Open-Meteo weather forecasts
 │   ├── feature_engineering.py      # Cross-layer engineered features
 │   └── build_articles.py           # Article content generation
@@ -169,14 +170,14 @@ python pipeline/run_weekend.py --phase post_race      --round N   # race done
 # What pre_fp_predict runs (priors only, before any FP telemetry):
 #   01_download_data → 03a_normalize_jolpica → 03b_build_jolpica_features →
 #   06_run_predictions → 07_calculate_fantasy → 08_monte_carlo_fantasy →
-#   08_export_website_json
+#   08_export_website_json → predict_horizon (optional, non-fatal)
 # (06_run_predictions falls back to "priors only" path when no FP features exist;
 # Layer-2 telemetry features are NaN and XGBoost handles them natively.)
 #
 # What post_fp / post_quali runs:
 #   01_download_data → 02_build_laps → 03_extract_features →
 #   06_run_predictions → 07_calculate_fantasy → 08_monte_carlo_fantasy →
-#   10_fp_analysis → 08_export_website_json
+#   10_fp_analysis → 08_export_website_json → predict_horizon (optional, non-fatal)
 #
 # What post_race runs:
 #   01_download_data → 09_post_race_analysis → 11_actual_fantasy_points →
