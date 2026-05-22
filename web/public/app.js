@@ -3673,6 +3673,13 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
         </div>`;
 
         // Timeline
+        // P7: Track previous round's team so we can compute the "vs hold"
+        // counterfactual per round — lets the user audit whether each round's
+        // extra-transfer penalty was actually worth taking.
+        let prevTeamForTradeoff = {
+            drivers: [...myTeamDrivers],
+            constructors: [...myTeamConstructors],
+        };
         html += '<div class="mw-timeline">';
         for (const action of plan.roundActions) {
             const isSprint = action.isSprint;
@@ -3704,8 +3711,46 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
             }
             html += '</div>';
 
-            html += `<div class="mw-round-pts">${action.netPoints.toFixed(1)} pts</div>`;
-            html += `<div class="mw-round-meta">${action.penalty > 0 ? `-${action.penalty} penalty · ` : ''}${action.bankedAfter} FT banked</div>`;
+            // P7: Make gross visible when there's a penalty, so user sees
+            // both the chip-adjusted gross and the net hit. Without penalty,
+            // keep the original compact display.
+            if (action.penalty > 0) {
+                html += `<div class="mw-round-pts">${action.netPoints.toFixed(1)} <span style="font-size:0.65em;font-weight:400;color:var(--text-secondary);">net</span></div>`;
+                html += `<div class="mw-round-meta">${action.points.toFixed(1)} gross · <span style="color:var(--red, #ef4444);">-${action.penalty} pen</span> · ${action.bankedAfter} FT</div>`;
+            } else {
+                html += `<div class="mw-round-pts">${action.netPoints.toFixed(1)} pts</div>`;
+                html += `<div class="mw-round-meta">${action.bankedAfter} FT banked</div>`;
+            }
+
+            // P7: Penalty trade-off audit — show what "holding the previous
+            // round's team" would have scored against this round's projections.
+            // Lets the user answer "was the swap (and any extra-transfer
+            // penalty) actually worth it?". Caveat: ignores chip effects in
+            // the hold-alternative (treats chip as fired either way). Marked
+            // with * + tooltip when a chip was used this round.
+            const rpForTradeoff = roundProjections.find(r => r.round === action.round);
+            if (rpForTradeoff && action.swaps.length > 0) {
+                const holdGross = scoreTeam(prevTeamForTradeoff.drivers, prevTeamForTradeoff.constructors, rpForTradeoff.drivers, rpForTradeoff.constructors);
+                const swapGross = scoreTeam(action.team.drivers, action.team.constructors, rpForTradeoff.drivers, rpForTradeoff.constructors);
+                const swapDelta = swapGross - holdGross;          // gross gain from swapping (pre-chip, pre-penalty)
+                const netTradeoff = swapDelta - action.penalty;   // after penalty
+                const tradeoffColor = netTradeoff > 0 ? 'var(--green)' : (netTradeoff < 0 ? 'var(--red, #ef4444)' : 'var(--text-secondary)');
+                const sign = netTradeoff > 0 ? '+' : '';
+                const chipNote = action.chip ? '*' : '';
+                const chipTooltip = action.chip ? ' title="Comparison ignores chip effects — treats chip as fired either way."' : '';
+                let labelText;
+                if (action.penalty > 0) {
+                    // Penalty present — explicitly show whether extra transfer paid off
+                    const verdict = netTradeoff > 0
+                        ? `worth it`
+                        : (netTradeoff < 0 ? `lost vs hold` : `break-even`);
+                    labelText = `vs hold: ${sign}${netTradeoff.toFixed(1)} net (${verdict})${chipNote}`;
+                } else {
+                    // No penalty — just show the swap's gross value
+                    labelText = `vs hold: ${sign}${swapDelta.toFixed(1)} pts${chipNote}`;
+                }
+                html += `<div class="mw-round-tradeoff" style="font-size:0.7rem;color:${tradeoffColor};margin-top:4px;line-height:1.3;font-weight:600;"${chipTooltip}>${labelText}</div>`;
+            }
 
             // P4: Per-round budget evolution. budgetBefore/After/appreciation
             // are populated by P1's beam-search budget propagation. Renders
@@ -3720,6 +3765,10 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
             }
 
             html += '</div>';
+
+            // P7: Advance the trade-off baseline so next round compares against
+            // THIS round's chosen team, not the original starting team.
+            prevTeamForTradeoff = action.team;
         }
         html += '</div>';
 

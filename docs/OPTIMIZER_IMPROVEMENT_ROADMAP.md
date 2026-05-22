@@ -14,7 +14,7 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 | P4 | Render budget evolution in results UI | **done** |
 | P5 | Replace greedy Wildcard/Limitless with real optimizer | pending |
 | P6 | Beam dedupe key includes chip/bank state | pending |
-| P7 | Annotate penalty trade-offs in rendering | pending |
+| P7 | Annotate penalty trade-offs in rendering | **done** |
 | P8 | Cadillac / cold-start handling in projections | pending |
 | P9 | (future) ML predictions for future-round projections | parked |
 
@@ -75,6 +75,12 @@ Order: implement, test, document, get user sign-off, then move to the next item.
 **Problem:** user can't audit "was the -10pt extra transfer worth it?"
 
 **Fix:** in plan rendering, when penalty > 0, show `+X gross, -10 penalty, +Y net` per round.
+
+**Implementation (app.js v57):** Two additions to the per-round timeline block in `displayMultiWeekResults`:
+1. **When penalty > 0** the points block expands to show gross + penalty + net explicitly (`14.3 net` / `24.3 gross · -10 pen · 2 FT`) so the user sees the whole math, not just the post-penalty number.
+2. **Each round with swaps** gets a new "vs hold" trade-off line: compares the candidate's gross score against scoring the previous round's team against this round's projections. When penalty > 0, includes a verdict (`worth it` / `lost vs hold` / `break-even`). When no penalty, just shows the swap's gross delta. `prevTeamForTradeoff` is tracked across the timeline iteration so each round compares against the previous chosen team.
+
+**Chip caveat:** hold-alternative uses raw `scoreTeam` without chip multipliers, so when the round fires a chip the comparison is directional rather than exact. Flagged with `*` and a `title` tooltip on the trade-off line.
 
 ## P8 — Cold-start handling
 
