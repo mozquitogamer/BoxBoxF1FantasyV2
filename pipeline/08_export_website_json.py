@@ -368,7 +368,54 @@ def build_predictions_json(round_num: int) -> dict | None:
 
         constructors_json.append(entry)
 
-    return {
+    # ----- Team upgrade adjustments (manual modifiers) -----
+    # If pipeline/apply_upgrades.py wrote an adjustments.json for this round,
+    # merge per-driver adjusted_expected_points / predicted_finish_adjusted etc.
+    # The base ML fields (expected_points, predicted_finish) are NOT touched —
+    # the adjusted values live alongside as a toggle-able overlay on the site.
+    adj_path = PREDICTIONS_DIR / f"round{round_num}" / "adjustments.json"
+    upgrade_meta = None
+    if adj_path.exists():
+        try:
+            with open(adj_path) as f:
+                adj_data = json.load(f)
+            by_driver = {d["driver_abbrev"]: d for d in adj_data.get("drivers", [])}
+            modifiers_applied = adj_data.get("modifiers_applied", {})
+            constructor_pts_delta = {cid: 0.0 for cid in modifiers_applied}
+            for entry in drivers_json:
+                d_adj = by_driver.get(entry["driver_id"])
+                if not d_adj:
+                    continue
+                pts_delta = float(d_adj.get("total_points_delta", 0))
+                entry["expected_points_adjusted"] = round(entry["expected_points"] + pts_delta, 1)
+                entry["points_delta"] = round(pts_delta, 1)
+                entry["predicted_quali_adjusted"] = d_adj["adjusted"]["quali"]
+                entry["predicted_finish_adjusted"] = d_adj["adjusted"]["race"]
+                if "sprint" in d_adj["adjusted"]:
+                    entry["predicted_sprint_adjusted"] = d_adj["adjusted"]["sprint"]
+                entry["pace_bump"] = round(float(d_adj.get("pace_bump", 0)), 2)
+                # Roll up the constructor's points delta = sum of both drivers'
+                # quali + race + sprint deltas (driver-level position-points only,
+                # excludes DOTD — same exclusion the real constructor scoring uses).
+                cid = entry.get("constructor")
+                if cid in constructor_pts_delta:
+                    q = d_adj.get("points_delta", {}).get("quali", 0)
+                    r = d_adj.get("points_delta", {}).get("race", 0)
+                    s = d_adj.get("points_delta", {}).get("sprint", 0)
+                    constructor_pts_delta[cid] += float(q + r + s)
+            for c_entry in constructors_json:
+                cid = c_entry.get("constructor_id")
+                if cid in constructor_pts_delta:
+                    delta = constructor_pts_delta[cid]
+                    c_entry["expected_points_adjusted"] = round(c_entry["expected_points"] + delta, 1)
+                    c_entry["points_delta"] = round(delta, 1)
+                    c_entry["pace_bump"] = round(float(modifiers_applied.get(cid, 0)), 2)
+            upgrade_meta = {"modifiers": modifiers_applied}
+            print(f"  Merged team upgrade adjustments for {len(modifiers_applied)} team(s)")
+        except Exception as e:
+            print(f"  Warning: Could not load team upgrade adjustments: {e}")
+
+    payload = {
         "race": race_name,
         "round": round_num,
         "season": CURRENT_SEASON,
@@ -379,6 +426,9 @@ def build_predictions_json(round_num: int) -> dict | None:
         "drivers": drivers_json,
         "constructors": constructors_json,
     }
+    if upgrade_meta:
+        payload["upgrade_adjustments"] = upgrade_meta
+    return payload
 
 
 def build_season_summary() -> dict:

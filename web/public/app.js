@@ -1088,7 +1088,8 @@ function renderDrivers() {
 
     // Cards
     const cardsEl = document.getElementById('driverCards');
-    cardsEl.innerHTML = drivers.map((d, i) => driverCard(d, i)).join('');
+    const upgradeBanner = renderUpgradeBanner();
+    cardsEl.innerHTML = upgradeBanner + drivers.map((d, i) => driverCard(d, i)).join('');
 
     // Table - apply column header sort if active, otherwise use dropdown sort
     let tableDrivers = [...drivers];
@@ -1149,6 +1150,12 @@ function driverCard(d, i) {
         <div class="points-badge">
             ${d.expected_points.toFixed(1)}
             <span class="points-label">pts</span>
+            ${(typeof d.expected_points_adjusted === 'number' && Math.abs(d.points_delta || 0) >= 0.1) ? `
+                <span class="upgrade-delta ${d.points_delta > 0 ? 'pos' : 'neg'}"
+                      title="With manual team upgrade (pace bump ${d.pace_bump >= 0 ? '+' : ''}${d.pace_bump}): adjusted to ${d.expected_points_adjusted.toFixed(1)} pts (P${d.predicted_finish_adjusted} race)">
+                    ${d.points_delta > 0 ? '+' : ''}${d.points_delta.toFixed(1)}
+                </span>
+            ` : ''}
         </div>
 
         <div class="points-breakdown">
@@ -1245,9 +1252,30 @@ function renderConstructors() {
     constructors.sort((a, b) => ascending ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey]);
 
     const grid = document.getElementById('constructorCards');
-    grid.innerHTML = constructors.map((c, i) => constructorCard(c, i)).join('');
+    const upgradeBanner = renderUpgradeBanner();
+    grid.innerHTML = upgradeBanner + constructors.map((c, i) => constructorCard(c, i)).join('');
 
     renderPitstopPanel();
+}
+
+// Renders the "team upgrades active" banner above the drivers/constructors
+// grids when data.upgrade_adjustments is present. Returns "" otherwise so it
+// can be safely concatenated into innerHTML.
+function renderUpgradeBanner() {
+    if (!data || !data.upgrade_adjustments || !data.upgrade_adjustments.modifiers) return '';
+    const mods = data.upgrade_adjustments.modifiers;
+    const teams = Object.keys(mods);
+    if (teams.length === 0) return '';
+    const list = teams.map(tid => {
+        const bump = mods[tid];
+        const teamName = (TEAMS[tid] && TEAMS[tid].name) || tid;
+        const sign = bump > 0 ? '+' : '';
+        return `<strong style="color:${(TEAMS[tid] && TEAMS[tid].color) || 'currentColor'}">${teamName}</strong> ${sign}${bump.toFixed(2)}`;
+    }).join(' &middot; ');
+    return `<div class="upgrade-banner">
+        <strong>Manual team upgrades active:</strong> ${list}.
+        Adjusted points appear next to each card's main number as a colored delta badge — the base ML prediction is unchanged.
+    </div>`;
 }
 
 // Render the all-teams pit stop comparison panel above constructor cards.
@@ -1413,6 +1441,12 @@ function constructorCard(c, i) {
             <div class="points-badge">
                 ${c.expected_points.toFixed(1)}
                 <span class="points-label">pts</span>
+                ${(typeof c.expected_points_adjusted === 'number' && Math.abs(c.points_delta || 0) >= 0.1) ? `
+                    <span class="upgrade-delta ${c.points_delta > 0 ? 'pos' : 'neg'}"
+                          title="With manual team upgrade (pace bump ${c.pace_bump >= 0 ? '+' : ''}${c.pace_bump}): adjusted to ${c.expected_points_adjusted.toFixed(1)} pts">
+                        ${c.points_delta > 0 ? '+' : ''}${c.points_delta.toFixed(1)}
+                    </span>
+                ` : ''}
             </div>
         </div>
 

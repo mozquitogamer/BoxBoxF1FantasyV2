@@ -585,6 +585,193 @@ def _show_comparison(actual, mc_data, fp_df, round_num):
 
 
 # ==============================================================================
+# Page: Team Upgrades (manual performance modifiers)
+# ==============================================================================
+
+def page_team_upgrades():
+    st.header("Team Upgrades")
+    st.caption(
+        "Manually boost a team's predicted performance for an upcoming race "
+        "(e.g. a major aero / engine upgrade landing this weekend). The base "
+        "ML prediction is preserved; adjusted values appear as an overlay on "
+        "the public site and can be toggled by visitors."
+    )
+
+    import subprocess
+
+    upgrades_path = SEED_DIR / "team_upgrades.json"
+
+    # Load existing or default
+    if upgrades_path.exists():
+        with open(upgrades_path) as f:
+            current = json.load(f)
+    else:
+        current = {"round": None, "modifiers": {}}
+
+    # Available rounds for prediction
+    available_rounds = []
+    for rd in sorted(PREDICTIONS_DIR.glob("round*")):
+        try:
+            rn = int(rd.name.replace("round", ""))
+        except ValueError:
+            continue
+        if (rd / "predictions.parquet").exists() and rn not in CANCELLED_ROUNDS_2026:
+            available_rounds.append(rn)
+
+    if not available_rounds:
+        st.warning("No prediction rounds found. Run the pipeline first.")
+        return
+
+    default_round = current.get("round") if current.get("round") in available_rounds else available_rounds[-1]
+    round_num = st.selectbox(
+        "Round to apply upgrades to",
+        available_rounds,
+        index=available_rounds.index(default_round),
+        format_func=lambda r: f"Round {r}",
+    )
+
+    st.markdown("### Pace bump per team")
+    st.caption(
+        "Pace bump is in raw XGBRanker score units. From the trained models, "
+        "**~0.30–0.50 ≈ one finishing position better**. Slide right (positive) "
+        "for a team you expect to improve, left (negative) for a team you "
+        "expect to regress. Existing values are kept; teams left at 0 have no "
+        "modifier applied."
+    )
+
+    constructors_info = load_constructors_info()
+    team_ids = sorted(constructors_info.keys())
+
+    # Only apply existing modifiers if their round matches the selected round.
+    # Otherwise start from zero so you don't accidentally carry last round's bumps.
+    if current.get("round") == round_num:
+        existing = current.get("modifiers", {}) or {}
+    else:
+        existing = {}
+
+    cols = st.columns(2)
+    new_modifiers = {}
+    for i, tid in enumerate(team_ids):
+        info = constructors_info[tid]
+        name = info.get("name", tid)
+        prev_bump = float(existing.get(tid, {}).get("pace_bump", 0.0) or 0.0)
+        prev_note = existing.get(tid, {}).get("note", "")
+        with cols[i % 2]:
+            bump = st.slider(
+                f"{name}",
+                min_value=-2.0, max_value=2.0, step=0.05,
+                value=prev_bump,
+                key=f"bump_{tid}",
+                help="Raw score units. ~0.35 ≈ +1 finish position.",
+            )
+            note = st.text_input(
+                f"Note for {name}",
+                value=prev_note,
+                key=f"note_{tid}",
+                placeholder="optional — e.g. 'Floor + sidepod upgrade'",
+                label_visibility="collapsed",
+            )
+            if bump != 0.0:
+                new_modifiers[tid] = {"pace_bump": bump, "note": note}
+
+    st.markdown("---")
+
+    col1, col2, col3 = st.columns([1, 1, 2])
+    save_clicked = col1.button("Save & Apply", type="primary",
+                                help="Writes team_upgrades.json, runs apply_upgrades + 08_export_website_json. Site updates in ~15s.")
+    clear_clicked = col2.button("Clear All",
+                                 help="Removes every modifier and clears any adjustments.json for this round.")
+
+    if clear_clicked:
+        new_data = {"round": None, "modifiers": {}}
+        with open(upgrades_path, "w") as f:
+            json.dump(new_data, f, indent=2)
+        # Also delete the round's adjustments sidecar so the site reverts to ML
+        try:
+            subprocess.run(
+                ["python", str(PROJECT_ROOT / "pipeline" / "apply_upgrades.py"),
+                 "--round", str(round_num), "--clear"],
+                check=True, capture_output=True, text=True,
+            )
+        except subprocess.CalledProcessError as e:
+            st.warning(f"apply_upgrades --clear failed: {e.stderr}")
+        # Re-export to bake the cleared state into the live JSON
+        try:
+            subprocess.run(
+                ["python", str(PROJECT_ROOT / "pipeline" / "08_export_website_json.py"),
+                 "--round", str(round_num)],
+                check=True, capture_output=True, text=True,
+            )
+            st.success("Cleared. Re-exported website JSON.")
+        except subprocess.CalledProcessError as e:
+            st.warning(f"08_export failed: {e.stderr}")
+
+    if save_clicked:
+        new_data = {
+            "_comment": current.get("_comment", "Manual team performance modifiers."),
+            "round": round_num,
+            "modifiers": new_modifiers,
+        }
+        with open(upgrades_path, "w") as f:
+            json.dump(new_data, f, indent=2)
+        st.info(f"Saved {len(new_modifiers)} modifier(s) to team_upgrades.json")
+
+        progress = st.progress(0, text="Applying upgrades…")
+        try:
+            r = subprocess.run(
+                ["python", str(PROJECT_ROOT / "pipeline" / "apply_upgrades.py"),
+                 "--round", str(round_num)],
+                check=True, capture_output=True, text=True,
+            )
+            progress.progress(50, text="Re-exporting website JSON…")
+            st.code(r.stdout or "(no stdout)", language="text")
+        except subprocess.CalledProcessError as e:
+            progress.empty()
+            st.error(f"apply_upgrades failed:\n{e.stderr}")
+            return
+
+        try:
+            r = subprocess.run(
+                ["python", str(PROJECT_ROOT / "pipeline" / "08_export_website_json.py"),
+                 "--round", str(round_num)],
+                check=True, capture_output=True, text=True,
+            )
+            progress.progress(100, text="Done.")
+            st.success(f"Applied. Website JSON updated for Round {round_num}.")
+            st.code(r.stdout[-2000:] or "(no stdout)", language="text")
+        except subprocess.CalledProcessError as e:
+            progress.empty()
+            st.error(f"08_export_website_json failed:\n{e.stderr}")
+            return
+
+    # Show currently-applied adjustments for visibility
+    adj_path = PREDICTIONS_DIR / f"round{round_num}" / "adjustments.json"
+    if adj_path.exists():
+        with open(adj_path) as f:
+            adj = json.load(f)
+        st.markdown("### Currently applied")
+        st.caption(f"From `{adj_path.relative_to(PROJECT_ROOT)}`")
+        rows = []
+        for d in adj.get("drivers", []):
+            if d.get("total_points_delta", 0) == 0:
+                continue
+            rows.append({
+                "Driver": d.get("driver_abbrev", d["driver_id"]),
+                "Team": d["constructor_id"],
+                "Pace bump": d["pace_bump"],
+                "Quali Δ": f"{d['baseline']['quali']} → {d['adjusted']['quali']}",
+                "Race Δ": f"{d['baseline']['race']} → {d['adjusted']['race']}",
+                "Pts Δ": d["total_points_delta"],
+            })
+        if rows:
+            st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+        else:
+            st.caption("No driver-level effects to display.")
+    else:
+        st.caption("No adjustments currently applied to this round.")
+
+
+# ==============================================================================
 # Page: Season Overview
 # ==============================================================================
 
@@ -744,21 +931,26 @@ def page_deep_dive():
     # -- Pace Summary Table --
     st.markdown("### Driver Pace Summary (Fuel-Corrected)")
     st.caption("All times adjusted for fuel load. Gap = seconds slower than the fastest driver. Std Dev measures consistency (lower = steadier).")
+    # Drivers with few clean laps (DNF early, traffic-heavy, etc.) can have
+    # None for N-lap-avg / theoretical-best / degradation fields. Round safely.
+    def _rnd(v, ndigits=3):
+        return round(v, ndigits) if v is not None else None
+
     pace_rows = []
     for d in drivers_sorted:
         m = metrics[d]
         pace_rows.append({
             "Driver": d,
             "Team": dd["driver_constructors"].get(d, ""),
-            "Avg Lap": round(m["avg_lap"], 3),
-            "Best Lap": round(m["best_lap"], 3),
-            "3-Lap Avg": round(m["best_3_lap_avg"], 3),
-            "5-Lap Avg": round(m["best_5_lap_avg"], 3),
-            "10-Lap Avg": round(m["best_10_lap_avg"], 3),
-            "Theo. Best": round(m["theoretical_best"], 3),
-            "Gap": round(m["pace_delta"], 3),
-            "Std Dev": round(m["lap_time_std"], 3),
-            "Laps": m["laps_analyzed"],
+            "Avg Lap": _rnd(m.get("avg_lap")),
+            "Best Lap": _rnd(m.get("best_lap")),
+            "3-Lap Avg": _rnd(m.get("best_3_lap_avg")),
+            "5-Lap Avg": _rnd(m.get("best_5_lap_avg")),
+            "10-Lap Avg": _rnd(m.get("best_10_lap_avg")),
+            "Theo. Best": _rnd(m.get("theoretical_best")),
+            "Gap": _rnd(m.get("pace_delta")),
+            "Std Dev": _rnd(m.get("lap_time_std")),
+            "Laps": m.get("laps_analyzed"),
         })
     st.dataframe(pd.DataFrame(pace_rows), use_container_width=True, hide_index=True)
 
@@ -954,12 +1146,14 @@ def main():
 
     page = st.sidebar.radio(
         "Navigation",
-        ["Race Predictions", "Actual Results", "Season Overview", "Race Deep Dive"],
+        ["Race Predictions", "Team Upgrades", "Actual Results", "Season Overview", "Race Deep Dive"],
         index=0,
     )
 
     if page == "Race Predictions":
         page_predictions()
+    elif page == "Team Upgrades":
+        page_team_upgrades()
     elif page == "Actual Results":
         page_actuals()
     elif page == "Season Overview":
