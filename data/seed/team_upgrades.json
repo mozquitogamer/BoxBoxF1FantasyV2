@@ -1,5 +1,6 @@
 {
   "_comment": "Manual team performance modifiers.",
   "round": null,
-  "modifiers": {}
+  "modifiers": {},
+  "driver_modifiers": {}
 }

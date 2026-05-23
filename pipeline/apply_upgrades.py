@@ -46,21 +46,35 @@ from config.fantasy_scoring import (
 )
 
 
-def _load_upgrades(round_num: int) -> dict[str, float]:
-    """Return {constructor_id: pace_bump} for the given round, or {}."""
+def _load_upgrades(round_num: int) -> tuple[dict[str, float], dict[str, float]]:
+    """Return ({constructor_id: pace_bump}, {driver_abbrev: pace_bump}) for the round, or ({},{}).
+
+    `modifiers` (team-level, keyed by constructor_id) and `driver_modifiers`
+    (driver-level, keyed by driver_abbrev like 'VER') compose additively at
+    apply time: total_bump_per_driver = team_bump + driver_bump.
+    """
     path = SEED_DIR / "team_upgrades.json"
     if not path.exists():
-        return {}
+        return {}, {}
     with open(path) as f:
         data = json.load(f)
     if data.get("round") != round_num:
-        return {}
-    modifiers = data.get("modifiers", {}) or {}
-    return {
+        return {}, {}
+
+    team_mods = data.get("modifiers", {}) or {}
+    by_team = {
         team: float(info.get("pace_bump", 0.0) or 0.0)
-        for team, info in modifiers.items()
+        for team, info in team_mods.items()
         if float(info.get("pace_bump", 0.0) or 0.0) != 0.0
     }
+
+    driver_mods = data.get("driver_modifiers", {}) or {}
+    by_driver = {
+        abbrev: float(info.get("pace_bump", 0.0) or 0.0)
+        for abbrev, info in driver_mods.items()
+        if float(info.get("pace_bump", 0.0) or 0.0) != 0.0
+    }
+    return by_team, by_driver
 
 
 def _rerank(raw_scores: pd.Series, bumps: pd.Series) -> pd.Series:
@@ -108,10 +122,10 @@ def apply_upgrades(round_num: int) -> bool:
         print(f"  No predictions.parquet for round {round_num}")
         return False
 
-    bumps_by_team = _load_upgrades(round_num)
+    bumps_by_team, bumps_by_driver = _load_upgrades(round_num)
     adj_path = PREDICTIONS_DIR / f"round{round_num}" / "adjustments.json"
 
-    if not bumps_by_team:
+    if not bumps_by_team and not bumps_by_driver:
         # No upgrades for this round — make sure no stale adjustments.json lingers.
         if adj_path.exists():
             adj_path.unlink()
@@ -121,8 +135,13 @@ def apply_upgrades(round_num: int) -> bool:
         return False
 
     df = pd.read_parquet(pred_path)
-    bumps = df["constructor_id"].map(bumps_by_team).fillna(0.0)
-    print(f"  Round {round_num}: applying bumps to {(bumps != 0).sum()} drivers across {len(bumps_by_team)} teams")
+    # Compose: bump_per_driver = team_bump + driver_bump
+    team_bumps = df["constructor_id"].map(bumps_by_team).fillna(0.0)
+    driver_bumps = df["driver_abbrev"].map(bumps_by_driver).fillna(0.0)
+    bumps = team_bumps + driver_bumps
+    n_drivers_affected = (bumps != 0).sum()
+    print(f"  Round {round_num}: applying bumps to {n_drivers_affected} drivers "
+          f"({len(bumps_by_team)} team-level, {len(bumps_by_driver)} driver-level)")
 
     # Re-rank each session
     out_rows = []
@@ -174,6 +193,7 @@ def apply_upgrades(round_num: int) -> bool:
     payload = {
         "round": round_num,
         "modifiers_applied": bumps_by_team,
+        "driver_modifiers_applied": bumps_by_driver,
         "drivers": out_rows,
     }
 

@@ -1262,19 +1262,34 @@ function renderConstructors() {
 // grids when data.upgrade_adjustments is present. Returns "" otherwise so it
 // can be safely concatenated into innerHTML.
 function renderUpgradeBanner() {
-    if (!data || !data.upgrade_adjustments || !data.upgrade_adjustments.modifiers) return '';
-    const mods = data.upgrade_adjustments.modifiers;
-    const teams = Object.keys(mods);
-    if (teams.length === 0) return '';
-    const list = teams.map(tid => {
-        const bump = mods[tid];
+    if (!data || !data.upgrade_adjustments) return '';
+    const teamMods = data.upgrade_adjustments.modifiers || {};
+    const driverMods = data.upgrade_adjustments.driver_modifiers || {};
+    const teams = Object.keys(teamMods);
+    const drivers = Object.keys(driverMods);
+    if (teams.length === 0 && drivers.length === 0) return '';
+
+    const teamList = teams.map(tid => {
+        const bump = teamMods[tid];
         const teamName = (TEAMS[tid] && TEAMS[tid].name) || tid;
         const sign = bump > 0 ? '+' : '';
         return `<strong style="color:${(TEAMS[tid] && TEAMS[tid].color) || 'currentColor'}">${teamName}</strong> ${sign}${bump.toFixed(2)}`;
     }).join(' &middot; ');
+
+    const driverList = drivers.map(abbrev => {
+        const bump = driverMods[abbrev];
+        const sign = bump > 0 ? '+' : '';
+        return `<strong>${abbrev}</strong> ${sign}${bump.toFixed(2)}`;
+    }).join(' &middot; ');
+
+    const parts = [];
+    if (teams.length)   parts.push(`<div><strong>Team:</strong> ${teamList}</div>`);
+    if (drivers.length) parts.push(`<div><strong>Driver-only:</strong> ${driverList}</div>`);
+
     return `<div class="upgrade-banner">
-        <strong>Manual team upgrades active:</strong> ${list}.
-        Adjusted points appear next to each card's main number as a colored delta badge — the base ML prediction is unchanged.
+        <strong>Manual upgrade overlay active</strong> (team + driver bumps stack):
+        ${parts.join('')}
+        <div style="margin-top:6px;opacity:0.8;font-size:0.78rem;">Adjusted points appear next to each card's main number as a colored delta badge. Base ML prediction is unchanged.</div>
     </div>`;
 }
 

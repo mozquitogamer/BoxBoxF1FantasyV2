@@ -646,8 +646,10 @@ def page_team_upgrades():
     # Otherwise start from zero so you don't accidentally carry last round's bumps.
     if current.get("round") == round_num:
         existing = current.get("modifiers", {}) or {}
+        existing_drivers = current.get("driver_modifiers", {}) or {}
     else:
         existing = {}
+        existing_drivers = {}
 
     cols = st.columns(2)
     new_modifiers = {}
@@ -674,6 +676,79 @@ def page_team_upgrades():
             if bump != 0.0:
                 new_modifiers[tid] = {"pace_bump": bump, "note": note}
 
+    # ---- Per-driver bumps (composed additively with the team bump above) ----
+    st.markdown("---")
+    st.markdown("### Per-driver bumps (optional)")
+    st.caption(
+        "Driver-specific bumps stack on top of the team bump for that driver "
+        "— useful when one teammate is materially stronger than the other in "
+        "specific conditions (wet weather, street circuits, etc). The "
+        "**effective bump** applied to a driver is `team_bump + driver_bump`. "
+        "Leave at 0 to inherit only the team value."
+    )
+
+    drivers_info = load_drivers_info()
+    # Group drivers by team for visual scannability (same row → same team)
+    drivers_by_team: dict[str, list[str]] = {}
+    for abbrev, dinfo in drivers_info.items():
+        tid = dinfo.get("constructor_id", "")
+        drivers_by_team.setdefault(tid, []).append(abbrev)
+    # Sort teams by name, drivers within a team alphabetically by abbrev
+    sorted_teams = sorted(drivers_by_team.keys(), key=lambda t: constructors_info.get(t, {}).get("name", t))
+
+    new_driver_modifiers: dict[str, dict] = {}
+    for tid in sorted_teams:
+        team_name = constructors_info.get(tid, {}).get("name", tid)
+        abbrevs = sorted(drivers_by_team[tid])
+        # Two-column row per team (one driver per column)
+        cols_dr = st.columns(2)
+        for col_idx, abbrev in enumerate(abbrevs[:2]):
+            dinfo = drivers_info.get(abbrev, {})
+            full_name = f"{dinfo.get('first_name','')} {dinfo.get('last_name','')}".strip() or abbrev
+            label = f"{abbrev} — {full_name} ({team_name})"
+            prev_d_bump = float(existing_drivers.get(abbrev, {}).get("pace_bump", 0.0) or 0.0)
+            prev_d_note = existing_drivers.get(abbrev, {}).get("note", "")
+            with cols_dr[col_idx]:
+                d_bump = st.slider(
+                    label,
+                    min_value=-1.5, max_value=1.5, step=0.05,
+                    value=prev_d_bump,
+                    key=f"dbump_{abbrev}",
+                    help="Driver-only bump. Adds to the team bump above when computing effective per-driver pace bump.",
+                )
+                d_note = st.text_input(
+                    f"Note for {abbrev}",
+                    value=prev_d_note,
+                    key=f"dnote_{abbrev}",
+                    placeholder="optional — e.g. 'wet specialist', 'rookie penalty'",
+                    label_visibility="collapsed",
+                )
+                if d_bump != 0.0:
+                    new_driver_modifiers[abbrev] = {"pace_bump": d_bump, "note": d_note}
+
+    # Live effective-bump preview
+    if new_modifiers or new_driver_modifiers:
+        st.markdown("### Effective bump preview")
+        rows_preview = []
+        for abbrev, dinfo in drivers_info.items():
+            tid = dinfo.get("constructor_id", "")
+            t = float(new_modifiers.get(tid, {}).get("pace_bump", 0.0) or 0.0)
+            d = float(new_driver_modifiers.get(abbrev, {}).get("pace_bump", 0.0) or 0.0)
+            eff = t + d
+            if eff != 0.0:
+                rows_preview.append({
+                    "Driver": abbrev,
+                    "Team": constructors_info.get(tid, {}).get("name", tid),
+                    "Team bump": round(t, 2),
+                    "Driver bump": round(d, 2),
+                    "Effective": round(eff, 2),
+                })
+        if rows_preview:
+            rows_preview.sort(key=lambda r: -r["Effective"])
+            st.dataframe(pd.DataFrame(rows_preview), use_container_width=True, hide_index=True)
+        else:
+            st.caption("All current slider values net to zero — no effective bumps.")
+
     st.markdown("---")
 
     col1, col2, col3 = st.columns([1, 1, 2])
@@ -683,7 +758,7 @@ def page_team_upgrades():
                                  help="Removes every modifier and clears any adjustments.json for this round.")
 
     if clear_clicked:
-        new_data = {"round": None, "modifiers": {}}
+        new_data = {"round": None, "modifiers": {}, "driver_modifiers": {}}
         with open(upgrades_path, "w") as f:
             json.dump(new_data, f, indent=2)
         # Also delete the round's adjustments sidecar so the site reverts to ML
@@ -711,10 +786,11 @@ def page_team_upgrades():
             "_comment": current.get("_comment", "Manual team performance modifiers."),
             "round": round_num,
             "modifiers": new_modifiers,
+            "driver_modifiers": new_driver_modifiers,
         }
         with open(upgrades_path, "w") as f:
             json.dump(new_data, f, indent=2)
-        st.info(f"Saved {len(new_modifiers)} modifier(s) to team_upgrades.json")
+        st.info(f"Saved {len(new_modifiers)} team-level + {len(new_driver_modifiers)} driver-level modifier(s) to team_upgrades.json")
 
         progress = st.progress(0, text="Applying upgrades…")
         try:

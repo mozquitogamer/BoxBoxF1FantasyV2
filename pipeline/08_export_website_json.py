@@ -381,6 +381,7 @@ def build_predictions_json(round_num: int) -> dict | None:
                 adj_data = json.load(f)
             by_driver = {d["driver_abbrev"]: d for d in adj_data.get("drivers", [])}
             modifiers_applied = adj_data.get("modifiers_applied", {})
+            driver_modifiers_applied = adj_data.get("driver_modifiers_applied", {})
             constructor_pts_delta = {cid: 0.0 for cid in modifiers_applied}
             for entry in drivers_json:
                 d_adj = by_driver.get(entry["driver_id"])
@@ -410,8 +411,11 @@ def build_predictions_json(round_num: int) -> dict | None:
                     c_entry["expected_points_adjusted"] = round(c_entry["expected_points"] + delta, 1)
                     c_entry["points_delta"] = round(delta, 1)
                     c_entry["pace_bump"] = round(float(modifiers_applied.get(cid, 0)), 2)
-            upgrade_meta = {"modifiers": modifiers_applied}
-            print(f"  Merged team upgrade adjustments for {len(modifiers_applied)} team(s)")
+            upgrade_meta = {
+                "modifiers": modifiers_applied,
+                "driver_modifiers": driver_modifiers_applied,
+            }
+            print(f"  Merged upgrade adjustments: {len(modifiers_applied)} team(s), {len(driver_modifiers_applied)} driver(s)")
         except Exception as e:
             print(f"  Warning: Could not load team upgrade adjustments: {e}")
 
