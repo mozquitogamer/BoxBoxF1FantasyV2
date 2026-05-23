@@ -46,20 +46,27 @@ from config.fantasy_scoring import (
 )
 
 
-def _load_upgrades(round_num: int) -> tuple[dict[str, float], dict[str, float]]:
-    """Return ({constructor_id: pace_bump}, {driver_abbrev: pace_bump}) for the round, or ({},{}).
+def _load_upgrades(round_num: int) -> tuple[dict[str, float], dict[str, float], str]:
+    """Return ({constructor_id: pace_bump}, {driver_abbrev: pace_bump}, scope) for the round.
 
     `modifiers` (team-level, keyed by constructor_id) and `driver_modifiers`
     (driver-level, keyed by driver_abbrev like 'VER') compose additively at
     apply time: total_bump_per_driver = team_bump + driver_bump.
+
+    `scope` controls which sessions the bumps affect:
+      - "all"        : bumps applied to quali_raw, race_raw, AND sprint_raw (default)
+      - "race_only"  : bumps applied ONLY to race_raw. Useful for sprint weekends
+                       where conditions differ between sessions (e.g. dry sprint
+                       + dry quali + wet race — bumps reflect the rain race, not
+                       sessions that will be dry).
     """
     path = SEED_DIR / "team_upgrades.json"
     if not path.exists():
-        return {}, {}
+        return {}, {}, "all"
     with open(path) as f:
         data = json.load(f)
     if data.get("round") != round_num:
-        return {}, {}
+        return {}, {}, "all"
 
     team_mods = data.get("modifiers", {}) or {}
     by_team = {
@@ -74,7 +81,10 @@ def _load_upgrades(round_num: int) -> tuple[dict[str, float], dict[str, float]]:
         for abbrev, info in driver_mods.items()
         if float(info.get("pace_bump", 0.0) or 0.0) != 0.0
     }
-    return by_team, by_driver
+    scope = data.get("scope", "all")
+    if scope not in ("all", "race_only"):
+        scope = "all"
+    return by_team, by_driver, scope
 
 
 def _rerank(raw_scores: pd.Series, bumps: pd.Series) -> pd.Series:
@@ -122,7 +132,7 @@ def apply_upgrades(round_num: int) -> bool:
         print(f"  No predictions.parquet for round {round_num}")
         return False
 
-    bumps_by_team, bumps_by_driver = _load_upgrades(round_num)
+    bumps_by_team, bumps_by_driver, scope = _load_upgrades(round_num)
     adj_path = PREDICTIONS_DIR / f"round{round_num}" / "adjustments.json"
 
     if not bumps_by_team and not bumps_by_driver:
@@ -141,14 +151,23 @@ def apply_upgrades(round_num: int) -> bool:
     bumps = team_bumps + driver_bumps
     n_drivers_affected = (bumps != 0).sum()
     print(f"  Round {round_num}: applying bumps to {n_drivers_affected} drivers "
-          f"({len(bumps_by_team)} team-level, {len(bumps_by_driver)} driver-level)")
+          f"({len(bumps_by_team)} team-level, {len(bumps_by_driver)} driver-level), scope={scope}")
 
-    # Re-rank each session
+    # Re-rank each session. With scope="race_only", we feed a zero-bump vector
+    # to quali + sprint re-ranking so those positions stay at the baseline ML
+    # values. Only the race re-rank receives the actual bumps. This matches
+    # situations where conditions differ between sessions on a single weekend
+    # (e.g. dry sprint + dry quali + wet race — bumps should reflect rain
+    # impact on the race only, not on the dry sessions).
+    zero_bumps = pd.Series([0.0] * len(df), index=df.index)
+    quali_input_bumps = zero_bumps if scope == "race_only" else bumps
+    sprint_input_bumps = zero_bumps if scope == "race_only" else bumps
+
     out_rows = []
-    adj_quali = _rerank(df["predicted_quali_raw"], bumps)
+    adj_quali = _rerank(df["predicted_quali_raw"], quali_input_bumps)
     adj_race = _rerank(df["predicted_race_raw"], bumps)
     has_sprint = "predicted_sprint_raw" in df.columns and df["predicted_sprint_raw"].notna().any()
-    adj_sprint = _rerank(df["predicted_sprint_raw"], bumps) if has_sprint else None
+    adj_sprint = _rerank(df["predicted_sprint_raw"], sprint_input_bumps) if has_sprint else None
 
     for i, row in df.iterrows():
         base_q = int(row["predicted_quali_position"])
@@ -192,6 +211,7 @@ def apply_upgrades(round_num: int) -> bool:
 
     payload = {
         "round": round_num,
+        "scope": scope,
         "modifiers_applied": bumps_by_team,
         "driver_modifiers_applied": bumps_by_driver,
         "drivers": out_rows,

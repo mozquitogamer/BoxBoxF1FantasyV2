@@ -630,6 +630,21 @@ def page_team_upgrades():
         format_func=lambda r: f"Round {r}",
     )
 
+    # Scope selector — which sessions do these bumps apply to?
+    st.markdown("### Bump scope")
+    prev_scope = current.get("scope", "all") if current.get("round") == round_num else "all"
+    scope = st.radio(
+        "Which sessions should these bumps affect?",
+        options=["all", "race_only"],
+        index=["all", "race_only"].index(prev_scope),
+        format_func=lambda s: {
+            "all": "All sessions (quali + sprint + race) — for general team upgrades or skill changes that apply to every session",
+            "race_only": "Race only — for one-off conditions affecting only the race (e.g. rain forecast for Sunday, sprint & quali will be dry)",
+        }[s],
+        horizontal=False,
+        key="bump_scope",
+    )
+
     st.markdown("### Pace bump per team")
     st.caption(
         "Pace bump is in raw XGBRanker score units. From the trained models, "
@@ -758,7 +773,7 @@ def page_team_upgrades():
                                  help="Removes every modifier and clears any adjustments.json for this round.")
 
     if clear_clicked:
-        new_data = {"round": None, "modifiers": {}, "driver_modifiers": {}}
+        new_data = {"round": None, "scope": "all", "modifiers": {}, "driver_modifiers": {}}
         with open(upgrades_path, "w") as f:
             json.dump(new_data, f, indent=2)
         # Also delete the round's adjustments sidecar so the site reverts to ML
@@ -785,12 +800,14 @@ def page_team_upgrades():
         new_data = {
             "_comment": current.get("_comment", "Manual team performance modifiers."),
             "round": round_num,
+            "scope": scope,
             "modifiers": new_modifiers,
             "driver_modifiers": new_driver_modifiers,
         }
         with open(upgrades_path, "w") as f:
             json.dump(new_data, f, indent=2)
-        st.info(f"Saved {len(new_modifiers)} team-level + {len(new_driver_modifiers)} driver-level modifier(s) to team_upgrades.json")
+        scope_label = "ALL sessions" if scope == "all" else "RACE ONLY"
+        st.info(f"Saved {len(new_modifiers)} team-level + {len(new_driver_modifiers)} driver-level modifier(s) (scope: {scope_label}) to team_upgrades.json")
 
         progress = st.progress(0, text="Applying upgrades…")
         try:

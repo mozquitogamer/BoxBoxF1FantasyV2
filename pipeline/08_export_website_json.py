@@ -414,8 +414,9 @@ def build_predictions_json(round_num: int) -> dict | None:
             upgrade_meta = {
                 "modifiers": modifiers_applied,
                 "driver_modifiers": driver_modifiers_applied,
+                "scope": adj_data.get("scope", "all"),
             }
-            print(f"  Merged upgrade adjustments: {len(modifiers_applied)} team(s), {len(driver_modifiers_applied)} driver(s)")
+            print(f"  Merged upgrade adjustments: {len(modifiers_applied)} team(s), {len(driver_modifiers_applied)} driver(s), scope={upgrade_meta['scope']}")
         except Exception as e:
             print(f"  Warning: Could not load team upgrade adjustments: {e}")
 
