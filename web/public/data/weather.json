@@ -14,7 +14,7 @@
     "end": "2026-05-24"
   },
   "overall_rain_risk": "LOW",
-  "max_rain_probability": 23,
+  "max_rain_probability": 26,
   "daily": [
     {
       "date": "2026-05-22",
@@ -45,14 +45,14 @@
     {
       "date": "2026-05-24",
       "temp_max": 16.8,
-      "temp_min": 10.8,
-      "precip_probability_max": 44,
-      "precip_sum_mm": 2.7,
-      "wind_max_kmh": 19.4,
-      "weather_description": "Moderate drizzle",
-      "weather_category": "drizzle",
-      "weather_icon": "\ud83c\udf26\ufe0f",
-      "weather_code": 53,
+      "temp_min": 10.9,
+      "precip_probability_max": 64,
+      "precip_sum_mm": 2.5,
+      "wind_max_kmh": 20.0,
+      "weather_description": "Slight rain",
+      "weather_category": "rain",
+      "weather_icon": "\ud83c\udf27\ufe0f",
+      "weather_code": 61,
       "rain_risk": "MEDIUM"
     }
   ],
@@ -321,59 +321,59 @@
       "name": "Race",
       "day_label": "Sunday",
       "date": "2026-05-24",
-      "rain_probability": 23,
+      "rain_probability": 26,
       "rain_risk": "LOW",
-      "avg_temp": 12.2,
-      "avg_wind": 17.6,
-      "total_precip_mm": 0.0,
+      "avg_temp": 11.4,
+      "avg_wind": 15.5,
+      "total_precip_mm": 0.4,
       "weather_description": "Overcast",
       "weather_category": "overcast",
       "weather_icon": "\u2601\ufe0f",
       "hourly": [
         {
           "hour": 13,
-          "temp": 11.8,
-          "humidity": 85,
-          "precip_prob": 23,
-          "precip_mm": 0.0,
-          "windspeed": 17.1,
-          "windgusts": 40.0,
-          "weather_code": 3
+          "temp": 11.6,
+          "humidity": 81,
+          "precip_prob": 26,
+          "precip_mm": 0.4,
+          "windspeed": 16.3,
+          "windgusts": 47.5,
+          "weather_code": 51
         },
         {
           "hour": 14,
-          "temp": 12.2,
-          "humidity": 85,
-          "precip_prob": 14,
+          "temp": 11.2,
+          "humidity": 83,
+          "precip_prob": 12,
           "precip_mm": 0.0,
-          "windspeed": 18.3,
-          "windgusts": 42.8,
+          "windspeed": 15.8,
+          "windgusts": 46.4,
           "weather_code": 3
         },
         {
           "hour": 15,
-          "temp": 12.6,
-          "humidity": 84,
-          "precip_prob": 9,
+          "temp": 11.5,
+          "humidity": 82,
+          "precip_prob": 10,
           "precip_mm": 0.0,
-          "windspeed": 16.5,
-          "windgusts": 41.8,
+          "windspeed": 15.3,
+          "windgusts": 45.0,
           "weather_code": 3
         },
         {
           "hour": 16,
-          "temp": 12.4,
-          "humidity": 83,
-          "precip_prob": 9,
+          "temp": 11.4,
+          "humidity": 84,
+          "precip_prob": 11,
           "precip_mm": 0.0,
-          "windspeed": 18.7,
-          "windgusts": 49.0,
+          "windspeed": 14.6,
+          "windgusts": 44.6,
           "weather_code": 3
         }
       ]
     }
   ],
-  "last_updated": "2026-05-24T08:17:37Z",
-  "next_update": "2026-05-24T14:17:37Z",
+  "last_updated": "2026-05-24T13:02:18Z",
+  "next_update": "2026-05-24T19:02:18Z",
   "data_source": "Open-Meteo (open-meteo.com)"
 }
