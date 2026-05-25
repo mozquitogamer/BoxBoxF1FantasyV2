@@ -8,18 +8,20 @@ For technical architecture, see [TECHNICAL_DEEP_DIVE.md](TECHNICAL_DEEP_DIVE.md)
 
 ## Tab Overview
 
-The site has 11 tabs. Tabs lazy-load — only the active tab fetches its data, so navigation is fast.
+The site has 12 tabs. Tabs lazy-load — only the active tab fetches its data, so navigation is fast.
 
 - **Drivers** — all 22 drivers ranked by predicted points (the page you land on)
 - **Constructors** — all 11 teams with constructor-specific scoring
 - **Optimizer** — three lineup tools: Lineup Optimizer, Transfer Advisor, Multi-Week Planner
+- **Analysis** — Free Practice + Post-Race telemetry breakdowns
 - **Season** — championship standings + price trackers
 - **H2H** — head-to-head matchup predictions between any two drivers or constructors
 - **Accuracy** — predicted vs actual analysis (toggle Drivers / Constructors)
 - **Race Deep Dive** — post-race analysis: pace, tyre strategy, stints, fuel-corrected pace
 - **Videos** — curated F1 video content for the current weekend
 - **Articles** — generated data-driven race previews and post-race reviews
-- **About** — methodology, data sources, credits
+- **Changelog** — release notes describing model and feature updates over time
+- **About** — methodology, data sources, contact, credits
 
 ---
 
@@ -44,6 +46,26 @@ Your starting point. Predicted fantasy points for every driver this round.
 - Confidence ≥ 90% means we have FP telemetry. Confidence ~65-70% is priors-only.
 - **Left-click a driver card** to lock them into the optimizer (green border)
 - **Right-click** to exclude (red border, strikethrough)
+
+### What-If Scenarios (the "±" button on every card)
+
+Click the small **±** button on the top-left of any driver or constructor card to open a slider that lets you bump that pick's predicted pace by ±5 positions in half-position steps. The card updates instantly with an adjusted points total alongside the model's baseline.
+
+- Use it when you have a strong opinion the model doesn't share — e.g. "I think Hadjar is going to outqualify the model's prediction by 2 positions this weekend"
+- A floating purple pill at the top of the page shows how many bumps are active; click **Manage** for the full overview (per-team master sliders, share-via-URL link, reset all)
+- Bumps are stored in your browser only (this device), and auto-clear when the round changes
+- Share-via-URL lets you send your what-if scenario to a friend — open the URL and they see the same overlay
+- **What's affected:** predicted positions, position points, positions gained/lost, constructor totals
+- **What's NOT affected:** the model's central prediction stays untouched as the canonical view; your bumps are an overlay alongside
+
+### Weather forecast badges
+
+When the race forecast triggers any weather-aware adjustment, you'll see one or two badges at the top of each driver/constructor card:
+
+- **🌧 Wet race forecast / Wet race likely / Light rain risk** — the Monte Carlo's confidence intervals widen, DNF risk multiplier kicks in (up to 2.6× on HIGH rain risk), and historically wet-strong drivers (Verstappen, Hamilton, Alonso, Antonelli) get a small score bias upward
+- **🥶 Cool race {temp}°C** — appears when the race forecast is under ~18°C air temp. Cold-strong constructors (Mercedes, Williams) get a small score bias upward in the simulation
+
+The weather widget on the Drivers tab also expands with a plain-English explainer of what's being adjusted ("Rain risk HIGH → confidence intervals widened by 70%, DNF risk ×2.6, wet-skilled drivers favoured.").
 
 ---
 
@@ -247,11 +269,26 @@ Generated data-driven articles. Race previews, post-race reviews, season trends.
 
 ---
 
+## Changelog Tab
+
+A reverse-chronological log of meaningful model and feature updates. Each entry has a date, a tagged category (`feature`, `model`, `fix`, `infra`), and a plain-English description of what changed and why it matters for fantasy decisions.
+
+Use it when:
+- You notice a step-change in the Accuracy tab between two rounds (it's probably a model upgrade landing — the Changelog will say so)
+- You want to know what's been added to the site recently
+- A driver/team prediction shifts unexpectedly and you want context
+
+Sourced from `web/public/data/changelog.json` — editable in one place if you want to add or correct an entry.
+
+---
+
 ## About Tab
 
 Background on how BoxBoxF1Fantasy works — the ML pipeline (high-level), data sources, scoring methodology, known limitations, and project credits.
 
-It also has a **Support BoxBox** card with Ko-fi and PayPal links if you want to chip in. The site is free and stays free at this baseline; tips help cover hosting and keep the development time funded. (A subscription tier for advanced features may launch later — when it does, it'll be clearly delineated and the existing features remain free.)
+It also has:
+- A **Support BoxBox** card with Ko-fi and PayPal links if you want to chip in. The site is free and stays free at this baseline; tips help cover hosting and keep the development time funded. (A subscription tier for advanced features may launch later — when it does, it'll be clearly delineated and the existing features remain free.)
+- A **Contact** section with X (@BoxBoxF1Fantasy) and email (boxboxf1fantasy@gmail.com) links for bug reports, feature requests, or just to argue about predictions.
 
 ---
 

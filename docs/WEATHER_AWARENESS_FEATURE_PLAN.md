@@ -1,6 +1,26 @@
 # Weather-Awareness Feature Plan
 
-**Status:** Planned. Filed 2026-05-23 after the R7 Canada prep highlighted the gap. To be implemented during a post-race break (priority: high — affects accuracy on every weekend where rain is plausible).
+**Status:** **Level 3 shipped 2026-05-25** (commit `aa15acf`). Level 2 was skipped — the model retrain plus an MC widener layer covered both needs in one push. Level 3.5 (dedicated DNF-by-weather classifier) is the remaining open item.
+
+**Detailed implementation report:** see `docs/WEATHER_LEVEL3_IMPLEMENTATION_PLAN.md` for the full Phase A-E breakdown and validation gate outcome.
+
+**TL;DR what shipped:**
+- Historical weather backfilled from FastF1 cache (469 sessions, 14.5% wet) into `data/processed/weather/`
+- Quali / race / sprint models retrained with weather features (`weather_was_wet_*`, `weather_track_temp_*`, etc.) and `cold_skill` constructor rating
+- 6× sample-weight boost on wet training rows to address ~85/15 dry/wet imbalance
+- Inference reads `weather.json` and injects per-session forecast; metadata recorded in `prediction_metadata.json`
+- MC weather widener: rain risk → noise + DNF multipliers + per-driver wet/cold perturbations, capped at ±0.4σ
+- Wet/cool race badges on driver+constructor cards + explainer in the weather widget
+- Recalibrated MC noise multiplier with new model
+
+**Validation outcome:** stratified walk-forward backtest gave +0.185 wet MAE positions (95% CI [+0.084, +0.290], excludes zero) + +0.046 dry MAE improvement. Plan's original +0.30 target wasn't reached — data ceiling on wet-race sample (11 wet rounds in test window). Honest result documented in the Changelog tab.
+
+**Still open (Level 3.5):** dedicated DNF-by-weather classifier — a small `(driver, track, weather, recent_DNF) → DNF_prob` model that would feed MC's DNF sampling directly. The plan section below remains the spec.
+
+---
+
+## Original plan (kept for history)
+
 
 **Problem in one line:** The forecast is fetched and shown on the site, but **the model and the MC simulator both ignore it.** Wet races are predicted as if dry.
 

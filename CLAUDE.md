@@ -77,12 +77,13 @@ BoxBoxF1FantasyV2/
 └── vercel.json                       # Vercel deployment config
 ```
 
-## Architecture: Two-Layer Feature System
+## Architecture: Two-Layer Feature System (+ weather conditioning)
 
-The core design: two data layers merged for XGBoost, which handles NaN natively.
+The core design: two data layers merged for XGBoost, which handles NaN natively. A third layer of per-session weather features lands on top.
 
-- **Layer 1 — Jolpica Priors (91 features, always available):** Rolling averages (1/3/5 race windows), circuit experience, constructor trends, teammate deltas, DNF rates, form trends, track similarity features, skill ratings. Uses `.shift(1)` to prevent leakage.
+- **Layer 1 — Jolpica Priors (~85 features, always available):** Rolling averages (1/3/5 race windows), circuit experience, constructor trends, teammate deltas, DNF rates, form trends, track similarity features, skill ratings (including `wet_skill` per driver and `cold_skill` per constructor). Uses `.shift(1)` to prevent leakage.
 - **Layer 2 — FP Telemetry (40+ features, sparse/NaN in training):** Lap times, sectors, degradation, long-run pace, compound-specific features (soft/medium/hard), relative pace deltas. Only ~160/2,600 training rows have this data.
+- **Layer 3 — Per-session weather (added 2026-05-25, Level 3):** `weather_was_wet_{quali,race,sprint}`, `weather_track_temp_*`, `weather_air_temp_*`, `weather_humidity_*`, plus `weather_precip_minutes_race`. Built from FastF1 cache via `pipeline/03c_extract_session_weather.py` → `data/processed/weather/all_session_weather.parquet`, joined by `04_build_model_inputs.py`. Each model gets ONLY its own session's weather (quali model sees `_quali`, race sees `_race`, sprint sees `_sprint`). 6× sample-weight boost on wet training rows compensates for the ~85/15 dry/wet imbalance.
 
 XGBoost's native NaN handling means: when FP data exists → model uses it to refine; when missing → model relies on priors. No imputation needed.
 
@@ -125,16 +126,26 @@ Callsites that apply this mapping:
 
 Constructors simulated per-iteration: sum both drivers' simulated points (with exact per-sim DOTD subtraction) + qualifying bonus + sampled pit stop points. Constructor output includes P5/P25/P75/P95 percentiles.
 
+**Weather widener (Level 3 Option B, added 2026-05-25):** `MC_WEATHER_TUNABLES` block at the top of the script reads `web/public/data/weather.json` and resolves rain risk + race-session air temp to:
+- Position noise multiplier (1.0× NONE → 1.7× HIGH rain)
+- DNF rate multiplier (1.0× → 2.6×) capped at 0.60 absolute probability
+- Per-driver `wet_skill` perturbation (z-score units; cap ±0.4σ per driver after combining with cold)
+- Per-constructor `cold_skill` perturbation when race air temp < ~22°C (Mercedes/Williams favoured)
+
+Conservative by design — under-promises on wet weekends (CI widens, DNF rises, wet-strong drivers shift up). Sidecar metadata in `monte_carlo_fantasy.json::simulation_params::weather_adjustments_active` is surfaced to the frontend so driver cards show `🌧 Wet` / `🥶 Cool` badges and the weather widget explains what's being adjusted.
+
 ## Multi-Week Transfer Planner (web/public/app.js)
 
 Plans optimal transfer sequences across 2-5 upcoming rounds using beam search optimization. Future-round scores come from `horizon_projections.json` (priors-only ML predictions written by `predict_horizon.py`) when available, falling back to a confidence-weighted track-affinity heuristic (`base_form × affinity × sprint_multiplier`, affinity blended toward 1.0 by confidence so cold-start picks get a dampened signal instead of being silently defaulted). Beam search (width 60) explores 0/1/2-swap candidates per round — including the new constructor+constructor 2-swap (P12) and a PPM-aware candidate pool (P11) that surfaces cheap high-value picks for budget-relief swaps. Budget propagates across rounds via projected appreciation (P1) so the spending ceiling reflects held-asset value. Three strategies (Max Points, Balanced, Budget Gain) re-rank plans internally but plan totals always display raw net points (P14). Optional "Target Team" mode adds a continuous per-round distance penalty (P3) weighted by a user-selectable **Target Intensity** dropdown (Loose=10 / Balanced=30 / Strict=80, P13). A feasibility card (P2) classifies the target as reachable now / possibly reachable / unreachable before the search runs. Wild Card uses a true brute-force optimal-team search (target-aware); Limitless is a one-round dream team that correctly reverts (P5b). All constants live in `MW_TUNABLES` at the top of the planner section (P10). Plan cards show per-round budget evolution and "vs hold" trade-off lines (P4, P7); heatmap cells flag low-confidence projections (P8). Requires `track_data.json` + `driver_history.json` and optionally `horizon_projections.json` (all exported by pipeline).
 
 ## Website Frontend (web/public/app.js)
 
-Single-page vanilla JS app with tab-based navigation. Tabs: Drivers, Constructors, Optimizer, Season, H2H, Accuracy, Deep Dive, Videos, Articles, About.
+Single-page vanilla JS app with tab-based navigation. Tabs: Drivers, Constructors, Optimizer, Analysis, Season, H2H, Accuracy, Deep Dive, Videos, Articles, Changelog, About.
 
 Key features:
-- **Driver/Constructor cards** with predicted points, MC confidence intervals, price change brackets, scoring breakdowns
+- **Driver/Constructor cards** with predicted points, MC confidence intervals, price change brackets, scoring breakdowns, weather badges (wet / cool) when forecast triggers MC adjustments, and a ± What-If Scenarios slider
+- **What-If Scenarios overlay** (`web/public/scenarios.js`) — per-card ± slider lets visitors dial driver/constructor pace bumps in "positions gained" units (−5 to +5, 0.5 step). Re-ranks raw XGBRanker scores in JS using the per-round `score_unit` adjacent-gap median, recomputes position-points + positions-gained deltas (mirrors `pipeline/apply_upgrades.py`). Floating purple pill + manager modal (per-team master sliders, share-via-URL, reset all). Round-scoped LocalStorage; auto-clears on round change.
+- **Changelog tab** — JSON-driven release notes (`web/public/data/changelog.json`). Each entry has date, tags (`feature`/`model`/`fix`/`infra`), and plain-English body. Used to explain step-changes in the Accuracy tab when model upgrades land.
 - **Lineup optimizer** — brute-force over C(22,5)xC(11,2)=1.4M combinations. 4 strategies (Max Points, Max Value, Budget Builder, Balanced). Lock/exclude picks (left-click to lock, right-click to exclude).
 - **6 chips:** Limitless (no budget cap), 3x Boost (best driver 3x + second-best 2x), Wild Card (unlimited transfers), No Negative (negatives become 0), Autopilot (auto 2x on best), Final Fix (post-quali changes)
 - **Transfer Advisor** — given current team + budget + free transfers + max extra transfers (0-2), finds optimal swaps respecting locked/excluded picks. Shows expected price change for each recommendation. Filters out transfers worse than keeping current team.

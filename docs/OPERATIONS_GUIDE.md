@@ -589,7 +589,19 @@ Reads raw Jolpica JSON, writes normalized CSVs to `data/processed/jolpica/normal
 --all
 ```
 
-Builds rolling features (91 columns), saves to `data/processed/jolpica/model_rows/model_rows_{year}.parquet` and aggregates `all_model_rows.parquet`.
+Builds rolling features (~85 columns including `cold_skill` constructor rating added in the Weather Level 3 release), saves to `data/processed/jolpica/model_rows/model_rows_{year}.parquet` and aggregates `all_model_rows.parquet`. Re-run when you change `config/team_driver_ratings.py` (driver wet_skill, constructor cold_skill, strategy ratings).
+
+### `pipeline/03c_extract_session_weather.py` — Per-session weather aggregator (manual)
+
+```
+--year YYYY        (default: all 2020-current)
+--round N          (requires --year; one round)
+--force            (re-extract sessions already on disk)
+```
+
+Walks the FastF1 cache and produces per-session weather aggregates (`was_wet`, `precip_minutes`, `track_temp_avg/min/max`, `air_temp_avg`, `humidity_avg`, `wind_avg`). Output: `data/processed/weather/session_weather_year{Y}.parquet` per year + a combined `all_session_weather.parquet`.
+
+**When to re-run:** after `01_download_data.py` pulls new round data. Incremental by default — only processes sessions not already in the per-year file. `--force` re-extracts everything. Use `--round N` for a single fresh round (fast).
 
 ### `pipeline/04_build_model_inputs.py` — Training-set assembler (orchestrated)
 
@@ -608,6 +620,18 @@ No CLI args. Trains all 5 models (`quali`, `race`, `race_fp`, `sprint`, `fp_sign
 ### `pipeline/05b_experiment_models.py` — Experimental tuning (rarely used)
 
 No CLI args. Tests alternative algorithms and hyperparams. Output is informational only — does not overwrite production models.
+
+### `pipeline/validate_weather_features.py` — Weather model validation gate (manual)
+
+```
+--min-test-year YYYY    (default 2023)
+--features full|minimal (default full)
+--wet-weight N          (default 1.0; recommended 6.0)
+```
+
+Stratified walk-forward backtest comparing the race model with and without weather features. Computes per-round MAE, splits by wet vs dry, reports a bootstrap 95% CI of the improvement, and applies the gate criteria from `docs/WEATHER_LEVEL3_IMPLEMENTATION_PLAN.md` (≥+0.30 wet improvement, ≤0.10 dry regression).
+
+**When to re-run:** when you tweak `WET_TRAINING_WEIGHT_MULTIPLIER` or add/remove weather features in `05_train_models.py`. Read-only — does NOT touch `models/trained/`. The actual retrain happens via `05_train_models.py` after the gate passes (or after a documented exception).
 
 ### `pipeline/06_run_predictions.py` — Prediction generator (orchestrated)
 

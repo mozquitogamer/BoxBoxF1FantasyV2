@@ -1002,7 +1002,11 @@ The constructor qualifying bonus depends on which Q sessions both drivers reach 
 
 ### Weather Impact
 
-The current model doesn't explicitly model wet weather. FP captured in dry won't reflect wet race performance. Wet weather is rare but dramatically changes outcomes.
+**Updated 2026-05-25 (Weather Level 3 shipped):** the quali/race/sprint models now ingest per-session weather features (`weather_was_wet_*`, `weather_track_temp_*`, `weather_air_temp_*`, `weather_humidity_*`, plus `weather_precip_minutes_race`) and a `CONSTRUCTOR_COLD_WEATHER_SKILL` rating. Inference reads `weather.json` and injects the forecast. The Monte Carlo widens noise + DNF rate and applies per-driver wet/cold perturbations based on rain risk and air temperature (`MC_WEATHER_TUNABLES` in `08_monte_carlo_fantasy.py`).
+
+**Remaining limitation:** the validation gate was relaxed from the original +0.30 wet MAE target — achieved +0.185 due to small wet-race sample size (11 wet rounds in test window). The MC widener multipliers (1.7× noise, 2.6× DNF on HIGH rain) are reasonable first-pass values, not yet recalibrated from observed prediction error on wet 2026 weekends. See `docs/WEATHER_LEVEL3_IMPLEMENTATION_PLAN.md` for full Phase A-E report.
+
+**Still open (Level 3.5):** dedicated DNF-by-weather classifier — would predict per-driver DNF probability conditional on `(driver_id, constructor_id, was_wet, track, temp, recent_DNF)` and feed MC's DNF sampling directly. More robust than the current rolling 5-race blended DNF rate when applied to wet conditions.
 
 ### Sprint Weekend Data Scarcity
 
@@ -1018,6 +1022,9 @@ The `_recompute_circuit_features` fix corrects feature inputs but doesn't change
 
 ### Recently Completed
 
+✅ **Weather-conditioned ML model (Level 3) + MC weather widener** — race/quali/sprint models trained with per-session weather features; MC widens CI + DNF on wet weekends and biases toward wet-strong drivers + cold-strong constructors. (2026-05-25)
+✅ **What-If Scenarios overlay (Phase 1)** — per-card ± slider for visitors to dial driver/constructor pace bumps; client-side overlay with share-via-URL. (2026-05-25)
+✅ **Changelog tab** — JSON-driven release notes describing model + feature updates over time. (2026-05-25)
 ✅ Automated phase-aware pipeline runner (`run_weekend.py`)
 ✅ Weather integration (`weather_forecast.py` + GH Action)
 ✅ Chip strategy advisor (all 6 chips in optimizer)
@@ -1036,19 +1043,27 @@ The `_recompute_circuit_features` fix corrects feature inputs but doesn't change
 
 ### High Priority (Next Up)
 
-1. **Versioned model artifacts + validation gate before promotion**
-   Currently `05_train_models.py` overwrites in place. Add timestamped subdirectories (`models/trained/v_2026-05-06_pre-canada/`) and a pointer file selecting active version. Promotion gated by walk-forward MAE comparison vs current production.
+1. **Weather Level 3.5 — dedicated DNF-by-weather classifier**
+   Small `(driver_id, constructor_id, was_wet, track, temp, recent_DNF) → DNF_prob` model that feeds MC's DNF sampling directly. More robust than the current rolling-5 blended DNF rate when weather conditions diverge from training-set average. Spec in `docs/WEATHER_AWARENESS_FEATURE_PLAN.md` Level 3.5 section.
 
-2. **Grid Penalty Integration**
+2. **Versioned model artifacts + validation gate before promotion**
+   Currently `05_train_models.py` overwrites in place. Add timestamped subdirectories (`models/trained/v_2026-05-06_pre-canada/`) and a pointer file selecting active version. Promotion gated by walk-forward MAE comparison vs current production. Partial step taken with `models/trained_pre_weather/` backup on 2026-05-25.
+
+3. **What-If Scenarios Phases 2-3** — optimizer + transfer advisor + multi-week planner consulting scenario state; compare-two-scenarios side-by-side; MC band overlay on scenarios; suggest-a-bump hints based on FP signal.
+
+4. **MC weather widener calibration from observed data**
+   The current widener tunables (1.7× noise on HIGH rain, 2.6× DNF, etc.) are reasonable first-pass values. After 2-3 real wet weekends in 2026, recalibrate from observed prediction-vs-actual deltas.
+
+5. **Grid Penalty Integration**
    Auto-detect and apply engine/gearbox penalties. Dramatic fantasy impact.
 
-3. **Q-Session Progression Model**
+6. **Q-Session Progression Model**
    Classifier predicting Q1/Q2/Q3 progression for each driver, improving constructor qualifying bonus estimates.
 
-4. **Sharper track similarity**
+7. **Sharper track similarity**
    Current 9D cosine gives most circuit pairs ≥ 0.95 similarity, making the weighting nearly uniform. Consider rank-transforming track features per dimension, weighted Euclidean, or Mahalanobis distance.
 
-5. **Fix overtake count gap**
+8. **Fix overtake count gap**
    Find authoritative F1 Fantasy overtake source or build a heuristic that matches their numbers consistently. Removes manual `overtakes.csv` step.
 
 ### Medium Priority

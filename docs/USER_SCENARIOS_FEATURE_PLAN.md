@@ -1,6 +1,23 @@
 # User-Facing "What-If Scenarios" Feature — Implementation Plan
 
-**Status:** Planned, not implemented. Approved 2026-05-22 to build during the next post-race break (after R7 Canada).
+**Status:** **Phase 1 shipped 2026-05-25** (commit `aa15acf`). Phases 2-5 deferred until traction is proven.
+
+**What shipped:**
+- Per-card ± slider opening a mini popup (driver and constructor cards)
+- Floating purple header pill showing active bump count with Manage / Reset
+- Full manager modal with per-team master sliders, share-via-URL, reset all
+- Round-scoped LocalStorage; auto-clears on round change
+- `scenarios.js` overlay re-ranks XGBRanker raw scores and applies position-points/positions-gained deltas (mirrors `pipeline/apply_upgrades.py`)
+- `predictions.json` now ships `raw_scores` per driver + per-round `score_unit` adjacent-gap median so the JS can convert positions → raw bumps
+- Reuses existing `.upgrade-delta` badge UI so the visual layer was free
+
+**What didn't ship (deferred):**
+- Phase 2: optimizer + transfer advisor + multi-week planner consulting scenario state (still use baseline). The infrastructure is in place; integration is a follow-up.
+- Phase 3: compare-two-scenarios side-by-side, MC band overlay, suggest-a-bump hints
+- Phase 4: Premium tier with backend (would need auth + payments — defer until usage proven)
+- Phase 5: Smarter math (heuristic FL adjustments, track-record-conditional bumps, accuracy calibration)
+
+**Approval history:** Approved 2026-05-22 to build during the next post-race break (after R7 Canada).
 
 **TL;DR:** Visitors to the public site can tweak per-driver and per-team pace bumps in their own browser to see how predicted points and lineups change. The base ML prediction stays untouched as the canonical view; the user's scenario is a transparent overlay alongside it. All client-side, no backend required. Persists per-user via LocalStorage; shareable via URL.
 
