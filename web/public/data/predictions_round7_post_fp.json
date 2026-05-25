@@ -5,7 +5,7 @@
   "circuit": "Montreal",
   "date": "2026-05-24",
   "is_sprint_weekend": true,
-  "generated_at": "2026-05-25T07:21:47.205518+00:00",
+  "generated_at": "2026-05-25T09:28:16.067988+00:00",
   "drivers": [
     {
       "driver_id": "NOR",
@@ -30,6 +30,12 @@
       "current_price": 26.5,
       "expected_points_sprint_quali": 8.0,
       "expected_points_sprint_race": 12.5,
+      "raw_scores": {
+        "quali": 1.701561,
+        "race": 1.725287,
+        "sprint": 2.168792
+      },
+      "predicted_sprint": 1,
       "mc_total_mean": 41.1,
       "mc_total_std": 14.4,
       "mc_total_p5": 19.0,
@@ -65,6 +71,12 @@
       "current_price": 24.7,
       "expected_points_sprint_quali": 9.0,
       "expected_points_sprint_race": 4.2,
+      "raw_scores": {
+        "quali": 2.59392,
+        "race": 2.534317,
+        "sprint": 1.612427
+      },
+      "predicted_sprint": 4,
       "mc_total_mean": 49.0,
       "mc_total_std": 14.1,
       "mc_total_p5": 26.0,
@@ -100,6 +112,12 @@
       "current_price": 28.5,
       "expected_points_sprint_quali": 10.0,
       "expected_points_sprint_race": 5.7,
+      "raw_scores": {
+        "quali": 2.494774,
+        "race": 1.829193,
+        "sprint": 1.923398
+      },
+      "predicted_sprint": 3,
       "mc_total_mean": 39.5,
       "mc_total_std": 13.3,
       "mc_total_p5": 20.0,
@@ -135,6 +153,12 @@
       "current_price": 25.0,
       "expected_points_sprint_quali": 7.0,
       "expected_points_sprint_race": 12.5,
+      "raw_scores": {
+        "quali": 1.420668,
+        "race": 1.36482,
+        "sprint": 2.088142
+      },
+      "predicted_sprint": 2,
       "mc_total_mean": 37.5,
       "mc_total_std": 12.9,
       "mc_total_p5": 15.0,
@@ -170,6 +194,12 @@
       "current_price": 23.6,
       "expected_points_sprint_quali": 6.0,
       "expected_points_sprint_race": 6.2,
+      "raw_scores": {
+        "quali": 2.027637,
+        "race": 1.563458,
+        "sprint": 1.252529
+      },
+      "predicted_sprint": 5,
       "mc_total_mean": 32.4,
       "mc_total_std": 13.0,
       "mc_total_p5": 13.0,
@@ -205,6 +235,12 @@
       "current_price": 24.1,
       "expected_points_sprint_quali": 5.0,
       "expected_points_sprint_race": 5.2,
+      "raw_scores": {
+        "quali": 1.82076,
+        "race": 1.326111,
+        "sprint": 1.236732
+      },
+      "predicted_sprint": 6,
       "mc_total_mean": 30.3,
       "mc_total_std": 12.2,
       "mc_total_p5": 13.0,
@@ -240,6 +276,12 @@
       "current_price": 12.1,
       "expected_points_sprint_quali": 3.0,
       "expected_points_sprint_race": 1.0,
+      "raw_scores": {
+        "quali": -0.367228,
+        "race": 0.099192,
+        "sprint": 0.31829
+      },
+      "predicted_sprint": 8,
       "mc_total_mean": 19.4,
       "mc_total_std": 21.5,
       "mc_total_p5": -13.0,
@@ -275,6 +317,12 @@
       "current_price": 28.4,
       "expected_points_sprint_quali": 4.0,
       "expected_points_sprint_race": 1.8,
+      "raw_scores": {
+        "quali": 2.256201,
+        "race": 1.70269,
+        "sprint": 0.785648
+      },
+      "predicted_sprint": 7,
       "mc_total_mean": 24.4,
       "mc_total_std": 22.5,
       "mc_total_p5": -11.0,
@@ -310,6 +358,12 @@
       "current_price": 8.8,
       "expected_points_sprint_quali": 0.0,
       "expected_points_sprint_race": 4.7,
+      "raw_scores": {
+        "quali": 0.259798,
+        "race": -0.047603,
+        "sprint": -0.160582
+      },
+      "predicted_sprint": 12,
       "mc_total_mean": 15.9,
       "mc_total_std": 13.8,
       "mc_total_p5": -6.0,
@@ -345,6 +399,12 @@
       "current_price": 9.0,
       "expected_points_sprint_quali": 0.0,
       "expected_points_sprint_race": 1.8,
+      "raw_scores": {
+        "quali": -0.33914,
+        "race": -0.334458,
+        "sprint": -0.830024
+      },
+      "predicted_sprint": 20,
       "mc_total_mean": 12.6,
       "mc_total_std": 12.6,
       "mc_total_p5": -8.0,
@@ -380,6 +440,12 @@
       "current_price": 12.2,
       "expected_points_sprint_quali": 0.0,
       "expected_points_sprint_race": 10.0,
+      "raw_scores": {
+        "quali": -0.416366,
+        "race": -0.626234,
+        "sprint": -0.285152
+      },
+      "predicted_sprint": 13,
       "mc_total_mean": 8.1,
       "mc_total_std": 16.2,
       "mc_total_p5": -19.0,
@@ -415,6 +481,12 @@
       "current_price": 12.8,
       "expected_points_sprint_quali": 1.0,
       "expected_points_sprint_race": 3.9,
+      "raw_scores": {
+        "quali": 0.151849,
+        "race": -0.279736,
+        "sprint": 0.093413
+      },
+      "predicted_sprint": 9,
       "mc_total_mean": 15.2,
       "mc_total_std": 11.0,
       "mc_total_p5": -2.0,
@@ -450,6 +522,12 @@
       "current_price": 9.9,
       "expected_points_sprint_quali": 0.0,
       "expected_points_sprint_race": 8.7,
+      "raw_scores": {
+        "quali": 0.33149,
+        "race": -0.517554,
+        "sprint": -0.094904
+      },
+      "predicted_sprint": 11,
       "mc_total_mean": 12.0,
       "mc_total_std": 10.6,
       "mc_total_p5": -6.0,
@@ -485,6 +563,12 @@
       "current_price": 7.0,
       "expected_points_sprint_quali": 0.0,
       "expected_points_sprint_race": 2.0,
+      "raw_scores": {
+        "quali": -1.495143,
+        "race": -1.886767,
+        "sprint": -0.640214
+      },
+      "predicted_sprint": 18,
       "mc_total_mean": 12.5,
       "mc_total_std": 11.7,
       "mc_total_p5": -13.0,
@@ -520,6 +604,12 @@
       "current_price": 7.9,
       "expected_points_sprint_quali": 0.0,
       "expected_points_sprint_race": 1.2,
+      "raw_scores": {
+        "quali": -1.022211,
+        "race": -0.611853,
+        "sprint": -0.341889
+      },
+      "predicted_sprint": 15,
       "mc_total_mean": 15.1,
       "mc_total_std": 18.8,
       "mc_total_p5": -16.0,
@@ -555,6 +645,12 @@
       "current_price": 6.4,
       "expected_points_sprint_quali": 2.0,
       "expected_points_sprint_race": 1.9,
+      "raw_scores": {
+        "quali": 0.442697,
+        "race": -0.538189,
+        "sprint": 0.052461
+      },
+      "predicted_sprint": 10,
       "mc_total_mean": 11.1,
       "mc_total_std": 10.2,
       "mc_total_p5": -6.0,
@@ -590,6 +686,12 @@
       "current_price": 8.8,
       "expected_points_sprint_quali": 0.0,
       "expected_points_sprint_race": 1.7,
+      "raw_scores": {
+        "quali": -0.629915,
+        "race": -0.78545,
+        "sprint": -0.329507
+      },
+      "predicted_sprint": 14,
       "mc_total_mean": 8.5,
       "mc_total_std": 17.3,
       "mc_total_p5": -20.0,
@@ -625,6 +727,12 @@
       "current_price": 5.4,
       "expected_points_sprint_quali": 0.0,
       "expected_points_sprint_race": -2.1,
+      "raw_scores": {
+        "quali": 0.146106,
+        "race": -0.533452,
+        "sprint": -0.53397
+      },
+      "predicted_sprint": 17,
       "mc_total_mean": 6.9,
       "mc_total_std": 10.6,
       "mc_total_p5": -10.0,
@@ -660,6 +768,12 @@
       "current_price": 4.5,
       "expected_points_sprint_quali": 0.0,
       "expected_points_sprint_race": -0.6,
+      "raw_scores": {
+        "quali": -1.374655,
+        "race": -2.33381,
+        "sprint": -0.944431
+      },
+      "predicted_sprint": 22,
       "mc_total_mean": 0.4,
       "mc_total_std": 12.8,
       "mc_total_p5": -21.0,
@@ -695,6 +809,12 @@
       "current_price": 5.4,
       "expected_points_sprint_quali": 0.0,
       "expected_points_sprint_race": -1.4,
+      "raw_scores": {
+        "quali": -1.356747,
+        "race": -2.197522,
+        "sprint": -0.840559
+      },
+      "predicted_sprint": 21,
       "mc_total_mean": 3.6,
       "mc_total_std": 13.7,
       "mc_total_p5": -19.0,
@@ -730,6 +850,12 @@
       "current_price": 7.4,
       "expected_points_sprint_quali": 0.0,
       "expected_points_sprint_race": 1.0,
+      "raw_scores": {
+        "quali": -0.066883,
+        "race": -0.993232,
+        "sprint": -0.42261
+      },
+      "predicted_sprint": 16,
       "mc_total_mean": 1.0,
       "mc_total_std": 14.3,
       "mc_total_p5": -22.0,
@@ -765,6 +891,12 @@
       "current_price": 3.8,
       "expected_points_sprint_quali": 0.0,
       "expected_points_sprint_race": -6.1,
+      "raw_scores": {
+        "quali": 0.547977,
+        "race": -0.190151,
+        "sprint": -0.814112
+      },
+      "predicted_sprint": 19,
       "mc_total_mean": -1.2,
       "mc_total_std": 14.1,
       "mc_total_p5": -25.0,
@@ -1088,6 +1220,11 @@
       "mc_dnf_prob": 0.266
     }
   ],
+  "score_unit": {
+    "quali_gap_median": 0.120488,
+    "race_gap_median": 0.139231,
+    "sprint_gap_median": 0.106245
+  },
   "phase": "post_fp",
-  "exported_at": "2026-05-25T07:21:47.205613+00:00"
+  "exported_at": "2026-05-25T09:28:16.068111+00:00"
 }

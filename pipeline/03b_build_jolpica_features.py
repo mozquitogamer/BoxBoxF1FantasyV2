@@ -42,6 +42,7 @@ from config.team_driver_ratings import (
     get_driver_wet_skill,
     get_driver_overtaking,
     get_driver_quali_skill,
+    get_constructor_cold_skill,
 )
 
 # All seasons to load for cross-season rolling features
@@ -578,6 +579,9 @@ def add_team_driver_ratings(df: pd.DataFrame) -> pd.DataFrame:
     # Team ratings via canonical constructor_id
     d["strategy_rating"] = d["constructor_id"].map(get_team_strategy_rating)
     d["adaptability"] = d["constructor_id"].map(get_team_adaptability)
+    # Per-constructor cold-weather rating (used in interaction with weather
+    # features at training time, and as an MC perturbation when forecast is cold).
+    d["cold_skill"] = d["constructor_id"].map(get_constructor_cold_skill)
 
     # Driver ratings via jolpica driver_id
     d["tire_mgmt"] = d["driver_id"].map(get_driver_tire_mgmt)

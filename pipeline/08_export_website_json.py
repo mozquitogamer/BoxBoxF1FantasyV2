@@ -224,6 +224,33 @@ def build_predictions_json(round_num: int) -> dict | None:
     driver_df = pd.read_parquet(driver_path)
     constructor_df = pd.read_parquet(constructor_path) if constructor_path.exists() else pd.DataFrame()
 
+    # Load raw XGBRanker scores from predictions.parquet so the website can do
+    # client-side what-if re-ranking (see web/public/scenarios.js). Without these
+    # the user-scenarios overlay can't simulate per-driver pace bumps.
+    raw_by_driver: dict[str, dict[str, float]] = {}
+    sprint_pos_by_driver: dict[str, int] = {}
+    pred_parquet_path = PREDICTIONS_DIR / f"round{round_num}" / "predictions.parquet"
+    if pred_parquet_path.exists():
+        try:
+            pred_df = pd.read_parquet(pred_parquet_path)
+            for _, prow in pred_df.iterrows():
+                abbrev = prow.get("driver_abbrev", prow.get("driver_id"))
+                if not abbrev:
+                    continue
+                entry = {}
+                for col, key in [
+                    ("predicted_quali_raw", "quali"),
+                    ("predicted_race_raw", "race"),
+                    ("predicted_sprint_raw", "sprint"),
+                ]:
+                    if col in prow and pd.notna(prow[col]):
+                        entry[key] = float(prow[col])
+                raw_by_driver[abbrev] = entry
+                if "predicted_sprint_position" in prow and pd.notna(prow.get("predicted_sprint_position")):
+                    sprint_pos_by_driver[abbrev] = int(prow["predicted_sprint_position"])
+        except Exception as e:
+            print(f"  Warning: Could not load raw scores: {e}")
+
     # Build price lookup from latest fantasy_prices.json
     driver_prices = {}
     if prices and "drivers" in prices:
@@ -275,14 +302,26 @@ def build_predictions_json(round_num: int) -> dict | None:
                 float(row.get("expected_sprint_race_pts", 0)), 1
             )
 
+        # Raw XGBRanker scores per session — consumed by the client-side
+        # user-scenarios overlay to re-rank when the user dials a pace bump.
+        raw = raw_by_driver.get(abbrev) or {}
+        if raw:
+            entry["raw_scores"] = {k: round(v, 6) for k, v in raw.items()}
+        if abbrev in sprint_pos_by_driver:
+            entry["predicted_sprint"] = sprint_pos_by_driver[abbrev]
+
         drivers_json.append(entry)
 
     # Merge Monte Carlo data if available
     mc_path = PREDICTIONS_DIR / f"round{round_num}" / "monte_carlo_fantasy.json"
+    weather_adjustments_active = None
     if mc_path.exists():
         try:
             with open(mc_path) as f:
                 mc_data = json.load(f)
+            # Capture weather adjustments metadata for the frontend badges
+            sim_params = mc_data.get("simulation_params", {})
+            weather_adjustments_active = sim_params.get("weather_adjustments_active")
             mc_by_driver = {d["driver_abbrev"]: d for d in mc_data.get("drivers", [])}
             for entry in drivers_json:
                 mc = mc_by_driver.get(entry["driver_id"])
@@ -420,6 +459,26 @@ def build_predictions_json(round_num: int) -> dict | None:
         except Exception as e:
             print(f"  Warning: Could not load team upgrade adjustments: {e}")
 
+    # Per-session adjacent-gap median in raw-score space. The user-scenarios
+    # overlay uses these to convert "positions gained" (UI surface unit) into
+    # raw-score bumps: bump_per_position ≈ gap_median. A wider gap means it
+    # takes more pace to gain a position on that session.
+    score_unit = {}
+    for key in ("quali", "race", "sprint"):
+        values = sorted(
+            (r.get(key) for r in raw_by_driver.values() if key in r),
+            reverse=True,
+        )
+        if len(values) < 2:
+            continue
+        gaps = [abs(values[i] - values[i + 1]) for i in range(len(values) - 1)]
+        gaps.sort()
+        mid = len(gaps) // 2
+        median = gaps[mid] if len(gaps) % 2 else 0.5 * (gaps[mid - 1] + gaps[mid])
+        # Guard against degenerate (all-zero) raw scores.
+        if median > 1e-9:
+            score_unit[f"{key}_gap_median"] = round(median, 6)
+
     payload = {
         "race": race_name,
         "round": round_num,
@@ -431,8 +490,15 @@ def build_predictions_json(round_num: int) -> dict | None:
         "drivers": drivers_json,
         "constructors": constructors_json,
     }
+    if score_unit:
+        payload["score_unit"] = score_unit
     if upgrade_meta:
         payload["upgrade_adjustments"] = upgrade_meta
+    if weather_adjustments_active is not None:
+        # Surfaced to the frontend so driver/constructor cards can show
+        # wet/cold badges and the weather widget can render an explainer
+        # of what's being adjusted in the Monte Carlo.
+        payload["weather_adjustments"] = weather_adjustments_active
     return payload
 
 

@@ -1,61 +1,77 @@
 {
-  "noise_multiplier": 1.4183,
-  "bias_correction": -6.28,
-  "n_rounds": 3,
-  "n_samples": 66,
-  "coverage_90": 0.833,
-  "coverage_50": 0.47,
-  "overall_rmse": 14.36,
-  "overall_bias": -6.28,
+  "noise_multiplier": 1.3448,
+  "bias_correction": -4.09,
+  "n_rounds": 5,
+  "n_samples": 110,
+  "coverage_90": 0.855,
+  "coverage_50": 0.491,
+  "overall_rmse": 16.96,
+  "overall_bias": -4.09,
   "per_tier": {
     "front": {
-      "coverage_90": 1.0,
-      "bias": -4.35,
-      "n": 15
+      "coverage_90": 0.84,
+      "bias": -6.56,
+      "n": 25
     },
     "midfield": {
-      "coverage_90": 0.8095,
-      "bias": -5.76,
-      "n": 21
+      "coverage_90": 0.8286,
+      "bias": -5.95,
+      "n": 35
     },
     "back": {
-      "coverage_90": 0.7667,
-      "bias": -7.61,
-      "n": 30
+      "coverage_90": 0.88,
+      "bias": -1.55,
+      "n": 50
     }
   },
   "per_round": [
     {
       "round": 1,
-      "coverage_90": 0.7273,
-      "coverage_50": 0.3636,
+      "coverage_90": 0.9545,
+      "coverage_50": 0.5909,
+      "noise_multiplier": 0.9798,
+      "bias": -2.32,
+      "n": 22
+    },
+    {
+      "round": 2,
+      "coverage_90": 0.7727,
+      "coverage_50": 0.3182,
       "noise_multiplier": 1.5,
-      "bias": -7.82,
+      "bias": -5.01,
       "n": 22
     },
     {
       "round": 3,
       "coverage_90": 1.0,
-      "coverage_50": 0.5455,
+      "coverage_50": 0.7273,
       "noise_multiplier": 0.8,
-      "bias": -3.23,
+      "bias": -1.51,
       "n": 22
     },
     {
       "round": 6,
       "coverage_90": 0.7727,
-      "coverage_50": 0.5,
+      "coverage_50": 0.3636,
       "noise_multiplier": 1.5,
-      "bias": -7.79,
+      "bias": -6.52,
+      "n": 22
+    },
+    {
+      "round": 7,
+      "coverage_90": 0.7727,
+      "coverage_50": 0.4545,
+      "noise_multiplier": 1.5,
+      "bias": -5.08,
       "n": 22
     }
   ],
   "pit_histogram": [
-    20,
-    24,
+    31,
     13,
-    5,
-    4
+    32,
+    17,
+    17
   ],
-  "pit_chi2": 23.85
+  "pit_chi2": 14.18
 }

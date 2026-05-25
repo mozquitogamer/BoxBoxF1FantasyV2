@@ -69,6 +69,10 @@ from config.fantasy_scoring import (
     PITSTOP_WORLD_RECORD_BONUS,
     PITSTOP_WORLD_RECORD_TIME,
 )
+from config.team_driver_ratings import (
+    get_driver_wet_skill,
+    get_constructor_cold_skill,
+)
 
 
 # ==============================================================================
@@ -150,6 +154,171 @@ TEAMMATE_CORRELATION_ALPHA = 0.35
 # --- Correlated DNF modeling (Fix 1.5) ---
 TEAM_DNF_CORRELATION = 0.3  # Probability that if one driver DNFs, teammate also has elevated risk
 INCIDENT_DNF_BOOST = 0.02   # Small base probability of multi-car incident per sim
+
+
+# ==============================================================================
+# Weather widening (Level 3 Option B)
+# ==============================================================================
+# Conditionally widen position noise + DNF rate and apply per-driver wet/cold
+# perturbations based on weather.json forecast for the race session.
+#
+# Design notes (see docs/WEATHER_LEVEL3_IMPLEMENTATION_PLAN.md):
+#   - Mean expected_points is the MC mean — widening noise alone doesn't shift
+#     the headline number. But wet_skill / cold_skill perturbations DO shift
+#     individual driver means (a wet-strong driver should genuinely score more
+#     on a rain race). The "conservative bias" comes from:
+#       (a) wider downside band (P5 drops) on every driver — visible on cards
+#       (b) higher DNF rate (genuinely true historically: 15.3% wet vs 12.2% dry)
+#   - Perturbations are applied in z-score space (raw scores normalized by
+#     run_simulations) so the magnitudes here are in std-units, not raw points.
+#   - Total per-driver perturbation magnitude capped at ±0.4 std-units to
+#     prevent runaway when wet + cold both hit (rare but real, e.g. Imola 2022).
+
+MC_WEATHER_TUNABLES = {
+    # Per rain risk bucket: (position_noise_mult, dnf_rate_mult, wet_skill_perturb_weight)
+    # The wet_skill weight is the z-score-space coefficient applied to
+    # (wet_skill - 5), so a wet_skill=10 driver in HIGH rain gets +0.30 boost.
+    "rain": {
+        "NONE":   {"noise_mult": 1.00, "dnf_mult": 1.00, "wet_weight": 0.00},
+        "LOW":    {"noise_mult": 1.15, "dnf_mult": 1.30, "wet_weight": 0.02},
+        "MEDIUM": {"noise_mult": 1.40, "dnf_mult": 1.90, "wet_weight": 0.04},
+        "HIGH":   {"noise_mult": 1.70, "dnf_mult": 2.60, "wet_weight": 0.06},
+    },
+    # Per air-temp bucket (Celsius): cold_skill weight only. Cold doesn't widen
+    # noise (cold races aren't more chaotic on average, just different in pace).
+    "cold_weight_by_air_temp": [
+        (-99.0, 12.0, 0.05),   # very cold (<12C)
+        (12.0,  18.0, 0.03),   # cold (12-18C)
+        (18.0,  22.0, 0.01),   # cool (18-22C)
+        (22.0,  99.0, 0.00),   # neutral / warm
+    ],
+    # Cap on absolute per-driver perturbation magnitude (z-score units).
+    "max_perturb_zscore": 0.40,
+    # Cap on DNF probability after multiplier (avoid absurd 100% DNF predictions
+    # even in worst-case scenarios).
+    "max_dnf_prob": 0.60,
+}
+
+
+def load_weather_for_mc(round_num: int) -> dict:
+    """Read web/public/data/weather.json and resolve MC weather adjustments.
+
+    Returns a dict with:
+        rain_risk:           NONE|LOW|MEDIUM|HIGH (or NONE if forecast missing)
+        race_air_temp:       float or None
+        noise_mult:          position noise multiplier (>=1)
+        dnf_mult:            DNF probability multiplier (>=1)
+        wet_weight:          per-driver wet_skill perturbation coefficient
+        cold_weight:         per-driver cold_skill perturbation coefficient
+        is_active:           True if any adjustment is non-neutral
+        source:              weather.json last_updated timestamp (or "missing")
+    """
+    weather_path = WEB_DATA_DIR / "weather.json"
+    result = {
+        "rain_risk": "NONE",
+        "race_air_temp": None,
+        "noise_mult": 1.0,
+        "dnf_mult": 1.0,
+        "wet_weight": 0.0,
+        "cold_weight": 0.0,
+        "is_active": False,
+        "source": "missing",
+        "overall_rain_risk": None,
+    }
+    if not weather_path.exists():
+        return result
+    try:
+        with open(weather_path) as f:
+            wjson = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return result
+
+    # Sanity check: weather file is for this round
+    wr = wjson.get("round")
+    if wr is not None and wr != round_num:
+        # Stale weather (different round) — don't apply
+        return result
+
+    result["source"] = wjson.get("last_updated") or "unknown"
+    result["overall_rain_risk"] = wjson.get("overall_rain_risk")
+
+    # Find the Race session specifically
+    race_session = None
+    for sess in wjson.get("sessions", []) or []:
+        name = (sess.get("name") or "").lower()
+        if "race" in name and "sprint" not in name:
+            race_session = sess
+            break
+
+    if race_session is None:
+        return result
+
+    # Race-session rain risk takes precedence over overall_rain_risk (sometimes
+    # only practice was wet but race forecast is dry).
+    race_risk = (race_session.get("rain_risk") or "NONE").upper()
+    if race_risk not in ("NONE", "LOW", "MEDIUM", "HIGH"):
+        race_risk = "NONE"
+    result["rain_risk"] = race_risk
+
+    rain_cfg = MC_WEATHER_TUNABLES["rain"][race_risk]
+    result["noise_mult"] = rain_cfg["noise_mult"]
+    result["dnf_mult"] = rain_cfg["dnf_mult"]
+    result["wet_weight"] = rain_cfg["wet_weight"]
+
+    # Cold weight from air temp bucket
+    air_t = race_session.get("avg_temp")
+    if air_t is not None:
+        result["race_air_temp"] = float(air_t)
+        for lo, hi, w in MC_WEATHER_TUNABLES["cold_weight_by_air_temp"]:
+            if lo <= air_t < hi:
+                result["cold_weight"] = w
+                break
+
+    result["is_active"] = (
+        result["noise_mult"] != 1.0
+        or result["dnf_mult"] != 1.0
+        or result["wet_weight"] != 0.0
+        or result["cold_weight"] != 0.0
+    )
+    return result
+
+
+def compute_weather_perturbations(
+    abbrevs: np.ndarray,
+    constructors: np.ndarray,
+    abbrev_to_driver_id: dict[str, str],
+    weather: dict,
+) -> np.ndarray:
+    """Per-driver score perturbation (z-score units) from wet + cold skills.
+
+    Capped at ±MC_WEATHER_TUNABLES['max_perturb_zscore'] per driver. Returns a
+    1-D array shape (n_drivers,) added to normalized race/sprint raw scores
+    before noise sampling.
+    """
+    n = len(abbrevs)
+    if not weather["is_active"]:
+        return np.zeros(n)
+
+    cap = MC_WEATHER_TUNABLES["max_perturb_zscore"]
+    wet_w = weather["wet_weight"]
+    cold_w = weather["cold_weight"]
+
+    perturbs = np.zeros(n)
+    for i, ab in enumerate(abbrevs):
+        # Wet perturbation (per-driver)
+        driver_id = abbrev_to_driver_id.get(ab, ab)
+        wet_skill = get_driver_wet_skill(driver_id)
+        # Cold perturbation (per-constructor)
+        cold_skill = get_constructor_cold_skill(constructors[i])
+
+        p = wet_w * (wet_skill - 5.0) + cold_w * (cold_skill - 5.0)
+        # Cap magnitude
+        if p > cap:
+            p = cap
+        elif p < -cap:
+            p = -cap
+        perturbs[i] = p
+    return perturbs
 
 
 # ==============================================================================
@@ -662,6 +831,7 @@ def run_simulations(
     seed: int = DEFAULT_SEED,
     is_sprint: bool = False,
     calibration: dict | None = None,
+    weather: dict | None = None,
 ) -> dict:
     """Run Monte Carlo simulations and return aggregated results.
 
@@ -715,6 +885,9 @@ def run_simulations(
 
     quali_raw = normalize_scores(quali_raw)
     race_raw = normalize_scores(race_raw)
+    # NOTE: weather perturbations applied AFTER normalization (below) — they
+    # are in z-score units, so adding them post-normalize keeps the magnitudes
+    # interpretable. See compute_weather_perturbations.
 
     # Sprint raw scores: use dedicated sprint model scores when available
     sprint_raw = None
@@ -741,12 +914,56 @@ def run_simulations(
         print(f"  Calibration applied: noise x{noise_mult:.3f} "
               f"(from {cal_rounds} rounds of data)")
 
+    # Apply weather widening on top of calibration. Wet weekends widen position
+    # noise + DNF rate; cold weekends only apply per-driver perturbations.
+    wx = weather or {"is_active": False, "noise_mult": 1.0, "dnf_mult": 1.0,
+                     "wet_weight": 0.0, "cold_weight": 0.0, "rain_risk": "NONE",
+                     "race_air_temp": None}
+    if wx["is_active"]:
+        # Widen race noise (quali typically less affected by race-day rain, so
+        # we apply a milder widening to quali — half the race widening above 1.0).
+        quali_widen = 1.0 + (wx["noise_mult"] - 1.0) * 0.5
+        cal_quali_noise *= quali_widen
+        cal_race_noise *= wx["noise_mult"]
+        # Compute per-driver perturbations once
+        abbrev_to_id_for_weather = {}
+        if "driver_id" in pred_df.columns:
+            for _, prow in pred_df.iterrows():
+                ab = prow.get("driver_abbrev", "")
+                if ab:
+                    abbrev_to_id_for_weather[ab] = prow["driver_id"]
+        weather_perturbations = compute_weather_perturbations(
+            abbrevs, constructors, abbrev_to_id_for_weather, wx,
+        )
+        # Apply DNF multiplier (capped to prevent absurd 100% DNF)
+        dnf_cap = MC_WEATHER_TUNABLES["max_dnf_prob"]
+        print(f"  Weather widening active: rain={wx['rain_risk']}, "
+              f"air_temp={wx['race_air_temp']}C, "
+              f"noise x{wx['noise_mult']:.2f}, DNF x{wx['dnf_mult']:.2f}, "
+              f"wet_weight={wx['wet_weight']}, cold_weight={wx['cold_weight']}")
+    else:
+        weather_perturbations = np.zeros(n_drivers)
+        dnf_cap = 0.95  # original cap when no weather
+
     # DNF probabilities from fantasy_df (matched by driver_abbrev)
     dnf_probs = np.zeros(n_drivers)
     fp_lookup = fantasy_df.set_index("driver_abbrev")
     for i, abbrev in enumerate(abbrevs):
         if abbrev in fp_lookup.index:
             dnf_probs[i] = fp_lookup.loc[abbrev, "dnf_probability"]
+
+    # Apply weather perturbations and DNF widening
+    if wx["is_active"]:
+        race_raw = race_raw + weather_perturbations
+        # Quali weather perturbations apply too but lighter (rain affects
+        # qualifying less than the race for skilled drivers)
+        quali_raw = quali_raw + (weather_perturbations * 0.5)
+        if sprint_raw is not None:
+            sprint_raw = sprint_raw + weather_perturbations
+        dnf_probs = np.minimum(dnf_probs * wx["dnf_mult"], dnf_cap)
+    else:
+        # Honour existing cap behaviour
+        dnf_probs = np.minimum(dnf_probs, dnf_cap)
 
     # Load driver-specific overtake history from seed data
     overtake_hist = load_overtake_history()
@@ -957,6 +1174,16 @@ def run_simulations(
             "calibration_source": "OpenF1 R1+R2 actual data (2026)",
             "calibration_rounds": cal.get("n_rounds", 0),
             "is_sprint_weekend": is_sprint,
+            "weather_adjustments_active": {
+                "is_active": bool(wx["is_active"]),
+                "rain_risk": wx.get("rain_risk", "NONE"),
+                "race_air_temp_C": wx.get("race_air_temp"),
+                "noise_mult": wx.get("noise_mult", 1.0),
+                "dnf_mult": wx.get("dnf_mult", 1.0),
+                "wet_weight": wx.get("wet_weight", 0.0),
+                "cold_weight": wx.get("cold_weight", 0.0),
+                "source": wx.get("source", "missing"),
+            },
         },
         # Return raw arrays for constructor per-iteration simulation
         "_sim_arrays": {
@@ -1381,6 +1608,14 @@ def main() -> None:
         print(f"  Calibration loaded: noise_mult={calibration['noise_multiplier']:.3f}"
               f" ({calibration.get('n_rounds', '?')} rounds{cov_str}, src={src})")
 
+    # Load weather forecast for the race session and resolve MC adjustments
+    # (Level 3 Option B: widen CI + DNF on wet, bias toward wet-strong drivers
+    # and cold-weather teams). See MC_WEATHER_TUNABLES.
+    weather = load_weather_for_mc(args.round)
+    if weather["is_active"]:
+        print(f"  Weather adjustments: rain={weather['rain_risk']}, "
+              f"air_temp={weather['race_air_temp']}C")
+
     # Run simulations
     results = run_simulations(
         pred_df=pred_df,
@@ -1389,6 +1624,7 @@ def main() -> None:
         seed=args.seed,
         is_sprint=is_sprint,
         calibration=calibration,
+        weather=weather,
     )
 
     # Load pitstop priors for constructor simulation

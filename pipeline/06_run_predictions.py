@@ -42,12 +42,185 @@ from config.settings import (
     JOLPICA_MODEL_ROWS_DIR,
     SPRINT_ROUNDS_2026,
     CANCELLED_ROUNDS_2026,
+    WEB_DATA_DIR,
     fastf1_round,
     is_race_completed,
 )
 from pipeline.feature_engineering import engineer_features
 from config.track_classifications import get_circuit_id_from_race_name
 from config.track_similarity import get_similarity
+
+
+# ============================================================
+# Weather inference (Level 3 Phase D)
+# ============================================================
+# Reads web/public/data/weather.json (produced by pipeline/weather_forecast.py)
+# and injects per-session weather features into the prediction row so the
+# model can condition on the forecast at inference time.
+#
+# The features mirror what pipeline/04_build_model_inputs.py joins onto
+# training rows from data/processed/weather/all_session_weather.parquet:
+#   weather_was_wet_{quali,race,sprint}     0.0 / 1.0
+#   weather_track_temp_{quali,race,sprint}  deg C
+#   weather_air_temp_{quali,race,sprint}    deg C
+#   weather_humidity_{quali,race,sprint}    %
+#   weather_precip_minutes_race             approximate from forecast precip
+#
+# Tunables here are conservative: we under-predict wet risk because the
+# product cost of "predicted wet, was dry" (user picks rain-strong drivers,
+# gets average finish) > "predicted dry, was wet" (no worse than current
+# state of the world). See docs/WEATHER_LEVEL3_IMPLEMENTATION_PLAN.md §5.
+
+WEATHER_INFERENCE_TUNABLES = {
+    # When session rain_probability >= this OR total_precip_mm >= 1.0,
+    # set was_wet_X = 1.0. 60 is conservative — favours False.
+    "wet_probability_threshold_pct": 60,
+    "wet_precip_threshold_mm": 1.0,
+    # Track temperature is hotter than air. Constant offset works as a
+    # starting heuristic; can be refined later from historical (track-air)
+    # deltas per circuit.
+    "track_vs_air_offset_C": 10.0,
+    # Approximate `precip_minutes` for a session from total_precip_mm.
+    # Drizzle (1mm) ~= 5min of FastF1 Rainfall=True at training; steady rain
+    # (10mm) ~= ~50min. Linear scale; ~5 min per mm.
+    "precip_min_per_mm": 5.0,
+}
+
+
+def _classify_session_to_label(session_name: str) -> str | None:
+    """Map weather.json session name to our internal session label.
+
+    Returns one of 'quali', 'race', 'sprint', or None (skip).
+    """
+    n = (session_name or "").lower()
+    if "race" in n and "sprint" not in n:
+        return "race"
+    if "sprint" in n and "qualif" not in n and "shoot" not in n:
+        # "Sprint" or "Sprint Race"
+        return "sprint"
+    if "qualif" in n and "sprint" not in n:
+        return "quali"
+    return None
+
+
+def _aggregate_forecast_session(sess: dict) -> dict:
+    """Convert one weather.json session block into our feature dict."""
+    tunables = WEATHER_INFERENCE_TUNABLES
+    rain_p = sess.get("rain_probability")
+    precip_mm = sess.get("total_precip_mm") or 0.0
+    air_temp = sess.get("avg_temp")
+
+    # Was wet? Conservative thresholding.
+    was_wet = False
+    if rain_p is not None and rain_p >= tunables["wet_probability_threshold_pct"]:
+        was_wet = True
+    if precip_mm >= tunables["wet_precip_threshold_mm"]:
+        was_wet = True
+
+    # Humidity from hourly average, if available.
+    hourly = sess.get("hourly") or []
+    humidities = [h.get("humidity") for h in hourly if h.get("humidity") is not None]
+    humidity_avg = (sum(humidities) / len(humidities)) if humidities else None
+
+    return {
+        "was_wet": 1.0 if was_wet else 0.0,
+        "air_temp": float(air_temp) if air_temp is not None else None,
+        "track_temp": (
+            float(air_temp) + tunables["track_vs_air_offset_C"]
+            if air_temp is not None else None
+        ),
+        "humidity": float(humidity_avg) if humidity_avg is not None else None,
+        "precip_minutes": float(precip_mm) * tunables["precip_min_per_mm"],
+        "rain_probability_pct": float(rain_p) if rain_p is not None else None,
+        "total_precip_mm": float(precip_mm),
+    }
+
+
+def inject_weather_features(pred_df: pd.DataFrame, round_num: int) -> tuple[pd.DataFrame, dict]:
+    """Read weather.json and add weather_*_{quali,race,sprint} columns to pred_df.
+
+    Returns (enriched pred_df, metadata dict for the prediction_metadata sidecar).
+    All drivers in the round share the same weather (session-level fact), so we
+    populate every row identically.
+
+    On missing/stale weather.json: leaves weather columns as NaN (XGBoost handles
+    natively) and prints a loud warning. We never silently fabricate "dry" —
+    that would hide a broken forecast pipeline.
+    """
+    weather_path = WEB_DATA_DIR / "weather.json"
+    weather_meta: dict = {"source": None, "missing": True, "per_session": {}}
+
+    if not weather_path.exists():
+        print(f"  [WARN] {weather_path} not found — running prediction WITHOUT weather conditioning.")
+        print(f"         If conditions differ from dry baseline, predictions may be inaccurate.")
+        # Ensure NaN columns exist so feature_columns alignment doesn't break
+        for sess in ("quali", "race", "sprint"):
+            for metric in ("was_wet", "track_temp", "air_temp", "humidity", "precip_minutes"):
+                col = f"weather_{metric}_{sess}"
+                if col not in pred_df.columns:
+                    pred_df[col] = np.nan
+        return pred_df, weather_meta
+
+    try:
+        with open(weather_path) as f:
+            wjson = json.load(f)
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"  [WARN] weather.json unreadable ({e}) — running WITHOUT weather conditioning.")
+        for sess in ("quali", "race", "sprint"):
+            for metric in ("was_wet", "track_temp", "air_temp", "humidity", "precip_minutes"):
+                col = f"weather_{metric}_{sess}"
+                if col not in pred_df.columns:
+                    pred_df[col] = np.nan
+        return pred_df, weather_meta
+
+    # Sanity-check: weather.json should be for the same round we're predicting
+    weather_round = wjson.get("round")
+    if weather_round is not None and weather_round != round_num:
+        print(f"  [WARN] weather.json is for round {weather_round}, but predicting round {round_num}.")
+        print(f"         Using forecast anyway, but verify pipeline/weather_forecast.py ran for this round.")
+
+    weather_meta["source"] = wjson.get("last_updated") or "unknown"
+    weather_meta["missing"] = False
+    weather_meta["overall_rain_risk"] = wjson.get("overall_rain_risk")
+    weather_meta["weather_round"] = weather_round
+
+    # Collect per-session aggregates. If multiple sessions share a label
+    # (e.g. FP1+FP2+FP3 all map to None and quali maps to quali), we keep the
+    # last one seen — for quali/race/sprint there's only one each per weekend.
+    per_session: dict[str, dict] = {}
+    for sess in wjson.get("sessions", []) or []:
+        label = _classify_session_to_label(sess.get("name", ""))
+        if not label:
+            continue
+        per_session[label] = _aggregate_forecast_session(sess)
+
+    # Populate pred_df columns. NaN where forecast is missing.
+    for label in ("quali", "race", "sprint"):
+        agg = per_session.get(label, {})
+        pred_df[f"weather_was_wet_{label}"] = float(agg.get("was_wet")) if agg.get("was_wet") is not None else np.nan
+        pred_df[f"weather_track_temp_{label}"] = agg.get("track_temp") if "track_temp" in agg else np.nan
+        pred_df[f"weather_air_temp_{label}"] = agg.get("air_temp") if "air_temp" in agg else np.nan
+        pred_df[f"weather_humidity_{label}"] = agg.get("humidity") if "humidity" in agg else np.nan
+        if label == "race":
+            # Only race model expects precip_minutes
+            pred_df[f"weather_precip_minutes_{label}"] = agg.get("precip_minutes") if "precip_minutes" in agg else np.nan
+        weather_meta["per_session"][label] = agg
+
+    # Log what we injected
+    rsess = weather_meta["per_session"].get("race", {})
+    qsess = weather_meta["per_session"].get("quali", {})
+    print(f"  Weather forecast injected (source: {weather_meta['source']}):")
+    if rsess:
+        was_wet_str = "WET" if rsess.get("was_wet") == 1.0 else "dry"
+        print(f"    Race: {was_wet_str} "
+              f"(rain {int(rsess.get('rain_probability_pct') or 0)}%, "
+              f"{rsess.get('total_precip_mm') or 0:.1f}mm, "
+              f"air {rsess.get('air_temp') or 0:.1f}C)")
+    if qsess:
+        was_wet_str = "WET" if qsess.get("was_wet") == 1.0 else "dry"
+        print(f"    Quali: {was_wet_str} (air {qsess.get('air_temp') or 0:.1f}C)")
+
+    return pred_df, weather_meta
 
 
 # -- Driver ID mapping ---------------------------------------------------------
@@ -486,6 +659,10 @@ def run_predictions(
                                 pred_df.loc[driver_mask, col] = fp_row[col]
             print(f"  Updated existing FP columns in priors")
 
+    # ---- Step 3.5: Inject weather forecast (Level 3 Phase D) ----
+    print(f"\n[Step 3.5] Injecting weather forecast...")
+    pred_df, weather_meta = inject_weather_features(pred_df, round_num)
+
     # ---- Step 4: Feature engineering ----
     print(f"\n[Step 4] Applying feature engineering...")
     pred_df = engineer_features(pred_df)
@@ -851,6 +1028,10 @@ def run_predictions(
         "race_model_used": race_model_used.name,
         "quali_model_sha256_16": _file_sha256(quali_path),
         "race_model_sha256_16": _file_sha256(race_model_used),
+        # Level 3: record exactly which weather values the model conditioned on,
+        # so the Accuracy / Changelog tabs can diagnose "why does this round
+        # predict X" without re-running the pipeline.
+        "weather_features_used": weather_meta,
     }
     # P9: suffix the metadata file alongside the predictions parquet
     meta_filename = f"prediction_metadata_{output_suffix}.json" if output_suffix else "prediction_metadata.json"

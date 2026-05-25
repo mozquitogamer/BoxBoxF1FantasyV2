@@ -7,6 +7,8 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="scenarios.css?v=1">
+    <link rel="stylesheet" href="weather.css?v=2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -65,6 +67,7 @@
                 <button class="tab" data-tab="deepdive">Race Deep Dive</button>
                 <button class="tab" data-tab="videos">Videos</button>
                 <button class="tab" data-tab="articles">Articles</button>
+                <button class="tab" data-tab="changelog">Changelog</button>
                 <button class="tab" data-tab="about">About</button>
             </div>
         </div>
@@ -487,6 +490,9 @@
                 <div class="accuracy-header">
                     <h2>Model Accuracy</h2>
                     <p>Track how well our predictions match reality. Updated after each race weekend.</p>
+                    <div class="model-version-note">
+                        <strong>Heads up:</strong> Rounds 1&ndash;7 use the original (weather-blind) model; rounds 8+ use the weather-conditioned model shipped on 2026-05-25. A step-change in accuracy between R7 and R8 is the upgrade, not luck. See the <a href="#changelog">Changelog</a> for details.
+                    </div>
                 </div>
                 <div id="accuracyContent">
                     <p class="no-data">Loading accuracy data...</p>
@@ -528,6 +534,17 @@
                 </div>
                 <div id="articlesContent">
                     <p class="no-data">Loading articles...</p>
+                </div>
+            </section>
+
+            <!-- Changelog Tab -->
+            <section class="tab-content" id="tab-changelog">
+                <div class="changelog-header">
+                    <h2>What's New</h2>
+                    <p>Model and feature updates — the meaningful changes behind your fantasy picks.</p>
+                </div>
+                <div id="changelogContent">
+                    <p class="no-data">Loading changelog...</p>
                 </div>
             </section>
 
@@ -604,6 +621,21 @@
                     </div>
 
                     <div class="about-section">
+                        <h3>Contact</h3>
+                        <p>Questions, bug reports, feature requests, or just want to argue about predictions? Reach out.</p>
+                        <div class="contact-row">
+                            <a href="https://x.com/BoxBoxF1Fantasy" target="_blank" rel="noopener" class="contact-link">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                <span>@BoxBoxF1Fantasy</span>
+                            </a>
+                            <a href="mailto:boxboxf1fantasy@gmail.com" class="contact-link">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                                <span>boxboxf1fantasy@gmail.com</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="about-section">
                         <h3>Disclaimer</h3>
                         <p>These predictions are for entertainment purposes only. F1 races are inherently unpredictable — weather, crashes, strategy calls, and reliability can dramatically alter outcomes. Use these predictions as one input for your fantasy decisions, not the only one.</p>
                     </div>
@@ -662,6 +694,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
             integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
             crossorigin="anonymous" async></script>
-    <script src="app.js?v=68"></script>
+    <script src="scenarios.js?v=1"></script>
+    <script src="app.js?v=70"></script>
 </body>
 </html>

@@ -74,6 +74,34 @@ except ImportError:
 # Feature Column Definitions
 # ============================================================
 
+# Weather features per session (Level 3). Each model gets ONLY its session's
+# weather features; the others are excluded from the auto-derived list below.
+# See pipeline/04_build_model_inputs.py::merge_session_weather for column origins.
+WEATHER_QUALI_FEATURES = [
+    "weather_was_wet_quali",
+    "weather_track_temp_quali",
+    "weather_air_temp_quali",
+    "weather_humidity_quali",
+]
+WEATHER_RACE_FEATURES = [
+    "weather_was_wet_race",
+    "weather_track_temp_race",
+    "weather_air_temp_race",
+    "weather_humidity_race",
+    "weather_precip_minutes_race",
+]
+WEATHER_SPRINT_FEATURES = [
+    "weather_was_wet_sprint",
+    "weather_track_temp_sprint",
+    "weather_air_temp_sprint",
+    "weather_humidity_sprint",
+]
+# Wet-row sample weight multiplier — addresses the ~85/15 dry/wet imbalance.
+# Calibrated via pipeline/validate_weather_features.py: 6x gives statistically
+# significant wet improvement (+0.185 MAE, CI [+0.084, +0.290]) without dry
+# regression. See Phase C gate report in docs/WEATHER_LEVEL3_IMPLEMENTATION_PLAN.md.
+WET_TRAINING_WEIGHT_MULTIPLIER = 6.0
+
 # Columns to EXCLUDE from qualifying features
 QUALI_EXCLUDE = {
     # Identifiers / metadata
@@ -98,6 +126,10 @@ QUALI_EXCLUDE = {
     "pole_advantage", "front_row_advantage", "grid_importance_factor",
     "top10_sc_interaction", "top10_turn1_interaction", "top10_street_interaction",
     "quali_vs_fp_rank",
+    # Weather: race + sprint session weather is irrelevant to quali model
+    # (quali model gets only its own session's weather; appended via build_quali_feature_list).
+    *WEATHER_RACE_FEATURES,
+    *WEATHER_SPRINT_FEATURES,
 }
 
 # Prefixes to exclude from qualifying features
@@ -112,6 +144,8 @@ RACE_EXTRA_FEATURES = [
     "recent_wins", "recent_podiums", "recent_points_rate",
     "recent_form_weighted", "form_trend", "team_recent_form",
     "is_pole_position", "is_front_row", "is_top10_quali", "grid_advantage",
+    # Race-session weather (Level 3)
+    *WEATHER_RACE_FEATURES,
 ]
 
 # FP signal features (pace-focused subset for confidence scoring)
@@ -130,7 +164,12 @@ FP_SIGNAL_FEATURES = [
 
 
 def build_quali_feature_list(all_columns: list[str]) -> list[str]:
-    """Build the qualifying feature list by excluding metadata, targets, and race-specific columns."""
+    """Build the qualifying feature list by excluding metadata, targets, and race-specific columns.
+
+    Quali-session weather features (WEATHER_QUALI_FEATURES) are appended explicitly
+    after the auto-exclusion step — they're excluded from auto-derivation only so
+    that race/sprint weather doesn't leak into the quali model.
+    """
     features = []
     for col in sorted(all_columns):
         if col in QUALI_EXCLUDE:
@@ -148,6 +187,11 @@ def build_quali_feature_list(all_columns: list[str]) -> list[str]:
         }:
             continue
         features.append(col)
+    # Append quali-session weather (which is NOT in QUALI_EXCLUDE but we keep
+    # this explicit so the model unambiguously receives it).
+    for wcol in WEATHER_QUALI_FEATURES:
+        if wcol in all_columns and wcol not in features:
+            features.append(wcol)
     return features
 
 
@@ -157,7 +201,40 @@ def build_race_feature_list(quali_features: list[str], all_columns: list[str]) -
     for col in RACE_EXTRA_FEATURES:
         if col not in race_features and col in all_columns:
             race_features.append(col)
+    # Quali-session weather is part of quali_features; strip it from race
+    # features (race model gets race-session weather only via RACE_EXTRA_FEATURES).
+    race_features = [c for c in race_features if c not in WEATHER_QUALI_FEATURES]
     return race_features
+
+
+def apply_wet_training_boost(
+    df: pd.DataFrame, wet_col: str = "weather_was_wet_race"
+) -> pd.DataFrame:
+    """Multiply sample_weight for wet-race training rows by WET_TRAINING_WEIGHT_MULTIPLIER.
+
+    Compensates for the ~85/15 dry/wet imbalance in historical data. Without this,
+    XGBoost can ignore weather features because the dry signal dominates. Validated
+    via pipeline/validate_weather_features.py at 6x (the current default).
+
+    Returns a COPY of df with the modified sample_weight column. The original
+    df is not mutated. If wet_col is missing from df, returns df unchanged.
+
+    Use the same column (default weather_was_wet_race) for ALL model training
+    blocks (quali, race, sprint) — the "wetness of the weekend" is a single fact
+    per (season, round), and using the race-session label as the canonical signal
+    keeps the boost stable across models.
+    """
+    if wet_col not in df.columns or "sample_weight" not in df.columns:
+        return df
+    boosted = df.copy()
+    is_wet = (boosted[wet_col].fillna(0.0) > 0.5).astype(float)
+    boost = 1.0 + (WET_TRAINING_WEIGHT_MULTIPLIER - 1.0) * is_wet
+    boosted["sample_weight"] = boosted["sample_weight"] * boost
+    n_wet = int(is_wet.sum())
+    if n_wet > 0:
+        print(f"    Applied {WET_TRAINING_WEIGHT_MULTIPLIER}x weight to "
+              f"{n_wet:,} wet-race training rows")
+    return boosted
 
 
 # ============================================================
@@ -658,6 +735,7 @@ def main() -> None:
 
     # Train final qualifying model on all data
     print("\n  Training final qualifying model on all data...")
+    quali_df = apply_wet_training_boost(quali_df)
     quali_df = sort_by_race_groups(quali_df)
     X_q = quali_df[quali_available]
     y_q_rel = position_to_relevance(quali_df["quali_position"])
@@ -772,6 +850,7 @@ def main() -> None:
 
     # Train final race model on all data
     print("\n  Training final race model on all data...")
+    race_df = apply_wet_training_boost(race_df)
     race_df = sort_by_race_groups(race_df)
     X_r = race_df[race_available]
     y_r_rel = position_to_relevance(race_df["finish_position"])
@@ -901,6 +980,7 @@ def main() -> None:
 
         # Train final race_fp_model on all data with WF quali
         print("\n  Training final race_model_fp on all WF-quali data...")
+        race_fp_df = apply_wet_training_boost(race_fp_df)
         race_fp_df = sort_by_race_groups(race_fp_df)
         # Ensure all needed columns are available and aligned
         X_r_fp = race_fp_df[race_available].copy()
@@ -1017,12 +1097,15 @@ def main() -> None:
     else:
         print(f"  WARNING: sprint_grid not available — sprint model will lack key feature")
 
-    # Sprint model uses race features PLUS sprint-grid-derived features
+    # Sprint model uses race features PLUS sprint-grid-derived features.
+    # Sprint-session weather replaces race-session weather (the sprint runs
+    # on Saturday — its conditions can differ from Sunday's race).
     SPRINT_EXTRA_FEATURES = [
         "sprint_grid", "sprint_is_front_row", "sprint_is_top3",
         "sprint_is_top10", "sprint_grid_advantage", "quali_to_sprint_grid_delta",
+        *WEATHER_SPRINT_FEATURES,
     ]
-    sprint_feature_cols = list(race_feature_cols)
+    sprint_feature_cols = [c for c in race_feature_cols if c not in WEATHER_RACE_FEATURES]
     for sf in SPRINT_EXTRA_FEATURES:
         if sf in sprint_df.columns and sf not in sprint_feature_cols:
             sprint_feature_cols.append(sf)
@@ -1058,6 +1141,9 @@ def main() -> None:
 
         # Train final sprint model on all sprint data
         print("\n  Training final sprint model on all sprint data...")
+        # Apply wet boost using the sprint's own wet label (sprint races have their
+        # own wet/dry status — Belgium 2023 sprint was wet, race was dry).
+        sprint_df = apply_wet_training_boost(sprint_df, wet_col="weather_was_wet_sprint")
         sprint_df = sort_by_race_groups(sprint_df)
         X_s = sprint_df[sprint_available]
         y_s_rel = position_to_relevance(sprint_df["sprint_position"])
@@ -1230,6 +1316,7 @@ def main() -> None:
                 print(f"  Skipping sprint_model_fp save (benchmark did not improve).")
             else:
                 print("\n  Training final sprint_model_fp on all WF-quali sprint data...")
+                sprint_fp_df = apply_wet_training_boost(sprint_fp_df, wet_col="weather_was_wet_sprint")
                 sprint_fp_df = sort_by_race_groups(sprint_fp_df)
                 X_s_fp = sprint_fp_df[sprint_fp_available].copy()
                 y_s_fp = position_to_relevance(sprint_fp_df["sprint_position"])

@@ -190,6 +190,34 @@ DRIVER_WET_WEATHER_SKILL = {
     'ollie_bearman': 6,
 }
 
+CONSTRUCTOR_COLD_WEATHER_SKILL = {
+    # Hand-curated per-constructor rating: how well does this team's car
+    # perform in cool/cold-temperature races (air <= ~18C)? Scale 1-10, 5 = neutral.
+    # Mercedes has historically been strongest in cold conditions
+    # (W11/W14/W16 power unit + chassis combo). Used as both a model feature
+    # (via 03b_build_jolpica_features) and an MC perturbation when
+    # weather.json forecasts a cold race.
+    #
+    # Update from observation as the season progresses; defaults to 5 for
+    # constructors not listed.
+    'mercedes':     8,
+    'williams':     7,   # Mercedes-powered, historically OK in cool
+    'ferrari':      6,
+    'red_bull':     6,
+    'mclaren':      6,
+    'aston_martin': 5,
+    'alpine':       5,
+    'racing_bulls': 5,
+    'rb':           5,
+    'haas':         5,
+    'audi':         5,
+    'sauber':       5,
+    'alfa_romeo':   5,
+    'cadillac':     5,
+    # Legacy constructor IDs (2020-2025 training compatibility)
+    'alphatauri':   5,
+}
+
 DRIVER_OVERTAKING_SKILL = {
     # 2026 grid — updated ratings
     # Elite overtakers
@@ -301,6 +329,10 @@ def get_driver_tire_mgmt(driver_id):
 def get_driver_wet_skill(driver_id):
     """Get driver wet weather skill"""
     return DRIVER_WET_WEATHER_SKILL.get(driver_id, 6)
+
+def get_constructor_cold_skill(constructor_id):
+    """Get constructor cold-weather rating (1-10, 5=neutral). Default 5."""
+    return CONSTRUCTOR_COLD_WEATHER_SKILL.get(constructor_id, 5)
 
 def get_driver_overtaking(driver_id):
     """Get driver overtaking ability"""

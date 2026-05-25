@@ -259,10 +259,52 @@ async function renderTabIfNeeded(tabName) {
             removeTabSpinner(tabId);
             _tabRendered.articles = true;
             break;
+        case 'changelog':
+            showTabSpinner(tabId);
+            await ensureLoaded('changelog', loadChangelog);
+            renderChangelog();
+            removeTabSpinner(tabId);
+            _tabRendered.changelog = true;
+            break;
         case 'about':
             _tabRendered.about = true;
             break;
     }
+}
+
+let changelogData = null;
+async function loadChangelog() {
+    try {
+        const resp = await fetch(cacheBust('data/changelog.json'));
+        if (resp.ok) changelogData = await resp.json();
+    } catch(e) { changelogData = null; }
+}
+
+function renderChangelog() {
+    const el = document.getElementById('changelogContent');
+    if (!el) return;
+    if (!changelogData || !changelogData.entries) {
+        el.innerHTML = '<p class="no-data">Changelog unavailable.</p>';
+        return;
+    }
+    // Sort newest first by date (ISO strings sort lexicographically)
+    const entries = [...changelogData.entries].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    el.innerHTML = entries.map(e => {
+        const tags = (e.tags || []).map(t =>
+            `<span class="changelog-tag ${t}">${t}</span>`
+        ).join('');
+        const body = (e.body || []).map(p => `<p>${p}</p>`).join('');
+        return `
+            <article class="changelog-entry">
+                <div class="changelog-entry-header">
+                    <h3 class="changelog-entry-title">${e.title}</h3>
+                    <span class="changelog-entry-date">${e.date}</span>
+                </div>
+                ${tags ? `<div class="changelog-tag-row">${tags}</div>` : ''}
+                <div class="changelog-entry-body">${body}</div>
+            </article>
+        `;
+    }).join('');
 }
 
 // -- Init --
@@ -270,6 +312,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Phase 1: Load only essential data for home page (Drivers tab)
     await loadData();
     await loadSeasonData();
+
+    // User-scenarios overlay: load LocalStorage state (per round, auto-cleared
+    // when the round changes). When the user dials a slider, we re-render the
+    // affected views.
+    if (window.scenarios && data) {
+        window.scenarios.init(data);
+        window.scenarios.onChange(() => {
+            renderDrivers();
+            if (_tabRendered.constructors) renderConstructors();
+            renderScenarioPill();
+        });
+        // Allow ?scenario=... share links
+        try {
+            const params = new URLSearchParams(location.search);
+            const s = params.get('scenario');
+            if (s) window.scenarios.loadFromShareString(s);
+        } catch(e) {}
+        injectScenarioPill();
+        renderScenarioPill();
+    }
+
     startCountdown();
     setupTabs();
     setupControls();
@@ -1037,6 +1100,27 @@ function renderWeather() {
 
     const overallColor = riskColors[w.overall_rain_risk] || '#666';
 
+    // Weather-aware modelling explainer: if predictions.json reports
+    // weather_adjustments with non-neutral multipliers, show what's actually
+    // being adjusted in the Monte Carlo. Honest about the cause.
+    const wxAdj = data && data.weather_adjustments;
+    let wxExplainer = '';
+    if (wxAdj && wxAdj.is_active) {
+        const parts = [];
+        if (wxAdj.rain_risk && wxAdj.rain_risk !== 'NONE') {
+            const widenPct = Math.round((wxAdj.noise_mult - 1) * 100);
+            const dnfX = wxAdj.dnf_mult.toFixed(1);
+            parts.push(`Rain risk <strong>${wxAdj.rain_risk}</strong> \u2192 confidence intervals widened by ~${widenPct}%, DNF risk \u00d7${dnfX}, wet-skilled drivers favoured.`);
+        }
+        if (wxAdj.cold_weight && wxAdj.cold_weight > 0) {
+            const tStr = wxAdj.race_air_temp_C != null ? `${wxAdj.race_air_temp_C.toFixed(1)}\u00b0C` : 'cool';
+            parts.push(`Cool race forecast (${tStr}) \u2192 Mercedes &amp; Williams get a small score boost in the simulation.`);
+        }
+        if (parts.length > 0) {
+            wxExplainer = `<div class="weather-adjust-explainer">${parts.join(' ')}</div>`;
+        }
+    }
+
     el.innerHTML = `
         <div class="weather-widget">
             <div class="weather-header">
@@ -1052,9 +1136,30 @@ function renderWeather() {
             <div class="weather-sessions-grid">
                 ${sessionsHtml}
             </div>
+            ${wxExplainer}
             <div class="weather-source">Data: ${w.data_source || 'Open-Meteo'}</div>
         </div>
     `;
+}
+
+// Returns the wet/cold badge HTML to drop into a driver/constructor card, or "".
+// Reads `data.weather_adjustments` (populated by 08_export_website_json from
+// the MC sim's weather_adjustments_active block).
+function renderWeatherBadges() {
+    const w = data && data.weather_adjustments;
+    if (!w || !w.is_active) return '';
+    const badges = [];
+    if (w.rain_risk && w.rain_risk !== 'NONE') {
+        const label = w.rain_risk === 'HIGH' ? 'Wet race forecast' :
+                      w.rain_risk === 'MEDIUM' ? 'Wet race likely' : 'Light rain risk';
+        badges.push(`<span class="card-weather-badge wet" title="Race rain risk: ${w.rain_risk}. Downside widened, DNF risk \u00d7${w.dnf_mult.toFixed(1)}, wet-strong drivers favoured.">\u{1F327} ${label}</span>`);
+    }
+    if (w.cold_weight && w.cold_weight > 0) {
+        const tStr = w.race_air_temp_C != null ? `${w.race_air_temp_C.toFixed(0)}\u00b0C` : 'cool';
+        badges.push(`<span class="card-weather-badge cold" title="Cool race forecast (${tStr} air). Cold-strong constructors (Mercedes, Williams) favoured.">\u{1F976} Cool race ${tStr}</span>`);
+    }
+    if (badges.length === 0) return '';
+    return `<div class="card-weather-badges">${badges.join('')}</div>`;
 }
 
 // -- Driver rendering --
@@ -1065,7 +1170,12 @@ function renderDrivers() {
     const teamFilter = document.getElementById('teamFilter').value;
     const searchQuery = (document.getElementById('driverSearch').value || '').trim().toLowerCase();
 
-    let drivers = [...data.drivers];
+    // Apply user-scenario overlay (no-op if scenario empty). Returns a shallow
+    // copy with overlay fields on each driver — base ML data in `data` untouched.
+    const view = (window.scenarios && !window.scenarios.isEmpty())
+        ? window.scenarios.applyToAll(data)
+        : data;
+    let drivers = [...view.drivers];
 
     // Compute price change fields
     drivers.forEach(d => computeDriverPriceFields(d));
@@ -1137,8 +1247,19 @@ function driverCard(d, i) {
 
     const hasSprintPts = d.expected_points_sprint_quali || d.expected_points_sprint_race;
 
+    // User-scenario "±" affordance: opens the per-pick slider popup. Shows the
+    // active bump if non-zero so users see at a glance which picks they tweaked.
+    const driverOnlyBump = window.scenarios ? window.scenarios.getDriverOnlyBump(d.driver_id) : 0;
+    const scenBtnActive = Math.abs(driverOnlyBump) > 0.001;
+    const scenBtnLabel = scenBtnActive
+        ? `${driverOnlyBump > 0 ? '+' : ''}${driverOnlyBump.toFixed(1)}`
+        : '±';
+
     return `
     <div class="driver-card" style="--team-color:${team.color};--i:${i}">
+        <button class="scenario-btn ${scenBtnActive ? 'active' : ''}"
+                data-scen-type="driver" data-scen-id="${d.driver_id}"
+                title="What-if: bump ${d.name}'s pace by N positions">${scenBtnLabel}</button>
         <div class="card-header">
             <div class="driver-info">
                 <h3>${d.name}</h3>
@@ -1146,6 +1267,7 @@ function driverCard(d, i) {
             </div>
             <div class="driver-number">${d.number}</div>
         </div>
+        ${renderWeatherBadges()}
 
         <div class="points-badge">
             ${d.expected_points.toFixed(1)}
@@ -1246,7 +1368,10 @@ function renderConstructors() {
     if (!data) return;
 
     const sortKey = document.getElementById('constructorSort').value;
-    let constructors = [...data.constructors];
+    const view = (window.scenarios && !window.scenarios.isEmpty())
+        ? window.scenarios.applyToAll(data)
+        : data;
+    let constructors = [...view.constructors];
 
     const ascending = ['current_price'].includes(sortKey);
     constructors.sort((a, b) => ascending ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey]);
@@ -1292,6 +1417,356 @@ function renderUpgradeBanner() {
         <div style="margin-top:6px;opacity:0.8;font-size:0.78rem;">Adjusted points appear next to each card's main number as a colored delta badge. Base ML prediction is unchanged.</div>
     </div>`;
 }
+
+/* ============================================================
+   User Scenarios — UI plumbing
+   ============================================================
+   - Floating pill at the top: shows "Scenario: N picks" when any
+     bump is active, clicking opens the manager modal.
+   - Mini popup: per-card "±" button opens a positions-gained
+     slider tied to one driver or one constructor.
+   - Manager modal: full list of active bumps + share URL + reset.
+   The scenarios.applyToAll() overlay is what makes the cards
+   actually reflect these bumps (see renderDrivers / renderConstructors).
+   ============================================================ */
+function injectScenarioPill() {
+    if (document.getElementById('scenarioPill')) return;
+    const pill = document.createElement('div');
+    pill.id = 'scenarioPill';
+    pill.className = 'scenario-pill';
+    pill.style.display = 'none';
+    pill.innerHTML = `
+        <span class="scenario-pill-label">Scenario: <span id="scenarioPillCount">0</span></span>
+        <button class="scenario-pill-manage" id="scenarioPillManage" type="button">Manage</button>
+        <button class="scenario-pill-reset" id="scenarioPillReset" type="button" title="Clear all bumps">Reset</button>
+    `;
+    document.body.appendChild(pill);
+    document.getElementById('scenarioPillManage').addEventListener('click', openScenarioManager);
+    document.getElementById('scenarioPillReset').addEventListener('click', () => {
+        if (window.scenarios) window.scenarios.reset();
+    });
+}
+
+function renderScenarioPill() {
+    const pill = document.getElementById('scenarioPill');
+    if (!pill || !window.scenarios) return;
+    const n = window.scenarios.activeCount();
+    if (n === 0) {
+        pill.style.display = 'none';
+        return;
+    }
+    pill.style.display = '';
+    const lbl = document.getElementById('scenarioPillCount');
+    if (lbl) lbl.textContent = `${n} bump${n === 1 ? '' : 's'} active`;
+}
+
+// Mini popup for a single pick — lazy-injected once, repositioned each open.
+function injectScenarioPopup() {
+    if (document.getElementById('scenarioPopup')) return;
+    const div = document.createElement('div');
+    div.id = 'scenarioPopup';
+    div.className = 'scenario-popup';
+    div.style.display = 'none';
+    div.innerHTML = `
+        <div class="scenario-popup-header">
+            <strong id="scenarioPopupTitle">Pace bump</strong>
+            <button class="scenario-popup-close" id="scenarioPopupClose" type="button">&times;</button>
+        </div>
+        <div class="scenario-popup-hint">"+2" means: I think this pick will finish 2 positions better than the model says.</div>
+        <div class="scenario-popup-slider-row">
+            <button class="scenario-popup-step" id="scenarioPopupMinus" type="button" title="-0.5">−</button>
+            <input type="range" id="scenarioPopupSlider" min="-5" max="5" step="0.5" value="0">
+            <button class="scenario-popup-step" id="scenarioPopupPlus" type="button" title="+0.5">+</button>
+        </div>
+        <div class="scenario-popup-value-row">
+            <span id="scenarioPopupValue">0.0 positions</span>
+            <span class="scenario-popup-effect" id="scenarioPopupEffect"></span>
+        </div>
+        <div class="scenario-popup-actions">
+            <button class="scenario-popup-clear" id="scenarioPopupClear" type="button">Clear</button>
+            <button class="scenario-popup-done" id="scenarioPopupDone" type="button">Done</button>
+        </div>
+    `;
+    document.body.appendChild(div);
+
+    document.getElementById('scenarioPopupClose').addEventListener('click', closeScenarioPopup);
+    document.getElementById('scenarioPopupDone').addEventListener('click', closeScenarioPopup);
+    document.getElementById('scenarioPopupClear').addEventListener('click', () => {
+        const slider = document.getElementById('scenarioPopupSlider');
+        slider.value = 0;
+        slider.dispatchEvent(new Event('input'));
+    });
+    document.getElementById('scenarioPopupMinus').addEventListener('click', () => {
+        const s = document.getElementById('scenarioPopupSlider');
+        s.value = Math.max(-5, parseFloat(s.value) - 0.5);
+        s.dispatchEvent(new Event('input'));
+    });
+    document.getElementById('scenarioPopupPlus').addEventListener('click', () => {
+        const s = document.getElementById('scenarioPopupSlider');
+        s.value = Math.min(5, parseFloat(s.value) + 0.5);
+        s.dispatchEvent(new Event('input'));
+    });
+
+    // Click-outside-to-close
+    document.addEventListener('click', (e) => {
+        const popup = document.getElementById('scenarioPopup');
+        if (!popup || popup.style.display === 'none') return;
+        if (popup.contains(e.target)) return;
+        if (e.target.closest('.scenario-btn')) return;
+        closeScenarioPopup();
+    });
+}
+
+let _scenarioPopupTarget = null;  // { type, id }
+
+function openScenarioPopup(type, id, anchorEl) {
+    injectScenarioPopup();
+    const popup = document.getElementById('scenarioPopup');
+    _scenarioPopupTarget = { type, id };
+
+    // Title
+    let title = id;
+    if (type === 'driver') {
+        const d = (data.drivers || []).find(x => x.driver_id === id);
+        title = d ? `${d.name} (${id})` : id;
+    } else {
+        const c = (data.constructors || []).find(x => x.constructor_id === id);
+        title = c ? `${c.full_name || c.name} (whole team)` : id;
+    }
+    document.getElementById('scenarioPopupTitle').textContent = title;
+
+    // Current value
+    let cur = 0;
+    if (window.scenarios) {
+        cur = (type === 'driver')
+            ? window.scenarios.getDriverOnlyBump(id)
+            : window.scenarios.getTeamBump(id);
+    }
+    const slider = document.getElementById('scenarioPopupSlider');
+    slider.value = cur;
+    updateScenarioPopupValue(cur);
+
+    // Wire slider input each open (clean handler)
+    slider.oninput = (e) => {
+        const v = parseFloat(e.target.value);
+        updateScenarioPopupValue(v);
+        if (!window.scenarios) return;
+        if (type === 'driver') window.scenarios.setDriverBump(id, v);
+        else                    window.scenarios.setTeamBump(id, v);
+    };
+
+    // Position popup near the anchor
+    popup.style.display = '';
+    const rect = anchorEl.getBoundingClientRect();
+    const popupRect = popup.getBoundingClientRect();
+    let left = rect.left + window.scrollX;
+    let top  = rect.bottom + window.scrollY + 6;
+    // Keep on-screen
+    const vw = window.innerWidth;
+    if (left + popupRect.width > vw - 12) {
+        left = Math.max(12, vw - popupRect.width - 12);
+    }
+    popup.style.left = `${left}px`;
+    popup.style.top  = `${top}px`;
+}
+
+function closeScenarioPopup() {
+    const popup = document.getElementById('scenarioPopup');
+    if (popup) popup.style.display = 'none';
+    _scenarioPopupTarget = null;
+}
+
+function updateScenarioPopupValue(v) {
+    const valEl = document.getElementById('scenarioPopupValue');
+    const effEl = document.getElementById('scenarioPopupEffect');
+    if (!valEl) return;
+    const sign = v > 0 ? '+' : '';
+    valEl.textContent = `${sign}${v.toFixed(1)} position${Math.abs(v) === 1 ? '' : 's'}`;
+    if (Math.abs(v) < 0.001) {
+        effEl.textContent = '';
+        return;
+    }
+    if (!_scenarioPopupTarget || !window.scenarios) { effEl.textContent = ''; return; }
+    // Show the resulting points delta for this pick (after re-rank)
+    const overlaid = window.scenarios.applyToAll(data);
+    if (_scenarioPopupTarget.type === 'driver') {
+        const d = overlaid.drivers.find(x => x.driver_id === _scenarioPopupTarget.id);
+        if (d && typeof d.points_delta === 'number') {
+            const s = d.points_delta > 0 ? '+' : '';
+            effEl.textContent = ` → ${s}${d.points_delta.toFixed(1)} pts (P${d.predicted_finish_adjusted || d.predicted_finish})`;
+        }
+    } else {
+        const c = overlaid.constructors.find(x => x.constructor_id === _scenarioPopupTarget.id);
+        if (c && typeof c.points_delta === 'number') {
+            const s = c.points_delta > 0 ? '+' : '';
+            effEl.textContent = ` → ${s}${c.points_delta.toFixed(1)} pts (team total)`;
+        }
+    }
+}
+
+// Full manager modal — lists active bumps, master team sliders, share URL, reset.
+function injectScenarioManager() {
+    if (document.getElementById('scenarioManager')) return;
+    const div = document.createElement('div');
+    div.id = 'scenarioManager';
+    div.className = 'scenario-modal-backdrop';
+    div.style.display = 'none';
+    div.innerHTML = `
+        <div class="scenario-modal">
+            <div class="scenario-modal-header">
+                <h3>What-If Scenario</h3>
+                <button class="scenario-modal-close" id="scenarioManagerClose" type="button">&times;</button>
+            </div>
+            <div class="scenario-modal-intro">
+                Dial pace bumps for any driver or team. The base ML prediction stays untouched — bumps are your overlay, saved in this browser only.
+                Bumps apply to this round only and reset when the round changes.
+            </div>
+
+            <div class="scenario-modal-section">
+                <h4>Team bumps</h4>
+                <div id="scenarioManagerTeams" class="scenario-team-grid"></div>
+            </div>
+
+            <div class="scenario-modal-section">
+                <h4>Active driver bumps</h4>
+                <div id="scenarioManagerDrivers" class="scenario-driver-list">
+                    <p class="scenario-empty">No driver bumps active. Click the "±" button on a driver card to add one.</p>
+                </div>
+            </div>
+
+            <div class="scenario-modal-section">
+                <h4>Share &amp; reset</h4>
+                <div class="scenario-share-row">
+                    <input type="text" id="scenarioShareUrl" readonly>
+                    <button id="scenarioShareCopy" type="button">Copy</button>
+                </div>
+                <div class="scenario-share-hint">Send this URL to share your what-if. Loads only if the recipient is on the same round.</div>
+                <div class="scenario-modal-actions">
+                    <button class="scenario-reset-all" id="scenarioManagerReset" type="button">Reset all</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(div);
+
+    document.getElementById('scenarioManagerClose').addEventListener('click', closeScenarioManager);
+    div.addEventListener('click', (e) => {
+        if (e.target === div) closeScenarioManager();   // backdrop click
+    });
+    document.getElementById('scenarioManagerReset').addEventListener('click', () => {
+        if (window.scenarios) window.scenarios.reset();
+        renderScenarioManagerBody();
+    });
+    document.getElementById('scenarioShareCopy').addEventListener('click', () => {
+        const input = document.getElementById('scenarioShareUrl');
+        input.select();
+        try { document.execCommand('copy'); } catch(e) {}
+        const btn = document.getElementById('scenarioShareCopy');
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = orig; }, 1200);
+    });
+}
+
+function openScenarioManager() {
+    injectScenarioManager();
+    renderScenarioManagerBody();
+    document.getElementById('scenarioManager').style.display = '';
+}
+function closeScenarioManager() {
+    const m = document.getElementById('scenarioManager');
+    if (m) m.style.display = 'none';
+}
+
+function renderScenarioManagerBody() {
+    if (!data || !window.scenarios) return;
+    const state = window.scenarios.getState();
+
+    // Team sliders — one per constructor on the grid
+    const teamsEl = document.getElementById('scenarioManagerTeams');
+    if (teamsEl) {
+        teamsEl.innerHTML = (data.constructors || []).map(c => {
+            const team = TEAMS[c.constructor_id] || { name: c.name, color: '#666' };
+            const cur = state.teamModifiers[c.constructor_id] || 0;
+            return `
+                <div class="scenario-team-row" style="--team-color:${team.color}">
+                    <span class="scenario-team-name">${team.name}</span>
+                    <input type="range" min="-5" max="5" step="0.5" value="${cur}"
+                           data-scen-team="${c.constructor_id}" class="scenario-team-slider">
+                    <span class="scenario-team-value">${cur > 0 ? '+' : ''}${cur.toFixed(1)}</span>
+                </div>
+            `;
+        }).join('');
+        teamsEl.querySelectorAll('.scenario-team-slider').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const v = parseFloat(e.target.value);
+                const tid = e.target.dataset.scenTeam;
+                window.scenarios.setTeamBump(tid, v);
+                e.target.parentElement.querySelector('.scenario-team-value').textContent =
+                    `${v > 0 ? '+' : ''}${v.toFixed(1)}`;
+            });
+        });
+    }
+
+    // Driver bumps — show only drivers with active driver-level bumps
+    const driversEl = document.getElementById('scenarioManagerDrivers');
+    if (driversEl) {
+        const entries = Object.entries(state.driverModifiers).filter(([_, v]) => Math.abs(v) > 0.001);
+        if (entries.length === 0) {
+            driversEl.innerHTML = `<p class="scenario-empty">No driver-only bumps active. Click the "±" button on a driver card to add one.</p>`;
+        } else {
+            driversEl.innerHTML = entries.map(([abbrev, v]) => {
+                const d = (data.drivers || []).find(x => x.driver_id === abbrev);
+                const name = d ? d.name : abbrev;
+                return `
+                    <div class="scenario-driver-row">
+                        <span class="scenario-driver-name">${name}</span>
+                        <input type="range" min="-5" max="5" step="0.5" value="${v}"
+                               data-scen-driver="${abbrev}" class="scenario-driver-slider">
+                        <span class="scenario-driver-value">${v > 0 ? '+' : ''}${v.toFixed(1)}</span>
+                        <button class="scenario-driver-clear" data-clear-driver="${abbrev}" type="button" title="Clear">&times;</button>
+                    </div>
+                `;
+            }).join('');
+            driversEl.querySelectorAll('.scenario-driver-slider').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const v = parseFloat(e.target.value);
+                    const abbrev = e.target.dataset.scenDriver;
+                    window.scenarios.setDriverBump(abbrev, v);
+                    e.target.parentElement.querySelector('.scenario-driver-value').textContent =
+                        `${v > 0 ? '+' : ''}${v.toFixed(1)}`;
+                });
+            });
+            driversEl.querySelectorAll('.scenario-driver-clear').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const abbrev = e.target.dataset.clearDriver;
+                    window.scenarios.setDriverBump(abbrev, 0);
+                    renderScenarioManagerBody();
+                });
+            });
+        }
+    }
+
+    // Share URL
+    const shareInput = document.getElementById('scenarioShareUrl');
+    if (shareInput && window.scenarios) {
+        const code = window.scenarios.encodeForUrl();
+        const url = `${location.origin}${location.pathname}?scenario=${code}`;
+        shareInput.value = window.scenarios.isEmpty() ? '' : url;
+    }
+}
+
+// Global delegation: any click on a "±" button opens the popup for that pick.
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.scenario-btn');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const type = btn.dataset.scenType;
+    const id = btn.dataset.scenId;
+    if (!type || !id) return;
+    openScenarioPopup(type, id, btn);
+});
 
 // Render the all-teams pit stop comparison panel above constructor cards.
 // Sortable by any column, default sort: season best (fastest first).
@@ -1443,8 +1918,18 @@ function constructorCard(c, i) {
             ${c.quali_bonus ? `<span title="Expected qualifying teamwork bonus">Quali bonus: <strong style="color:${c.quali_bonus > 0 ? 'var(--green)' : 'var(--red, #ef4444)'}">${c.quali_bonus > 0 ? '+' : ''}${typeof c.quali_bonus === 'number' ? c.quali_bonus.toFixed ? c.quali_bonus.toFixed(1) : c.quali_bonus : c.quali_bonus}</strong></span>` : ''}
         </div>` : '';
 
+    const teamBumpVal = window.scenarios ? window.scenarios.getTeamBump(c.constructor_id) : 0;
+    const scenBtnActive = Math.abs(teamBumpVal) > 0.001;
+    const scenBtnLabel = scenBtnActive
+        ? `${teamBumpVal > 0 ? '+' : ''}${teamBumpVal.toFixed(1)}`
+        : '±';
+
     return `
     <div class="constructor-card" style="--team-color:${team.color};--i:${i}">
+        <button class="scenario-btn ${scenBtnActive ? 'active' : ''}"
+                data-scen-type="team" data-scen-id="${c.constructor_id}"
+                title="What-if: bump ${c.name}'s pace by N positions (applies to both drivers)">${scenBtnLabel}</button>
+        ${renderWeatherBadges()}
         <div class="constructor-header">
             <div>
                 <h3>${c.full_name || c.name}</h3>

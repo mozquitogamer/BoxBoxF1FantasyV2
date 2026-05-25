@@ -50,8 +50,35 @@ from config.settings import (
     REGULATION_WEIGHT_MULTIPLIER,
     SEED_DIR,
     FASTF1_RAW_DIR,
+    PROCESSED_DIR,
 )
 from pipeline.feature_engineering import engineer_features
+
+
+# -- Weather features (Level 3) -----------------------------------------------
+# Produced by pipeline/03c_extract_session_weather.py. Joined onto model_rows
+# by (season, round) below. Each model picks the relevant session-suffix:
+#   quali model      -> weather_*_quali
+#   race / race_fp   -> weather_*_race
+#   sprint           -> weather_*_sprint  (sprint weekends only; NaN otherwise)
+#
+# The model never sees raw aggregate names — only these per-session columns.
+
+SESSION_WEATHER_PATH = PROCESSED_DIR / "weather" / "all_session_weather.parquet"
+
+WEATHER_SESSION_MAP = {
+    "Q":  "quali",
+    "R":  "race",
+    "SR": "sprint",
+}
+
+WEATHER_METRIC_COLS = [
+    "was_wet",
+    "precip_minutes",
+    "track_temp_avg",
+    "air_temp_avg",
+    "humidity_avg",
+]
 
 
 # -- FP feature columns -------------------------------------------------------
@@ -222,6 +249,113 @@ def merge_fp_features(
     return model_rows
 
 
+# -- Session weather merge (Level 3 Phase B) ----------------------------------
+
+def merge_session_weather(model_rows: pd.DataFrame) -> pd.DataFrame:
+    """Join per-session weather aggregates onto every training row.
+
+    For each (season, round) we pivot the long-format session_weather table
+    into wide weather_*_{race,quali,sprint} columns. Every row of model_rows
+    for that round gets the same weather features (weather is a session-level
+    fact, not driver-level).
+
+    Rows for rounds where no weather has been extracted yet (or where the
+    specific session is missing — e.g. sprint columns on a non-sprint
+    weekend) become NaN. XGBoost handles those natively.
+
+    Returns model_rows with these columns appended:
+        weather_was_wet_{race,quali,sprint}            (bool, cast to float for parquet)
+        weather_precip_minutes_{race,quali,sprint}     (int)
+        weather_track_temp_{race,quali,sprint}         (float, deg C)
+        weather_air_temp_{race,quali,sprint}           (float, deg C)
+        weather_humidity_{race,quali,sprint}           (float, %)
+    """
+    if not SESSION_WEATHER_PATH.exists():
+        print(f"  WARNING: {SESSION_WEATHER_PATH} not found — weather features will be all NaN.")
+        print(f"           Run pipeline/03c_extract_session_weather.py first.")
+        # Still add the columns so feature lists don't break downstream
+        for sess_label in WEATHER_SESSION_MAP.values():
+            for metric in WEATHER_METRIC_COLS:
+                col = _weather_col(metric, sess_label)
+                if col not in model_rows.columns:
+                    model_rows[col] = np.nan
+        return model_rows
+
+    weather_df = pd.read_parquet(SESSION_WEATHER_PATH)
+    # Keep only sessions we care about for modelling
+    weather_df = weather_df[weather_df["session_name"].isin(WEATHER_SESSION_MAP.keys())].copy()
+
+    # Pivot wide: one row per (season, round) with weather_*_{race|quali|sprint} columns
+    wide_parts = []
+    for sess_code, sess_label in WEATHER_SESSION_MAP.items():
+        sub = weather_df[weather_df["session_name"] == sess_code]
+        if sub.empty:
+            continue
+        keep = ["season", "round"] + WEATHER_METRIC_COLS
+        sub = sub[keep].copy()
+        rename_map = {m: _weather_col(m, sess_label) for m in WEATHER_METRIC_COLS}
+        sub = sub.rename(columns=rename_map)
+        wide_parts.append(sub)
+
+    if not wide_parts:
+        print("  WARNING: no usable weather rows found in extract.")
+        return model_rows
+
+    # Merge each per-session frame onto a (season, round) key. We don't dedup
+    # — if a (season, round) appears more than once for the same session in
+    # the source extract, the merge would duplicate rows. Defensive: keep
+    # only one row per (season, round, session) by groupby-first before pivot.
+    weather_wide = wide_parts[0]
+    for part in wide_parts[1:]:
+        weather_wide = weather_wide.merge(part, on=["season", "round"], how="outer")
+
+    # Make sure all expected columns exist (handles seasons with no sprint data)
+    for sess_label in WEATHER_SESSION_MAP.values():
+        for metric in WEATHER_METRIC_COLS:
+            col = _weather_col(metric, sess_label)
+            if col not in weather_wide.columns:
+                weather_wide[col] = np.nan
+
+    # Cast booleans to float so XGBoost gets numeric 0/1 (and NaN works)
+    for sess_label in WEATHER_SESSION_MAP.values():
+        col = _weather_col("was_wet", sess_label)
+        weather_wide[col] = weather_wide[col].astype(float)
+
+    before = model_rows.shape[1]
+    # Drop any existing weather columns to allow clean re-runs
+    weather_cols_in_rows = [c for c in model_rows.columns if c.startswith("weather_")]
+    if weather_cols_in_rows:
+        model_rows = model_rows.drop(columns=weather_cols_in_rows)
+
+    model_rows = model_rows.merge(weather_wide, on=["season", "round"], how="left")
+    added = model_rows.shape[1] - before
+    matched_rounds = weather_wide.shape[0]
+    total_rounds = model_rows[["season", "round"]].drop_duplicates().shape[0]
+    print(f"  Weather: {matched_rounds} (season, round) pairs in extract, "
+          f"covering {total_rounds} model_rows rounds")
+    print(f"  Added {added} weather feature columns")
+
+    # Quick sanity: how many training rows have was_wet_race populated?
+    if "weather_was_wet_race" in model_rows.columns:
+        non_nan = model_rows["weather_was_wet_race"].notna().sum()
+        wet = int(model_rows["weather_was_wet_race"].fillna(0).sum())
+        print(f"  Race weather populated: {non_nan:,}/{len(model_rows):,} rows; "
+              f"{wet:,} are wet ({wet / max(non_nan, 1) * 100:.1f}% of populated)")
+
+    return model_rows
+
+
+def _weather_col(metric: str, session_label: str) -> str:
+    """Canonical column name. Examples:
+        ("was_wet",        "race")   -> "weather_was_wet_race"
+        ("track_temp_avg", "quali")  -> "weather_track_temp_quali"
+        ("precip_minutes", "sprint") -> "weather_precip_minutes_sprint"
+    """
+    # Drop the trailing "_avg" — it's noise once the column says "track_temp_quali".
+    metric_clean = metric.replace("_avg", "")
+    return f"weather_{metric_clean}_{session_label}"
+
+
 # -- Main pipeline ------------------------------------------------------------
 
 def main() -> None:
@@ -273,6 +407,10 @@ def main() -> None:
     # ---- Step 3: Merge FP features -------------------------------------------
     print(f"\n[Step 3] Merging FP telemetry features ...")
     model_rows = merge_fp_features(model_rows, abbrev_to_jolpica)
+
+    # ---- Step 3.5: Merge per-session weather (Level 3 Phase B) ---------------
+    print(f"\n[Step 3.5] Merging per-session weather aggregates ...")
+    model_rows = merge_session_weather(model_rows)
 
     # ---- Step 4: Apply feature engineering -----------------------------------
     print(f"\n[Step 4] Applying feature engineering ...")

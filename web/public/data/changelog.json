@@ -1,0 +1,107 @@
+{
+  "entries": [
+    {
+      "date": "2026-05-25",
+      "title": "Weather-conditioned predictions — model now learns rain & temperature",
+      "tags": ["model", "feature"],
+      "body": [
+        "Predictions used to assume every weekend was dry. They aren't anymore. The qualifying, race, and sprint models have been retrained with historical session-level weather labels (wet/dry, track and air temperature, humidity) backfilled from 2020-2026 race data. <strong>17 wet races and 4 wet sprints</strong> across the training set finally have the conditional label they always needed.",
+        "<strong>What changes on the site:</strong>",
+        "<ul><li><strong>Wet race forecast badge</strong> appears on driver/constructor cards when the race forecast is rainy. Monte Carlo confidence intervals widen (up to ~70% on HIGH rain risk), DNF probability rises (up to 2.6×), and wet-strong drivers (Verstappen, Hamilton, Alonso, Antonelli) get a small bias toward better outcomes.</li><li><strong>Cool race badge</strong> appears when air temperature is forecast under ~18°C. Mercedes and Williams (historically the strongest cold-weather constructors) get a small score boost in the simulation. Cadillac and other newer teams default to neutral until enough cold races accumulate.</li><li><strong>Per-prediction weather metadata</strong> is now recorded in every prediction snapshot, so we can diagnose 'why does the model think this round will rain' without re-running the pipeline.</li></ul>",
+        "<strong>Conservative by design.</strong> Predictions deliberately under-promise on wet weekends rather than over-promise — better to be pleasantly surprised than burned. The model's central point prediction stays honest; the conservatism shows up as wider downside bands and elevated DNF rates that you can actually see on the cards.",
+        "<strong>Validation:</strong> walk-forward backtest on 11 wet rounds (2023-2026) shows a statistically significant +0.185 race-position MAE improvement (95% CI [+0.084, +0.290], excludes zero), plus a small +0.046 improvement on dry races. The +0.30 improvement my plan originally targeted wasn't reached — the data ceiling on wet-race sample size limits what we can prove. This ships as a real, measurable upgrade rather than the ambitious one."
+      ]
+    },
+    {
+      "date": "2026-05-25",
+      "title": "What-If Scenarios — dial your own pace bumps",
+      "tags": ["feature"],
+      "body": [
+        "Every driver and constructor card now has a small <strong>±</strong> button at the top-left. Click it to dial a pace bump in 'positions gained' — for example, +2 means 'I think this pick will finish 2 spots better than the model says'. Cards update instantly with an adjusted points number alongside the base ML prediction.",
+        "Bumps are stored in your browser only (this device) and reset automatically when the race round changes. The floating purple pill at the top of the page summarises active bumps; click <em>Manage</em> for a full overview, per-team master sliders, share-via-URL, and reset.",
+        "The base ML prediction is never modified — your scenario is an overlay. Think of it as 'what does my view of the weekend look like if I trust myself on this driver more than the model?'"
+      ]
+    },
+    {
+      "date": "2026-05-25",
+      "title": "Pre-race weather forecast widget",
+      "tags": ["feature"],
+      "body": [
+        "The Drivers tab now shows a per-session weather forecast (FP, qualifying, sprint, race) with rain risk, temperature, and wind sourced from Open-Meteo. The forecast updates every few hours through the weekend.",
+        "Worth noting: the ML model does <strong>not</strong> currently condition predictions on weather (we're working on it — see roadmap). The widget is informational. For now, dial pace bumps via the What-If Scenarios overlay if a forecast suggests a particular team will benefit or suffer."
+      ]
+    },
+    {
+      "date": "2026-05-24",
+      "title": "Race Deep Dive — full post-race telemetry",
+      "tags": ["feature"],
+      "body": [
+        "New <strong>Race Deep Dive</strong> tab analyses every finished race lap-by-lap. Fuel-corrected pace, sector-by-sector breakdowns, tyre stint analysis, real wheels-up pit-stop times (when public feeds publish them), and per-driver overtake counts. Designed for the people who like to look at the data themselves rather than trust a single number."
+      ]
+    },
+    {
+      "date": "2026-05-22",
+      "title": "Multi-Week Transfer Planner — 14 improvements",
+      "tags": ["feature", "model"],
+      "body": [
+        "Major rework of the Multi-Week Transfer Planner. Highlights:",
+        "<ul><li><strong>Target-team mode</strong> with intensity dial (Loose / Balanced / Strict) — the planner can chase a specific dream team across upcoming rounds, trading some raw points for convergence toward your target.</li><li><strong>Beam search</strong> (width 60) explores 0/1/2-swap candidates per round, including constructor+constructor double-swaps.</li><li><strong>Budget propagation</strong> across rounds: projected price changes feed forward into the next round's spending ceiling.</li><li><strong>Future-round scoring</strong> uses real ML projections (priors-only) where available, falling back to a confidence-weighted track-affinity heuristic for cold-start picks.</li><li><strong>PPM-aware candidate pool</strong> surfaces high-value budget picks that pure score-ranked search misses.</li><li><strong>Heatmap</strong> flags low-confidence projections; per-round 'vs hold' lines show the trade-off of each move.</li></ul>",
+        "All tunable constants live in a single <code>MW_TUNABLES</code> block — easy to iterate without hunting through 5,000 lines of code."
+      ]
+    },
+    {
+      "date": "2026-05-22",
+      "title": "Phase archives + accuracy dashboard",
+      "tags": ["model", "infra"],
+      "body": [
+        "Predictions are now archived per <strong>phase</strong> (pre-FP, post-FP, post-quali) for every round. The Accuracy tab can show how the forecast tightened as data arrived during the weekend — pre-FP runs on priors only (~65% confidence), post-FP adds telemetry (~90%), post-quali locks in the grid.",
+        "Each prediction phase writes a <code>prediction_metadata.json</code> sidecar recording the phase, model SHA-256 hashes, and inference flags — the authoritative source for accuracy attribution."
+      ]
+    },
+    {
+      "date": "2026-05-22",
+      "title": "Append-only audit log + recovery system",
+      "tags": ["infra"],
+      "body": [
+        "Every public JSON export now appends to an append-only audit log and writes an immutable timestamped snapshot under <code>data/audit/snapshots/</code>. If the live JSON ever gets corrupted or accidentally overwritten by a backfill run, we can recover any historical prediction exactly as it was at any past phase.",
+        "Race-completed guards in the pipeline prevent the model from 'predicting' a round it's already been trained on (which would silently poison the accuracy archive). Pass <code>--force</code> only if you know what you're doing."
+      ]
+    },
+    {
+      "date": "2026-05-15",
+      "title": "Pit-stop scoring uses real wheels-up times",
+      "tags": ["model", "fix"],
+      "body": [
+        "Constructor pit-stop fantasy points now use real <strong>stationary</strong> (wheels-up) times from public timing feeds — not lane time (which includes the slow approach). When stationary time is unavailable (safety-car stops, sensor dropouts) the stop is counted but excluded from scoring and shown as 'n/a'.",
+        "OpenF1's stop_duration field can lag 24-48h after a race. If pit-stop points look low immediately after the race, check back the next day — the numbers refresh automatically when the data lands."
+      ]
+    },
+    {
+      "date": "2026-05-10",
+      "title": "Monte Carlo calibration from actual results",
+      "tags": ["model"],
+      "body": [
+        "Confidence intervals on driver cards are now calibrated from observed prediction error vs actuals. After each race, <code>calibrate_confidence.py</code> compares the MC's 90% CI coverage to reality and writes a noise multiplier that the next round's MC picks up automatically. The 90% CI on driver cards genuinely contains the realised outcome ~90% of the time."
+      ]
+    },
+    {
+      "date": "2026-04-25",
+      "title": "Phase-aware race model (post-FP vs post-quali)",
+      "tags": ["model"],
+      "body": [
+        "Two distinct race models now live in the pipeline:",
+        "<ul><li><strong>race_model</strong> — used when actual qualifying has happened. Trained on real quali positions.</li><li><strong>race_model_fp</strong> — used post-FP when quali hasn't run yet. Trained on walk-forward <em>predicted</em> quali (each season's quali predicted by a model trained on earlier seasons).</li></ul>",
+        "Eliminates the train/inference distribution shift that would otherwise occur when feeding noisy predicted quali into a model that learned on clean actual quali."
+      ]
+    },
+    {
+      "date": "2026-04-12",
+      "title": "Two-layer feature system — Jolpica priors + FP telemetry",
+      "tags": ["model"],
+      "body": [
+        "The model now consumes two feature layers merged at training and inference: <strong>91 Jolpica prior features</strong> (rolling averages, circuit experience, constructor trends, teammate deltas, DNF rates, form trends, skill ratings — always available) and <strong>40+ FP telemetry features</strong> (lap times, sectors, tyre degradation, compound-specific pace — sparse, only populated when free practice runs).",
+        "XGBoost's native NaN handling means: when FP data exists, the model uses it to refine; when missing, it relies on priors. No imputation needed, no separate model. This is what lets pre-FP predictions still be ~65% confident — priors carry real signal."
+      ]
+    }
+  ]
+}

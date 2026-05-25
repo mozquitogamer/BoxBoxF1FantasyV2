@@ -1,0 +1,92 @@
+/* ============================================================
+   BoxBoxF1Fantasy — Weather adjustments UI
+   Loaded alongside styles.css. Compact badge for driver/
+   constructor cards on wet or cold race weekends, plus a plain-
+   English explainer that sits in the weather widget.
+   ============================================================ */
+
+.card-weather-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 8px;
+}
+.card-weather-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 10px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    border: 1px dashed currentColor;
+    cursor: help;
+    line-height: 1.2;
+}
+.card-weather-badge.wet {
+    color: #ffa340;
+    background: rgba(255, 163, 64, 0.10);
+}
+.card-weather-badge.cold {
+    color: #6cb8ff;
+    background: rgba(108, 184, 255, 0.10);
+}
+
+.weather-adjust-explainer {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    color: #c7d2fe;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+.weather-adjust-explainer strong { color: #e0e7ff; }
+
+/* Model-version note on the Accuracy tab — explains the step-change in MAE
+   between R7 and R8 once the weather-conditioned model goes live. */
+.model-version-note {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 8px;
+    color: #c7d2fe;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+.model-version-note strong { color: #e0e7ff; }
+.model-version-note a {
+    color: #a5b4fc;
+    text-decoration: underline;
+}
+.model-version-note a:hover { color: #c7d2fe; }
+
+/* Contact links on the About tab */
+.contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 12px;
+}
+.contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+}
+.contact-link:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-light);
+    color: #e0e7ff;
+}
+.contact-link svg { opacity: 0.85; }
