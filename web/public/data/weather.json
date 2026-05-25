@@ -48,7 +48,7 @@
       "temp_min": 11.3,
       "precip_probability_max": 61,
       "precip_sum_mm": 2.5,
-      "wind_max_kmh": 21.4,
+      "wind_max_kmh": 19.9,
       "weather_description": "Slight rain",
       "weather_category": "rain",
       "weather_icon": "\ud83c\udf27\ufe0f",
@@ -323,8 +323,8 @@
       "date": "2026-05-24",
       "rain_probability": 13,
       "rain_risk": "NONE",
-      "avg_temp": 12.8,
-      "avg_wind": 18.2,
+      "avg_temp": 12.5,
+      "avg_wind": 19.6,
       "total_precip_mm": 0.0,
       "weather_description": "Overcast",
       "weather_category": "overcast",
@@ -342,38 +342,38 @@
         },
         {
           "hour": 14,
-          "temp": 13.1,
+          "temp": 12.9,
           "humidity": 79,
           "precip_prob": 7,
           "precip_mm": 0.0,
-          "windspeed": 21.4,
-          "windgusts": 40.3,
+          "windspeed": 19.9,
+          "windgusts": 38.2,
           "weather_code": 3
         },
         {
           "hour": 15,
-          "temp": 12.5,
-          "humidity": 82,
-          "precip_prob": 5,
+          "temp": 12.3,
+          "humidity": 81,
+          "precip_prob": 4,
           "precip_mm": 0.0,
-          "windspeed": 17.4,
-          "windgusts": 39.6,
+          "windspeed": 19.9,
+          "windgusts": 40.7,
           "weather_code": 3
         },
         {
           "hour": 16,
-          "temp": 12.7,
-          "humidity": 81,
-          "precip_prob": 5,
+          "temp": 11.7,
+          "humidity": 85,
+          "precip_prob": 4,
           "precip_mm": 0.0,
-          "windspeed": 15.2,
-          "windgusts": 43.2,
+          "windspeed": 19.9,
+          "windgusts": 37.4,
           "weather_code": 3
         }
       ]
     }
   ],
-  "last_updated": "2026-05-24T19:03:33Z",
-  "next_update": "2026-05-25T01:03:33Z",
+  "last_updated": "2026-05-25T02:36:37Z",
+  "next_update": "2026-05-25T08:36:37Z",
   "data_source": "Open-Meteo (open-meteo.com)"
 }
