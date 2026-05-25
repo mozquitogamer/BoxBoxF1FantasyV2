@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "last_updated": "2026-05-06",
+  "last_updated": "2026-05-25",
   "description": "Official F1 Fantasy points per round. These override pipeline-calculated actuals for price change predictions.",
   "rounds": {
     "1": {
@@ -161,6 +161,46 @@
         "cadillac": 24,
         "audi": -27,
         "aston_martin": 38
+      }
+    },
+    "7": {
+      "race": "Canadian Grand Prix",
+      "drivers": {
+        "ANT": 62,
+        "LEC": 27,
+        "RUS": 4,
+        "VER": 26,
+        "HAM": 42,
+        "NOR": 6,
+        "PIA": 12,
+        "SAI": 11,
+        "COL": 25,
+        "OCO": 8,
+        "LAW": 23,
+        "BEA": 10,
+        "GAS": 16,
+        "PER": -11,
+        "BOR": 5,
+        "ALB": -8,
+        "HAD": 6,
+        "BOT": 12,
+        "LIN": -16,
+        "ALO": -26,
+        "STR": 11,
+        "HUL": 1
+      },
+      "constructors": {
+        "mercedes": 76,
+        "ferrari": 69,
+        "mclaren": 33,
+        "red_bull": 44,
+        "alpine": 46,
+        "haas": 19,
+        "racing_bulls": 22,
+        "williams": 6,
+        "cadillac": 2,
+        "audi": 11,
+        "aston_martin": -14
       }
     }
   }

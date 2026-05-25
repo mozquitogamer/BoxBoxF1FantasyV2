@@ -46,6 +46,7 @@ models/training_data/
 
 # FastF1 cache
 data/raw/fastf1/cache/
+data/fastf1_cache/
 
 # OS
 .DS_Store

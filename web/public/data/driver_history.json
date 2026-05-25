@@ -26,6 +26,12 @@
           "circuit_id": "miami",
           "points": 30,
           "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 26,
+          "is_dnf": false
         }
       ]
     },
@@ -54,6 +60,12 @@
           "circuit_id": "miami",
           "points": 37,
           "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": -1,
+          "is_dnf": true
         }
       ]
     },
@@ -81,6 +93,12 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 40,
+          "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 62,
           "is_dnf": false
         }
       ]
@@ -110,6 +128,12 @@
           "circuit_id": "miami",
           "points": 23,
           "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 27,
+          "is_dnf": false
         }
       ]
     },
@@ -137,6 +161,12 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 20,
+          "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 42,
           "is_dnf": false
         }
       ]
@@ -166,6 +196,12 @@
           "circuit_id": "miami",
           "points": 54,
           "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": -3,
+          "is_dnf": true
         }
       ]
     },
@@ -193,6 +229,12 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 6,
+          "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 10,
           "is_dnf": false
         }
       ]
@@ -222,6 +264,12 @@
           "circuit_id": "miami",
           "points": -4,
           "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": -16,
+          "is_dnf": false
         }
       ]
     },
@@ -249,6 +297,12 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 7,
+          "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 5,
           "is_dnf": false
         }
       ]
@@ -278,6 +332,12 @@
           "circuit_id": "miami",
           "points": -13,
           "is_dnf": true
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 16,
+          "is_dnf": false
         }
       ]
     },
@@ -305,6 +365,12 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 14,
+          "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 8,
           "is_dnf": false
         }
       ]
@@ -334,6 +400,12 @@
           "circuit_id": "miami",
           "points": 18,
           "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 11,
+          "is_dnf": false
         }
       ]
     },
@@ -362,6 +434,12 @@
           "circuit_id": "miami",
           "points": 19,
           "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": -14,
+          "is_dnf": true
         }
       ]
     },
@@ -389,6 +467,12 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 13,
+          "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 25,
           "is_dnf": false
         }
       ]
@@ -418,6 +502,12 @@
           "circuit_id": "miami",
           "points": -16,
           "is_dnf": true
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 23,
+          "is_dnf": false
         }
       ]
     },
@@ -446,6 +536,12 @@
           "circuit_id": "miami",
           "points": 16,
           "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": -15,
+          "is_dnf": true
         }
       ]
     },
@@ -473,6 +569,12 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 16,
+          "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 11,
           "is_dnf": false
         }
       ]
@@ -502,6 +604,12 @@
           "circuit_id": "miami",
           "points": -17,
           "is_dnf": true
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 3,
+          "is_dnf": false
         }
       ]
     },
@@ -529,6 +637,12 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 40,
+          "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 12,
           "is_dnf": false
         }
       ]
@@ -558,6 +672,12 @@
           "circuit_id": "miami",
           "points": 20,
           "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": -30,
+          "is_dnf": true
         }
       ]
     },
@@ -585,6 +705,12 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 4,
+          "is_dnf": false
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 12,
           "is_dnf": false
         }
       ]
@@ -614,6 +740,12 @@
           "circuit_id": "miami",
           "points": -29,
           "is_dnf": true
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 1,
+          "is_dnf": false
         }
       ]
     }
@@ -640,6 +772,11 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 97
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 71
         }
       ]
     },
@@ -664,6 +801,11 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 53
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 69
         }
       ]
     },
@@ -688,6 +830,11 @@
           "round": 6,
           "circuit_id": "miami",
           "points": -17
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 12
         }
       ]
     },
@@ -712,6 +859,11 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 23
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 19
         }
       ]
     },
@@ -736,6 +888,11 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 28
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 39
         }
       ]
     },
@@ -760,6 +917,11 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 12
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 46
         }
       ]
     },
@@ -784,6 +946,11 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 40
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": -2
         }
       ]
     },
@@ -808,6 +975,11 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 106
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 24
         }
       ]
     },
@@ -832,6 +1004,11 @@
           "round": 6,
           "circuit_id": "miami",
           "points": -21
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 9
         }
       ]
     },
@@ -856,6 +1033,11 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 19
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": -4
         }
       ]
     },
@@ -880,6 +1062,11 @@
           "round": 6,
           "circuit_id": "miami",
           "points": 39
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": -20
         }
       ]
     }

@@ -1,8 +1,9 @@
 {
-    "description": "Driver of the Day winners per round. Source: formula1.com/en/results/2026/awards/driver-of-the-day",
-    "season": 2026,
-    "winners": {
-        "1": "VER",
-        "2": "ANT"
-    }
+  "description": "Driver of the Day winners per round. Source: formula1.com/en/results/2026/awards/driver-of-the-day",
+  "season": 2026,
+  "winners": {
+    "1": "VER",
+    "2": "ANT",
+    "7": "HAM"
+  }
 }
