@@ -387,3 +387,255 @@
 .changelog-entry-body ul { margin: 4px 0 8px; padding-left: 22px; }
 .changelog-entry-body li { margin-bottom: 4px; }
 .changelog-entry-body strong { color: var(--text-primary); }
+
+/* Banner inserted into optimizer / transfer / planner result panels when the
+   user has active What-If bumps. Tells them the scoring includes their overlay. */
+.scenario-active-banner {
+    background: rgba(99, 102, 241, 0.12);
+    color: #c7d2fe;
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    padding: 8px 14px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.scenario-active-banner strong { color: #e0e7ff; }
+
+/* Saved scenarios — list, save row, compare controls + table */
+.scenario-save-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.scenario-save-row input {
+    flex: 1;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 7px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+.scenario-save-row button {
+    padding: 7px 14px;
+    background: #6366f1;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.82rem;
+}
+.scenario-save-row button:hover { background: #4f46e5; }
+
+.scenario-saved-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+.scenario-saved-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: var(--bg-card-hover);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+.scenario-saved-name {
+    flex: 1;
+    color: var(--text-primary);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.scenario-saved-meta {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+.scenario-saved-load {
+    background: rgba(99, 102, 241, 0.20);
+    color: #c7d2fe;
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    padding: 4px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.78rem;
+}
+.scenario-saved-load:hover { background: rgba(99, 102, 241, 0.32); }
+.scenario-saved-delete {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 1.05rem;
+    line-height: 1;
+}
+.scenario-saved-delete:hover {
+    background: rgba(239, 68, 68, 0.10);
+    color: var(--red);
+    border-color: var(--red);
+}
+
+.scenario-compare-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: 6px;
+    font-size: 0.82rem;
+    margin-bottom: 8px;
+}
+.scenario-compare-controls.hidden { display: none; }
+.scenario-compare-controls label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+}
+.scenario-compare-controls select {
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+}
+.scenario-compare-controls button {
+    margin-left: auto;
+    padding: 6px 14px;
+    background: #6366f1;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.82rem;
+}
+
+.scenario-compare-result { margin-top: 10px; }
+.scenario-compare-table-wrap {
+    background: var(--bg-card-hover);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+}
+.scenario-compare-header {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+.scenario-compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+.scenario-compare-table th,
+.scenario-compare-table td {
+    padding: 4px 8px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.scenario-compare-table th { color: var(--text-secondary); font-weight: 500; }
+.scenario-compare-table td.num,
+.scenario-compare-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* MC band overlay — visual where the user's scenario lands vs the model's
+   prediction inside the MC 90% CI. Shown only on cards with active bumps. */
+.mc-band-overlay {
+    margin-top: 6px;
+    padding: 6px 4px 4px;
+}
+.mc-band-track {
+    position: relative;
+    height: 8px;
+    background: linear-gradient(90deg,
+        rgba(255,255,255,0.04) 0%,
+        rgba(255,255,255,0.10) 30%,
+        rgba(255,255,255,0.10) 70%,
+        rgba(255,255,255,0.04) 100%);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+}
+.mc-band-marker {
+    position: absolute;
+    top: -2px;
+    width: 4px;
+    height: 12px;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    pointer-events: auto;
+    cursor: help;
+}
+.mc-band-marker.baseline {
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+}
+.mc-band-marker.adjusted {
+    background: #a5b4fc;
+    box-shadow: 0 0 6px rgba(165, 180, 252, 0.6);
+}
+.mc-band-marker.adjusted.out-of-band {
+    background: #f97316;       /* warn: scenario falls outside the model's 90% CI */
+    box-shadow: 0 0 8px rgba(249, 115, 22, 0.7);
+}
+.mc-band-legend {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+.mc-band-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+.mc-band-dot.baseline { background: rgba(255, 255, 255, 0.85); }
+.mc-band-dot.adjusted { background: #a5b4fc; }
+
+/* Smart-suggestion line inside the per-card scenario popup */
+.scenario-popup-suggestion {
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: rgba(99, 102, 241, 0.10);
+    border: 1px solid rgba(99, 102, 241, 0.30);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: #c7d2fe;
+    line-height: 1.4;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+.scenario-popup-suggestion .suggestion-label {
+    color: #e0e7ff;
+    font-weight: 600;
+}
+.scenario-popup-suggestion .suggestion-apply {
+    margin-left: auto;
+    background: #6366f1;
+    color: #fff;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+.scenario-popup-suggestion .suggestion-apply:hover { background: #4f46e5; }

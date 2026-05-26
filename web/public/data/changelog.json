@@ -2,6 +2,27 @@
   "entries": [
     {
       "date": "2026-05-25",
+      "title": "What-If Scenarios Phase 2 + 3 — overlay reaches the optimizer, save/compare/MC band/hint",
+      "tags": ["feature"],
+      "body": [
+        "Phase 2: the Lineup Optimizer, Transfer Advisor, and Multi-Week Planner now consult your active What-If bumps when scoring picks. A purple banner appears on the results when scoring includes your overlay so you can't mistake it for the baseline model view. Bumps still don't affect future rounds in the Multi-Week Planner (they're round-scoped by design — pace bumps don't transfer between Canada and Monaco).",
+        "Phase 3 also lands as one bundle:",
+        "<ul><li><strong>Save / load named scenarios</strong> — name the current bumps (e.g. \"Mercedes upgrade lands\", \"Cool Monaco rain\"), keep several saved per round, swap between them.</li><li><strong>Side-by-side compare</strong> — pick any two saved scenarios (or current vs saved) and see a per-driver delta table of who diverges most between the two views.</li><li><strong>MC band overlay on driver cards</strong> — when a bump is active, a small bar visualises the model's 90% CI with the baseline mean (white) and your scenario's adjusted points (purple) marked. If your scenario falls outside the model's CI, the marker turns orange.</li><li><strong>Smart suggestions</strong> in the per-card popup — when the MC distribution shape suggests asymmetric upside/downside, you get a one-click hint to apply a starting bump.</li></ul>",
+        "All client-side, all per-round-scoped, all stored in your browser only."
+      ]
+    },
+    {
+      "date": "2026-05-25",
+      "title": "DNF-by-weather classifier — built but not shipped (honest)",
+      "tags": ["model", "infra"],
+      "body": [
+        "Built and tested a dedicated logistic-regression model to predict per-driver DNF probability conditional on weather, temperature, and rolling reliability. <strong>The gate failed honestly.</strong>",
+        "Brier-score improvement over the baseline (just predicting the average DNF rate) was only 0.57% (gate was 1%), AUC was 0.585 (gate was 0.60), and the wet-vs-dry signal (+0.010 absolute probability) was much weaker than the MC weather widener's 2.6× DNF multiplier on HIGH rain risk already provides.",
+        "F1 DNFs are inherently noisy — most are single-event collisions or mechanical failures that don't aggregate well into features. Shipping a model that's barely better than the existing approach would have replaced a working coarse heuristic with a finely-tuned but worse predictor. The training script (`pipeline/train_dnf_classifier.py`) stays in place to re-run when more historical data accumulates."
+      ]
+    },
+    {
+      "date": "2026-05-25",
       "title": "Weather-conditioned predictions — model now learns rain & temperature",
       "tags": ["model", "feature"],
       "body": [

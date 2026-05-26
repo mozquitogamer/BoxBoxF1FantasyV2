@@ -25,6 +25,11 @@
     'use strict';
 
     const STORAGE_KEY = 'boxbox_scenario_v1';
+    // Phase 3: saved named scenarios live in a separate key. Cap to MAX_SAVED
+    // so a malicious site can't fill up LocalStorage. Per-round map keeps
+    // saves scoped — a Canada scenario won't appear when planning Monaco.
+    const SAVES_KEY = 'boxbox_scenario_saves_v1';
+    const MAX_SAVED_PER_ROUND = 10;
 
     // Mirrors config/fantasy_scoring.py — keep in sync if scoring rules change.
     const QUALI_POS_POINTS = {1:10,2:9,3:8,4:7,5:6,6:5,7:4,8:3,9:2,10:1};
@@ -66,6 +71,107 @@
 
     function notify() {
         _listeners.forEach(fn => { try { fn(_state); } catch(e) {} });
+    }
+
+    // -- Saved named scenarios (Phase 3) -------------------------------------
+    // Storage shape:
+    //   { "<round>": [ { name, driverModifiers, teamModifiers, savedAt }, ... ] }
+    function loadSavesAll() {
+        try {
+            const raw = localStorage.getItem(SAVES_KEY);
+            return raw ? JSON.parse(raw) : {};
+        } catch(e) { return {}; }
+    }
+    function persistSavesAll(saves) {
+        try { localStorage.setItem(SAVES_KEY, JSON.stringify(saves)); } catch(e) {}
+    }
+    function listSavedScenarios() {
+        const all = loadSavesAll();
+        return (all[String(_round)] || []).slice();
+    }
+    function saveCurrentAs(name) {
+        if (!name || !String(name).trim()) return false;
+        const trimmed = String(name).trim();
+        const all = loadSavesAll();
+        const key = String(_round);
+        all[key] = all[key] || [];
+        // Replace any existing save with the same name (case-insensitive)
+        all[key] = all[key].filter(s => s.name.toLowerCase() !== trimmed.toLowerCase());
+        all[key].unshift({
+            name: trimmed,
+            driverModifiers: Object.assign({}, _state.driverModifiers),
+            teamModifiers: Object.assign({}, _state.teamModifiers),
+            savedAt: new Date().toISOString(),
+        });
+        // Cap
+        if (all[key].length > MAX_SAVED_PER_ROUND) {
+            all[key] = all[key].slice(0, MAX_SAVED_PER_ROUND);
+        }
+        persistSavesAll(all);
+        notify();
+        return true;
+    }
+    function loadSavedScenario(name) {
+        const saves = listSavedScenarios();
+        const found = saves.find(s => s.name === name);
+        if (!found) return false;
+        _state = freshState();
+        _state.round = _round;
+        _state.driverModifiers = Object.assign({}, found.driverModifiers || {});
+        _state.teamModifiers = Object.assign({}, found.teamModifiers || {});
+        _state.scenarioName = found.name;
+        saveStorage();
+        notify();
+        return true;
+    }
+    function deleteSavedScenario(name) {
+        const all = loadSavesAll();
+        const key = String(_round);
+        if (!all[key]) return false;
+        const before = all[key].length;
+        all[key] = all[key].filter(s => s.name !== name);
+        if (all[key].length === before) return false;
+        persistSavesAll(all);
+        notify();
+        return true;
+    }
+    // Compare two saved scenarios — returns per-driver { baseline, A_pts, B_pts, delta }.
+    // Useful for side-by-side rendering.
+    function compareSavedScenarios(nameA, nameB, predictions) {
+        if (!predictions) return null;
+        const saves = listSavedScenarios();
+        const findOrLoad = (name) => {
+            if (name === '__current__') return { driverModifiers: _state.driverModifiers, teamModifiers: _state.teamModifiers };
+            return saves.find(s => s.name === name);
+        };
+        const a = findOrLoad(nameA);
+        const b = findOrLoad(nameB);
+        if (!a || !b) return null;
+        // Temporarily swap _state to compute each overlay, then restore
+        const original = { d: _state.driverModifiers, t: _state.teamModifiers };
+        _state.driverModifiers = Object.assign({}, a.driverModifiers || {});
+        _state.teamModifiers = Object.assign({}, a.teamModifiers || {});
+        const viewA = applyToAll(predictions);
+        _state.driverModifiers = Object.assign({}, b.driverModifiers || {});
+        _state.teamModifiers = Object.assign({}, b.teamModifiers || {});
+        const viewB = applyToAll(predictions);
+        _state.driverModifiers = original.d;
+        _state.teamModifiers = original.t;
+        // Build per-driver compare row
+        const drivers = (predictions.drivers || []).map(base => {
+            const da = viewA.drivers.find(x => x.driver_id === base.driver_id);
+            const db = viewB.drivers.find(x => x.driver_id === base.driver_id);
+            return {
+                driver_id: base.driver_id,
+                name: base.name,
+                constructor: base.constructor,
+                baseline: base.expected_points,
+                A_pts: da ? da.expected_points_adjusted ?? da.expected_points : base.expected_points,
+                B_pts: db ? db.expected_points_adjusted ?? db.expected_points : base.expected_points,
+            };
+        });
+        drivers.forEach(d => { d.delta = (d.A_pts || 0) - (d.B_pts || 0); });
+        return { nameA, nameB, drivers };
     }
 
     // Public: initialize with the current-round predictions payload.
@@ -316,5 +422,11 @@
         onChange,
         encodeForUrl,
         loadFromShareString,
+        // Phase 3: saved named scenarios + compare
+        listSavedScenarios,
+        saveCurrentAs,
+        loadSavedScenario,
+        deleteSavedScenario,
+        compareSavedScenarios,
     };
 })();

@@ -1,8 +1,8 @@
 # User-Facing "What-If Scenarios" Feature — Implementation Plan
 
-**Status:** **Phase 1 shipped 2026-05-25** (commit `aa15acf`). Phases 2-5 deferred until traction is proven.
+**Status:** **Phases 1, 2, and 3 all shipped 2026-05-25.** Phases 4 (premium tier with backend) and 5 (smarter math) remain deferred.
 
-**What shipped:**
+**Phase 1 — Foundation (commit `aa15acf`):**
 - Per-card ± slider opening a mini popup (driver and constructor cards)
 - Floating purple header pill showing active bump count with Manage / Reset
 - Full manager modal with per-team master sliders, share-via-URL, reset all
@@ -11,13 +11,23 @@
 - `predictions.json` now ships `raw_scores` per driver + per-round `score_unit` adjacent-gap median so the JS can convert positions → raw bumps
 - Reuses existing `.upgrade-delta` badge UI so the visual layer was free
 
+**Phase 2 — Optimizer integration (this commit):**
+- Lineup Optimizer, Transfer Advisor, Multi-Week Planner now consult `window.scenarios.applyToAll(data)` when scoring picks
+- Helper `getScenarioView()` returns overlay-applied or baseline data
+- `scenarioBannerHtml()` appends a "based on your scenario" banner to result panels when bumps are active
+- Multi-Week Planner only overlays the CURRENT round (scenarios are round-scoped — future rounds use the planner's own track-affinity heuristic / horizon ML)
+
+**Phase 3 — Polish (this commit):**
+- **Save/load named scenarios** — per-round LocalStorage map, cap of 10 saves per round, manager modal lists them with Load/Delete
+- **Side-by-side compare** — pick any two saved scenarios (or current vs saved) and see a per-driver delta table sorted by |delta|
+- **MC band overlay on driver cards** — when a bump is active, a small horizontal bar visualises the MC 90% CI with baseline mean (white marker) and adjusted points (purple marker); orange when adjusted falls outside the CI
+- **Smart suggestions in per-card popup** — heuristic based on MC distribution asymmetry (upside vs downside skew); proposes a starting bump with one-click Apply. Honest about being a hint, not a recommendation.
+
 **What didn't ship (deferred):**
-- Phase 2: optimizer + transfer advisor + multi-week planner consulting scenario state (still use baseline). The infrastructure is in place; integration is a follow-up.
-- Phase 3: compare-two-scenarios side-by-side, MC band overlay, suggest-a-bump hints
 - Phase 4: Premium tier with backend (would need auth + payments — defer until usage proven)
 - Phase 5: Smarter math (heuristic FL adjustments, track-record-conditional bumps, accuracy calibration)
 
-**Approval history:** Approved 2026-05-22 to build during the next post-race break (after R7 Canada).
+**Approval history:** Approved 2026-05-22 to build during the next post-race break (after R7 Canada). Phases 1, 2, 3 all shipped 2026-05-25 in that same break.
 
 **TL;DR:** Visitors to the public site can tweak per-driver and per-team pace bumps in their own browser to see how predicted points and lineups change. The base ML prediction stays untouched as the canonical view; the user's scenario is a transparent overlay alongside it. All client-side, no backend required. Persists per-user via LocalStorage; shareable via URL.
 

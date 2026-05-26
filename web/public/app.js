@@ -187,6 +187,30 @@ async function ensureDeepDiveData() {
 // -- Tab render tracking --
 const _tabRendered = {};
 
+// -- Scenario-aware data view --
+// When the user has any What-If bumps active, the Lineup Optimizer, Transfer
+// Advisor, and Multi-Week Planner should score against the overlaid prediction,
+// not the baseline. This helper returns the overlay-applied data when scenarios
+// are active, or `data` itself when they aren't. Cheap — applyToAll is O(n) per
+// session, and we call it once per optimizer run (not per combination).
+function getScenarioView() {
+    if (!data) return data;
+    if (window.scenarios && !window.scenarios.isEmpty()) {
+        return window.scenarios.applyToAll(data);
+    }
+    return data;
+}
+
+// Returns "" or a small banner HTML announcing that the lineup/transfer/planner
+// results are based on the user's active scenario, not the baseline ML view.
+function scenarioBannerHtml() {
+    if (!window.scenarios || window.scenarios.isEmpty()) return '';
+    const n = window.scenarios.activeCount();
+    return `<div class="scenario-active-banner" title="Lineup scoring includes your What-If bumps. Open the floating Scenario pill (top-right) to manage or reset.">
+        \u{2728} Results include your active scenario (<strong>${n}</strong> bump${n === 1 ? '' : 's'})
+    </div>`;
+}
+
 async function renderTabIfNeeded(tabName) {
     if (_tabRendered[tabName]) return;
     const tabId = `tab-${tabName}`;
@@ -1142,6 +1166,43 @@ function renderWeather() {
     `;
 }
 
+// Renders a visual MC band only when a scenario is active for this driver.
+// Shows the model's MC 90% CI as a faded bar, the model's baseline mean as
+// one marker, and the user's adjusted expected_points as a second marker.
+// Makes the "your scenario vs the model" delta visceral.
+function renderMcBandVisual(d) {
+    // Only render when scenario is meaningfully shifting this driver
+    if (typeof d.points_delta !== 'number' || Math.abs(d.points_delta) < 0.5) return '';
+    if (d.mc_total_p5 == null || d.mc_total_p95 == null) return '';
+
+    const lo = d.mc_total_p5;
+    const hi = d.mc_total_p95;
+    const range = hi - lo;
+    if (range <= 0) return '';
+
+    const baseline = d.mc_total_mean != null ? d.mc_total_mean : d.expected_points - d.points_delta;
+    const adjusted = d.expected_points_adjusted != null ? d.expected_points_adjusted : d.expected_points;
+
+    // Clamp positions to [0, 100] %
+    const clamp = (x) => Math.max(0, Math.min(100, x));
+    const baselinePct = clamp((baseline - lo) / range * 100);
+    const adjustedPct = clamp((adjusted - lo) / range * 100);
+    const adjustedOutOfBand = (adjusted < lo - 0.5) || (adjusted > hi + 0.5);
+
+    return `
+        <div class="mc-band-overlay" title="Where your scenario puts ${d.name} (purple) vs the model's prediction (white). MC 90% CI band shown faded.">
+            <div class="mc-band-track">
+                <div class="mc-band-marker baseline" style="left:${baselinePct.toFixed(1)}%" title="Model: ${baseline.toFixed(1)} pts"></div>
+                <div class="mc-band-marker adjusted ${adjustedOutOfBand ? 'out-of-band' : ''}" style="left:${adjustedPct.toFixed(1)}%" title="Your scenario: ${adjusted.toFixed(1)} pts"></div>
+            </div>
+            <div class="mc-band-legend">
+                <span><span class="mc-band-dot baseline"></span>Model ${baseline.toFixed(1)}</span>
+                <span><span class="mc-band-dot adjusted"></span>You ${adjusted.toFixed(1)} ${adjustedOutOfBand ? ' ⚠' : ''}</span>
+            </div>
+        </div>
+    `;
+}
+
 // Returns the wet/cold badge HTML to drop into a driver/constructor card, or "".
 // Reads `data.weather_adjustments` (populated by 08_export_website_json from
 // the MC sim's weather_adjustments_active block).
@@ -1332,7 +1393,8 @@ function driverCard(d, i) {
         <div class="mc-range" title="Monte Carlo simulation: 90% of outcomes fall within this range (5th to 95th percentile). Shows downside risk and upside potential.">
             <span class="mc-label">MC 90% CI</span>
             <span class="mc-values">${d.mc_total_p5.toFixed(0)} — ${d.mc_total_p95.toFixed(0)} pts</span>
-        </div>` : ''}
+        </div>
+        ${renderMcBandVisual(d)}` : ''}
         ${renderPriceChangeBrackets(d)}
     </div>`;
 }
@@ -1482,6 +1544,7 @@ function injectScenarioPopup() {
             <span id="scenarioPopupValue">0.0 positions</span>
             <span class="scenario-popup-effect" id="scenarioPopupEffect"></span>
         </div>
+        <div id="scenarioPopupSuggestion" class="scenario-popup-suggestion" style="display:none;"></div>
         <div class="scenario-popup-actions">
             <button class="scenario-popup-clear" id="scenarioPopupClear" type="button">Clear</button>
             <button class="scenario-popup-done" id="scenarioPopupDone" type="button">Done</button>
@@ -1555,6 +1618,10 @@ function openScenarioPopup(type, id, anchorEl) {
         else                    window.scenarios.setTeamBump(id, v);
     };
 
+    // Smart suggestion line (Phase 3) — computed from the driver's MC shape.
+    // Cleared and rebuilt each open so it reflects the current pick.
+    renderPopupSuggestion(type, id);
+
     // Position popup near the anchor
     popup.style.display = '';
     const rect = anchorEl.getBoundingClientRect();
@@ -1568,6 +1635,78 @@ function openScenarioPopup(type, id, anchorEl) {
     }
     popup.style.left = `${left}px`;
     popup.style.top  = `${top}px`;
+}
+
+// Heuristic suggestion shown inside the per-card scenario popup.
+// Explicitly framed as a HINT, not a recommendation. Reads the MC distribution
+// shape — wide upside vs wide downside vs neither — and proposes a starting
+// bump for the user to dial from. Click "Apply" to set the slider.
+function renderPopupSuggestion(type, id) {
+    const el = document.getElementById('scenarioPopupSuggestion');
+    if (!el || !data) { return; }
+    let bumpHint = null;
+    let rationale = '';
+
+    if (type === 'driver') {
+        const d = (data.drivers || []).find(x => x.driver_id === id);
+        if (!d || d.mc_total_p5 == null || d.mc_total_p95 == null || d.mc_total_mean == null) {
+            el.style.display = 'none';
+            return;
+        }
+        const upside = d.mc_total_p95 - d.mc_total_mean;
+        const downside = d.mc_total_mean - d.mc_total_p5;
+        // Asymmetry: when upside >> downside the MC distribution is right-skewed
+        // (rare-but-large positive outcomes). User who's bullish on this pick
+        // might lean +1. Symmetric inverse for left-skewed.
+        const asym = upside - downside;
+        if (Math.abs(asym) >= 8) {
+            bumpHint = asym > 0 ? 1.0 : -1.0;
+            const dir = asym > 0 ? 'upside' : 'downside';
+            rationale = `MC ${dir} is ${Math.abs(asym).toFixed(0)} pts larger than the other tail. Try ${bumpHint > 0 ? '+1' : '-1'} if you trust the ${dir} story.`;
+        } else if (d.confidence != null && d.confidence < 70) {
+            // Low-confidence pick: hint without a fixed direction
+            rationale = `Confidence is ${d.confidence}% (priors-only or thin FP data). Wider bump range is justified — try +/-1.5 if you have a strong view.`;
+            // No bumpHint — let the user choose direction
+        }
+    } else {
+        // Constructor: derived from both drivers
+        const c = (data.constructors || []).find(x => x.constructor_id === id);
+        if (!c || c.mc_total_p5 == null || c.mc_total_p95 == null) {
+            el.style.display = 'none';
+            return;
+        }
+        const upside = c.mc_total_p95 - (c.mc_total_mean || 0);
+        const downside = (c.mc_total_mean || 0) - c.mc_total_p5;
+        const asym = upside - downside;
+        if (Math.abs(asym) >= 12) {
+            bumpHint = asym > 0 ? 0.5 : -0.5;
+            const dir = asym > 0 ? 'upside' : 'downside';
+            rationale = `Team-level MC ${dir} skewed by ${Math.abs(asym).toFixed(0)} pts. A ${bumpHint > 0 ? '+0.5' : '-0.5'} team bump nudges both drivers.`;
+        }
+    }
+
+    if (!rationale) {
+        el.style.display = 'none';
+        return;
+    }
+
+    el.style.display = '';
+    el.innerHTML = `
+        <span class="suggestion-label">\u{1F4A1} Hint:</span>
+        <span>${rationale}</span>
+        ${bumpHint != null
+            ? `<button type="button" class="suggestion-apply" data-suggest="${bumpHint}">Apply ${bumpHint > 0 ? '+' : ''}${bumpHint}</button>`
+            : ''}
+    `;
+    const applyBtn = el.querySelector('.suggestion-apply');
+    if (applyBtn) {
+        applyBtn.onclick = () => {
+            const v = parseFloat(applyBtn.dataset.suggest);
+            const slider = document.getElementById('scenarioPopupSlider');
+            slider.value = v;
+            slider.dispatchEvent(new Event('input'));
+        };
+    }
 }
 
 function closeScenarioPopup() {
@@ -1635,6 +1774,25 @@ function injectScenarioManager() {
             </div>
 
             <div class="scenario-modal-section">
+                <h4>Saved scenarios</h4>
+                <p class="scenario-empty" style="margin-bottom:8px;">Save the current bumps as a named scenario so you can flip between alternatives (e.g. "Mercedes upgrade lands" vs "Mercedes upgrade flops").</p>
+                <div class="scenario-save-row">
+                    <input type="text" id="scenarioSaveName" placeholder="Name this scenario..." maxlength="48">
+                    <button id="scenarioSaveBtn" type="button">Save current</button>
+                </div>
+                <div id="scenarioSavedList" class="scenario-saved-list"></div>
+                <div id="scenarioCompareControls" class="scenario-compare-controls hidden">
+                    <label>Compare
+                        <select id="scenarioCompareA"></select>
+                        vs
+                        <select id="scenarioCompareB"></select>
+                    </label>
+                    <button id="scenarioCompareGo" type="button">Compare</button>
+                </div>
+                <div id="scenarioCompareResult" class="scenario-compare-result"></div>
+            </div>
+
+            <div class="scenario-modal-section">
                 <h4>Share &amp; reset</h4>
                 <div class="scenario-share-row">
                     <input type="text" id="scenarioShareUrl" readonly>
@@ -1666,6 +1824,88 @@ function injectScenarioManager() {
         btn.textContent = 'Copied!';
         setTimeout(() => { btn.textContent = orig; }, 1200);
     });
+
+    // Saved scenarios — save / load / delete / compare wiring
+    document.getElementById('scenarioSaveBtn').addEventListener('click', () => {
+        const nameInput = document.getElementById('scenarioSaveName');
+        const name = nameInput.value.trim();
+        if (!name) {
+            nameInput.focus();
+            return;
+        }
+        if (window.scenarios.isEmpty()) {
+            alert('No active bumps to save. Adjust a slider first.');
+            return;
+        }
+        const ok = window.scenarios.saveCurrentAs(name);
+        if (ok) {
+            nameInput.value = '';
+            renderScenarioManagerBody();
+        }
+    });
+    document.getElementById('scenarioCompareGo').addEventListener('click', () => {
+        const a = document.getElementById('scenarioCompareA').value;
+        const b = document.getElementById('scenarioCompareB').value;
+        if (!a || !b || a === b) {
+            alert('Pick two different saved scenarios to compare.');
+            return;
+        }
+        const result = window.scenarios.compareSavedScenarios(a, b, data);
+        renderScenarioCompareResult(result);
+    });
+    // Delegated handlers for load/delete buttons inside the saved list
+    document.getElementById('scenarioSavedList').addEventListener('click', (e) => {
+        const loadBtn = e.target.closest('[data-load-saved]');
+        const delBtn = e.target.closest('[data-delete-saved]');
+        if (loadBtn) {
+            window.scenarios.loadSavedScenario(loadBtn.dataset.loadSaved);
+            renderScenarioManagerBody();
+        } else if (delBtn) {
+            if (confirm(`Delete saved scenario "${delBtn.dataset.deleteSaved}"?`)) {
+                window.scenarios.deleteSavedScenario(delBtn.dataset.deleteSaved);
+                renderScenarioManagerBody();
+            }
+        }
+    });
+}
+
+// Render the per-driver delta table when comparing two scenarios. Sorted by
+// abs(delta) descending so the biggest disagreements show first.
+function renderScenarioCompareResult(result) {
+    const el = document.getElementById('scenarioCompareResult');
+    if (!el) return;
+    if (!result) {
+        el.innerHTML = '<p class="scenario-empty">Could not compare — make sure both scenarios are saved.</p>';
+        return;
+    }
+    const rows = result.drivers
+        .filter(d => Math.abs(d.delta) > 0.05)
+        .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+        .slice(0, 12);
+    if (rows.length === 0) {
+        el.innerHTML = `<p class="scenario-empty">No meaningful differences between "${result.nameA}" and "${result.nameB}" (deltas all under 0.1 pts).</p>`;
+        return;
+    }
+    const labelA = result.nameA === '__current__' ? 'Current' : result.nameA;
+    const labelB = result.nameB === '__current__' ? 'Current' : result.nameB;
+    el.innerHTML = `
+        <div class="scenario-compare-table-wrap">
+            <div class="scenario-compare-header">Top differences (${rows.length} drivers shown, sorted by |delta|)</div>
+            <table class="scenario-compare-table">
+                <thead><tr><th>Driver</th><th class="num">${labelA}</th><th class="num">${labelB}</th><th class="num">Δ</th></tr></thead>
+                <tbody>
+                    ${rows.map(r => `
+                        <tr>
+                            <td><strong>${r.name}</strong></td>
+                            <td class="num">${(r.A_pts || 0).toFixed(1)}</td>
+                            <td class="num">${(r.B_pts || 0).toFixed(1)}</td>
+                            <td class="num" style="color:${r.delta > 0 ? 'var(--green)' : 'var(--red, #ef4444)'}">${r.delta > 0 ? '+' : ''}${r.delta.toFixed(1)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
 }
 
 function openScenarioManager() {
@@ -1753,6 +1993,42 @@ function renderScenarioManagerBody() {
         const code = window.scenarios.encodeForUrl();
         const url = `${location.origin}${location.pathname}?scenario=${code}`;
         shareInput.value = window.scenarios.isEmpty() ? '' : url;
+    }
+
+    // Saved scenarios list + compare dropdowns
+    const savedListEl = document.getElementById('scenarioSavedList');
+    const compareControlsEl = document.getElementById('scenarioCompareControls');
+    if (savedListEl && window.scenarios) {
+        const saves = window.scenarios.listSavedScenarios();
+        if (saves.length === 0) {
+            savedListEl.innerHTML = '<p class="scenario-empty">No saved scenarios yet for this round.</p>';
+            if (compareControlsEl) compareControlsEl.classList.add('hidden');
+        } else {
+            savedListEl.innerHTML = saves.map(s => {
+                const mods = Object.keys(s.driverModifiers || {}).length + Object.keys(s.teamModifiers || {}).length;
+                const date = s.savedAt ? new Date(s.savedAt).toLocaleDateString() : '';
+                return `
+                    <div class="scenario-saved-row">
+                        <span class="scenario-saved-name">${s.name}</span>
+                        <span class="scenario-saved-meta">${mods} bumps · ${date}</span>
+                        <button data-load-saved="${s.name.replace(/"/g, '&quot;')}" type="button" class="scenario-saved-load">Load</button>
+                        <button data-delete-saved="${s.name.replace(/"/g, '&quot;')}" type="button" class="scenario-saved-delete" title="Delete">&times;</button>
+                    </div>
+                `;
+            }).join('');
+            // Show compare controls only if we have >= 1 saved (current + 1 saved is enough)
+            if (compareControlsEl) {
+                compareControlsEl.classList.remove('hidden');
+                const opts = ['<option value="__current__">Current (unsaved)</option>']
+                    .concat(saves.map(s => `<option value="${s.name.replace(/"/g, '&quot;')}">${s.name}</option>`))
+                    .join('');
+                document.getElementById('scenarioCompareA').innerHTML = opts;
+                document.getElementById('scenarioCompareB').innerHTML = opts;
+                // Default selections: current vs first saved
+                document.getElementById('scenarioCompareA').value = '__current__';
+                document.getElementById('scenarioCompareB').value = saves[0].name;
+            }
+        }
     }
 }
 
@@ -2424,11 +2700,16 @@ function runOptimizerSync(budget, strategy, chip) {
         return item.expected_points * 0.6 + item.value_score * 10 * 0.4;
     }
 
+    // Scenario-aware view: when What-If bumps are active, score against the
+    // overlay; otherwise the baseline data. Same `drivers` / `constructors`
+    // shape, so the rest of this function is unchanged.
+    const view = getScenarioView();
+
     // Filter out excluded picks
-    const drivers = data.drivers
+    const drivers = view.drivers
         .filter(d => !excludedDrivers.has(d.driver_id))
         .map(d => ({ ...d, _type: 'driver', _score: score(d) }));
-    const constructors = data.constructors
+    const constructors = view.constructors
         .filter(c => !excludedConstructors.has(c.constructor_id))
         .map(c => ({ ...c, _type: 'constructor', _score: score(c) }));
 
@@ -2567,6 +2848,16 @@ function runOptimizerSync(budget, strategy, chip) {
 function displayLineups(strategy) {
     const resultEl = document.getElementById('optimizerResult');
     resultEl.classList.remove('hidden');
+
+    // Scenario banner — only shown when What-If bumps influenced the result.
+    // Rendered above lineupSummary so it can't be missed.
+    const banner = scenarioBannerHtml();
+    let bannerEl = resultEl.querySelector('.scenario-active-banner');
+    if (bannerEl) bannerEl.remove();
+    if (banner) {
+        const summaryEl = document.getElementById('lineupSummary');
+        summaryEl.insertAdjacentHTML('beforebegin', banner);
+    }
 
     const budget = parseFloat(document.getElementById('budget').value);
     const total = allLineups.length;
@@ -3013,8 +3304,10 @@ function runTransferAdvisor() {
         return total;
     }
 
-    const allDrivers = data.drivers.filter(d => !excludedDrivers.has(d.driver_id));
-    const allConstructors = data.constructors.filter(c => !excludedConstructors.has(c.constructor_id));
+    // Scenario-aware view (see runOptimizerSync for rationale).
+    const view = getScenarioView();
+    const allDrivers = view.drivers.filter(d => !excludedDrivers.has(d.driver_id));
+    const allConstructors = view.constructors.filter(c => !excludedConstructors.has(c.constructor_id));
 
     const numDriverSlots = 5;
     const effectiveBudget = chip === 'limitless' ? 999 : budget;
@@ -3241,6 +3534,15 @@ function runTransferAdvisor() {
 function displayTransferResults(strategy, chip, showWildcardHint) {
     const resultEl = document.getElementById('optimizerResult');
     resultEl.classList.remove('hidden');
+
+    // Scenario banner (only when bumps active)
+    const banner = scenarioBannerHtml();
+    let bannerEl = resultEl.querySelector('.scenario-active-banner');
+    if (bannerEl) bannerEl.remove();
+    if (banner) {
+        const summaryEl = document.getElementById('lineupSummary');
+        summaryEl.insertAdjacentHTML('beforebegin', banner);
+    }
 
     const total = allLineups.length;
     const end = Math.min(lineupsShown + LINEUPS_PER_PAGE, total);
@@ -3941,6 +4243,11 @@ async function runMultiWeekPlanner() {
 
     const currentRound = data.round || 0;
 
+    // Scenario-aware view of the CURRENT round only. Scenarios are round-scoped
+    // (auto-clear when the round changes), so future rounds use the planner's
+    // own track-affinity heuristic / horizon ML and are NOT overlay-adjusted.
+    const view = getScenarioView();
+
     // Load race calendar from seasonSummary (include current round since transfers haven't been made)
     const upcomingRounds = seasonSummary.rounds
         .filter(r => r.round >= currentRound)
@@ -3964,11 +4271,11 @@ async function runMultiWeekPlanner() {
             const constructorScores = {};
             const driverConfidence = {};
             const constructorConfidence = {};
-            for (const d of data.drivers) {
+            for (const d of view.drivers) {
                 driverScores[d.driver_id] = d.expected_points || 0;
                 driverConfidence[d.driver_id] = 1.0;
             }
-            for (const c of data.constructors) {
+            for (const c of view.constructors) {
                 constructorScores[c.constructor_id] = c.expected_points || 0;
                 constructorConfidence[c.constructor_id] = 1.0;
             }
@@ -4498,12 +4805,16 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
     if (!plans.length) {
         // Still show feasibility card if target was set — explains why no plans
         const feasHtml = renderFeasibilityCard(feasibilityInfo);
-        container.innerHTML = feasHtml + '<p style="color:var(--text-secondary);">No valid plans found. Check your team selection and budget.</p>';
+        container.innerHTML = scenarioBannerHtml() + feasHtml + '<p style="color:var(--text-secondary);">No valid plans found. Check your team selection and budget.</p>';
         container.classList.remove('hidden');
         return;
     }
 
     let html = '';
+
+    // Scenario banner — only when active. Shown ahead of all plan rendering so
+    // users can't miss that the plans reflect their bumps for the current round.
+    html += scenarioBannerHtml();
 
     // P2: Target-team feasibility card (renders only if useTargetTeam was set)
     html += renderFeasibilityCard(feasibilityInfo);
