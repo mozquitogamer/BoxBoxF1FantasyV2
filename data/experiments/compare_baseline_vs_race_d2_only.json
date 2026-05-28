@@ -1,0 +1,64 @@
+{
+  "baseline": "baseline",
+  "candidate": "race_d2_only",
+  "models": {
+    "quali": {
+      "n_folds": 5,
+      "rounds": [
+        1,
+        2,
+        3,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 3.0401913875598088,
+      "candidate_mae_mean": 3.0401913875598088,
+      "mae_delta_mean": 0.0,
+      "mae_delta_ci_95": [
+        0.0,
+        0.0
+      ],
+      "excludes_zero": false,
+      "direction": "candidate worse",
+      "verdict": "no improvement"
+    },
+    "race": {
+      "n_folds": 5,
+      "rounds": [
+        1,
+        2,
+        3,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 4.881339712918661,
+      "candidate_mae_mean": 4.490909090909091,
+      "mae_delta_mean": -0.39043062200956913,
+      "mae_delta_ci_95": [
+        -0.608612440191387,
+        -0.17224880382775112
+      ],
+      "excludes_zero": true,
+      "direction": "candidate better",
+      "verdict": "STATISTICALLY BETTER (95% CI on improvement excludes zero)"
+    },
+    "sprint": {
+      "n_folds": 3,
+      "rounds": [
+        2,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 0.12121212121212122,
+      "candidate_mae_mean": 0.12121212121212122,
+      "mae_delta_mean": 0.0,
+      "mae_delta_ci_95": [
+        0.0,
+        0.0
+      ],
+      "excludes_zero": false,
+      "direction": "candidate worse",
+      "verdict": "no improvement"
+    }
+  }
+}

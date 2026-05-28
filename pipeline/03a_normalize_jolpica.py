@@ -319,21 +319,35 @@ def process_year(
         for rdir in round_dirs:
             rnd_num = int(re.search(r"\d+", rdir.name).group())
 
+            # IMPORTANT: Jolpica's JSON response uses compressed numbering that
+            # skips cancelled rounds — e.g. Miami arrives labeled "round 4" even
+            # though it's our internal R6 (because R4 Bahrain and R5 Saudi were
+            # cancelled). We override the round field on every parsed row with
+            # the internal round number derived from the directory name. This is
+            # the source of truth — `data/raw/jolpica/year{Y}/round{N}/` is
+            # always our internal numbering. Without this override, the model
+            # rows for Miami silently overwrite the cancelled-Bahrain slot and
+            # later rounds disappear entirely.
+            def _stamp_round(rows: list[Dict[str, Any]]) -> list[Dict[str, Any]]:
+                for r in rows:
+                    r["round"] = rnd_num
+                return rows
+
             results_path = rdir / "results.json"
             if results_path.exists():
-                all_results.extend(parse_round_results(read_json(results_path)))
+                all_results.extend(_stamp_round(parse_round_results(read_json(results_path))))
             else:
                 print(f"  [WARN] Missing results.json for round {rnd_num}")
 
             qual_path = rdir / "qualifying.json"
             if qual_path.exists():
-                all_qualifying.extend(parse_round_qualifying(read_json(qual_path)))
+                all_qualifying.extend(_stamp_round(parse_round_qualifying(read_json(qual_path))))
             else:
                 print(f"  [WARN] Missing qualifying.json for round {rnd_num}")
 
             sprint_path = rdir / "sprint.json"
             if sprint_path.exists():
-                sprint_rows = parse_round_sprint(read_json(sprint_path))
+                sprint_rows = _stamp_round(parse_round_sprint(read_json(sprint_path)))
                 if sprint_rows:
                     all_sprint.extend(sprint_rows)
     else:

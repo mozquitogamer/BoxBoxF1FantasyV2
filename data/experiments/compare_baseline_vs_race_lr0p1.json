@@ -1,0 +1,64 @@
+{
+  "baseline": "baseline",
+  "candidate": "race_lr0p1",
+  "models": {
+    "quali": {
+      "n_folds": 5,
+      "rounds": [
+        1,
+        2,
+        3,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 3.0401913875598088,
+      "candidate_mae_mean": 3.0401913875598088,
+      "mae_delta_mean": 0.0,
+      "mae_delta_ci_95": [
+        0.0,
+        0.0
+      ],
+      "excludes_zero": false,
+      "direction": "candidate worse",
+      "verdict": "no improvement"
+    },
+    "race": {
+      "n_folds": 5,
+      "rounds": [
+        1,
+        2,
+        3,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 4.881339712918661,
+      "candidate_mae_mean": 4.911961722488039,
+      "mae_delta_mean": 0.030622009569378238,
+      "mae_delta_ci_95": [
+        -0.1387559808612437,
+        0.20000000000000018
+      ],
+      "excludes_zero": false,
+      "direction": "candidate worse",
+      "verdict": "no improvement"
+    },
+    "sprint": {
+      "n_folds": 3,
+      "rounds": [
+        2,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 0.12121212121212122,
+      "candidate_mae_mean": 0.12121212121212122,
+      "mae_delta_mean": 0.0,
+      "mae_delta_ci_95": [
+        0.0,
+        0.0
+      ],
+      "excludes_zero": false,
+      "direction": "candidate worse",
+      "verdict": "no improvement"
+    }
+  }
+}

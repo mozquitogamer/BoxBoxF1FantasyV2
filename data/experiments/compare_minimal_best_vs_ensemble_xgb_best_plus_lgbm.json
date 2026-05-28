@@ -1,0 +1,64 @@
+{
+  "baseline": "minimal_best",
+  "candidate": "ensemble_xgb_best_plus_lgbm",
+  "models": {
+    "quali": {
+      "n_folds": 5,
+      "rounds": [
+        1,
+        2,
+        3,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 2.9129186602870814,
+      "candidate_mae_mean": 2.897607655502392,
+      "mae_delta_mean": -0.01531100478468903,
+      "mae_delta_ci_95": [
+        -0.18181818181818182,
+        0.15119617224880377
+      ],
+      "excludes_zero": false,
+      "direction": "candidate better",
+      "verdict": "directional improvement (CI includes zero \u2014 not statistically significant)"
+    },
+    "race": {
+      "n_folds": 5,
+      "rounds": [
+        1,
+        2,
+        3,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 4.490909090909091,
+      "candidate_mae_mean": 4.4851674641148325,
+      "mae_delta_mean": -0.005741626794258358,
+      "mae_delta_ci_95": [
+        -0.38086124401913873,
+        0.3760765550239237
+      ],
+      "excludes_zero": false,
+      "direction": "candidate better",
+      "verdict": "directional improvement (CI includes zero \u2014 not statistically significant)"
+    },
+    "sprint": {
+      "n_folds": 3,
+      "rounds": [
+        2,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 0.12121212121212122,
+      "candidate_mae_mean": 0.3333333333333333,
+      "mae_delta_mean": 0.21212121212121213,
+      "mae_delta_ci_95": [
+        0.1818181818181818,
+        0.2727272727272727
+      ],
+      "excludes_zero": true,
+      "direction": "candidate worse",
+      "verdict": "STATISTICALLY WORSE (95% CI on regression excludes zero)"
+    }
+  }
+}

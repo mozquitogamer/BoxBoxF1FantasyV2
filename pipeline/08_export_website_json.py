@@ -315,6 +315,7 @@ def build_predictions_json(round_num: int) -> dict | None:
     # Merge Monte Carlo data if available
     mc_path = PREDICTIONS_DIR / f"round{round_num}" / "monte_carlo_fantasy.json"
     weather_adjustments_active = None
+    calibration_meta = None
     if mc_path.exists():
         try:
             with open(mc_path) as f:
@@ -322,6 +323,17 @@ def build_predictions_json(round_num: int) -> dict | None:
             # Capture weather adjustments metadata for the frontend badges
             sim_params = mc_data.get("simulation_params", {})
             weather_adjustments_active = sim_params.get("weather_adjustments_active")
+            # Surface calibration metadata so the frontend can show users which
+            # adjustments are being applied to predictions. None of these fields
+            # change the numbers (those are already baked into the per-driver
+            # values above) — they only document what was done.
+            calibration_meta = {
+                "noise_multiplier": sim_params.get("noise_multiplier"),
+                "bias_correction_global": sim_params.get("bias_correction_global"),
+                "bias_correction_per_tier": sim_params.get("bias_correction_per_tier"),
+                "bias_correction_applied": sim_params.get("bias_correction_applied", False),
+                "calibration_rounds": sim_params.get("calibration_rounds"),
+            }
             mc_by_driver = {d["driver_abbrev"]: d for d in mc_data.get("drivers", [])}
             for entry in drivers_json:
                 mc = mc_by_driver.get(entry["driver_id"])
@@ -499,6 +511,8 @@ def build_predictions_json(round_num: int) -> dict | None:
         # wet/cold badges and the weather widget can render an explainer
         # of what's being adjusted in the Monte Carlo.
         payload["weather_adjustments"] = weather_adjustments_active
+    if calibration_meta is not None:
+        payload["calibration"] = calibration_meta
     return payload
 
 

@@ -344,9 +344,22 @@ def load_calibration(round_num: int | None = None) -> dict:
     with open(path) as f:
         cal = json.load(f)
 
+    # Per-tier bias dict (front / midfield / back). calibrate_confidence.py
+    # writes these alongside the global bias because front-runners are
+    # systematically more over-predicted than back-markers. Applying a tier-
+    # specific correction is more accurate than the global value. Fallback to
+    # global bias if per_tier is missing or empty.
+    per_tier = cal.get("per_tier") or {}
+    per_tier_bias = {
+        tier: float(per_tier[tier].get("bias", cal.get("bias_correction", 0.0)))
+        for tier in ("front", "midfield", "back")
+        if tier in per_tier
+    }
+
     result = {
         "noise_multiplier": cal.get("noise_multiplier", 1.0),
         "bias_correction": cal.get("bias_correction", 0.0),
+        "per_tier_bias": per_tier_bias,
         "n_rounds": cal.get("n_rounds", 0),
         "coverage_90": cal.get("coverage_90", None),
         "source": "global",
@@ -1107,8 +1120,32 @@ def run_simulations(
     print(f"  Aggregating results...")
     driver_results = []
 
+    # Per-tier bias correction. calibrate_confidence.py measures systematic
+    # over-prediction (negative bias = predicted > actual). We shift each
+    # driver's full distribution by the calibrated tier-specific bias so all
+    # downstream percentiles inherit the correction automatically. Component
+    # breakdowns (mc_quali_pts_mean / mc_race_pts_mean) are NOT shifted —
+    # those are informational decompositions; only the total is corrected.
+    # Tiers from calibrate_confidence.py: front ≤5, midfield 6-12, back >12
+    # (by predicted_race_position).
+    per_tier_bias = cal.get("per_tier_bias") or {}
+    global_bias = float(cal.get("bias_correction", 0.0))
+    bias_applied_per_driver = []
+
     for i in range(n_drivers):
-        pts = all_total_pts[:, i]
+        pts = all_total_pts[:, i].copy()
+        # Apply tier-specific bias correction (or fall back to global)
+        det_pos = int(pred_df.iloc[i]["predicted_race_position"])
+        if det_pos <= 5:
+            tier = "front"
+        elif det_pos <= 12:
+            tier = "midfield"
+        else:
+            tier = "back"
+        tier_bias = per_tier_bias.get(tier, global_bias)
+        if tier_bias != 0.0:
+            pts = pts + tier_bias
+        bias_applied_per_driver.append({"abbrev": abbrevs[i], "tier": tier, "bias": tier_bias})
         q_pts = all_quali_pts[:, i]
         r_pts = all_race_pts[:, i]
         s_pts = all_sprint_pts[:, i]
@@ -1166,6 +1203,9 @@ def run_simulations(
             "calibrated_quali_noise": round(cal_quali_noise, 4),
             "calibrated_race_noise": round(cal_race_noise, 4),
             "noise_multiplier": round(noise_mult, 4),
+            "bias_correction_per_tier": per_tier_bias,
+            "bias_correction_global": global_bias,
+            "bias_correction_applied": (any(d["bias"] != 0.0 for d in bias_applied_per_driver)),
             "confidence_noise_factor": CONFIDENCE_NOISE_FACTOR,
             "overtake_cv": OVERTAKE_CV,
             "teammate_correlation_alpha": TEAMMATE_CORRELATION_ALPHA,

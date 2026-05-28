@@ -1,0 +1,64 @@
+{
+  "baseline": "baseline",
+  "candidate": "quali_depth2",
+  "models": {
+    "quali": {
+      "n_folds": 5,
+      "rounds": [
+        1,
+        2,
+        3,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 3.0401913875598088,
+      "candidate_mae_mean": 2.9100478468899524,
+      "mae_delta_mean": -0.13014354066985648,
+      "mae_delta_ci_95": [
+        -0.31196172248803833,
+        0.05167464114832541
+      ],
+      "excludes_zero": false,
+      "direction": "candidate better",
+      "verdict": "directional improvement (CI includes zero \u2014 not statistically significant)"
+    },
+    "race": {
+      "n_folds": 5,
+      "rounds": [
+        1,
+        2,
+        3,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 4.881339712918661,
+      "candidate_mae_mean": 4.881339712918661,
+      "mae_delta_mean": 0.0,
+      "mae_delta_ci_95": [
+        0.0,
+        0.0
+      ],
+      "excludes_zero": false,
+      "direction": "candidate worse",
+      "verdict": "no improvement"
+    },
+    "sprint": {
+      "n_folds": 3,
+      "rounds": [
+        2,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 0.12121212121212122,
+      "candidate_mae_mean": 0.12121212121212122,
+      "mae_delta_mean": 0.0,
+      "mae_delta_ci_95": [
+        0.0,
+        0.0
+      ],
+      "excludes_zero": false,
+      "direction": "candidate worse",
+      "verdict": "no improvement"
+    }
+  }
+}

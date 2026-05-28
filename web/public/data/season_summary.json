@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-05-25T16:47:53.177837+00:00",
+  "generated_at": "2026-05-27T19:09:30.957378+00:00",
   "rounds": [
     {
       "round": 1,
@@ -52,7 +52,7 @@
       "name": "Monaco Grand Prix",
       "circuit": "Monaco",
       "date": "2026-06-07",
-      "has_predictions": false,
+      "has_predictions": true,
       "has_post_race": false,
       "has_actual": false
     },

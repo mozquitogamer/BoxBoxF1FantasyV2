@@ -1,6 +1,31 @@
 {
   "entries": [
     {
+      "date": "2026-05-27",
+      "title": "Fixed bug: Monte Carlo calibration's bias correction was being loaded but never applied",
+      "tags": ["fix", "model"],
+      "body": [
+        "Found while auditing the calibration pipeline: <code>pipeline/calibrate_confidence.py</code> measures both a noise multiplier (how much to widen the 90% CI band) AND a bias correction (how many points predictions systematically over- or under-shoot actuals). The noise multiplier was being applied correctly. The bias correction was being loaded from <code>data/seed/mc_calibration.json</code> but completely ignored by the Monte Carlo simulation.",
+        "<strong>What that meant in practice:</strong> across the 5 completed 2026 rounds, the model systematically over-predicts fantasy points by ~4 points on average (significant) — and even more for front-runners (−6.6) than back-markers (−1.5). The website was showing predictions un-adjusted for this known systematic error.",
+        "<strong>Fix:</strong> <code>pipeline/08_monte_carlo_fantasy.py</code> now applies a per-tier bias correction (front / midfield / back, tiered by predicted race position) to every driver's simulated point distribution. Front-runners get the larger correction, back-markers the smaller, mirroring what the calibration script actually measured. The website's <code>predictions.json</code> exposes the calibration metadata under a new <code>calibration</code> block for transparency.",
+        "<strong>Visible impact on Monaco predictions:</strong> Antonelli expected points dropped from 32.1 → 25.5; Russell 24.4 → 17.8; Leclerc 29.6 → 22.7. Back-marker corrections are much smaller (Lindblad −1.5 only). The MC 90% CIs widen and shift accordingly. This isn't &quot;lower&quot; — it's <em>more accurate</em>. The previous numbers were optimistic by the measured bias amount."
+      ]
+    },
+    {
+      "date": "2026-05-27",
+      "title": "Model retuning attempt — reverted after multi-year validation exposed the gains as small-sample artifacts",
+      "tags": ["model"],
+      "body": [
+        "<strong>Earlier today I shipped a tuning change to the race and quali models, claiming an 8% race MAE reduction and a 4% quali MAE reduction with statistically significant confidence intervals. Both changes have now been reverted. The original claims were based on too few folds and didn't hold up at proper sample size.</strong>",
+        "<strong>What I did first (and what was misleading):</strong> Ran walk-forward cross-validation over the 5 completed 2026 rounds. Race depth lowered from 5 to 2 showed −0.390 MAE (95% CI [−0.61, −0.17]); quali learning rate lowered from 0.025 to 0.015 showed −0.127 MAE (CI [−0.22, −0.05]). Both passed the &quot;CI excludes zero&quot; gate. Shipped.",
+        "<strong>What I did next (and what corrected the record):</strong> Re-ran the same comparison with walk-forward extended back to 2022 — 97 folds instead of 5. The headline collapsed:",
+        "<ul><li><strong>Race depth=2 improvement</strong> on 97 folds: only −0.087 MAE (95% CI [−0.175, −0.006]) — about 2.4%, not 8%. Still barely significant overall, but year-stratified results showed 2023 actually <em>regressed</em> by +0.023 while 2026 alone showed the original −0.390. The &quot;big win&quot; was driven by one anomalous fold (R7 Canada in 2026, where the baseline model had MAE 7.36).</li><li><strong>Quali lr=0.015 improvement</strong> on 97 folds: only −0.038 MAE (95% CI [−0.077, +0.002]) — <strong>not statistically significant</strong>. The 5-fold significance was a small-sample artifact.</li></ul>",
+        "<strong>Why this matters honestly:</strong> a change that improves one year of folds dramatically but regresses another is not a robust improvement — it's tuning to noise. Shipping it would have made the next race's prediction better in expectation by ~2% on race, but at the cost of potentially worse predictions in years the new tuning happens to disagree with. Not worth it without a uniformly-stable win.",
+        "<strong>Current state:</strong> production hyperparams are back to their pre-attempt values (race max_depth=5, quali learning_rate=0.025). Monaco predictions on the homepage are regenerated with these. The 97-fold walk-forward validator now lives in <code>pipeline/validate_model_config.py --test-from-year 2022</code> — any future tuning attempt has to pass this stronger gate before shipping. Models snapshot at <code>models/trained_pre_2026_reweight/</code> kept for reference.",
+        "<strong>One real upgrade did land alongside this:</strong> the <code>03a_normalize_jolpica.py</code> data ingestion was silently using Jolpica's compressed round numbering, which mislabeled Miami (internal R6) as R4 and dropped Canada (R7) from the training set entirely. Patched to use the internal round from the directory name. Without that fix, even the multi-year re-validation wouldn't have been honest."
+      ]
+    },
+    {
       "date": "2026-05-25",
       "title": "What-If Scenarios Phase 2 + 3 — overlay reaches the optimizer, save/compare/MC band/hint",
       "tags": ["feature"],

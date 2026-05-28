@@ -1,0 +1,64 @@
+{
+  "baseline": "baseline",
+  "candidate": "sprint_ndcg",
+  "models": {
+    "quali": {
+      "n_folds": 5,
+      "rounds": [
+        1,
+        2,
+        3,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 3.0401913875598088,
+      "candidate_mae_mean": 3.0401913875598088,
+      "mae_delta_mean": 0.0,
+      "mae_delta_ci_95": [
+        0.0,
+        0.0
+      ],
+      "excludes_zero": false,
+      "direction": "candidate worse",
+      "verdict": "no improvement"
+    },
+    "race": {
+      "n_folds": 5,
+      "rounds": [
+        1,
+        2,
+        3,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 4.881339712918661,
+      "candidate_mae_mean": 4.881339712918661,
+      "mae_delta_mean": 0.0,
+      "mae_delta_ci_95": [
+        0.0,
+        0.0
+      ],
+      "excludes_zero": false,
+      "direction": "candidate worse",
+      "verdict": "no improvement"
+    },
+    "sprint": {
+      "n_folds": 3,
+      "rounds": [
+        2,
+        6,
+        7
+      ],
+      "baseline_mae_mean": 0.12121212121212122,
+      "candidate_mae_mean": 2.4242424242424243,
+      "mae_delta_mean": 2.303030303030303,
+      "mae_delta_ci_95": [
+        1.9090909090909092,
+        2.6363636363636367
+      ],
+      "excludes_zero": true,
+      "direction": "candidate worse",
+      "verdict": "STATISTICALLY WORSE (95% CI on regression excludes zero)"
+    }
+  }
+}

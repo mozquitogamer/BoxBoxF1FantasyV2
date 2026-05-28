@@ -713,7 +713,13 @@ def main() -> None:
     def make_quali_model():
         return xgb.XGBRanker(
             n_estimators=1200,
-            learning_rate=0.025,
+            learning_rate=0.025,  # REVERTED 2026-05-27. Initially lowered to
+                                  # 0.015 based on 5-fold 2026 CV, but the
+                                  # subsequent 97-fold (2022-2026) re-validation
+                                  # showed the improvement (-0.038 MAE) was
+                                  # NOT statistically significant — 95% CI
+                                  # [-0.077, +0.002] includes zero. The 5-fold
+                                  # finding was a small-sample artifact.
             max_depth=3,
             subsample=0.85,
             colsample_bytree=0.85,
@@ -831,7 +837,19 @@ def main() -> None:
         return xgb.XGBRanker(
             n_estimators=650,
             learning_rate=0.03,
-            max_depth=5,
+            max_depth=5,  # REVERTED 2026-05-27. Briefly set to 2 based on
+                          # 5-fold 2026 CV (showed -0.390 race MAE improvement).
+                          # The subsequent 97-fold (2022-2026) re-validation
+                          # exposed the headline as misleading: real
+                          # improvement was only -0.087 MAE (95% CI [-0.175,
+                          # -0.006], barely significant). The "8% gain" was
+                          # driven by ONE anomalous 2026 fold (R7 Canada,
+                          # baseline MAE=7.36). Year-stratified results showed
+                          # 2023 actually regressed (+0.023). Reverting to the
+                          # robust historical depth until a tuning is found
+                          # that improves uniformly across all 4+ training
+                          # years on the 97-fold framework. See
+                          # data/experiments/compare_baseline_multiyear_vs_winner_multiyear.json
             subsample=0.85,
             colsample_bytree=0.85,
             min_child_weight=5,
@@ -1399,6 +1417,7 @@ def main() -> None:
                 "min_child_weight": 3,
                 "reg_alpha": 0.1,
                 "reg_lambda": 1.0,
+                "_tuning_note": "lr=0.015 was attempted on 2026-05-27 and reverted — 97-fold re-validation showed -0.038 MAE not significant (CI includes 0)",
             },
             "walk_forward_results": quali_wf_results,
             "walk_forward_mean_mae": round(quali_avg_mae, 4) if quali_avg_mae else None,
@@ -1420,6 +1439,7 @@ def main() -> None:
                 "subsample": 0.85,
                 "colsample_bytree": 0.85,
                 "min_child_weight": 5,
+                "_tuning_note": "max_depth=2 was attempted on 2026-05-27 and reverted — 97-fold re-validation showed only -0.087 MAE (driven by one anomalous 2026 fold, with 2023 actually regressing). Robust depth=5 retained until a year-stable improvement is found.",
             },
             "walk_forward_results": race_wf_results,
             "walk_forward_mean_mae": round(race_avg_mae, 4) if race_avg_mae else None,
