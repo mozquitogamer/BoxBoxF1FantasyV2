@@ -1,0 +1,92 @@
+{
+  "baseline": "baseline",
+  "candidate": "quali_reg_lambda_2_multiyear",
+  "models": {
+    "quali": {
+      "n_folds": 5,
+      "folds": [
+        "2026:1",
+        "2026:2",
+        "2026:3",
+        "2026:6",
+        "2026:7"
+      ],
+      "baseline_mae_mean": 3.0401913875598088,
+      "candidate_mae_mean": 3.152153110047847,
+      "mae_delta_mean": 0.11196172248803826,
+      "mae_delta_ci_95": [
+        -0.01251196172248797,
+        0.23923444976076552
+      ],
+      "p_value_uncorrected": 0.0726,
+      "excludes_zero": false,
+      "direction": "candidate worse",
+      "verdict": "no improvement",
+      "per_season": {
+        "2026": {
+          "n_folds": 5,
+          "delta_mean": 0.11196172248803826,
+          "baseline_mae_mean": 3.0401913875598088,
+          "candidate_mae_mean": 3.152153110047847
+        }
+      }
+    },
+    "race": {
+      "n_folds": 5,
+      "folds": [
+        "2026:1",
+        "2026:2",
+        "2026:3",
+        "2026:6",
+        "2026:7"
+      ],
+      "baseline_mae_mean": 4.881339712918661,
+      "candidate_mae_mean": 4.881339712918661,
+      "mae_delta_mean": 0.0,
+      "mae_delta_ci_95": [
+        0.0,
+        0.0
+      ],
+      "p_value_uncorrected": 1.0,
+      "excludes_zero": false,
+      "direction": "candidate worse",
+      "verdict": "no improvement",
+      "per_season": {
+        "2026": {
+          "n_folds": 5,
+          "delta_mean": 0.0,
+          "baseline_mae_mean": 4.881339712918661,
+          "candidate_mae_mean": 4.881339712918661
+        }
+      }
+    },
+    "sprint": {
+      "n_folds": 3,
+      "folds": [
+        "2026:2",
+        "2026:6",
+        "2026:7"
+      ],
+      "baseline_mae_mean": 0.12121212121212122,
+      "candidate_mae_mean": 0.12121212121212122,
+      "mae_delta_mean": 0.0,
+      "mae_delta_ci_95": [
+        0.0,
+        0.0
+      ],
+      "p_value_uncorrected": 1.0,
+      "excludes_zero": false,
+      "direction": "candidate worse",
+      "verdict": "no improvement",
+      "per_season": {
+        "2026": {
+          "n_folds": 3,
+          "delta_mean": 0.0,
+          "baseline_mae_mean": 0.12121212121212122,
+          "candidate_mae_mean": 0.12121212121212122
+        }
+      }
+    },
+    "race_fp": null
+  }
+}

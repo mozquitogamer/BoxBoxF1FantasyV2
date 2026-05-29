@@ -1,0 +1,16 @@
+
+========================================================================================
+OAT SWEEP: race_reg_alpha_multiyear
+  vs baseline (n=5 folds; bootstrap 95% CI on per-fold MAE delta)
+  Negative MAE delta = candidate is BETTER. CI excludes 0 = statistically significant.
+========================================================================================
+  config                  race dMAE               quali dMAE              sprint dMAE           
+  ----------------------  ----------------------  ----------------------  ----------------------
+  race_reg_alpha_0_multiyear  -0.100 [-0.23,+0.02]    +0.000 [+0.00,+0.00]    +0.000 [+0.00,+0.00]  
+  race_reg_alpha_0p05_multiyear  +0.109 [+0.02,+0.20]*   +0.000 [+0.00,+0.00]    +0.000 [+0.00,+0.00]  
+  race_reg_alpha_0p1_multiyear  +0.000 [+0.00,+0.00]    +0.000 [+0.00,+0.00]    +0.000 [+0.00,+0.00]  
+  race_reg_alpha_0p2_multiyear  +0.112 [-0.05,+0.26]    +0.000 [+0.00,+0.00]    +0.000 [+0.00,+0.00]  
+  race_reg_alpha_0p5_multiyear  -0.127 [-0.35,+0.04]    +0.000 [+0.00,+0.00]    +0.000 [+0.00,+0.00]  
+  race_reg_alpha_1_multiyear  -0.073 [-0.69,+0.36]    +0.000 [+0.00,+0.00]    +0.000 [+0.00,+0.00]  
+========================================================================================
+  * = statistically significant (95% CI excludes 0)

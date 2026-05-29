@@ -1,0 +1,9 @@
+{
+  "baseline": "race_fp_baseline_multiyear",
+  "candidate": "race_fp_n400_multiyear",
+  "models": {
+    "quali": null,
+    "race": null,
+    "sprint": null
+  }
+}

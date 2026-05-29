@@ -451,7 +451,7 @@ def paired_compare(baseline_path: Path, candidate_path: Path) -> dict[str, Any]:
         return (int(r.get("season", CURRENT_SEASON)), int(r["round"]))
 
     out: dict[str, Any] = {"baseline": base["config_name"], "candidate": cand["config_name"], "models": {}}
-    for model in ("quali", "race", "sprint"):
+    for model in ("quali", "race", "sprint", "race_fp"):
         b_rows = {_fold_key(r): r for r in base["folds"].get(model, [])}
         c_rows = {_fold_key(r): r for r in cand["folds"].get(model, [])}
         common = sorted(set(b_rows) & set(c_rows))

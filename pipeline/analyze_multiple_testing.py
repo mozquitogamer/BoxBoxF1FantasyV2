@@ -140,13 +140,13 @@ def main() -> None:
     print(f"Alpha:       {args.alpha}\n")
 
     # Collect results per model family
-    per_model: dict[str, list[dict]] = {"quali": [], "race": [], "sprint": []}
+    per_model: dict[str, list[dict]] = {"quali": [], "race": [], "sprint": [], "race_fp": []}
     for cand_path in candidates:
         try:
             cand = json.loads(cand_path.read_text())
         except json.JSONDecodeError:
             continue
-        for model in ("quali", "race", "sprint"):
+        for model in ("quali", "race", "sprint", "race_fp"):
             b_folds = baseline["folds"].get(model, [])
             c_folds = cand["folds"].get(model, [])
             deltas = compute_deltas(b_folds, c_folds)
@@ -194,7 +194,7 @@ def main() -> None:
     }, indent=2))
 
     # Print table
-    for model in ("race", "quali", "sprint"):
+    for model in ("race", "quali", "sprint", "race_fp"):
         info = output[model]
         if info["n_tests"] == 0:
             continue

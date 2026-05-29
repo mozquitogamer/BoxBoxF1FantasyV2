@@ -95,6 +95,30 @@ SWEEPS: dict[str, list[tuple[str, list[str]]]] = {
         (f"sprint_lr{lr:g}".replace(".", "p"), ["--sprint-learning-rate", str(lr)])
         for lr in [0.01, 0.02, 0.035, 0.05, 0.08]
     ],
+    # ---- Race model: reg_alpha (L1) — multiyear ----
+    "race_reg_alpha_multiyear": [
+        (f"race_reg_alpha_{a:g}_multiyear".replace(".", "p"),
+         ["--race-reg-alpha", str(a), "--test-from-year", "2022"])
+        for a in [0.0, 0.05, 0.1, 0.2, 0.5, 1.0]
+    ],
+    # ---- Race model: reg_lambda (L2) — multiyear ----
+    "race_reg_lambda_multiyear": [
+        (f"race_reg_lambda_{l:g}_multiyear".replace(".", "p"),
+         ["--race-reg-lambda", str(l), "--test-from-year", "2022"])
+        for l in [0.5, 1.0, 1.5, 2.0, 3.0, 5.0]
+    ],
+    # ---- Quali model: reg_alpha (L1) — multiyear ----
+    "quali_reg_alpha_multiyear": [
+        (f"quali_reg_alpha_{a:g}_multiyear".replace(".", "p"),
+         ["--quali-reg-alpha", str(a), "--test-from-year", "2022"])
+        for a in [0.0, 0.05, 0.1, 0.2, 0.5, 1.0]
+    ],
+    # ---- Quali model: reg_lambda (L2) — multiyear ----
+    "quali_reg_lambda_multiyear": [
+        (f"quali_reg_lambda_{l:g}_multiyear".replace(".", "p"),
+         ["--quali-reg-lambda", str(l), "--test-from-year", "2022"])
+        for l in [0.5, 1.0, 1.5, 2.0, 3.0, 5.0]
+    ],
     # ---- Alternative objectives ----
     "ndcg_objective": [
         ("race_ndcg", ["--race-objective", "rank:ndcg"]),

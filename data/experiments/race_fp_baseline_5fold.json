@@ -1,0 +1,122 @@
+{
+  "config_name": "race_fp_baseline_5fold",
+  "test_from_year": 2026,
+  "model": "race_fp",
+  "weight_2026": 2.5,
+  "wet_boost": 6.0,
+  "quali_params": {
+    "n_estimators": 1200,
+    "learning_rate": 0.025,
+    "max_depth": 3,
+    "subsample": 0.85,
+    "colsample_bytree": 0.85,
+    "min_child_weight": 3,
+    "reg_alpha": 0.1,
+    "reg_lambda": 1.0,
+    "tree_method": "hist",
+    "objective": "rank:pairwise",
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "race_fp_params": {
+    "n_estimators": 650,
+    "learning_rate": 0.03,
+    "max_depth": 5,
+    "subsample": 0.85,
+    "colsample_bytree": 0.85,
+    "min_child_weight": 5,
+    "reg_alpha": 0.1,
+    "reg_lambda": 1.0,
+    "tree_method": "hist",
+    "objective": "rank:pairwise",
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "folds": {
+    "race_fp": [
+      {
+        "mae": 5.947368421052632,
+        "top3_acc": 0.3333333333333333,
+        "kendall_tau": 0.1695906432748538,
+        "n": 19,
+        "season": 2026,
+        "round": 1,
+        "model": "race_fp",
+        "is_wet": false,
+        "train_n": 2616,
+        "test_n": 19
+      },
+      {
+        "mae": 6.454545454545454,
+        "top3_acc": 0.3333333333333333,
+        "kendall_tau": 0.16017316017316016,
+        "n": 22,
+        "season": 2026,
+        "round": 2,
+        "model": "race_fp",
+        "is_wet": false,
+        "train_n": 2635,
+        "test_n": 22
+      },
+      {
+        "mae": 3.0,
+        "top3_acc": 0.6666666666666666,
+        "kendall_tau": 0.5844155844155845,
+        "n": 22,
+        "season": 2026,
+        "round": 3,
+        "model": "race_fp",
+        "is_wet": false,
+        "train_n": 2657,
+        "test_n": 22
+      },
+      {
+        "mae": 4.090909090909091,
+        "top3_acc": 0.3333333333333333,
+        "kendall_tau": 0.43722943722943725,
+        "n": 22,
+        "season": 2026,
+        "round": 6,
+        "model": "race_fp",
+        "is_wet": false,
+        "train_n": 2679,
+        "test_n": 22
+      },
+      {
+        "mae": 7.545454545454546,
+        "top3_acc": 0.6666666666666666,
+        "kendall_tau": 0.012987012987012986,
+        "n": 22,
+        "season": 2026,
+        "round": 7,
+        "model": "race_fp",
+        "is_wet": false,
+        "train_n": 2701,
+        "test_n": 22
+      }
+    ]
+  },
+  "summary": {
+    "race_fp": {
+      "n_folds": 5,
+      "mae_mean": 5.407655502392345,
+      "mae_std": 1.8363060396731101,
+      "mae_ci_95": [
+        3.9090909090909087,
+        6.789473684210526
+      ],
+      "top3_mean": 0.4666666666666666,
+      "kendall_tau_mean": 0.2728791676160097,
+      "wet_folds": 0,
+      "wet_mae_mean": null,
+      "dry_mae_mean": 5.407655502392345,
+      "per_season": {
+        "2026": {
+          "n_folds": 5,
+          "mae_mean": 5.407655502392345,
+          "wet_folds": 0
+        }
+      }
+    }
+  }
+}
