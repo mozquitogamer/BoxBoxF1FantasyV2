@@ -294,7 +294,7 @@
           "hour": 13,
           "temp": 25.7,
           "humidity": 45,
-          "precip_prob": 7,
+          "precip_prob": 5,
           "precip_mm": 0.0,
           "windspeed": 7.6,
           "windgusts": 8.3,
@@ -304,7 +304,7 @@
           "hour": 14,
           "temp": 26.1,
           "humidity": 42,
-          "precip_prob": 8,
+          "precip_prob": 6,
           "precip_mm": 0.0,
           "windspeed": 8.5,
           "windgusts": 9.4,
@@ -314,10 +314,10 @@
           "hour": 15,
           "temp": 26.4,
           "humidity": 39,
-          "precip_prob": 9,
+          "precip_prob": 7,
           "precip_mm": 0.0,
           "windspeed": 8.5,
-          "windgusts": 9.0,
+          "windgusts": 10.4,
           "weather_code": 0
         },
         {
@@ -327,13 +327,13 @@
           "precip_prob": 9,
           "precip_mm": 0.0,
           "windspeed": 7.6,
-          "windgusts": 7.9,
+          "windgusts": 11.5,
           "weather_code": 0
         }
       ]
     }
   ],
-  "last_updated": "2026-05-30T18:59:49Z",
-  "next_update": "2026-05-31T00:59:49Z",
+  "last_updated": "2026-05-31T02:36:59Z",
+  "next_update": "2026-05-31T08:36:59Z",
   "data_source": "Open-Meteo (open-meteo.com)"
 }
