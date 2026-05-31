@@ -3271,7 +3271,7 @@ function runTransferAdvisor() {
     const maxExtraTransfers = parseInt(document.getElementById('maxExtraTransfers').value) || 0;
     const showWildcardHint = maxExtraTransfers >= 3 && !isWildcard;
     const maxTransfers = isWildcard ? 7 : freeTransfers + maxExtraTransfers; // Wildcard = unlimited
-    const transferPenalty = 10; // -10 pts per extra transfer
+    const transferPenalty = TA_TUNABLES.transferPenalty; // -10 pts per extra transfer
 
     withLoadingButton('runTransferAdvisor', 'Find Best Transfers', () => {
 
@@ -3314,7 +3314,7 @@ function runTransferAdvisor() {
 
     // Generate all valid lineups and score them, tracking transfers needed
     const results = [];
-    const MAX_RESULTS = 200;
+    const MAX_RESULTS = TA_TUNABLES.maxResults;
 
     // ---- Explicit "keep current team" baseline ----
     // We compute and push the current team entry FIRST so it reliably exists
@@ -3386,22 +3386,35 @@ function runTransferAdvisor() {
         return;
     }
 
-    // Free pool = top-N by `_score`, BUT always include the user's current
-    // drivers (otherwise the search can't generate "keep most of current team"
-    // recommendations if a current pick has a low _score). Locked drivers are
-    // already excluded.
-    const FREE_POOL = 15;
+    // Free pool = UNION of (top-N by strategy score) ∪ (top-M by PPM) ∪
+    // (K cheapest), PLUS the user's current drivers. The PPM and cheapest
+    // sub-pools fix the old FREE_POOL=15 gap: a cheap low-points enabler (one
+    // you'd transfer in purely to free budget for a star) was invisible to a
+    // pure score-ranked pool under the max_points strategy. Always include
+    // current drivers so "keep most of current team" recommendations remain
+    // reachable. Locked drivers are already excluded.
     let freeBase = allDrivers.filter(d => !lockedDriverIds.has(d.driver_id));
-    // Annotate with strategy-aware score for ranking
     freeBase.forEach(d => { d._score = score(d); });
-    freeBase.sort((a, b) => b._score - a._score);
-    const topByScore = freeBase.slice(0, FREE_POOL);
-    const includedIds = new Set(topByScore.map(d => d.driver_id));
-    const augmented = [...topByScore];
+
+    const byScore = [...freeBase].sort((a, b) => b._score - a._score)
+        .slice(0, TA_TUNABLES.poolByScore);
+    const byPpm = [...freeBase].sort((a, b) =>
+            (b._score / (b.current_price || 1e-6)) - (a._score / (a.current_price || 1e-6)))
+        .slice(0, TA_TUNABLES.poolByPpm);
+    const byCheapest = [...freeBase].sort((a, b) => a.current_price - b.current_price)
+        .slice(0, TA_TUNABLES.poolByCheapest);
+
+    const poolIds = new Set();
+    const augmented = [];
+    for (const d of [...byScore, ...byPpm, ...byCheapest]) {
+        if (!poolIds.has(d.driver_id)) { poolIds.add(d.driver_id); augmented.push(d); }
+    }
+    // Always include current drivers (not locked, not excluded) so the search
+    // can hold them.
     for (const did of currentDriverIds) {
-        if (!includedIds.has(did) && !lockedDriverIds.has(did) && !excludedDrivers.has(did)) {
+        if (!poolIds.has(did) && !lockedDriverIds.has(did) && !excludedDrivers.has(did)) {
             const d = freeBase.find(x => x.driver_id === did);
-            if (d) augmented.push(d);
+            if (d) { poolIds.add(did); augmented.push(d); }
         }
     }
     // Re-sort by current_price ascending (prerequisite for branch-and-bound).
@@ -3410,7 +3423,7 @@ function runTransferAdvisor() {
     for (const d of freeDriverPool) priceSum.push(priceSum[priceSum.length - 1] + d.current_price);
 
     // Safety cap kept as a backstop; with pruning + top-N this is rarely hit.
-    const MAX_ITERATIONS = 500000;
+    const MAX_ITERATIONS = TA_TUNABLES.maxIterations;
     let iterations = 0;
     let hitCap = false;
 
@@ -3613,6 +3626,22 @@ function renderTransferCard(lineup, index, chip) {
 
     const expandedClass = index === 0 ? ' expanded' : '';
     const optionLabel = lineup._isKeepCurrent ? 'Keep Current Team' : `Option #${index + 1}`;
+
+    // Efficiency line: net-points gain over keeping the current team, and the
+    // gain per transfer spent. This is the key judgement a manager makes when
+    // deciding whether extra transfer hits are worth taking. Baseline = the
+    // "keep current" lineup (always present in allLineups; transfersNeeded 0).
+    let efficiencyHtml = '';
+    if (lineup.transfersNeeded > 0) {
+        const baseline = (typeof allLineups !== 'undefined' && allLineups)
+            ? allLineups.find(l => l.transfersNeeded === 0) : null;
+        if (baseline) {
+            const gain = lineup.netPoints - baseline.netPoints;
+            const perTransfer = gain / lineup.transfersNeeded;
+            const gainColor = gain >= 0 ? 'var(--green)' : 'var(--red, #ef4444)';
+            efficiencyHtml = `· <span style="color:${gainColor};font-weight:600;" title="Net points gained versus keeping your current team (after transfer penalties), and the gain per transfer used.">${gain >= 0 ? '+' : ''}${gain.toFixed(1)} vs hold · ${perTransfer >= 0 ? '+' : ''}${perTransfer.toFixed(1)}/transfer</span>`;
+        }
+    }
     let html = `<div class="lineup-block${expandedClass}" style="margin-bottom:16px;" onclick="this.classList.toggle('expanded')">
         <div class="lineup-block-header">
             <h4><span class="lineup-expand-icon">\u25BC</span> ${optionLabel}</h4>
