@@ -149,6 +149,28 @@ class ModelConfig:
     sprint_params: dict[str, Any] = field(default_factory=lambda: deepcopy(DEFAULT_SPRINT_PARAMS))
     weight_2026: float = 2.5
     wet_boost: float = float(WET_TRAINING_WEIGHT_MULTIPLIER_DEFAULT)
+    # Feature-ablation support (#10). Names listed here, OR any feature whose
+    # name starts with one of drop_prefixes, are removed from ALL model feature
+    # lists before training. Used to test whether dropping noisy/sparse feature
+    # groups improves generalisation. Empty = full feature set (baseline).
+    drop_features: list[str] = field(default_factory=list)
+    drop_prefixes: list[str] = field(default_factory=list)
+
+
+def _apply_feature_drops(features: list[str], config: "ModelConfig") -> list[str]:
+    """Remove ablated features from a feature list. Never drops the target-
+    proxy quali_position (race model needs it)."""
+    if not config.drop_features and not config.drop_prefixes:
+        return features
+    drop_set = set(config.drop_features)
+    out = []
+    for f in features:
+        if f in drop_set:
+            continue
+        if any(f.startswith(p) for p in config.drop_prefixes):
+            continue
+        out.append(f)
+    return out
 
 
 # ============================================================
@@ -316,6 +338,19 @@ def run_walk_forward(
     for wcol in WEATHER_SPRINT_FEATURES:
         if wcol in df.columns and wcol not in sprint_features:
             sprint_features.append(wcol)
+
+    # Feature ablation (#10): drop named/prefixed features from every list.
+    if config.drop_features or config.drop_prefixes:
+        before = (len(quali_features), len(race_features), len(sprint_features))
+        quali_features = _apply_feature_drops(quali_features, config)
+        race_features = _apply_feature_drops(race_features, config)
+        sprint_features = _apply_feature_drops(sprint_features, config)
+        after = (len(quali_features), len(race_features), len(sprint_features))
+        if verbose:
+            print(f"  Feature ablation: dropped {config.drop_features or ''} "
+                  f"prefixes={config.drop_prefixes or ''} "
+                  f"| quali {before[0]}->{after[0]}, race {before[1]}->{after[1]}, "
+                  f"sprint {before[2]}->{after[2]}")
 
     all_results: dict[str, list[dict[str, Any]]] = {m: [] for m in models_to_run}
 
@@ -543,6 +578,10 @@ def build_config_from_args(args: argparse.Namespace) -> ModelConfig:
                     params[hp] = str(val)
                 else:
                     params[hp] = float(val)
+    if getattr(args, "drop_features", None):
+        config.drop_features = [f.strip() for f in args.drop_features.split(",") if f.strip()]
+    if getattr(args, "drop_prefixes", None):
+        config.drop_prefixes = [p.strip() for p in args.drop_prefixes.split(",") if p.strip()]
     return config
 
 
@@ -561,6 +600,10 @@ def main() -> None:
         for hp in ("n_estimators", "max_depth", "learning_rate", "min_child_weight",
                    "subsample", "colsample_bytree", "reg_alpha", "reg_lambda", "objective"):
             ap.add_argument(f"--{m}-{hp.replace('_', '-')}", type=str, default=None)
+    ap.add_argument("--drop-features", type=str, default=None,
+                    help="Comma-separated feature names to drop from all models (ablation, #10).")
+    ap.add_argument("--drop-prefixes", type=str, default=None,
+                    help="Comma-separated feature-name prefixes to drop (e.g. 'weather_,soft_').")
     ap.add_argument("--compare", nargs=2, metavar=("BASELINE", "CANDIDATE"),
                     help="Compare two existing result files (no training).")
     args = ap.parse_args()

@@ -1,0 +1,234 @@
+{
+  "config_name": "catboost_5fold_smoke",
+  "test_from_year": 2026,
+  "algorithm": "catboost",
+  "folds": {
+    "quali": [
+      {
+        "mae": 3.3684210526315788,
+        "top3_acc": 0.3333333333333333,
+        "kendall_tau": 0.5789473684210525,
+        "n": 19,
+        "season": 2026,
+        "round": 1,
+        "model": "quali",
+        "is_wet": false,
+        "train_n": 2616,
+        "test_n": 19
+      },
+      {
+        "mae": 3.272727272727273,
+        "top3_acc": 0.3333333333333333,
+        "kendall_tau": 0.5930735930735931,
+        "n": 22,
+        "season": 2026,
+        "round": 2,
+        "model": "quali",
+        "is_wet": false,
+        "train_n": 2635,
+        "test_n": 22
+      },
+      {
+        "mae": 2.727272727272727,
+        "top3_acc": 0.6666666666666666,
+        "kendall_tau": 0.6623376623376623,
+        "n": 22,
+        "season": 2026,
+        "round": 3,
+        "model": "quali",
+        "is_wet": false,
+        "train_n": 2657,
+        "test_n": 22
+      },
+      {
+        "mae": 3.1818181818181817,
+        "top3_acc": 0.3333333333333333,
+        "kendall_tau": 0.567099567099567,
+        "n": 22,
+        "season": 2026,
+        "round": 6,
+        "model": "quali",
+        "is_wet": false,
+        "train_n": 2679,
+        "test_n": 22
+      },
+      {
+        "mae": 2.3636363636363638,
+        "top3_acc": 0.6666666666666666,
+        "kendall_tau": 0.7402597402597402,
+        "n": 22,
+        "season": 2026,
+        "round": 7,
+        "model": "quali",
+        "is_wet": false,
+        "train_n": 2701,
+        "test_n": 22
+      }
+    ],
+    "race": [
+      {
+        "mae": 5.0,
+        "top3_acc": 0.6666666666666666,
+        "kendall_tau": 0.3216374269005848,
+        "n": 19,
+        "season": 2026,
+        "round": 1,
+        "model": "race",
+        "is_wet": false,
+        "train_n": 2616,
+        "test_n": 19
+      },
+      {
+        "mae": 4.818181818181818,
+        "top3_acc": 0.6666666666666666,
+        "kendall_tau": 0.37662337662337664,
+        "n": 22,
+        "season": 2026,
+        "round": 2,
+        "model": "race",
+        "is_wet": false,
+        "train_n": 2635,
+        "test_n": 22
+      },
+      {
+        "mae": 1.9090909090909092,
+        "top3_acc": 0.6666666666666666,
+        "kendall_tau": 0.7575757575757576,
+        "n": 22,
+        "season": 2026,
+        "round": 3,
+        "model": "race",
+        "is_wet": false,
+        "train_n": 2657,
+        "test_n": 22
+      },
+      {
+        "mae": 4.2727272727272725,
+        "top3_acc": 0.3333333333333333,
+        "kendall_tau": 0.47186147186147187,
+        "n": 22,
+        "season": 2026,
+        "round": 6,
+        "model": "race",
+        "is_wet": false,
+        "train_n": 2679,
+        "test_n": 22
+      },
+      {
+        "mae": 5.2727272727272725,
+        "top3_acc": 0.6666666666666666,
+        "kendall_tau": 0.35064935064935066,
+        "n": 22,
+        "season": 2026,
+        "round": 7,
+        "model": "race",
+        "is_wet": false,
+        "train_n": 2701,
+        "test_n": 22
+      }
+    ],
+    "sprint": [
+      {
+        "mae": 0.18181818181818182,
+        "top3_acc": 1.0,
+        "kendall_tau": 0.9826839826839827,
+        "n": 22,
+        "season": 2026,
+        "round": 2,
+        "model": "sprint",
+        "is_wet": false,
+        "train_n": 479,
+        "test_n": 22
+      },
+      {
+        "mae": 0.09090909090909091,
+        "top3_acc": 1.0,
+        "kendall_tau": 0.9913419913419913,
+        "n": 22,
+        "season": 2026,
+        "round": 6,
+        "model": "sprint",
+        "is_wet": false,
+        "train_n": 501,
+        "test_n": 22
+      },
+      {
+        "mae": 0.09090909090909091,
+        "top3_acc": 1.0,
+        "kendall_tau": 0.9913419913419913,
+        "n": 22,
+        "season": 2026,
+        "round": 7,
+        "model": "sprint",
+        "is_wet": false,
+        "train_n": 523,
+        "test_n": 22
+      }
+    ]
+  },
+  "summary": {
+    "quali": {
+      "n_folds": 5,
+      "mae_mean": 2.9827751196172247,
+      "mae_std": 0.42456667586060265,
+      "mae_ci_95": [
+        2.618181818181818,
+        3.2928229665071767
+      ],
+      "top3_mean": 0.4666666666666666,
+      "kendall_tau_mean": 0.6283435862383231,
+      "wet_folds": 0,
+      "wet_mae_mean": null,
+      "dry_mae_mean": 2.9827751196172247,
+      "per_season": {
+        "2026": {
+          "n_folds": 5,
+          "mae_mean": 2.9827751196172247,
+          "wet_folds": 0
+        }
+      }
+    },
+    "race": {
+      "n_folds": 5,
+      "mae_mean": 4.254545454545455,
+      "mae_std": 1.3612099624905303,
+      "mae_ci_95": [
+        3.0545454545454547,
+        5.072727272727272
+      ],
+      "top3_mean": 0.6,
+      "kendall_tau_mean": 0.45566947672210834,
+      "wet_folds": 0,
+      "wet_mae_mean": null,
+      "dry_mae_mean": 4.254545454545455,
+      "per_season": {
+        "2026": {
+          "n_folds": 5,
+          "mae_mean": 4.254545454545455,
+          "wet_folds": 0
+        }
+      }
+    },
+    "sprint": {
+      "n_folds": 3,
+      "mae_mean": 0.12121212121212122,
+      "mae_std": 0.052486388108147805,
+      "mae_ci_95": [
+        0.0909090909090909,
+        0.1818181818181818
+      ],
+      "top3_mean": 1.0,
+      "kendall_tau_mean": 0.9884559884559884,
+      "wet_folds": 0,
+      "wet_mae_mean": null,
+      "dry_mae_mean": 0.12121212121212122,
+      "per_season": {
+        "2026": {
+          "n_folds": 3,
+          "mae_mean": 0.12121212121212122,
+          "wet_folds": 0
+        }
+      }
+    }
+  }
+}

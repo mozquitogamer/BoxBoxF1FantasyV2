@@ -119,6 +119,56 @@ SWEEPS: dict[str, list[tuple[str, list[str]]]] = {
          ["--quali-reg-lambda", str(l), "--test-from-year", "2022"])
         for l in [0.5, 1.0, 1.5, 2.0, 3.0, 5.0]
     ],
+    # ---- Quali model: subsample — multiyear ----
+    "quali_subsample_multiyear": [
+        (f"quali_sub_{s:g}_multiyear".replace(".", "p"),
+         ["--quali-subsample", str(s), "--test-from-year", "2022"])
+        for s in [0.6, 0.7, 0.85, 1.0]
+    ],
+    # ---- Quali model: colsample_bytree — multiyear ----
+    "quali_colsample_multiyear": [
+        (f"quali_col_{c:g}_multiyear".replace(".", "p"),
+         ["--quali-colsample-bytree", str(c), "--test-from-year", "2022"])
+        for c in [0.6, 0.7, 0.85, 1.0]
+    ],
+    # ---- Quali model: min_child_weight — multiyear ----
+    "quali_mcw_multiyear": [
+        (f"quali_mcw_{m}_multiyear", ["--quali-min-child-weight", str(m), "--test-from-year", "2022"])
+        for m in [1, 3, 5, 8, 12]
+    ],
+    # ---- Global wet_boost — multiyear (affects all models' wet-row weight) ----
+    "wet_boost_multiyear": [
+        (f"wet_boost_{w:g}_multiyear".replace(".", "p"),
+         ["--wet-boost", str(w), "--test-from-year", "2022"])
+        for w in [1.0, 3.0, 6.0, 9.0, 12.0]
+    ],
+    # ---- Feature ablation (#10) — multiyear ----
+    # FP telemetry block: sparse (~97% NaN in training). Does dropping it help?
+    "feature_ablation_multiyear": [
+        ("ablate_weather_multiyear",
+         ["--drop-prefixes", "weather_", "--test-from-year", "2022"]),
+        ("ablate_fp_telemetry_multiyear",
+         ["--drop-features",
+          "avg_lap_time,best_lap_time,median_lap_time,best_5_lap_avg,p50_to_p95_avg,"
+          "degradation_rate,long_run_avg,lap_time_std,pace_delta,theoretical_best,cv_lap_time,"
+          "pace_delta_to_fastest,pace_delta_to_median,avg_pace_delta_to_median,race_pace_delta_to_median,"
+          "soft_best_lap,soft_avg_lap,medium_long_run_avg,hard_long_run_avg,"
+          "sector_1_delta,sector_2_delta,sector_3_delta,long_run_rank",
+          "--test-from-year", "2022"]),
+        ("ablate_skill_ratings_multiyear",
+         ["--drop-features",
+          "quali_skill,wet_skill,cold_skill,adaptability,overtaking,tire_mgmt,"
+          "strategy_rating,quali_skill_x_ot_diff",
+          "--test-from-year", "2022"]),
+        ("ablate_weather_and_fp_multiyear",
+         ["--drop-prefixes", "weather_,soft_,hard_,medium_",
+          "--drop-features",
+          "avg_lap_time,best_lap_time,median_lap_time,best_5_lap_avg,p50_to_p95_avg,"
+          "degradation_rate,long_run_avg,lap_time_std,pace_delta,theoretical_best,cv_lap_time,"
+          "pace_delta_to_fastest,pace_delta_to_median,avg_pace_delta_to_median,race_pace_delta_to_median,"
+          "sector_1_delta,sector_2_delta,sector_3_delta,long_run_rank",
+          "--test-from-year", "2022"]),
+    ],
     # ---- Alternative objectives ----
     "ndcg_objective": [
         ("race_ndcg", ["--race-objective", "rank:ndcg"]),

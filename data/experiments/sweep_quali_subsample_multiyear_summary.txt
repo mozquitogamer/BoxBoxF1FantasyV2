@@ -1,0 +1,14 @@
+
+========================================================================================
+OAT SWEEP: quali_subsample_multiyear
+  vs baseline (n=5 folds; bootstrap 95% CI on per-fold MAE delta)
+  Negative MAE delta = candidate is BETTER. CI excludes 0 = statistically significant.
+========================================================================================
+  config                  race dMAE               quali dMAE              sprint dMAE           
+  ----------------------  ----------------------  ----------------------  ----------------------
+  quali_sub_0p6_multiyear  +0.000 [+0.00,+0.00]    +0.000 [-0.20,+0.16]    +0.000 [+0.00,+0.00]  
+  quali_sub_0p7_multiyear  +0.000 [+0.00,+0.00]    -0.122 [-0.29,+0.07]    +0.000 [+0.00,+0.00]  
+  quali_sub_0p85_multiyear  +0.000 [+0.00,+0.00]    +0.000 [+0.00,+0.00]    +0.000 [+0.00,+0.00]  
+  quali_sub_1_multiyear   +0.000 [+0.00,+0.00]    +0.036 [-0.07,+0.13]    +0.000 [+0.00,+0.00]  
+========================================================================================
+  * = statistically significant (95% CI excludes 0)

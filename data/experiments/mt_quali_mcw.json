@@ -1,0 +1,194 @@
+{
+  "baseline": "baseline_multiyear",
+  "alpha": 0.05,
+  "pattern": "quali_mcw_*_multiyear",
+  "per_model": {
+    "quali": {
+      "n_tests": 5,
+      "bonferroni_alpha": 0.01,
+      "results": [
+        {
+          "config": "quali_mcw_5_multiyear",
+          "n_folds": 97,
+          "delta_mean": -0.025329255660237766,
+          "ci_lo": -0.06866842598530068,
+          "ci_hi": 0.018344719577763503,
+          "p_uncorrected": 0.2532,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_mcw_12_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.012923592956148568,
+          "ci_lo": -0.02990874562225619,
+          "ci_hi": 0.05623809993587529,
+          "p_uncorrected": 0.5456,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_mcw_1_multiyear",
+          "n_folds": 97,
+          "delta_mean": -0.01241059537315644,
+          "ci_lo": -0.05603660040447888,
+          "ci_hi": 0.03233463226952097,
+          "p_uncorrected": 0.5914,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_mcw_8_multiyear",
+          "n_folds": 97,
+          "delta_mean": -0.0066196418882257255,
+          "ci_lo": -0.05006770088294777,
+          "ci_hi": 0.03728259261086169,
+          "p_uncorrected": 0.7794,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_mcw_3_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        }
+      ]
+    },
+    "race": {
+      "n_tests": 5,
+      "bonferroni_alpha": 0.01,
+      "results": [
+        {
+          "config": "quali_mcw_12_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_mcw_1_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_mcw_3_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_mcw_5_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_mcw_8_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        }
+      ]
+    },
+    "sprint": {
+      "n_tests": 5,
+      "bonferroni_alpha": 0.01,
+      "results": [
+        {
+          "config": "quali_mcw_12_multiyear",
+          "n_folds": 24,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_mcw_1_multiyear",
+          "n_folds": 24,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_mcw_3_multiyear",
+          "n_folds": 24,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_mcw_5_multiyear",
+          "n_folds": 24,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_mcw_8_multiyear",
+          "n_folds": 24,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        }
+      ]
+    },
+    "race_fp": {
+      "n_tests": 0,
+      "results": []
+    }
+  }
+}

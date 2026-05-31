@@ -1,0 +1,161 @@
+{
+  "baseline": "baseline_multiyear",
+  "alpha": 0.05,
+  "pattern": "quali_sub_*_multiyear",
+  "per_model": {
+    "quali": {
+      "n_tests": 4,
+      "bonferroni_alpha": 0.0125,
+      "results": [
+        {
+          "config": "quali_sub_0p7_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.01055591180387706,
+          "ci_lo": -0.03425775662210823,
+          "ci_hi": 0.057500246633453364,
+          "p_uncorrected": 0.655,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_sub_1_multiyear",
+          "n_folds": 97,
+          "delta_mean": -0.010279682336112053,
+          "ci_lo": -0.05880012824939573,
+          "ci_hi": 0.03959453460267351,
+          "p_uncorrected": 0.7028,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_sub_0p6_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.006402604449267498,
+          "ci_lo": -0.04087764514378732,
+          "ci_hi": 0.05472303063187491,
+          "p_uncorrected": 0.7858,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_sub_0p85_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        }
+      ]
+    },
+    "race": {
+      "n_tests": 4,
+      "bonferroni_alpha": 0.0125,
+      "results": [
+        {
+          "config": "quali_sub_0p6_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_sub_0p7_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_sub_0p85_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_sub_1_multiyear",
+          "n_folds": 97,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        }
+      ]
+    },
+    "sprint": {
+      "n_tests": 4,
+      "bonferroni_alpha": 0.0125,
+      "results": [
+        {
+          "config": "quali_sub_0p6_multiyear",
+          "n_folds": 24,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_sub_0p7_multiyear",
+          "n_folds": 24,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_sub_0p85_multiyear",
+          "n_folds": 24,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        },
+        {
+          "config": "quali_sub_1_multiyear",
+          "n_folds": 24,
+          "delta_mean": 0.0,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "p_uncorrected": 1.0,
+          "bonferroni_significant": false,
+          "bh_fdr_significant": false,
+          "uncorrected_significant": false
+        }
+      ]
+    },
+    "race_fp": {
+      "n_tests": 0,
+      "results": []
+    }
+  }
+}
