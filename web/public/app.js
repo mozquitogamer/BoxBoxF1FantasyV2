@@ -123,6 +123,21 @@ const PPM_RATINGS = {
     // < 0.6 = Terrible
 };
 
+// -- Transfer Advisor tunables --
+// All advisor search constants in one place (mirrors MW_TUNABLES). The driver
+// candidate pool is the UNION of three sub-pools so the search sees both
+// high-ceiling picks AND cheap budget-enablers (a cheap low-points driver
+// freed up to afford a star is invisible to a pure top-by-score pool — the old
+// FREE_POOL=15 limitation).
+const TA_TUNABLES = {
+    poolByScore: 15,       // top-N by strategy score (ceiling picks)
+    poolByPpm: 6,          // top-M by points-per-$M (value/enabler picks)
+    poolByCheapest: 4,     // K cheapest available (pure budget relief)
+    maxIterations: 500000, // branch-and-bound backstop
+    maxResults: 200,       // cap on stored lineups before display slice
+    transferPenalty: 10,   // F1 Fantasy: -10 pts per transfer beyond free count
+};
+
 // -- Deferred loading state --
 const _deferredLoaded = {};
 
@@ -3649,6 +3664,7 @@ function renderTransferCard(lineup, index, chip) {
                 ${lineup.netPoints.toFixed(1)} net pts \u00b7 ${lineup.transfersNeeded} transfer${lineup.transfersNeeded !== 1 ? 's' : ''}
                 ${lineup.penalty > 0 ? ` · <span style="color:var(--red, #ef4444)">-${lineup.penalty} penalty</span>` : ''}
                 · $${lineup.totalCost.toFixed(1)}M
+                ${efficiencyHtml}
             </span>
         </div>
         <div class="lineup-details">`;
@@ -3738,12 +3754,29 @@ function renderSwapRow(outItem, inItem, type) {
         inPriceChangeHtml = formatPriceChangeBadge(pc.expectedChange);
     }
 
+    // Net cost + points delta of THIS swap — the two numbers a manager weighs:
+    // "does it free budget, and how many points does it add?" Net cost =
+    // in price − out price (positive = costs money, negative = frees budget).
+    let swapDeltaHtml = '';
+    if (outItem && inItem) {
+        const netCost = inItem.current_price - outItem.current_price;
+        const ptsDelta = inItem.expected_points - outItem.expected_points;
+        const costSign = netCost > 0 ? '+' : (netCost < 0 ? '−' : '');
+        const costColor = netCost > 0 ? 'var(--red, #ef4444)' : (netCost < 0 ? 'var(--green)' : 'var(--text-secondary)');
+        const ptsSign = ptsDelta >= 0 ? '+' : '';
+        const ptsColor = ptsDelta >= 0 ? 'var(--green)' : 'var(--red, #ef4444)';
+        swapDeltaHtml = `<div style="font-size:0.65rem;text-align:center;white-space:nowrap;line-height:1.3;">
+            <span style="color:${ptsColor};font-weight:600;">${ptsSign}${ptsDelta.toFixed(1)}pts</span>
+            <span style="color:${costColor};">${costSign}$${Math.abs(netCost).toFixed(1)}M</span>
+        </div>`;
+    }
+
     return `<div class="transfer-swap">
         <div class="transfer-out" style="flex:1">
             <div class="transfer-pick-name">${outName}</div>
             <div class="transfer-pick-detail">${outPts} pts · ${outPrice}</div>
         </div>
-        <div class="transfer-arrow">→</div>
+        <div class="transfer-arrow" style="display:flex;flex-direction:column;align-items:center;gap:2px;"><span>→</span>${swapDeltaHtml}</div>
         <div class="transfer-in" style="flex:1">
             <div class="transfer-pick-name">${inName} ${inPriceChangeHtml}</div>
             <div class="transfer-pick-detail">${inPts} pts · ${inPrice}</div>

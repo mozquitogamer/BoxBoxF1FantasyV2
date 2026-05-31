@@ -2,11 +2,11 @@
   "entries": [
     {
       "date": "2026-05-31",
-      "title": "Transfer Advisor — clearer swaps, smarter candidate pool, DNF-aware price hints",
+      "title": "Transfer Advisor — clearer swaps, smarter candidate pool",
       "tags": ["feature"],
       "body": [
         "Several upgrades to the Transfer Advisor based on a full audit of how it works:",
-        "<ul><li><strong>Per-swap net cost + points delta</strong> — each recommended swap now shows exactly what it does to your wallet and your score (e.g. <em>+4.2 pts · −$1.5M</em>), the two numbers you actually weigh when deciding. Green when a swap frees budget, red when it costs.</li><li><strong>Efficiency line</strong> — every option shows its net-points gain versus simply keeping your current team, plus the gain per transfer used. Makes it obvious whether taking an extra −10 transfer hit is actually worth it.</li><li><strong>Smarter candidate pool</strong> — the search now considers cheap high-value 'enabler' picks (a budget driver you'd bring in purely to afford a star elsewhere), not just the top names by raw points. Previously these could be invisible to the search under the Max Points strategy.</li><li><strong>DNF-aware price predictions</strong> — projected price changes now discount a pick's expected points by its DNF risk, so a high-risk driver no longer shows the same rosy price-rise as a reliable one.</li></ul>",
+        "<ul><li><strong>Per-swap net cost + points delta</strong> — each recommended swap now shows exactly what it does to your wallet and your score (e.g. <em>+4.2pts −$1.5M</em>), the two numbers you actually weigh when deciding. Green when a swap frees budget, red when it costs.</li><li><strong>Efficiency line</strong> — every option shows its net-points gain versus simply keeping your current team, plus the gain per transfer used. Makes it obvious whether taking an extra −10 transfer hit is actually worth it.</li><li><strong>Smarter candidate pool</strong> — the search now considers cheap high-value 'enabler' picks (a budget driver you'd bring in purely to afford a star elsewhere), not just the top names by raw points. Previously these could be invisible to the search under the Max Points strategy.</li></ul>",
         "Under the hood, all the advisor's tunable constants moved into a single <code>TA_TUNABLES</code> block (mirroring the multi-week planner) so the search is easier to maintain."
       ]
     },
