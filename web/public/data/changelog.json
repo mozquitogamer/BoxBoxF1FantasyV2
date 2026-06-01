@@ -1,6 +1,17 @@
 {
   "entries": [
     {
+      "date": "2026-06-01",
+      "title": "Reverted the bias correction — it was suppressing every prediction",
+      "tags": ["fix", "model"],
+      "body": [
+        "Last week I added a 'bias correction' that subtracted points from predictions to account for the model historically over-predicting. <strong>It was a mistake and it's now removed.</strong>",
+        "<strong>The problem:</strong> the bias amounts (−6.6 pts for front-runners, etc.) were measured against the <em>old</em> model. Then the model was retrained — but the correction kept subtracting the old model's bias from the new model's output. The net effect was knocking ~6.6 points off every predicted front-runner for no valid reason. The predicted Monaco winner was showing 25.5 when the raw model said 32, and real 2026 race winners have been scoring 50-68.",
+        "<strong>The fix:</strong> the bias subtraction is gone. Predictions now show the raw model + Monte Carlo output. The confidence-interval calibration (how wide the 90% bands are) stays — that part is model-agnostic and correct. A bias correction is only valid if it's measured on the same model it's applied to and held out round-by-round; rebuilding it that way is noted for later, but shipping the raw honest prediction is better than shipping a stale over-correction.",
+        "<strong>Visible impact:</strong> Monaco front-runners are back up ~6.6 pts (Antonelli 25.5 → 31.7, Leclerc 22.7 → 29.5). Monaco is still a genuinely low-scoring weekend (almost no overtakes), so the numbers are lower than a normal race — that part is real."
+      ]
+    },
+    {
       "date": "2026-05-31",
       "title": "Transfer Advisor — clearer swaps, smarter candidate pool",
       "tags": ["feature"],
@@ -12,13 +23,11 @@
     },
     {
       "date": "2026-05-27",
-      "title": "Fixed bug: Monte Carlo calibration's bias correction was being loaded but never applied",
+      "title": "Wired up the Monte Carlo bias correction (later reverted — see 2026-06-01)",
       "tags": ["fix", "model"],
       "body": [
-        "Found while auditing the calibration pipeline: <code>pipeline/calibrate_confidence.py</code> measures both a noise multiplier (how much to widen the 90% CI band) AND a bias correction (how many points predictions systematically over- or under-shoot actuals). The noise multiplier was being applied correctly. The bias correction was being loaded from <code>data/seed/mc_calibration.json</code> but completely ignored by the Monte Carlo simulation.",
-        "<strong>What that meant in practice:</strong> across the 5 completed 2026 rounds, the model systematically over-predicts fantasy points by ~4 points on average (significant) — and even more for front-runners (−6.6) than back-markers (−1.5). The website was showing predictions un-adjusted for this known systematic error.",
-        "<strong>Fix:</strong> <code>pipeline/08_monte_carlo_fantasy.py</code> now applies a per-tier bias correction (front / midfield / back, tiered by predicted race position) to every driver's simulated point distribution. Front-runners get the larger correction, back-markers the smaller, mirroring what the calibration script actually measured. The website's <code>predictions.json</code> exposes the calibration metadata under a new <code>calibration</code> block for transparency.",
-        "<strong>Visible impact on Monaco predictions:</strong> Antonelli expected points dropped from 32.1 → 25.5; Russell 24.4 → 17.8; Leclerc 29.6 → 22.7. Back-marker corrections are much smaller (Lindblad −1.5 only). The MC 90% CIs widen and shift accordingly. This isn't &quot;lower&quot; — it's <em>more accurate</em>. The previous numbers were optimistic by the measured bias amount."
+        "<strong>Superseded:</strong> this change was reverted on 2026-06-01 — the bias amounts were measured on the pre-retrain model and applying them to the retrained model just suppressed every prediction. See the 2026-06-01 entry. Kept here for an honest record of what happened.",
+        "What it did at the time: <code>pipeline/calibrate_confidence.py</code> measures both a noise multiplier (CI band width) and a bias correction (systematic over/under-prediction). The noise multiplier was being applied; the bias correction was being loaded but ignored. This change started applying the per-tier bias — which turned out to be the wrong call once the model had been retrained underneath it."
       ]
     },
     {

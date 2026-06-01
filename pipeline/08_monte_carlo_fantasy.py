@@ -1128,24 +1128,18 @@ def run_simulations(
     # those are informational decompositions; only the total is corrected.
     # Tiers from calibrate_confidence.py: front ≤5, midfield 6-12, back >12
     # (by predicted_race_position).
-    per_tier_bias = cal.get("per_tier_bias") or {}
-    global_bias = float(cal.get("bias_correction", 0.0))
-    bias_applied_per_driver = []
-
+    # NOTE (2026-06-01): per-tier bias subtraction was REMOVED. It was measured
+    # on the PRE-retrain model (front −6.59, midfield −5.95) and then applied
+    # to the RETRAINED model's output — subtracting points to correct an error
+    # the current model may not even make. The net effect was pessimizing every
+    # front-runner by ~6.6 pts (e.g. predicted winner 32 → 25.5), which is a
+    # regression, not a correction. A bias correction is only valid if measured
+    # on the SAME model it's applied to AND held out leave-one-round-out. Until
+    # that's rebuilt properly (see pending_features.md), we ship the raw
+    # model+MC output. The noise-multiplier calibration (CI widening) is kept —
+    # that one is model-agnostic and sound.
     for i in range(n_drivers):
-        pts = all_total_pts[:, i].copy()
-        # Apply tier-specific bias correction (or fall back to global)
-        det_pos = int(pred_df.iloc[i]["predicted_race_position"])
-        if det_pos <= 5:
-            tier = "front"
-        elif det_pos <= 12:
-            tier = "midfield"
-        else:
-            tier = "back"
-        tier_bias = per_tier_bias.get(tier, global_bias)
-        if tier_bias != 0.0:
-            pts = pts + tier_bias
-        bias_applied_per_driver.append({"abbrev": abbrevs[i], "tier": tier, "bias": tier_bias})
+        pts = all_total_pts[:, i]
         q_pts = all_quali_pts[:, i]
         r_pts = all_race_pts[:, i]
         s_pts = all_sprint_pts[:, i]
@@ -1203,9 +1197,9 @@ def run_simulations(
             "calibrated_quali_noise": round(cal_quali_noise, 4),
             "calibrated_race_noise": round(cal_race_noise, 4),
             "noise_multiplier": round(noise_mult, 4),
-            "bias_correction_per_tier": per_tier_bias,
-            "bias_correction_global": global_bias,
-            "bias_correction_applied": (any(d["bias"] != 0.0 for d in bias_applied_per_driver)),
+            "bias_correction_per_tier": {},
+            "bias_correction_global": 0.0,
+            "bias_correction_applied": False,
             "confidence_noise_factor": CONFIDENCE_NOISE_FACTOR,
             "overtake_cv": OVERTAKE_CV,
             "teammate_correlation_alpha": TEAMMATE_CORRELATION_ALPHA,
