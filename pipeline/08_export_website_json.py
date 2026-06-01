@@ -49,6 +49,7 @@ from pipeline.audit import (
     load_prediction_metadata,
     load_actuals,
 )
+from pipeline.prediction_sanity import print_report as _sanity_report
 
 
 VALID_PHASES = ("pre_fp", "post_fp", "post_quali")
@@ -757,6 +758,16 @@ def main():
     print("\n[1] Exporting predictions...")
     predictions = build_predictions_json(round_num)
     if predictions:
+        # Sanity guard: flag grossly-broken predictions (all zeros, NaNs, a
+        # winner predicted to score single digits, ranking collapse) BEFORE we
+        # write them to the live site. This is a smoke alarm — it does not block
+        # the export (model output is the user's call), but it prints loud
+        # problems so a regression like the bias-nerf can't ship silently.
+        sane = _sanity_report(predictions, label=f"R{round_num} {phase}")
+        if not sane and not args.force:
+            print("  NOTE: sanity problems above. Export continues; re-check the model/MC "
+                  "output. Pass --force to silence this note.")
+
         # Tag the payload with phase + reconstruction info
         predictions["phase"] = phase
         predictions["exported_at"] = datetime.now(timezone.utc).isoformat()
