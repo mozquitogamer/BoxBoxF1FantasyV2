@@ -198,6 +198,8 @@ Click it: on a touch device your native share sheet opens (WhatsApp, Messages, X
 
 When someone opens the link, it drops them into the **Transfer Advisor with that team pre-loaded**, scored against the current round, so they can see what it's worth this week and tweak it. Scoring is always current-round — links are not frozen snapshots.
 
+**Share a single prediction too:** every driver and constructor card has a small **🔗** button (next to the ± what-if button). It copies a link straight to that card; when someone opens it, the site jumps to the Drivers/Constructors tab, scrolls to that pick, and briefly highlights it.
+
 ---
 
 ## The 6 Chips

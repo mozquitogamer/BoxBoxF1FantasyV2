@@ -380,10 +380,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderHero();
     renderDrivers();
 
-    // Shared-team deep link (?team=ID,ID,...) → pre-fill the Transfer Advisor.
+    // Deep links: ?team= pre-fills the Transfer Advisor; ?driver= / ?constructor=
+    // jump to and highlight a single prediction card.
     try {
-        const sharedTeam = new URLSearchParams(location.search).get('team');
-        if (sharedTeam) applySharedTeam(sharedTeam);
+        const qp = new URLSearchParams(location.search);
+        const sharedTeam = qp.get('team');
+        const sharedDriver = qp.get('driver');
+        const sharedConstructor = qp.get('constructor');
+        if (sharedTeam) {
+            applySharedTeam(sharedTeam);
+        } else if (sharedDriver) {
+            focusPrediction('driver', sharedDriver);
+            history.replaceState(null, '', location.pathname);
+        } else if (sharedConstructor) {
+            focusPrediction('constructor', sharedConstructor);
+            history.replaceState(null, '', location.pathname);
+        }
     } catch (e) {}
     _tabRendered.drivers = true;
 
@@ -1376,10 +1388,11 @@ function driverCard(d, i) {
         : '±';
 
     return `
-    <div class="driver-card" style="--team-color:${team.color};--i:${i}">
+    <div class="driver-card" data-driver-id="${d.driver_id}" style="--team-color:${team.color};--i:${i}">
         <button class="scenario-btn ${scenBtnActive ? 'active' : ''}"
                 data-scen-type="driver" data-scen-id="${d.driver_id}"
                 title="What-if: bump ${d.name}'s pace by N positions">${scenBtnLabel}</button>
+        <button class="card-share-btn" type="button" onclick="sharePrediction('driver','${d.driver_id}', this)" title="Share ${d.name}'s prediction">🔗</button>
         <div class="card-header">
             <div class="driver-info">
                 <h3>${d.name}</h3>
@@ -2260,10 +2273,11 @@ function constructorCard(c, i) {
         : '±';
 
     return `
-    <div class="constructor-card" style="--team-color:${team.color};--i:${i}">
+    <div class="constructor-card" data-constructor-id="${c.constructor_id}" style="--team-color:${team.color};--i:${i}">
         <button class="scenario-btn ${scenBtnActive ? 'active' : ''}"
                 data-scen-type="team" data-scen-id="${c.constructor_id}"
                 title="What-if: bump ${c.name}'s pace by N positions (applies to both drivers)">${scenBtnLabel}</button>
+        <button class="card-share-btn" type="button" onclick="sharePrediction('constructor','${c.constructor_id}', this)" title="Share ${c.name}'s prediction">🔗</button>
         ${renderWeatherBadges()}
         <div class="constructor-header">
             <div>
@@ -3128,8 +3142,8 @@ function flashBtn(btn, msg) {
     setTimeout(() => { btn.textContent = btn.dataset._orig; btn.disabled = false; }, 1600);
 }
 
-function copyTextToClipboard(text, btn) {
-    const ok = () => flashBtn(btn, '✓ Copied!');
+function copyTextToClipboard(text, btn, copiedMsg) {
+    const ok = () => flashBtn(btn, copiedMsg || '✓ Copied!');
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(ok).catch(() => fallbackCopyText(text, ok));
     } else {
@@ -3153,22 +3167,64 @@ function fallbackCopyText(text, done) {
     } catch (e) { /* clipboard blocked — nothing we can do */ }
 }
 
-// Share a team: native share sheet on touch devices, copy-to-clipboard on desktop.
-function shareTeam(driverIds, constructorIds, btn) {
-    const url = buildShareTeamUrl(driverIds, constructorIds);
-    const blurb = buildTeamBlurb(driverIds, constructorIds);
+// Share or copy: native share sheet on touch devices, clipboard on desktop.
+function shareOrCopy(blurb, url, btn, copiedMsg) {
     let isTouch = false;
     try { isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches; } catch (e) {}
     if (isTouch && navigator.share) {
         navigator.share({ title: 'BoxBox F1 Fantasy', text: blurb, url }).catch(() => {});
         return;
     }
-    copyTextToClipboard(`${blurb}\n${url}`, btn);
+    copyTextToClipboard(`${blurb}\n${url}`, btn, copiedMsg);
+}
+
+function shareTeam(driverIds, constructorIds, btn) {
+    shareOrCopy(buildTeamBlurb(driverIds, constructorIds), buildShareTeamUrl(driverIds, constructorIds), btn);
 }
 
 // Called from the inline onclick on each optimizer lineup's Share button.
 function shareTeamFromIds(driverCsv, consCsv, btn) {
     shareTeam(driverCsv ? driverCsv.split(',') : [], consCsv ? consCsv.split(',') : [], btn);
+}
+
+// --- Option D: share a single driver/constructor prediction ---
+function buildPredictionBlurb(type, id) {
+    if (!data) return 'Check out this BoxBox F1 Fantasy prediction';
+    const race = data.race || 'this round';
+    if (type === 'constructor') {
+        const c = data.constructors.find(x => x.constructor_id === id);
+        if (!c) return `BoxBox F1 Fantasy prediction for ${race}`;
+        return `${(c.name || c.constructor_id).toUpperCase()} — ${race}: ${Math.round(c.expected_points)} predicted pts on BoxBoxF1Fantasy`;
+    }
+    const d = data.drivers.find(x => x.driver_id === id);
+    if (!d) return `BoxBox F1 Fantasy prediction for ${race}`;
+    return `${d.name} — ${race}: P${d.predicted_quali} quali, P${d.predicted_finish} finish, ${Math.round(d.expected_points)} predicted pts on BoxBoxF1Fantasy`;
+}
+
+function sharePrediction(type, id, btn) {
+    const param = type === 'constructor' ? 'constructor' : 'driver';
+    const url = `${location.origin}${location.pathname}?${param}=${encodeURIComponent(id)}`;
+    shareOrCopy(buildPredictionBlurb(type, id), url, btn, '✓');
+}
+
+// Receiving end: ?driver=ID / ?constructor=ID → open the tab, scroll to and
+// briefly highlight that card.
+function focusPrediction(type, id) {
+    const tab = type === 'constructor' ? 'constructors' : 'drivers';
+    switchTab(tab);  // triggers the lazy render if the tab hasn't been opened yet
+    const sel = type === 'constructor' ? `[data-constructor-id="${id}"]` : `[data-driver-id="${id}"]`;
+    let attempts = 0;
+    const tryFocus = () => {
+        const card = document.querySelector(sel);
+        if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.classList.add('card-highlight');
+            setTimeout(() => card.classList.remove('card-highlight'), 2400);
+        } else if (attempts++ < 15) {
+            setTimeout(tryFocus, 120);  // constructors render async on first open
+        }
+    };
+    tryFocus();
 }
 
 // Receiving end: ?team=ID,ID,... → pre-fill the Transfer Advisor with the team.

@@ -1341,6 +1341,42 @@ select:focus, input:focus {
     color: var(--text-primary);
 }
 
+/* Per-card share button (Option D) — sits just right of the "±" scenario button */
+.card-share-btn {
+    position: absolute;
+    top: 8px;
+    left: 42px;
+    z-index: 2;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 11px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.card-share-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    transform: scale(1.05);
+}
+.card-share-btn:disabled { opacity: 0.75; cursor: default; }
+
+/* Brief glow when you arrive on a shared driver/constructor card */
+.card-highlight {
+    animation: cardHighlightPulse 2.4s ease-out;
+}
+@keyframes cardHighlightPulse {
+    0%, 100% { box-shadow: none; }
+    8%, 55%  { box-shadow: 0 0 0 3px var(--accent); }
+}
+
 .lineup-picks-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
