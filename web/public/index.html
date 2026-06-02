@@ -3,10 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BoxBoxF1Fantasy — F1 Fantasy Predictions</title>
+
+    <!-- Primary SEO -->
+    <title>Free F1 Fantasy 2026 Predictions, Optimizer &amp; Tips | BoxBox</title>
+    <meta name="description" content="Free, data-driven F1 Fantasy 2026 tools: machine-learning driver &amp; constructor predictions, a lineup optimizer, transfer planner and weekly tips — with a public accuracy record. Updated every race weekend.">
+    <link rel="canonical" href="https://boxboxf1fantasy.com/">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#0a0d12">
+
+    <!-- Open Graph (Facebook / Discord / WhatsApp / LinkedIn) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="BoxBoxF1Fantasy">
+    <meta property="og:title" content="Free F1 Fantasy 2026 Predictions, Optimizer &amp; Tips">
+    <meta property="og:description" content="ML-powered F1 Fantasy predictions, a lineup optimizer, transfer planner and weekly tips — free, with a public accuracy record.">
+    <meta property="og:url" content="https://boxboxf1fantasy.com/">
+    <meta property="og:image" content="https://boxboxf1fantasy.com/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@BoxBoxF1Fantasy">
+    <meta name="twitter:title" content="Free F1 Fantasy 2026 Predictions, Optimizer &amp; Tips">
+    <meta name="twitter:description" content="ML-powered F1 Fantasy predictions, a lineup optimizer, transfer planner and weekly tips — free, with a public accuracy record.">
+    <meta name="twitter:image" content="https://boxboxf1fantasy.com/og-image.png">
+
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="stylesheet" href="styles.css?v=4">
+    <link rel="stylesheet" href="styles.css?v=5">
     <link rel="stylesheet" href="scenarios.css?v=3">
     <link rel="stylesheet" href="weather.css?v=2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,6 +49,65 @@
         // "/" would double-count the landing and clutter the Pages report.
         gtag('config', 'G-T3HS76FJ7W', { send_page_view: false });
     </script>
+
+    <!-- Structured data for search engines / AI overviews -->
+    <script type="application/ld+json">
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "BoxBoxF1Fantasy",
+        "url": "https://boxboxf1fantasy.com/",
+        "applicationCategory": "SportsApplication",
+        "operatingSystem": "Web",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "description": "Free F1 Fantasy 2026 prediction tools: machine-learning driver and constructor predictions, a lineup optimizer, transfer planner and weekly tips, with a public accuracy record."
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "BoxBoxF1Fantasy",
+        "url": "https://boxboxf1fantasy.com/",
+        "logo": "https://boxboxf1fantasy.com/logo.png",
+        "sameAs": [
+          "https://x.com/BoxBoxF1Fantasy",
+          "https://www.youtube.com/@BoxBoxF1Fantasy",
+          "https://www.tiktok.com/@boxboxf1fantasy"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How does F1 Fantasy scoring work?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Drivers score points for their qualifying and race finishing positions, positions gained, overtakes (+1 each), and fastest-lap and Driver of the Day bonuses, minus a penalty if they don't finish (DNF). Sprint weekends add sprint qualifying and sprint race points. Constructors score both of their drivers' points plus a qualifying teamwork bonus and pit-stop points. BoxBoxF1Fantasy projects every one of these for the upcoming round." }
+          },
+          {
+            "@type": "Question",
+            "name": "Is it better to pick good drivers or constructors in F1 Fantasy?",
+            "acceptedAnswer": { "@type": "Answer", "text": "You need both, but don't overlook constructors: they score both of their drivers' points and add pit-stop points and a qualifying teamwork bonus that individual drivers don't get. A strong constructor is often better value than a third premium driver." }
+          },
+          {
+            "@type": "Question",
+            "name": "How do you win F1 Fantasy?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Consistency and value win leagues, not chasing one big week. Build around points-per-million value picks, plan transfers a few rounds ahead, time your chips for weekends that suit them, and captain a driver with high, reliable upside. BoxBox's Optimizer, Transfer Advisor and Multi-Week Planner are built to do exactly that." }
+          },
+          {
+            "@type": "Question",
+            "name": "How accurate are BoxBox's F1 Fantasy predictions?",
+            "acceptedAnswer": { "@type": "Answer", "text": "We publish our track record: the Accuracy tab shows our prediction error and confidence-interval coverage for every completed round, including the misses. Predictions come from machine-learning models plus a 10,000-run Monte Carlo simulation, and they sharpen as practice and qualifying data arrive through the weekend." }
+          },
+          {
+            "@type": "Question",
+            "name": "Is BoxBoxF1Fantasy free?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes - all predictions and tools are completely free, with no login required." }
+          }
+        ]
+      }
+    ]
+    </script>
 </head>
 <body>
 
@@ -35,8 +118,8 @@
                 <div class="logo">
                     <img src="logo.png" alt="BoxBox F1 Fantasy" class="logo-img">
                     <div>
-                        <h1 class="logo-text">BoxBox<span class="accent">F1</span>Fantasy</h1>
-                        <p class="logo-sub">Data-driven F1 Fantasy predictions</p>
+                        <div class="logo-text">BoxBox<span class="accent">F1</span>Fantasy</div>
+                        <p class="logo-sub">Free data-driven F1 Fantasy 2026 predictions</p>
                     </div>
                 </div>
                 <div class="header-right">
@@ -83,6 +166,12 @@
 
             <!-- Drivers Tab -->
             <section class="tab-content active" id="tab-drivers">
+                <!-- Crawlable intro (real H1 + keyword text for SEO; useful orientation for new visitors) -->
+                <section class="seo-intro">
+                    <h1>F1 Fantasy 2026 Predictions, Optimizer &amp; Tips</h1>
+                    <p>Free, data-driven predictions for every 2026 F1 Fantasy round &mdash; machine-learning driver and constructor projections, a lineup optimizer, transfer planner, and weekly tips, with a public accuracy record. Updated every race weekend.</p>
+                </section>
+
                 <!-- Hero Section -->
                 <div class="hero" id="heroSection">
                     <!-- JS will populate this -->
@@ -624,6 +713,32 @@
                             <li><strong>DNF probability blends history and current season.</strong> A driver's reliability rating is a mix of their rolling 5-race DNF rate and their team's 2026 reliability so far. Small sample sizes early in the year can produce DNF estimates that look high; they self-correct as more races run.</li>
                             <li><strong>Pit stop points may update a day after the race.</strong> Constructor pit stop scoring uses real wheels-up stationary times from public data feeds. Those feeds occasionally lag 24-48h post-race. If pit stop points look low immediately after the race, check back the next day — the numbers refresh automatically.</li>
                         </ul>
+                    </div>
+
+                    <div class="about-section">
+                        <h3>Frequently Asked Questions</h3>
+                        <div class="faq">
+                            <div class="faq-item">
+                                <h4>How does F1 Fantasy scoring work?</h4>
+                                <p>Drivers score points for their qualifying and race finishing positions, positions gained, overtakes (+1 each), and fastest-lap and Driver of the Day bonuses, minus a penalty if they don't finish (DNF). Sprint weekends add sprint qualifying and sprint race points. Constructors score both of their drivers' points plus a qualifying teamwork bonus and pit-stop points. BoxBoxF1Fantasy projects every one of these for the upcoming round.</p>
+                            </div>
+                            <div class="faq-item">
+                                <h4>Is it better to pick good drivers or constructors in F1 Fantasy?</h4>
+                                <p>You need both, but don't overlook constructors: they score both of their drivers' points and add pit-stop points and a qualifying teamwork bonus that individual drivers don't get. A strong constructor is often better value than a third premium driver. Our Constructors tab shows the full breakdown so you can compare.</p>
+                            </div>
+                            <div class="faq-item">
+                                <h4>How do you win F1 Fantasy?</h4>
+                                <p>Consistency and value win leagues, not chasing one big week. Build around points-per-million value picks, plan transfers a few rounds ahead, time your chips for weekends that suit them, and captain a driver with high, reliable upside. BoxBox's Optimizer, Transfer Advisor and Multi-Week Planner are built to do exactly that.</p>
+                            </div>
+                            <div class="faq-item">
+                                <h4>How accurate are BoxBox's F1 Fantasy predictions?</h4>
+                                <p>We publish our track record: the Accuracy tab shows our prediction error and confidence-interval coverage for every completed round &mdash; including the misses. Predictions come from machine-learning models plus a 10,000-run Monte Carlo simulation, and they sharpen as practice and qualifying data arrive through the weekend.</p>
+                            </div>
+                            <div class="faq-item">
+                                <h4>Is BoxBoxF1Fantasy free?</h4>
+                                <p>Yes &mdash; all predictions and tools are completely free, with no login required.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="about-section">
