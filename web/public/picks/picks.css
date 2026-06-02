@@ -1,0 +1,80 @@
+/* Styling for the static SEO landing pages under /picks/.
+   Self-contained dark theme matching the main app's brand colours.
+   Loaded from same-origin so it satisfies the site CSP (style-src 'self'). */
+:root {
+  --bg: #0a0d12;
+  --card: #12161f;
+  --border: #222a35;
+  --text: #e9edf3;
+  --muted: #9aa4b2;
+  --accent: #e10600;
+  --green: #16a34a;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.55;
+}
+a { color: #7ab8ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 880px; margin: 0 auto; padding: 0 18px; }
+
+.topbar {
+  border-bottom: 1px solid var(--border);
+  background: #0c1018;
+  position: sticky; top: 0; z-index: 5;
+}
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; height: 58px; }
+.brand { font-weight: 800; font-size: 1.1rem; color: var(--text); }
+.brand:hover { text-decoration: none; }
+.brand .ac { color: var(--accent); }
+.cta {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--accent), #c10500);
+  color: #fff; font-weight: 700; padding: 9px 16px; border-radius: 8px; font-size: 0.9rem;
+}
+.cta:hover { text-decoration: none; filter: brightness(1.08); }
+
+h1 { font-size: 1.9rem; line-height: 1.2; margin: 22px 0 6px; }
+h2 { font-size: 1.25rem; margin: 32px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+.lede { color: var(--text); font-size: 1.02rem; margin: 0 0 8px; }
+.meta { color: var(--muted); font-size: 0.82rem; margin: 0 0 16px; }
+.crumbs { font-size: 0.8rem; color: var(--muted); margin: 14px 0 0; }
+
+table { width: 100%; border-collapse: collapse; margin: 8px 0 4px; font-size: 0.9rem; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-weight: 600; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tbody tr:hover { background: #11151d; }
+
+.callout {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 14px 16px; margin: 16px 0;
+}
+.btnrow { margin: 22px 0; display: flex; gap: 12px; flex-wrap: wrap; }
+.faq-q { font-weight: 700; margin: 16px 0 4px; }
+.faq-a { color: var(--muted); margin: 0; }
+
+.racelist { list-style: none; padding: 0; margin: 12px 0; }
+.racelist li {
+  border: 1px solid var(--border); border-radius: 8px; background: var(--card);
+  padding: 12px 14px; margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.racelist .date { color: var(--muted); font-size: 0.82rem; }
+.tag { display: inline-block; background: var(--accent); color: #fff; font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+
+.footer { border-top: 1px solid var(--border); margin-top: 40px; padding: 20px 0; color: var(--muted); font-size: 0.8rem; }
+.footer a { color: var(--muted); text-decoration: underline; }
+
+@media (max-width: 600px) {
+  h1 { font-size: 1.5rem; }
+  .topbar .cta { padding: 7px 11px; font-size: 0.8rem; }
+  th, td { padding: 7px 6px; font-size: 0.84rem; }
+}

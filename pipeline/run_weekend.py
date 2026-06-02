@@ -120,6 +120,9 @@ PHASES = {
             # updated current-round predictions. Non-fatal if it fails — the
             # planner falls back to the affinity heuristic.
             ("predict_horizon.py", ["--current-round", "{round}", "--horizon", "5"], {"non_fatal": True}),
+            # SEO: regenerate the static /picks/ race landing pages from the
+            # freshly exported JSON. Non-fatal — a failure won't abort the weekend.
+            ("14_build_seo_pages.py", [], {"non_fatal": True}),
         ],
     },
     "post_fp": {
@@ -134,6 +137,7 @@ PHASES = {
             ("10_fp_analysis.py", ["--round", "{round}"]),
             ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_fp"]),
             ("predict_horizon.py", ["--current-round", "{round}", "--horizon", "5"], {"non_fatal": True}),
+            ("14_build_seo_pages.py", [], {"non_fatal": True}),
         ],
     },
     "post_quali": {
@@ -148,6 +152,7 @@ PHASES = {
             ("10_fp_analysis.py", ["--round", "{round}"]),
             ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_quali"]),
             ("predict_horizon.py", ["--current-round", "{round}", "--horizon", "5"], {"non_fatal": True}),
+            ("14_build_seo_pages.py", [], {"non_fatal": True}),
         ],
     },
     "post_race": {
@@ -166,6 +171,7 @@ PHASES = {
             ("12_count_overtakes.py", ["--round", "{round}"]),
             ("13_fetch_pitstop_stationary.py", ["--year", str(CURRENT_SEASON), "--round", "{round}"]),
             ("08_export_website_json.py", ["--round", "{round}"]),
+            ("14_build_seo_pages.py", [], {"non_fatal": True}),
         ],
     },
 }
