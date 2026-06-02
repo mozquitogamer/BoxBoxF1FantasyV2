@@ -1015,6 +1015,8 @@ When you change `web/public/app.js`, bump the version in `web/public/index.html`
 <script src="app.js?v=73"></script>   <!-- bump from 73 → 74 -->
 ```
 
+Likewise, when you change `web/public/styles.css`, bump its query string: `<link rel="stylesheet" href="styles.css?v=N">` (the `scenarios.css` / `weather.css` links are versioned the same way).
+
 The data JSONs are fetched with timestamp query params (`?t=Date.now()`) automatically, so they don't need versioning.
 
 ### Donation links (Ko-fi + PayPal)

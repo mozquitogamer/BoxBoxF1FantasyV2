@@ -233,19 +233,19 @@ body {
 
 .tab-list {
     display: flex;
-    gap: 4px;
+    flex-wrap: wrap;
+    gap: 3px;
     padding: 8px 0;
-    overflow-x: auto;
 }
 
 .tab {
     background: none;
-    border: none;
+    border: 1px solid transparent;
     color: var(--text-secondary);
     font-family: inherit;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
-    padding: 8px 20px;
+    padding: 8px 14px;
     border-radius: var(--radius-xs);
     cursor: pointer;
     transition: all 0.15s;
@@ -1950,6 +1950,13 @@ table.sortable th.sort-desc::after {
 
     .countdown-badge {
         width: 100%;
+    }
+
+    /* On phones, keep the nav as a single horizontally-scrollable row
+       rather than wrapping 12 tabs into several stacked rows. */
+    .tab-list {
+        flex-wrap: nowrap;
+        overflow-x: auto;
     }
 
     .controls {
