@@ -3167,7 +3167,9 @@ function fallbackCopyText(text, done) {
     } catch (e) { /* clipboard blocked — nothing we can do */ }
 }
 
-// Share or copy: native share sheet on touch devices, clipboard on desktop.
+// Share or copy. Touch devices get the native share sheet with the points
+// blurb (it lands in a message, where the text reads nicely). Desktop copies
+// JUST the bare link — that's what you paste into an address bar or chat box.
 function shareOrCopy(blurb, url, btn, copiedMsg) {
     let isTouch = false;
     try { isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches; } catch (e) {}
@@ -3175,7 +3177,7 @@ function shareOrCopy(blurb, url, btn, copiedMsg) {
         navigator.share({ title: 'BoxBox F1 Fantasy', text: blurb, url }).catch(() => {});
         return;
     }
-    copyTextToClipboard(`${blurb}\n${url}`, btn, copiedMsg);
+    copyTextToClipboard(url, btn, copiedMsg);
 }
 
 function shareTeam(driverIds, constructorIds, btn) {
