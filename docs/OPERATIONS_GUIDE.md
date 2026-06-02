@@ -4,7 +4,7 @@
 
 This document is the source of truth for *how to drive the system*. If you can read this guide cold and produce predictions for the next race, post-race actuals after, and a full website refresh, it is doing its job.
 
-For *why* the system is designed the way it is (model architecture, feature engineering rationale, scoring math), see [TECHNICAL_DEEP_DIVE.md](TECHNICAL_DEEP_DIVE.md).
+For *why* the system is designed the way it is (model architecture, feature engineering rationale, scoring math), see [TECHNICAL_DEEP_DIVE.md](TECHNICAL_DEEP_DIVE.md). For the end-user UI guide and a narrated walkthrough, see [USER_GUIDE.md](USER_GUIDE.md) and [SITE_TUTORIAL.md](SITE_TUTORIAL.md).
 
 ---
 
@@ -525,7 +525,7 @@ Edit only on driver swaps mid-season (rare).
 
 ### `web/public/index.html` cache version
 
-When you edit `web/public/app.js`, bump the `app.js?v=N` query string in `index.html` so users get the new version instead of a stale cached copy. Currently at `v=49`.
+When you edit `web/public/app.js`, bump the `app.js?v=N` query string in `index.html` so users get the new version instead of a stale cached copy. Currently at `v=73`.
 
 ### `config/track_classifications.py`
 
@@ -617,9 +617,15 @@ Merges Jolpica priors + FP features into `data/processed/model_inputs/training_d
 
 No CLI args. Trains all 5 models (`quali`, `race`, `race_fp`, `sprint`, `fp_signal`) from `training_data.parquet`. Writes to `models/trained/`.
 
-### `pipeline/05b_experiment_models.py` — Experimental tuning (rarely used)
+### `pipeline/validate_model_config.py` — Walk-forward config validator (research gate)
 
-No CLI args. Tests alternative algorithms and hyperparams. Output is informational only — does not overwrite production models.
+```
+--test-from-year YYYY    (default 2022 — extends walk-forward back for ~97 round-folds)
+```
+
+The statistical gate any hyperparameter change must clear **before** it ships. Runs walk-forward cross-validation across 2022–2026 (≈97 round-folds, not just the 5 completed 2026 rounds), with paired bootstrap confidence intervals and multiple-testing correction (Bonferroni + Benjamini-Hochberg). A tuning change that looks significant on 5 folds but collapses at 97 is rejected here — this is the harness that caught two small-sample false positives in May 2026. Read-only; never touches `models/trained/`.
+
+Replaced the old throwaway `05b_experiment_models.py` (deleted). Companion research one-offs (also read-only, not part of normal operation): `run_oat_sweep.py`, `run_combined_grid.py`, `run_race_fp_sweep.py`, `validate_race_fp.py`, `validate_alt_algorithm.py` / `validate_alt_algo_v2.py` (CatBoost / RandomForest evaluation), `analyze_multiple_testing.py`.
 
 ### `pipeline/validate_weather_features.py` — Weather model validation gate (manual)
 
@@ -921,6 +927,31 @@ No CLI args. Updates `web/public/data/youtube_videos.json`.
 
 Imported by `04_build_model_inputs.py` and `06_run_predictions.py`. Contains cross-layer engineered features. No CLI.
 
+### `pipeline/prediction_sanity.py` — Pre-export sanity guard (imported, auto-runs)
+
+Imported by `08_export_website_json.py`. Before predictions are written to the live site, `check_predictions(payload)` scans for gross breakage — empty / all-zero / NaN points, a predicted winner scoring implausibly low (the bias-nerf signature), ranking collapse, missing constructors. Prints `[OK]` / `- warning` / `[X] problem` lines (ASCII-only — the Windows cp1252 console can't encode ✓/✗ and would crash the export). Problems print **loudly but do not block** the export (model output is a judgement call); the point is that a regression like the May 2026 bias-nerf can't ship *silently*. Tunable thresholds in the `SANITY` dict at the top.
+
+### `pipeline/train_dnf_classifier.py` — DNF-by-weather classifier (research, not shipped)
+
+Trains a logistic-regression DNF-probability model conditioned on weather / temperature / rolling reliability. Built and validated but **not wired into production** — it failed its accuracy gate (Brier improvement 0.57% vs a 1% gate, AUC 0.585 vs 0.60). Kept to re-run when more wet-race history accumulates. See the 2026-05-25 changelog entry.
+
+### Testing & safety net (`tests/`)
+
+A lightweight suite targets the bug classes that have actually bitten this project (silent scoring errors, undefined frontend references, grossly-broken exports). Run before pushing any frontend or scoring change:
+
+```bash
+python -m pytest tests/ -q          # scoring rules + the prediction sanity guard
+node tests/smoke_app_js.js          # app.js loads; TA_TUNABLES/MW_TUNABLES defined; key fns resolve
+# one-liner before pushing:
+python -m pytest tests/ -q && node tests/smoke_app_js.js && echo "safe to push"
+```
+
+- `tests/test_fantasy_scoring.py` — every scoring function in `config/fantasy_scoring.py` (position ladders, overtakes, FL/DOTD, pit-stop brackets, DOTD-excluded-from-constructors). Catches silent scoring drift.
+- `tests/test_prediction_sanity.py` — the export guard itself (all-zeros, NaN, gross suppression, ranking collapse, strict mode).
+- `tests/smoke_app_js.js` — evaluates `app.js` in a mocked-browser sandbox so an undefined reference throws here instead of in a user's browser. `node --check` only validates *syntax* and would miss this class — it's exactly how a crashing Transfer Advisor once shipped.
+
+See `tests/README.md` for details.
+
 ---
 
 ## 12. Calibration
@@ -981,7 +1012,7 @@ No build step. Vercel serves the contents of `web/public/` as-is. Static JSON in
 
 When you change `web/public/app.js`, bump the version in `web/public/index.html`:
 ```html
-<script src="app.js?v=49"></script>   <!-- bump from 49 → 50 -->
+<script src="app.js?v=73"></script>   <!-- bump from 73 → 74 -->
 ```
 
 The data JSONs are fetched with timestamp query params (`?t=Date.now()`) automatically, so they don't need versioning.

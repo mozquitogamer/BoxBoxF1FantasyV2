@@ -240,11 +240,12 @@ Visual representations of the pipeline, feature architecture, scoring, and the r
 ║  │  │  │   ├── Lineup Optimizer (1.4M brute-force)        │                 │    ║
 ║  │  │  │   ├── Transfer Advisor (with penalty calc)       │                 │    ║
 ║  │  │  │   └── Multi-Week Planner (beam search, 2-5 rds)  │                 │    ║
+║  │  │  ├── Analysis (FP + post-race breakdowns)           │                 │    ║
 ║  │  │  ├── Season (standings + price tracker)             │                 │    ║
 ║  │  │  ├── H2H (matchup predictions)                      │                 │    ║
 ║  │  │  ├── Accuracy (drivers + constructors toggle)       │                 │    ║
 ║  │  │  ├── Race Deep Dive                                 │                 │    ║
-║  │  │  ├── Videos, Articles, About                        │                 │    ║
+║  │  │  ├── Videos, Articles, Changelog, About             │                 │    ║
 ║  │  │  └── Lock-deadline countdown                        │                 │    ║
 ║  │  └─────────────────────────────────────────────────────┘                 │    ║
 ║  │                                                                          │    ║

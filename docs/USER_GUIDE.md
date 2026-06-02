@@ -2,7 +2,7 @@
 
 A guide to every feature on [boxboxf1fantasy.com](https://boxboxf1fantasy.com).
 
-For technical architecture, see [TECHNICAL_DEEP_DIVE.md](TECHNICAL_DEEP_DIVE.md). For pipeline operation, see [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md).
+For a guided, narrated walkthrough (and a ready-to-record YouTube video script), see [SITE_TUTORIAL.md](SITE_TUTORIAL.md). For technical architecture, see [TECHNICAL_DEEP_DIVE.md](TECHNICAL_DEEP_DIVE.md). For pipeline operation, see [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md).
 
 ---
 
@@ -120,10 +120,13 @@ The brute-force evaluates ~1.4M combinations with budget pruning, returns top 20
 
 **Results:**
 - Each row shows OUT → IN with predicted point delta
+- **Per-swap net cost + points delta** — each swap shows what it does to your score *and* your wallet (e.g. `+4.2pts −$1.5M`): green when a swap frees up budget, red when it costs you
+- **Efficiency line** — each option shows its net gain *vs simply keeping your current team*, plus gain-per-transfer-used, so it's obvious whether taking an extra −10 transfer is actually worth it
 - **Net points** = predicted points minus transfer penalty
 - "NEW" badges highlight incoming players
 - Each swap shows expected price change for the incoming player (green ↑ or red ↓)
 - "Keep Current Team" appears when no transfer beats holding
+- **Smarter candidate pool** — the search also considers cheap high-value "enabler" picks (a budget driver brought in purely to afford a star elsewhere), not just the top names by raw points
 
 **Lock & Exclude in Transfer Advisor:**
 - Lock a driver to prevent the advisor from swapping them out

@@ -3,7 +3,7 @@
 **Architecture and design rationale.** Read this when you need to understand *why* something is the way it is, or when modifying the pipeline.
 
 For *how to operate* the system day-to-day (run phases, CLI args, troubleshooting), see [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md).
-For end-user UI documentation, see [USER_GUIDE.md](USER_GUIDE.md).
+For end-user UI documentation, see [USER_GUIDE.md](USER_GUIDE.md). For a narrated walkthrough / ready-to-record video script, see [SITE_TUTORIAL.md](SITE_TUTORIAL.md).
 
 ---
 
@@ -114,7 +114,7 @@ BoxBoxF1FantasyV2/
 │   ├── 03b_build_jolpica_features.py # Layer-1 rolling features (91 cols)
 │   ├── 04_build_model_inputs.py    # Merge Layer 1 + Layer 2 → training_data.parquet
 │   ├── 05_train_models.py          # Train 5 models (quali, race, race_fp, sprint, fp_signal)
-│   ├── 05b_experiment_models.py    # Algorithm/hyperparam experiments (informational)
+│   ├── validate_model_config.py     # 97-fold walk-forward config validator (research gate)
 │   ├── 06_run_predictions.py       # Inference (phase-aware, recomputes circuit/sim features)
 │   ├── 07_calculate_fantasy.py     # Fantasy points (deterministic)
 │   ├── 08_monte_carlo_fantasy.py   # 10K-iteration MC
@@ -174,7 +174,7 @@ BoxBoxF1FantasyV2/
 ├── web/
 │   ├── public/
 │   │   ├── index.html                 # SPA shell (cache version: app.js?v=N)
-│   │   ├── app.js                     # All frontend logic (~5,800 lines)
+│   │   ├── app.js                     # All frontend logic (~7,800 lines)
 │   │   ├── styles.css                 # CSS with custom properties for theming
 │   │   ├── articles/*.md              # Article content
 │   │   └── data/*.json                # All website data (predictions, actuals, etc.)
@@ -360,7 +360,7 @@ All rolling features use `.shift(1)` — the current race's result is NOT includ
 
 ### Why XGBoost?
 
-We tested LightGBM, Random Forest, Gradient Boosting, ExtraTrees, stacking ensembles, voting ensembles in `05b_experiment_models.py`. XGBoost won because:
+We tested LightGBM, Random Forest, CatBoost, Gradient Boosting, ExtraTrees, and stacking/voting ensembles (the evaluation harnesses live in `validate_alt_algorithm.py` / `validate_alt_algo_v2.py` and the 97-fold `validate_model_config.py`). XGBoost won because:
 
 1. **Native NaN handling** — critical for the two-layer system
 2. **Strong with sparse features** — Layer 2 is 90%+ NaN in training
@@ -948,7 +948,7 @@ With limited data (<3 rounds), multiplier capped at ±10%. With 6+ rounds, the c
 
 ### Stack
 
-- **Frontend:** Vanilla JavaScript (no framework). Single `app.js` (~5,800 lines).
+- **Frontend:** Vanilla JavaScript (no framework). Single `app.js` (~7,800 lines).
 - **Styling:** Pure CSS with custom properties.
 - **Hosting:** Vercel (static file hosting, CDN).
 - **Deployment:** `git push` → GitHub → Vercel auto-deploys.
@@ -963,7 +963,7 @@ With limited data (<3 rounds), multiplier capped at ±10%. With 6+ rounds, the c
 3. **Phase 3 (background):** Deferred loads for weather, official points, actuals.
 4. **Phase 4 (on-demand):** Each tab renders on first click with a loading spinner.
 
-Tabs: Drivers, Constructors, Optimizer, Season, H2H, Accuracy, Race Deep Dive, Videos, Articles, About.
+Tabs: Drivers, Constructors, Optimizer, Analysis, Season, H2H, Accuracy, Race Deep Dive, Videos, Articles, Changelog, About.
 
 ### Data Flow
 
