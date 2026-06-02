@@ -1,6 +1,16 @@
 {
   "entries": [
     {
+      "date": "2026-06-02",
+      "title": "Share your team with a link",
+      "tags": ["feature"],
+      "body": [
+        "You can now share a team. Every lineup the optimizer suggests has a <strong>🔗 Share</strong> button, and the Transfer Advisor's \"My Current Team\" has a <strong>Share team</strong> button.",
+        "Tap it and — on a phone — your share sheet opens (WhatsApp, Messages, X) with a short blurb and the link; on desktop the link is copied straight to your clipboard. The whole team is encoded in the link itself, so there's no sign-up and nothing saved on a server.",
+        "When someone opens your link, it drops them straight into the Transfer Advisor with your team pre-loaded and scored against the current round — so they can see what it's worth this week and start tinkering. Links always score against the live round; they're not frozen snapshots."
+      ]
+    },
+    {
       "date": "2026-06-01",
       "title": "Reverted the bias correction — it was suppressing every prediction",
       "tags": ["fix", "model"],

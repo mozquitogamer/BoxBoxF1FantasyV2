@@ -379,6 +379,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Phase 2: Render Drivers tab immediately
     renderHero();
     renderDrivers();
+
+    // Shared-team deep link (?team=ID,ID,...) → pre-fill the Transfer Advisor.
+    try {
+        const sharedTeam = new URLSearchParams(location.search).get('team');
+        if (sharedTeam) applySharedTeam(sharedTeam);
+    } catch (e) {}
     _tabRendered.drivers = true;
 
     // Phase 3: Load deferred data in background (non-blocking)
@@ -884,6 +890,15 @@ function setupControls() {
 
     // Transfer advisor
     document.getElementById('runTransferAdvisor').addEventListener('click', runTransferAdvisor);
+    const shareMyTeamBtn = document.getElementById('shareMyTeam');
+    if (shareMyTeamBtn) {
+        shareMyTeamBtn.addEventListener('click', () => {
+            const dIds = myTeamDrivers.filter(Boolean);
+            const cIds = myTeamConstructors.filter(Boolean);
+            if (!dIds.length && !cIds.length) { flashBtn(shareMyTeamBtn, 'Pick a team first'); return; }
+            shareTeam(dIds, cIds, shareMyTeamBtn);
+        });
+    }
 
     // Multi-week planner
     document.getElementById('runMultiWeekPlanner').addEventListener('click', runMultiWeekPlanner);
@@ -2997,14 +3012,19 @@ function renderSingleLineup(lineup, index, strategy, budget) {
     const boostedId = lineup.boostedDriverId;
     const secondBoostedId = lineup.secondBoostedDriverId || null;
     const expandedClass = index === 0 ? ' expanded' : '';
+    const shareDriverIds = lineup.drivers.map(d => d.driver_id).join(',');
+    const shareConsIds = lineup.constructors.map(c => c.constructor_id).join(',');
     let html = `<div class="lineup-block${expandedClass}" style="margin-bottom:24px;" onclick="this.classList.toggle('expanded')">
         <div class="lineup-block-header">
             <h4><span class="lineup-expand-icon">\u25BC</span> Lineup #${index + 1}</h4>
-            <span class="lineup-block-stats">
-                ${lineup.totalPoints.toFixed(1)} pts (incl boost) \u00b7 $${lineup.totalCost.toFixed(1)}M \u00b7
-                $${(budget - lineup.totalCost).toFixed(1)}M left \u00b7
-                <span style="color:${totalExpChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)'}">${totalExpChange >= 0 ? '+' : ''}${totalExpChange.toFixed(1)}M exp change</span>
-            </span>
+            <div class="lineup-header-right">
+                <span class="lineup-block-stats">
+                    ${lineup.totalPoints.toFixed(1)} pts (incl boost) \u00b7 $${lineup.totalCost.toFixed(1)}M \u00b7
+                    $${(budget - lineup.totalCost).toFixed(1)}M left \u00b7
+                    <span style="color:${totalExpChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)'}">${totalExpChange >= 0 ? '+' : ''}${totalExpChange.toFixed(1)}M exp change</span>
+                </span>
+                <button type="button" class="share-team-btn" onclick="event.stopPropagation(); shareTeamFromIds('${shareDriverIds}','${shareConsIds}', this)">\ud83d\udd17 Share</button>
+            </div>
         </div>
         <div class="lineup-details">
         <div class="lineup-picks-row">`;
@@ -3068,6 +3088,129 @@ function renderSingleLineup(lineup, index, strategy, budget) {
 
     html += '</div></div></div>';
     return html;
+}
+
+// ============================================================
+// Share Team — encode a 5+2 lineup into a link, copy/share it, and (on the
+// receiving end) pre-fill the Transfer Advisor from ?team=...
+// No backend: the whole team lives in the URL. Drivers and constructors share
+// one comma list and are told apart by lookup on decode (their IDs never
+// collide). Scoring is always against the round currently loaded.
+// ============================================================
+function buildShareTeamUrl(driverIds, constructorIds) {
+    const ids = [...driverIds.filter(Boolean), ...constructorIds.filter(Boolean)];
+    return `${location.origin}${location.pathname}?team=${ids.join(',')}`;
+}
+
+function buildTeamBlurb(driverIds, constructorIds) {
+    if (!data) return 'Check out my BoxBox F1 Fantasy team';
+    let pts = 0;
+    const names = [];
+    driverIds.filter(Boolean).forEach(id => {
+        const d = data.drivers.find(x => x.driver_id === id);
+        if (d) { pts += d.expected_points || 0; names.push(d.name.split(' ').pop()); }
+    });
+    constructorIds.filter(Boolean).forEach(id => {
+        const c = data.constructors.find(x => x.constructor_id === id);
+        if (c) pts += c.expected_points || 0;
+    });
+    const race = data.race || 'this round';
+    const who = names.length ? names.join(', ') : 'my team';
+    return `My BoxBox F1 Fantasy team for ${race}: ${who} — ${Math.round(pts)} predicted pts 🏎️`;
+}
+
+// Brief button feedback ("Copied!"), then restore the original label.
+function flashBtn(btn, msg) {
+    if (!btn) return;
+    if (!btn.dataset._orig) btn.dataset._orig = btn.textContent;
+    btn.textContent = msg;
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = btn.dataset._orig; btn.disabled = false; }, 1600);
+}
+
+function copyTextToClipboard(text, btn) {
+    const ok = () => flashBtn(btn, '✓ Copied!');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok).catch(() => fallbackCopyText(text, ok));
+    } else {
+        fallbackCopyText(text, ok);
+    }
+}
+
+function fallbackCopyText(text, done) {
+    try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.top = '-1000px';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (done) done();
+    } catch (e) { /* clipboard blocked — nothing we can do */ }
+}
+
+// Share a team: native share sheet on touch devices, copy-to-clipboard on desktop.
+function shareTeam(driverIds, constructorIds, btn) {
+    const url = buildShareTeamUrl(driverIds, constructorIds);
+    const blurb = buildTeamBlurb(driverIds, constructorIds);
+    let isTouch = false;
+    try { isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches; } catch (e) {}
+    if (isTouch && navigator.share) {
+        navigator.share({ title: 'BoxBox F1 Fantasy', text: blurb, url }).catch(() => {});
+        return;
+    }
+    copyTextToClipboard(`${blurb}\n${url}`, btn);
+}
+
+// Called from the inline onclick on each optimizer lineup's Share button.
+function shareTeamFromIds(driverCsv, consCsv, btn) {
+    shareTeam(driverCsv ? driverCsv.split(',') : [], consCsv ? consCsv.split(',') : [], btn);
+}
+
+// Receiving end: ?team=ID,ID,... → pre-fill the Transfer Advisor with the team.
+function applySharedTeam(teamParam) {
+    if (!data || !teamParam) return;
+    const ids = teamParam.split(',').map(s => s.trim()).filter(Boolean);
+    const dIds = [], cIds = [];
+    ids.forEach(id => {
+        if (data.drivers.some(d => d.driver_id === id)) dIds.push(id);
+        else if (data.constructors.some(c => c.constructor_id === id)) cIds.push(id);
+    });
+    if (!dIds.length && !cIds.length) return;  // nothing recognisable in the link
+
+    myTeamDrivers = [null, null, null, null, null];
+    myTeamConstructors = [null, null];
+    dIds.slice(0, 5).forEach((id, i) => { myTeamDrivers[i] = id; });
+    cIds.slice(0, 2).forEach((id, i) => { myTeamConstructors[i] = id; });
+
+    // Show it in the Transfer Advisor.
+    switchTab('optimizer');
+    const transfersBtn = document.querySelector('.mode-btn[data-mode="transfers"]');
+    if (transfersBtn) transfersBtn.click();
+    renderMyTeamGrid();
+    showSharedTeamBanner();
+
+    // Tidy the address bar so a refresh doesn't re-trigger the import.
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+}
+
+function showSharedTeamBanner() {
+    const section = document.querySelector('#mode-transfers .my-team-section');
+    if (!section) return;
+    let b = document.getElementById('sharedTeamBanner');
+    if (!b) {
+        b = document.createElement('div');
+        b.id = 'sharedTeamBanner';
+        b.className = 'shared-team-banner';
+        section.insertBefore(b, section.firstChild);
+    }
+    b.innerHTML = `👋 You're viewing a <strong>shared team</strong>. Tweak the picks, or hit <strong>Find Best Transfers</strong> for upgrade ideas. <button type="button" class="shared-team-dismiss" aria-label="Dismiss">×</button>`;
+    const dismiss = b.querySelector('.shared-team-dismiss');
+    if (dismiss) dismiss.addEventListener('click', () => b.remove());
 }
 
 // ============================================================

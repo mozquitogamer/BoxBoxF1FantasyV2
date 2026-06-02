@@ -187,6 +187,19 @@ The brute-force evaluates ~1.4M combinations with budget pruning, returns top 20
 
 ---
 
+## Sharing a Team
+
+Built a lineup worth sending to a friend (or posting)? Two share buttons:
+
+- **Lineup Optimizer results** — each suggested lineup card has a **🔗 Share** button.
+- **Transfer Advisor** — the "My Current Team" picker has a **Share team** button.
+
+Click it: on a touch device your native share sheet opens (WhatsApp, Messages, X) with a short blurb + link; on desktop the link is copied to your clipboard. The whole team is encoded in the link itself — no login, nothing stored server-side.
+
+When someone opens the link, it drops them into the **Transfer Advisor with that team pre-loaded**, scored against the current round, so they can see what it's worth this week and tweak it. Scoring is always current-round — links are not frozen snapshots.
+
+---
+
 ## The 6 Chips
 
 | Chip | Effect |
