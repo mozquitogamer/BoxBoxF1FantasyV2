@@ -765,6 +765,27 @@ function startCountdown() {
 }
 
 // -- Tabs --
+// GA4 virtual page views. This is a single-page app, so without help GA only
+// ever sees one page ("/") and can't tell us where people spend their time.
+// Each tab switch fires a synthetic page_view with a distinct virtual path
+// (/drivers, /optimizer, …) so every tab shows up as its own row in GA4's
+// "Pages and screens" report — with its own view count AND average engagement
+// time. The real browser URL is never changed; these paths exist only in GA.
+const GA_TAB_TITLES = {
+    drivers: 'Drivers', constructors: 'Constructors', optimizer: 'Lineup Optimizer',
+    analysis: 'Analysis', season: 'Season', h2h: 'H2H', accuracy: 'Accuracy',
+    deepdive: 'Race Deep Dive', videos: 'Videos', articles: 'Articles',
+    changelog: 'Changelog', about: 'About',
+};
+function trackTabView(tabName) {
+    if (typeof gtag !== 'function') return;  // GA blocked / not loaded — skip silently
+    const label = GA_TAB_TITLES[tabName] || tabName;
+    gtag('event', 'page_view', {
+        page_title: `${label} | BoxBoxF1Fantasy`,
+        page_location: `${location.origin}/${tabName}`,
+    });
+}
+
 function switchTab(tabName) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -775,6 +796,9 @@ function switchTab(tabName) {
 
     // Lazy render the tab content on first visit
     renderTabIfNeeded(tabName);
+
+    // GA4 virtual page view for this tab
+    trackTabView(tabName);
 }
 
 function setupTabs() {
@@ -797,6 +821,11 @@ function setupTabs() {
         document.querySelector(`.tab[data-tab="${hash}"]`)?.classList.add('active');
         document.getElementById(`tab-${hash}`)?.classList.add('active');
     }
+
+    // Fire the initial GA4 virtual page view for the landing tab (default
+    // "drivers", or the deep-linked hash tab). switchTab() isn't called on
+    // initial load — see the note above — so track it explicitly here.
+    trackTabView((hash && document.getElementById(`tab-${hash}`)) ? hash : 'drivers');
 
     // Handle browser back/forward — fine to use switchTab here; the page
     // has finished initial load by the time the user navigates.
@@ -6189,6 +6218,7 @@ function renderSeason() {
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 document.querySelector('[data-tab="analysis"]').classList.add('active');
                 document.getElementById('tab-analysis').classList.add('active');
+                trackTabView('analysis');  // jumped here from a calendar row — GA4 still counts it
 
                 document.querySelectorAll('.analysis-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.analysis-panel').forEach(p => p.classList.remove('active'));

@@ -19,7 +19,11 @@
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-T3HS76FJ7W');
+        // send_page_view:false — this is a single-page app, so app.js fires a
+        // virtual page_view per tab (incl. the landing tab) for accurate
+        // per-tab traffic + engagement time. Letting GA also auto-fire one for
+        // "/" would double-count the landing and clutter the Pages report.
+        gtag('config', 'G-T3HS76FJ7W', { send_page_view: false });
     </script>
 </head>
 <body>
@@ -696,6 +700,6 @@
             integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
             crossorigin="anonymous" async></script>
     <script src="scenarios.js?v=3"></script>
-    <script src="app.js?v=73"></script>
+    <script src="app.js?v=74"></script>
 </body>
 </html>
