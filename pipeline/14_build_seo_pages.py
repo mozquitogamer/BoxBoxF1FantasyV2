@@ -73,12 +73,27 @@ def ld_block(objs: list) -> str:
     )
 
 
+# GA4 snippet. Plain (non-f) string so the JS braces survive. Unlike the SPA,
+# each static page is a real distinct URL, so we let gtag fire its automatic
+# page_view per page (no send_page_view:false) - they show up directly in GA's
+# Pages report. googletagmanager/google-analytics are allowed by the site CSP.
+GA_SNIPPET = """<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-T3HS76FJ7W"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-T3HS76FJ7W');
+</script>"""
+
+
 def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{GA_SNIPPET}
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <link rel="canonical" href="{canonical}">
