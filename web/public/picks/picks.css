@@ -40,6 +40,12 @@ a:hover { text-decoration: underline; }
 
 h1 { font-size: 1.9rem; line-height: 1.2; margin: 22px 0 6px; }
 h2 { font-size: 1.25rem; margin: 32px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+h3 { font-size: 1.02rem; margin: 18px 0 6px; color: var(--text); }
+p { margin: 10px 0; }
+ul, ol { color: var(--text); padding-left: 22px; margin: 8px 0; }
+li { margin: 5px 0; }
+.footnav { margin: 0 0 8px; }
+.footnav a { color: var(--muted); }
 .lede { color: var(--text); font-size: 1.02rem; margin: 0 0 8px; }
 .meta { color: var(--muted); font-size: 0.82rem; margin: 0 0 16px; }
 .crumbs { font-size: 0.8rem; color: var(--muted); margin: 14px 0 0; }
