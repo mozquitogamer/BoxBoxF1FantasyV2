@@ -1,7 +1,12 @@
 {
   "_comment": "Manual team performance modifiers.",
-  "round": null,
+  "round": 8,
   "scope": "all",
   "modifiers": {},
-  "driver_modifiers": {}
+  "driver_modifiers": {
+    "LIN": {
+      "pace_bump": 0.75,
+      "note": ""
+    }
+  }
 }

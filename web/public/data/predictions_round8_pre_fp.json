@@ -5,7 +5,7 @@
   "circuit": "Monaco",
   "date": "2026-06-07",
   "is_sprint_weekend": false,
-  "generated_at": "2026-06-01T07:06:04.863022+00:00",
+  "generated_at": "2026-06-04T13:21:41.737928+00:00",
   "drivers": [
     {
       "driver_id": "ANT",
@@ -42,7 +42,12 @@
       "mc_dnf_rate": 0.0,
       "mc_overtakes_mean": 5.1,
       "mc_quali_pts_mean": 8.4,
-      "mc_race_pts_mean": 23.3
+      "mc_race_pts_mean": 23.3,
+      "expected_points_adjusted": 31.7,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 2,
+      "predicted_finish_adjusted": 1,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "LEC",
@@ -79,7 +84,12 @@
       "mc_dnf_rate": 0.0,
       "mc_overtakes_mean": 7.7,
       "mc_quali_pts_mean": 6.6,
-      "mc_race_pts_mean": 22.8
+      "mc_race_pts_mean": 22.8,
+      "expected_points_adjusted": 29.5,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 3,
+      "predicted_finish_adjusted": 3,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "RUS",
@@ -116,7 +126,12 @@
       "mc_dnf_rate": 0.2,
       "mc_overtakes_mean": 5.7,
       "mc_quali_pts_mean": 8.9,
-      "mc_race_pts_mean": 15.4
+      "mc_race_pts_mean": 15.4,
+      "expected_points_adjusted": 24.3,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 1,
+      "predicted_finish_adjusted": 2,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "HAM",
@@ -153,7 +168,12 @@
       "mc_dnf_rate": 0.0,
       "mc_overtakes_mean": 6.2,
       "mc_quali_pts_mean": 5.9,
-      "mc_race_pts_mean": 21.8
+      "mc_race_pts_mean": 21.8,
+      "expected_points_adjusted": 27.7,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 5,
+      "predicted_finish_adjusted": 4,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "VER",
@@ -190,7 +210,12 @@
       "mc_dnf_rate": 0.3,
       "mc_overtakes_mean": 7.3,
       "mc_quali_pts_mean": 5.6,
-      "mc_race_pts_mean": 11.3
+      "mc_race_pts_mean": 11.3,
+      "expected_points_adjusted": 16.9,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 7,
+      "predicted_finish_adjusted": 5,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "SAI",
@@ -227,7 +252,12 @@
       "mc_dnf_rate": 0.0,
       "mc_overtakes_mean": 6.3,
       "mc_quali_pts_mean": 0.4,
-      "mc_race_pts_mean": 8.3
+      "mc_race_pts_mean": 8.3,
+      "expected_points_adjusted": 7.7,
+      "points_delta": -1.0,
+      "predicted_quali_adjusted": 17,
+      "predicted_finish_adjusted": 13,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "NOR",
@@ -264,7 +294,12 @@
       "mc_dnf_rate": 0.2,
       "mc_overtakes_mean": 4.8,
       "mc_quali_pts_mean": 6.1,
-      "mc_race_pts_mean": 9.4
+      "mc_race_pts_mean": 9.4,
+      "expected_points_adjusted": 15.5,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 4,
+      "predicted_finish_adjusted": 6,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "PIA",
@@ -301,7 +336,12 @@
       "mc_dnf_rate": 0.0,
       "mc_overtakes_mean": 4.7,
       "mc_quali_pts_mean": 5.8,
-      "mc_race_pts_mean": 9.9
+      "mc_race_pts_mean": 9.9,
+      "expected_points_adjusted": 15.7,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 6,
+      "predicted_finish_adjusted": 7,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "LIN",
@@ -338,7 +378,12 @@
       "mc_dnf_rate": 0.0,
       "mc_overtakes_mean": 6.8,
       "mc_quali_pts_mean": 0.2,
-      "mc_race_pts_mean": 7.7
+      "mc_race_pts_mean": 7.7,
+      "expected_points_adjusted": 18.0,
+      "points_delta": 10.0,
+      "predicted_quali_adjusted": 9,
+      "predicted_finish_adjusted": 9,
+      "pace_bump": 0.75
     },
     {
       "driver_id": "HAD",
@@ -375,7 +420,12 @@
       "mc_dnf_rate": 0.3,
       "mc_overtakes_mean": 5.6,
       "mc_quali_pts_mean": 1.2,
-      "mc_race_pts_mean": 5.6
+      "mc_race_pts_mean": 5.6,
+      "expected_points_adjusted": 5.9,
+      "points_delta": -1.0,
+      "predicted_quali_adjusted": 10,
+      "predicted_finish_adjusted": 8,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "COL",
@@ -412,7 +462,12 @@
       "mc_dnf_rate": 0.0,
       "mc_overtakes_mean": 6.4,
       "mc_quali_pts_mean": 0.9,
-      "mc_race_pts_mean": 8.6
+      "mc_race_pts_mean": 8.6,
+      "expected_points_adjusted": 6.5,
+      "points_delta": -3.0,
+      "predicted_quali_adjusted": 11,
+      "predicted_finish_adjusted": 11,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "OCO",
@@ -449,7 +504,12 @@
       "mc_dnf_rate": 0.0,
       "mc_overtakes_mean": 8.1,
       "mc_quali_pts_mean": 0.5,
-      "mc_race_pts_mean": 8.3
+      "mc_race_pts_mean": 8.3,
+      "expected_points_adjusted": 7.8,
+      "points_delta": -1.0,
+      "predicted_quali_adjusted": 14,
+      "predicted_finish_adjusted": 14,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "GAS",
@@ -486,7 +546,12 @@
       "mc_dnf_rate": 0.2,
       "mc_overtakes_mean": 4.8,
       "mc_quali_pts_mean": 1.9,
-      "mc_race_pts_mean": 1.4
+      "mc_race_pts_mean": 1.4,
+      "expected_points_adjusted": 1.3,
+      "points_delta": -2.0,
+      "predicted_quali_adjusted": 8,
+      "predicted_finish_adjusted": 10,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "ALB",
@@ -523,7 +588,12 @@
       "mc_dnf_rate": 0.2,
       "mc_overtakes_mean": 5.4,
       "mc_quali_pts_mean": 0.1,
-      "mc_race_pts_mean": 3.1
+      "mc_race_pts_mean": 3.1,
+      "expected_points_adjusted": 3.2,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 18,
+      "predicted_finish_adjusted": 17,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "STR",
@@ -560,7 +630,12 @@
       "mc_dnf_rate": 0.3,
       "mc_overtakes_mean": 3.3,
       "mc_quali_pts_mean": 0.0,
-      "mc_race_pts_mean": -2.0
+      "mc_race_pts_mean": -2.0,
+      "expected_points_adjusted": -2.0,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 22,
+      "predicted_finish_adjusted": 20,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "BOR",
@@ -597,7 +672,12 @@
       "mc_dnf_rate": 0.1,
       "mc_overtakes_mean": 6.0,
       "mc_quali_pts_mean": 0.4,
-      "mc_race_pts_mean": 3.8
+      "mc_race_pts_mean": 3.8,
+      "expected_points_adjusted": 4.2,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 16,
+      "predicted_finish_adjusted": 18,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "BEA",
@@ -634,7 +714,12 @@
       "mc_dnf_rate": 0.2,
       "mc_overtakes_mean": 5.6,
       "mc_quali_pts_mean": 0.4,
-      "mc_race_pts_mean": 2.1
+      "mc_race_pts_mean": 2.1,
+      "expected_points_adjusted": 1.5,
+      "points_delta": -1.0,
+      "predicted_quali_adjusted": 15,
+      "predicted_finish_adjusted": 15,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "BOT",
@@ -671,7 +756,12 @@
       "mc_dnf_rate": 0.3,
       "mc_overtakes_mean": 3.1,
       "mc_quali_pts_mean": 0.0,
-      "mc_race_pts_mean": -2.0
+      "mc_race_pts_mean": -2.0,
+      "expected_points_adjusted": -2.0,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 21,
+      "predicted_finish_adjusted": 21,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "LAW",
@@ -708,7 +798,12 @@
       "mc_dnf_rate": 0.2,
       "mc_overtakes_mean": 4.5,
       "mc_quali_pts_mean": 0.9,
-      "mc_race_pts_mean": 1.6
+      "mc_race_pts_mean": 1.6,
+      "expected_points_adjusted": 1.5,
+      "points_delta": -1.0,
+      "predicted_quali_adjusted": 12,
+      "predicted_finish_adjusted": 12,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "ALO",
@@ -745,7 +840,12 @@
       "mc_dnf_rate": 0.3,
       "mc_overtakes_mean": 4.9,
       "mc_quali_pts_mean": 0.1,
-      "mc_race_pts_mean": -1.0
+      "mc_race_pts_mean": -1.0,
+      "expected_points_adjusted": -1.0,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 19,
+      "predicted_finish_adjusted": 19,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "PER",
@@ -782,7 +882,12 @@
       "mc_dnf_rate": 0.2,
       "mc_overtakes_mean": 4.3,
       "mc_quali_pts_mean": 0.0,
-      "mc_race_pts_mean": -1.2
+      "mc_race_pts_mean": -1.2,
+      "expected_points_adjusted": -1.2,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 20,
+      "predicted_finish_adjusted": 22,
+      "pace_bump": 0.0
     },
     {
       "driver_id": "HUL",
@@ -819,7 +924,12 @@
       "mc_dnf_rate": 0.2,
       "mc_overtakes_mean": 4.9,
       "mc_quali_pts_mean": 0.6,
-      "mc_race_pts_mean": -0.3
+      "mc_race_pts_mean": -0.3,
+      "expected_points_adjusted": 0.3,
+      "points_delta": 0.0,
+      "predicted_quali_adjusted": 13,
+      "predicted_finish_adjusted": 16,
+      "pace_bump": 0.0
     }
   ],
   "constructors": [
@@ -1114,6 +1224,13 @@
     "quali_gap_median": 0.132484,
     "race_gap_median": 0.139794
   },
+  "upgrade_adjustments": {
+    "modifiers": {},
+    "driver_modifiers": {
+      "LIN": 0.75
+    },
+    "scope": "all"
+  },
   "weather_adjustments": {
     "is_active": false,
     "rain_risk": "NONE",
@@ -1132,5 +1249,5 @@
     "calibration_rounds": 5
   },
   "phase": "pre_fp",
-  "exported_at": "2026-06-01T07:06:04.863215+00:00"
+  "exported_at": "2026-06-04T13:21:41.738079+00:00"
 }
