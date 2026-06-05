@@ -474,6 +474,16 @@ OVERTAKE_DAMP_FLOOR: float = 0.13   # overtake multiplier at difficulty 10 -> Mo
 POS_NOISE_DAMP_PIVOT: int = 6       # difficulty at/below which MC position noise is unchanged
 POS_NOISE_DAMP_FLOOR: float = 0.70  # MC position-noise multiplier at difficulty 10 (Monaco)
 
+# Grid-anchoring: on hard-to-overtake circuits the race result tracks the
+# starting grid far more than pure race-pace ranking implies. This blends the
+# race model's predicted finish toward the qualifying grid, scaled by
+# `overtaking_difficulty`. Unlike the damping multipliers above this ramps UP
+# with difficulty: 0 at/below the pivot (normal tracks untouched) -> CEIL at
+# difficulty 10 (Monaco ~grid-locked). Raise the ceiling to freeze the grid
+# harder, lower it to let race pace re-order more.
+GRID_ANCHOR_PIVOT: int = 6          # difficulty at/below which finish is NOT anchored to grid
+GRID_ANCHOR_CEIL: float = 0.85      # grid-anchor weight at difficulty 10 (Monaco)
+
 
 def _difficulty_for(circuit_id: str) -> int:
     """overtaking_difficulty (1-10) for a circuit_id; 5 (neutral) if unknown."""
@@ -500,3 +510,23 @@ def overtake_multiplier(circuit_id: str) -> float:
 def position_noise_multiplier(circuit_id: str) -> float:
     """Multiplier (<=1.0) applied to Monte-Carlo position noise on sticky-grid tracks."""
     return _difficulty_damp(circuit_id, POS_NOISE_DAMP_PIVOT, POS_NOISE_DAMP_FLOOR)
+
+
+def _difficulty_ramp_up(circuit_id: str, pivot: int, ceil: float) -> float:
+    """Linear ramp UP: 0.0 at/below `pivot`, up to `ceil` at difficulty 10."""
+    diff = _difficulty_for(circuit_id)
+    if diff <= pivot:
+        return 0.0
+    if diff >= 10:
+        return ceil
+    return ceil * (diff - pivot) / (10 - pivot)
+
+
+def grid_anchor_weight(circuit_id: str) -> float:
+    """Weight (0..CEIL) for blending the predicted race finish toward the grid.
+
+    On hard-to-overtake circuits the race result tracks the starting grid far
+    more than pure race-pace ranking implies. 0 at/below the pivot (normal
+    tracks unchanged) ramping to GRID_ANCHOR_CEIL at difficulty 10 (Monaco).
+    """
+    return _difficulty_ramp_up(circuit_id, GRID_ANCHOR_PIVOT, GRID_ANCHOR_CEIL)
