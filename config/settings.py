@@ -147,6 +147,27 @@ def is_race_completed(round_num: int, year: int = CURRENT_SEASON) -> bool:
         return race_date < datetime.now().date()
     return False
 
+
+def race_name_for_round(round_num: int, year: int = CURRENT_SEASON) -> str:
+    """Return the Grand Prix name for an internal round (from races.json).
+
+    Returns '' if the round isn't found. Used to resolve a circuit_id via
+    track_classifications.get_circuit_id_from_race_name() at predict/score time.
+    """
+    import json
+    races_path = SEED_DIR / "races.json"
+    if not races_path.exists():
+        return ""
+    try:
+        with open(races_path) as f:
+            races = json.load(f).get("races", [])
+    except Exception:
+        return ""
+    for r in races:
+        if r.get("round") == round_num:
+            return r.get("name", "") or ""
+    return ""
+
 # -- Number of grid positions (11 teams × 2 drivers) --------------------------
 GRID_SIZE: int = 22
 NUM_CONSTRUCTORS: int = 11

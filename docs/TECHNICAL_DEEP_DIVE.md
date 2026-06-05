@@ -706,6 +706,10 @@ Base overtakes by grid bucket (calibrated from R1-R3 actuals):
 
 `positions_gained` is added because most position gains involve overtakes, plus there may be additional overtakes from re-passes / back-and-forth battles.
 
+### Track-difficulty damping (added 2026-06-05)
+
+The base overtake heuristic is track-agnostic, which massively over-counted passing at hard circuits (Monaco projected ~138 field overtakes; reality is near zero). Both `07_calculate_fantasy.py::estimate_overtakes` and the MC's `sample_overtakes` now apply an `overtake_multiplier(circuit_id)` derived from each track's `overtaking_difficulty` (1-10): tracks at/below difficulty 6 are unchanged, harder tracks ramp linearly down to a floor at difficulty 10 (Monaco → ×0.13, ~15-20 field overtakes). The MC additionally tightens position noise via `position_noise_multiplier(circuit_id)` (Monaco → ×0.70) so the grid is stickier and the CI bands narrow. Both helpers and their tunable floors live in `config/track_classifications.py`; the circuit is resolved per round via `settings.race_name_for_round` → `get_circuit_id_from_race_name`. (The base `estimate_overtakes` grid buckets themselves are due a data-driven retune now that 2026 actuals exist.)
+
 ### Sprint Overtakes
 
 Sprints are ~45% of race distance. `estimate_sprint_overtakes()` uses reduced base values (~50% of race base) and `sprint_gains = max(0, positions_gained - 1)` to reflect fewer laps to convert position changes.

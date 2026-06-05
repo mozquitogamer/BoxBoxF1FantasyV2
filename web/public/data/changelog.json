@@ -1,6 +1,16 @@
 {
   "entries": [
     {
+      "date": "2026-06-05",
+      "title": "Track-aware overtakes — Monaco no longer overcounts passing",
+      "tags": ["model", "fix"],
+      "body": [
+        "Predictions now scale overtakes and position movement to how hard a circuit is to overtake at. Monaco is the headline case: the old track-agnostic model projected <strong>~138 overtakes across the grid</strong> (even back-markers getting 7-11), which is wildly unrealistic for a track where on-track passing barely happens.",
+        "<strong>What changed:</strong> each circuit's overtaking difficulty (which we already track) now damps both the overtake estimate and the Monte Carlo's position shuffling. At Monaco the field now projects <strong>~15-20 total overtakes</strong>, front-runners ~0, and the confidence ranges are tighter. Easy-overtaking tracks (Monza, Spa, Baku) are unaffected; only genuinely hard ones (Monaco, Singapore) are damped.",
+        "<strong>Visible impact:</strong> Monaco midfield and back-marker projected points come down (those overtake points weren't real), front-runner ranges tighten, and the optimizer's Monaco picks get more realistic. This applies automatically to every future hard-to-overtake round."
+      ]
+    },
+    {
       "date": "2026-06-02",
       "title": "Share your team with a link",
       "tags": ["feature"],

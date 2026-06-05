@@ -51,6 +51,12 @@ from config.settings import (
     CANCELLED_ROUNDS_2026,
     GRID_SIZE,
     is_race_completed,
+    race_name_for_round,
+)
+from config.track_classifications import (
+    get_circuit_id_from_race_name,
+    overtake_multiplier,
+    position_noise_multiplier,
 )
 from config.fantasy_scoring import (
     QUALIFYING_POSITION_POINTS,
@@ -618,7 +624,8 @@ def sample_overtakes(grid_positions: np.ndarray, race_positions: np.ndarray,
                      dnf_mask: np.ndarray, rng: np.random.Generator,
                      is_sprint: bool = False,
                      driver_ids: list[str] | None = None,
-                     overtake_history: dict | None = None) -> np.ndarray:
+                     overtake_history: dict | None = None,
+                     overtake_mult: float = 1.0) -> np.ndarray:
     """Sample overtake counts for each driver.
 
     Uses driver-specific overtake history from data/seed/overtakes.csv when
@@ -697,7 +704,8 @@ def sample_overtakes(grid_positions: np.ndarray, race_positions: np.ndarray,
             expected_ot = bucket_ot
             std = max(1.5, expected_ot * cv)
 
-        sampled = rng.normal(expected_ot, std)
+        # overtake_mult (<=1) damps overtakes on hard-to-pass circuits (Monaco)
+        sampled = rng.normal(expected_ot, std) * overtake_mult
         # Cap at 30 as a safety bound — real-world per-race per-driver overtakes
         # rarely exceed ~15 even in chaos races; 30 protects against noise tail
         # samples from producing absurd fantasy point totals.
@@ -845,6 +853,8 @@ def run_simulations(
     is_sprint: bool = False,
     calibration: dict | None = None,
     weather: dict | None = None,
+    overtake_mult: float = 1.0,
+    position_noise_mult: float = 1.0,
 ) -> dict:
     """Run Monte Carlo simulations and return aggregated results.
 
@@ -958,6 +968,13 @@ def run_simulations(
         weather_perturbations = np.zeros(n_drivers)
         dnf_cap = 0.95  # original cap when no weather
 
+    # Track stickiness: hard-to-overtake circuits (e.g. Monaco) shuffle far less.
+    # Tighten position noise on top of calibration + weather.
+    if position_noise_mult != 1.0:
+        cal_quali_noise *= position_noise_mult
+        cal_race_noise *= position_noise_mult
+        print(f"  Track position-noise damping: x{position_noise_mult:.2f}")
+
     # DNF probabilities from fantasy_df (matched by driver_abbrev)
     dnf_probs = np.zeros(n_drivers)
     fp_lookup = fantasy_df.set_index("driver_abbrev")
@@ -1055,7 +1072,8 @@ def run_simulations(
 
         # 4. Sample overtakes (use driver-specific history when available)
         overtakes = sample_overtakes(quali_positions, race_positions, dnf_mask, rng,
-                                     driver_ids=driver_id_list, overtake_history=overtake_hist)
+                                     driver_ids=driver_id_list, overtake_history=overtake_hist,
+                                     overtake_mult=overtake_mult)
 
         # 5. Sample fastest lap & DOTD
         fl_idx = sample_fastest_lap(race_positions, dnf_mask, rng)
@@ -1085,7 +1103,8 @@ def run_simulations(
             sprint_positions[sprint_dnf_mask] = GRID_SIZE
             sprint_overtakes = sample_overtakes(
                 quali_positions, sprint_positions, sprint_dnf_mask, rng, is_sprint=True,
-                driver_ids=driver_id_list, overtake_history=overtake_hist
+                driver_ids=driver_id_list, overtake_history=overtake_hist,
+                overtake_mult=overtake_mult
             )
             sprint_fl_idx = sample_fastest_lap(sprint_positions, sprint_dnf_mask, rng)
 
@@ -1650,6 +1669,16 @@ def main() -> None:
         print(f"  Weather adjustments: rain={weather['rain_risk']}, "
               f"air_temp={weather['race_air_temp']}C")
 
+    # Track-difficulty modifiers (overtake damping + position-noise tightening).
+    # Hard-to-overtake circuits (Monaco, Singapore) get fewer overtakes and a
+    # stickier grid; normal tracks are unaffected.
+    circuit_id = get_circuit_id_from_race_name(race_name_for_round(args.round))
+    ot_mult = overtake_multiplier(circuit_id)
+    pos_noise_mult = position_noise_multiplier(circuit_id)
+    if ot_mult < 1.0 or pos_noise_mult < 1.0:
+        print(f"  Track modifiers for {circuit_id}: overtakes x{ot_mult:.2f}, "
+              f"position-noise x{pos_noise_mult:.2f}")
+
     # Run simulations
     results = run_simulations(
         pred_df=pred_df,
@@ -1659,6 +1688,8 @@ def main() -> None:
         is_sprint=is_sprint,
         calibration=calibration,
         weather=weather,
+        overtake_mult=ot_mult,
+        position_noise_mult=pos_noise_mult,
     )
 
     # Load pitstop priors for constructor simulation

@@ -456,3 +456,47 @@ RACE_NAME_TO_CIRCUIT = {
 def get_circuit_id_from_race_name(race_name: str) -> str:
     """Map a GP name (e.g. 'Australian Grand Prix') to a circuit_id."""
     return RACE_NAME_TO_CIRCUIT.get(race_name.lower().strip(), 'unknown')
+
+
+# ============================================================================
+# Track-difficulty modifiers — overtakes & MC position-noise damping
+# ============================================================================
+# Hard-to-overtake circuits (Monaco, Singapore) produce far fewer overtakes and
+# far less position shuffling than the track-agnostic heuristics assume. Both
+# multipliers are derived from each track's `overtaking_difficulty` (1-10):
+#   * tracks at/below the PIVOT are unaffected (multiplier 1.0)
+#   * harder tracks ramp linearly down to the FLOOR at difficulty 10
+# Monaco (difficulty 10) lands exactly on the floor. Lower a floor to make the
+# effect stronger, raise it to soften. (estimate_overtakes itself is due a
+# data-driven retune later; this damping sits on top of it.)
+OVERTAKE_DAMP_PIVOT: int = 6        # difficulty at/below which overtakes are unchanged
+OVERTAKE_DAMP_FLOOR: float = 0.13   # overtake multiplier at difficulty 10 -> Monaco ~15-20 field total
+POS_NOISE_DAMP_PIVOT: int = 6       # difficulty at/below which MC position noise is unchanged
+POS_NOISE_DAMP_FLOOR: float = 0.70  # MC position-noise multiplier at difficulty 10 (Monaco)
+
+
+def _difficulty_for(circuit_id: str) -> int:
+    """overtaking_difficulty (1-10) for a circuit_id; 5 (neutral) if unknown."""
+    cid = (circuit_id or "").lower().replace(" ", "_")
+    feats = TRACK_DATABASE.get(cid)
+    return int(feats.get("overtaking_difficulty", 5)) if feats else 5
+
+
+def _difficulty_damp(circuit_id: str, pivot: int, floor: float) -> float:
+    """Linear ramp: 1.0 at/below `pivot`, down to `floor` at difficulty 10."""
+    diff = _difficulty_for(circuit_id)
+    if diff <= pivot:
+        return 1.0
+    if diff >= 10:
+        return floor
+    return 1.0 - (1.0 - floor) * (diff - pivot) / (10 - pivot)
+
+
+def overtake_multiplier(circuit_id: str) -> float:
+    """Multiplier (<=1.0) applied to estimated overtakes on hard-to-pass tracks."""
+    return _difficulty_damp(circuit_id, OVERTAKE_DAMP_PIVOT, OVERTAKE_DAMP_FLOOR)
+
+
+def position_noise_multiplier(circuit_id: str) -> float:
+    """Multiplier (<=1.0) applied to Monte-Carlo position noise on sticky-grid tracks."""
+    return _difficulty_damp(circuit_id, POS_NOISE_DAMP_PIVOT, POS_NOISE_DAMP_FLOOR)

@@ -37,6 +37,11 @@ from config.settings import (
     SPRINT_ROUNDS_2026,
     CANCELLED_ROUNDS_2026,
     is_race_completed,
+    race_name_for_round,
+)
+from config.track_classifications import (
+    get_circuit_id_from_race_name,
+    overtake_multiplier,
 )
 from config.fantasy_scoring import (
     QUALIFYING_POSITION_POINTS,
@@ -238,7 +243,8 @@ def _expected_pitstop_points(mean: float, std: float, stops_per_race: float,
 
 # -- Overtake estimation -------------------------------------------------------
 
-def estimate_overtakes(predicted_quali: int, predicted_race: int, grid_size: int = 22) -> int:
+def estimate_overtakes(predicted_quali: int, predicted_race: int, grid_size: int = 22,
+                       multiplier: float = 1.0) -> int:
     """
     Estimate expected overtakes from grid position and positions gained.
 
@@ -268,10 +274,12 @@ def estimate_overtakes(predicted_quali: int, predicted_race: int, grid_size: int
     else:
         base = 7
 
-    return base + positions_gained
+    # multiplier (<=1) damps overtakes on hard-to-pass circuits (e.g. Monaco)
+    return max(0, round((base + positions_gained) * multiplier))
 
 
-def estimate_sprint_overtakes(predicted_quali: int, predicted_race: int) -> int:
+def estimate_sprint_overtakes(predicted_quali: int, predicted_race: int,
+                              multiplier: float = 1.0) -> int:
     """
     Estimate expected overtakes for a sprint race (~45% of race distance).
 
@@ -294,7 +302,7 @@ def estimate_sprint_overtakes(predicted_quali: int, predicted_race: int) -> int:
 
     # Fewer laps means fewer opportunities to convert position gains into counted overtakes
     sprint_gains = max(0, positions_gained - 1)
-    return base + sprint_gains
+    return max(0, round((base + sprint_gains) * multiplier))
 
 
 # -- Fantasy prices ------------------------------------------------------------
@@ -342,6 +350,13 @@ def calculate_driver_fantasy(
     driver_prices, _ = load_fantasy_prices()
     risk_ratings = calculate_risk_ratings(predictions)
 
+    # Track-difficulty overtake damping (hard-to-pass circuits like Monaco get
+    # far fewer overtakes than the track-agnostic heuristic assumes).
+    circuit_id = get_circuit_id_from_race_name(race_name_for_round(round_num))
+    ot_mult = overtake_multiplier(circuit_id)
+    if ot_mult < 1.0:
+        print(f"  Overtake damping for {circuit_id}: x{ot_mult:.2f}")
+
     rows = []
     for _, row in predictions.iterrows():
         driver_id = row["driver_id"]  # Jolpica format
@@ -362,7 +377,7 @@ def calculate_driver_fantasy(
         pos_pts = pos_change * RACE_POSITIONS_GAINED_PER_POS
 
         # Estimated overtakes
-        est_overtakes = estimate_overtakes(pred_quali, pred_race)
+        est_overtakes = estimate_overtakes(pred_quali, pred_race, multiplier=ot_mult)
         overtake_pts = est_overtakes
 
         # Fastest lap probability (based on predicted race position)
@@ -411,7 +426,7 @@ def calculate_driver_fantasy(
 
             sprint_pos_pts = SPRINT_POSITION_POINTS.get(pred_sprint, 0)
             sprint_pos_change = pred_sprint_quali - pred_sprint
-            sprint_overtakes = estimate_sprint_overtakes(pred_sprint_quali, pred_sprint)
+            sprint_overtakes = estimate_sprint_overtakes(pred_sprint_quali, pred_sprint, multiplier=ot_mult)
 
             # Sprint FL probability based on sprint finish position (not race)
             if pred_sprint <= 3:
