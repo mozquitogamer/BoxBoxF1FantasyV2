@@ -166,7 +166,7 @@ def calculate_risk_ratings(predictions: pd.DataFrame) -> dict[str, float]:
         # Cap at 15% early in season (unreliable small samples),
         # increase cap as season progresses
         max_races = max((d[1] for d in season_dnfs.values()), default=0)
-        cap = min(0.08 + max_races * 0.02, 0.30)  # trimmed 2026-06-05: ~22% by R7, 30% max
+        cap = min(0.075 + max_races * 0.015, 0.25)  # ~15% at 5 races run, ramps to 25% max late-season
         # Floor: no driver has truly 0% DNF risk — mechanical failures, incidents etc.
         floor = 0.02  # 2% minimum baseline
         risk[driver_id] = round(min(max(blended, floor), cap) * 100, 1)
