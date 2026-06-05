@@ -100,6 +100,11 @@ RACE_OVERTAKE_POINTS: int = 1                 # +1 per overtake
 RACE_FASTEST_LAP_BONUS: int = 10
 RACE_DRIVER_OF_THE_DAY_BONUS: int = 10        # Driver only, NOT constructors
 RACE_DNF_DSQ_PENALTY: int = -20
+# Expected-value softener for DNFs in PROJECTIONS (not actuals). A predicted DNF
+# probability includes some late/partial retirements, so projections apply 60%
+# of the full -20 as the expected penalty. Used by BOTH the deterministic scorer
+# (07_calculate_fantasy) and the Monte Carlo (08) so the two stay consistent.
+DNF_EXPECTED_PENALTY_FACTOR: float = 0.6
 
 # ==============================================================================
 # RACE — Constructors

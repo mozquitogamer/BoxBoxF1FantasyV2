@@ -594,7 +594,7 @@ For each driver:
 4. **Overtakes:** `estimated_overtakes × 1pt`
 5. **Fastest lap probability:** `prob × 10pts` (F1 Fantasy bonus, separate from championship FL which was removed in 2026)
 6. **DOTD probability:** `prob × 10pts`
-7. **DNF risk:** `prob × (-20pts)`
+7. **DNF risk:** `prob × (-20 × DNF_EXPECTED_PENALTY_FACTOR)` — the expected penalty applies a 0.6 softener (≈ −12) because a predicted DNF probability includes some late/partial retirements. Both the deterministic scorer and the Monte Carlo use the same `DNF_EXPECTED_PENALTY_FACTOR` constant so projections stay consistent (the full −20 is still what an *actual* DNF scores in post-race results).
 8. **Sprint scoring** (if sprint weekend): see §6 Sprint Model. Sprint DNF = -10 pts (vs -20 main race in 2026).
 
 ### Constructor Scoring

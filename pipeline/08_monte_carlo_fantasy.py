@@ -65,6 +65,7 @@ from config.fantasy_scoring import (
     RACE_FASTEST_LAP_BONUS,
     RACE_DRIVER_OF_THE_DAY_BONUS,
     RACE_DNF_DSQ_PENALTY,
+    DNF_EXPECTED_PENALTY_FACTOR,
     SPRINT_POSITION_POINTS,
     SPRINT_POSITIONS_GAINED_PER_POS,
     SPRINT_FASTEST_LAP_BONUS,
@@ -803,7 +804,10 @@ def calc_driver_fantasy_points_sim(
 
     # Race points
     if is_dnf:
-        race_pts = RACE_DNF_DSQ_PENALTY
+        # Soft expected penalty (matches the deterministic scorer): a predicted
+        # DNF includes some late/partial retirements, so projections apply 60%
+        # of the full -20. Quali points are still kept (quali happened first).
+        race_pts = RACE_DNF_DSQ_PENALTY * DNF_EXPECTED_PENALTY_FACTOR
         race_finish_pts = 0
         pos_change_pts = 0
         overtake_pts = 0

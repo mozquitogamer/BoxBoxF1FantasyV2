@@ -50,6 +50,7 @@ from config.fantasy_scoring import (
     RACE_FASTEST_LAP_BONUS,
     RACE_DRIVER_OF_THE_DAY_BONUS,
     RACE_DNF_DSQ_PENALTY,
+    DNF_EXPECTED_PENALTY_FACTOR,
     SPRINT_POSITION_POINTS,
     SPRINT_FASTEST_LAP_BONUS,
     SPRINT_DNF_DSQ_PENALTY,
@@ -411,7 +412,7 @@ def calculate_driver_fantasy(
             race_position_pts + pos_pts + overtake_pts +
             expected_fl_pts + expected_dotd_pts
         )
-        soft_dnf_penalty = RACE_DNF_DSQ_PENALTY * 0.6
+        soft_dnf_penalty = RACE_DNF_DSQ_PENALTY * DNF_EXPECTED_PENALTY_FACTOR
         expected_race_pts = (1 - dnf_prob) * race_pts_if_finish + dnf_prob * soft_dnf_penalty
 
         # -- Sprint (if applicable) --
