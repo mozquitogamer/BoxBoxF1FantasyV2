@@ -1,7 +1,14 @@
 {
-  "updated": "2026-06-03T15:06:28Z",
+  "updated": "2026-06-05T13:27:58Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "p5dkrl5RHSM",
+      "title": "F1 Fantasy Tips for the Monaco Grand Prix - LeClerc? - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-06-04",
+      "thumbnail": "https://i.ytimg.com/vi/p5dkrl5RHSM/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=p5dkrl5RHSM"
+    },
     {
       "id": "AInvmGGBfoE",
       "title": "F1 Fantasy Deadline Stream - CANADIAN Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
@@ -22,13 +29,6 @@
       "published": "2026-05-03",
       "thumbnail": "https://i.ytimg.com/vi/qMMgyS7E30M/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=qMMgyS7E30M"
-    },
-    {
-      "id": "xWosYN1ua_o",
-      "title": "F1 Fantasy Deadline Stream - Miami Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
-      "published": "2026-05-03",
-      "thumbnail": "https://i.ytimg.com/vi/xWosYN1ua_o/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=xWosYN1ua_o"
     }
   ]
 }
