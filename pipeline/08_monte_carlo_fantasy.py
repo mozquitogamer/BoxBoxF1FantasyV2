@@ -159,8 +159,14 @@ SPRINT_OVERTAKE_CV = 0.45  # Higher CV in sprints (more volatile, fewer laps)
 TEAMMATE_CORRELATION_ALPHA = 0.35
 
 # --- Correlated DNF modeling (Fix 1.5) ---
-TEAM_DNF_CORRELATION = 0.3  # Probability that if one driver DNFs, teammate also has elevated risk
-INCIDENT_DNF_BOOST = 0.02   # Small base probability of multi-car incident per sim
+# Trimmed 2026-06-05: the team correlation + incident boost were inflating
+# reliable drivers' DNF rate (e.g. Verstappen 0.20 base -> 0.30 in-sim, driven by
+# teammate Hadjar's high DNF rate). Ideally only shared CAR/mechanical failures
+# should correlate between teammates, not a teammate's crash; that needs the 2026
+# DNF cause classification fixed first (currently all 2026 DNFs mislabel as
+# mechanical), so for now we just dampen the correlation generally.
+TEAM_DNF_CORRELATION = 0.15  # P(teammate also at elevated risk | one DNFs)
+INCIDENT_DNF_BOOST = 0.012   # Base probability of a multi-car incident per sim
 
 
 # ==============================================================================
@@ -1057,10 +1063,10 @@ def run_simulations(
                 i1, i2 = team_indices
                 if dnf_mask[i1] and not dnf_mask[i2]:
                     if rng.random() < TEAM_DNF_CORRELATION:
-                        dnf_mask[i2] = rng.random() < min(dnf_probs[i2] * 3, 0.5)
+                        dnf_mask[i2] = rng.random() < min(dnf_probs[i2] * 1.5, 0.25)
                 elif dnf_mask[i2] and not dnf_mask[i1]:
                     if rng.random() < TEAM_DNF_CORRELATION:
-                        dnf_mask[i1] = rng.random() < min(dnf_probs[i1] * 3, 0.5)
+                        dnf_mask[i1] = rng.random() < min(dnf_probs[i1] * 1.5, 0.25)
 
         # 3. Sample race positions with teammate correlation (separate shocks from quali)
         race_team_shocks = np.zeros(n_drivers)
