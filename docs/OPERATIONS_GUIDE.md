@@ -306,9 +306,15 @@ What runs:
 4. `06_run_predictions.py` — phase-aware: detects no actual quali yet → uses `race_model_fp.json` (trained on walk-forward predicted quali to match inference distribution).
 5. `07_calculate_fantasy.py` → `08_monte_carlo_fantasy.py` → `10_fp_analysis.py` → `08_export_website_json.py`.
 
-### Lock Deadline
+**Two FP-driven adjustments run inside step 4 (`06_run_predictions.py`)** — see Technical Deep Dive §7 for the full detail:
+- **FP-pace quali blend** — the predicted qualifying is blended toward this weekend's FP pace (a composite of best lap + best-3 + best-5 lap averages), because raw FP pace backtests as a *better* quali predictor than the model alone. Weight is track-scaled (0.6 normal → 0.80 at Monaco-level one-lap circuits). Tunables: `FP_QUALI_BLEND_TUNABLES` at the top of `06_run_predictions.py`.
+- **Grid-anchoring** — on hard-to-overtake circuits the predicted race finish is blended toward the grid (0 below difficulty 6 → 0.85 at Monaco). Tunables: `GRID_ANCHOR_*` in `config/track_classifications.py`.
 
-F1 Fantasy locks at the start of qualifying (or sprint qualifying for sprint weekends). **Get this run pushed before then.** Vercel deploys ~30–60 seconds after `git push`.
+Both self-skip when no FP data is present, so `pre_fp_predict` and horizon projections are unaffected.
+
+### Lock Deadline — why `post_fp` is *the* run that matters
+
+F1 Fantasy locks at the start of qualifying (or sprint qualifying for sprint weekends). The deadline is **before qualifying**, so free practice is the only data available when managers pick teams — **`post_fp` is the actionable prediction, not a rough draft.** `post_quali` (below) is for post-deadline / retrospective interest only. Treat the `post_fp` push as the deliverable and **get it out before quali.** Vercel deploys ~30–60 seconds after `git push`.
 
 ```bash
 git add web/public/data/ && git commit -m "Post-FP predictions for R7 (Canada)" && git push
@@ -515,6 +521,18 @@ year,round,driver_id,session,overtakes
 { "1": "RUS", "2": "ANT", "3": "PIA", "6": "VER", ... }
 ```
 
+The **actual** DOTD winner per round (used for accuracy/analysis). Not to be confused with `dotd_overrides.json` below, which is a *prediction-time* input.
+
+### `data/seed/dotd_overrides.json` (optional — judgment calls)
+
+Manual per-round DOTD **probability** overrides for fan-vote favourites the position heuristic can't see (e.g. a home hero near-certain to win it). Keyed by internal round → jolpica `driver_id` → probability (0–1):
+
+```json
+{ "8": { "leclerc": 0.65 } }
+```
+
+Applied by **both** `07_calculate_fantasy.py` (sets the displayed DOTD %) and `08_monte_carlo_fantasy.py` (forces it in the sim — which is what actually moves the displayed points, since the export uses the MC mean). Constructor scoring still excludes DOTD. **Remove a round's entry to revert** that round to the automatic heuristic. This is a deliberate judgment-call knob — an override that doesn't pan out shows as a miss on the Accuracy tab.
+
 ### `data/seed/races.json`
 
 The 2026 calendar with cancelled flags. Edit only if F1 cancels another race or adds a sprint round mid-season.
@@ -532,6 +550,13 @@ When you edit `web/public/app.js`, bump the `app.js?v=N` query string in `index.
 If a new circuit is added to the calendar, add an entry to `TRACK_DATABASE` with the 9 features (is_street, overtaking_difficulty, avg_corner_speed, straight_line_importance, downforce_level, turn1_incident_risk, safety_car_probability, track_evolution, grip_level — values 1-10).
 
 Also add the race name → circuit_id mapping in `RACE_NAME_TO_CIRCUIT`.
+
+**Track-difficulty tunables (all keyed off `overtaking_difficulty`):** this file also holds the prediction modifiers that scale with how hard a track is to overtake at. Adjust the ceilings/floors if a race's predictions look off:
+- `OVERTAKE_DAMP_FLOOR` / `POS_NOISE_DAMP_FLOOR` — fewer overtakes + stickier grid on hard tracks (Monaco).
+- `GRID_ANCHOR_CEIL` (0.85) — how hard the predicted finish anchors to the grid at difficulty 10.
+- `grid_anchor_weight()` / `fp_quali_blend_weight()` — the ramps consumed by `06_run_predictions.py`. The FP-blend base/hard-track weights themselves live in `FP_QUALI_BLEND_TUNABLES` at the top of `06_run_predictions.py`.
+
+> The hard-track magnitudes are domain-knowledge defaults (no completed Monaco-tier 2026 round yet). Recalibrate against the Accuracy tab after the first one runs.
 
 ---
 

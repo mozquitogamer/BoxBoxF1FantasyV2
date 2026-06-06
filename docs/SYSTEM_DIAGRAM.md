@@ -718,3 +718,18 @@ The pipeline has 5 named phases. Operators run them via `pipeline/run_weekend.py
     │                                                                │
     └───────────────────────────────────────────────────────────────┘
 ```
+
+**Two post-FP adjustments sit between the model scores and the ranking** (added 2026-06; the deadline is before quali, so the post-FP prediction is the one that matters — see Technical Deep Dive §7):
+
+```
+  QUALI MODEL raw score ─► [FP-PACE BLEND] ─► rank ─► predicted quali
+                            blend toward this weekend's FP pace
+                            (composite: best lap + best-3 + best-5 avg),
+                            track-scaled weight 0.6 normal → 0.80 Monaco
+
+  RACE MODEL raw score  ─► [GRID-ANCHOR] ──► rank ─► predicted finish
+                            on hard-to-overtake tracks only, blend toward
+                            the grid (0 below difficulty 6 → 0.85 Monaco)
+```
+
+Both overwrite the raw scores, so the change flows to fantasy scoring AND the Monte Carlo. They self-skip when no FP pace exists (pre_fp / horizon). DOTD can also be hand-set per round via `data/seed/dotd_overrides.json` (applied in both 07 and the MC).

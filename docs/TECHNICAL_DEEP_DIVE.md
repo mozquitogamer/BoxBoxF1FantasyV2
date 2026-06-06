@@ -485,6 +485,23 @@ If neither FP features nor actual quali exist, the script:
 2. Actual quali exists → uses `race_model.json` with real quali positions.
 3. The model is operating in-distribution (trained on actual quali, inferred with actual quali).
 
+### Post-FP prediction adjustments (the deadline-before-quali reality)
+
+> **Why post-FP is the product, not a rough draft.** The F1 Fantasy team-lock deadline falls **before Q1**. We never have qualifying data at decision time — free practice is the only signal a manager (or this site) has when picking a team. So the `post_fp` prediction is the one that matters; `post_quali` is for post-deadline / retrospective interest only. This makes any under-use of FP telemetry a *first-order* accuracy problem, which motivated the two adjustments below (added 2026-06).
+
+Both are applied inside `06_run_predictions.py` and **overwrite the raw model scores** (`predicted_quali_raw` / `predicted_race_raw`) so the change flows to *both* the deterministic finish AND the Monte Carlo (which re-ranks from those raw scores). All constants live in `FP_QUALI_BLEND_TUNABLES` (top of `06`) and `config/track_classifications.py`.
+
+**1. FP-pace qualifying blend.** The trained quali model under-weights FP telemetry (it's present in only ~6% of training rows, so XGBoost leans on always-present priors). Backtesting on 2026 completed rounds showed that simply ranking by FP pace predicts *actual* qualifying **better** than the full model (MAE 2.44 vs 2.88). So after the quali model runs, its scores are blended (in z-score space) toward this weekend's FP pace:
+
+- **Signal = a composite** of the single best lap + best-3-lap average + best-5-lap average (mean of per-metric z-scores). A single lap can be a one-off banker (tow / perfect lap / low fuel); the multi-lap averages reward *repeatable* pace. The composite backtests best (quali MAE 2.24) vs any single metric (best-lap 2.36, best-3 2.34, best-5 2.38, best-10 2.67 — best-10 excluded as too diluted).
+- **Weight is track-scaled** via `fp_quali_blend_weight()`: base **0.6** on normal tracks (the backtest optimum), ramping up with `overtaking_difficulty` to **0.80** at Monaco-level circuits (one-lap tracks where qualifying decides the weekend). Singapore ≈0.70, Barcelona ≈0.65, normal tracks 0.60.
+- Self-skips when no FP pace exists (pre-FP / horizon projections) — those stay priors-only.
+- The race model is **not** blended toward FP: FP long-run pace is a poor finish predictor (MAE 6.4 vs model 4.3 — finishes are dominated by DNFs / strategy / first-lap chaos). The improved quali still reaches the race because `quali_position`/`grid_advantage` are race-model features, and via grid-anchoring (below).
+
+**2. Grid-anchoring on hard-to-overtake circuits.** The race model ranks on pace, which let it predict big grid reshuffles where passing is near-impossible (a P4 starter "winning" at Monaco). `grid_anchor_weight(circuit_id)` blends the predicted race finish toward the starting grid, scaled by `overtaking_difficulty`: **0 at/below difficulty 6** (normal tracks untouched, byte-for-byte) ramping to **0.85 at Monaco** (Hungary ≈0.64, Zandvoort/Singapore ≈0.42, Barcelona ≈0.21). Only 5 of 22 rounds are affected. Pace still decides the finish wherever it physically can be expressed.
+
+> **Calibration honesty:** the *normal-track* values are backtested on 2026 data. The *hard-track* magnitudes (FP weight 0.80, grid-anchor 0.85) are domain-knowledge choices — there's no completed Monaco-tier round in 2026 yet to calibrate against. They're isolated one-line tunables; recalibrate after the first hard-track race via the Accuracy tab.
+
 ### Sprint inference
 
 When `is_sprint_weekend == True`:
@@ -624,6 +641,13 @@ Weighted by predicted finishing position (P1-P3 highest — they pit for fresh t
 ### DOTD Probability
 
 Estimate based on positions gained and finishing position. Drivers gaining the most positions while finishing well tend to win DOTD.
+
+**Manual per-round overrides.** DOTD is a fan vote the position heuristic can't see (e.g. a home hero near-certain to win it). `data/seed/dotd_overrides.json` lets you set a manual probability per round per driver — keyed `{ "round": { "jolpica_driver_id": prob } }`, loaded by `config.settings.load_dotd_overrides()`. Because the **displayed** expected points come from the Monte Carlo mean (the export overwrites the deterministic value), and the MC samples DOTD independently, the override is applied in **both** places to stay consistent:
+
+- `07_calculate_fantasy.py` sets the displayed `dotd_probability`.
+- `08_monte_carlo_fantasy.py::run_simulations` forces that driver as DOTD at the given probability in each simulation (only when they didn't DNF) — which is what actually moves the displayed points.
+
+Constructor scoring still excludes DOTD regardless of the override (the per-iteration subtraction handles whoever won it). Remove a round's entry to revert to the automatic heuristic. This is a deliberate judgment-call knob; an override that doesn't pan out will (correctly) show as a miss on the Accuracy tab.
 
 ---
 

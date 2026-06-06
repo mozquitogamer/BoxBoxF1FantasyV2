@@ -331,9 +331,11 @@ This section is gold for retention — it pre-empts the exact things that make n
 >
 > **Wide confidence intervals are honest, not noisy.** A range of '8 to 53 points' reflects real F1 chaos — a midfielder genuinely *could* score either. The model says so instead of faking precision.
 >
-> **Predictions shift across the weekend.** Pre-practice it's running on history — about 65% confidence. Once practice data lands it sharpens to ~90%. After qualifying the grid is locked and it tightens again. If a driver moves between Friday and Sunday, that's the model learning, not flip-flopping.
+> **Predictions shift across the weekend.** Pre-practice it's running on history — about 65% confidence. Once practice data lands it sharpens to ~90%. The big thing to know: **your fantasy deadline is *before* qualifying**, so the after-practice numbers are the ones you actually pick teams on. We lean those hard on real practice pace — and not just one hot lap, but a driver's *consistent* pace across their best laps — because that's what's genuinely predictive of where they'll qualify. The post-qualifying update you'll see later is for interest; by then the deadline's gone.
 >
-> **Monaco scores look low — that's real.** Almost no overtakes means almost no overtake points for the whole field. A low-scoring weekend on this site usually means a genuinely low-scoring track.
+> **A predicted P2 sometimes outscores the predicted winner.** Looks wrong, isn't. The winner might be carrying higher retirement risk — which drags down their *expected* points — or the runner-up is a strong Driver-of-the-Day pick. The card is scoring risk and bonuses, not just track position.
+>
+> **Monaco scores look low — that's real.** Almost no overtakes means almost no overtake points for the whole field. A low-scoring weekend on this site usually means a genuinely low-scoring track. And at tracks like Monaco the predicted finish hugs the grid, because you can't gain places you physically can't overtake for.
 >
 > **New teams play it safe.** Cadillac has no history to learn from, so their numbers sit near grid-average until 2026 results pile up. Same for rookies. Lower confidence early is correct, not lazy.
 >

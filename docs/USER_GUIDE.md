@@ -39,6 +39,14 @@ Your starting point. Predicted fantasy points for every driver this round.
 - **DNF probability** — color-coded green/yellow/red; based on rolling 5-race DNF rate
 - **Price change bracket** — points needed this round to trigger an A/B-tier price increase or decrease
 
+### How the predictions are made (plain English)
+
+The F1 Fantasy deadline is **before qualifying**, so the only live data we have when you're picking a team is **free practice**. The predictions are built to make the most of it:
+
+- **Practice pace drives the qualifying call.** We blend the model toward each driver's actual practice pace — and we use a *consistency* measure (their best lap **plus** their best-3-lap and best-5-lap averages), not just one hot lap, so a single tow-assisted banker doesn't fool it. On testing this predicts qualifying better than the model alone.
+- **Hard-to-overtake tracks behave like the real thing.** At circuits like Monaco where passing is nearly impossible, the predicted finish stays close to the grid (you can't gain places you can't physically take). At easy-overtaking tracks (Monza, Spa) pace fully decides the order.
+- **One quirk that's working as intended:** sometimes the predicted P2 driver shows *more* points than the predicted winner. That's the winner carrying a higher DNF (retirement) risk, which lowers their *expected* score — or the runner-up being a strong Driver-of-the-Day favourite. The points are being honest about risk and bonuses, not just position.
+
 ### Tips
 
 - Sort by predicted points, price, or value (points per $M)
