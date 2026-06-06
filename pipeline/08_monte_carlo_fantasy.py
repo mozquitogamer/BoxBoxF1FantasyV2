@@ -52,6 +52,7 @@ from config.settings import (
     GRID_SIZE,
     is_race_completed,
     race_name_for_round,
+    load_dotd_overrides,
 )
 from config.track_classifications import (
     get_circuit_id_from_race_name,
@@ -865,6 +866,7 @@ def run_simulations(
     weather: dict | None = None,
     overtake_mult: float = 1.0,
     position_noise_mult: float = 1.0,
+    dotd_overrides: dict | None = None,
 ) -> dict:
     """Run Monte Carlo simulations and return aggregated results.
 
@@ -894,6 +896,21 @@ def run_simulations(
         abbrevs = pred_df["driver_id"].map(id_to_abbrev).values
 
     constructors = pred_df["constructor_id"].values
+
+    # Manual DOTD overrides: map jolpica driver_id -> sim index -> forced prob.
+    # In each sim, with this probability we assign DOTD to that driver directly
+    # (if they didn't DNF), otherwise the normal fan-weighted sample_dotd runs.
+    # Lets a judgment call (e.g. home-hero fan favourite) flow into the MC mean,
+    # which is what the site displays as expected points.
+    dotd_force = {}
+    if dotd_overrides:
+        ids = pred_df["driver_id"].values
+        for idx, did in enumerate(ids):
+            if did in dotd_overrides:
+                dotd_force[idx] = float(dotd_overrides[did])
+        if dotd_force:
+            print(f"  Manual DOTD overrides active: "
+                  f"{ {pred_df['driver_id'].values[i]: p for i, p in dotd_force.items()} }")
 
     # Get raw model scores (or synthesize from positions if not available)
     if "predicted_quali_raw" in pred_df.columns:
@@ -1088,6 +1105,12 @@ def run_simulations(
         # 5. Sample fastest lap & DOTD
         fl_idx = sample_fastest_lap(race_positions, dnf_mask, rng)
         dotd_idx = sample_dotd(race_positions, quali_positions, dnf_mask, rng)
+        # Manual DOTD override: force the favoured driver at the set probability
+        # (only when they finished — a DNF can't win DOTD).
+        for ov_idx, ov_prob in dotd_force.items():
+            if not dnf_mask[ov_idx] and rng.random() < ov_prob:
+                dotd_idx = ov_idx
+                break
         all_dotd_idx[sim] = dotd_idx
 
         # 6. Sprint simulation (if applicable)
@@ -1689,6 +1712,9 @@ def main() -> None:
         print(f"  Track modifiers for {circuit_id}: overtakes x{ot_mult:.2f}, "
               f"position-noise x{pos_noise_mult:.2f}")
 
+    # Manual per-round DOTD overrides (judgment calls for fan-vote favourites).
+    dotd_overrides = load_dotd_overrides(args.round)
+
     # Run simulations
     results = run_simulations(
         pred_df=pred_df,
@@ -1700,6 +1726,7 @@ def main() -> None:
         weather=weather,
         overtake_mult=ot_mult,
         position_noise_mult=pos_noise_mult,
+        dotd_overrides=dotd_overrides,
     )
 
     # Load pitstop priors for constructor simulation

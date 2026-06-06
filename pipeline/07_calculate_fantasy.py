@@ -38,6 +38,7 @@ from config.settings import (
     CANCELLED_ROUNDS_2026,
     is_race_completed,
     race_name_for_round,
+    load_dotd_overrides,
 )
 from config.track_classifications import (
     get_circuit_id_from_race_name,
@@ -361,6 +362,11 @@ def calculate_driver_fantasy(
     if ot_mult < 1.0:
         print(f"  Overtake damping for {circuit_id}: x{ot_mult:.2f}")
 
+    # Manual per-round DOTD overrides (judgment calls for fan-vote favourites).
+    dotd_overrides = load_dotd_overrides(round_num)
+    if dotd_overrides:
+        print(f"  Manual DOTD overrides: {dotd_overrides}")
+
     rows = []
     for _, row in predictions.iterrows():
         driver_id = row["driver_id"]  # Jolpica format
@@ -402,6 +408,10 @@ def calculate_driver_fantasy(
             dotd_prob = 0.08
         else:
             dotd_prob = 0.03
+        # Manual override (e.g. home-hero fan-vote favourite) takes precedence so
+        # the displayed DOTD % matches the MC's forced DOTD rate.
+        if driver_id in dotd_overrides:
+            dotd_prob = dotd_overrides[driver_id]
         expected_dotd_pts = dotd_prob * RACE_DRIVER_OF_THE_DAY_BONUS
 
         # DNF risk adjustment (capped at 25% by calculate_risk_ratings)

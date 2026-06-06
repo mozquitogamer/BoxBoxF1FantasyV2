@@ -168,6 +168,34 @@ def race_name_for_round(round_num: int, year: int = CURRENT_SEASON) -> str:
             return r.get("name", "") or ""
     return ""
 
+
+def load_dotd_overrides(round_num: int) -> dict:
+    """Return manual Driver-of-the-Day probability overrides for a round.
+
+    Reads data/seed/dotd_overrides.json — a judgment-call mechanism for fan-vote
+    favourites the position heuristic can't see (e.g. a home hero near-certain to
+    win DOTD). Returns {jolpica_driver_id: probability} for the given internal
+    round, or {} if none. Both 07_calculate_fantasy.py (display %) and
+    08_monte_carlo_fantasy.py (sim points) read this so they stay consistent.
+    """
+    import json
+    path = SEED_DIR / "dotd_overrides.json"
+    if not path.exists():
+        return {}
+    try:
+        with open(path) as f:
+            data = json.load(f)
+    except Exception:
+        return {}
+    raw = data.get(str(round_num), {}) or {}
+    out = {}
+    for did, prob in raw.items():
+        try:
+            out[did] = max(0.0, min(1.0, float(prob)))
+        except (TypeError, ValueError):
+            continue
+    return out
+
 # -- Number of grid positions (11 teams × 2 drivers) --------------------------
 GRID_SIZE: int = 22
 NUM_CONSTRUCTORS: int = 11
