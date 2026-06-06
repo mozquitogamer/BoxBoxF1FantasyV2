@@ -87,10 +87,12 @@ from config.track_similarity import get_similarity
 # showed raw FP single-lap pace predicts ACTUAL quali BETTER than the full model:
 #   FP single-lap rank -> actual quali  MAE 2.44  (Spearman ~0.9)
 #   model predicted quali -> actual     MAE 2.88
-# Blending the model's quali toward the FP single-lap pace ranking (weight swept
-# in the same z-score space used below) minimises MAE at ~0.6 (2.73 -> 2.32);
-# 0.5-0.8 all clearly beat 0.0. Because it was validated ON normal tracks and
-# improves them, this applies to EVERY round, not just hard-overtake circuits.
+# Blending the model's quali toward the FP pace ranking (weight swept in the same
+# z-score space used below) minimises MAE at ~0.6 (2.73 -> 2.32); 0.5-0.8 all
+# clearly beat 0.0. Because it was validated ON normal tracks and improves them,
+# this applies to EVERY round, not just hard-overtake circuits. The FP pace signal
+# is a composite (best lap + best-3 + best-5 lap averages) — see
+# FP_QUALI_BLEND_TUNABLES below — which backtests better than any single metric.
 #
 # Race finish is deliberately NOT blended toward FP: FP long-run pace is a poor
 # finish predictor (MAE 6.4 vs model 4.3 — finishes are dominated by DNFs /
@@ -105,12 +107,18 @@ from config.track_similarity import get_similarity
 # pace; normal tracks keep 0.6; mild tracks (e.g. Barcelona, diff 7) get a small
 # bump. Note this is a domain-knowledge choice for hard tracks (no completed
 # Monaco-tier round in the 2026 backtest yet) — recalibrate once one exists.
+# Quali-pace signal is a COMPOSITE of the single best lap plus best-3 and best-5
+# lap averages (mean of per-metric z-scores). A single best lap can be a one-off
+# banker (tow, perfect lap, low fuel); the multi-lap averages reward repeatable
+# pace. Backtest on 2026 R1/3/6/7: composite MAE 2.24 vs 2.36 for best-lap alone
+# — better than any single metric. (best_10_lap_avg excluded: 2.67, too diluted
+# by traffic/fuel laps.)
 FP_QUALI_BLEND_TUNABLES = {
     "weight": 0.6,                 # base (normal tracks): 0 = pure model, 1 = pure FP pace
     "weight_hard_track": 0.80,     # FP weight at overtaking_difficulty 10 (Monaco)
     "hard_track_pivot": 6,         # at/below this difficulty, use base weight
     "min_drivers_with_pace": 10,   # need at least this many FP times to blend
-    "pace_col": "best_lap_time",   # FP single fastest lap; lower = faster
+    "pace_cols": ["best_lap_time", "best_3_lap_avg", "best_5_lap_avg"],  # composite; lower = faster
 }
 
 
@@ -783,29 +791,38 @@ def run_predictions(
     # predicted_quali_raw (-> MC sim, -> race model's quali_position feature)
     # inherit the blend. Only blends drivers that actually set an FP lap.
     fp_blend = FP_QUALI_BLEND_TUNABLES
-    pace_col = fp_blend["pace_col"]
+    pace_cols = [c for c in fp_blend["pace_cols"] if c in pred_df.columns]
     # Scale the FP weight up on quali-dominant (hard-to-overtake) tracks.
     w_fp = fp_quali_blend_weight(
         target_circuit, fp_blend["weight"], fp_blend["weight_hard_track"],
         fp_blend["hard_track_pivot"],
     )
-    if w_fp > 0 and pace_col in pred_df.columns:
-        pace = pd.to_numeric(pred_df[pace_col], errors="coerce")
-        has_pace = pace.notna().values
-        if int(has_pace.sum()) >= fp_blend["min_drivers_with_pace"]:
-            def _zscore_q(a: np.ndarray) -> np.ndarray:
-                a = np.asarray(a, dtype=float)
-                s = a.std()
-                return (a - a.mean()) / s if s > 1e-9 else a - a.mean()
+    if w_fp > 0 and pace_cols:
+        def _zscore_q(a: np.ndarray) -> np.ndarray:
+            a = np.asarray(a, dtype=float)
+            s = a.std()
+            return (a - a.mean()) / s if s > 1e-9 else a - a.mean()
 
+        # Composite FP quali-pace signal: mean of per-metric z-scores, negated so
+        # a faster (lower) time scores higher. Blending the single best lap with
+        # best-3 and best-5 lap averages rewards repeatable pace over a one-off
+        # banker lap (backtests better than any single metric — see tunables).
+        zmat = []
+        for c in pace_cols:
+            col = pd.to_numeric(pred_df[c], errors="coerce")
+            sd = col.std()
+            zmat.append(-(col - col.mean()) / sd if sd and sd > 1e-9 else col * 0.0)
+        fp_pace_z = pd.concat(zmat, axis=1).mean(axis=1, skipna=True)  # NaN if all metrics NaN
+        has_pace = fp_pace_z.notna().values
+        if int(has_pace.sum()) >= fp_blend["min_drivers_with_pace"]:
             z_model = _zscore_q(quali_raw)
-            z_fp = np.full(len(pred_df), np.nan)
-            z_fp[has_pace] = _zscore_q(-pace.values[has_pace])  # faster lap -> higher score
+            comp_z = np.zeros(len(pred_df))
+            comp_z[has_pace] = _zscore_q(fp_pace_z.values[has_pace])
             blended = z_model.copy()
-            blended[has_pace] = (1.0 - w_fp) * z_model[has_pace] + w_fp * z_fp[has_pace]
+            blended[has_pace] = (1.0 - w_fp) * z_model[has_pace] + w_fp * comp_z[has_pace]
             quali_raw = blended
-            print(f"  FP-pace quali blend applied (weight={w_fp}, "
-                  f"{int(has_pace.sum())}/{len(pred_df)} drivers with FP pace)")
+            print(f"  FP-pace quali blend applied (weight={w_fp:.2f}, "
+                  f"cols={pace_cols}, {int(has_pace.sum())}/{len(pred_df)} drivers)")
         else:
             print(f"  FP-pace quali blend skipped (only {int(has_pace.sum())} drivers "
                   f"with FP pace < {fp_blend['min_drivers_with_pace']} min)")
