@@ -530,3 +530,20 @@ def grid_anchor_weight(circuit_id: str) -> float:
     tracks unchanged) ramping to GRID_ANCHOR_CEIL at difficulty 10 (Monaco).
     """
     return _difficulty_ramp_up(circuit_id, GRID_ANCHOR_PIVOT, GRID_ANCHOR_CEIL)
+
+
+def fp_quali_blend_weight(circuit_id: str, base: float, hard: float, pivot: int = 6) -> float:
+    """FP-pace qualifying blend weight, scaled UP on quali-dominant circuits.
+
+    On hard-to-overtake tracks (Monaco, Singapore, Hungary) one-lap pace decides
+    the weekend far more than season-long race form, so we lean the quali
+    prediction harder on this weekend's FP single-lap pace. Returns `base` at/below
+    `pivot` (normal tracks keep the backtested weight) ramping linearly to `hard`
+    at difficulty 10. Keyed off the same `overtaking_difficulty` as grid-anchoring.
+    """
+    diff = _difficulty_for(circuit_id)
+    if diff <= pivot:
+        return base
+    if diff >= 10:
+        return hard
+    return base + (hard - base) * (diff - pivot) / (10 - pivot)

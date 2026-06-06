@@ -47,7 +47,11 @@ from config.settings import (
     is_race_completed,
 )
 from pipeline.feature_engineering import engineer_features
-from config.track_classifications import get_circuit_id_from_race_name, grid_anchor_weight
+from config.track_classifications import (
+    get_circuit_id_from_race_name,
+    grid_anchor_weight,
+    fp_quali_blend_weight,
+)
 from config.track_similarity import get_similarity
 
 
@@ -93,8 +97,18 @@ from config.track_similarity import get_similarity
 # strategy / start chaos). The improved quali still flows to the race because
 # (a) quali_position/grid_advantage are race-model features and (b) on hard-to-
 # overtake tracks grid-anchoring carries the grid into the finish.
+# The base weight (0.6) is the backtest optimum on normal-overtake tracks. On
+# quali-dominant circuits (Monaco, Singapore, Hungary) one-lap pace decides the
+# weekend far more than season race form, so the weight is scaled UP toward
+# `weight_hard_track` via overtaking_difficulty (same track property as grid-
+# anchoring). At difficulty 10 (Monaco) the quali prediction is ~80% practice
+# pace; normal tracks keep 0.6; mild tracks (e.g. Barcelona, diff 7) get a small
+# bump. Note this is a domain-knowledge choice for hard tracks (no completed
+# Monaco-tier round in the 2026 backtest yet) — recalibrate once one exists.
 FP_QUALI_BLEND_TUNABLES = {
-    "weight": 0.6,                 # 0 = pure model, 1 = pure FP single-lap pace
+    "weight": 0.6,                 # base (normal tracks): 0 = pure model, 1 = pure FP pace
+    "weight_hard_track": 0.80,     # FP weight at overtaking_difficulty 10 (Monaco)
+    "hard_track_pivot": 6,         # at/below this difficulty, use base weight
     "min_drivers_with_pace": 10,   # need at least this many FP times to blend
     "pace_col": "best_lap_time",   # FP single fastest lap; lower = faster
 }
@@ -770,7 +784,11 @@ def run_predictions(
     # inherit the blend. Only blends drivers that actually set an FP lap.
     fp_blend = FP_QUALI_BLEND_TUNABLES
     pace_col = fp_blend["pace_col"]
-    w_fp = fp_blend["weight"]
+    # Scale the FP weight up on quali-dominant (hard-to-overtake) tracks.
+    w_fp = fp_quali_blend_weight(
+        target_circuit, fp_blend["weight"], fp_blend["weight_hard_track"],
+        fp_blend["hard_track_pivot"],
+    )
     if w_fp > 0 and pace_col in pred_df.columns:
         pace = pd.to_numeric(pred_df[pace_col], errors="coerce")
         has_pace = pace.notna().values
