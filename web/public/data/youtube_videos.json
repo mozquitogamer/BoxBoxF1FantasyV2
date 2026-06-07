@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-06T11:47:15Z",
+  "updated": "2026-06-07T12:02:41Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
     {
@@ -8,13 +8,6 @@
       "published": "2026-06-06",
       "thumbnail": "https://i.ytimg.com/vi/jyuQToLZh-w/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=jyuQToLZh-w"
-    },
-    {
-      "id": "FswkHIrqWGs",
-      "title": "F1 Fantasy Deadline Stream - MONACO Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
-      "published": "2026-06-06",
-      "thumbnail": "https://i.ytimg.com/vi/FswkHIrqWGs/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=FswkHIrqWGs"
     },
     {
       "id": "p5dkrl5RHSM",
@@ -29,6 +22,13 @@
       "published": "2026-05-24",
       "thumbnail": "https://i.ytimg.com/vi/AInvmGGBfoE/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=AInvmGGBfoE"
+    },
+    {
+      "id": "7WSeL1mGIKg",
+      "title": "Should you play the WILD CARD? Canadian GP Preview - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-05-21",
+      "thumbnail": "https://i.ytimg.com/vi/7WSeL1mGIKg/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=7WSeL1mGIKg"
     }
   ]
 }
