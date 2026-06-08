@@ -32,6 +32,12 @@
           "circuit_id": "villeneuve",
           "points": 26,
           "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": -11,
+          "is_dnf": true
         }
       ]
     },
@@ -66,6 +72,12 @@
           "circuit_id": "villeneuve",
           "points": -1,
           "is_dnf": true
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 0,
+          "is_dnf": false
         }
       ]
     },
@@ -99,6 +111,12 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": 62,
+          "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 55,
           "is_dnf": false
         }
       ]
@@ -134,6 +152,12 @@
           "circuit_id": "villeneuve",
           "points": 27,
           "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": -13,
+          "is_dnf": true
         }
       ]
     },
@@ -167,6 +191,12 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": 42,
+          "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 27,
           "is_dnf": false
         }
       ]
@@ -202,6 +232,12 @@
           "circuit_id": "villeneuve",
           "points": -3,
           "is_dnf": true
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": -17,
+          "is_dnf": true
         }
       ]
     },
@@ -236,6 +272,12 @@
           "circuit_id": "villeneuve",
           "points": 10,
           "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": -20,
+          "is_dnf": true
         }
       ]
     },
@@ -270,6 +312,12 @@
           "circuit_id": "villeneuve",
           "points": -16,
           "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 17,
+          "is_dnf": false
         }
       ]
     },
@@ -302,6 +350,12 @@
         {
           "round": 7,
           "circuit_id": "villeneuve",
+          "points": 5,
+          "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
           "points": 5,
           "is_dnf": false
         }
@@ -338,6 +392,12 @@
           "circuit_id": "villeneuve",
           "points": 16,
           "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 12,
+          "is_dnf": false
         }
       ]
     },
@@ -371,6 +431,12 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": 8,
+          "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 12,
           "is_dnf": false
         }
       ]
@@ -406,6 +472,12 @@
           "circuit_id": "villeneuve",
           "points": 11,
           "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": -20,
+          "is_dnf": true
         }
       ]
     },
@@ -440,6 +512,12 @@
           "circuit_id": "villeneuve",
           "points": -14,
           "is_dnf": true
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 9,
+          "is_dnf": false
         }
       ]
     },
@@ -473,6 +551,12 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": 25,
+          "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 0,
           "is_dnf": false
         }
       ]
@@ -508,6 +592,12 @@
           "circuit_id": "villeneuve",
           "points": 23,
           "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 16,
+          "is_dnf": false
         }
       ]
     },
@@ -542,6 +632,12 @@
           "circuit_id": "villeneuve",
           "points": -15,
           "is_dnf": true
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 8,
+          "is_dnf": false
         }
       ]
     },
@@ -576,6 +672,12 @@
           "circuit_id": "villeneuve",
           "points": 11,
           "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": -20,
+          "is_dnf": true
         }
       ]
     },
@@ -609,6 +711,12 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": 3,
+          "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 23,
           "is_dnf": false
         }
       ]
@@ -644,6 +752,12 @@
           "circuit_id": "villeneuve",
           "points": 12,
           "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 19,
+          "is_dnf": false
         }
       ]
     },
@@ -678,6 +792,12 @@
           "circuit_id": "villeneuve",
           "points": -30,
           "is_dnf": true
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 15,
+          "is_dnf": false
         }
       ]
     },
@@ -712,6 +832,12 @@
           "circuit_id": "villeneuve",
           "points": 12,
           "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": -20,
+          "is_dnf": true
         }
       ]
     },
@@ -746,6 +872,12 @@
           "circuit_id": "villeneuve",
           "points": 1,
           "is_dnf": false
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 3,
+          "is_dnf": false
         }
       ]
     }
@@ -777,6 +909,11 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": 71
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 55
         }
       ]
     },
@@ -806,6 +943,11 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": 69
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 24
         }
       ]
     },
@@ -835,6 +977,11 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": 12
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 38
         }
       ]
     },
@@ -864,6 +1011,11 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": 19
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": -9
         }
       ]
     },
@@ -893,6 +1045,11 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": 39
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 27
         }
       ]
     },
@@ -922,6 +1079,11 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": 46
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 17
         }
       ]
     },
@@ -951,6 +1113,11 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": -2
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": -8
         }
       ]
     },
@@ -980,6 +1147,11 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": 24
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 12
         }
       ]
     },
@@ -1008,6 +1180,11 @@
         {
           "round": 7,
           "circuit_id": "villeneuve",
+          "points": 9
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
           "points": 9
         }
       ]
@@ -1038,6 +1215,11 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": -4
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": -13
         }
       ]
     },
@@ -1067,6 +1249,11 @@
           "round": 7,
           "circuit_id": "villeneuve",
           "points": -20
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": -6
         }
       ]
     }

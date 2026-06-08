@@ -353,17 +353,19 @@ git add web/public/data/ && git commit -m "Post-quali predictions for R7 (Canada
 
 ### Pre-step: Update overtakes.csv
 
-Before running, manually copy official F1 Fantasy overtake counts into `data/seed/overtakes.csv`. F1 Fantasy's overtake count sometimes differs from FastF1/OpenF1's auto-detected count, and the official number is what gets scored. Format (extend the file with one row per driver per round):
+Before running, manually copy official F1 Fantasy overtake/position counts into `data/seed/overtakes.csv`. F1 Fantasy's count sometimes differs from FastF1/OpenF1's auto-detected count, and the official number is what gets scored. **Exact format** (one row per driver per round):
 
 ```csv
-year,round,driver_id,session,overtakes
-2026,7,VER,race,8
-2026,7,RUS,race,6
-...
-2026,7,VER,sprint,3      # if sprint weekend
+driver_id,round,overtakes_made,positions_gained,positions_lost,sprint_positions_gained,sprint_positions_lost,sprint_overtakes
+max_verstappen,6,0,0,0,0,0,0
+russell,6,1,0,6,0,0,0
 ```
 
-`load_seed_overtakes()` in `11_actual_fantasy_points.py` reads this and overrides detected counts.
+Two gotchas that bite:
+- **`driver_id` is the full Jolpica name** (`max_verstappen`, `antonelli`, `arvid_lindblad`), NOT the abbreviation.
+- **`round` uses COMPRESSED numbering** (skipping cancelled R4/R5 — same compression FastF1/Jolpica use), so internal R8 Monaco → `round` **6**. `load_seed_overtakes()` translates internal→compressed via `fastf1_round()` when reading. There is **no `year` column** (current season is assumed).
+
+If you put the wrong round number or use abbreviations, the loader silently finds nothing and falls back to auto-detected counts. `load_seed_overtakes()` in `11_actual_fantasy_points.py` reads this and overrides detected counts; it prints `Manual overtakes.csv override for race (N drivers)` when the file is used.
 
 ### Run the phase
 
