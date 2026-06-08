@@ -143,7 +143,7 @@ TRACK_DATABASE = {
     # === TECHNICAL/BALANCED CIRCUITS ===
     'catalunya': {  # Barcelona
         'is_street': 0,
-        'overtaking_difficulty': 7,
+        'overtaking_difficulty': 6,  # was 7; ~78-90 overtakes/yr + 2026 overtake mode = moderate, not hard (no damping/anchoring at <=pivot 6)
         'avg_corner_speed': 6,
         'straight_line_importance': 4,
         'downforce_level': 7,

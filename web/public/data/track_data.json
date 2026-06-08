@@ -112,7 +112,7 @@
     },
     "catalunya": {
       "is_street": 0,
-      "overtaking_difficulty": 7,
+      "overtaking_difficulty": 6,
       "avg_corner_speed": 6,
       "straight_line_importance": 4,
       "downforce_level": 7,
