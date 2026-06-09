@@ -6,8 +6,8 @@
       "tags": ["feature"],
       "body": [
         "Every driver and constructor card now shows its <strong>current price</strong> as a pill right under the name, so you can weigh cost against predicted points without hunting for it.",
-        "The Drivers <strong>table view</strong> (the ☰ toggle, top-right of the Drivers tab) gains four price-forecast columns, budget-builder style: <strong>Rise pts</strong> (the points this round that would push the price up), <strong>Max rise</strong> (the biggest jump on offer), <strong>Drop pts</strong> (score below this and the price takes its full hit), and <strong>Max drop</strong> (the worst-case fall).",
-        "These use the same rolling-3-round value rating the cards already showed in their price-change panel — now condensed into an at-a-glance grid. Click any column header to sort — line up the cheapest risers, or the assets with the most downside, in one tap. Hover a header for the full explanation."
+        "The Drivers <strong>table view</strong> (the ☰ toggle, top-right of the Drivers tab) gains four budget-builder columns showing <strong>how many points a driver needs this weekend to hit each price-change tier</strong>: <strong>Big rise</strong>, <strong>Sm rise</strong>, <strong>Sm drop</strong> and <strong>Big drop</strong>. Each cell is the points range that lands them in that bracket (e.g. \"44+\" for the biggest rise, \"<26\" for the biggest drop).",
+        "These use the same rolling-3-round value rating the cards already showed in their price-change panel. Click any column header to sort — line up who can rise with the fewest points, or who's closest to a drop, in one tap. Hover a cell for the exact price move (it depends on the asset's price tier)."
       ]
     },
     {

@@ -982,16 +982,17 @@ function computeDriverPriceFields(driver) {
         driver._price_change = 0;
     }
     // Price-change forecast (mirrors the card brackets via predictPriceChange).
-    // Stored on the driver so the table columns are sortable. Thresholds are
-    // points THIS round (rolling-3 PPM basis) that move the asset across a
-    // price boundary: _rise_pts = score >= this -> price rises; _drop_pts =
-    // score < this -> full/steepest drop. _max_rise / _max_drop = best/worst
-    // possible swing this round (top / bottom PPM bracket for the asset's tier).
+    // Stored on the driver so the table columns are sortable. Each value is the
+    // points THIS round (rolling-3 PPM basis) required to reach that price-change
+    // tier: score >= _pts_great -> biggest rise; >= _pts_good -> small rise;
+    // >= _pts_poor -> only a small drop; below _pts_poor (== _pts_terrible) ->
+    // biggest drop. The actual $ change per tier depends on the asset's price
+    // tier (A vs B) and is shown in each cell's tooltip.
     const fc = predictPriceChange(driver, driver.expected_points);
-    driver._rise_pts = Math.max(0, Math.ceil(fc.ptsForGood));
-    driver._max_rise = fc.tierChanges.great;
-    driver._drop_pts = Math.max(0, Math.ceil(fc.ptsForPoor));
-    driver._max_drop = fc.tierChanges.terrible;
+    driver._pts_great = Math.max(0, Math.ceil(fc.ptsForGreat));
+    driver._pts_good = Math.max(0, Math.ceil(fc.ptsForGood));
+    driver._pts_poor = Math.max(0, Math.ceil(fc.ptsForPoor));
+    driver._pts_terrible = driver._pts_poor; // distinct sort key; same boundary as poor
     driver._price_tier = fc.tier;
 }
 
@@ -1009,12 +1010,12 @@ const TABLE_COLUMNS = [
     { key: 'current_price', label: 'Price' },
     { key: 'price_change', label: 'Change' },
     { key: 'value_score', label: 'PPM' },
-    // Price-change forecast columns (sortable; values precomputed onto each
-    // driver by computeDriverPriceFields as _rise_pts/_max_rise/_drop_pts/_max_drop)
-    { key: '_rise_pts', label: 'Rise pts' },
-    { key: '_max_rise', label: 'Max rise' },
-    { key: '_drop_pts', label: 'Drop pts' },
-    { key: '_max_drop', label: 'Max drop' },
+    // Per-tier price-change point thresholds (sortable; values precomputed onto
+    // each driver by computeDriverPriceFields as _pts_great/_pts_good/_pts_poor/_pts_terrible)
+    { key: '_pts_great', label: 'Big rise' },
+    { key: '_pts_good', label: 'Sm rise' },
+    { key: '_pts_poor', label: 'Sm drop' },
+    { key: '_pts_terrible', label: 'Big drop' },
 ];
 
 function setupTableSorting() {
@@ -1032,10 +1033,10 @@ function setupTableSorting() {
             } else {
                 tableSortColumn = col.key;
                 // Default direction: ascending for position-like / "lower is more
-                // interesting" columns, descending for others. _rise_pts asc =
-                // easiest risers first; _max_drop asc = biggest (most negative)
-                // drops first.
-                tableSortAsc = ['predicted_quali', 'predicted_finish', 'current_price', 'starting_price', 'name', 'constructor', '_rise_pts', '_max_drop'].includes(col.key);
+                // interesting" columns, descending for others. The rise-tier
+                // thresholds default ascending (fewest points needed = easiest to
+                // rise, shown first); the drop tiers default descending.
+                tableSortAsc = ['predicted_quali', 'predicted_finish', 'current_price', 'starting_price', 'name', 'constructor', '_pts_great', '_pts_good'].includes(col.key);
             }
             renderDrivers();
             updateSortIndicators();
@@ -1501,14 +1502,16 @@ function driverRow(d, i) {
     const pcColor = pc > 0 ? 'color:var(--green)' : pc < 0 ? 'color:var(--red, #ef4444)' : '';
     const pcText = pc > 0 ? `+${pc.toFixed(1)}` : pc < 0 ? pc.toFixed(1) : '0.0';
 
-    // Price-change forecast — precomputed onto the driver by
-    // computeDriverPriceFields() so these columns are sortable. See that
-    // function for what each field means.
-    const riseAt = d._rise_pts;
-    const crashAt = d._drop_pts;
-    const maxUp = d._max_rise;
-    const maxDn = d._max_drop;
-    const tier = d._price_tier;
+    // Price-change forecast — per-tier points thresholds, precomputed onto the
+    // driver by computeDriverPriceFields() so the columns are sortable. Each
+    // tier shows the points RANGE that lands the asset in that price bracket.
+    const G = d._pts_great, Gd = d._pts_good, P = d._pts_poor;
+    const tc = d._price_tier === 'A' ? PRICE_TIERS.A_TIER_CHANGES : PRICE_TIERS.B_TIER_CHANGES;
+    const fmtChg = (v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}M`;
+    const greatCell = `${G}+`;
+    const goodCell = G > Gd ? `${Gd}–${G - 1}` : `${Gd}+`;
+    const poorCell = Gd > P ? `${P}–${Gd - 1}` : `${P}+`;
+    const terribleCell = `<${P}`;
 
     return `
     <tr>
@@ -1524,10 +1527,10 @@ function driverRow(d, i) {
         <td class="num">$${d.current_price.toFixed(1)}M</td>
         <td class="num" style="${pcColor}">${pcText}</td>
         <td class="num">${d.value_score.toFixed(2)}</td>
-        <td class="num" title="Points this round (rolling-3 PPM basis) needed for a price RISE. Score below this and the price drops.">${riseAt}</td>
-        <td class="num" style="color:var(--green)" title="Largest possible price rise this round (top PPM bracket for a ${tier}-tier asset)">+${maxUp.toFixed(1)}</td>
-        <td class="num" title="Score below this and the price takes its FULL drop. Between this and 'Rise pts' is a smaller drop.">${crashAt}</td>
-        <td class="num" style="color:var(--red, #ef4444)" title="Largest possible price drop this round (bottom PPM bracket for a ${tier}-tier asset)">${maxDn.toFixed(1)}</td>
+        <td class="num" style="color:var(--green)" title="Score this many points this round (rolling-3 PPM basis) for the biggest price rise (${fmtChg(tc.great)})">${greatCell}</td>
+        <td class="num" style="color:#22d3ee" title="Points this round for a small price rise (${fmtChg(tc.good)})">${goodCell}</td>
+        <td class="num" style="color:var(--orange)" title="Points this round for only a small price drop (${fmtChg(tc.poor)}). Score below this range and the price takes its biggest drop.">${poorCell}</td>
+        <td class="num" style="color:var(--red, #ef4444)" title="Score below ${P} pts this round and the price takes its biggest drop (${fmtChg(tc.terrible)})">${terribleCell}</td>
     </tr>`;
 }
 
