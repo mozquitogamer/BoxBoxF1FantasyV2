@@ -665,6 +665,16 @@ select:focus, input:focus {
     vertical-align: middle;
 }
 
+/* Drivers table carries 16 columns (incl. the price-change forecast). Compact
+   its padding/typography so the whole board fits inside the 1280px container
+   without a horizontal scrollbar. Scoped to #driverTable so the roomier
+   styling on every other table is left untouched. */
+#driverTable .data-table { font-size: 12px; }
+#driverTable .data-table th,
+#driverTable .data-table td { padding: 6px 8px; }
+#driverTable .data-table .team-dot { width: 8px; height: 8px; margin-right: 5px; }
+#driverTable .data-table .risk-badge { padding: 2px 5px; font-size: 9.5px; letter-spacing: 0.2px; }
+
 /* ---- Pit Stop Performance Panel ---- */
 .pitstop-panel {
     background: var(--bg-card);
