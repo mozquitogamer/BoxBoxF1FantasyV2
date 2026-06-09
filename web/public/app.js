@@ -981,6 +981,18 @@ function computeDriverPriceFields(driver) {
         driver._starting_price = driver.current_price;
         driver._price_change = 0;
     }
+    // Price-change forecast (mirrors the card brackets via predictPriceChange).
+    // Stored on the driver so the table columns are sortable. Thresholds are
+    // points THIS round (rolling-3 PPM basis) that move the asset across a
+    // price boundary: _rise_pts = score >= this -> price rises; _drop_pts =
+    // score < this -> full/steepest drop. _max_rise / _max_drop = best/worst
+    // possible swing this round (top / bottom PPM bracket for the asset's tier).
+    const fc = predictPriceChange(driver, driver.expected_points);
+    driver._rise_pts = Math.max(0, Math.ceil(fc.ptsForGood));
+    driver._max_rise = fc.tierChanges.great;
+    driver._drop_pts = Math.max(0, Math.ceil(fc.ptsForPoor));
+    driver._max_drop = fc.tierChanges.terrible;
+    driver._price_tier = fc.tier;
 }
 
 // -- Table header sorting --
@@ -997,6 +1009,12 @@ const TABLE_COLUMNS = [
     { key: 'current_price', label: 'Price' },
     { key: 'price_change', label: 'Change' },
     { key: 'value_score', label: 'PPM' },
+    // Price-change forecast columns (sortable; values precomputed onto each
+    // driver by computeDriverPriceFields as _rise_pts/_max_rise/_drop_pts/_max_drop)
+    { key: '_rise_pts', label: 'Rise pts' },
+    { key: '_max_rise', label: 'Max rise' },
+    { key: '_drop_pts', label: 'Drop pts' },
+    { key: '_max_drop', label: 'Max drop' },
 ];
 
 function setupTableSorting() {
@@ -1013,8 +1031,11 @@ function setupTableSorting() {
                 tableSortAsc = !tableSortAsc;
             } else {
                 tableSortColumn = col.key;
-                // Default direction: ascending for position-like columns, descending for others
-                tableSortAsc = ['predicted_quali', 'predicted_finish', 'current_price', 'starting_price', 'name', 'constructor'].includes(col.key);
+                // Default direction: ascending for position-like / "lower is more
+                // interesting" columns, descending for others. _rise_pts asc =
+                // easiest risers first; _max_drop asc = biggest (most negative)
+                // drops first.
+                tableSortAsc = ['predicted_quali', 'predicted_finish', 'current_price', 'starting_price', 'name', 'constructor', '_rise_pts', '_max_drop'].includes(col.key);
             }
             renderDrivers();
             updateSortIndicators();
@@ -1397,6 +1418,7 @@ function driverCard(d, i) {
             <div class="driver-info">
                 <h3>${d.name}</h3>
                 <div class="driver-team" style="color:${team.color}">${team.name}</div>
+                <div class="card-cost" title="Current F1 Fantasy price">$${d.current_price.toFixed(1)}M</div>
             </div>
             <div class="driver-number">${d.number}</div>
         </div>
@@ -1458,7 +1480,6 @@ function driverCard(d, i) {
                 <span>${d.confidence}%</span>
             </div>
             <span class="risk-badge ${riskClass}" title="DNF risk: ${((d.dnf_probability||0) * 100).toFixed(0)}% probability based on rolling 5-race DNF rate">${d.risk}</span>
-            <span class="price-tag" title="Current F1 Fantasy price">$${d.current_price.toFixed(1)}M</span>
             <span class="value-tag" style="position:relative;cursor:help" title="PPM = Points Per Million. Expected Fantasy Points / Price ($M). Higher is better. Above 1.0 = good, above 2.0 = excellent.">${d.value_score.toFixed(2)} ppm<span class="value-tooltip">PPM = Points Per Million (Expected Fantasy Points &divide; Price). Higher is better. Above 1.0 = good, above 2.0 = excellent.</span></span>
         </div>
         ${d.mc_total_p5 != null ? `
@@ -1480,6 +1501,15 @@ function driverRow(d, i) {
     const pcColor = pc > 0 ? 'color:var(--green)' : pc < 0 ? 'color:var(--red, #ef4444)' : '';
     const pcText = pc > 0 ? `+${pc.toFixed(1)}` : pc < 0 ? pc.toFixed(1) : '0.0';
 
+    // Price-change forecast — precomputed onto the driver by
+    // computeDriverPriceFields() so these columns are sortable. See that
+    // function for what each field means.
+    const riseAt = d._rise_pts;
+    const crashAt = d._drop_pts;
+    const maxUp = d._max_rise;
+    const maxDn = d._max_drop;
+    const tier = d._price_tier;
+
     return `
     <tr>
         <td>${i + 1}</td>
@@ -1494,6 +1524,10 @@ function driverRow(d, i) {
         <td class="num">$${d.current_price.toFixed(1)}M</td>
         <td class="num" style="${pcColor}">${pcText}</td>
         <td class="num">${d.value_score.toFixed(2)}</td>
+        <td class="num" title="Points this round (rolling-3 PPM basis) needed for a price RISE. Score below this and the price drops.">${riseAt}</td>
+        <td class="num" style="color:var(--green)" title="Largest possible price rise this round (top PPM bracket for a ${tier}-tier asset)">+${maxUp.toFixed(1)}</td>
+        <td class="num" title="Score below this and the price takes its FULL drop. Between this and 'Rise pts' is a smaller drop.">${crashAt}</td>
+        <td class="num" style="color:var(--red, #ef4444)" title="Largest possible price drop this round (bottom PPM bracket for a ${tier}-tier asset)">${maxDn.toFixed(1)}</td>
     </tr>`;
 }
 
@@ -2286,6 +2320,7 @@ function constructorCard(c, i) {
                     <span class="mini-driver">${c.driver_1}</span>
                     <span class="mini-driver">${c.driver_2}</span>
                 </div>
+                <div class="card-cost" title="Current F1 Fantasy price">$${c.current_price.toFixed(1)}M</div>
             </div>
             <div class="points-badge">
                 ${c.expected_points.toFixed(1)}
@@ -2310,7 +2345,6 @@ function constructorCard(c, i) {
 
         <div class="card-meta">
             <span class="risk-badge ${riskClass}" title="DNF risk based on combined driver risk">${c.risk}</span>
-            <span class="price-tag" title="Current F1 Fantasy price">$${c.current_price.toFixed(1)}M</span>
             <span class="value-tag" title="PPM = Points Per Million. Expected Points / Price ($M).">${c.value_score.toFixed(2)} ppm</span>
         </div>
         ${scoringBreakdownHtml}

@@ -1,6 +1,16 @@
 {
   "entries": [
     {
+      "date": "2026-06-09",
+      "title": "Prices on every card, plus a budget-builder view of who's about to rise or fall",
+      "tags": ["feature"],
+      "body": [
+        "Every driver and constructor card now shows its <strong>current price</strong> as a pill right under the name, so you can weigh cost against predicted points without hunting for it.",
+        "The Drivers <strong>table view</strong> (the ☰ toggle, top-right of the Drivers tab) gains four price-forecast columns, budget-builder style: <strong>Rise pts</strong> (the points this round that would push the price up), <strong>Max rise</strong> (the biggest jump on offer), <strong>Drop pts</strong> (score below this and the price takes its full hit), and <strong>Max drop</strong> (the worst-case fall).",
+        "These use the same rolling-3-round value rating the cards already showed in their price-change panel — now condensed into an at-a-glance grid. Click any column header to sort — line up the cheapest risers, or the assets with the most downside, in one tap. Hover a header for the full explanation."
+      ]
+    },
+    {
       "date": "2026-06-05",
       "title": "Predictions now lean on practice pace — fixing drivers shown out of position",
       "tags": ["model", "fix"],
