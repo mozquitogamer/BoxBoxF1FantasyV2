@@ -988,10 +988,12 @@ function computeDriverPriceFields(driver) {
     // >= _pts_poor -> only a small drop; below _pts_poor (== _pts_terrible) ->
     // biggest drop. The actual $ change per tier depends on the asset's price
     // tier (A vs B) and is shown in each cell's tooltip.
+    // No clamp to 0 — thresholds can be negative (a driver on a hot streak can
+    // hold/rise even on a low or negative score), matching the card brackets.
     const fc = predictPriceChange(driver, driver.expected_points);
-    driver._pts_great = Math.max(0, Math.ceil(fc.ptsForGreat));
-    driver._pts_good = Math.max(0, Math.ceil(fc.ptsForGood));
-    driver._pts_poor = Math.max(0, Math.ceil(fc.ptsForPoor));
+    driver._pts_great = Math.ceil(fc.ptsForGreat);
+    driver._pts_good = Math.ceil(fc.ptsForGood);
+    driver._pts_poor = Math.ceil(fc.ptsForPoor);
     driver._pts_terrible = driver._pts_poor; // distinct sort key; same boundary as poor
     driver._price_tier = fc.tier;
 }
@@ -1508,9 +1510,10 @@ function driverRow(d, i) {
     const G = d._pts_great, Gd = d._pts_good, P = d._pts_poor;
     const tc = d._price_tier === 'A' ? PRICE_TIERS.A_TIER_CHANGES : PRICE_TIERS.B_TIER_CHANGES;
     const fmtChg = (v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}M`;
+    // " to " separator (not an en-dash) so negative ranges like "-25 to -11" read cleanly.
     const greatCell = `${G}+`;
-    const goodCell = G > Gd ? `${Gd}–${G - 1}` : `${Gd}+`;
-    const poorCell = Gd > P ? `${P}–${Gd - 1}` : `${P}+`;
+    const goodCell = G > Gd ? `${Gd} to ${G - 1}` : `${Gd}+`;
+    const poorCell = Gd > P ? `${P} to ${Gd - 1}` : `${P}+`;
     const terribleCell = `<${P}`;
 
     return `
