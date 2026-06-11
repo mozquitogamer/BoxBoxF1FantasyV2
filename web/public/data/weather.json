@@ -14,7 +14,7 @@
     "end": "2026-06-14"
   },
   "overall_rain_risk": "NONE",
-  "max_rain_probability": 0,
+  "max_rain_probability": 1,
   "daily": [
     {
       "date": "2026-06-12",
@@ -46,7 +46,7 @@
       "date": "2026-06-14",
       "temp_max": 30.4,
       "temp_min": 16.8,
-      "precip_probability_max": 0,
+      "precip_probability_max": 3,
       "precip_sum_mm": 0.0,
       "wind_max_kmh": 13.7,
       "weather_description": "Partly cloudy",
@@ -281,7 +281,7 @@
       "name": "Race",
       "day_label": "Sunday",
       "date": "2026-06-14",
-      "rain_probability": 0,
+      "rain_probability": 1,
       "rain_risk": "NONE",
       "avg_temp": 29.9,
       "avg_wind": 12.6,
@@ -324,7 +324,7 @@
           "hour": 16,
           "temp": 29.1,
           "humidity": 40,
-          "precip_prob": 0,
+          "precip_prob": 1,
           "precip_mm": 0.0,
           "windspeed": 13.7,
           "windgusts": 36.0,
@@ -333,7 +333,7 @@
       ]
     }
   ],
-  "last_updated": "2026-06-10T20:13:17Z",
-  "next_update": "2026-06-11T02:13:17Z",
+  "last_updated": "2026-06-11T02:44:39Z",
+  "next_update": "2026-06-11T08:44:39Z",
   "data_source": "Open-Meteo (open-meteo.com)"
 }
