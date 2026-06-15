@@ -41,6 +41,7 @@ from config.settings import (
     SEED_DIR,
     CANCELLED_ROUNDS_2026,
 )
+from config.tyre_deg import stint_degradation, compound_average
 
 
 # -- Load helpers --------------------------------------------------------------
@@ -211,7 +212,14 @@ def analyze_tyre_degradation(df: pd.DataFrame) -> dict:
     """
     Analyze tyre degradation per driver per compound.
 
-    Returns degradation rate (seconds/lap) for each compound used.
+    Returns a fuel-corrected degradation rate (seconds/lap of tyre age) for each
+    compound, computed via config.tyre_deg.stint_degradation (regress fuel-
+    corrected lap time on real tyre age, robust outlier rejection, min clean
+    laps). Stints that can't be fit reliably (quali sims, short runs) get
+    deg_rate=None and are excluded from the lap-weighted compound average.
+
+    Grouping is by (session, stint, compound): FastF1 restarts stint numbers
+    each FP session, so omitting session merges unrelated runs.
     """
     if df is None or df.empty:
         return {}
@@ -220,49 +228,55 @@ def analyze_tyre_degradation(df: pd.DataFrame) -> dict:
     if not all(c in df.columns for c in required):
         return {}
 
+    has_session = "session" in df.columns
+    has_age = "tyre_life" in df.columns
+    has_lap = "lap_number" in df.columns
+    group_keys = (["session"] if has_session else []) + ["stint", "compound"]
+
     clean = df[df["lap_time"].notna() & (df["lap_time"] > 0)].copy()
 
     result = {}
     for driver_id, driver_group in clean.groupby("driver_id"):
-        compounds = {}
-        for (stint, compound), stint_group in driver_group.groupby(["stint", "compound"]):
-            if len(stint_group) < 4:
-                continue
+        compounds: dict[str, list] = {}
+        for keys, stint_group in driver_group.groupby(group_keys):
+            session = keys[0] if has_session else "?"
+            stint = keys[-2]
+            compound = keys[-1]
 
-            if "lap_number" in stint_group.columns:
-                stint_sorted = stint_group.sort_values("lap_number")
+            sort_col = "lap_number" if has_lap else None
+            stint_sorted = stint_group.sort_values(sort_col) if sort_col else stint_group
+
+            times = stint_sorted["lap_time"].to_numpy(dtype=float)
+            if has_age:
+                age = stint_sorted["tyre_life"].to_numpy(dtype=float)
+            elif has_lap:
+                lap = stint_sorted["lap_number"].to_numpy(dtype=float)
+                age = lap - np.nanmin(lap)
             else:
-                stint_sorted = stint_group
+                age = None
 
-            times = stint_sorted["lap_time"].values
-            # Remove first lap and outliers
-            times = times[1:]
-            median = np.median(times) if len(times) > 0 else 0
-            times = times[times < median * 1.05]
-
-            if len(times) < 3:
-                continue
-
-            x = np.arange(len(times))
-            slope = np.polyfit(x, times, 1)[0]
+            deg, n_clean = stint_degradation(times, age)
 
             compound_str = str(compound)
-            if compound_str not in compounds:
-                compounds[compound_str] = []
-            compounds[compound_str].append({
+            compounds.setdefault(compound_str, []).append({
                 "stint": int(stint),
-                "laps": len(times),
-                "deg_rate": round(float(slope), 4),
-                "avg_pace": round(float(np.mean(times)), 3),
+                "session": str(session),
+                "laps": int(n_clean),
+                "deg_rate": (round(float(deg), 3) if deg is not None else None),
+                "avg_pace": round(float(np.nanmin(times)), 3),  # stint best (push) pace
             })
 
         if compounds:
             result[driver_id] = {}
             for comp, stints in compounds.items():
-                avg_deg = np.mean([s["deg_rate"] for s in stints])
+                avg_deg, total_laps, n_used = compound_average(
+                    [(s["deg_rate"], s["laps"]) for s in stints]
+                )
                 result[driver_id][comp] = {
                     "stints": stints,
-                    "avg_degradation": round(float(avg_deg), 4),
+                    "avg_degradation": (round(float(avg_deg), 3) if avg_deg is not None else None),
+                    "deg_laps": int(total_laps),       # clean laps behind the number
+                    "deg_stints": int(n_used),         # fittable stints behind the number
                 }
 
     return result
@@ -533,57 +547,66 @@ def analyze_stint_breakdown(df: pd.DataFrame) -> dict:
     if not all(c in df.columns for c in required):
         return {}
 
+    has_session = "session" in df.columns
+    has_age = "tyre_life" in df.columns
+    has_lap = "lap_number" in df.columns
+    group_keys = (["session"] if has_session else []) + ["stint"]
+
     clean = df[df["lap_time"].notna() & (df["lap_time"] > 0)].copy()
 
     result = {}
     for driver_id, driver_group in clean.groupby("driver_id"):
         stints = []
-        for stint, stint_group in driver_group.groupby("stint"):
+        for keys, stint_group in driver_group.groupby(group_keys):
             if len(stint_group) < 3:
                 continue
+            session = str(keys[0]) if has_session else "?"
+            stint = keys[-1]
 
-            if "lap_number" in stint_group.columns:
-                stint_sorted = stint_group.sort_values("lap_number")
-            else:
-                stint_sorted = stint_group
+            sort_col = "lap_number" if has_lap else None
+            stint_sorted = stint_group.sort_values(sort_col) if sort_col else stint_group
 
-            times = stint_sorted["lap_time"].values
+            times = stint_sorted["lap_time"].to_numpy(dtype=float)
             compound = str(stint_sorted["compound"].iloc[0]) if "compound" in stint_sorted.columns else "UNKNOWN"
-            session = str(stint_sorted["session"].iloc[0]) if "session" in stint_sorted.columns else "?"
-
-            # Remove first lap (out lap / cold tyres) for pace analysis
-            pace_times = times[1:] if len(times) > 1 else times
-            # Remove extreme outliers for calculations
-            if len(pace_times) > 2:
-                median = np.median(pace_times)
-                pace_clean = pace_times[pace_times < median * 1.08]
+            if has_age:
+                age = stint_sorted["tyre_life"].to_numpy(dtype=float)
+            elif has_lap:
+                lap = stint_sorted["lap_number"].to_numpy(dtype=float)
+                age = lap - np.nanmin(lap)
             else:
+                age = None
+
+            # Fuel-corrected, robust degradation (None when not reliably fittable)
+            slope, n_clean = stint_degradation(times, age)
+
+            # Pace summary: drop the out-lap, clip obvious junk for display only
+            pace_times = times[1:] if len(times) > 1 else times
+            best = float(np.nanmin(pace_times)) if len(pace_times) else float("nan")
+            pace_clean = pace_times[pace_times <= best * 1.10] if len(pace_times) else pace_times
+            if len(pace_clean) < 1:
                 pace_clean = pace_times
-
-            if len(pace_clean) < 2:
-                continue
-
-            # Degradation: linear fit
-            x = np.arange(len(pace_clean))
-            slope = float(np.polyfit(x, pace_clean, 1)[0]) if len(pace_clean) >= 3 else 0.0
 
             stints.append({
                 "stint": int(stint),
                 "session": session,
                 "compound": compound,
-                "total_laps": len(times),
+                "total_laps": int(len(times)),
+                "deg_laps": int(n_clean),
                 "first_lap_pace": round(float(times[0]), 3),
                 "last_lap_pace": round(float(times[-1]), 3),
                 "avg_pace": round(float(np.mean(pace_clean)), 3),
                 "best_pace": round(float(np.min(pace_clean)), 3),
-                "degradation_rate": round(slope, 4),
+                "degradation_rate": (round(float(slope), 3) if slope is not None else None),
             })
 
         if stints:
+            avg_deg, _, _ = compound_average(
+                [(s["degradation_rate"], s["deg_laps"]) for s in stints]
+            )
             result[driver_id] = {
                 "stints": stints,
                 "total_stints": len(stints),
-                "avg_degradation": round(float(np.mean([s["degradation_rate"] for s in stints])), 4),
+                "avg_degradation": (round(float(avg_deg), 3) if avg_deg is not None else None),
             }
 
     return result

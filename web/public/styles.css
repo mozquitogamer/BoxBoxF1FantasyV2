@@ -2015,6 +2015,33 @@ table.sortable th.sort-desc::after {
 .deg-good { color: var(--green); }
 .deg-ok { color: var(--yellow); }
 .deg-bad { color: var(--red); }
+.deg-none { color: var(--text-muted); font-weight: 500; font-style: italic; }
+
+/* Small lap-count context + unit next to a deg value */
+.deg-unit { font-size: 11px; font-weight: 500; color: var(--text-muted); }
+.deg-ctx {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 4px;
+    padding: 1px 5px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+/* Practice/test runners not in the fantasy roster — de-emphasised, sorted last */
+.deg-card.deg-rookie { opacity: 0.55; }
+.deg-tag {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1px 5px;
+    margin-left: 4px;
+}
 
 /* Management score */
 .mgmt-score {

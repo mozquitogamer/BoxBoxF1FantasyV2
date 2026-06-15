@@ -5618,27 +5618,69 @@ function renderFPAnalysis() {
         postRenderFns.push(tbl.renderTable);
     }
 
-    // Tyre Degradation
+    // Tyre Degradation — fuel-corrected pace loss per lap of tyre age, from FP
+    // long runs. Colour is FIELD-RELATIVE per compound (best third green, worst
+    // third red) so it reads fairly whether the weekend is high- or low-deg.
     if (fpAnalysis.tyre_degradation && Object.keys(fpAnalysis.tyre_degradation).length > 0) {
+        const roster = new Set((data && data.drivers ? data.drivers : []).map(d => d.driver_id));
         const entries = Object.entries(fpAnalysis.tyre_degradation);
+
+        // Build per-compound sorted lists of fittable (non-null) deg values for
+        // field-relative tercile colouring.
+        const byCompound = {};
+        entries.forEach(([id, compounds]) => {
+            Object.entries(compounds).forEach(([comp, d]) => {
+                if (d.avg_degradation != null) (byCompound[comp] = byCompound[comp] || []).push(d.avg_degradation);
+            });
+        });
+        Object.values(byCompound).forEach(arr => arr.sort((a, b) => a - b));
+        const degClass = (comp, deg) => {
+            if (deg == null) return 'deg-none';
+            if (deg < 0) return 'deg-none';                 // track evolving / fuel — not real tyre gain
+            const arr = byCompound[comp] || [];
+            if (arr.length < 3) return 'deg-ok';
+            const rank = arr.filter(v => v < deg).length / arr.length;
+            return rank < 0.34 ? 'deg-good' : rank < 0.67 ? 'deg-ok' : 'deg-bad';
+        };
+        // Sort: roster drivers with a real value first (lowest deg = best saver),
+        // then roster "short runs only", then non-roster practice runners.
+        const repDeg = compounds => {
+            const vals = Object.values(compounds).map(d => d.avg_degradation).filter(v => v != null && v >= 0);
+            return vals.length ? Math.min(...vals) : Infinity;
+        };
+        entries.sort((a, b) => {
+            const ar = roster.has(a[0]) ? 0 : 1, br = roster.has(b[0]) ? 0 : 1;
+            if (ar !== br) return ar - br;
+            return repDeg(a[1]) - repDeg(b[1]);
+        });
+
         html += `
         <div class="analysis-block">
             <h3>Tyre Degradation</h3>
-            <p class="analysis-note">Seconds lost per additional lap of tyre age. Green = low degradation, red = high. Lower is better for race strategy.</p>
+            <p class="analysis-note">Fuel-corrected pace lost per lap of tyre age on this weekend's practice long runs &mdash; lower is a better tyre-saver (holds pace late &rarr; positions gained, less likely to be undercut). Colour is relative to the field on each compound. <strong>"track evolving"</strong> = the car got <em>faster</em> through the run (fuel burn / track rubbering in), not real tyre gain. Short, noisy runs (quali sims) are excluded.</p>
             <div class="deg-grid">${entries.map(([id, compounds]) => {
+                const isRookie = !roster.has(id);
                 const compoundEntries = Object.entries(compounds);
                 return `
-                <div class="deg-card">
-                    <div class="deg-driver">${id}</div>
-                    ${compoundEntries.map(([comp, data]) => {
-                        const deg = data.avg_degradation;
-                        if (deg == null) return '';
+                <div class="deg-card${isRookie ? ' deg-rookie' : ''}">
+                    <div class="deg-driver">${id}${isRookie ? ' <span class="deg-tag" title="Not in the current fantasy roster — practice/test runner">practice</span>' : ''}</div>
+                    ${compoundEntries.map(([comp, d]) => {
+                        const deg = d.avg_degradation;
+                        const laps = d.deg_laps || 0;
+                        const perStint = (d.stints || []).filter(s => s.deg_rate != null)
+                            .map(s => `${s.session || ''} ${s.deg_rate >= 0 ? '+' : ''}${s.deg_rate.toFixed(2)} (${s.laps}L)`).join(', ');
+                        let valHtml;
+                        if (deg == null) {
+                            valHtml = `<span class="deg-rate deg-none" title="No clean long run (5+ laps) on this compound — quali sims only">short runs only</span>`;
+                        } else if (deg < 0) {
+                            valHtml = `<span class="deg-rate deg-none" title="Car got faster over the run (fuel/track evolution), not real tyre gain. Based on ${laps} clean laps.">track evolving</span>`;
+                        } else {
+                            valHtml = `<span class="deg-rate ${degClass(comp, deg)}" title="Over a 10-lap stint that's ~${(deg * 10).toFixed(1)}s lost to tyre wear. Based on ${laps} clean laps${perStint ? ' — ' + perStint : ''}.">+${deg.toFixed(2)}<span class="deg-unit">s/lap</span> <span class="deg-ctx">${laps}L</span></span>`;
+                        }
                         return `
                         <div class="deg-compound">
                             <span class="compound-badge ${comp.toLowerCase()}">${comp}</span>
-                            <span class="deg-rate ${deg <= 0.03 ? 'deg-good' : deg <= 0.06 ? 'deg-ok' : 'deg-bad'}">
-                                ${deg >= 0 ? '+' : ''}${deg.toFixed(4)}s/lap
-                            </span>
+                            ${valHtml}
                         </div>`;
                     }).join('')}
                 </div>`;
@@ -5664,7 +5706,7 @@ function renderFPAnalysis() {
                     best_pace: s.best_pace ?? 0,
                     first_lap: s.first_lap_pace ?? s.first_lap ?? 0,
                     last_lap: s.last_lap_pace ?? s.last_lap ?? 0,
-                    deg: s.degradation_rate ?? s.degradation ?? s.deg_rate ?? 0
+                    deg: s.degradation_rate ?? s.degradation ?? s.deg_rate ?? null
                 });
             });
         });
@@ -5679,7 +5721,7 @@ function renderFPAnalysis() {
                 { key: 'best_pace', label: 'Best', cls: 'num', title: 'Best lap in the stint', fmt: r => r.best_pace ? fmtTime(r.best_pace) : '-' },
                 { key: 'first_lap', label: 'First Lap', cls: 'num', title: 'Pace of first timed lap in stint', fmt: r => r.first_lap ? fmtTime(r.first_lap) : '-' },
                 { key: 'last_lap', label: 'Last Lap', cls: 'num', title: 'Pace of last lap in stint', fmt: r => r.last_lap ? fmtTime(r.last_lap) : '-' },
-                { key: 'deg', label: 'Deg (s/lap)', cls: 'num', title: 'Degradation rate: seconds lost per lap of tyre age (linear fit)', fmt: r => r.deg ? (r.deg >= 0 ? '+' : '') + r.deg.toFixed(4) : '-' }
+                { key: 'deg', label: 'Deg (s/lap)', cls: 'num', title: 'Fuel-corrected pace lost per lap of tyre age (robust linear fit). Blank = run too short/noisy to fit.', fmt: r => r.deg != null ? (r.deg >= 0 ? '+' : '') + r.deg.toFixed(2) : '-' }
             ], rows, 'avg_pace', true);
             html += `<div class="analysis-block"><h3>Stint Breakdown</h3><p class="analysis-note">Detailed per-stint data showing pace evolution and tyre degradation within each run.</p>${tbl.getHtml()}</div>`;
             postRenderFns.push(tbl.renderTable);
@@ -5929,7 +5971,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
                         <td>${i+1}</td>
                         <td><strong>${id}</strong></td>
                         <td class="num"><span class="mgmt-score ${d.management_score >= 70 ? 'score-good' : d.management_score >= 40 ? 'score-ok' : 'score-bad'}">${d.management_score}/100</span></td>
-                        <td class="num">${d.avg_degradation.toFixed(4)}s/lap</td>
+                        <td class="num">${d.avg_degradation != null ? d.avg_degradation.toFixed(2) + 's/lap' : '-'}</td>
                         <td>${d.stints.map(s => `<span class="compound-badge ${s.compound.toLowerCase()}">${s.compound} (${s.laps}L)</span>`).join(' ')}</td>
                     </tr>`).join('')}
                 </tbody>
@@ -6029,7 +6071,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
                             <td>${i+1}</td>
                             <td><strong>${id}</strong></td>
                             <td class="num"><span class="mgmt-score ${d.management_score >= 70 ? 'score-good' : d.management_score >= 40 ? 'score-ok' : 'score-bad'}">${d.management_score}/100</span></td>
-                            <td class="num">${d.avg_degradation.toFixed(4)}s/lap</td>
+                            <td class="num">${d.avg_degradation != null ? d.avg_degradation.toFixed(2) + 's/lap' : '-'}</td>
                             <td>${d.stints.map(s => `<span class="compound-badge ${s.compound.toLowerCase()}">${s.compound} (${s.laps}L)</span>`).join(' ')}</td>
                         </tr>`).join('')}
                     </tbody>
@@ -7608,7 +7650,7 @@ async function renderDeepDive(roundNum) {
                 <td class="num">${ddFix(s.avg_pace)}</td>
                 <td class="num">${ddFix(s.start_pace)}</td>
                 <td class="num">${ddFix(s.end_pace)}</td>
-                <td class="num">${ddFix(s.degradation_rate, 4)}</td>
+                <td class="num">${ddFix(s.degradation_rate, 2)}</td>
                 <td>${cliffSet.has(s.stint) ? '<span class="badge badge-red">CLIFF</span>' : ''}</td>
             </tr>`;
         });

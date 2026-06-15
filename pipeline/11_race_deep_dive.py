@@ -308,8 +308,12 @@ def compute_stint_analysis(clean: pd.DataFrame) -> dict:
 
             compound = str(sg["Compound"].iloc[0]) if "Compound" in sg.columns else "UNKNOWN"
 
-            # Linear regression slope = degradation rate (seconds/lap)
-            x = np.arange(len(fc))
+            # Linear regression slope = degradation rate (seconds/lap of tyre age).
+            # Regress on REAL in-stint lap age (LapNumber - stint start), not
+            # np.arange(len) — after outlier laps are dropped the surviving laps
+            # have gaps, and arange would compress them and distort the slope.
+            lap_no = sg["LapNumber"].to_numpy(dtype=float)
+            x = lap_no - lap_no.min()
             slope, intercept, _, _, _ = sp_stats.linregress(x, fc)
 
             start_pace = round(float(np.mean(fc[:3])), 3)

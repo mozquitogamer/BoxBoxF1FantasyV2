@@ -783,23 +783,43 @@
         "stints": [
           {
             "stint": 1,
-            "laps": 3,
-            "deg_rate": -15.11,
-            "avg_pace": 98.14
+            "session": "FP2",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 78.922
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 83.95
           }
         ],
-        "avg_degradation": -15.11
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       },
       "SOFT": {
         "stints": [
           {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 78.79
+          },
+          {
             "stint": 4,
+            "session": "FP2",
             "laps": 7,
-            "deg_rate": 0.0889,
-            "avg_pace": 84.998
+            "deg_rate": 0.198,
+            "avg_pace": 83.469
           }
         ],
-        "avg_degradation": 0.0889
+        "avg_degradation": 0.198,
+        "deg_laps": 7,
+        "deg_stints": 1
       }
     },
     "ALO": {
@@ -807,36 +827,129 @@
         "stints": [
           {
             "stint": 1,
-            "laps": 5,
-            "deg_rate": -1.3255,
-            "avg_pace": 83.547
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 81.227
+          },
+          {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 82.513
+          },
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 79.793
+          },
+          {
+            "stint": 5,
+            "session": "FP2",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 102.884
           }
         ],
-        "avg_degradation": -1.3255
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       },
       "SOFT": {
         "stints": [
           {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 80.067
+          },
+          {
             "stint": 4,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 81.287
+          },
+          {
+            "stint": 5,
+            "session": "FP1",
             "laps": 3,
-            "deg_rate": -1.9805,
-            "avg_pace": 84.223
+            "deg_rate": null,
+            "avg_pace": 86.887
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 79.286
+          },
+          {
+            "stint": 4,
+            "session": "FP2",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 85.248
           }
         ],
-        "avg_degradation": -1.9805
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       }
     },
     "ANT": {
+      "MEDIUM": {
+        "stints": [
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.022
+          },
+          {
+            "stint": 4,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.946
+          },
+          {
+            "stint": 7,
+            "session": "FP2",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 81.034
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
+      },
       "SOFT": {
         "stints": [
           {
+            "stint": 5,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.015
+          },
+          {
             "stint": 6,
-            "laps": 8,
-            "deg_rate": 0.5598,
-            "avg_pace": 82.41
+            "session": "FP2",
+            "laps": 10,
+            "deg_rate": 0.627,
+            "avg_pace": 80.801
           }
         ],
-        "avg_degradation": 0.5598
+        "avg_degradation": 0.627,
+        "deg_laps": 10,
+        "deg_stints": 1
       }
     },
     "ARO": {
@@ -844,37 +957,129 @@
         "stints": [
           {
             "stint": 2,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 78.247
+          },
+          {
+            "stint": 3,
+            "session": "FP1",
             "laps": 4,
-            "deg_rate": -8.2234,
-            "avg_pace": 96.784
+            "deg_rate": null,
+            "avg_pace": 77.321
           },
           {
             "stint": 4,
-            "laps": 3,
-            "deg_rate": 0.011,
-            "avg_pace": 81.388
+            "session": "FP1",
+            "laps": 5,
+            "deg_rate": -0.006,
+            "avg_pace": 81.283
           }
         ],
-        "avg_degradation": -4.1062
+        "avg_degradation": -0.006,
+        "deg_laps": 5,
+        "deg_stints": 1
       }
     },
     "BEA": {
+      "HARD": {
+        "stints": [
+          {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 80.491
+          },
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 80.272
+          },
+          {
+            "stint": 4,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 80.154
+          },
+          {
+            "stint": 5,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 79.945
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
+      },
       "SOFT": {
         "stints": [
           {
+            "stint": 6,
+            "session": "FP1",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 78.172
+          },
+          {
+            "stint": 4,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.945
+          },
+          {
             "stint": 5,
-            "laps": 9,
-            "deg_rate": 0.0614,
-            "avg_pace": 83.725
+            "session": "FP2",
+            "laps": 10,
+            "deg_rate": 0.098,
+            "avg_pace": 83.385
+          }
+        ],
+        "avg_degradation": 0.098,
+        "deg_laps": 10,
+        "deg_stints": 1
+      },
+      "MEDIUM": {
+        "stints": [
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.384
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 108.97
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.46
           },
           {
             "stint": 6,
-            "laps": 3,
-            "deg_rate": 0.67,
-            "avg_pace": 83.083
+            "session": "FP2",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 82.618
           }
         ],
-        "avg_degradation": 0.3657
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       }
     },
     "BEG": {
@@ -882,103 +1087,310 @@
         "stints": [
           {
             "stint": 1,
-            "laps": 6,
-            "deg_rate": -0.387,
-            "avg_pace": 82.037
+            "session": "FP1",
+            "laps": 7,
+            "deg_rate": -0.546,
+            "avg_pace": 81.012
           },
           {
             "stint": 2,
-            "laps": 6,
-            "deg_rate": -3.4961,
-            "avg_pace": 98.023
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 79.935
           }
         ],
-        "avg_degradation": -1.9416
+        "avg_degradation": -0.546,
+        "deg_laps": 7,
+        "deg_stints": 1
       },
       "SOFT": {
         "stints": [
           {
             "stint": 3,
-            "laps": 6,
-            "deg_rate": -0.1707,
-            "avg_pace": 94.515
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 77.778
           }
         ],
-        "avg_degradation": -0.1707
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       }
     },
     "BOR": {
       "MEDIUM": {
         "stints": [
           {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 80.554
+          },
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 79.745
+          },
+          {
+            "stint": 4,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 79.652
+          },
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.889
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.694
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.912
+          },
+          {
             "stint": 6,
+            "session": "FP2",
             "laps": 7,
-            "deg_rate": 0.3596,
-            "avg_pace": 84.467
+            "deg_rate": 0.432,
+            "avg_pace": 82.143
           }
         ],
-        "avg_degradation": 0.3596
+        "avg_degradation": 0.432,
+        "deg_laps": 7,
+        "deg_stints": 1
       },
       "SOFT": {
         "stints": [
           {
+            "stint": 6,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.209
+          },
+          {
+            "stint": 7,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.783
+          },
+          {
             "stint": 8,
-            "laps": 5,
-            "deg_rate": 0.3343,
-            "avg_pace": 82.585
+            "session": "FP1",
+            "laps": 6,
+            "deg_rate": 0.19,
+            "avg_pace": 81.4
+          },
+          {
+            "stint": 4,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.611
+          },
+          {
+            "stint": 7,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 94.404
           }
         ],
-        "avg_degradation": 0.3343
+        "avg_degradation": 0.19,
+        "deg_laps": 6,
+        "deg_stints": 1
       }
     },
     "BOT": {
+      "MEDIUM": {
+        "stints": [
+          {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 81.196
+          },
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 80.093
+          },
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.528
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
+      },
       "SOFT": {
         "stints": [
           {
             "stint": 4,
+            "session": "FP1",
             "laps": 6,
-            "deg_rate": 0.7205,
-            "avg_pace": 82.011
+            "deg_rate": 0.549,
+            "avg_pace": 78.914
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.225
           }
         ],
-        "avg_degradation": 0.7205
+        "avg_degradation": 0.549,
+        "deg_laps": 6,
+        "deg_stints": 1
       }
     },
     "COL": {
-      "SOFT": {
-        "stints": [
-          {
-            "stint": 5,
-            "laps": 6,
-            "deg_rate": 0.4408,
-            "avg_pace": 81.528
-          }
-        ],
-        "avg_degradation": 0.4408
-      },
       "MEDIUM": {
         "stints": [
           {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 79.461
+          },
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 79.169
+          },
+          {
             "stint": 6,
-            "laps": 13,
-            "deg_rate": 0.1247,
-            "avg_pace": 84.074
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 80.928
+          },
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.766
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.873
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 85.232
+          },
+          {
+            "stint": 6,
+            "session": "FP2",
+            "laps": 11,
+            "deg_rate": 0.381,
+            "avg_pace": 82.297
           }
         ],
-        "avg_degradation": 0.1247
+        "avg_degradation": 0.381,
+        "deg_laps": 11,
+        "deg_stints": 1
+      },
+      "SOFT": {
+        "stints": [
+          {
+            "stint": 4,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.893
+          },
+          {
+            "stint": 5,
+            "session": "FP1",
+            "laps": 6,
+            "deg_rate": 0.485,
+            "avg_pace": 78.73
+          },
+          {
+            "stint": 4,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.051
+          },
+          {
+            "stint": 5,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.016
+          }
+        ],
+        "avg_degradation": 0.485,
+        "deg_laps": 6,
+        "deg_stints": 1
       }
     },
     "FOR": {
+      "MEDIUM": {
+        "stints": [
+          {
+            "stint": 7,
+            "session": "FP1",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 78.584
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
+      },
       "SOFT": {
         "stints": [
           {
             "stint": 8,
+            "session": "FP1",
             "laps": 4,
-            "deg_rate": -4.2123,
-            "avg_pace": 85.051
+            "deg_rate": null,
+            "avg_pace": 77.216
           }
         ],
-        "avg_degradation": -4.2123
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       }
     },
     "GAS": {
@@ -986,18 +1398,78 @@
         "stints": [
           {
             "stint": 2,
-            "laps": 5,
-            "deg_rate": 0.8204,
-            "avg_pace": 88.432
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 79.401
+          },
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 79.787
           },
           {
             "stint": 6,
-            "laps": 11,
-            "deg_rate": 0.4594,
-            "avg_pace": 84.618
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 82.601
+          },
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.414
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.007
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.278
+          },
+          {
+            "stint": 6,
+            "session": "FP2",
+            "laps": 7,
+            "deg_rate": 0.478,
+            "avg_pace": 82.046
           }
         ],
-        "avg_degradation": 0.6399
+        "avg_degradation": 0.478,
+        "deg_laps": 7,
+        "deg_stints": 1
+      },
+      "SOFT": {
+        "stints": [
+          {
+            "stint": 4,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.508
+          },
+          {
+            "stint": 5,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.26
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       }
     },
     "HAD": {
@@ -1005,42 +1477,94 @@
         "stints": [
           {
             "stint": 1,
-            "laps": 3,
-            "deg_rate": -27.3175,
-            "avg_pace": 115.018
+            "session": "FP2",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 78.407
           },
           {
             "stint": 4,
+            "session": "FP2",
             "laps": 6,
-            "deg_rate": 0.314,
-            "avg_pace": 83.684
+            "deg_rate": 0.249,
+            "avg_pace": 82.059
           }
         ],
-        "avg_degradation": -13.5017
+        "avg_degradation": 0.249,
+        "deg_laps": 6,
+        "deg_stints": 1
       },
       "SOFT": {
         "stints": [
           {
-            "stint": 5,
+            "stint": 3,
+            "session": "FP2",
             "laps": 3,
-            "deg_rate": -0.7225,
-            "avg_pace": 83.456
+            "deg_rate": null,
+            "avg_pace": 76.674
+          },
+          {
+            "stint": 5,
+            "session": "FP2",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 82.846
           }
         ],
-        "avg_degradation": -0.7225
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       }
     },
     "HAM": {
       "MEDIUM": {
         "stints": [
           {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 77.43
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 77.542
+          },
+          {
             "stint": 5,
-            "laps": 5,
-            "deg_rate": 0.2129,
-            "avg_pace": 82.708
+            "session": "FP2",
+            "laps": 6,
+            "deg_rate": 0.254,
+            "avg_pace": 81.262
           }
         ],
-        "avg_degradation": 0.2129
+        "avg_degradation": 0.254,
+        "deg_laps": 6,
+        "deg_stints": 1
+      },
+      "SOFT": {
+        "stints": [
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.631
+          },
+          {
+            "stint": 4,
+            "session": "FP2",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 76.916
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       }
     },
     "HER": {
@@ -1048,18 +1572,36 @@
         "stints": [
           {
             "stint": 1,
-            "laps": 5,
-            "deg_rate": -7.2382,
-            "avg_pace": 96.675
+            "session": "FP1",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 81.363
+          },
+          {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 80.716
+          },
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 80.697
           },
           {
             "stint": 4,
-            "laps": 6,
-            "deg_rate": 0.4216,
-            "avg_pace": 84.793
+            "session": "FP1",
+            "laps": 7,
+            "deg_rate": 0.458,
+            "avg_pace": 83.305
           }
         ],
-        "avg_degradation": -3.4083
+        "avg_degradation": 0.458,
+        "deg_laps": 7,
+        "deg_stints": 1
       }
     },
     "HUL": {
@@ -1067,31 +1609,159 @@
         "stints": [
           {
             "stint": 1,
-            "laps": 3,
-            "deg_rate": -17.371,
-            "avg_pace": 99.837
+            "session": "FP2",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 78.092
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.829
           },
           {
             "stint": 5,
-            "laps": 7,
-            "deg_rate": 0.1464,
-            "avg_pace": 83.667
+            "session": "FP2",
+            "laps": 6,
+            "deg_rate": 0.301,
+            "avg_pace": 81.71
           }
         ],
-        "avg_degradation": -8.6123
+        "avg_degradation": 0.301,
+        "deg_laps": 6,
+        "deg_stints": 1
+      },
+      "SOFT": {
+        "stints": [
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.934
+          },
+          {
+            "stint": 4,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.219
+          },
+          {
+            "stint": 6,
+            "session": "FP2",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 81.702
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       }
     },
     "IWA": {
       "MEDIUM": {
         "stints": [
           {
+            "stint": 1,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 85.666
+          },
+          {
             "stint": 3,
+            "session": "FP1",
             "laps": 5,
-            "deg_rate": 0.2368,
-            "avg_pace": 83.01
+            "deg_rate": 0.567,
+            "avg_pace": 79.509
           }
         ],
-        "avg_degradation": 0.2368
+        "avg_degradation": 0.567,
+        "deg_laps": 5,
+        "deg_stints": 1
+      },
+      "SOFT": {
+        "stints": [
+          {
+            "stint": 4,
+            "session": "FP1",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 78.298
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
+      }
+    },
+    "LAW": {
+      "MEDIUM": {
+        "stints": [
+          {
+            "stint": 1,
+            "session": "FP1",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 78.397
+          },
+          {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.061
+          },
+          {
+            "stint": 4,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 79.169
+          },
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.967
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
+      },
+      "SOFT": {
+        "stints": [
+          {
+            "stint": 5,
+            "session": "FP1",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 77.472
+          },
+          {
+            "stint": 7,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 83.192
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.962
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       }
     },
     "LEC": {
@@ -1099,96 +1769,329 @@
         "stints": [
           {
             "stint": 1,
-            "laps": 3,
-            "deg_rate": 0.6915,
-            "avg_pace": 77.929
+            "session": "FP1",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 78.009
           },
           {
-            "stint": 6,
-            "laps": 6,
-            "deg_rate": 0.3069,
-            "avg_pace": 81.785
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.731
+          },
+          {
+            "stint": 4,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.512
           },
           {
             "stint": 7,
-            "laps": 4,
-            "deg_rate": 1.0387,
-            "avg_pace": 82.661
+            "session": "FP1",
+            "laps": 5,
+            "deg_rate": 0.738,
+            "avg_pace": 81.415
+          },
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.626
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.995
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.16
+          },
+          {
+            "stint": 6,
+            "session": "FP2",
+            "laps": 7,
+            "deg_rate": 0.293,
+            "avg_pace": 80.865
           }
         ],
-        "avg_degradation": 0.679
+        "avg_degradation": 0.478,
+        "deg_laps": 12,
+        "deg_stints": 2
+      },
+      "SOFT": {
+        "stints": [
+          {
+            "stint": 5,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.883
+          },
+          {
+            "stint": 6,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.36
+          },
+          {
+            "stint": 4,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 75.799
+          },
+          {
+            "stint": 8,
+            "session": "FP2",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 96.819
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       }
     },
     "LIN": {
       "MEDIUM": {
         "stints": [
           {
+            "stint": 1,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 78.501
+          },
+          {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 79.17
+          },
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 79.911
+          },
+          {
+            "stint": 7,
+            "session": "FP1",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 82.55
+          },
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.058
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.466
+          },
+          {
             "stint": 5,
-            "laps": 14,
-            "deg_rate": 0.4563,
-            "avg_pace": 84.896
+            "session": "FP2",
+            "laps": 15,
+            "deg_rate": 0.514,
+            "avg_pace": 82.125
           }
         ],
-        "avg_degradation": 0.4563
+        "avg_degradation": 0.514,
+        "deg_laps": 15,
+        "deg_stints": 1
       },
       "SOFT": {
         "stints": [
           {
+            "stint": 4,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.804
+          },
+          {
+            "stint": 5,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.141
+          },
+          {
             "stint": 6,
-            "laps": 5,
-            "deg_rate": 0.3236,
-            "avg_pace": 83.815
+            "session": "FP1",
+            "laps": 6,
+            "deg_rate": 0.376,
+            "avg_pace": 82.724
+          },
+          {
+            "stint": 4,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.411
           }
         ],
-        "avg_degradation": 0.3236
+        "avg_degradation": 0.376,
+        "deg_laps": 6,
+        "deg_stints": 1
       }
     },
     "NOR": {
       "MEDIUM": {
         "stints": [
           {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.867
+          },
+          {
             "stint": 2,
+            "session": "FP2",
             "laps": 3,
-            "deg_rate": -1.893,
-            "avg_pace": 86.67
+            "deg_rate": null,
+            "avg_pace": 76.574
+          },
+          {
+            "stint": 5,
+            "session": "FP2",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 114.106
           }
         ],
-        "avg_degradation": -1.893
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       },
       "SOFT": {
         "stints": [
           {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 75.426
+          },
+          {
             "stint": 4,
+            "session": "FP2",
             "laps": 8,
-            "deg_rate": 0.2799,
-            "avg_pace": 82.511
+            "deg_rate": 0.28,
+            "avg_pace": 81.107
           }
         ],
-        "avg_degradation": 0.2799
+        "avg_degradation": 0.28,
+        "deg_laps": 8,
+        "deg_stints": 1
       }
     },
     "OCO": {
       "HARD": {
         "stints": [
           {
-            "stint": 5,
+            "stint": 1,
+            "session": "FP1",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 80.771
+          },
+          {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 80.194
+          },
+          {
+            "stint": 4,
+            "session": "FP1",
             "laps": 3,
-            "deg_rate": 4.1195,
-            "avg_pace": 86.104
+            "deg_rate": null,
+            "avg_pace": 81.265
+          },
+          {
+            "stint": 5,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 82.923
           }
         ],
-        "avg_degradation": 4.1195
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
+      },
+      "SOFT": {
+        "stints": [
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.372
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.538
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       },
       "MEDIUM": {
         "stints": [
           {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.245
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 79.947
+          },
+          {
             "stint": 5,
-            "laps": 11,
-            "deg_rate": -0.0374,
-            "avg_pace": 85.333
+            "session": "FP2",
+            "laps": 9,
+            "deg_rate": 0.139,
+            "avg_pace": 83.058
           }
         ],
-        "avg_degradation": -0.0374
+        "avg_degradation": 0.139,
+        "deg_laps": 9,
+        "deg_stints": 1
       }
     },
     "PER": {
@@ -1196,29 +2099,50 @@
         "stints": [
           {
             "stint": 1,
-            "laps": 3,
-            "deg_rate": -14.0475,
-            "avg_pace": 98.759
+            "session": "FP2",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 79.902
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 79.978
           },
           {
             "stint": 5,
-            "laps": 9,
-            "deg_rate": 0.3204,
-            "avg_pace": 85.131
+            "session": "FP2",
+            "laps": 7,
+            "deg_rate": 0.351,
+            "avg_pace": 83.343
           }
         ],
-        "avg_degradation": -6.8636
+        "avg_degradation": 0.351,
+        "deg_laps": 7,
+        "deg_stints": 1
       },
       "SOFT": {
         "stints": [
           {
             "stint": 4,
-            "laps": 3,
-            "deg_rate": -17.7475,
-            "avg_pace": 105.053
+            "session": "FP2",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 79.261
+          },
+          {
+            "stint": 6,
+            "session": "FP2",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 83.702
           }
         ],
-        "avg_degradation": -17.7475
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       }
     },
     "PIA": {
@@ -1226,18 +2150,92 @@
         "stints": [
           {
             "stint": 1,
+            "session": "FP1",
             "laps": 3,
-            "deg_rate": 0.9155,
-            "avg_pace": 76.966
+            "deg_rate": null,
+            "avg_pace": 77.555
+          },
+          {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 77.667
+          },
+          {
+            "stint": 6,
+            "session": "FP1",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 121.787
+          },
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 75.724
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.803
           },
           {
             "stint": 5,
+            "session": "FP2",
             "laps": 6,
-            "deg_rate": 0.0857,
-            "avg_pace": 82.767
+            "deg_rate": 0.155,
+            "avg_pace": 81.581
           }
         ],
-        "avg_degradation": 0.5006
+        "avg_degradation": 0.155,
+        "deg_laps": 6,
+        "deg_stints": 1
+      },
+      "SOFT": {
+        "stints": [
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.566
+          },
+          {
+            "stint": 4,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.463
+          },
+          {
+            "stint": 5,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 80.419
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 75.483
+          },
+          {
+            "stint": 6,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 110.72
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       }
     },
     "RUS": {
@@ -1245,35 +2243,78 @@
         "stints": [
           {
             "stint": 1,
-            "laps": 4,
-            "deg_rate": -2.3574,
-            "avg_pace": 84.038
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 77.353
           },
           {
             "stint": 4,
-            "laps": 8,
-            "deg_rate": 0.3919,
-            "avg_pace": 81.872
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 110.664
+          },
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 75.945
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 75.939
+          },
+          {
+            "stint": 4,
+            "session": "FP2",
+            "laps": 7,
+            "deg_rate": 0.387,
+            "avg_pace": 80.746
           }
         ],
-        "avg_degradation": -0.9828
+        "avg_degradation": 0.387,
+        "deg_laps": 7,
+        "deg_stints": 1
       },
       "SOFT": {
         "stints": [
           {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.363
+          },
+          {
             "stint": 3,
+            "session": "FP1",
             "laps": 10,
-            "deg_rate": 0.0918,
-            "avg_pace": 81.775
+            "deg_rate": 0.127,
+            "avg_pace": 80.994
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 75.435
           },
           {
             "stint": 5,
-            "laps": 3,
-            "deg_rate": 0.3355,
-            "avg_pace": 81.253
+            "session": "FP2",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 80.943
           }
         ],
-        "avg_degradation": 0.2137
+        "avg_degradation": 0.127,
+        "deg_laps": 10,
+        "deg_stints": 1
       }
     },
     "SAI": {
@@ -1281,35 +2322,85 @@
         "stints": [
           {
             "stint": 2,
-            "laps": 4,
-            "deg_rate": -5.0571,
-            "avg_pace": 88.144
+            "session": "FP1",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 79.337
+          },
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 80.343
+          },
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.971
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 78.681
           },
           {
             "stint": 4,
-            "laps": 3,
-            "deg_rate": 0.864,
-            "avg_pace": 83.988
+            "session": "FP2",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 83.152
           },
           {
             "stint": 5,
-            "laps": 7,
-            "deg_rate": 0.3123,
-            "avg_pace": 85.892
+            "session": "FP2",
+            "laps": 8,
+            "deg_rate": 0.371,
+            "avg_pace": 84.358
           }
         ],
-        "avg_degradation": -1.2936
+        "avg_degradation": 0.371,
+        "deg_laps": 8,
+        "deg_stints": 1
       },
       "SOFT": {
         "stints": [
           {
+            "stint": 4,
+            "session": "FP1",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 78.293
+          },
+          {
             "stint": 5,
-            "laps": 7,
-            "deg_rate": 0.2136,
-            "avg_pace": 85.159
+            "session": "FP1",
+            "laps": 8,
+            "deg_rate": 0.296,
+            "avg_pace": 83.732
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.02
+          },
+          {
+            "stint": 6,
+            "session": "FP2",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 82.784
           }
         ],
-        "avg_degradation": 0.2136
+        "avg_degradation": 0.296,
+        "deg_laps": 8,
+        "deg_stints": 1
       }
     },
     "STR": {
@@ -1317,72 +2408,215 @@
         "stints": [
           {
             "stint": 1,
+            "session": "FP1",
             "laps": 3,
-            "deg_rate": 0.124,
-            "avg_pace": 80.75
-          }
-        ],
-        "avg_degradation": 0.124
-      }
-    },
-    "VER": {
-      "HARD": {
-        "stints": [
+            "deg_rate": null,
+            "avg_pace": 81.283
+          },
+          {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 81.439
+          },
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 81.71
+          },
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 80.359
+          },
           {
             "stint": 4,
-            "laps": 9,
-            "deg_rate": 0.287,
-            "avg_pace": 82.208
-          }
-        ],
-        "avg_degradation": 0.287
-      },
-      "MEDIUM": {
-        "stints": [
+            "session": "FP2",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 87.13
+          },
           {
             "stint": 5,
-            "laps": 3,
-            "deg_rate": 0.031,
-            "avg_pace": 81.912
+            "session": "FP2",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 117.684
           }
         ],
-        "avg_degradation": 0.031
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       },
       "SOFT": {
         "stints": [
           {
-            "stint": 5,
-            "laps": 8,
-            "deg_rate": 0.1745,
-            "avg_pace": 81.739
+            "stint": 4,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 80.318
           },
           {
-            "stint": 6,
-            "laps": 3,
-            "deg_rate": 0.272,
-            "avg_pace": 81.802
+            "stint": 5,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 80.617
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 79.459
           }
         ],
-        "avg_degradation": 0.2233
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
       }
     },
-    "VES": {
+    "VER": {
+      "MEDIUM": {
+        "stints": [
+          {
+            "stint": 1,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 78.511
+          },
+          {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 78.614
+          },
+          {
+            "stint": 5,
+            "session": "FP1",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 81.86
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
+      },
       "SOFT": {
         "stints": [
           {
             "stint": 3,
-            "laps": 6,
-            "deg_rate": -6.3514,
-            "avg_pace": 113.745
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.047
           },
           {
             "stint": 4,
-            "laps": 6,
-            "deg_rate": 0.3462,
-            "avg_pace": 83.006
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.675
+          },
+          {
+            "stint": 6,
+            "session": "FP1",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 81.553
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.321
+          },
+          {
+            "stint": 5,
+            "session": "FP2",
+            "laps": 9,
+            "deg_rate": 0.109,
+            "avg_pace": 81.217
           }
         ],
-        "avg_degradation": -3.0026
+        "avg_degradation": 0.109,
+        "deg_laps": 9,
+        "deg_stints": 1
+      },
+      "HARD": {
+        "stints": [
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 76.452
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 77.907
+          },
+          {
+            "stint": 4,
+            "session": "FP2",
+            "laps": 9,
+            "deg_rate": 0.253,
+            "avg_pace": 81.094
+          }
+        ],
+        "avg_degradation": 0.253,
+        "deg_laps": 9,
+        "deg_stints": 1
+      }
+    },
+    "VES": {
+      "MEDIUM": {
+        "stints": [
+          {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 79.904
+          }
+        ],
+        "avg_degradation": null,
+        "deg_laps": 0,
+        "deg_stints": 0
+      },
+      "SOFT": {
+        "stints": [
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 78.365
+          },
+          {
+            "stint": 4,
+            "session": "FP1",
+            "laps": 6,
+            "deg_rate": 0.361,
+            "avg_pace": 82.083
+          }
+        ],
+        "avg_degradation": 0.361,
+        "deg_laps": 6,
+        "deg_stints": 1
       }
     }
   },
@@ -2370,26 +3604,28 @@
           "session": "FP2",
           "compound": "MEDIUM",
           "total_laps": 7,
+          "deg_laps": 2,
           "first_lap_pace": 78.922,
           "last_lap_pace": 125.742,
-          "avg_pace": 105.041,
+          "avg_pace": 79.849,
           "best_pace": 79.849,
-          "degradation_rate": 2.2365
+          "degradation_rate": null
         },
         {
           "stint": 4,
           "session": "FP2",
           "compound": "SOFT",
           "total_laps": 9,
+          "deg_laps": 7,
           "first_lap_pace": 83.469,
           "last_lap_pace": 118.972,
           "avg_pace": 84.998,
           "best_pace": 84.092,
-          "degradation_rate": 0.0889
+          "degradation_rate": 0.198
         }
       ],
       "total_stints": 2,
-      "avg_degradation": 1.1627
+      "avg_degradation": 0.198
     },
     "ALO": {
       "stints": [
@@ -2397,49 +3633,65 @@
           "stint": 1,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 10,
+          "total_laps": 5,
+          "deg_laps": 3,
           "first_lap_pace": 82.972,
-          "last_lap_pace": 80.059,
-          "avg_pace": 83.547,
-          "best_pace": 79.793,
-          "degradation_rate": -1.3255
+          "last_lap_pace": 81.435,
+          "avg_pace": 81.331,
+          "best_pace": 81.227,
+          "degradation_rate": null
         },
         {
           "stint": 2,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 4,
+          "total_laps": 3,
+          "deg_laps": 3,
           "first_lap_pace": 87.46,
           "last_lap_pace": 82.513,
-          "avg_pace": 80.9,
-          "best_pace": 79.286,
-          "degradation_rate": 0.0
+          "avg_pace": 82.513,
+          "best_pace": 82.513,
+          "degradation_rate": null
+        },
+        {
+          "stint": 5,
+          "session": "FP1",
+          "compound": "SOFT",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 107.049,
+          "last_lap_pace": 120.038,
+          "avg_pace": 86.887,
+          "best_pace": 86.887,
+          "degradation_rate": null
+        },
+        {
+          "stint": 1,
+          "session": "FP2",
+          "compound": "MEDIUM",
+          "total_laps": 5,
+          "deg_laps": 2,
+          "first_lap_pace": 79.793,
+          "last_lap_pace": 80.059,
+          "avg_pace": 80.059,
+          "best_pace": 80.059,
+          "degradation_rate": null
         },
         {
           "stint": 4,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 4,
+          "total_laps": 3,
+          "deg_laps": 3,
           "first_lap_pace": 85.82,
-          "last_lap_pace": 81.287,
-          "avg_pace": 84.223,
-          "best_pace": 81.287,
-          "degradation_rate": -1.9805
-        },
-        {
-          "stint": 5,
-          "session": "FP2",
-          "compound": "MEDIUM",
-          "total_laps": 5,
-          "first_lap_pace": 102.884,
-          "last_lap_pace": 120.038,
-          "avg_pace": 104.658,
-          "best_pace": 86.887,
-          "degradation_rate": 6.4945
+          "last_lap_pace": 86.134,
+          "avg_pace": 85.691,
+          "best_pace": 85.248,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 4,
-      "avg_degradation": 0.7971
+      "total_stints": 5,
+      "avg_degradation": null
     },
     "ANT": {
       "stints": [
@@ -2448,26 +3700,28 @@
           "session": "FP2",
           "compound": "SOFT",
           "total_laps": 10,
+          "deg_laps": 10,
           "first_lap_pace": 81.117,
           "last_lap_pace": 86.11,
-          "avg_pace": 82.41,
+          "avg_pace": 83.125,
           "best_pace": 80.801,
-          "degradation_rate": 0.5598
+          "degradation_rate": 0.627
         },
         {
           "stint": 7,
           "session": "FP2",
           "compound": "MEDIUM",
           "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 81.136,
           "last_lap_pace": 119.192,
           "avg_pace": 82.034,
           "best_pace": 81.034,
-          "degradation_rate": 0.0
+          "degradation_rate": null
         }
       ],
       "total_stints": 2,
-      "avg_degradation": 0.2799
+      "avg_degradation": 0.627
     },
     "ARO": {
       "stints": [
@@ -2476,37 +3730,40 @@
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 7,
+          "deg_laps": 3,
           "first_lap_pace": 79.313,
           "last_lap_pace": 78.247,
-          "avg_pace": 101.994,
+          "avg_pace": 78.381,
           "best_pace": 78.247,
-          "degradation_rate": -4.3273
+          "degradation_rate": null
         },
         {
           "stint": 3,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 77.321,
           "last_lap_pace": 78.579,
-          "avg_pace": 94.504,
+          "avg_pace": 78.579,
           "best_pace": 78.579,
-          "degradation_rate": 0.0
+          "degradation_rate": null
         },
         {
           "stint": 4,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 5,
+          "deg_laps": 5,
           "first_lap_pace": 81.656,
           "last_lap_pace": 81.305,
           "avg_pace": 82.751,
           "best_pace": 81.283,
-          "degradation_rate": -0.5197
+          "degradation_rate": -0.006
         }
       ],
       "total_stints": 3,
-      "avg_degradation": -1.6157
+      "avg_degradation": -0.006
     },
     "BEA": {
       "stints": [
@@ -2514,38 +3771,53 @@
           "stint": 2,
           "session": "FP1",
           "compound": "HARD",
-          "total_laps": 4,
+          "total_laps": 3,
+          "deg_laps": 3,
           "first_lap_pace": 81.072,
           "last_lap_pace": 80.491,
-          "avg_pace": 94.731,
+          "avg_pace": 80.491,
           "best_pace": 80.491,
-          "degradation_rate": 0.0
-        },
-        {
-          "stint": 5,
-          "session": "FP2",
-          "compound": "SOFT",
-          "total_laps": 11,
-          "first_lap_pace": 83.385,
-          "last_lap_pace": 83.698,
-          "avg_pace": 83.347,
-          "best_pace": 79.945,
-          "degradation_rate": 0.2508
+          "degradation_rate": null
         },
         {
           "stint": 6,
           "session": "FP1",
           "compound": "SOFT",
-          "total_laps": 10,
+          "total_laps": 6,
+          "deg_laps": 4,
           "first_lap_pace": 78.172,
-          "last_lap_pace": 123.484,
-          "avg_pace": 82.981,
+          "last_lap_pace": 110.336,
+          "avg_pace": 83.083,
           "best_pace": 82.111,
-          "degradation_rate": 0.0366
+          "degradation_rate": null
+        },
+        {
+          "stint": 5,
+          "session": "FP2",
+          "compound": "SOFT",
+          "total_laps": 10,
+          "deg_laps": 10,
+          "first_lap_pace": 83.385,
+          "last_lap_pace": 83.698,
+          "avg_pace": 83.725,
+          "best_pace": 83.479,
+          "degradation_rate": 0.098
+        },
+        {
+          "stint": 6,
+          "session": "FP2",
+          "compound": "MEDIUM",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 83.039,
+          "last_lap_pace": 123.484,
+          "avg_pace": 82.618,
+          "best_pace": 82.618,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 3,
-      "avg_degradation": 0.0958
+      "total_stints": 4,
+      "avg_degradation": 0.098
     },
     "BEG": {
       "stints": [
@@ -2554,65 +3826,70 @@
           "session": "FP1",
           "compound": "MEDIUM",
           "total_laps": 7,
+          "deg_laps": 7,
           "first_lap_pace": 85.203,
           "last_lap_pace": 81.231,
           "avg_pace": 82.037,
           "best_pace": 81.012,
-          "degradation_rate": -0.387
+          "degradation_rate": -0.546
         },
         {
           "stint": 2,
           "session": "FP1",
           "compound": "MEDIUM",
           "total_laps": 7,
+          "deg_laps": 3,
           "first_lap_pace": 81.074,
           "last_lap_pace": 79.935,
-          "avg_pace": 98.023,
+          "avg_pace": 80.12,
           "best_pace": 79.935,
-          "degradation_rate": -3.4961
+          "degradation_rate": null
         },
         {
           "stint": 3,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 9,
+          "deg_laps": 3,
           "first_lap_pace": 77.778,
           "last_lap_pace": 102.647,
-          "avg_pace": 96.617,
+          "avg_pace": 79.366,
           "best_pace": 78.32,
-          "degradation_rate": -1.6831
+          "degradation_rate": null
         }
       ],
       "total_stints": 3,
-      "avg_degradation": -1.8554
+      "avg_degradation": -0.546
     },
     "BOR": {
       "stints": [
-        {
-          "stint": 6,
-          "session": "FP1",
-          "compound": "SOFT",
-          "total_laps": 9,
-          "first_lap_pace": 78.209,
-          "last_lap_pace": 85.664,
-          "avg_pace": 84.176,
-          "best_pace": 82.143,
-          "degradation_rate": 0.4334
-        },
         {
           "stint": 8,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 7,
+          "deg_laps": 6,
           "first_lap_pace": 82.84,
           "last_lap_pace": 126.329,
           "avg_pace": 82.585,
           "best_pace": 81.4,
-          "degradation_rate": 0.3343
+          "degradation_rate": 0.19
+        },
+        {
+          "stint": 6,
+          "session": "FP2",
+          "compound": "MEDIUM",
+          "total_laps": 8,
+          "deg_laps": 7,
+          "first_lap_pace": 82.143,
+          "last_lap_pace": 85.664,
+          "avg_pace": 84.467,
+          "best_pace": 82.483,
+          "degradation_rate": 0.432
         }
       ],
       "total_stints": 2,
-      "avg_degradation": 0.3839
+      "avg_degradation": 0.32
     },
     "BOT": {
       "stints": [
@@ -2621,26 +3898,28 @@
           "session": "FP1",
           "compound": "MEDIUM",
           "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 80.093,
           "last_lap_pace": 80.849,
-          "avg_pace": 96.073,
+          "avg_pace": 80.849,
           "best_pace": 80.849,
-          "degradation_rate": 0.0
+          "degradation_rate": null
         },
         {
           "stint": 4,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 11,
+          "deg_laps": 6,
           "first_lap_pace": 78.914,
           "last_lap_pace": 113.615,
           "avg_pace": 82.011,
           "best_pace": 79.42,
-          "degradation_rate": 0.7205
+          "degradation_rate": 0.549
         }
       ],
       "total_stints": 2,
-      "avg_degradation": 0.3603
+      "avg_degradation": 0.549
     },
     "COL": {
       "stints": [
@@ -2648,38 +3927,53 @@
           "stint": 2,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 5,
+          "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 79.914,
           "last_lap_pace": 79.461,
-          "avg_pace": 78.667,
-          "best_pace": 77.873,
-          "degradation_rate": 0.0
+          "avg_pace": 79.461,
+          "best_pace": 79.461,
+          "degradation_rate": null
         },
         {
           "stint": 5,
-          "session": "FP2",
+          "session": "FP1",
           "compound": "SOFT",
-          "total_laps": 8,
-          "first_lap_pace": 78.016,
+          "total_laps": 7,
+          "deg_laps": 6,
+          "first_lap_pace": 78.73,
           "last_lap_pace": 82.572,
-          "avg_pace": 81.528,
-          "best_pace": 78.73,
-          "degradation_rate": 0.4408
+          "avg_pace": 82.087,
+          "best_pace": 81.293,
+          "degradation_rate": 0.485
+        },
+        {
+          "stint": 6,
+          "session": "FP1",
+          "compound": "MEDIUM",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 80.928,
+          "last_lap_pace": 119.09,
+          "avg_pace": 81.187,
+          "best_pace": 81.187,
+          "degradation_rate": null
         },
         {
           "stint": 6,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 16,
+          "total_laps": 13,
+          "deg_laps": 11,
           "first_lap_pace": 82.297,
           "last_lap_pace": 111.859,
-          "avg_pace": 84.074,
-          "best_pace": 80.928,
-          "degradation_rate": 0.1247
+          "avg_pace": 84.623,
+          "best_pace": 82.368,
+          "degradation_rate": 0.381
         }
       ],
-      "total_stints": 3,
-      "avg_degradation": 0.1885
+      "total_stints": 4,
+      "avg_degradation": 0.418
     },
     "FOR": {
       "stints": [
@@ -2688,26 +3982,28 @@
           "session": "FP1",
           "compound": "MEDIUM",
           "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 78.584,
           "last_lap_pace": 114.289,
-          "avg_pace": 90.117,
+          "avg_pace": 78.622,
           "best_pace": 78.622,
-          "degradation_rate": 0.0
+          "degradation_rate": null
         },
         {
           "stint": 8,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 8,
+          "deg_laps": 4,
           "first_lap_pace": 77.216,
           "last_lap_pace": 116.831,
-          "avg_pace": 85.051,
+          "avg_pace": 81.366,
           "best_pace": 79.19,
-          "degradation_rate": -4.2123
+          "degradation_rate": null
         }
       ],
       "total_stints": 2,
-      "avg_degradation": -2.1061
+      "avg_degradation": null
     },
     "GAS": {
       "stints": [
@@ -2715,38 +4011,29 @@
           "stint": 2,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 8,
+          "total_laps": 7,
+          "deg_laps": 3,
           "first_lap_pace": 79.864,
           "last_lap_pace": 80.076,
-          "avg_pace": 88.432,
-          "best_pace": 78.007,
-          "degradation_rate": 0.8204
-        },
-        {
-          "stint": 3,
-          "session": "FP2",
-          "compound": "MEDIUM",
-          "total_laps": 3,
-          "first_lap_pace": 78.278,
-          "last_lap_pace": 79.787,
-          "avg_pace": 90.501,
-          "best_pace": 79.787,
-          "degradation_rate": 0.0
+          "avg_pace": 79.738,
+          "best_pace": 79.401,
+          "degradation_rate": null
         },
         {
           "stint": 6,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 14,
+          "total_laps": 13,
+          "deg_laps": 7,
           "first_lap_pace": 82.046,
           "last_lap_pace": 133.172,
-          "avg_pace": 84.618,
-          "best_pace": 82.601,
-          "degradation_rate": 0.4594
+          "avg_pace": 84.819,
+          "best_pace": 82.625,
+          "degradation_rate": 0.478
         }
       ],
-      "total_stints": 3,
-      "avg_degradation": 0.4266
+      "total_stints": 2,
+      "avg_degradation": 0.478
     },
     "HAD": {
       "stints": [
@@ -2755,48 +4042,52 @@
           "session": "FP2",
           "compound": "MEDIUM",
           "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 78.496,
           "last_lap_pace": 78.407,
-          "avg_pace": 115.018,
+          "avg_pace": 78.407,
           "best_pace": 78.407,
-          "degradation_rate": -27.3175
+          "degradation_rate": null
         },
         {
           "stint": 3,
           "session": "FP2",
           "compound": "SOFT",
           "total_laps": 3,
+          "deg_laps": 3,
           "first_lap_pace": 76.674,
           "last_lap_pace": 77.756,
-          "avg_pace": 101.079,
+          "avg_pace": 77.756,
           "best_pace": 77.756,
-          "degradation_rate": 0.0
+          "degradation_rate": null
         },
         {
           "stint": 4,
           "session": "FP2",
           "compound": "MEDIUM",
           "total_laps": 7,
+          "deg_laps": 6,
           "first_lap_pace": 82.059,
           "last_lap_pace": 83.404,
           "avg_pace": 83.684,
           "best_pace": 82.781,
-          "degradation_rate": 0.314
+          "degradation_rate": 0.249
         },
         {
           "stint": 5,
           "session": "FP2",
           "compound": "SOFT",
           "total_laps": 5,
+          "deg_laps": 4,
           "first_lap_pace": 82.846,
           "last_lap_pace": 131.246,
           "avg_pace": 83.456,
           "best_pace": 82.958,
-          "degradation_rate": -0.7225
+          "degradation_rate": null
         }
       ],
       "total_stints": 4,
-      "avg_degradation": -6.9315
+      "avg_degradation": 0.249
     },
     "HAM": {
       "stints": [
@@ -2805,26 +4096,28 @@
           "session": "FP2",
           "compound": "MEDIUM",
           "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 77.996,
           "last_lap_pace": 77.43,
-          "avg_pace": 95.317,
+          "avg_pace": 77.43,
           "best_pace": 77.43,
-          "degradation_rate": 0.0
+          "degradation_rate": null
         },
         {
           "stint": 5,
           "session": "FP2",
           "compound": "MEDIUM",
           "total_laps": 8,
+          "deg_laps": 6,
           "first_lap_pace": 82.025,
           "last_lap_pace": 144.991,
           "avg_pace": 82.708,
           "best_pace": 81.262,
-          "degradation_rate": 0.2129
+          "degradation_rate": 0.254
         }
       ],
       "total_stints": 2,
-      "avg_degradation": 0.1065
+      "avg_degradation": 0.254
     },
     "HER": {
       "stints": [
@@ -2833,26 +4126,28 @@
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 9,
+          "deg_laps": 4,
           "first_lap_pace": 84.225,
           "last_lap_pace": 81.363,
-          "avg_pace": 101.92,
+          "avg_pace": 82.015,
           "best_pace": 81.363,
-          "degradation_rate": -5.4093
+          "degradation_rate": null
         },
         {
           "stint": 4,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 8,
+          "deg_laps": 7,
           "first_lap_pace": 83.305,
           "last_lap_pace": 131.923,
           "avg_pace": 84.793,
           "best_pace": 83.81,
-          "degradation_rate": 0.4216
+          "degradation_rate": 0.458
         }
       ],
       "total_stints": 2,
-      "avg_degradation": -2.4939
+      "avg_degradation": 0.458
     },
     "HUL": {
       "stints": [
@@ -2861,37 +4156,40 @@
           "session": "FP2",
           "compound": "MEDIUM",
           "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 78.641,
           "last_lap_pace": 78.092,
-          "avg_pace": 99.837,
+          "avg_pace": 78.092,
           "best_pace": 78.092,
-          "degradation_rate": -17.371
+          "degradation_rate": null
         },
         {
           "stint": 5,
           "session": "FP2",
           "compound": "MEDIUM",
           "total_laps": 9,
+          "deg_laps": 6,
           "first_lap_pace": 81.71,
           "last_lap_pace": 84.337,
           "avg_pace": 83.667,
           "best_pace": 82.102,
-          "degradation_rate": 0.1464
+          "degradation_rate": 0.301
         },
         {
           "stint": 6,
           "session": "FP2",
           "compound": "SOFT",
           "total_laps": 3,
+          "deg_laps": 3,
           "first_lap_pace": 81.702,
           "last_lap_pace": 114.206,
-          "avg_pace": 98.177,
+          "avg_pace": 82.148,
           "best_pace": 82.148,
-          "degradation_rate": 0.0
+          "degradation_rate": null
         }
       ],
       "total_stints": 3,
-      "avg_degradation": -5.7415
+      "avg_degradation": 0.301
     },
     "IWA": {
       "stints": [
@@ -2900,65 +4198,58 @@
           "session": "FP1",
           "compound": "MEDIUM",
           "total_laps": 7,
+          "deg_laps": 5,
           "first_lap_pace": 80.527,
           "last_lap_pace": 82.855,
           "avg_pace": 83.01,
           "best_pace": 79.509,
-          "degradation_rate": 0.2368
+          "degradation_rate": 0.567
         },
         {
           "stint": 4,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 5,
+          "deg_laps": 2,
           "first_lap_pace": 78.298,
           "last_lap_pace": 92.074,
-          "avg_pace": 85.911,
+          "avg_pace": 79.749,
           "best_pace": 79.749,
-          "degradation_rate": 0.0
+          "degradation_rate": null
         }
       ],
       "total_stints": 2,
-      "avg_degradation": 0.1184
+      "avg_degradation": 0.567
     },
     "LAW": {
       "stints": [
-        {
-          "stint": 1,
-          "session": "FP1",
-          "compound": "MEDIUM",
-          "total_laps": 3,
-          "first_lap_pace": 101.336,
-          "last_lap_pace": 78.397,
-          "avg_pace": 77.682,
-          "best_pace": 76.967,
-          "degradation_rate": 0.0
-        },
         {
           "stint": 4,
           "session": "FP1",
           "compound": "MEDIUM",
           "total_laps": 3,
+          "deg_laps": 3,
           "first_lap_pace": 79.169,
           "last_lap_pace": 79.576,
-          "avg_pace": 97.002,
+          "avg_pace": 79.576,
           "best_pace": 79.576,
-          "degradation_rate": 0.0
+          "degradation_rate": null
         },
         {
           "stint": 7,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 3,
+          "deg_laps": 3,
           "first_lap_pace": 83.192,
           "last_lap_pace": 109.756,
-          "avg_pace": 96.575,
+          "avg_pace": 83.393,
           "best_pace": 83.393,
-          "degradation_rate": 0.0
+          "degradation_rate": null
         }
       ],
-      "total_stints": 3,
-      "avg_degradation": 0.0
+      "total_stints": 2,
+      "avg_degradation": null
     },
     "LEC": {
       "stints": [
@@ -2966,38 +4257,41 @@
           "stint": 1,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 5,
+          "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 93.262,
           "last_lap_pace": 78.009,
-          "avg_pace": 77.929,
-          "best_pace": 76.626,
-          "degradation_rate": 0.6915
-        },
-        {
-          "stint": 6,
-          "session": "FP2",
-          "compound": "MEDIUM",
-          "total_laps": 8,
-          "first_lap_pace": 81.165,
-          "last_lap_pace": 82.143,
-          "avg_pace": 81.153,
-          "best_pace": 77.36,
-          "degradation_rate": 0.4109
+          "avg_pace": 78.581,
+          "best_pace": 78.009,
+          "degradation_rate": null
         },
         {
           "stint": 7,
           "session": "FP1",
           "compound": "MEDIUM",
           "total_laps": 7,
+          "deg_laps": 5,
           "first_lap_pace": 81.745,
           "last_lap_pace": 133.011,
           "avg_pace": 82.661,
           "best_pace": 81.415,
-          "degradation_rate": 1.0387
+          "degradation_rate": 0.738
+        },
+        {
+          "stint": 6,
+          "session": "FP2",
+          "compound": "MEDIUM",
+          "total_laps": 7,
+          "deg_laps": 7,
+          "first_lap_pace": 81.165,
+          "last_lap_pace": 82.143,
+          "avg_pace": 81.785,
+          "best_pace": 80.865,
+          "degradation_rate": 0.293
         }
       ],
       "total_stints": 3,
-      "avg_degradation": 0.7137
+      "avg_degradation": 0.478
     },
     "LIN": {
       "stints": [
@@ -3005,38 +4299,41 @@
           "stint": 1,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 4,
+          "total_laps": 3,
+          "deg_laps": 3,
           "first_lap_pace": 79.258,
           "last_lap_pace": 78.501,
-          "avg_pace": 77.78,
-          "best_pace": 77.058,
-          "degradation_rate": 0.0
-        },
-        {
-          "stint": 5,
-          "session": "FP2",
-          "compound": "MEDIUM",
-          "total_laps": 18,
-          "first_lap_pace": 82.125,
-          "last_lap_pace": 113.02,
-          "avg_pace": 84.74,
-          "best_pace": 78.141,
-          "degradation_rate": 0.5076
+          "avg_pace": 78.501,
+          "best_pace": 78.501,
+          "degradation_rate": null
         },
         {
           "stint": 6,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 6,
+          "deg_laps": 6,
           "first_lap_pace": 82.724,
           "last_lap_pace": 84.627,
           "avg_pace": 83.815,
           "best_pace": 83.288,
-          "degradation_rate": 0.3236
+          "degradation_rate": 0.376
+        },
+        {
+          "stint": 5,
+          "session": "FP2",
+          "compound": "MEDIUM",
+          "total_laps": 17,
+          "deg_laps": 15,
+          "first_lap_pace": 82.125,
+          "last_lap_pace": 113.02,
+          "avg_pace": 85.18,
+          "best_pace": 82.368,
+          "degradation_rate": 0.514
         }
       ],
       "total_stints": 3,
-      "avg_degradation": 0.2771
+      "avg_degradation": 0.475
     },
     "NOR": {
       "stints": [
@@ -3045,26 +4342,28 @@
           "session": "FP2",
           "compound": "MEDIUM",
           "total_laps": 6,
+          "deg_laps": 3,
           "first_lap_pace": 76.574,
           "last_lap_pace": 78.142,
-          "avg_pace": 86.67,
+          "avg_pace": 80.035,
           "best_pace": 78.142,
-          "degradation_rate": -1.893
+          "degradation_rate": null
         },
         {
           "stint": 4,
           "session": "FP2",
           "compound": "SOFT",
           "total_laps": 9,
+          "deg_laps": 8,
           "first_lap_pace": 81.107,
           "last_lap_pace": 83.083,
           "avg_pace": 82.511,
           "best_pace": 81.521,
-          "degradation_rate": 0.2799
+          "degradation_rate": 0.28
         }
       ],
       "total_stints": 2,
-      "avg_degradation": -0.8065
+      "avg_degradation": 0.28
     },
     "OCO": {
       "stints": [
@@ -3072,49 +4371,65 @@
           "stint": 1,
           "session": "FP1",
           "compound": "HARD",
-          "total_laps": 5,
+          "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 81.947,
           "last_lap_pace": 80.771,
-          "avg_pace": 79.508,
-          "best_pace": 78.245,
-          "degradation_rate": 0.0
+          "avg_pace": 80.771,
+          "best_pace": 80.771,
+          "degradation_rate": null
         },
         {
           "stint": 2,
-          "session": "FP2",
-          "compound": "MEDIUM",
-          "total_laps": 6,
-          "first_lap_pace": 115.777,
+          "session": "FP1",
+          "compound": "HARD",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 80.194,
           "last_lap_pace": 80.315,
-          "avg_pace": 80.152,
-          "best_pace": 79.947,
-          "degradation_rate": 0.184
+          "avg_pace": 80.315,
+          "best_pace": 80.315,
+          "degradation_rate": null
         },
         {
           "stint": 4,
           "session": "FP1",
           "compound": "HARD",
           "total_laps": 3,
+          "deg_laps": 3,
           "first_lap_pace": 81.265,
           "last_lap_pace": 82.219,
           "avg_pace": 82.356,
           "best_pace": 82.219,
-          "degradation_rate": 0.0
+          "degradation_rate": null
+        },
+        {
+          "stint": 5,
+          "session": "FP1",
+          "compound": "HARD",
+          "total_laps": 5,
+          "deg_laps": 3,
+          "first_lap_pace": 82.923,
+          "last_lap_pace": 118.54,
+          "avg_pace": 86.104,
+          "best_pace": 83.183,
+          "degradation_rate": null
         },
         {
           "stint": 5,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 20,
+          "total_laps": 15,
+          "deg_laps": 9,
           "first_lap_pace": 83.058,
           "last_lap_pace": 132.636,
-          "avg_pace": 85.327,
-          "best_pace": 82.923,
-          "degradation_rate": 0.0483
+          "avg_pace": 85.333,
+          "best_pace": 83.808,
+          "degradation_rate": 0.139
         }
       ],
-      "total_stints": 4,
-      "avg_degradation": 0.0581
+      "total_stints": 5,
+      "avg_degradation": 0.139
     },
     "PER": {
       "stints": [
@@ -3123,48 +4438,52 @@
           "session": "FP2",
           "compound": "MEDIUM",
           "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 80.518,
           "last_lap_pace": 79.902,
-          "avg_pace": 98.759,
+          "avg_pace": 79.902,
           "best_pace": 79.902,
-          "degradation_rate": -14.0475
+          "degradation_rate": null
         },
         {
           "stint": 4,
           "session": "FP2",
           "compound": "SOFT",
           "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 79.261,
           "last_lap_pace": 79.683,
-          "avg_pace": 105.053,
+          "avg_pace": 79.683,
           "best_pace": 79.683,
-          "degradation_rate": -17.7475
+          "degradation_rate": null
         },
         {
           "stint": 5,
           "session": "FP2",
           "compound": "MEDIUM",
           "total_laps": 10,
+          "deg_laps": 7,
           "first_lap_pace": 83.343,
           "last_lap_pace": 85.454,
           "avg_pace": 85.131,
           "best_pace": 83.884,
-          "degradation_rate": 0.3204
+          "degradation_rate": 0.351
         },
         {
           "stint": 6,
           "session": "FP2",
           "compound": "SOFT",
           "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 84.538,
           "last_lap_pace": 119.608,
           "avg_pace": 84.011,
           "best_pace": 83.702,
-          "degradation_rate": 0.0
+          "degradation_rate": null
         }
       ],
       "total_stints": 4,
-      "avg_degradation": -7.8686
+      "avg_degradation": 0.351
     },
     "PIA": {
       "stints": [
@@ -3172,49 +4491,53 @@
           "stint": 1,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 7,
+          "total_laps": 6,
+          "deg_laps": 3,
           "first_lap_pace": 78.885,
           "last_lap_pace": 77.555,
-          "avg_pace": 76.966,
-          "best_pace": 75.724,
-          "degradation_rate": 0.9155
+          "avg_pace": 77.587,
+          "best_pace": 77.555,
+          "degradation_rate": null
         },
         {
           "stint": 2,
-          "session": "FP2",
+          "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 5,
-          "first_lap_pace": 76.803,
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 77.667,
           "last_lap_pace": 77.723,
-          "avg_pace": 77.695,
-          "best_pace": 77.667,
-          "degradation_rate": 0.0
+          "avg_pace": 77.723,
+          "best_pace": 77.723,
+          "degradation_rate": null
+        },
+        {
+          "stint": 5,
+          "session": "FP1",
+          "compound": "SOFT",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 82.259,
+          "last_lap_pace": 80.419,
+          "avg_pace": 80.81,
+          "best_pace": 80.419,
+          "degradation_rate": null
         },
         {
           "stint": 5,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 10,
+          "total_laps": 7,
+          "deg_laps": 6,
           "first_lap_pace": 81.581,
-          "last_lap_pace": 80.419,
-          "avg_pace": 82.276,
-          "best_pace": 80.419,
-          "degradation_rate": -0.2268
-        },
-        {
-          "stint": 6,
-          "session": "FP2",
-          "compound": "SOFT",
-          "total_laps": 3,
-          "first_lap_pace": 110.72,
-          "last_lap_pace": 146.708,
-          "avg_pace": 134.248,
-          "best_pace": 121.787,
-          "degradation_rate": 0.0
+          "last_lap_pace": 82.35,
+          "avg_pace": 82.767,
+          "best_pace": 82.244,
+          "degradation_rate": 0.155
         }
       ],
       "total_stints": 4,
-      "avg_degradation": 0.1722
+      "avg_degradation": 0.155
     },
     "RUS": {
       "stints": [
@@ -3222,49 +4545,53 @@
           "stint": 1,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 9,
+          "total_laps": 7,
+          "deg_laps": 3,
           "first_lap_pace": 77.414,
           "last_lap_pace": 77.441,
-          "avg_pace": 96.794,
-          "best_pace": 75.945,
-          "degradation_rate": -3.2223
+          "avg_pace": 77.397,
+          "best_pace": 77.353,
+          "degradation_rate": null
         },
         {
           "stint": 3,
-          "session": "FP2",
+          "session": "FP1",
           "compound": "SOFT",
-          "total_laps": 11,
-          "first_lap_pace": 75.435,
+          "total_laps": 10,
+          "deg_laps": 10,
+          "first_lap_pace": 81.768,
           "last_lap_pace": 82.337,
-          "avg_pace": 81.775,
+          "avg_pace": 81.776,
           "best_pace": 80.994,
-          "degradation_rate": 0.0918
+          "degradation_rate": 0.127
         },
         {
           "stint": 4,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 10,
+          "total_laps": 9,
+          "deg_laps": 7,
           "first_lap_pace": 81.114,
-          "last_lap_pace": 110.664,
+          "last_lap_pace": 83.523,
           "avg_pace": 81.872,
           "best_pace": 80.746,
-          "degradation_rate": 0.3919
+          "degradation_rate": 0.387
         },
         {
           "stint": 5,
           "session": "FP2",
           "compound": "SOFT",
           "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 81.02,
           "last_lap_pace": 81.614,
           "avg_pace": 81.253,
           "best_pace": 80.943,
-          "degradation_rate": 0.3355
+          "degradation_rate": null
         }
       ],
       "total_stints": 4,
-      "avg_degradation": -0.6008
+      "avg_degradation": 0.234
     },
     "SAI": {
       "stints": [
@@ -3272,38 +4599,53 @@
           "stint": 2,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 7,
+          "total_laps": 6,
+          "deg_laps": 2,
           "first_lap_pace": 79.337,
           "last_lap_pace": 79.831,
-          "avg_pace": 88.144,
-          "best_pace": 78.681,
-          "degradation_rate": -5.0571
+          "avg_pace": 79.831,
+          "best_pace": 79.831,
+          "degradation_rate": null
+        },
+        {
+          "stint": 5,
+          "session": "FP1",
+          "compound": "SOFT",
+          "total_laps": 9,
+          "deg_laps": 8,
+          "first_lap_pace": 83.732,
+          "last_lap_pace": 122.251,
+          "avg_pace": 85.159,
+          "best_pace": 84.031,
+          "degradation_rate": 0.296
         },
         {
           "stint": 4,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 6,
+          "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 83.152,
-          "last_lap_pace": 78.293,
-          "avg_pace": 82.564,
-          "best_pace": 78.293,
-          "degradation_rate": -1.3628
+          "last_lap_pace": 84.926,
+          "avg_pace": 83.988,
+          "best_pace": 83.198,
+          "degradation_rate": null
         },
         {
           "stint": 5,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 17,
+          "total_laps": 8,
+          "deg_laps": 8,
           "first_lap_pace": 84.358,
-          "last_lap_pace": 122.251,
-          "avg_pace": 85.406,
-          "best_pace": 83.732,
-          "degradation_rate": 0.1307
+          "last_lap_pace": 85.966,
+          "avg_pace": 85.892,
+          "best_pace": 84.793,
+          "degradation_rate": 0.371
         }
       ],
-      "total_stints": 3,
-      "avg_degradation": -2.0964
+      "total_stints": 4,
+      "avg_degradation": 0.334
     },
     "STR": {
       "stints": [
@@ -3311,38 +4653,53 @@
           "stint": 1,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 7,
+          "total_laps": 3,
+          "deg_laps": 3,
           "first_lap_pace": 81.957,
+          "last_lap_pace": 81.283,
+          "avg_pace": 81.283,
+          "best_pace": 81.283,
+          "degradation_rate": null
+        },
+        {
+          "stint": 4,
+          "session": "FP1",
+          "compound": "SOFT",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 80.318,
+          "last_lap_pace": 80.347,
+          "avg_pace": 80.347,
+          "best_pace": 80.347,
+          "degradation_rate": null
+        },
+        {
+          "stint": 1,
+          "session": "FP2",
+          "compound": "MEDIUM",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 80.359,
           "last_lap_pace": 80.607,
-          "avg_pace": 80.75,
-          "best_pace": 80.359,
-          "degradation_rate": 0.124
+          "avg_pace": 80.607,
+          "best_pace": 80.607,
+          "degradation_rate": null
         },
         {
           "stint": 4,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 6,
-          "first_lap_pace": 87.13,
-          "last_lap_pace": 80.347,
-          "avg_pace": 84.178,
-          "best_pace": 80.318,
-          "degradation_rate": 0.0998
-        },
-        {
-          "stint": 5,
-          "session": "FP2",
-          "compound": "MEDIUM",
           "total_laps": 3,
-          "first_lap_pace": 117.684,
-          "last_lap_pace": 80.617,
-          "avg_pace": 112.401,
-          "best_pace": 80.617,
-          "degradation_rate": 0.0
+          "deg_laps": 3,
+          "first_lap_pace": 87.13,
+          "last_lap_pace": 88.48,
+          "avg_pace": 88.025,
+          "best_pace": 87.569,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 3,
-      "avg_degradation": 0.0746
+      "total_stints": 4,
+      "avg_degradation": null
     },
     "VER": {
       "stints": [
@@ -3350,60 +4707,77 @@
           "stint": 1,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 4,
+          "total_laps": 3,
+          "deg_laps": 3,
           "first_lap_pace": 78.511,
           "last_lap_pace": 78.93,
-          "avg_pace": 77.691,
-          "best_pace": 76.452,
-          "degradation_rate": 0.0
+          "avg_pace": 78.93,
+          "best_pace": 78.93,
+          "degradation_rate": null
         },
         {
           "stint": 2,
-          "session": "FP2",
-          "compound": "HARD",
-          "total_laps": 4,
-          "first_lap_pace": 77.907,
+          "session": "FP1",
+          "compound": "MEDIUM",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 78.879,
           "last_lap_pace": 78.614,
-          "avg_pace": 78.746,
+          "avg_pace": 78.614,
           "best_pace": 78.614,
-          "degradation_rate": 0.0
-        },
-        {
-          "stint": 4,
-          "session": "FP2",
-          "compound": "HARD",
-          "total_laps": 11,
-          "first_lap_pace": 81.431,
-          "last_lap_pace": 83.312,
-          "avg_pace": 81.755,
-          "best_pace": 77.675,
-          "degradation_rate": 0.3257
+          "degradation_rate": null
         },
         {
           "stint": 5,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 14,
+          "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 81.988,
-          "last_lap_pace": 137.522,
-          "avg_pace": 81.842,
-          "best_pace": 81.217,
-          "degradation_rate": 0.0229
+          "last_lap_pace": 81.969,
+          "avg_pace": 81.912,
+          "best_pace": 81.86,
+          "degradation_rate": null
         },
         {
           "stint": 6,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 81.774,
           "last_lap_pace": 82.097,
           "avg_pace": 81.802,
           "best_pace": 81.553,
-          "degradation_rate": 0.272
+          "degradation_rate": null
+        },
+        {
+          "stint": 4,
+          "session": "FP2",
+          "compound": "HARD",
+          "total_laps": 10,
+          "deg_laps": 9,
+          "first_lap_pace": 81.431,
+          "last_lap_pace": 83.312,
+          "avg_pace": 82.208,
+          "best_pace": 81.094,
+          "degradation_rate": 0.253
+        },
+        {
+          "stint": 5,
+          "session": "FP2",
+          "compound": "SOFT",
+          "total_laps": 10,
+          "deg_laps": 9,
+          "first_lap_pace": 82.454,
+          "last_lap_pace": 137.522,
+          "avg_pace": 81.739,
+          "best_pace": 81.217,
+          "degradation_rate": 0.109
         }
       ],
-      "total_stints": 5,
-      "avg_degradation": 0.1241
+      "total_stints": 6,
+      "avg_degradation": 0.181
     },
     "VES": {
       "stints": [
@@ -3412,37 +4786,40 @@
           "session": "FP1",
           "compound": "MEDIUM",
           "total_laps": 3,
+          "deg_laps": 3,
           "first_lap_pace": 79.904,
           "last_lap_pace": 122.107,
           "avg_pace": 118.607,
           "best_pace": 115.107,
-          "degradation_rate": 0.0
+          "degradation_rate": null
         },
         {
           "stint": 3,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 7,
+          "deg_laps": 3,
           "first_lap_pace": 79.163,
           "last_lap_pace": 78.365,
-          "avg_pace": 113.745,
+          "avg_pace": 78.406,
           "best_pace": 78.365,
-          "degradation_rate": -6.3514
+          "degradation_rate": null
         },
         {
           "stint": 4,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 8,
+          "deg_laps": 6,
           "first_lap_pace": 83.47,
           "last_lap_pace": 84.547,
           "avg_pace": 83.684,
           "best_pace": 82.083,
-          "degradation_rate": 0.6101
+          "degradation_rate": 0.361
         }
       ],
       "total_stints": 3,
-      "avg_degradation": -1.9138
+      "avg_degradation": 0.361
     }
   },
   "sector_rankings": {

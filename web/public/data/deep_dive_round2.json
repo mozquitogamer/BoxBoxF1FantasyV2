@@ -587,7 +587,7 @@
         "stint": 1,
         "compound": "HARD",
         "laps": 22,
-        "degradation_rate": -0.0656,
+        "degradation_rate": -0.0456,
         "avg_pace": 99.357,
         "start_pace": 99.595,
         "end_pace": 99.068
@@ -607,7 +607,7 @@
         "stint": 2,
         "compound": "HARD",
         "laps": 39,
-        "degradation_rate": -0.0052,
+        "degradation_rate": -0.0051,
         "avg_pace": 95.503,
         "start_pace": 96.493,
         "end_pace": 96.459
@@ -627,7 +627,7 @@
         "stint": 2,
         "compound": "HARD",
         "laps": 39,
-        "degradation_rate": -0.0122,
+        "degradation_rate": -0.0113,
         "avg_pace": 96.815,
         "start_pace": 97.498,
         "end_pace": 96.587
@@ -647,7 +647,7 @@
         "stint": 2,
         "compound": "HARD",
         "laps": 37,
-        "degradation_rate": 0.0108,
+        "degradation_rate": 0.0099,
         "avg_pace": 98.976,
         "start_pace": 98.911,
         "end_pace": 98.986
@@ -658,7 +658,7 @@
         "stint": 1,
         "compound": "HARD",
         "laps": 23,
-        "degradation_rate": 0.0096,
+        "degradation_rate": 0.0101,
         "avg_pace": 97.46,
         "start_pace": 97.178,
         "end_pace": 97.344
@@ -667,7 +667,7 @@
         "stint": 2,
         "compound": "MEDIUM",
         "laps": 21,
-        "degradation_rate": 0.127,
+        "degradation_rate": 0.1242,
         "avg_pace": 97.153,
         "start_pace": 96.278,
         "end_pace": 98.774
@@ -687,7 +687,7 @@
         "stint": 2,
         "compound": "HARD",
         "laps": 38,
-        "degradation_rate": -0.0378,
+        "degradation_rate": -0.0344,
         "avg_pace": 96.879,
         "start_pace": 97.877,
         "end_pace": 96.595
@@ -707,7 +707,7 @@
         "stint": 3,
         "compound": "HARD",
         "laps": 38,
-        "degradation_rate": -0.0033,
+        "degradation_rate": -0.0038,
         "avg_pace": 97.424,
         "start_pace": 97.959,
         "end_pace": 97.721
@@ -727,7 +727,7 @@
         "stint": 2,
         "compound": "HARD",
         "laps": 39,
-        "degradation_rate": -0.0006,
+        "degradation_rate": -0.0005,
         "avg_pace": 96.124,
         "start_pace": 96.222,
         "end_pace": 96.177
@@ -738,7 +738,7 @@
         "stint": 1,
         "compound": "HARD",
         "laps": 24,
-        "degradation_rate": -0.0393,
+        "degradation_rate": -0.0249,
         "avg_pace": 97.683,
         "start_pace": 98.498,
         "end_pace": 97.333
@@ -747,7 +747,7 @@
         "stint": 2,
         "compound": "MEDIUM",
         "laps": 18,
-        "degradation_rate": 0.1056,
+        "degradation_rate": 0.1001,
         "avg_pace": 96.947,
         "start_pace": 96.009,
         "end_pace": 97.647
@@ -767,7 +767,7 @@
         "stint": 2,
         "compound": "HARD",
         "laps": 37,
-        "degradation_rate": -0.025,
+        "degradation_rate": -0.0226,
         "avg_pace": 97.324,
         "start_pace": 98.31,
         "end_pace": 97.12
@@ -787,7 +787,7 @@
         "stint": 2,
         "compound": "HARD",
         "laps": 39,
-        "degradation_rate": 0.0041,
+        "degradation_rate": 0.0039,
         "avg_pace": 96.212,
         "start_pace": 96.686,
         "end_pace": 96.084
@@ -798,7 +798,7 @@
         "stint": 1,
         "compound": "HARD",
         "laps": 32,
-        "degradation_rate": -0.0084,
+        "degradation_rate": -0.0053,
         "avg_pace": 97.925,
         "start_pace": 98.03,
         "end_pace": 98.15
@@ -807,7 +807,7 @@
         "stint": 2,
         "compound": "MEDIUM",
         "laps": 11,
-        "degradation_rate": 0.1838,
+        "degradation_rate": 0.1697,
         "avg_pace": 96.349,
         "start_pace": 95.795,
         "end_pace": 97.312
@@ -818,7 +818,7 @@
         "stint": 1,
         "compound": "HARD",
         "laps": 20,
-        "degradation_rate": 0.0065,
+        "degradation_rate": 0.0106,
         "avg_pace": 97.568,
         "start_pace": 97.452,
         "end_pace": 97.25
@@ -827,7 +827,7 @@
         "stint": 2,
         "compound": "MEDIUM",
         "laps": 14,
-        "degradation_rate": 0.1355,
+        "degradation_rate": 0.1323,
         "avg_pace": 97.499,
         "start_pace": 96.673,
         "end_pace": 98.497
@@ -836,7 +836,7 @@
         "stint": 3,
         "compound": "SOFT",
         "laps": 7,
-        "degradation_rate": -0.025,
+        "degradation_rate": -0.0198,
         "avg_pace": 96.268,
         "start_pace": 96.3,
         "end_pace": 96.226
@@ -856,7 +856,7 @@
         "stint": 2,
         "compound": "HARD",
         "laps": 36,
-        "degradation_rate": 0.0251,
+        "degradation_rate": 0.0211,
         "avg_pace": 99.217,
         "start_pace": 99.026,
         "end_pace": 98.908
@@ -876,7 +876,7 @@
         "stint": 2,
         "compound": "HARD",
         "laps": 39,
-        "degradation_rate": -0.0252,
+        "degradation_rate": -0.024,
         "avg_pace": 95.676,
         "start_pace": 97.575,
         "end_pace": 95.816
@@ -896,7 +896,7 @@
         "stint": 2,
         "compound": "HARD",
         "laps": 37,
-        "degradation_rate": 0.0051,
+        "degradation_rate": 0.0043,
         "avg_pace": 97.993,
         "start_pace": 98.244,
         "end_pace": 98.786
@@ -927,7 +927,7 @@
         "stint": 2,
         "compound": "HARD",
         "laps": 27,
-        "degradation_rate": -0.0402,
+        "degradation_rate": -0.0354,
         "avg_pace": 96.898,
         "start_pace": 97.763,
         "end_pace": 96.744

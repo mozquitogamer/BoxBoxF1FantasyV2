@@ -1,6 +1,17 @@
 {
   "entries": [
     {
+      "date": "2026-06-15",
+      "title": "Tyre degradation, fixed — the Analysis numbers now mean what they say",
+      "tags": ["fix"],
+      "body": [
+        "The <strong>Tyre Degradation</strong> table on the Analysis tab was badly broken and we've rebuilt it. The old version published nonsense — drivers shown as the <em>best</em> tyre-savers in green when the raw maths had them \"improving\" 15+ seconds a lap (physically impossible), because it never corrected for fuel burn, fitted noisy 3-lap quali sims, and accidentally merged runs from different practice sessions.",
+        "<strong>What changed:</strong> degradation is now the fuel-corrected pace lost per lap of <em>tyre age</em>, fitted only on genuine long runs (5+ clean laps) with proper outlier handling — the same method the race Deep Dive already used. Quali sims and short runs are no longer dressed up as low-degradation; they read <strong>\"short runs only\"</strong>. A run where the car got faster (track rubbering in / fuel burning off) now reads <strong>\"track evolving\"</strong> instead of a fake green number.",
+        "<strong>Easier to read, too:</strong> values are colour-graded relative to the field on each compound (so green genuinely means best tyre-saver this weekend), shown to 2 decimals with the lap count behind each number, sorted best-first, with practice/test runners greyed out. Hover any value for the per-stint detail and what it costs over a 10-lap run.",
+        "The race-side degradation in the Deep Dive tab got the same lap-age fix and has been re-run for every 2026 round."
+      ]
+    },
+    {
       "date": "2026-06-09",
       "title": "Prices on every card, plus a budget-builder view of who's about to rise or fall",
       "tags": ["feature"],
