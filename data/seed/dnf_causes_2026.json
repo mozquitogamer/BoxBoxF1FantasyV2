@@ -1,0 +1,78 @@
+{
+  "_instructions": "Manual DNF cause overrides for 2026. Jolpica AND FastF1 report every 2026 retirement as a generic 'Retired' with no cause, so we curate causes here. Fill in the cause for each driver below. ALLOWED VALUES: 'mechanical' = car/power-unit/reliability failure (this is the ONLY cause that elevates the team-mate's risk in the sim); 'collision' = contact with another car; 'driver_error' = solo crash/spin/off-track; 'other' = puncture from debris, illness, etc. Leave \"\" (empty) for any you're unsure of \u2014 those fall back to the generic blunt handling. Add new rounds as the season continues.",
+  "season": 2026,
+  "_race_names": {
+    "1": "Australian Grand Prix",
+    "2": "Chinese Grand Prix",
+    "3": "Japanese Grand Prix",
+    "6": "Miami Grand Prix",
+    "7": "Canadian Grand Prix",
+    "8": "Monaco Grand Prix",
+    "9": "Barcelona Grand Prix"
+  },
+  "_driver_names": {
+    "ALB": "Alex Albon",
+    "ALO": "Fernando Alonso",
+    "ANT": "Kimi Antonelli",
+    "BEA": "Oliver Bearman",
+    "BOT": "Valtteri Bottas",
+    "GAS": "Pierre Gasly",
+    "HAD": "Isack Hadjar",
+    "HUL": "Nico Hulkenberg",
+    "LAW": "Liam Lawson",
+    "LEC": "Charles Leclerc",
+    "NOR": "Lando Norris",
+    "PER": "Sergio Perez",
+    "RUS": "George Russell",
+    "SAI": "Carlos Sainz",
+    "STR": "Lance Stroll",
+    "VER": "Max Verstappen"
+  },
+  "causes": {
+    "1": {
+      "HAD": "",
+      "ALO": "",
+      "BOT": ""
+    },
+    "2": {
+      "VER": "",
+      "ALO": "",
+      "STR": ""
+    },
+    "3": {
+      "STR": "",
+      "BEA": ""
+    },
+    "6": {
+      "GAS": "",
+      "LAW": "",
+      "HAD": "",
+      "HUL": ""
+    },
+    "7": {
+      "RUS": "",
+      "NOR": "",
+      "ALB": "",
+      "PER": "",
+      "ALO": ""
+    },
+    "8": {
+      "VER": "",
+      "LEC": "",
+      "NOR": "",
+      "SAI": "",
+      "STR": "",
+      "BEA": "",
+      "BOT": ""
+    },
+    "9": {
+      "ANT": "",
+      "HUL": "",
+      "LEC": "",
+      "BEA": "",
+      "ALO": "",
+      "BOT": "",
+      "STR": ""
+    }
+  }
+}

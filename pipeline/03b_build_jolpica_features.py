@@ -32,6 +32,7 @@ from config.settings import (
     HISTORICAL_SEASONS,
     CURRENT_SEASON,
     SEED_DIR,
+    load_dnf_causes,
 )
 from config.track_classifications import get_track_features, TRACK_FEATURE_NAMES
 from config.track_similarity import get_similarity
@@ -798,6 +799,29 @@ def build_features(target_years: list[int]) -> None:
     df = pd.concat([df.reset_index(drop=True), flags.reset_index(drop=True)], axis=1)
 
     df["dnf_cause"] = dnf_cause_bucket(df["status"], df["is_dnf"], df["is_dsq"])
+
+    # Manual cause overrides for recent seasons where the API gives only a
+    # generic "Retired" (no cause). Applied BEFORE the boolean flags below so the
+    # per-cause rolling rates pick them up. Only overrides current-season DNF rows
+    # that have a curated cause; everything else keeps the status-derived bucket.
+    manual_causes = load_dnf_causes(CURRENT_SEASON)
+    if manual_causes:
+        n_applied = 0
+        for rnd, drivers in manual_causes.items():
+            for jid, cause in drivers.items():
+                mask = (
+                    (df["season"] == CURRENT_SEASON)
+                    & (df["round"] == rnd)
+                    & (df["driver_id"] == jid)
+                    & (df["is_dnf"] == 1)
+                )
+                if mask.any():
+                    df.loc[mask, "dnf_cause"] = cause
+                    n_applied += int(mask.sum())
+        if n_applied:
+            print(f"  Applied {n_applied} manual {CURRENT_SEASON} DNF cause overrides "
+                  f"(data/seed/dnf_causes_{CURRENT_SEASON}.json)")
+
     df["dnf_mechanical"] = ((df["dnf_cause"] == "mechanical") & (df["is_dnf"] == 1)).astype(int)
     df["dnf_collision"] = ((df["dnf_cause"] == "collision") & (df["is_dnf"] == 1)).astype(int)
     df["dnf_driver_error"] = ((df["dnf_cause"] == "driver_error") & (df["is_dnf"] == 1)).astype(int)

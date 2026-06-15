@@ -196,6 +196,55 @@ def load_dotd_overrides(round_num: int) -> dict:
             continue
     return out
 
+
+def load_dnf_causes(year: int = CURRENT_SEASON) -> dict:
+    """Return manual DNF cause overrides, keyed {round:int -> {jolpica_id: cause}}.
+
+    Jolpica AND FastF1 report every recent-season DNF as a generic "Retired"
+    with no cause, so 2026 DNF causes are hand-curated in
+    data/seed/dnf_causes_{year}.json. Causes: mechanical | collision |
+    driver_error | other. The seed file is keyed by driver ABBREVIATION (LEC)
+    for readability; this loader maps to the Jolpica id (leclerc) used by the
+    pipeline. Empty/blank causes are skipped (fall back to generic handling).
+
+    Consumed by 03b_build_jolpica_features.py to override `dnf_cause` for the
+    current season before the per-cause rolling-rate features are computed.
+    """
+    import json
+    path = SEED_DIR / f"dnf_causes_{year}.json"
+    if not path.exists():
+        return {}
+    try:
+        with open(path) as f:
+            data = json.load(f)
+    except Exception:
+        return {}
+
+    # abbrev -> jolpica id map
+    abbrev_to_jolpica = {}
+    ids_path = SEED_DIR / "driver_ids.json"
+    if ids_path.exists():
+        try:
+            with open(ids_path) as f:
+                for m in json.load(f).get("mappings", []):
+                    abbrev_to_jolpica[m["abbrev"]] = m["jolpica"]
+        except Exception:
+            pass
+
+    valid = {"mechanical", "collision", "driver_error", "other"}
+    out: dict[int, dict] = {}
+    for rnd_str, drivers in (data.get("causes", {}) or {}).items():
+        try:
+            rnd = int(rnd_str)
+        except (TypeError, ValueError):
+            continue
+        for abbrev, cause in (drivers or {}).items():
+            if not cause or cause not in valid:
+                continue
+            jid = abbrev_to_jolpica.get(abbrev, abbrev)
+            out.setdefault(rnd, {})[jid] = cause
+    return out
+
 # -- Number of grid positions (11 teams × 2 drivers) --------------------------
 GRID_SIZE: int = 22
 NUM_CONSTRUCTORS: int = 11
