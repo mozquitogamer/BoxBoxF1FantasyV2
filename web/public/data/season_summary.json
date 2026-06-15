@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-06-12T22:48:06.973769+00:00",
+  "generated_at": "2026-06-15T06:56:19.198761+00:00",
   "rounds": [
     {
       "round": 1,
@@ -62,8 +62,8 @@
       "circuit": "Barcelona",
       "date": "2026-06-14",
       "has_predictions": true,
-      "has_post_race": false,
-      "has_actual": false
+      "has_post_race": true,
+      "has_actual": true
     },
     {
       "round": 10,

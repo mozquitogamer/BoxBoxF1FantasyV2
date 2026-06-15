@@ -38,6 +38,12 @@
           "circuit_id": "monaco",
           "points": -11,
           "is_dnf": true
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 23,
+          "is_dnf": false
         }
       ]
     },
@@ -77,6 +83,12 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": 0,
+          "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 29,
           "is_dnf": false
         }
       ]
@@ -118,6 +130,12 @@
           "circuit_id": "monaco",
           "points": 55,
           "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": -12,
+          "is_dnf": true
         }
       ]
     },
@@ -157,6 +175,12 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": -13,
+          "is_dnf": true
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": -19,
           "is_dnf": true
         }
       ]
@@ -198,6 +222,12 @@
           "circuit_id": "monaco",
           "points": 27,
           "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 47,
+          "is_dnf": false
         }
       ]
     },
@@ -238,6 +268,12 @@
           "circuit_id": "monaco",
           "points": -17,
           "is_dnf": true
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 24,
+          "is_dnf": false
         }
       ]
     },
@@ -276,6 +312,12 @@
         {
           "round": 8,
           "circuit_id": "monaco",
+          "points": -20,
+          "is_dnf": true
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
           "points": -20,
           "is_dnf": true
         }
@@ -318,6 +360,12 @@
           "circuit_id": "monaco",
           "points": 17,
           "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 12,
+          "is_dnf": false
         }
       ]
     },
@@ -357,6 +405,12 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": 5,
+          "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 9,
           "is_dnf": false
         }
       ]
@@ -398,6 +452,12 @@
           "circuit_id": "monaco",
           "points": 12,
           "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 21,
+          "is_dnf": false
         }
       ]
     },
@@ -436,6 +496,12 @@
         {
           "round": 8,
           "circuit_id": "monaco",
+          "points": 12,
+          "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
           "points": 12,
           "is_dnf": false
         }
@@ -478,6 +544,12 @@
           "circuit_id": "monaco",
           "points": -20,
           "is_dnf": true
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 12,
+          "is_dnf": false
         }
       ]
     },
@@ -517,6 +589,12 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": 9,
+          "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 5,
           "is_dnf": false
         }
       ]
@@ -558,6 +636,12 @@
           "circuit_id": "monaco",
           "points": 0,
           "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 11,
+          "is_dnf": false
         }
       ]
     },
@@ -597,6 +681,12 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": 16,
+          "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 12,
           "is_dnf": false
         }
       ]
@@ -638,6 +728,12 @@
           "circuit_id": "monaco",
           "points": 8,
           "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 13,
+          "is_dnf": false
         }
       ]
     },
@@ -676,6 +772,12 @@
         {
           "round": 8,
           "circuit_id": "monaco",
+          "points": -20,
+          "is_dnf": true
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
           "points": -20,
           "is_dnf": true
         }
@@ -718,6 +820,12 @@
           "circuit_id": "monaco",
           "points": 23,
           "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 21,
+          "is_dnf": false
         }
       ]
     },
@@ -757,6 +865,12 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": 19,
+          "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 21,
           "is_dnf": false
         }
       ]
@@ -798,6 +912,12 @@
           "circuit_id": "monaco",
           "points": 15,
           "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": -20,
+          "is_dnf": true
         }
       ]
     },
@@ -836,6 +956,12 @@
         {
           "round": 8,
           "circuit_id": "monaco",
+          "points": -20,
+          "is_dnf": true
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
           "points": -20,
           "is_dnf": true
         }
@@ -878,6 +1004,12 @@
           "circuit_id": "monaco",
           "points": 3,
           "is_dnf": false
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": -18,
+          "is_dnf": true
         }
       ]
     }
@@ -914,6 +1046,11 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": 55
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 38
         }
       ]
     },
@@ -948,6 +1085,11 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": 24
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 41
         }
       ]
     },
@@ -982,6 +1124,11 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": 38
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 31
         }
       ]
     },
@@ -1016,6 +1163,11 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": -9
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": -7
         }
       ]
     },
@@ -1050,6 +1202,11 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": 27
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 65
         }
       ]
     },
@@ -1084,6 +1241,11 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": 17
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 37
         }
       ]
     },
@@ -1118,6 +1280,11 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": -8
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 33
         }
       ]
     },
@@ -1152,6 +1319,11 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": 12
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 60
         }
       ]
     },
@@ -1186,6 +1358,11 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": 9
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 15
         }
       ]
     },
@@ -1220,6 +1397,11 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": -13
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": -6
         }
       ]
     },
@@ -1254,6 +1436,11 @@
           "round": 8,
           "circuit_id": "monaco",
           "points": -6
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": -36
         }
       ]
     }
