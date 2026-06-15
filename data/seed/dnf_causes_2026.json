@@ -30,49 +30,50 @@
   },
   "causes": {
     "1": {
-      "HAD": "",
-      "ALO": "",
-      "BOT": ""
+      "HAD": "mechanical",
+      "ALO": "mechanical",
+      "BOT": "mechanical"
     },
     "2": {
-      "VER": "",
-      "ALO": "",
-      "STR": ""
+      "VER": "mechanical",
+      "ALO": "mechanical",
+      "STR": "mechanical"
     },
     "3": {
-      "STR": "",
-      "BEA": ""
+      "STR": "mechanical",
+      "BEA": "driver_error"
     },
     "6": {
-      "GAS": "",
-      "LAW": "",
-      "HAD": "",
-      "HUL": ""
+      "GAS": "collision",
+      "LAW": "collision",
+      "HAD": "driver_error",
+      "HUL": "mechanical"
     },
     "7": {
-      "RUS": "",
-      "NOR": "",
-      "ALB": "",
-      "PER": "",
-      "ALO": ""
+      "RUS": "mechanical",
+      "NOR": "mechanical",
+      "ALB": "collision",
+      "PER": "mechanical",
+      "ALO": "other"
     },
     "8": {
-      "VER": "",
-      "LEC": "",
-      "NOR": "",
-      "SAI": "",
-      "STR": "",
-      "BEA": "",
-      "BOT": ""
+      "VER": "mechanical",
+      "LEC": "driver_error",
+      "NOR": "mechanical",
+      "SAI": "collision",
+      "STR": "driver_error",
+      "BEA": "mechanical",
+      "BOT": "mechanical"
     },
     "9": {
-      "ANT": "",
-      "HUL": "",
-      "LEC": "",
-      "BEA": "",
-      "ALO": "",
-      "BOT": "",
-      "STR": ""
+      "ANT": "mechanical",
+      "HUL": "other",
+      "LEC": "mechanical",
+      "BEA": "mechanical",
+      "ALO": "mechanical",
+      "BOT": "mechanical",
+      "STR": "mechanical"
     }
-  }
+  },
+  "_source": "Causes researched from race reports (formula1.com, planetf1, the-race, crash.net, speedcafe, formuladaily) 2026-06-15. mechanical=car/PU failure; collision=contact; driver_error=solo crash; other=external/freak."
 }
