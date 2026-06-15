@@ -45,6 +45,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config.settings import (
     CURRENT_SEASON,
     PREDICTIONS_DIR,
+    JOLPICA_MODEL_ROWS_DIR,
     SEED_DIR,
     WEB_DATA_DIR,
     SPRINT_ROUNDS_2026,
@@ -170,8 +171,16 @@ TEAMMATE_CORRELATION_ALPHA = 0.35
 # "Retired" with no cause, so mechanical-vs-collision can't be distinguished
 # without a hand-curated cause seed. The blunt all-cause 0.15 is the honest
 # setting until such a seed exists.
-TEAM_DNF_CORRELATION = 0.15  # P(teammate also at elevated risk | one DNFs)
+TEAM_DNF_CORRELATION = 0.22  # base P(teammate elevated | one DNFs) for a FULLY-
+#  mechanical failure. Scaled per sim by the DNF-ing car's mechanical share
+#  (see load_mechanical_shares) so a team-mate's CRASH does not raise the other
+#  car's risk — only shared car/PU failures do. 0.22 * the ~0.68 field-average
+#  mechanical share ~= the 0.15 that reproduced the empirical 0.198 teammate
+#  conditional, so the field-average correlation is preserved while it's
+#  redistributed toward mechanically-fragile cars. Cause data: 2022 raw + the
+#  hand-curated data/seed/dnf_causes_2026.json.
 INCIDENT_DNF_BOOST = 0.012   # Base probability of a multi-car incident per sim
+DNF_MECH_SHARE_DEFAULT = 0.68  # field-average mechanical share of DNFs (fallback)
 
 # --- DNF severity (Phase 1, 2026-06-15) ---
 # When a driver is sampled as a DNF, the race-points hit isn't a fixed value —
@@ -471,6 +480,40 @@ def load_constructors_info() -> dict:
     with open(SEED_DIR / "constructors.json") as f:
         data = json.load(f)
     return {c["constructor_id"]: c for c in data["constructors"]}
+
+
+def load_mechanical_shares(driver_id_list: list[str],
+                           default: float = DNF_MECH_SHARE_DEFAULT) -> np.ndarray:
+    """Per-driver share of DNFs that are mechanical (vs crash/incident).
+
+    Returns an array aligned to driver_id_list (Jolpica ids). Used to gate the
+    teammate DNF correlation: only a mechanical failure (shared car/PU) should
+    elevate the team-mate's risk, not a solo crash. Computed from the latest
+    rolling rates in model_rows (roll_mech_dnf_rate_5 / roll_dnf_rate_5), shrunk
+    toward the field-average prior for stability; missing/thin history falls back
+    to the default. Cause labels come from 2022 raw + dnf_causes_{year}.json.
+    """
+    shares = np.full(len(driver_id_list), float(default))
+    path = JOLPICA_MODEL_ROWS_DIR / "all_model_rows.parquet"
+    if not path.exists():
+        return shares
+    try:
+        mr = pd.read_parquet(path, columns=[
+            "season", "round", "driver_id",
+            "roll_dnf_rate_5", "roll_mech_dnf_rate_5_driver",
+        ])
+    except Exception:
+        return shares
+    latest = mr.sort_values(["season", "round"]).groupby("driver_id").last()
+    for i, did in enumerate(driver_id_list):
+        if did in latest.index:
+            tot = latest.loc[did, "roll_dnf_rate_5"]
+            mech = latest.loc[did, "roll_mech_dnf_rate_5_driver"]
+            if pd.notna(tot) and tot > 0.01 and pd.notna(mech):
+                raw = mech / tot
+                # 70% driver signal, 30% prior — small DNF samples are noisy
+                shares[i] = float(np.clip(0.7 * raw + 0.3 * default, 0.0, 1.0))
+    return shares
 
 
 def load_overtake_history() -> dict:
@@ -1056,6 +1099,10 @@ def run_simulations(
             abbrev_to_id[row.get("driver_abbrev", "")] = row["driver_id"]
     driver_id_list = [abbrev_to_id.get(a, a) for a in abbrevs]
 
+    # Per-driver mechanical share of DNFs — gates teammate correlation so only
+    # shared mechanical failures (not a team-mate's crash) elevate the other car.
+    mech_shares = load_mechanical_shares(driver_id_list)
+
     # Storage for all simulation results
     all_total_pts = np.zeros((n_sims, n_drivers))
     all_quali_pts = np.zeros((n_sims, n_drivers))
@@ -1099,11 +1146,14 @@ def run_simulations(
             team_indices = [i for i in range(n_drivers) if constructors[i] == cid]
             if len(team_indices) == 2:
                 i1, i2 = team_indices
+                # Gate on the DNF-ing car's mechanical share — a team-mate's
+                # crash/incident shouldn't elevate the other car, only a shared
+                # car/PU failure should.
                 if dnf_mask[i1] and not dnf_mask[i2]:
-                    if rng.random() < TEAM_DNF_CORRELATION:
+                    if rng.random() < TEAM_DNF_CORRELATION * mech_shares[i1]:
                         dnf_mask[i2] = rng.random() < min(dnf_probs[i2] * 1.5, 0.25)
                 elif dnf_mask[i2] and not dnf_mask[i1]:
-                    if rng.random() < TEAM_DNF_CORRELATION:
+                    if rng.random() < TEAM_DNF_CORRELATION * mech_shares[i2]:
                         dnf_mask[i1] = rng.random() < min(dnf_probs[i1] * 1.5, 0.25)
 
         # 3. Sample race positions with teammate correlation (separate shocks from quali)

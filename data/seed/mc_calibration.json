@@ -1,26 +1,26 @@
 {
-  "noise_multiplier": 1.4887,
+  "noise_multiplier": 1.4686,
   "bias_correction": 0.0,
   "n_rounds": 7,
   "n_samples": 154,
-  "coverage_90": 0.812,
-  "coverage_50": 0.429,
-  "overall_rmse": 16.6,
-  "overall_bias": 0.34,
+  "coverage_90": 0.818,
+  "coverage_50": 0.422,
+  "overall_rmse": 16.61,
+  "overall_bias": 0.42,
   "per_tier": {
     "front": {
       "coverage_90": 0.8286,
-      "bias": -3.04,
+      "bias": -2.69,
       "n": 35
     },
     "midfield": {
-      "coverage_90": 0.8367,
-      "bias": 0.99,
+      "coverage_90": 0.8571,
+      "bias": 0.94,
       "n": 49
     },
     "back": {
       "coverage_90": 0.7857,
-      "bias": 1.57,
+      "bias": 1.6,
       "n": 70
     }
   },
@@ -30,7 +30,7 @@
       "coverage_90": 0.9091,
       "coverage_50": 0.5,
       "noise_multiplier": 1.0,
-      "bias": 1.6,
+      "bias": 1.69,
       "n": 22
     },
     {
@@ -38,7 +38,7 @@
       "coverage_90": 0.7727,
       "coverage_50": 0.4091,
       "noise_multiplier": 1.5,
-      "bias": 0.48,
+      "bias": 0.54,
       "n": 22
     },
     {
@@ -46,7 +46,7 @@
       "coverage_90": 1.0,
       "coverage_50": 0.7273,
       "noise_multiplier": 0.8,
-      "bias": 2.39,
+      "bias": 2.43,
       "n": 22
     },
     {
@@ -54,7 +54,7 @@
       "coverage_90": 0.8182,
       "coverage_50": 0.4091,
       "noise_multiplier": 1.4679,
-      "bias": 1.05,
+      "bias": 1.1,
       "n": 22
     },
     {
@@ -62,32 +62,32 @@
       "coverage_90": 0.7273,
       "coverage_50": 0.4545,
       "noise_multiplier": 1.5,
-      "bias": -2.82,
+      "bias": -2.69,
       "n": 22
     },
     {
       "round": 8,
-      "coverage_90": 0.5909,
+      "coverage_90": 0.6364,
       "coverage_50": 0.1818,
       "noise_multiplier": 1.5,
-      "bias": 0.73,
+      "bias": 0.81,
       "n": 22
     },
     {
       "round": 9,
       "coverage_90": 0.8636,
-      "coverage_50": 0.3182,
+      "coverage_50": 0.2727,
       "noise_multiplier": 1.3159,
-      "bias": -1.06,
+      "bias": -0.96,
       "n": 22
     }
   ],
   "pit_histogram": [
     35,
     22,
-    24,
-    31,
+    25,
+    30,
     42
   ],
-  "pit_chi2": 8.66
+  "pit_chi2": 8.27
 }
