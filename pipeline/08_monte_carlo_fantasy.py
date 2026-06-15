@@ -160,14 +160,34 @@ SPRINT_OVERTAKE_CV = 0.45  # Higher CV in sprints (more volatile, fewer laps)
 TEAMMATE_CORRELATION_ALPHA = 0.35
 
 # --- Correlated DNF modeling (Fix 1.5) ---
-# Trimmed 2026-06-05: the team correlation + incident boost were inflating
-# reliable drivers' DNF rate (e.g. Verstappen 0.20 base -> 0.30 in-sim, driven by
-# teammate Hadjar's high DNF rate). Ideally only shared CAR/mechanical failures
-# should correlate between teammates, not a teammate's crash; that needs the 2026
-# DNF cause classification fixed first (currently all 2026 DNFs mislabel as
-# mechanical), so for now we just dampen the correlation generally.
+# Trimmed 2026-06-05 (0.30 -> 0.15), then VALIDATED empirically 2026-06-15:
+# across 2020-2026, P(teammate DNF | this car DNF) = 0.198 vs a 0.136 base — a
+# modest 1.46x lift (only 2.7% of team-races are double-DNFs). The current 0.15
+# setting (plus the incident mechanism) reproduces roughly that, so the dampening
+# was right and no change is warranted. NOTE on cause-gating: ideally only shared
+# CAR/mechanical failures would correlate (not a team-mate's solo crash), but that
+# is DATA-BLOCKED — Jolpica AND FastF1 report every 2026 DNF as a generic
+# "Retired" with no cause, so mechanical-vs-collision can't be distinguished
+# without a hand-curated cause seed. The blunt all-cause 0.15 is the honest
+# setting until such a seed exists.
 TEAM_DNF_CORRELATION = 0.15  # P(teammate also at elevated risk | one DNFs)
 INCIDENT_DNF_BOOST = 0.012   # Base probability of a multi-car incident per sim
+
+# --- DNF severity (Phase 1, 2026-06-15) ---
+# When a driver is sampled as a DNF, the race-points hit isn't a fixed value —
+# real 2026 DNFs averaged a ~-20 race component (full retirement) with spread
+# (occasional late/partial DNFs keep a few points; grid-droppers lose more).
+# The old code applied a flat DNF_EXPECTED_PENALTY_FACTOR (0.6 -> -12), which was
+# both too soft AND gave zero spread, compressing the MC's low tail and leaving
+# actual DNF outcomes (mean ~-17 total) below the simulated P5 (only 42% covered).
+# Sample a severity multiplier on RACE_DNF_DSQ_PENALTY instead. Mean ~1.0 (full
+# penalty) reproduces the observed mean; the spread restores honest tail coverage.
+MC_DNF_SEVERITY = {
+    "mean": 1.0,
+    "std": 0.30,
+    "min": 0.30,   # late DNF that still banked some running
+    "max": 1.70,   # early DNF + position losses
+}
 
 
 # ==============================================================================
@@ -803,6 +823,7 @@ def calc_driver_fantasy_points_sim(
     sprint_overtakes: int = 0,
     sprint_fastest_lap: bool = False,
     sprint_dnf: bool = False,
+    dnf_severity: float = DNF_EXPECTED_PENALTY_FACTOR,
 ) -> dict:
     """Calculate full fantasy points for a single driver in one simulation."""
 
@@ -811,10 +832,10 @@ def calc_driver_fantasy_points_sim(
 
     # Race points
     if is_dnf:
-        # Soft expected penalty (matches the deterministic scorer): a predicted
-        # DNF includes some late/partial retirements, so projections apply 60%
-        # of the full -20. Quali points are still kept (quali happened first).
-        race_pts = RACE_DNF_DSQ_PENALTY * DNF_EXPECTED_PENALTY_FACTOR
+        # Penalty severity is SAMPLED per sim (dnf_severity, see MC_DNF_SEVERITY):
+        # most DNFs cost the full ~-20 race component, some less (late) / more
+        # (grid-droppers). Quali points are still kept (quali happened first).
+        race_pts = RACE_DNF_DSQ_PENALTY * dnf_severity
         race_finish_pts = 0
         pos_change_pts = 0
         overtake_pts = 0
@@ -1143,6 +1164,11 @@ def run_simulations(
 
         # 7. Calculate fantasy points for each driver
         for i in range(n_drivers):
+            # Sample DNF severity per retirement (full vs late/partial), so the
+            # MC reproduces the real spread of DNF outcomes, not a fixed -12.
+            dnf_sev = (float(np.clip(rng.normal(MC_DNF_SEVERITY["mean"], MC_DNF_SEVERITY["std"]),
+                                     MC_DNF_SEVERITY["min"], MC_DNF_SEVERITY["max"]))
+                       if dnf_mask[i] else DNF_EXPECTED_PENALTY_FACTOR)
             result = calc_driver_fantasy_points_sim(
                 quali_pos=quali_positions[i],
                 race_pos=race_positions[i],
@@ -1157,6 +1183,7 @@ def run_simulations(
                 sprint_overtakes=sprint_overtakes[i] if is_sprint else 0,
                 sprint_fastest_lap=(i == sprint_fl_idx) if is_sprint else False,
                 sprint_dnf=sprint_dnf_mask[i] if is_sprint else False,
+                dnf_severity=dnf_sev,
             )
 
             all_total_pts[sim, i] = result["total_pts"]

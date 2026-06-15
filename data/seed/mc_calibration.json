@@ -1,44 +1,44 @@
 {
-  "noise_multiplier": 1.5,
-  "bias_correction": -3.92,
+  "noise_multiplier": 1.4887,
+  "bias_correction": 0.0,
   "n_rounds": 7,
   "n_samples": 154,
-  "coverage_90": 0.734,
-  "coverage_50": 0.416,
-  "overall_rmse": 17.31,
-  "overall_bias": -3.92,
+  "coverage_90": 0.812,
+  "coverage_50": 0.429,
+  "overall_rmse": 16.6,
+  "overall_bias": 0.34,
   "per_tier": {
     "front": {
-      "coverage_90": 0.7429,
-      "bias": -9.03,
+      "coverage_90": 0.8286,
+      "bias": -3.04,
       "n": 35
     },
     "midfield": {
-      "coverage_90": 0.7755,
-      "bias": -2.57,
+      "coverage_90": 0.8367,
+      "bias": 0.99,
       "n": 49
     },
     "back": {
-      "coverage_90": 0.7,
-      "bias": -2.32,
+      "coverage_90": 0.7857,
+      "bias": 1.57,
       "n": 70
     }
   },
   "per_round": [
     {
       "round": 1,
-      "coverage_90": 0.9545,
-      "coverage_50": 0.5909,
-      "noise_multiplier": 0.9798,
-      "bias": -2.32,
+      "coverage_90": 0.9091,
+      "coverage_50": 0.5,
+      "noise_multiplier": 1.0,
+      "bias": 1.6,
       "n": 22
     },
     {
       "round": 2,
       "coverage_90": 0.7727,
-      "coverage_50": 0.3182,
+      "coverage_50": 0.4091,
       "noise_multiplier": 1.5,
-      "bias": -5.01,
+      "bias": 0.48,
       "n": 22
     },
     {
@@ -46,48 +46,48 @@
       "coverage_90": 1.0,
       "coverage_50": 0.7273,
       "noise_multiplier": 0.8,
-      "bias": -1.51,
+      "bias": 2.39,
       "n": 22
     },
     {
       "round": 6,
-      "coverage_90": 0.7727,
-      "coverage_50": 0.3636,
-      "noise_multiplier": 1.5,
-      "bias": -6.52,
+      "coverage_90": 0.8182,
+      "coverage_50": 0.4091,
+      "noise_multiplier": 1.4679,
+      "bias": 1.05,
       "n": 22
     },
     {
       "round": 7,
-      "coverage_90": 0.7727,
+      "coverage_90": 0.7273,
       "coverage_50": 0.4545,
       "noise_multiplier": 1.5,
-      "bias": -5.09,
+      "bias": -2.82,
       "n": 22
     },
     {
       "round": 8,
-      "coverage_90": 0.2727,
+      "coverage_90": 0.5909,
       "coverage_50": 0.1818,
       "noise_multiplier": 1.5,
-      "bias": -2.53,
+      "bias": 0.73,
       "n": 22
     },
     {
       "round": 9,
-      "coverage_90": 0.5909,
-      "coverage_50": 0.2727,
-      "noise_multiplier": 1.5,
-      "bias": -4.47,
+      "coverage_90": 0.8636,
+      "coverage_50": 0.3182,
+      "noise_multiplier": 1.3159,
+      "bias": -1.06,
       "n": 22
     }
   ],
   "pit_histogram": [
-    46,
-    16,
-    36,
+    35,
     22,
-    34
+    24,
+    31,
+    42
   ],
-  "pit_chi2": 18.34
+  "pit_chi2": 8.66
 }

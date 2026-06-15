@@ -143,10 +143,24 @@ def calculate_risk_ratings(predictions: pd.DataFrame) -> dict[str, float]:
             except Exception:
                 continue
 
+    # Observed field DNF rate, shrunk toward a historical prior so it tracks this
+    # season's actual attrition without overreacting to one carnage race. 2026 has
+    # run hot (~21% field DNF vs the ~12-13% historical norm), so the per-driver
+    # cap below must RISE with it — the old schedule wrongly assumed reliability
+    # improves through the year and clamped genuinely-unreliable cars far too low.
+    PRIOR_RATE = 0.13          # ~historical field DNF rate
+    PRIOR_N = 40               # prior strength in pseudo car-rounds (~2 races)
+    total_dnfs = sum(d[0] for d in season_dnfs.values()) if season_dnfs else 0
+    total_carrounds = sum(d[1] for d in season_dnfs.values()) if season_dnfs else 0
+    field_rate = ((total_dnfs + PRIOR_RATE * PRIOR_N) / (total_carrounds + PRIOR_N)
+                  if total_carrounds > 0 else PRIOR_RATE)
+    # The most failure-prone car runs ~2x the field rate; clamp to a sane band.
+    season_cap = min(max(field_rate * 2.0, 0.20), 0.50)
+
     if season_dnfs:
-        total_dnfs = sum(d[0] for d in season_dnfs.values())
-        total_races = max(d[1] for d in season_dnfs.values())
-        print(f"  Loaded {total_races} rounds of actual DNF data ({total_dnfs} total DNFs)")
+        total_rounds = max(d[1] for d in season_dnfs.values())
+        print(f"  Loaded {total_rounds} rounds of actual DNF data ({total_dnfs} total DNFs, "
+              f"field rate {field_rate:.1%}, per-driver cap {season_cap:.0%})")
 
     # Blend historical and current-season rates
     for driver_id in predictions["driver_id"].unique():
@@ -164,16 +178,12 @@ def calculate_risk_ratings(predictions: pd.DataFrame) -> dict[str, float]:
         else:
             blended = hist_rate
 
-        # Cap at 15% early in season (unreliable small samples),
-        # increase cap as season progresses
-        max_races = max((d[1] for d in season_dnfs.values()), default=0)
-        # DNF cap DECREASES through the season: cars get more reliable as
-        # teething issues are fixed, and a long reliable run makes a high DNF
-        # estimate less believable. ~15% now (5 races run), tapering to a 10% floor.
-        cap = max(0.175 - max_races * 0.005, 0.10)
+        # Cap tracks observed field attrition (season_cap, computed above) instead
+        # of a fixed decreasing schedule — so in a high-DNF season the unreliable
+        # cars aren't clamped down to a historical-norm ceiling.
         # Floor: no driver has truly 0% DNF risk — mechanical failures, incidents etc.
         floor = 0.02  # 2% minimum baseline
-        risk[driver_id] = round(min(max(blended, floor), cap) * 100, 1)
+        risk[driver_id] = round(min(max(blended, floor), season_cap) * 100, 1)
 
     return risk
 
