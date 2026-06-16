@@ -367,6 +367,12 @@ Two gotchas that bite:
 
 If you put the wrong round number or use abbreviations, the loader silently finds nothing and falls back to auto-detected counts. `load_seed_overtakes()` in `11_actual_fantasy_points.py` reads this and overrides detected counts; it prints `Manual overtakes.csv override for race (N drivers)` when the file is used.
 
+### Pre-step: Update DNF causes
+
+Jolpica AND FastF1 report every 2026 retirement as a generic **"Retired"** (Ergast, which recorded detailed causes, was frozen end-2024). So after a race with retirements, hand-classify them in `data/seed/dnf_causes_2026.json` — add the round and each retiree's cause: `mechanical` (car/PU failure — the only cause that elevates a team-mate's risk in the sim), `collision` (contact), `driver_error` (solo crash), or `other` (debris/illness). Keyed by round → driver **abbreviation** (e.g. `"10": {"VER": "mechanical"}`). Leave `""` if unsure.
+
+This powers the per-cause reliability features and the MC's **cause-gated teammate correlation** (a garage-mate's crash no longer drags your driver down). It only takes effect after a rebuild — `03a` → `03b` (or just re-run the model-input chain); `03b` prints `Applied N manual 2026 DNF cause overrides`. The `post_race` phase does **not** rebuild model_rows, so do this before the next round's prediction retrain. Research the causes from race reports if you didn't watch.
+
 ### Run the phase
 
 ```bash

@@ -325,7 +325,10 @@ Rolling stats with `.shift(1)` to prevent leakage:
 
 Built in `pipeline/03b_build_jolpica_features.py`.
 
-#### Layer 2 — FP Telemetry (sparse, 40+ columns)
+#### Layer 2 — FP Telemetry (40+ columns; ~56% of rows since the 2026-06-15 backfill)
+
+> **Coverage:** historically FP features were extracted for the current season only (~3% of training rows), because `02`/`03` were hardcoded to `CURRENT_SEASON`. `pipeline/backfill_fp_history.py` (2026-06-15) extracts the raw FastF1 FP that was already on disk for 2022-2025 into `data/processed/features/year{Y}/round{N}/` (which `04` was already built to merge), lifting coverage to **~56%** (2022:65% → 2025:94%; 2020-2021 have no raw FP). On the 97-fold walk-forward this improved qualifying MAE by −0.13 in all five seasons and pushed `pace_rank` into the quali top-8 — i.e. the model now weights FP pace *natively*, which it structurally couldn't at 3% coverage. The inference-time FP-pace blend (§6) still runs on top.
+
 
 - **Pace:** avg_lap_time, best_lap_time, median_lap_time, best_3_lap_avg, best_5_lap_avg, best_10_lap_avg, p50_to_p95_avg
 - **Consistency:** lap_time_std, lap_time_variance, coefficient of variation
@@ -664,7 +667,7 @@ Example: 50% chance of P1, 50% chance of P11 → expected position = P6, fantasy
 For each of 10,000 simulations:
 
 1. **Sample qualifying positions:** Z-score normalize raw XGBRanker scores (preserving model gaps), add team-correlated + individual Gaussian noise, re-rank.
-2. **Sample DNFs:** Two-stage correlated sampling — multi-car incidents (~2% base) + team-correlated mechanical failures (30% teammate correlation, 3x elevated probability when one teammate has already DNF'd).
+2. **Sample DNFs:** Two-stage correlated sampling — multi-car incidents + **cause-gated** team-correlated failures. Per-driver DNF probability is capped at a ceiling that **tracks the observed field attrition** (`07`; 2026 ran ~21% vs the old ≤14% decreasing cap). When a teammate has already DNF'd, the other car's elevation fires scaled by the **mechanical share** of the DNF-ing car's history (`load_mechanical_shares` from `dnf_causes_2026.json` + 2022 raw) — a solo crash doesn't correlate, only a shared car/PU failure does. A sampled retirement draws its points hit from `RACE_DNF_DSQ_PENALTY × severity` (severity ~N(1.0,0.30), clipped) to reproduce the real spread, not a fixed soft value. *(2026-06-15 overhaul: lifted DNF-driver 90% CI coverage 42%→90% and removed a −3.8 over-prediction bias.)*
 3. **Sample race positions:** Same gap-preserving approach as quali, with separate team shocks. DNF drivers assigned last position.
 4. **Sample overtakes:** Driver-specific history when available (blended with grid-bucket estimates), otherwise grid-bucket base + excess gains, with stochastic variation.
 5. **Sample fastest lap:** Weighted random selection by finishing position.

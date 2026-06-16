@@ -2,6 +2,27 @@
   "entries": [
     {
       "date": "2026-06-15",
+      "title": "The model now learns from four years of practice data — sharper qualifying",
+      "tags": ["model"],
+      "body": [
+        "Until now the prediction model only had <strong>this season's</strong> Friday/Saturday practice telemetry to learn from — roughly 3% of its training history. We found four full seasons of practice data (2022&ndash;2025) sitting unused on disk and wired it in. The model now trains on practice pace across <strong>~56% of its history</strong> instead of 3%.",
+        "Why it matters: with only a sliver of practice data, the model couldn't really learn how practice pace translates into results &mdash; so we leaned on a hand-tuned blend to compensate. Now it learns that relationship itself. On a rigorous back-test across every round of 2022&ndash;2026, <strong>qualifying prediction error dropped ~4% and improved in all five seasons</strong> &mdash; the kind of across-the-board gain we hold out for before shipping.",
+        "This kicks in from the <strong>Austrian Grand Prix</strong> onward. You'll see it as tighter, better-placed qualifying predictions, and it flows through to race predictions, the confidence ranges and the optimizer."
+      ]
+    },
+    {
+      "date": "2026-06-15",
+      "title": "Honest confidence ranges for a high-DNF season — and crash-aware reliability",
+      "tags": ["model", "fix"],
+      "body": [
+        "2026 has been brutal for retirements &mdash; about <strong>21% of cars per race</strong> haven't finished, well above the historical ~12%. Our confidence ranges hadn't caught up: when a driver actually retired, the result landed <em>outside</em> the predicted 90% range 58% of the time. The intervals were quietly too optimistic about reliability.",
+        "Two fixes: each driver's retirement risk now <strong>tracks the season's actual attrition</strong> instead of assuming cars get more reliable as the year goes on, and a simulated retirement now costs a realistic points hit (with spread) rather than a fixed soft estimate. Result &mdash; a retiring driver now lands inside the 90% range <strong>90% of the time</strong> (was 42%), and a systematic over-optimism in the numbers is gone.",
+        "We also made the <strong>team-mate reliability link smarter</strong>: a garage-mate's failure only raises your driver's retirement risk when it's a <em>shared car/engine</em> problem &mdash; a solo crash by the team-mate no longer drags your driver down. We hand-classified every 2026 retirement (mechanical vs crash vs incident) to power this.",
+        "Visible from the <strong>Austrian GP</strong>: genuinely crash-prone or unreliable drivers will show a slightly lower expected score and a wider downside in their confidence band. That's the maths being honest about a chaotic season, not pessimism."
+      ]
+    },
+    {
+      "date": "2026-06-15",
       "title": "Tyre degradation, fixed — the Analysis numbers now mean what they say",
       "tags": ["fix"],
       "body": [

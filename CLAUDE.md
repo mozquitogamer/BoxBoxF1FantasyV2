@@ -36,6 +36,8 @@ BoxBoxF1FantasyV2/
 │   ├── 13_fetch_openf1_overtakes.py # Overtakes from OpenF1 API
 │   ├── 13_fetch_pitstop_stationary.py # Pit stop stationary times
 │   ├── calibrate_confidence.py      # CI calibration: MC predictions vs actuals
+│   ├── backfill_fp_history.py       # One-off: extract historical (2022-2025) FP features into training
+│   ├── sweep_fp_blend.py            # Leak-free walk-forward sweep of the FP-quali blend weight
 │   ├── run_weekend.py              # Orchestrator: detects phase, runs pipeline
 │   ├── predict_horizon.py          # Priors-only ML predictions for upcoming rounds (multi-week planner input)
 │   ├── weather_forecast.py         # Open-Meteo weather forecasts
@@ -47,6 +49,7 @@ BoxBoxF1FantasyV2/
 │   ├── track_classifications.py    # 9-dimensional circuit feature vectors
 │   ├── track_similarity.py         # Cosine similarity for track weighting
 │   ├── team_driver_ratings.py      # Manual skill ratings per team/driver
+│   ├── tyre_deg.py                 # Shared robust tyre-degradation estimator (FP + race)
 │   └── circuit_coordinates.py      # Track GPS coordinates
 ├── data/
 │   ├── raw/fastf1/year{Y}/round{R}/ # FP1/2/3 + sprint quali parquets (sprint weekends)
@@ -59,6 +62,7 @@ BoxBoxF1FantasyV2/
 │       ├── constructors.json         # 11 constructors
 │       ├── races.json                # 2026 calendar
 │       ├── official_fantasy_points.json # Official F1 Fantasy points (manually entered)
+│       ├── dnf_causes_2026.json      # Manual DNF cause overrides (mechanical/collision/driver_error/other)
 │       └── mc_calibration.json       # MC noise calibration from actual results
 ├── models/trained/                   # Saved XGBoost models (.json)
 ├── web/public/
@@ -82,7 +86,7 @@ BoxBoxF1FantasyV2/
 The core design: two data layers merged for XGBoost, which handles NaN natively. A third layer of per-session weather features lands on top.
 
 - **Layer 1 — Jolpica Priors (~85 features, always available):** Rolling averages (1/3/5 race windows), circuit experience, constructor trends, teammate deltas, DNF rates, form trends, track similarity features, skill ratings (including `wet_skill` per driver and `cold_skill` per constructor). Uses `.shift(1)` to prevent leakage.
-- **Layer 2 — FP Telemetry (40+ features, sparse/NaN in training):** Lap times, sectors, degradation, long-run pace, compound-specific features (soft/medium/hard), relative pace deltas. Only ~160/2,600 training rows have this data.
+- **Layer 2 — FP Telemetry (40+ features):** Lap times, sectors, degradation, long-run pace, compound-specific features (soft/medium/hard), relative pace deltas. Backfilled across 2022-2026 via `pipeline/backfill_fp_history.py` (raw FastF1 FP for those years was on disk but `02`/`03` only ever extracted the current season), so **~56% of training rows now carry FP** (2022:65% → 2025:94%; 2020-2021 have no raw FP). Was 2026-only (~3%) until 2026-06-15 — that backfill let the model weight FP pace natively (validated quali walk-forward MAE −0.13, better in all 5 years; `pace_rank` rose into the quali top-8). The inference-time FP-pace blend (see ML Models) runs on top and stays additive.
 - **Layer 3 — Per-session weather (added 2026-05-25, Level 3):** `weather_was_wet_{quali,race,sprint}`, `weather_track_temp_*`, `weather_air_temp_*`, `weather_humidity_*`, plus `weather_precip_minutes_race`. Built from FastF1 cache via `pipeline/03c_extract_session_weather.py` → `data/processed/weather/all_session_weather.parquet`, joined by `04_build_model_inputs.py`. Each model gets ONLY its own session's weather (quali model sees `_quali`, race sees `_race`, sprint sees `_sprint`). 6× sample-weight boost on wet training rows compensates for the ~85/15 dry/wet imbalance.
 
 XGBoost's native NaN handling means: when FP data exists → model uses it to refine; when missing → model relies on priors. No imputation needed.
@@ -128,6 +132,11 @@ Callsites that apply this mapping:
 ## Monte Carlo Simulation (08_monte_carlo_fantasy.py)
 
 10,000 iterations per driver. Each iteration: add calibrated noise to model scores → re-rank → sample DNFs (two-stage: multi-car incidents + team-correlated mechanical failures) → sample overtakes → sample fastest lap/DOTD → compute full fantasy points. Noise bases auto-calibrated from `data/seed/mc_calibration.json` (computed by `calibrate_confidence.py`). Output: P5/P25/P50/P75/P95 percentiles.
+
+**DNF modeling (overhauled 2026-06-15 — fixed DNF-driver 90% CI coverage 42%→90%):**
+- **Per-driver DNF probability cap tracks observed field attrition** (`07_calculate_fantasy.py::calculate_risk_ratings`): the old cap was a *decreasing* schedule (assumed cars get reliable through the year) that clamped every car to ≤14% while 2026 ran ~21%. Now `cap = clip(shrunk_field_rate × 2, 0.20, 0.50)` so unreliable cars show real risk.
+- **Sampled DNF severity** (`MC_DNF_SEVERITY`): a simulated retirement draws `RACE_DNF_DSQ_PENALTY × severity` where severity ~ N(1.0, 0.30) clipped [0.3,1.7], reproducing the real 2026 DNF outcome spread (mean ~−17, tail to −30) instead of a fixed soft −12. Erased a systematic −3.8 over-prediction bias as a side effect.
+- **Cause-gated teammate correlation** (`load_mechanical_shares`): `TEAM_DNF_CORRELATION` (0.22) fires scaled by the DNF-ing car's **mechanical share** (roll_mech/roll_dnf per driver) — a team-mate's solo crash no longer elevates the other car, only shared car/PU failures do. Cause labels from 2022 raw + the hand-curated `data/seed/dnf_causes_2026.json` (Jolpica/FastF1 give only generic "Retired" for 2024+). 0.22 × the ~0.68 field mechanical share preserves the validated ~0.198 empirical teammate conditional.
 
 Constructors simulated per-iteration: sum both drivers' simulated points (with exact per-sim DOTD subtraction) + qualifying bonus + sampled pit stop points. Constructor output includes P5/P25/P75/P95 percentiles.
 
@@ -242,7 +251,8 @@ Before each round, update `data/seed/fantasy_prices.json` with current F1 Fantas
 - Pipeline scripts are numbered (01-13) and run sequentially
 - All rolling features use `.shift(1)` to prevent data leakage
 - Constructor scoring never includes driver boost multipliers (2x/3x)
-- DNF probability is blended: historical rolling 5-race rate + current season actuals, dynamically weighted
+- DNF probability is blended: historical rolling 5-race rate + current season actuals, dynamically weighted, then capped at a ceiling that **tracks the observed field DNF rate** (shrunk; `season_cap` in `07`) rather than a fixed decreasing schedule — see Monte Carlo § DNF modeling
+- **DNF causes:** Jolpica/FastF1 report only generic "Retired" for 2024+ (Ergast, which had detailed causes, froze end-2024). After each race, add that round's retirements to `data/seed/dnf_causes_2026.json` (`mechanical`/`collision`/`driver_error`/`other`) and re-run `03a`→`03b`→`04` so the per-cause reliability features + the MC's cause-gated teammate correlation pick them up. 2022 raw still has real causes; 2023-2026 rely on this seed
 - Price data in `fantasy_prices.json` has both `drivers` and `constructors` sections, plus `price_history` keyed by round number
 - Cache version in `index.html` (`app.js?v=N`) must be bumped when `app.js` changes
 - The website has no build step — edit `web/public/app.js` and `web/public/styles.css` directly
