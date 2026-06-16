@@ -77,7 +77,7 @@
           "precip_prob": 8,
           "precip_mm": 0.0,
           "windspeed": 2.0,
-          "windgusts": 9.7,
+          "windgusts": 5.4,
           "weather_code": 0
         },
         {
@@ -87,7 +87,7 @@
           "precip_prob": 12,
           "precip_mm": 0.0,
           "windspeed": 3.1,
-          "windgusts": 11.2,
+          "windgusts": 6.5,
           "weather_code": 0
         },
         {
@@ -97,7 +97,7 @@
           "precip_prob": 16,
           "precip_mm": 0.0,
           "windspeed": 4.4,
-          "windgusts": 9.4,
+          "windgusts": 6.8,
           "weather_code": 0
         },
         {
@@ -107,7 +107,7 @@
           "precip_prob": 20,
           "precip_mm": 0.0,
           "windspeed": 5.6,
-          "windgusts": 6.1,
+          "windgusts": 6.5,
           "weather_code": 1
         }
       ]
@@ -132,7 +132,7 @@
           "precip_prob": 24,
           "precip_mm": 0.0,
           "windspeed": 6.5,
-          "windgusts": 4.0,
+          "windgusts": 6.1,
           "weather_code": 1
         },
         {
@@ -142,7 +142,7 @@
           "precip_prob": 28,
           "precip_mm": 0.0,
           "windspeed": 7.2,
-          "windgusts": 4.0,
+          "windgusts": 5.8,
           "weather_code": 1
         },
         {
@@ -162,7 +162,7 @@
           "precip_prob": 35,
           "precip_mm": 0.0,
           "windspeed": 8.6,
-          "windgusts": 5.8,
+          "windgusts": 4.3,
           "weather_code": 2
         }
       ]
@@ -187,7 +187,7 @@
           "precip_prob": 12,
           "precip_mm": 0.0,
           "windspeed": 5.9,
-          "windgusts": 7.2,
+          "windgusts": 4.0,
           "weather_code": 1
         },
         {
@@ -197,7 +197,7 @@
           "precip_prob": 14,
           "precip_mm": 0.0,
           "windspeed": 8.7,
-          "windgusts": 9.0,
+          "windgusts": 5.8,
           "weather_code": 1
         },
         {
@@ -207,7 +207,7 @@
           "precip_prob": 16,
           "precip_mm": 0.0,
           "windspeed": 11.5,
-          "windgusts": 10.8,
+          "windgusts": 6.5,
           "weather_code": 1
         },
         {
@@ -217,7 +217,7 @@
           "precip_prob": 18,
           "precip_mm": 0.0,
           "windspeed": 13.6,
-          "windgusts": 12.6,
+          "windgusts": 6.8,
           "weather_code": 1
         }
       ]
@@ -242,7 +242,7 @@
           "precip_prob": 20,
           "precip_mm": 0.0,
           "windspeed": 14.5,
-          "windgusts": 13.3,
+          "windgusts": 7.2,
           "weather_code": 2
         },
         {
@@ -252,7 +252,7 @@
           "precip_prob": 23,
           "precip_mm": 0.0,
           "windspeed": 14.0,
-          "windgusts": 13.0,
+          "windgusts": 7.9,
           "weather_code": 2
         },
         {
@@ -262,7 +262,7 @@
           "precip_prob": 26,
           "precip_mm": 0.0,
           "windspeed": 12.5,
-          "windgusts": 11.9,
+          "windgusts": 8.3,
           "weather_code": 1
         },
         {
@@ -272,7 +272,7 @@
           "precip_prob": 29,
           "precip_mm": 0.0,
           "windspeed": 10.5,
-          "windgusts": 10.1,
+          "windgusts": 8.3,
           "weather_code": 1
         }
       ]
@@ -297,7 +297,7 @@
           "precip_prob": 22,
           "precip_mm": 0.0,
           "windspeed": 6.1,
-          "windgusts": 8.6,
+          "windgusts": 6.8,
           "weather_code": 0
         },
         {
@@ -307,7 +307,7 @@
           "precip_prob": 24,
           "precip_mm": 0.0,
           "windspeed": 6.4,
-          "windgusts": 9.7,
+          "windgusts": 7.2,
           "weather_code": 0
         },
         {
@@ -317,7 +317,7 @@
           "precip_prob": 25,
           "precip_mm": 0.0,
           "windspeed": 5.8,
-          "windgusts": 9.0,
+          "windgusts": 8.6,
           "weather_code": 0
         },
         {
@@ -327,13 +327,13 @@
           "precip_prob": 26,
           "precip_mm": 0.0,
           "windspeed": 4.7,
-          "windgusts": 7.6,
+          "windgusts": 10.8,
           "weather_code": 0
         }
       ]
     }
   ],
-  "last_updated": "2026-06-16T16:26:47Z",
-  "next_update": "2026-06-16T22:26:47Z",
+  "last_updated": "2026-06-16T20:39:34Z",
+  "next_update": "2026-06-17T02:39:34Z",
   "data_source": "Open-Meteo (open-meteo.com)"
 }
