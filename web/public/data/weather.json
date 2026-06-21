@@ -14,7 +14,7 @@
     "end": "2026-06-28"
   },
   "overall_rain_risk": "LOW",
-  "max_rain_probability": 30,
+  "max_rain_probability": 18,
   "daily": [
     {
       "date": "2026-06-26",
@@ -44,11 +44,11 @@
     },
     {
       "date": "2026-06-28",
-      "temp_max": 33.7,
-      "temp_min": 19.4,
-      "precip_probability_max": 39,
+      "temp_max": 34.8,
+      "temp_min": 19.2,
+      "precip_probability_max": 22,
       "precip_sum_mm": 0.0,
-      "wind_max_kmh": 4.2,
+      "wind_max_kmh": 5.9,
       "weather_description": "Mainly clear",
       "weather_category": "clear",
       "weather_icon": "\u2600\ufe0f",
@@ -281,10 +281,10 @@
       "name": "Race",
       "day_label": "Sunday",
       "date": "2026-06-28",
-      "rain_probability": 30,
+      "rain_probability": 18,
       "rain_risk": "LOW",
-      "avg_temp": 33.4,
-      "avg_wind": 3.1,
+      "avg_temp": 34.5,
+      "avg_wind": 5.2,
       "total_precip_mm": 0.0,
       "weather_description": "Clear sky",
       "weather_category": "clear",
@@ -292,48 +292,48 @@
       "hourly": [
         {
           "hour": 13,
-          "temp": 33.0,
-          "humidity": 28,
-          "precip_prob": 18,
+          "temp": 34.1,
+          "humidity": 26,
+          "precip_prob": 12,
           "precip_mm": 0.0,
-          "windspeed": 3.6,
-          "windgusts": 6.5,
+          "windspeed": 5.8,
+          "windgusts": 6.1,
           "weather_code": 0
         },
         {
           "hour": 14,
-          "temp": 33.7,
-          "humidity": 26,
-          "precip_prob": 22,
+          "temp": 34.8,
+          "humidity": 25,
+          "precip_prob": 14,
           "precip_mm": 0.0,
-          "windspeed": 3.7,
-          "windgusts": 7.2,
+          "windspeed": 5.9,
+          "windgusts": 6.5,
           "weather_code": 0
         },
         {
           "hour": 15,
-          "temp": 33.7,
+          "temp": 34.8,
           "humidity": 26,
-          "precip_prob": 26,
+          "precip_prob": 16,
           "precip_mm": 0.0,
-          "windspeed": 3.2,
-          "windgusts": 8.3,
+          "windspeed": 5.2,
+          "windgusts": 6.1,
           "weather_code": 1
         },
         {
           "hour": 16,
-          "temp": 33.2,
-          "humidity": 28,
-          "precip_prob": 30,
+          "temp": 34.2,
+          "humidity": 27,
+          "precip_prob": 18,
           "precip_mm": 0.0,
-          "windspeed": 1.9,
-          "windgusts": 9.7,
+          "windspeed": 3.8,
+          "windgusts": 5.0,
           "weather_code": 1
         }
       ]
     }
   ],
-  "last_updated": "2026-06-20T19:10:24Z",
-  "next_update": "2026-06-21T01:10:24Z",
+  "last_updated": "2026-06-21T02:48:50Z",
+  "next_update": "2026-06-21T08:48:50Z",
   "data_source": "Open-Meteo (open-meteo.com)"
 }
