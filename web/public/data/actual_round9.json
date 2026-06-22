@@ -653,10 +653,10 @@
       "quali_bonus": 10,
       "race_points": 32,
       "sprint_points": 0,
-      "pitstop_points": 0,
-      "total_points": 53,
+      "pitstop_points": 11,
+      "total_points": 64,
       "price": 29.7,
-      "ppm": 1.78
+      "ppm": 2.15
     },
     {
       "constructor_id": "mclaren",
@@ -667,10 +667,10 @@
       "quali_bonus": 10,
       "race_points": 31,
       "sprint_points": 0,
-      "pitstop_points": 0,
-      "total_points": 52,
+      "pitstop_points": 5,
+      "total_points": 57,
       "price": 29.8,
-      "ppm": 1.74
+      "ppm": 1.91
     },
     {
       "constructor_id": "ferrari",
@@ -681,10 +681,10 @@
       "quali_bonus": 5,
       "race_points": 17,
       "sprint_points": 0,
-      "pitstop_points": 0,
-      "total_points": 32,
+      "pitstop_points": 8,
+      "total_points": 40,
       "price": 25.4,
-      "ppm": 1.26
+      "ppm": 1.57
     },
     {
       "constructor_id": "mercedes",
@@ -695,10 +695,10 @@
       "quali_bonus": 10,
       "race_points": -2,
       "sprint_points": 0,
-      "pitstop_points": 5,
-      "total_points": 31,
+      "pitstop_points": 11,
+      "total_points": 37,
       "price": 31.4,
-      "ppm": 0.99
+      "ppm": 1.18
     },
     {
       "constructor_id": "alpine",
@@ -709,24 +709,10 @@
       "quali_bonus": 3,
       "race_points": 26,
       "sprint_points": 0,
-      "pitstop_points": 0,
-      "total_points": 29,
+      "pitstop_points": 2,
+      "total_points": 31,
       "price": 16.7,
-      "ppm": 1.74
-    },
-    {
-      "constructor_id": "racing_bulls",
-      "name": "Racing Bulls",
-      "driver_1": "LIN",
-      "driver_2": "LAW",
-      "quali_points": 3,
-      "quali_bonus": 5,
-      "race_points": 16,
-      "sprint_points": 0,
-      "pitstop_points": 0,
-      "total_points": 24,
-      "price": 10.5,
-      "ppm": 2.29
+      "ppm": 1.86
     },
     {
       "constructor_id": "williams",
@@ -737,10 +723,24 @@
       "quali_bonus": 1,
       "race_points": 15,
       "sprint_points": 0,
-      "pitstop_points": 0,
-      "total_points": 16,
+      "pitstop_points": 15,
+      "total_points": 31,
       "price": 15.0,
-      "ppm": 1.07
+      "ppm": 2.07
+    },
+    {
+      "constructor_id": "racing_bulls",
+      "name": "Racing Bulls",
+      "driver_1": "LIN",
+      "driver_2": "LAW",
+      "quali_points": 3,
+      "quali_bonus": 5,
+      "race_points": 16,
+      "sprint_points": 0,
+      "pitstop_points": 2,
+      "total_points": 26,
+      "price": 10.5,
+      "ppm": 2.48
     },
     {
       "constructor_id": "audi",
@@ -751,10 +751,10 @@
       "quali_bonus": 5,
       "race_points": -13,
       "sprint_points": 0,
-      "pitstop_points": 0,
-      "total_points": -6,
+      "pitstop_points": 19,
+      "total_points": 13,
       "price": 4.4,
-      "ppm": -1.36
+      "ppm": 2.95
     },
     {
       "constructor_id": "haas",
@@ -779,10 +779,10 @@
       "quali_bonus": -1,
       "race_points": -12,
       "sprint_points": 0,
-      "pitstop_points": 0,
-      "total_points": -13,
+      "pitstop_points": 2,
+      "total_points": -11,
       "price": 5.4,
-      "ppm": -2.41
+      "ppm": -2.04
     },
     {
       "constructor_id": "aston_martin",
@@ -793,10 +793,10 @@
       "quali_bonus": -1,
       "race_points": -40,
       "sprint_points": 0,
-      "pitstop_points": 0,
-      "total_points": -41,
+      "pitstop_points": 5,
+      "total_points": -36,
       "price": 6.9,
-      "ppm": -5.94
+      "ppm": -5.22
     }
   ]
 }
