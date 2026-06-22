@@ -42,7 +42,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 23,
+          "points": 22,
           "is_dnf": false
         }
       ]
@@ -88,7 +88,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 29,
+          "points": 28,
           "is_dnf": false
         }
       ]
@@ -226,7 +226,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 47,
+          "points": 46,
           "is_dnf": false
         }
       ]
@@ -272,7 +272,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 24,
+          "points": 23,
           "is_dnf": false
         }
       ]
@@ -364,7 +364,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 12,
+          "points": 10,
           "is_dnf": false
         }
       ]
@@ -410,7 +410,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 9,
+          "points": 7,
           "is_dnf": false
         }
       ]
@@ -456,7 +456,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 21,
+          "points": 17,
           "is_dnf": false
         }
       ]
@@ -502,7 +502,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 12,
+          "points": 8,
           "is_dnf": false
         }
       ]
@@ -548,7 +548,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 12,
+          "points": 11,
           "is_dnf": false
         }
       ]
@@ -594,7 +594,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 5,
+          "points": 4,
           "is_dnf": false
         }
       ]
@@ -640,7 +640,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 11,
+          "points": 9,
           "is_dnf": false
         }
       ]
@@ -686,7 +686,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 12,
+          "points": 9,
           "is_dnf": false
         }
       ]
@@ -732,7 +732,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 13,
+          "points": 8,
           "is_dnf": false
         }
       ]
@@ -870,7 +870,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 21,
+          "points": 19,
           "is_dnf": false
         }
       ]
@@ -1050,7 +1050,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 38
+          "points": 31
         }
       ]
     },
@@ -1089,7 +1089,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 41
+          "points": 32
         }
       ]
     },
@@ -1128,7 +1128,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 31
+          "points": 24
         }
       ]
     },
@@ -1167,7 +1167,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": -7
+          "points": -11
         }
       ]
     },
@@ -1206,7 +1206,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 65
+          "points": 53
         }
       ]
     },
@@ -1245,7 +1245,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 37
+          "points": 29
         }
       ]
     },
@@ -1284,7 +1284,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 33
+          "points": 16
         }
       ]
     },
@@ -1323,7 +1323,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 60
+          "points": 52
         }
       ]
     },
@@ -1362,7 +1362,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 15
+          "points": -6
         }
       ]
     },
@@ -1401,7 +1401,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": -6
+          "points": -13
         }
       ]
     },
@@ -1440,7 +1440,7 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": -36
+          "points": -41
         }
       ]
     }
