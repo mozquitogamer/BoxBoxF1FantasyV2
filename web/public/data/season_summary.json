@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-06-22T07:07:30.334404+00:00",
+  "generated_at": "2026-06-22T07:19:40.463979+00:00",
   "rounds": [
     {
       "round": 1,
@@ -70,7 +70,7 @@
       "name": "Austrian Grand Prix",
       "circuit": "Spielberg",
       "date": "2026-06-28",
-      "has_predictions": false,
+      "has_predictions": true,
       "has_post_race": false,
       "has_actual": false
     },
