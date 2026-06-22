@@ -608,6 +608,44 @@ function getConstructorPitStats(constructorId) {
     };
 }
 
+// Per-round wheels-up pit stop summary for the Analysis tab "Pit Stop
+// Performance" table. Reads the SAME OpenF1 stationary (wheels-up) service time
+// as the Constructors panel — NOT Jolpica's pit-stop "duration", which is the
+// full pit-lane transit (~20s) and is the wrong metric for fantasy scoring.
+// Stops with no measured stationary time are excluded from avg/best and flagged
+// as n/a. Returns null when no wheels-up data exists for the round yet.
+function getRoundPitStops(roundNum) {
+    const ps = window._pitstopData;
+    if (!ps || !ps.by_constructor) return null;
+    const rn = Number(roundNum);
+    const cons = (data && data.constructors) ? data.constructors : [];
+    const rows = [];
+    for (const c of cons) {
+        const entries = ps.by_constructor[c.constructor_id];
+        if (!entries) continue;
+        const roundEntry = entries.find(e => Number(e.round) === rn);
+        if (!roundEntry || !roundEntry.stops || roundEntry.stops.length === 0) continue;
+        const stops = roundEntry.stops;
+        const times = stops.filter(s => s.stationary != null).map(s => s.stationary);
+        const missing = stops.filter(s => s.stationary_missing).length;
+        const team = TEAMS[c.constructor_id] || { name: c.name, color: '#666' };
+        rows.push({
+            id: c.constructor_id,
+            name: c.full_name || c.name || team.name,
+            color: team.color,
+            avg: times.length ? times.reduce((a, b) => a + b, 0) / times.length : null,
+            best: times.length ? Math.min(...times) : null,
+            measured: times.length,
+            missing,
+            totalStops: stops.length,
+        });
+    }
+    if (rows.length === 0) return null;
+    // Best (lowest) average stationary first; teams with no measured time last.
+    rows.sort((a, b) => (a.avg ?? Infinity) - (b.avg ?? Infinity));
+    return rows;
+}
+
 function cacheBust(url) {
     return url + (url.includes('?') ? '&' : '?') + '_=' + Date.now();
 }
@@ -949,6 +987,7 @@ function setupControls() {
             loadPostRaceData(roundNum),
             loadPredictionsData(roundNum),
             loadActualData(roundNum),
+            ensureLoaded('pitstops', loadPitstopData),  // wheels-up times for the pit-stop table
         ]);
         if (requestId !== _postRaceRequestId) return; // stale request, discard
         renderPostRace(postRace, predictions, actual, roundNum);
@@ -5927,27 +5966,41 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
         </div>`;
     }
 
-    // Pit Stops by Team
-    if (prData && prData.pitstops && prData.pitstops.by_team && prData.pitstops.by_team.length > 0) {
+    // Pit Stops by Team — wheels-up (stationary) service time, the metric F1
+    // Fantasy scores. Sourced from the same OpenF1 data as the Constructors panel,
+    // NOT Jolpica's pit-stop "duration" (full pit-lane transit, ~20s).
+    const roundPits = getRoundPitStops(roundNum);
+    if (roundPits && roundPits.length > 0) {
         html += `
         <div class="analysis-block collapsible">
             <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Pit Stop Performance <span class="collapse-icon">▼</span></h3>
             <div class="collapsible-content">
             <table class="data-table sortable">
                 <thead><tr>
-                    <th>#</th><th>Team</th><th class="num">Avg Time</th>
-                    <th class="num">Best Time</th><th class="num">Stops</th>
+                    <th>#</th><th>Team</th><th class="num">Avg Stationary</th>
+                    <th class="num">Best Stationary</th><th class="num">Stops</th>
                 </tr></thead>
-                <tbody>${prData.pitstops.by_team.map((t, i) => `
+                <tbody>${roundPits.map((t, i) => `
                     <tr>
                         <td>${i+1}</td>
-                        <td><strong>${t.constructor_name}</strong></td>
-                        <td class="num">${t.avg_pitstop.toFixed(3)}s</td>
-                        <td class="num">${t.best_pitstop.toFixed(3)}s</td>
-                        <td class="num">${t.total_stops}</td>
+                        <td><strong>${t.name}</strong></td>
+                        <td class="num">${t.avg != null ? t.avg.toFixed(2) + 's' : 'n/a'}</td>
+                        <td class="num">${t.best != null ? t.best.toFixed(2) + 's' : 'n/a'}</td>
+                        <td class="num">${t.totalStops}${t.missing ? ` <span style="color:var(--text-muted);font-size:0.9em;" title="${t.missing} stop(s) without a recorded stationary time — typically safety car / VSC, retirements, or penalty stops">(${t.missing} n/a)</span>` : ''}</td>
                     </tr>`).join('')}
                 </tbody>
             </table>
+            <p class="analysis-note"><strong>Stationary time</strong> = wheels-up service time (the F1 Fantasy scoring metric), not the full pit-lane time. Refreshes 24–48h post-race as public timing feeds catch up.</p>
+            </div>
+        </div>`;
+    } else if (prData && prData.pitstops && prData.pitstops.by_team && prData.pitstops.by_team.length > 0) {
+        // Jolpica has pit data but the OpenF1 wheels-up times aren't in yet — show
+        // an honest note rather than the misleading ~20s pit-lane average.
+        html += `
+        <div class="analysis-block collapsible">
+            <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Pit Stop Performance <span class="collapse-icon">▼</span></h3>
+            <div class="collapsible-content">
+            <p class="no-data">Wheels-up (stationary) pit stop times for this round aren't published yet — they land 24–48h after the race as public timing feeds catch up. Season-wide stationary times are on the Constructors tab.</p>
             </div>
         </div>`;
     }

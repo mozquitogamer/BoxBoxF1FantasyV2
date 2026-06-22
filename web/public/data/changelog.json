@@ -1,6 +1,15 @@
 {
   "entries": [
     {
+      "date": "2026-06-22",
+      "title": "Pit Stop Performance on the Analysis tab now shows wheels-up times",
+      "tags": ["fix"],
+      "body": [
+        "The Pit Stop Performance table on the Analysis tab was showing each team's full pit-lane time, roughly 20 seconds from pit entry to pit exit, rather than the wheels-up stationary time that actually measures pit-crew speed. The two are worlds apart: a good stop is about 2 to 3 seconds stationary, so the old numbers told you nothing useful.",
+        "It now uses the same wheels-up (stationary) data as the Constructors tab and the fantasy scoring, broken out per round, with any stop that has no measured stationary time flagged as n/a rather than guessed. For very recent races, where the public timing feed hasn't published wheels-up times yet (it can lag a day or two), the table holds off and says so instead of showing the misleading pit-lane figure."
+      ]
+    },
+    {
       "date": "2026-06-15",
       "title": "Sharper qualifying predictions from four years of practice data",
       "tags": ["model"],
