@@ -1053,10 +1053,10 @@ const TABLE_COLUMNS = [
     { key: 'value_score', label: 'PPM' },
     // Per-tier price-change point thresholds (sortable; values precomputed onto
     // each driver by computeDriverPriceFields as _pts_great/_pts_good/_pts_poor/_pts_terrible)
-    { key: '_pts_great', label: 'Big rise' },
-    { key: '_pts_good', label: 'Sm rise' },
-    { key: '_pts_poor', label: 'Sm drop' },
     { key: '_pts_terrible', label: 'Big drop' },
+    { key: '_pts_poor', label: 'Sm drop' },
+    { key: '_pts_good', label: 'Sm rise' },
+    { key: '_pts_great', label: 'Big rise' },
 ];
 
 function setupTableSorting() {
@@ -1569,10 +1569,10 @@ function driverRow(d, i) {
         <td class="num">$${d.current_price.toFixed(1)}M</td>
         <td class="num" style="${pcColor}">${pcText}</td>
         <td class="num">${d.value_score.toFixed(2)}</td>
-        <td class="num" style="color:var(--green)" title="Score this many points this round (rolling-3 PPM basis) for the biggest price rise (${fmtChg(tc.great)})">${greatCell}</td>
-        <td class="num" style="color:#22d3ee" title="Points this round for a small price rise (${fmtChg(tc.good)})">${goodCell}</td>
-        <td class="num" style="color:var(--orange)" title="Points this round for only a small price drop (${fmtChg(tc.poor)}). Score below this range and the price takes its biggest drop.">${poorCell}</td>
         <td class="num" style="color:var(--red, #ef4444)" title="Score below ${P} pts this round and the price takes its biggest drop (${fmtChg(tc.terrible)})">${terribleCell}</td>
+        <td class="num" style="color:var(--orange)" title="Points this round for only a small price drop (${fmtChg(tc.poor)}). Score below this range and the price takes its biggest drop.">${poorCell}</td>
+        <td class="num" style="color:#22d3ee" title="Points this round for a small price rise (${fmtChg(tc.good)})">${goodCell}</td>
+        <td class="num" style="color:var(--green)" title="Score this many points this round (rolling-3 PPM basis) for the biggest price rise (${fmtChg(tc.great)})">${greatCell}</td>
     </tr>`;
 }
 
