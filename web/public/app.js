@@ -538,6 +538,19 @@ async function loadPitstopData() {
     if (window._pitstopData.rounds.length > 0) {
         window._pitstopData.last_round = Math.max(...window._pitstopData.rounds);
     }
+
+    // DHL official fastest pit stop per round (stationary, 2dp), manually maintained
+    // in data/dhl_fastest_pitstop.json from formula1.com. Authoritative fastest-stop
+    // figure — more precise than OpenF1's 1dp, and it reliably identifies the true
+    // fastest stop (OpenF1's rounding can disagree on who was quickest).
+    window._dhlFastest = null;
+    try {
+        const dhlResp = await fetch(cacheBust('data/dhl_fastest_pitstop.json'));
+        if (dhlResp.ok) {
+            const dhl = await dhlResp.json();
+            window._dhlFastest = (dhl && dhl.rounds) ? dhl.rounds : null;
+        }
+    } catch (e) { /* DHL fastest-stop file absent — non-fatal */ }
 }
 
 // Compute pit stop stats for one constructor, broken out by scope.
@@ -2195,6 +2208,30 @@ document.addEventListener('click', (e) => {
     openScenarioPopup(type, id, btn);
 });
 
+// One-line summary of the official DHL fastest pit stop (latest round + season best),
+// copied from formula1.com into data/dhl_fastest_pitstop.json (2dp). It's the
+// authoritative fastest-stop figure, shown above the OpenF1-derived (1dp) per-team
+// panel — OpenF1's 1dp rounding can't reliably tell who was actually quickest.
+function dhlFastestHtml() {
+    const d = window._dhlFastest;
+    if (!d || Object.keys(d).length === 0) return '';
+    const rounds = Object.keys(d).map(Number).sort((a, b) => a - b);
+    const get = rnd => d[String(rnd)] || d[rnd];
+    const teamName = cid => (TEAMS[cid] && TEAMS[cid].name) || cid;
+    const teamColor = cid => (TEAMS[cid] && TEAMS[cid].color) || 'var(--text)';
+    const fmt = rnd => {
+        const e = get(rnd);
+        return `<strong>${e.time.toFixed(2)}s</strong> <span style="color:${teamColor(e.team)};font-weight:600;">${teamName(e.team)}</span>`;
+    };
+    const latest = rounds[rounds.length - 1];
+    let bestRnd = rounds[0];
+    for (const r of rounds) { if (get(r).time < get(bestRnd).time) bestRnd = r; }
+    return `<div class="dhl-fastest" style="margin-bottom:8px;font-size:0.8rem;color:var(--text-secondary);">`
+        + `&#127942; <strong style="color:var(--text);">DHL official fastest stop</strong> &middot; `
+        + `R${latest}: ${fmt(latest)} &middot; Season best: ${fmt(bestRnd)} <span style="color:var(--text-muted);">(R${bestRnd})</span>`
+        + `<span style="color:var(--text-muted);font-size:0.92em;"> &middot; F1.com, 2dp</span></div>`;
+}
+
 // Render the all-teams pit stop comparison panel above constructor cards.
 // Sortable by any column, default sort: season best (fastest first).
 function renderPitstopPanel() {
@@ -2237,7 +2274,7 @@ function renderPitstopPanel() {
     let sortKey = 'seasonFastest';
     let sortAsc = true;
 
-    function fmtTime(v) { return v != null ? `${v.toFixed(2)}s` : '—'; }
+    function fmtTime(v) { return v != null ? `${v.toFixed(1)}s` : '—'; }
 
     function render() {
         const sorted = [...rows].sort((a, b) => {
@@ -2294,6 +2331,7 @@ function renderPitstopPanel() {
         }).join('');
 
         body.innerHTML = `
+            ${dhlFastestHtml()}
             <div class="pit-tbl-wrap">
                 <table class="pit-tbl">
                     <thead><tr><th class="pit-tbl-color"></th>${thead}</tr></thead>
@@ -5501,13 +5539,13 @@ function getPitStopStatsHtml(constructorId) {
         : '';
 
     const lastRaceLine = s.lastFastest != null
-        ? `<span title="Fastest stationary stop in the most recent race (R${s.lastRoundNum})">Last race best: <strong style="color:var(--text)">${s.lastFastest.toFixed(2)}s</strong> <span style="color:var(--text-muted);font-size:0.95em;">R${s.lastRoundNum}</span></span>`
+        ? `<span title="Fastest stationary stop in the most recent race (R${s.lastRoundNum})">Last race best: <strong style="color:var(--text)">${s.lastFastest.toFixed(1)}s</strong> <span style="color:var(--text-muted);font-size:0.95em;">R${s.lastRoundNum}</span></span>`
         : `<span style="color:var(--text-muted);">Last race best: —</span>`;
     const seasonLine = s.seasonFastest != null
-        ? `<span title="Team's fastest stationary stop across all completed rounds this season">Season best: <strong style="color:var(--green)">${s.seasonFastest.toFixed(2)}s</strong> <span style="color:var(--text-muted);font-size:0.95em;">R${s.seasonFastestRound}</span></span>`
+        ? `<span title="Team's fastest stationary stop across all completed rounds this season">Season best: <strong style="color:var(--green)">${s.seasonFastest.toFixed(1)}s</strong> <span style="color:var(--text-muted);font-size:0.95em;">R${s.seasonFastestRound}</span></span>`
         : `<span style="color:var(--text-muted);">Season best: —</span>`;
     const medianLine = s.median != null
-        ? `<span title="Median stationary time across this team's measured stops">Season median: <strong>${s.median.toFixed(2)}s</strong></span>`
+        ? `<span title="Median stationary time across this team's measured stops">Season median: <strong>${s.median.toFixed(1)}s</strong></span>`
         : `<span style="color:var(--text-muted);">Season median: —</span>`;
     const slowLine = measuredStops > 0
         ? (s.slowCount > 0
@@ -5984,8 +6022,8 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
                     <tr>
                         <td>${i+1}</td>
                         <td><strong>${t.name}</strong></td>
-                        <td class="num">${t.avg != null ? t.avg.toFixed(2) + 's' : 'n/a'}</td>
-                        <td class="num">${t.best != null ? t.best.toFixed(2) + 's' : 'n/a'}</td>
+                        <td class="num">${t.avg != null ? t.avg.toFixed(1) + 's' : 'n/a'}</td>
+                        <td class="num">${t.best != null ? t.best.toFixed(1) + 's' : 'n/a'}</td>
                         <td class="num">${t.totalStops}${t.missing ? ` <span style="color:var(--text-muted);font-size:0.9em;" title="${t.missing} stop(s) without a recorded stationary time — typically safety car / VSC, retirements, or penalty stops">(${t.missing} n/a)</span>` : ''}</td>
                     </tr>`).join('')}
                 </tbody>

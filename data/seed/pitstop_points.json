@@ -1,0 +1,14 @@
+{
+  "_comment": "MANUALLY-recorded official F1 Fantasy PIT STOP points each constructor earned per round (the pit-stop component of constructor scoring: bracket points + fastest-stop bonus). Fill in the real values from F1 Fantasy. null = not yet recorded. Round keys are INTERNAL rounds (cancelled R4/R5 skipped). USAGE IS NOT WIRED YET — tell Claude how you want these surfaced (display alongside our computed pit points, or override them in the constructor breakdown).",
+  "season": 2026,
+  "last_updated": "2026-06-23",
+  "rounds": {
+    "1": { "mercedes": null, "ferrari": null, "mclaren": null, "red_bull": null, "alpine": null, "racing_bulls": null, "haas": null, "williams": null, "audi": null, "cadillac": null, "aston_martin": null },
+    "2": { "mercedes": null, "ferrari": null, "mclaren": null, "red_bull": null, "alpine": null, "racing_bulls": null, "haas": null, "williams": null, "audi": null, "cadillac": null, "aston_martin": null },
+    "3": { "mercedes": null, "ferrari": null, "mclaren": null, "red_bull": null, "alpine": null, "racing_bulls": null, "haas": null, "williams": null, "audi": null, "cadillac": null, "aston_martin": null },
+    "6": { "mercedes": null, "ferrari": null, "mclaren": null, "red_bull": null, "alpine": null, "racing_bulls": null, "haas": null, "williams": null, "audi": null, "cadillac": null, "aston_martin": null },
+    "7": { "mercedes": null, "ferrari": null, "mclaren": null, "red_bull": null, "alpine": null, "racing_bulls": null, "haas": null, "williams": null, "audi": null, "cadillac": null, "aston_martin": null },
+    "8": { "mercedes": null, "ferrari": null, "mclaren": null, "red_bull": null, "alpine": null, "racing_bulls": null, "haas": null, "williams": null, "audi": null, "cadillac": null, "aston_martin": null },
+    "9": { "mercedes": null, "ferrari": null, "mclaren": null, "red_bull": null, "alpine": null, "racing_bulls": null, "haas": null, "williams": null, "audi": null, "cadillac": null, "aston_martin": null }
+  }
+}

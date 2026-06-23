@@ -1,0 +1,13 @@
+{
+  "_comment": "Official DHL Fastest Pit Stop per round (stationary 'wheels-up' time, 2 decimals) copied from https://www.formula1.com/en/results/2026/awards/fastest-pit-stops . MANUALLY maintained: after each race, add the round's fastest-stop team + time here. Round keys are INTERNAL rounds (cancelled R4/R5 skipped). 'team' uses constructor_id.",
+  "last_updated": "2026-06-23",
+  "rounds": {
+    "1": { "team": "mercedes", "time": 2.17 },
+    "2": { "team": "ferrari", "time": 2.29 },
+    "3": { "team": "ferrari", "time": 2.00 },
+    "6": { "team": "racing_bulls", "time": 2.08 },
+    "7": { "team": "racing_bulls", "time": 2.20 },
+    "8": { "team": "mercedes", "time": 2.17 },
+    "9": { "team": "mclaren", "time": 2.13 }
+  }
+}
