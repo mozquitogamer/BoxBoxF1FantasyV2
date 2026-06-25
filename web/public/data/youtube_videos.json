@@ -1,7 +1,14 @@
 {
-  "updated": "2026-06-24T12:30:01Z",
+  "updated": "2026-06-25T12:33:38Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "zy6M4dhdLVk",
+      "title": "F1 Fantasy Tips for the Austrian Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-06-24",
+      "thumbnail": "https://i.ytimg.com/vi/zy6M4dhdLVk/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=zy6M4dhdLVk"
+    },
     {
       "id": "jyuQToLZh-w",
       "title": "Final Thoughts after FP in Monaco! F1 Fantasy Tips - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
@@ -22,13 +29,6 @@
       "published": "2026-05-24",
       "thumbnail": "https://i.ytimg.com/vi/AInvmGGBfoE/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=AInvmGGBfoE"
-    },
-    {
-      "id": "7WSeL1mGIKg",
-      "title": "Should you play the WILD CARD? Canadian GP Preview - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
-      "published": "2026-05-21",
-      "thumbnail": "https://i.ytimg.com/vi/7WSeL1mGIKg/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=7WSeL1mGIKg"
     }
   ]
 }
