@@ -1281,7 +1281,15 @@ function renderWeather() {
         if (wxAdj.rain_risk && wxAdj.rain_risk !== 'NONE') {
             const widenPct = Math.round((wxAdj.noise_mult - 1) * 100);
             const dnfX = wxAdj.dnf_mult.toFixed(1);
-            parts.push(`Rain risk <strong>${wxAdj.rain_risk}</strong> \u2192 confidence intervals widened by ~${widenPct}%, DNF risk \u00d7${dnfX}, wet-skilled drivers favoured.`);
+            // Surface the RACE-session rain probability so the widening makes sense:
+            // practice/quali can be bone dry while race day carries the risk, and
+            // showing only "LOW RAIN RISK" against clear practice days reads as wrong.
+            const raceSession = (w.sessions || []).find(s => (s.name || '').toLowerCase() === 'race');
+            const racePct = raceSession && raceSession.rain_probability != null
+                ? raceSession.rain_probability
+                : (w.max_rain_probability != null ? w.max_rain_probability : null);
+            const pctStr = racePct != null ? ` (race ~${racePct}% rain)` : '';
+            parts.push(`Race rain risk <strong>${wxAdj.rain_risk}</strong>${pctStr} \u2192 confidence intervals widened ~${widenPct}%, DNF risk \u00d7${dnfX}, wet-skilled drivers favoured.`);
         }
         if (wxAdj.cold_weight && wxAdj.cold_weight > 0) {
             const tStr = wxAdj.race_air_temp_C != null ? `${wxAdj.race_air_temp_C.toFixed(1)}\u00b0C` : 'cool';

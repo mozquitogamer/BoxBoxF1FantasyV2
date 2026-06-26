@@ -223,7 +223,11 @@ MC_WEATHER_TUNABLES = {
     # (wet_skill - 5), so a wet_skill=10 driver in HIGH rain gets +0.30 boost.
     "rain": {
         "NONE":   {"noise_mult": 1.00, "dnf_mult": 1.00, "wet_weight": 0.00},
-        "LOW":    {"noise_mult": 1.15, "dnf_mult": 1.30, "wet_weight": 0.02},
+        # LOW is a low-probability / early-forecast bucket (e.g. ~30% race-day
+        # rain, often days out and likely to firm up dry). Kept a light touch so
+        # a small chance of rain doesn't materially inflate the CI; real widening
+        # is reserved for MEDIUM/HIGH where rain is genuinely likely.
+        "LOW":    {"noise_mult": 1.05, "dnf_mult": 1.10, "wet_weight": 0.02},
         "MEDIUM": {"noise_mult": 1.40, "dnf_mult": 1.90, "wet_weight": 0.04},
         "HIGH":   {"noise_mult": 1.70, "dnf_mult": 2.60, "wet_weight": 0.06},
     },
