@@ -1,7 +1,21 @@
 {
-  "updated": "2026-06-26T12:27:24Z",
+  "updated": "2026-06-27T11:47:27Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "EL7GTUId6mc",
+      "title": "F1 Fantasy Final THOUGHTS - Austrian Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-06-27",
+      "thumbnail": "https://i.ytimg.com/vi/EL7GTUId6mc/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=EL7GTUId6mc"
+    },
+    {
+      "id": "fMXQQrLUt2g",
+      "title": "F1 Fantasy Deadline Stream - Austrian Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
+      "published": "2026-06-27",
+      "thumbnail": "https://i.ytimg.com/vi/fMXQQrLUt2g/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=fMXQQrLUt2g"
+    },
     {
       "id": "zy6M4dhdLVk",
       "title": "F1 Fantasy Tips for the Austrian Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
@@ -15,20 +29,6 @@
       "published": "2026-06-06",
       "thumbnail": "https://i.ytimg.com/vi/jyuQToLZh-w/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=jyuQToLZh-w"
-    },
-    {
-      "id": "p5dkrl5RHSM",
-      "title": "F1 Fantasy Tips for the Monaco Grand Prix - LeClerc? - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
-      "published": "2026-06-04",
-      "thumbnail": "https://i.ytimg.com/vi/p5dkrl5RHSM/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=p5dkrl5RHSM"
-    },
-    {
-      "id": "AInvmGGBfoE",
-      "title": "F1 Fantasy Deadline Stream - CANADIAN Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
-      "published": "2026-05-24",
-      "thumbnail": "https://i.ytimg.com/vi/AInvmGGBfoE/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=AInvmGGBfoE"
     }
   ]
 }
