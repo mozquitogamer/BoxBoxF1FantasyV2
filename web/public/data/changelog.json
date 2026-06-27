@@ -1,6 +1,16 @@
 {
   "entries": [
     {
+      "date": "2026-06-27",
+      "title": "Smarter long-run (race pace) analysis on the Analysis tab",
+      "tags": ["feature"],
+      "body": [
+        "The Long Run Pace table estimates each driver's race-day pace from their practice long runs, but the old method was crude: it averaged in the slow in and out laps from the pits, kept the odd traffic or lock-up lap that a human would ignore, and sometimes picked the wrong stint entirely. On a busy Friday that could throw a driver's race-pace number off by a second or more.",
+        "It now reads a long run the way an analyst does off a timing screen: it strips out the in and out laps, then drops a one-off traffic or lock-up lap while keeping the genuine tyre-degradation laps that belong in the run. It also takes the headline from the session that actually shows race running, usually FP2, instead of blending in a green-track FP1 run. A new <strong>Long Run Detail</strong> panel shows the work: the laps kept in green and the ones thrown out struck through in red, so you can see exactly what each average is built on.",
+        "Checked against a well-regarded manual analysis of the same Austria FP2 session, the new numbers land within <strong>about 0.06 seconds</strong> on average, and match it exactly for several drivers."
+      ]
+    },
+    {
       "date": "2026-06-22",
       "title": "Pit Stop Performance on the Analysis tab now shows wheels-up times",
       "tags": ["fix"],

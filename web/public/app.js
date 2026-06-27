@@ -5684,21 +5684,55 @@ function renderFPAnalysis() {
         postRenderFns.push(tbl.renderTable);
     }
 
-    // Long Run Pace
+    // Long Run Pace (predicted race pace) — representative race-sim laps only.
     if (fpAnalysis.long_run_pace && Object.keys(fpAnalysis.long_run_pace).length > 0) {
-        const rows = Object.entries(fpAnalysis.long_run_pace).map(([id, d]) => ({
-            id, avg_pace: d.avg_long_run_pace, gap: d.gap_to_fastest, laps: d.total_long_run_laps, runs: d.runs || []
+        const SESS_RANK = { FP1: 1, FP2: 2, FP3: 3 };
+        // Restrict the race-pace board to fantasy-roster drivers. Practice/test
+        // runners (FP1 cameos, usually low-fuel) aren't rateable race pace and
+        // would otherwise top the board on a quick FP1 run. Fall back to all
+        // drivers only if the roster is unavailable.
+        const lrRoster = new Set((data && data.drivers ? data.drivers : []).map(d => d.driver_id));
+        let lrEntries = Object.entries(fpAnalysis.long_run_pace);
+        if (lrRoster.size) lrEntries = lrEntries.filter(([id]) => lrRoster.has(id));
+        const lrLeader = lrEntries.length ? Math.min(...lrEntries.map(([, d]) => d.avg_long_run_pace)) : 0;
+        const rows = lrEntries.map(([id, d]) => ({
+            id,
+            avg_pace: d.avg_long_run_pace,
+            gap: +(d.avg_long_run_pace - lrLeader).toFixed(3),
+            laps: d.headline_laps ?? d.total_long_run_laps,
+            sess: d.headline_session || '',
+            runs: d.runs || []
         }));
         const tbl = sortableTable('fpLongRunTable', [
             { key: '_rank', label: '#', cls: 'num', fmt: (r, i) => i + 1 },
             { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
-            { key: 'avg_pace', label: 'Avg Pace', cls: 'num', title: 'Average lap time across all long run stints (5+ laps). Lower = faster race pace.', fmt: r => fmtTime(r.avg_pace) },
-            { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to fastest long-run driver', fmt: r => r.gap === 0 ? '<span class="text-green">Leader</span>' : r.gap != null ? '+' + r.gap.toFixed(3) : '-' },
-            { key: 'laps', label: 'Laps', cls: 'num', title: 'Total long-run laps (stints of 5+ laps)' },
-            { key: 'runs', label: 'Runs', title: 'Individual stint details: compound, laps, avg pace', fmt: r => r.runs.map(s => `<span class="compound-badge ${s.compound.toLowerCase()}">${s.compound} (${s.laps}L, ${fmtTime(s.avg_pace)})</span>`).join(' ') }
+            { key: 'avg_pace', label: 'Race Pace', cls: 'num', title: 'Average of the representative long-run laps from the latest session that produced one (FP2 on a normal weekend). In/out laps, traffic and lock-ups are filtered out. Lower = faster race pace.', fmt: r => fmtTime(r.avg_pace) },
+            { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to the fastest driver', fmt: r => r.gap <= 0 ? '<span class="text-green">Leader</span>' : '+' + r.gap.toFixed(3) },
+            { key: 'sess', label: 'Session', cls: 'num', title: 'Session the headline pace is taken from' },
+            { key: 'laps', label: 'Laps', cls: 'num', title: 'Clean laps behind the headline pace' }
         ], rows, 'avg_pace', true);
-        html += `<div class="analysis-block"><h3>Long Run Pace (Predicted Race Pace)</h3><p class="analysis-note">Stints of 5+ laps on the same compound. Best indicator of race-day pace. Click headers to sort.</p>${tbl.getHtml()}</div>`;
+        html += `<div class="analysis-block"><h3>Long Run Pace (Predicted Race Pace)</h3><p class="analysis-note">Representative race-sim pace: only the clean long-run laps count &mdash; in/out laps, traffic and lock-ups are filtered out the way a human reads them off a timing screen. Headline is the latest session that produced a long run (usually FP2). Click headers to sort.</p>${tbl.getHtml()}</div>`;
         postRenderFns.push(tbl.renderTable);
+
+        // Long Run Detail — the laps behind each average (kept vs X'd outliers).
+        const detailCards = rows.slice().sort((a, b) => a.avg_pace - b.avg_pace).filter(r => r.runs.length).map(r => {
+            const runsHtml = r.runs.slice()
+                .sort((a, b) => (SESS_RANK[a.session] || 0) - (SESS_RANK[b.session] || 0))
+                .map(run => {
+                    const kept = (run.kept_laps || []).map(t => `<span class="lr-lap kept">${fmtTime(t)}</span>`).join('');
+                    const excl = (run.excluded_laps || []).map(t => `<span class="lr-lap excl" title="Excluded: in/out lap, traffic or lock-up">${fmtTime(t)}</span>`).join('');
+                    return `<div class="lr-run">
+                        <span class="compound-badge ${run.compound.toLowerCase()}">${run.session} ${run.compound}</span>
+                        <span class="lr-laps">${kept}${excl}</span>
+                        <span class="lr-avg">${fmtTime(run.avg_pace)} <span class="lr-ctx">${run.laps}L</span></span>
+                    </div>`;
+                }).join('');
+            return `<div class="lr-card">
+                <div class="lr-head"><strong>${r.id}</strong><span class="lr-headavg">${fmtTime(r.avg_pace)}</span>${r.gap <= 0 ? '<span class="text-green lr-headgap">Leader</span>' : `<span class="lr-headgap">+${r.gap.toFixed(3)}</span>`}</div>
+                ${runsHtml}
+            </div>`;
+        }).join('');
+        html += `<div class="analysis-block"><h3>Long Run Detail</h3><p class="analysis-note">The laps behind each driver's race-pace number. <span class="lr-lap excl" style="vertical-align:baseline">struck-through</span> laps were excluded as in/out laps, traffic or lock-ups; the rest form the run (the natural tyre-degradation tail is kept). The manual "X out the junk laps" long-run read, done automatically.</p><div class="lr-detail-grid">${detailCards}</div></div>`;
     }
 
     // Fuel-Corrected Pace

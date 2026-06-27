@@ -41,7 +41,18 @@ from config.settings import (
     SEED_DIR,
     CANCELLED_ROUNDS_2026,
 )
-from config.tyre_deg import stint_degradation, compound_average
+from config.tyre_deg import (
+    stint_degradation,
+    compound_average,
+    representative_stint_laps,
+)
+
+# Compounds that count as a race-pace long run (soft is treated as a quali sim).
+RACE_COMPOUNDS = {"MEDIUM", "HARD", "INTERMEDIATE", "WET"}
+# A stint needs this many raw laps to even be a long-run candidate; at least
+# LONG_RUN_MIN_CLEAN of them must survive the in/out gate + spike trim.
+LONG_RUN_MIN_RAW = 5
+LONG_RUN_MIN_CLEAN = 4
 
 
 # -- Load helpers --------------------------------------------------------------
@@ -144,12 +155,24 @@ def analyze_qualifying_pace(df: pd.DataFrame) -> dict:
     return result
 
 
-def analyze_long_run_pace(df: pd.DataFrame, min_stint_laps: int = 5) -> dict:
+def analyze_long_run_pace(df: pd.DataFrame, min_clean_laps: int = LONG_RUN_MIN_CLEAN) -> dict:
     """
-    Analyze long run pace (predicted race pace).
+    Detect each driver's representative race long runs and their pace.
 
-    Long runs = stints of 5+ laps on the same compound.
-    Excludes in/out laps and lap 1 of each stint.
+    A long run is a race-compound stint (MEDIUM/HARD/INTERMEDIATE/WET) of at
+    least LONG_RUN_MIN_RAW laps. For each one we keep only the laps that form a
+    clean, representative run via config.tyre_deg.representative_stint_laps:
+    drop in/out/cool laps (slower than 1.10x the stint best) and single traffic/
+    lock-up spikes, while keeping the natural degradation tail — exactly the laps
+    a human keeps when reading long-run pace off a timing screen. The reported
+    pace is the raw mean of the kept laps; the kept/excluded lap lists are
+    surfaced so the website can show the breakdown.
+
+    The old method skipped lap 1 of every stint (deleting a real flying lap once
+    the true out-lap was already filtered upstream) and used a one-sided
+    median*1.05 filter that did nothing once in/out laps dragged the median up.
+    It also grouped by `stint` only, so same-numbered stints from different FP
+    sessions merged. Grouping here is by (session, stint, compound).
     """
     if df is None or df.empty:
         return {}
@@ -158,45 +181,83 @@ def analyze_long_run_pace(df: pd.DataFrame, min_stint_laps: int = 5) -> dict:
     if not all(c in df.columns for c in required):
         return {}
 
+    has_session = "session" in df.columns
+    has_age = "tyre_life" in df.columns
+    has_lap = "lap_number" in df.columns
+    has_compound = "compound" in df.columns
+    group_keys = (
+        (["session"] if has_session else [])
+        + ["stint"]
+        + (["compound"] if has_compound else [])
+    )
+
     clean = df[df["lap_time"].notna() & (df["lap_time"] > 0)].copy()
 
     result = {}
     for driver_id, driver_group in clean.groupby("driver_id"):
-        long_runs = []
-        for stint, stint_group in driver_group.groupby("stint"):
-            if len(stint_group) < min_stint_laps:
+        runs = []
+        for keys, stint_group in driver_group.groupby(group_keys):
+            keys = keys if isinstance(keys, tuple) else (keys,)
+            session = str(keys[0]) if has_session else "?"
+            compound = str(keys[-1]).upper() if has_compound else "UNKNOWN"
+            stint = keys[-2] if has_compound else keys[-1]
+
+            # Only race compounds count as race-pace long runs.
+            if has_compound and compound not in RACE_COMPOUNDS:
+                continue
+            if len(stint_group) < LONG_RUN_MIN_RAW:
                 continue
 
-            # Sort by lap number and skip first lap of stint (out lap/cold tyres)
-            if "lap_number" in stint_group.columns:
-                stint_sorted = stint_group.sort_values("lap_number")
+            stint_sorted = stint_group.sort_values("lap_number") if has_lap else stint_group
+            times = stint_sorted["lap_time"].to_numpy(dtype=float)
+            if has_age:
+                age = stint_sorted["tyre_life"].to_numpy(dtype=float)
+            elif has_lap:
+                lap = stint_sorted["lap_number"].to_numpy(dtype=float)
+                age = lap - np.nanmin(lap)
             else:
-                stint_sorted = stint_group
+                age = None
 
-            times = stint_sorted["lap_time"].values[1:]  # Skip first lap
-            if len(times) < min_stint_laps - 1:
+            mask = representative_stint_laps(times, age, min_clean=min_clean_laps)
+            if int(mask.sum()) < min_clean_laps:
                 continue
 
-            # Remove outliers within stint
-            median = np.median(times)
-            times = times[times < median * 1.05]
-
-            compound = stint_sorted["compound"].iloc[0] if "compound" in stint_sorted.columns else "UNKNOWN"
-
-            long_runs.append({
-                "compound": str(compound),
-                "laps": len(times),
-                "avg_pace": round(float(np.mean(times)), 3),
-                "best_pace": round(float(np.min(times)), 3),
-                "consistency": round(float(np.std(times)), 3),
+            kept = times[mask]
+            excluded = times[~mask]
+            runs.append({
+                "session": session,
+                "stint": int(stint),
+                "compound": compound,
+                "laps": int(mask.sum()),
+                "avg_pace": round(float(np.mean(kept)), 3),
+                "best_pace": round(float(np.min(kept)), 3),
+                "consistency": round(float(np.std(kept)), 3),
+                "kept_laps": [round(float(x), 3) for x in kept],
+                "excluded_laps": [round(float(x), 3) for x in excluded],
             })
 
-        if long_runs:
-            overall_avg = np.mean([lr["avg_pace"] for lr in long_runs])
+        if runs:
+            # Headline pace = the latest session that actually produced a long
+            # run, lap-weighted within it. On a normal weekend that's FP2 (the
+            # high-fuel race sim); FP3 is usually quali-prep so yields no long
+            # run and we fall back to FP2; sprint weekends fall back to FP1.
+            # This keeps every driver ranked on a comparable, representative
+            # session instead of blending a green-track FP1 run into the mean
+            # (which also distorts ranking when drivers ran long in different
+            # sessions). All runs stay in `runs` for the per-session breakdown.
+            session_order = {"FP1": 1, "FP2": 2, "FP3": 3}
+            headline_session = max(
+                runs, key=lambda r: session_order.get(r["session"], 0)
+            )["session"]
+            head_runs = [r for r in runs if r["session"] == headline_session]
+            head_laps = sum(r["laps"] for r in head_runs)
+            overall_avg = sum(r["avg_pace"] * r["laps"] for r in head_runs) / head_laps
             result[driver_id] = {
-                "runs": long_runs,
+                "runs": runs,
                 "avg_long_run_pace": round(float(overall_avg), 3),
-                "total_long_run_laps": sum(lr["laps"] for lr in long_runs),
+                "headline_session": headline_session,
+                "headline_laps": head_laps,
+                "total_long_run_laps": sum(r["laps"] for r in runs),
             }
 
     # Rank

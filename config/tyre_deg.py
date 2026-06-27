@@ -39,6 +39,12 @@ JUNK_LAP_MULT: float = 1.10
 # quali sim / short run and we return None rather than a noisy number.
 MIN_CLEAN_LAPS: int = 5
 
+# Spike-trim threshold for representative_stint_laps(): a lap is X'd off the run
+# when its residual from the fuel-corrected deg trend exceeds this many robust
+# sigma (1.4826·MAD). 2.5 reproduces how a human ignores a single traffic/
+# lock-up lap while keeping the natural degradation tail.
+SPIKE_TRIM_K: float = 2.5
+
 
 def stint_degradation(
     lap_times,
@@ -97,6 +103,71 @@ def stint_degradation(
             slope = np.polyfit(age, corrected, 1)[0]
 
     return float(slope), int(len(age))
+
+
+def representative_stint_laps(
+    lap_times,
+    tyre_age=None,
+    fuel_effect: float = FUEL_EFFECT_PER_LAP,
+    junk_mult: float = JUNK_LAP_MULT,
+    min_clean: int = 4,
+    trim_k: float = SPIKE_TRIM_K,
+):
+    """Boolean mask of the laps that make up a clean, representative long run.
+
+    Mirrors how a human picks race-pace laps off a timing screen, which a flat
+    "drop laps slower than X% of the median" filter can't do once in/out laps are
+    still in the stint (they drag the median up so nothing gets cut):
+
+      1. In/out/cool gate: keep only laps within `junk_mult` of the stint's best
+         clean lap. This removes the 1:45-2:24 pit laps that survive a median
+         filter.
+      2. Spike trim: remove the single worst lap relative to a fuel-corrected
+         degradation trend, refit, repeat, until every survivor sits within
+         `trim_k` robust sigma of the line — or only `min_clean` laps remain.
+         One-at-a-time (not all-at-once) so a single big spike can't skew the OLS
+         fit and evict genuinely good laps. Degrading laps lie ON the line at
+         their tyre age, so the natural deg tail is kept; a lone traffic/lock-up
+         lap falls off and is X'd.
+
+    Returns a boolean array aligned to the INPUT order (True = part of the run).
+    Non-finite / non-positive laps are always False. Returns all-False when no
+    clean run of at least `min_clean` laps can be formed.
+    """
+    t = np.asarray(lap_times, dtype=float)
+    n = len(t)
+    age = (np.arange(n, dtype=float) if tyre_age is None
+           else np.asarray(tyre_age, dtype=float))
+
+    keep = np.isfinite(t) & (t > 0) & np.isfinite(age)
+    if keep.sum() < min_clean:
+        return np.zeros(n, dtype=bool)
+
+    # 1. In/out/cool gate
+    best = t[keep].min()
+    keep &= t <= best * junk_mult
+    if keep.sum() < min_clean:
+        return np.zeros(n, dtype=bool)
+
+    # 2. One-at-a-time spike trim vs the fuel-corrected deg trend
+    while keep.sum() > min_clean:
+        idx = np.where(keep)[0]
+        a = age[idx]
+        if np.unique(a).size < 2:
+            break
+        corrected = t[idx] + fuel_effect * a
+        slope, intercept = np.polyfit(a, corrected, 1)
+        resid = corrected - (slope * a + intercept)
+        mad = np.median(np.abs(resid - np.median(resid)))
+        if mad < 1e-9:
+            break
+        worst = int(np.argmax(np.abs(resid)))
+        if abs(resid[worst]) > trim_k * 1.4826 * mad:
+            keep[idx[worst]] = False
+        else:
+            break
+
+    return keep
 
 
 def compound_average(stint_results):

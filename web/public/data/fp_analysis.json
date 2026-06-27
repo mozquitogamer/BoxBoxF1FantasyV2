@@ -205,604 +205,807 @@
     "ALB": {
       "runs": [
         {
+          "session": "FP2",
+          "stint": 7,
           "compound": "MEDIUM",
-          "laps": 6,
-          "avg_pace": 78.547,
-          "best_pace": 70.607,
-          "consistency": 7.98
-        },
-        {
-          "compound": "MEDIUM",
-          "laps": 4,
-          "avg_pace": 74.933,
-          "best_pace": 69.644,
-          "consistency": 8.837
-        },
-        {
-          "compound": "SOFT",
-          "laps": 7,
-          "avg_pace": 73.484,
-          "best_pace": 72.579,
-          "consistency": 0.97
-        },
-        {
-          "compound": "MEDIUM",
-          "laps": 10,
-          "avg_pace": 73.734,
+          "laps": 11,
+          "avg_pace": 73.682,
           "best_pace": 72.846,
-          "consistency": 0.627
+          "consistency": 0.62,
+          "kept_laps": [
+            73.161,
+            72.931,
+            72.846,
+            73.067,
+            73.222,
+            74.112,
+            74.005,
+            73.81,
+            74.494,
+            74.299,
+            74.551
+          ],
+          "excluded_laps": [
+            80.355,
+            118.413,
+            139.663
+          ]
         }
       ],
-      "avg_long_run_pace": 75.174,
-      "total_long_run_laps": 27,
-      "gap_to_fastest": 4.618
-    },
-    "ALO": {
-      "runs": [
-        {
-          "compound": "HARD",
-          "laps": 5,
-          "avg_pace": 82.351,
-          "best_pace": 72.269,
-          "consistency": 12.361
-        },
-        {
-          "compound": "MEDIUM",
-          "laps": 4,
-          "avg_pace": 73.792,
-          "best_pace": 72.074,
-          "consistency": 2.062
-        },
-        {
-          "compound": "SOFT",
-          "laps": 6,
-          "avg_pace": 74.78,
-          "best_pace": 74.432,
-          "consistency": 0.515
-        }
-      ],
-      "avg_long_run_pace": 76.974,
-      "total_long_run_laps": 15,
-      "gap_to_fastest": 6.418
+      "avg_long_run_pace": 73.682,
+      "headline_session": "FP2",
+      "headline_laps": 11,
+      "total_long_run_laps": 11,
+      "gap_to_fastest": 2.919
     },
     "ANT": {
       "runs": [
         {
+          "session": "FP1",
+          "stint": 5,
           "compound": "MEDIUM",
-          "laps": 2,
-          "avg_pace": 68.323,
-          "best_pace": 68.198,
-          "consistency": 0.125
-        },
-        {
-          "compound": "SOFT",
-          "laps": 11,
-          "avg_pace": 72.077,
+          "laps": 9,
+          "avg_pace": 71.749,
           "best_pace": 71.367,
-          "consistency": 0.752
+          "consistency": 0.19,
+          "kept_laps": [
+            71.666,
+            71.367,
+            71.83,
+            71.569,
+            71.651,
+            71.852,
+            71.865,
+            71.985,
+            71.959
+          ],
+          "excluded_laps": [
+            73.009,
+            74.093,
+            77.042
+          ]
         },
         {
+          "session": "FP2",
+          "stint": 7,
           "compound": "MEDIUM",
-          "laps": 5,
-          "avg_pace": 71.268,
+          "laps": 6,
+          "avg_pace": 71.265,
           "best_pace": 70.912,
-          "consistency": 0.233
+          "consistency": 0.213,
+          "kept_laps": [
+            71.254,
+            70.912,
+            71.341,
+            71.123,
+            71.363,
+            71.599
+          ],
+          "excluded_laps": [
+            74.99
+          ]
         }
       ],
-      "avg_long_run_pace": 70.556,
-      "total_long_run_laps": 18,
-      "gap_to_fastest": 0.0
-    },
-    "ARO": {
-      "runs": [
-        {
-          "compound": "MEDIUM",
-          "laps": 3,
-          "avg_pace": 79.755,
-          "best_pace": 70.646,
-          "consistency": 12.739
-        }
-      ],
-      "avg_long_run_pace": 79.755,
-      "total_long_run_laps": 3,
-      "gap_to_fastest": 9.199
+      "avg_long_run_pace": 71.265,
+      "headline_session": "FP2",
+      "headline_laps": 6,
+      "total_long_run_laps": 15,
+      "gap_to_fastest": 0.502
     },
     "BEA": {
       "runs": [
         {
-          "compound": "HARD",
-          "laps": 4,
-          "avg_pace": 87.769,
-          "best_pace": 69.499,
-          "consistency": 17.797
-        },
-        {
+          "session": "FP1",
+          "stint": 5,
           "compound": "MEDIUM",
-          "laps": 3,
-          "avg_pace": 69.643,
-          "best_pace": 68.686,
-          "consistency": 0.678
-        },
-        {
-          "compound": "SOFT",
-          "laps": 13,
-          "avg_pace": 72.375,
+          "laps": 6,
+          "avg_pace": 72.186,
           "best_pace": 72.078,
-          "consistency": 0.255
+          "consistency": 0.096,
+          "kept_laps": [
+            72.304,
+            72.078,
+            72.146,
+            72.11,
+            72.148,
+            72.33
+          ],
+          "excluded_laps": []
         }
       ],
-      "avg_long_run_pace": 76.596,
-      "total_long_run_laps": 20,
-      "gap_to_fastest": 6.04
+      "avg_long_run_pace": 72.186,
+      "headline_session": "FP1",
+      "headline_laps": 6,
+      "total_long_run_laps": 6,
+      "gap_to_fastest": 1.423
     },
     "BEG": {
       "runs": [
         {
+          "session": "FP1",
+          "stint": 2,
           "compound": "MEDIUM",
-          "laps": 6,
-          "avg_pace": 82.348,
+          "laps": 4,
+          "avg_pace": 70.763,
           "best_pace": 69.871,
-          "consistency": 12.187
-        },
-        {
-          "compound": "SOFT",
-          "laps": 8,
-          "avg_pace": 86.405,
-          "best_pace": 69.054,
-          "consistency": 13.05
+          "consistency": 0.976,
+          "kept_laps": [
+            72.322,
+            70.856,
+            69.871,
+            70.005
+          ],
+          "excluded_laps": [
+            93.872,
+            97.092,
+            92.39,
+            98.636,
+            100.391
+          ]
         }
       ],
-      "avg_long_run_pace": 84.376,
-      "total_long_run_laps": 14,
-      "gap_to_fastest": 13.82
+      "avg_long_run_pace": 70.763,
+      "headline_session": "FP1",
+      "headline_laps": 4,
+      "total_long_run_laps": 4,
+      "gap_to_fastest": 0.0
     },
     "BOR": {
       "runs": [
         {
+          "session": "FP2",
+          "stint": 4,
           "compound": "HARD",
-          "laps": 3,
-          "avg_pace": 69.722,
-          "best_pace": 69.64,
-          "consistency": 0.067
-        },
-        {
-          "compound": "HARD",
-          "laps": 7,
-          "avg_pace": 73.385,
+          "laps": 8,
+          "avg_pace": 73.372,
           "best_pace": 72.498,
-          "consistency": 0.793
+          "consistency": 0.743,
+          "kept_laps": [
+            73.284,
+            72.498,
+            72.703,
+            72.699,
+            72.968,
+            74.016,
+            74.294,
+            74.517
+          ],
+          "excluded_laps": [
+            105.594,
+            114.315
+          ]
         }
       ],
-      "avg_long_run_pace": 71.553,
-      "total_long_run_laps": 10,
-      "gap_to_fastest": 0.997
-    },
-    "BOT": {
-      "runs": [
-        {
-          "compound": "HARD",
-          "laps": 4,
-          "avg_pace": 76.372,
-          "best_pace": 71.307,
-          "consistency": 8.089
-        }
-      ],
-      "avg_long_run_pace": 76.372,
-      "total_long_run_laps": 4,
-      "gap_to_fastest": 5.816
+      "avg_long_run_pace": 73.372,
+      "headline_session": "FP2",
+      "headline_laps": 8,
+      "total_long_run_laps": 8,
+      "gap_to_fastest": 2.609
     },
     "BRO": {
       "runs": [
         {
+          "session": "FP1",
+          "stint": 3,
           "compound": "HARD",
           "laps": 4,
           "avg_pace": 72.227,
           "best_pace": 71.428,
-          "consistency": 0.698
+          "consistency": 0.698,
+          "kept_laps": [
+            73.348,
+            72.085,
+            72.045,
+            71.428
+          ],
+          "excluded_laps": [
+            91.629,
+            103.331,
+            107.339,
+            102.979,
+            112.219
+          ]
         },
         {
+          "session": "FP1",
+          "stint": 6,
           "compound": "HARD",
-          "laps": 6,
-          "avg_pace": 72.803,
-          "best_pace": 72.431,
-          "consistency": 0.349
+          "laps": 7,
+          "avg_pace": 72.688,
+          "best_pace": 71.997,
+          "consistency": 0.429,
+          "kept_laps": [
+            71.997,
+            72.431,
+            72.54,
+            72.621,
+            72.66,
+            73.213,
+            73.351
+          ],
+          "excluded_laps": []
         }
       ],
-      "avg_long_run_pace": 72.515,
-      "total_long_run_laps": 10,
-      "gap_to_fastest": 1.959
+      "avg_long_run_pace": 72.52,
+      "headline_session": "FP1",
+      "headline_laps": 11,
+      "total_long_run_laps": 11,
+      "gap_to_fastest": 1.757
     },
     "COL": {
       "runs": [
         {
+          "session": "FP1",
+          "stint": 7,
           "compound": "MEDIUM",
-          "laps": 2,
-          "avg_pace": 70.58,
-          "best_pace": 70.262,
-          "consistency": 0.318
+          "laps": 5,
+          "avg_pace": 72.964,
+          "best_pace": 72.53,
+          "consistency": 0.27,
+          "kept_laps": [
+            72.53,
+            72.789,
+            73.151,
+            73.069,
+            73.281
+          ],
+          "excluded_laps": [
+            72.355
+          ]
         },
         {
-          "compound": "MEDIUM",
-          "laps": 3,
-          "avg_pace": 87.863,
-          "best_pace": 70.45,
-          "consistency": 13.473
-        },
-        {
-          "compound": "SOFT",
+          "session": "FP2",
+          "stint": 5,
+          "compound": "HARD",
           "laps": 10,
           "avg_pace": 72.473,
           "best_pace": 71.594,
-          "consistency": 0.469
-        },
-        {
-          "compound": "MEDIUM",
-          "laps": 5,
-          "avg_pace": 72.929,
-          "best_pace": 72.355,
-          "consistency": 0.329
+          "consistency": 0.469,
+          "kept_laps": [
+            72.207,
+            71.594,
+            72.005,
+            72.24,
+            72.56,
+            72.499,
+            72.77,
+            72.645,
+            72.83,
+            73.383
+          ],
+          "excluded_laps": [
+            138.767
+          ]
         }
       ],
-      "avg_long_run_pace": 75.961,
-      "total_long_run_laps": 20,
-      "gap_to_fastest": 5.405
-    },
-    "CRA": {
-      "runs": [
-        {
-          "compound": "HARD",
-          "laps": 2,
-          "avg_pace": 72.585,
-          "best_pace": 72.24,
-          "consistency": 0.345
-        },
-        {
-          "compound": "HARD",
-          "laps": 2,
-          "avg_pace": 72.353,
-          "best_pace": 72.211,
-          "consistency": 0.142
-        }
-      ],
-      "avg_long_run_pace": 72.469,
-      "total_long_run_laps": 4,
-      "gap_to_fastest": 1.913
+      "avg_long_run_pace": 72.473,
+      "headline_session": "FP2",
+      "headline_laps": 10,
+      "total_long_run_laps": 15,
+      "gap_to_fastest": 1.71
     },
     "GAS": {
       "runs": [
         {
+          "session": "FP1",
+          "stint": 5,
           "compound": "HARD",
-          "laps": 2,
-          "avg_pace": 70.38,
-          "best_pace": 70.015,
-          "consistency": 0.365
+          "laps": 6,
+          "avg_pace": 72.877,
+          "best_pace": 72.538,
+          "consistency": 0.427,
+          "kept_laps": [
+            72.538,
+            72.623,
+            72.54,
+            72.639,
+            73.285,
+            73.638
+          ],
+          "excluded_laps": [
+            74.219,
+            106.277
+          ]
         },
         {
-          "compound": "HARD",
-          "laps": 4,
-          "avg_pace": 75.13,
-          "best_pace": 69.569,
-          "consistency": 8.734
-        },
-        {
+          "session": "FP2",
+          "stint": 5,
           "compound": "MEDIUM",
-          "laps": 18,
-          "avg_pace": 72.722,
-          "best_pace": 71.654,
-          "consistency": 0.66
+          "laps": 12,
+          "avg_pace": 72.422,
+          "best_pace": 71.561,
+          "consistency": 0.621,
+          "kept_laps": [
+            71.561,
+            71.927,
+            71.654,
+            72.092,
+            71.977,
+            72.575,
+            72.43,
+            72.36,
+            72.519,
+            73.001,
+            73.719,
+            73.255
+          ],
+          "excluded_laps": [
+            79.212,
+            115.678,
+            134.404
+          ]
         }
       ],
-      "avg_long_run_pace": 72.744,
-      "total_long_run_laps": 24,
-      "gap_to_fastest": 2.188
+      "avg_long_run_pace": 72.422,
+      "headline_session": "FP2",
+      "headline_laps": 12,
+      "total_long_run_laps": 18,
+      "gap_to_fastest": 1.659
     },
     "HAD": {
       "runs": [
         {
-          "compound": "SOFT",
-          "laps": 6,
-          "avg_pace": 99.365,
-          "best_pace": 68.772,
-          "consistency": 14.853
-        },
-        {
+          "session": "FP2",
+          "stint": 5,
           "compound": "MEDIUM",
-          "laps": 5,
-          "avg_pace": 72.263,
+          "laps": 4,
+          "avg_pace": 71.919,
           "best_pace": 71.715,
-          "consistency": 0.88
+          "consistency": 0.209,
+          "kept_laps": [
+            72.254,
+            71.935,
+            71.774,
+            71.715
+          ],
+          "excluded_laps": [
+            71.873,
+            74.017,
+            146.944
+          ]
         }
       ],
-      "avg_long_run_pace": 85.814,
-      "total_long_run_laps": 11,
-      "gap_to_fastest": 15.258
+      "avg_long_run_pace": 71.919,
+      "headline_session": "FP2",
+      "headline_laps": 4,
+      "total_long_run_laps": 4,
+      "gap_to_fastest": 1.156
     },
     "HAM": {
       "runs": [
         {
+          "session": "FP2",
+          "stint": 4,
           "compound": "MEDIUM",
-          "laps": 7,
-          "avg_pace": 75.847,
-          "best_pace": 68.675,
-          "consistency": 7.599
-        },
-        {
-          "compound": "SOFT",
-          "laps": 5,
-          "avg_pace": 90.632,
-          "best_pace": 68.461,
-          "consistency": 20.102
-        },
-        {
-          "compound": "MEDIUM",
-          "laps": 8,
-          "avg_pace": 71.933,
+          "laps": 6,
+          "avg_pace": 71.773,
           "best_pace": 71.236,
-          "consistency": 0.396
+          "consistency": 0.45,
+          "kept_laps": [
+            71.461,
+            71.236,
+            71.556,
+            71.615,
+            72.452,
+            72.316
+          ],
+          "excluded_laps": [
+            76.877
+          ]
         }
       ],
-      "avg_long_run_pace": 79.471,
-      "total_long_run_laps": 20,
-      "gap_to_fastest": 8.915
+      "avg_long_run_pace": 71.773,
+      "headline_session": "FP2",
+      "headline_laps": 6,
+      "total_long_run_laps": 6,
+      "gap_to_fastest": 1.01
     },
     "HUL": {
       "runs": [
         {
+          "session": "FP1",
+          "stint": 5,
           "compound": "MEDIUM",
-          "laps": 6,
-          "avg_pace": 82.074,
-          "best_pace": 69.807,
-          "consistency": 12.3
+          "laps": 9,
+          "avg_pace": 73.305,
+          "best_pace": 72.099,
+          "consistency": 0.956,
+          "kept_laps": [
+            73.396,
+            72.257,
+            72.099,
+            72.379,
+            72.683,
+            74.247,
+            75.023,
+            73.689,
+            73.969
+          ],
+          "excluded_laps": []
         },
         {
-          "compound": "MEDIUM",
-          "laps": 2,
-          "avg_pace": 69.934,
-          "best_pace": 69.586,
-          "consistency": 0.348
-        },
-        {
+          "session": "FP2",
+          "stint": 5,
           "compound": "HARD",
-          "laps": 16,
-          "avg_pace": 72.793,
+          "laps": 8,
+          "avg_pace": 72.134,
           "best_pace": 71.716,
-          "consistency": 0.955
+          "consistency": 0.347,
+          "kept_laps": [
+            72.133,
+            72.172,
+            71.872,
+            71.716,
+            71.944,
+            71.976,
+            72.343,
+            72.917
+          ],
+          "excluded_laps": []
         }
       ],
-      "avg_long_run_pace": 74.934,
-      "total_long_run_laps": 24,
-      "gap_to_fastest": 4.378
+      "avg_long_run_pace": 72.134,
+      "headline_session": "FP2",
+      "headline_laps": 8,
+      "total_long_run_laps": 17,
+      "gap_to_fastest": 1.371
     },
     "LAW": {
       "runs": [
         {
+          "session": "FP2",
+          "stint": 4,
           "compound": "MEDIUM",
           "laps": 11,
-          "avg_pace": 73.082,
+          "avg_pace": 72.886,
           "best_pace": 72.421,
-          "consistency": 0.604
+          "consistency": 0.353,
+          "kept_laps": [
+            72.522,
+            72.809,
+            72.844,
+            72.98,
+            72.654,
+            72.519,
+            72.874,
+            72.421,
+            73.581,
+            73.397,
+            73.15
+          ],
+          "excluded_laps": [
+            74.675,
+            117.773,
+            133.682
+          ]
         }
       ],
-      "avg_long_run_pace": 73.082,
+      "avg_long_run_pace": 72.886,
+      "headline_session": "FP2",
+      "headline_laps": 11,
       "total_long_run_laps": 11,
-      "gap_to_fastest": 2.526
+      "gap_to_fastest": 2.123
     },
     "LEC": {
       "runs": [
         {
+          "session": "FP2",
+          "stint": 5,
           "compound": "MEDIUM",
-          "laps": 4,
-          "avg_pace": 87.207,
-          "best_pace": 69.32,
-          "consistency": 15.819
-        },
-        {
-          "compound": "MEDIUM",
-          "laps": 8,
-          "avg_pace": 73.077,
+          "laps": 7,
+          "avg_pace": 72.285,
           "best_pace": 71.868,
-          "consistency": 1.371
+          "consistency": 0.464,
+          "kept_laps": [
+            72.019,
+            71.913,
+            71.868,
+            72.059,
+            72.437,
+            73.302,
+            72.4
+          ],
+          "excluded_laps": [
+            75.652,
+            74.981,
+            138.907
+          ]
         }
       ],
-      "avg_long_run_pace": 80.142,
-      "total_long_run_laps": 12,
-      "gap_to_fastest": 9.586
+      "avg_long_run_pace": 72.285,
+      "headline_session": "FP2",
+      "headline_laps": 7,
+      "total_long_run_laps": 7,
+      "gap_to_fastest": 1.522
     },
     "LIN": {
       "runs": [
         {
-          "compound": "HARD",
-          "laps": 4,
-          "avg_pace": 70.339,
-          "best_pace": 68.974,
-          "consistency": 1.238
-        },
-        {
-          "compound": "SOFT",
-          "laps": 6,
-          "avg_pace": 84.405,
-          "best_pace": 68.378,
-          "consistency": 14.759
-        },
-        {
+          "session": "FP2",
+          "stint": 3,
           "compound": "MEDIUM",
-          "laps": 14,
-          "avg_pace": 72.455,
-          "best_pace": 68.726,
-          "consistency": 1.205
+          "laps": 12,
+          "avg_pace": 72.627,
+          "best_pace": 71.828,
+          "consistency": 0.526,
+          "kept_laps": [
+            72.063,
+            71.969,
+            71.828,
+            72.096,
+            72.348,
+            72.68,
+            72.743,
+            72.907,
+            73.109,
+            73.376,
+            73.276,
+            73.133
+          ],
+          "excluded_laps": [
+            74.112,
+            72.064,
+            147.219
+          ]
         }
       ],
-      "avg_long_run_pace": 75.733,
-      "total_long_run_laps": 24,
-      "gap_to_fastest": 5.177
+      "avg_long_run_pace": 72.627,
+      "headline_session": "FP2",
+      "headline_laps": 12,
+      "total_long_run_laps": 12,
+      "gap_to_fastest": 1.864
     },
     "NOR": {
       "runs": [
         {
+          "session": "FP2",
+          "stint": 6,
           "compound": "MEDIUM",
-          "laps": 4,
-          "avg_pace": 91.206,
-          "best_pace": 68.0,
-          "consistency": 22.795
-        },
-        {
-          "compound": "MEDIUM",
-          "laps": 8,
-          "avg_pace": 71.741,
-          "best_pace": 70.862,
-          "consistency": 0.754
+          "laps": 9,
+          "avg_pace": 71.642,
+          "best_pace": 70.849,
+          "consistency": 0.764,
+          "kept_laps": [
+            70.849,
+            70.862,
+            70.936,
+            71.811,
+            71.069,
+            71.458,
+            72.585,
+            72.157,
+            73.047
+          ],
+          "excluded_laps": []
         }
       ],
-      "avg_long_run_pace": 81.474,
-      "total_long_run_laps": 12,
-      "gap_to_fastest": 10.918
+      "avg_long_run_pace": 71.642,
+      "headline_session": "FP2",
+      "headline_laps": 9,
+      "total_long_run_laps": 9,
+      "gap_to_fastest": 0.879
     },
     "OCO": {
       "runs": [
         {
+          "session": "FP2",
+          "stint": 1,
           "compound": "HARD",
-          "laps": 5,
-          "avg_pace": 83.717,
+          "laps": 4,
+          "avg_pace": 71.599,
           "best_pace": 70.538,
-          "consistency": 14.987
+          "consistency": 0.613,
+          "kept_laps": [
+            71.919,
+            71.939,
+            70.538,
+            72.001
+          ],
+          "excluded_laps": [
+            113.111,
+            123.479,
+            143.032,
+            101.372,
+            117.486,
+            102.733
+          ]
         },
         {
+          "session": "FP2",
+          "stint": 4,
           "compound": "HARD",
           "laps": 9,
-          "avg_pace": 73.653,
+          "avg_pace": 73.481,
           "best_pace": 73.046,
-          "consistency": 0.9
+          "consistency": 0.433,
+          "kept_laps": [
+            74.614,
+            73.046,
+            73.303,
+            73.144,
+            73.482,
+            73.571,
+            73.261,
+            73.391,
+            73.52
+          ],
+          "excluded_laps": [
+            76.155,
+            120.945,
+            140.685
+          ]
         }
       ],
-      "avg_long_run_pace": 78.685,
-      "total_long_run_laps": 14,
-      "gap_to_fastest": 8.129
+      "avg_long_run_pace": 72.902,
+      "headline_session": "FP2",
+      "headline_laps": 13,
+      "total_long_run_laps": 13,
+      "gap_to_fastest": 2.139
     },
     "PIA": {
       "runs": [
         {
-          "compound": "MEDIUM",
-          "laps": 2,
-          "avg_pace": 100.619,
-          "best_pace": 98.111,
-          "consistency": 2.508
-        },
-        {
-          "compound": "MEDIUM",
-          "laps": 2,
-          "avg_pace": 69.352,
-          "best_pace": 69.221,
-          "consistency": 0.13
-        },
-        {
-          "compound": "SOFT",
-          "laps": 11,
-          "avg_pace": 71.897,
-          "best_pace": 68.871,
-          "consistency": 1.377
-        },
-        {
+          "session": "FP1",
+          "stint": 6,
           "compound": "MEDIUM",
           "laps": 4,
-          "avg_pace": 70.652,
-          "best_pace": 69.946,
-          "consistency": 0.49
+          "avg_pace": 70.777,
+          "best_pace": 70.445,
+          "consistency": 0.332,
+          "kept_laps": [
+            70.445,
+            70.445,
+            71.122,
+            71.097
+          ],
+          "excluded_laps": [
+            69.946
+          ]
+        },
+        {
+          "session": "FP2",
+          "stint": 5,
+          "compound": "MEDIUM",
+          "laps": 9,
+          "avg_pace": 71.926,
+          "best_pace": 70.845,
+          "consistency": 0.671,
+          "kept_laps": [
+            71.322,
+            70.845,
+            71.337,
+            71.768,
+            71.823,
+            72.648,
+            72.261,
+            72.21,
+            73.118
+          ],
+          "excluded_laps": [
+            74.663
+          ]
         }
       ],
-      "avg_long_run_pace": 78.13,
-      "total_long_run_laps": 19,
-      "gap_to_fastest": 7.574
+      "avg_long_run_pace": 71.926,
+      "headline_session": "FP2",
+      "headline_laps": 9,
+      "total_long_run_laps": 13,
+      "gap_to_fastest": 1.163
     },
     "RUS": {
       "runs": [
         {
+          "session": "FP1",
+          "stint": 4,
+          "compound": "MEDIUM",
+          "laps": 9,
+          "avg_pace": 71.741,
+          "best_pace": 71.181,
+          "consistency": 0.657,
+          "kept_laps": [
+            71.385,
+            71.181,
+            71.213,
+            71.366,
+            71.243,
+            71.851,
+            71.887,
+            72.215,
+            73.328
+          ],
+          "excluded_laps": [
+            78.689
+          ]
+        },
+        {
+          "session": "FP2",
+          "stint": 3,
           "compound": "MEDIUM",
           "laps": 4,
-          "avg_pace": 88.07,
-          "best_pace": 68.221,
-          "consistency": 19.752
-        },
-        {
-          "compound": "MEDIUM",
-          "laps": 7,
-          "avg_pace": 86.144,
-          "best_pace": 67.637,
-          "consistency": 20.719
-        },
-        {
-          "compound": "SOFT",
-          "laps": 5,
-          "avg_pace": 70.543,
-          "best_pace": 67.836,
-          "consistency": 1.355
-        },
-        {
-          "compound": "MEDIUM",
-          "laps": 8,
-          "avg_pace": 71.785,
-          "best_pace": 71.181,
-          "consistency": 0.684
+          "avg_pace": 71.22,
+          "best_pace": 71.155,
+          "consistency": 0.067,
+          "kept_laps": [
+            71.18,
+            71.329,
+            71.155,
+            71.214
+          ],
+          "excluded_laps": [
+            75.101
+          ]
         }
       ],
-      "avg_long_run_pace": 79.136,
-      "total_long_run_laps": 24,
-      "gap_to_fastest": 8.58
+      "avg_long_run_pace": 71.22,
+      "headline_session": "FP2",
+      "headline_laps": 4,
+      "total_long_run_laps": 13,
+      "gap_to_fastest": 0.457
     },
     "SAI": {
       "runs": [
         {
+          "session": "FP2",
+          "stint": 6,
           "compound": "MEDIUM",
-          "laps": 7,
-          "avg_pace": 73.241,
+          "laps": 8,
+          "avg_pace": 73.197,
           "best_pace": 72.781,
-          "consistency": 0.408
+          "consistency": 0.399,
+          "kept_laps": [
+            72.89,
+            72.805,
+            72.781,
+            73.118,
+            73.163,
+            73.184,
+            73.622,
+            74.013
+          ],
+          "excluded_laps": [
+            110.002,
+            133.443
+          ]
         }
       ],
-      "avg_long_run_pace": 73.241,
-      "total_long_run_laps": 7,
-      "gap_to_fastest": 2.685
-    },
-    "STR": {
-      "runs": [
-        {
-          "compound": "MEDIUM",
-          "laps": 3,
-          "avg_pace": 83.82,
-          "best_pace": 71.915,
-          "consistency": 9.156
-        },
-        {
-          "compound": "SOFT",
-          "laps": 6,
-          "avg_pace": 74.393,
-          "best_pace": 74.091,
-          "consistency": 0.284
-        }
-      ],
-      "avg_long_run_pace": 79.106,
-      "total_long_run_laps": 9,
-      "gap_to_fastest": 8.55
+      "avg_long_run_pace": 73.197,
+      "headline_session": "FP2",
+      "headline_laps": 8,
+      "total_long_run_laps": 8,
+      "gap_to_fastest": 2.434
     },
     "VER": {
       "runs": [
         {
-          "compound": "SOFT",
-          "laps": 3,
-          "avg_pace": 75.846,
-          "best_pace": 68.658,
-          "consistency": 10.0
-        },
-        {
+          "session": "FP2",
+          "stint": 5,
           "compound": "MEDIUM",
           "laps": 9,
-          "avg_pace": 72.074,
-          "best_pace": 70.999,
-          "consistency": 0.834
+          "avg_pace": 71.704,
+          "best_pace": 70.668,
+          "consistency": 0.605,
+          "kept_laps": [
+            70.668,
+            71.45,
+            70.999,
+            71.622,
+            71.801,
+            72.364,
+            71.499,
+            72.519,
+            72.411
+          ],
+          "excluded_laps": [
+            74.001,
+            137.955
+          ]
         }
       ],
-      "avg_long_run_pace": 73.96,
-      "total_long_run_laps": 12,
-      "gap_to_fastest": 3.404
+      "avg_long_run_pace": 71.704,
+      "headline_session": "FP2",
+      "headline_laps": 9,
+      "total_long_run_laps": 9,
+      "gap_to_fastest": 0.941
     }
   },
   "tyre_degradation": {
