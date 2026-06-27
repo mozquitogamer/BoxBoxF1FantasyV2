@@ -237,15 +237,16 @@ def analyze_long_run_pace(df: pd.DataFrame, min_clean_laps: int = LONG_RUN_MIN_C
             })
 
         if runs:
-            # Headline pace = the latest session that actually produced a long
-            # run, lap-weighted within it. On a normal weekend that's FP2 (the
-            # high-fuel race sim); FP3 is usually quali-prep so yields no long
-            # run and we fall back to FP2; sprint weekends fall back to FP1.
-            # This keeps every driver ranked on a comparable, representative
-            # session instead of blending a green-track FP1 run into the mean
-            # (which also distorts ranking when drivers ran long in different
-            # sessions). All runs stay in `runs` for the per-session breakdown.
-            session_order = {"FP1": 1, "FP2": 2, "FP3": 3}
+            # Headline pace = the most representative race-sim session, lap-
+            # weighted within it. FP2 is THE high-fuel race-run session on a
+            # normal weekend, so it wins; FP1 is the next best (sprint weekends
+            # have only FP1); FP3 is last because it's overwhelmingly low-fuel
+            # quali prep — trusting an FP3 run can put a driver on top of the
+            # race-pace board on a tank of low fuel (e.g. a hard-tyre run faster
+            # than his own medium run, which only happens light). This keeps
+            # every driver ranked on a comparable session instead of blending a
+            # green-track FP1 run in. All runs stay in `runs` for the breakdown.
+            session_order = {"FP2": 3, "FP1": 2, "FP3": 1}
             headline_session = max(
                 runs, key=lambda r: session_order.get(r["session"], 0)
             )["session"]
