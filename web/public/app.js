@@ -114,6 +114,7 @@ const PRICE_TIERS = {
     A_TIER_THRESHOLD: 18.5,
     A_TIER_CHANGES: { great: 0.3, good: 0.1, poor: -0.1, terrible: -0.3 },
     B_TIER_CHANGES: { great: 0.6, good: 0.2, poor: -0.2, terrible: -0.6 },
+    FLOOR: 3.0,   // F1 Fantasy minimum asset price ($M); an asset at the floor can't drop further
 };
 // PPM rating thresholds (rolling avg of last 3 rounds / price)
 const PPM_RATINGS = {
@@ -1048,6 +1049,7 @@ function computeDriverPriceFields(driver) {
     driver._pts_poor = Math.ceil(fc.ptsForPoor);
     driver._pts_terrible = driver._pts_poor; // distinct sort key; same boundary as poor
     driver._price_tier = fc.tier;
+    driver._at_floor = fc.atFloor; // at the $3.0M price floor -> can't drop, only rise
 }
 
 // -- Table header sorting --
@@ -1573,8 +1575,8 @@ function driverRow(d, i) {
     // " to " separator (not an en-dash) so negative ranges like "-25 to -11" read cleanly.
     const greatCell = `${G}+`;
     const goodCell = G > Gd ? `${Gd} to ${G - 1}` : `${Gd}+`;
-    const poorCell = Gd > P ? `${P} to ${Gd - 1}` : `${P}+`;
-    const terribleCell = `<${P}`;
+    const poorCell = d._at_floor ? 'floor' : (Gd > P ? `${P} to ${Gd - 1}` : `${P}+`);
+    const terribleCell = d._at_floor ? 'floor' : `<${P}`;
 
     return `
     <tr>
@@ -2554,25 +2556,33 @@ function makeTableSortable(tableEl) {
 // -- Price change brackets display --
 function renderPriceChangeBrackets(item) {
     const pc = predictPriceChange(item, item.expected_points);
+    const atFloor = pc.atFloor;
+    const floorStr = `$${PRICE_TIERS.FLOOR.toFixed(1)}M`;
     const changeColor = pc.expectedChange > 0 ? 'var(--green)' : pc.expectedChange < 0 ? 'var(--red, #ef4444)' : 'var(--text-secondary)';
     const changeSign = pc.expectedChange >= 0 ? '+' : '';
     const tierLabel = pc.isATier ? 'A-tier' : 'B-tier';
     const tc = pc.tierChanges;
 
-    // Build bracket rows — show how many points needed for each bracket
+    // Build bracket rows — points needed for each bracket. At the price floor the
+    // two drop brackets collapse into a single "won't drop" row (it can't fall
+    // below the floor); rise brackets stay since it can still go up.
     const brackets = [
         { label: `${tc.great >= 0 ? '+' : ''}${tc.great.toFixed(1)}M`, threshold: 'great', pts: pc.ptsForGreat, color: 'var(--green)' },
         { label: `${tc.good >= 0 ? '+' : ''}${tc.good.toFixed(1)}M`, threshold: 'good', pts: pc.ptsForGood, color: '#22d3ee' },
-        { label: `${tc.poor >= 0 ? '+' : ''}${tc.poor.toFixed(1)}M`, threshold: 'poor', pts: pc.ptsForPoor, color: 'var(--orange)' },
-        { label: `${tc.terrible >= 0 ? '+' : ''}${tc.terrible.toFixed(1)}M`, threshold: 'terrible', pts: null, color: 'var(--red, #ef4444)' },
     ];
+    if (atFloor) {
+        brackets.push({ label: 'No drop', threshold: 'floor', pts: null, color: 'var(--text-secondary)', floorRow: true });
+    } else {
+        brackets.push({ label: `${tc.poor >= 0 ? '+' : ''}${tc.poor.toFixed(1)}M`, threshold: 'poor', pts: pc.ptsForPoor, color: 'var(--orange)' });
+        brackets.push({ label: `${tc.terrible >= 0 ? '+' : ''}${tc.terrible.toFixed(1)}M`, threshold: 'terrible', pts: null, color: 'var(--red, #ef4444)' });
+    }
 
     // Determine which bracket the predicted score falls into
     const predicted = item.expected_points;
-    let activeBracket = 'terrible';
+    let activeBracket = atFloor ? 'floor' : 'terrible';
     if (predicted >= pc.ptsForGreat) activeBracket = 'great';
     else if (predicted >= pc.ptsForGood) activeBracket = 'good';
-    else if (predicted >= pc.ptsForPoor) activeBracket = 'poor';
+    else if (!atFloor && predicted >= pc.ptsForPoor) activeBracket = 'poor';
 
     const sourceLabel = pc.hasOfficialData ? 'Official pts' : 'Calculated pts';
     const pastDisplay = pc.pastScores.length > 0
@@ -2581,18 +2591,25 @@ function renderPriceChangeBrackets(item) {
 
     let bracketRows = brackets.map(b => {
         const isActive = b.threshold === activeBracket;
-        const ptsText = b.pts != null ? `${Math.ceil(b.pts)} pts or more` : `< ${Math.ceil(pc.ptsForPoor)} pts`;
+        let ptsText;
+        if (b.floorRow) ptsText = `won't drop &middot; min ${floorStr}`;
+        else if (b.pts != null) ptsText = `${Math.ceil(b.pts)} pts or more`;
+        else ptsText = `< ${Math.ceil(pc.ptsForPoor)} pts`;
         return `<div class="bracket-row ${isActive ? 'bracket-active' : ''}" style="--bracket-color:${b.color}">
             <span class="bracket-change">${b.label}</span>
             <span class="bracket-pts">${ptsText}</span>
         </div>`;
     }).join('');
 
+    const predictedHtml = (atFloor && pc.expectedChange <= 0)
+        ? `<span class="price-change-predicted" style="color:var(--text-secondary)" title="At the ${floorStr} price floor — can't drop further, only rise">\u{1F512} At ${floorStr} floor</span>`
+        : `<span class="price-change-predicted" style="color:${changeColor}">${changeSign}${pc.expectedChange.toFixed(1)}M</span>`;
+
     return `
     <div class="price-change-section">
         <div class="price-change-header">
             <span class="price-change-title">Price Change (${tierLabel})</span>
-            <span class="price-change-predicted" style="color:${changeColor}">${changeSign}${pc.expectedChange.toFixed(1)}M</span>
+            ${predictedHtml}
         </div>
         <div class="price-change-meta">
             <span title="${sourceLabel}: last ${pc.pastScores.length} round(s)">${sourceLabel}: ${pastDisplay}</span>
@@ -2660,6 +2677,12 @@ function predictPriceChange(item, predictedPts) {
     else if (avgPpm >= PPM_RATINGS.POOR) expectedChange = tierChanges.poor;
     else expectedChange = tierChanges.terrible;
 
+    // Price floor: the game won't let an asset fall below PRICE_TIERS.FLOOR ($3.0M).
+    // An asset already at the floor can't drop, so clamp any predicted negative
+    // change to zero. Rises are still possible if it hits the points threshold.
+    const atFloor = price <= PRICE_TIERS.FLOOR + 0.001;
+    if (atFloor && expectedChange < 0) expectedChange = 0;
+
     // Points needed this round for each threshold
     // Rolling window = last 2 actual rounds + predicted this round = 3 total
     // new_avg = (sum_of_last2 + X) / windowSize
@@ -2672,7 +2695,7 @@ function predictPriceChange(item, predictedPts) {
     const ptsForPoor = PPM_RATINGS.POOR * price * windowSize - recentSum;
 
     return {
-        avgPpm, rating, expectedChange, avgPts,
+        avgPpm, rating, expectedChange, avgPts, atFloor,
         cumulativeTotal, pastScores, isATier, tierChanges, hasOfficialData,
         tier: isATier ? 'A' : 'B',
         ptsForGreat, ptsForGood, ptsForPoor,
