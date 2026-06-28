@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-06-27T11:58:39.546802+00:00",
+  "generated_at": "2026-06-28T20:01:52.304981+00:00",
   "rounds": [
     {
       "round": 1,
@@ -71,8 +71,8 @@
       "circuit": "Spielberg",
       "date": "2026-06-28",
       "has_predictions": true,
-      "has_post_race": false,
-      "has_actual": false
+      "has_post_race": true,
+      "has_actual": true
     },
     {
       "round": 11,

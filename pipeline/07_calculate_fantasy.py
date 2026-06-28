@@ -268,26 +268,28 @@ def estimate_overtakes(predicted_quali: int, predicted_race: int, grid_size: int
     routinely make many more overtakes than their net position change due to
     battles, re-passes, and lapped traffic.
 
-    Calibrated from f1fantasytool.com actual data (Rounds 1-2):
-      BEA R1: P12→P7, 5 gained, 9 overtakes  (base ~4)
-      BEA R2: P10→P5, 5 gained, 13 overtakes (base ~8)
-      LIN R1: P9→P8,  1 gained, 8 overtakes  (base ~7)
-      LIN R2: P15→P12, 3 gained, 8 overtakes (base ~5)
+    Model: overtakes = base(grid bucket) + positions_gained
 
-    Model: overtakes = base(grid_position) + positions_gained
+    Bases retuned 2026-06-28 on 7 rounds of F1 Fantasy overtake data
+    (overtakes.csv joined to starting grid; normal-track rounds R1/2/3/6/7/9,
+    Monaco R8 excluded so its multiplier doesn't double-damp). The old R1-R2
+    bases assumed overtakes ramp toward the back; the data shows they're roughly
+    FLAT (~5) across the grid — even front-runners rack up sensor-counted passes
+    (DRS trains, recoveries, lapped traffic). Each base = mean overtakes minus
+    mean positions gained for that bucket, so the model is unbiased at the mean.
     """
     positions_gained = max(0, predicted_quali - predicted_race)
 
-    # Base overtakes from wheel-to-wheel racing (even without net position gain)
-    # Front-runners have fewer cars to battle; midfield/back have more traffic
+    # Wheel-to-wheel overtakes NOT explained by net position gain, per grid
+    # bucket. front obs 6.11/gp 0.17, upper 4.72/0.78, mid 5.28/1.39, back 4.70/2.70.
     if predicted_quali <= 3:
-        base = 2
+        base = 6
     elif predicted_quali <= 6:
         base = 4
     elif predicted_quali <= 12:
-        base = 6
+        base = 4
     else:
-        base = 7
+        base = 2
 
     # multiplier (<=1) damps overtakes on hard-to-pass circuits (e.g. Monaco)
     return max(0, round((base + positions_gained) * multiplier))
@@ -301,23 +303,24 @@ def estimate_sprint_overtakes(predicted_quali: int, predicted_race: int,
     Sprint races have fewer laps and fewer overtaking opportunities.
     Bases aligned with SPRINT_OVERTAKE_BASE in 08_monte_carlo_fantasy.py.
 
-    Calibrated from OpenF1 R2 sprint data: mean=7.0, std=3.1 (n=22).
+    Retuned 2026-06-28 on 3 sprints (internal R2/R6/R7, overtakes.csv
+    sprint_overtakes joined to sprint grid, n=66). Same base + positions_gained
+    model as the race; sprints see fewer, flatter passes (~3).
     """
     positions_gained = max(0, predicted_quali - predicted_race)
 
-    # Reduced base overtakes for sprint distance (~50% of race values)
+    # Per sprint-grid bucket. front obs 2.22/gp 0.22, upper 3.00/1.00,
+    # mid 3.17/0.33, back 3.77/2.17 → base = mean overtakes - mean gains.
     if predicted_quali <= 3:
-        base = 1
+        base = 2
     elif predicted_quali <= 6:
         base = 2
     elif predicted_quali <= 12:
         base = 3
     else:
-        base = 4
+        base = 2
 
-    # Fewer laps means fewer opportunities to convert position gains into counted overtakes
-    sprint_gains = max(0, positions_gained - 1)
-    return max(0, round((base + sprint_gains) * multiplier))
+    return max(0, round((base + positions_gained) * multiplier))
 
 
 # -- Fantasy prices ------------------------------------------------------------

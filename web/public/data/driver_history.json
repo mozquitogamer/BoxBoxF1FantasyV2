@@ -44,6 +44,12 @@
           "circuit_id": "catalunya",
           "points": 22,
           "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 33,
+          "is_dnf": false
         }
       ]
     },
@@ -89,6 +95,12 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": 28,
+          "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 37,
           "is_dnf": false
         }
       ]
@@ -136,6 +148,12 @@
           "circuit_id": "catalunya",
           "points": -12,
           "is_dnf": true
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 36,
+          "is_dnf": false
         }
       ]
     },
@@ -182,6 +200,12 @@
           "circuit_id": "catalunya",
           "points": -19,
           "is_dnf": true
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 10,
+          "is_dnf": false
         }
       ]
     },
@@ -227,6 +251,12 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": 46,
+          "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 24,
           "is_dnf": false
         }
       ]
@@ -274,6 +304,12 @@
           "circuit_id": "catalunya",
           "points": 23,
           "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 14,
+          "is_dnf": false
         }
       ]
     },
@@ -320,6 +356,12 @@
           "circuit_id": "catalunya",
           "points": -20,
           "is_dnf": true
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 0,
+          "is_dnf": false
         }
       ]
     },
@@ -365,6 +407,12 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": 10,
+          "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 6,
           "is_dnf": false
         }
       ]
@@ -412,6 +460,12 @@
           "circuit_id": "catalunya",
           "points": 7,
           "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 6,
+          "is_dnf": false
         }
       ]
     },
@@ -457,6 +511,12 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": 17,
+          "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 3,
           "is_dnf": false
         }
       ]
@@ -504,6 +564,12 @@
           "circuit_id": "catalunya",
           "points": 8,
           "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 7,
+          "is_dnf": false
         }
       ]
     },
@@ -550,6 +616,12 @@
           "circuit_id": "catalunya",
           "points": 11,
           "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": -20,
+          "is_dnf": true
         }
       ]
     },
@@ -596,6 +668,12 @@
           "circuit_id": "catalunya",
           "points": 4,
           "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 9,
+          "is_dnf": false
         }
       ]
     },
@@ -640,6 +718,12 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
+          "points": 9,
+          "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
           "points": 9,
           "is_dnf": false
         }
@@ -688,6 +772,12 @@
           "circuit_id": "catalunya",
           "points": 9,
           "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 9,
+          "is_dnf": false
         }
       ]
     },
@@ -734,6 +824,12 @@
           "circuit_id": "catalunya",
           "points": 8,
           "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": -20,
+          "is_dnf": true
         }
       ]
     },
@@ -778,6 +874,12 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
+          "points": -20,
+          "is_dnf": true
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
           "points": -20,
           "is_dnf": true
         }
@@ -826,6 +928,12 @@
           "circuit_id": "catalunya",
           "points": 21,
           "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 18,
+          "is_dnf": false
         }
       ]
     },
@@ -871,6 +979,12 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": 19,
+          "is_dnf": false
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 24,
           "is_dnf": false
         }
       ]
@@ -918,6 +1032,12 @@
           "circuit_id": "catalunya",
           "points": -20,
           "is_dnf": true
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 10,
+          "is_dnf": false
         }
       ]
     },
@@ -962,6 +1082,12 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
+          "points": -20,
+          "is_dnf": true
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
           "points": -20,
           "is_dnf": true
         }
@@ -1010,6 +1136,12 @@
           "circuit_id": "catalunya",
           "points": -18,
           "is_dnf": true
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 7,
+          "is_dnf": false
         }
       ]
     }
@@ -1051,6 +1183,11 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": 37
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 83
         }
       ]
     },
@@ -1090,6 +1227,11 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": 40
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 49
         }
       ]
     },
@@ -1129,6 +1271,11 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": 26
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 25
         }
       ]
     },
@@ -1168,6 +1315,11 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": -11
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 10
         }
       ]
     },
@@ -1207,6 +1359,11 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": 64
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 61
         }
       ]
     },
@@ -1246,6 +1403,11 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": 31
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 15
         }
       ]
     },
@@ -1285,6 +1447,11 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": 31
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": -12
         }
       ]
     },
@@ -1324,6 +1491,11 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": 57
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 48
         }
       ]
     },
@@ -1363,6 +1535,11 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": 13
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 16
         }
       ]
     },
@@ -1402,6 +1579,11 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": -11
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": -41
         }
       ]
     },
@@ -1441,6 +1623,11 @@
           "round": 9,
           "circuit_id": "catalunya",
           "points": -36
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": -11
         }
       ]
     }

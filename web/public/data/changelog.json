@@ -1,6 +1,16 @@
 {
   "entries": [
     {
+      "date": "2026-06-28",
+      "title": "Overtake predictions retuned on a full season of data",
+      "tags": ["model"],
+      "body": [
+        "Our overtake estimate feeds each driver's overtake points (one point per on-track pass) and, through them, their projected total. The old version was calibrated on just the first two races and assumed passes climb steadily toward the back of the grid, handing a back-row starter around 14 baseline overtakes a race.",
+        "With seven rounds of real F1 Fantasy overtake data in hand, that turned out to be well wide of the mark. On-track passing in 2026 is roughly flat across the grid, about five per driver, and even front-runners pick up a fair number through DRS trains, recoveries and lapped traffic. The old model projected roughly 260 passes a race when the real figure is closer to 110. We recalibrated the per-grid bases against the actual data so the totals line up, and folded the race and sprint estimates onto one consistent formula.",
+        "Most established drivers barely move, since their projection already leans on their own overtake history. The biggest correction is for back and midfield starters and for drivers with little history, such as rookies and Cadillac, who were being over-credited. This takes effect from the British Grand Prix."
+      ]
+    },
+    {
       "date": "2026-06-27",
       "title": "Smarter long-run (race pace) analysis on the Analysis tab",
       "tags": ["feature"],

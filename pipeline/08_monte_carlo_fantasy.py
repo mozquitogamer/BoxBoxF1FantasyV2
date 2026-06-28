@@ -123,36 +123,39 @@ RACE_NOISE_BASE = 0.3     # Same scale as quali. Z-score normalization
 # Formula: multiplier = 1 + CONFIDENCE_NOISE_FACTOR * (100 - confidence) / 50
 CONFIDENCE_NOISE_FACTOR = 1.5
 
-# --- Overtake calibration (from OpenF1 R1+R2 actual data) ---
-# These are mean overtakes by grid bucket (n=32 finishers across 2 races).
-# The MC adds positions_gained on top, then applies random variation.
+# --- Overtake calibration (retuned 2026-06-28 on 7 rounds of F1 Fantasy
+# overtake data: overtakes.csv joined to starting grid, normal-track rounds
+# R1/2/3/6/7/9, Monaco R8 EXCLUDED so its overtake_multiplier doesn't
+# double-damp). The old R1-R2 bases assumed overtakes ramp toward the back and
+# over-predicted total field passes by ~2.4x (262 vs observed ~111/race).
+# Reality: overtakes are roughly FLAT (~5) across the grid — even front-runners
+# rack up sensor-counted passes (DRS trains, recoveries, lapped traffic).
+# Model: overtakes = base[bucket] + max(0, positions_gained), so each base is
+# (mean overtakes - mean positions gained) for that bucket. Predicted total
+# under this model ~112/race, matching observed ~111.
 OVERTAKE_BASE = {
-    "front": 6,       # Grid P1-3:  actual mean=5.8, std=2.7 (n=5)
-    "upper_mid": 7,   # Grid P4-6:  actual mean=7.3, std=1.9 (n=3)
-    "mid": 12,         # Grid P7-12: actual mean=12.3, std=3.3 (n=10)
-    "back": 14,        # Grid P13+:  actual mean=15.5, std=3.5 (n=14)
+    "front": 6,       # Grid P1-3:  obs mean 6.11, gp 0.17 (n=18)
+    "upper_mid": 4,   # Grid P4-6:  obs mean 4.72, gp 0.78 (n=18)
+    "mid": 4,         # Grid P7-12: obs mean 5.28, gp 1.39 (n=36)
+    "back": 2,        # Grid P13+:  obs mean 4.70, gp 2.70 (n=60)
 }
-# Note: the base already includes the "typical" positions gained for that
-# grid bucket, so we DON'T add positions_gained on top anymore.
-# Instead, we add the EXCESS positions gained beyond what's typical.
-# Typical gains by bucket: front=0, upper_mid=1, mid=2, back=4
-TYPICAL_GAINS = {"front": 0, "upper_mid": 1, "mid": 2, "back": 4}
 
-# Standard deviation as fraction of mean (coefficient of variation).
-# From OpenF1 data: CV ranges from 0.23 (upper_mid) to 0.47 (front).
-# Using 0.35 as a reasonable middle ground.
+# Standard deviation as fraction of mean (coefficient of variation). Observed
+# per-driver CV is high (~0.7-0.9), but 0.35 is kept deliberately tight here:
+# the driver-history blend (below) supplies most of the per-driver variance,
+# and this CV only governs the no-history fallback.
 OVERTAKE_CV = 0.35
 
-# --- Sprint overtake calibration (from OpenF1 R2 sprint data) ---
-# Sprint mean=7.0, std=3.1 across all drivers (n=22)
-# Fewer laps = fewer opportunities, roughly 45% of race overtakes.
+# --- Sprint overtake calibration (retuned 2026-06-28 on 3 sprints: internal
+# R2/R6/R7, overtakes.csv sprint_overtakes joined to sprint grid, n=66). Same
+# base + max(0, positions_gained) model as the race. Sprints see fewer passes
+# (shorter, less DRS-train chaos) and are flatter still (~3).
 SPRINT_OVERTAKE_BASE = {
-    "front": 3,
-    "upper_mid": 4,
-    "mid": 5,
-    "back": 6,
+    "front": 2,       # obs mean 2.22, gp 0.22 (n=9)
+    "upper_mid": 2,   # obs mean 3.00, gp 1.00 (n=9)
+    "mid": 3,         # obs mean 3.17, gp 0.33 (n=18)
+    "back": 2,        # obs mean 3.77, gp 2.17 (n=30)
 }
-SPRINT_TYPICAL_GAINS = {"front": 0, "upper_mid": 0, "mid": 1, "back": 2}
 SPRINT_OVERTAKE_CV = 0.45  # Higher CV in sprints (more volatile, fewer laps)
 
 # --- Teammate correlation (Fix 1.2) ---
@@ -712,14 +715,14 @@ def sample_overtakes(grid_positions: np.ndarray, race_positions: np.ndarray,
       - Adjusted for simulated position change vs their typical gains
 
     When no history available:
-      - Uses grid-bucket base + excess gains beyond typical
+      - Uses grid-bucket base + positions gained (bases calibrated as mean
+        overtakes minus mean gains per bucket, so unbiased at the mean)
       - Distribution: Normal with CV from actual data
     """
     n = len(grid_positions)
     overtakes = np.zeros(n, dtype=int)
 
     base_map = SPRINT_OVERTAKE_BASE if is_sprint else OVERTAKE_BASE
-    typical = SPRINT_TYPICAL_GAINS if is_sprint else TYPICAL_GAINS
     cv = SPRINT_OVERTAKE_CV if is_sprint else OVERTAKE_CV
 
     for i in range(n):
@@ -737,11 +740,12 @@ def sample_overtakes(grid_positions: np.ndarray, race_positions: np.ndarray,
         else:
             bucket = "back"
 
-        # Grid-bucket estimate (always computed as baseline)
+        # Grid-bucket estimate (always computed as baseline).
+        # overtakes = base[bucket] + positions gained (bases are calibrated as
+        # mean overtakes minus mean gains, so this is unbiased at the mean).
         base = base_map[bucket]
         pos_gained = max(0, grid - race_positions[i])
-        excess_gains = max(0, pos_gained - typical[bucket])
-        bucket_ot = base + excess_gains
+        bucket_ot = base + pos_gained
 
         # Check for driver-specific overtake data
         driver_id = driver_ids[i] if driver_ids else None
