@@ -148,7 +148,9 @@ def calculate_risk_ratings(predictions: pd.DataFrame) -> dict[str, float]:
     # run hot (~21% field DNF vs the ~12-13% historical norm), so the per-driver
     # cap below must RISE with it — the old schedule wrongly assumed reliability
     # improves through the year and clamped genuinely-unreliable cars far too low.
-    PRIOR_RATE = 0.13          # ~historical field DNF rate
+    PRIOR_RATE = 0.16          # field DNF prior (bumped 0.13->0.16 on 2026-06-28:
+                               # 8 rounds confirm 2026 runs ~19-20% field DNF, well
+                               # above the historical norm; Brier-flat, cuts under-bias)
     PRIOR_N = 40               # prior strength in pseudo car-rounds (~2 races)
     total_dnfs = sum(d[0] for d in season_dnfs.values()) if season_dnfs else 0
     total_carrounds = sum(d[1] for d in season_dnfs.values()) if season_dnfs else 0
@@ -162,28 +164,29 @@ def calculate_risk_ratings(predictions: pd.DataFrame) -> dict[str, float]:
         print(f"  Loaded {total_rounds} rounds of actual DNF data ({total_dnfs} total DNFs, "
               f"field rate {field_rate:.1%}, per-driver cap {season_cap:.0%})")
 
-    # Blend historical and current-season rates
+    # Per-driver DNF probability via Beta-Binomial shrinkage (retuned 2026-06-28
+    # on 8 rounds, walk-forward Brier 0.168 -> 0.164, ~2.7% better). The old
+    # approach leaned ~90% on each driver's raw season rate then FLOORED
+    # non-retirees at 2% — so a clean front-runner (0 DNFs in 8 races) showed 2%
+    # risk when a ~19% field-attrition season makes ~8-13% realistic, which
+    # systematically OVER-predicted the points of the most valuable cars (the MC
+    # almost never retired them). It also pinned bad-luck cars (e.g. 4 DNFs in 8)
+    # to the cap. Now: start each driver from a field-aware prior (mostly this
+    # season's field rate, a little of their historical rolling rate) with
+    # strength PRIOR_K pseudo-races, then Bayesian-update with their actual season
+    # DNFs. This lifts never-retired cars to a real floor and pulls bad-luck cars
+    # off the cap, while leaving genuinely unreliable cars high.
+    PRIOR_K = 8                # prior strength in pseudo car-rounds (~half a season)
+    PRIOR_FIELD_WEIGHT = 0.75  # prior = 0.75*field_rate + 0.25*driver-historical
+    floor = 0.04               # no F1 car is truly below ~4% DNF risk
     for driver_id in predictions["driver_id"].unique():
         hist_rate = historical_rates.get(driver_id, SEASON_DEFAULT_DNF / 100)
-        season_data = season_dnfs.get(driver_id)
-
-        if season_data and season_data[1] >= 1:
-            season_rate = season_data[0] / season_data[1]
-            n_races = season_data[1]
-            # Weight current season more as we get more data
-            # At 2 races: 60% season, 40% historical
-            # At 5 races: 80% season, 20% historical
-            season_weight = min(0.4 + n_races * 0.1, 0.9)
-            blended = season_weight * season_rate + (1 - season_weight) * hist_rate
-        else:
-            blended = hist_rate
-
-        # Cap tracks observed field attrition (season_cap, computed above) instead
-        # of a fixed decreasing schedule — so in a high-DNF season the unreliable
-        # cars aren't clamped down to a historical-norm ceiling.
-        # Floor: no driver has truly 0% DNF risk — mechanical failures, incidents etc.
-        floor = 0.02  # 2% minimum baseline
-        risk[driver_id] = round(min(max(blended, floor), season_cap) * 100, 1)
+        prior = PRIOR_FIELD_WEIGHT * field_rate + (1 - PRIOR_FIELD_WEIGHT) * hist_rate
+        season_dnf, season_races = season_dnfs.get(driver_id, [0, 0])
+        # (season_races == 0 -> dnf_prob == prior, the natural no-data fallback)
+        dnf_prob = (season_dnf + PRIOR_K * prior) / (season_races + PRIOR_K)
+        # season_cap still guards the worst cars; floor keeps every car non-zero.
+        risk[driver_id] = round(min(max(dnf_prob, floor), season_cap) * 100, 1)
 
     return risk
 
@@ -427,7 +430,8 @@ def calculate_driver_fantasy(
             dotd_prob = dotd_overrides[driver_id]
         expected_dotd_pts = dotd_prob * RACE_DRIVER_OF_THE_DAY_BONUS
 
-        # DNF risk adjustment (capped at 25% by calculate_risk_ratings)
+        # DNF risk adjustment (per-driver %, capped at the season DNF cap in
+        # calculate_risk_ratings, which tracks observed field attrition)
         risk = risk_ratings.get(driver_id, 5.0)
         dnf_prob = risk / 100.0
 

@@ -2,6 +2,16 @@
   "entries": [
     {
       "date": "2026-06-28",
+      "title": "DNF risk estimates retuned for a high-attrition season",
+      "tags": ["model"],
+      "body": [
+        "Each driver carries a DNF (did-not-finish) risk that feeds their projected points and the width of their confidence range. The old method leaned almost entirely on a driver's own retirement count this season and then floored anyone who had not yet retired at 2 percent. In a season running close to 20 percent field retirements, that 2 percent was far too low, so the most reliable front-runners were being shown as almost bullet-proof and their points were nudged up accordingly.",
+        "We replaced that with a smoother estimate that starts every driver from the season's actual retirement rate and then adjusts up or down based on their own record, rather than swinging to extremes on a small sample. In a head-to-head test across the season this predicts retirements measurably better. The practical effect: drivers who have not retired yet now show a realistic single-digit risk instead of near zero, a couple of drivers who had unlucky early retirements come back off the ceiling, and genuinely fragile cars stay high.",
+        "This mainly sharpens the projected points and confidence ranges for the front of the grid, and takes effect from the British Grand Prix."
+      ]
+    },
+    {
+      "date": "2026-06-28",
       "title": "Overtake predictions retuned on a full season of data",
       "tags": ["model"],
       "body": [
