@@ -168,6 +168,7 @@ def run_walk_forward_fp(
     weight_2026: float,
     wet_boost: float,
     test_from_year: int,
+    algorithm: str = "xgboost",
     verbose: bool = True,
 ) -> dict[str, Any]:
     folds = completed_folds(df, test_from_year)
@@ -206,26 +207,42 @@ def run_walk_forward_fp(
         # Train race_fp model on WF-quali-overridden training set
         feats_avail = [c for c in race_features if c in tr.columns]
         tr_sorted = sort_by_race_groups(tr)
-        X = tr_sorted[feats_avail].copy()
-        y = position_to_relevance(tr_sorted["finish_position"])
+        te_sorted = sort_by_race_groups(te)
         qids = make_race_qids(tr_sorted)
-        if "sample_weight" in tr_sorted.columns:
-            w = tr_sorted["sample_weight"].to_numpy()
-            gw = []
-            prev = -1
-            for i, q in enumerate(qids):
-                if q != prev:
-                    gw.append(w[i])
-                    prev = q
-            gw = np.asarray(gw, dtype=float)
+        if algorithm == "catboost":
+            # CatBoost YetiRank — mirrors validate_alt_algo_v2's CATBOOST_PARAMS
+            # exactly so this is the SAME algorithm comparison, just under the
+            # race_fp protocol (WF-predicted quali). Like that comparison, the
+            # CatBoost path doesn't use per-group sample weights, so it's a
+            # conservative test (the XGBoost baseline keeps its 2026 weighting).
+            from catboost import CatBoost, Pool
+            y = position_to_relevance(tr_sorted["finish_position"]).to_numpy()
+            train_pool = Pool(tr_sorted[feats_avail].to_numpy(), label=y, group_id=qids)
+            test_pool = Pool(te_sorted[feats_avail].to_numpy(), group_id=make_race_qids(te_sorted))
+            cb = CatBoost(dict(loss_function="YetiRank", iterations=650, learning_rate=0.03,
+                               depth=6, random_seed=RNG_SEED, verbose=False,
+                               allow_writing_files=False))
+            cb.fit(train_pool)
+            scores = np.asarray(cb.predict(test_pool), dtype=float)
         else:
-            gw = None
-        model = xgb.XGBRanker(**race_fp_params)
-        model.fit(X, y, qid=qids, sample_weight=gw)
+            X = tr_sorted[feats_avail].copy()
+            y = position_to_relevance(tr_sorted["finish_position"])
+            if "sample_weight" in tr_sorted.columns:
+                w = tr_sorted["sample_weight"].to_numpy()
+                gw = []
+                prev = -1
+                for i, q in enumerate(qids):
+                    if q != prev:
+                        gw.append(w[i])
+                        prev = q
+                gw = np.asarray(gw, dtype=float)
+            else:
+                gw = None
+            model = xgb.XGBRanker(**race_fp_params)
+            model.fit(X, y, qid=qids, sample_weight=gw)
+            scores = model.predict(te_sorted[feats_avail])
 
         # Predict test fold (also WF-quali-overridden — consistent with train)
-        te_sorted = sort_by_race_groups(te)
-        scores = model.predict(te_sorted[feats_avail])
         preds = scores_to_positions(scores, te_sorted)
         m = fold_metrics(preds, te_sorted["finish_position"].to_numpy())
         m.update(season=Y, round=N, model="race_fp", is_wet=is_wet, train_n=len(tr), test_n=len(te))
@@ -238,6 +255,7 @@ def run_walk_forward_fp(
         "config_name": config_name,
         "test_from_year": test_from_year,
         "model": "race_fp",
+        "algorithm": algorithm,
         "weight_2026": weight_2026,
         "wet_boost": wet_boost,
         "quali_params": quali_params,
@@ -266,6 +284,8 @@ def build_params(args: argparse.Namespace) -> tuple[dict, dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config-name", required=True)
+    ap.add_argument("--algorithm", choices=["xgboost", "catboost"], default="xgboost",
+                    help="race_fp learner. catboost mirrors validate_alt_algo_v2's YetiRank config.")
     ap.add_argument("--test-from-year", type=int, default=CURRENT_SEASON)
     ap.add_argument("--weight-2026", type=float, default=2.5)
     ap.add_argument("--wet-boost", type=float, default=6.0)
@@ -284,7 +304,7 @@ def main() -> None:
     result = run_walk_forward_fp(
         df, args.config_name, qp, rp,
         weight_2026=args.weight_2026, wet_boost=args.wet_boost,
-        test_from_year=args.test_from_year,
+        test_from_year=args.test_from_year, algorithm=args.algorithm,
     )
 
     out_path = EXPERIMENTS_DIR / f"{args.config_name}.json"

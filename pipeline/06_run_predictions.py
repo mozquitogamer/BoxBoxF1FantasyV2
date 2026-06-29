@@ -38,6 +38,7 @@ from config.settings import (
     FEATURES_DIR,
     PREDICTIONS_DIR,
     TRAINED_DIR,
+    RACE_MODEL_ALGORITHM,
     SEED_DIR,
     JOLPICA_MODEL_ROWS_DIR,
     SPRINT_ROUNDS_2026,
@@ -751,18 +752,31 @@ def run_predictions(
     # (trained on actual quali) since actual quali is known.
     use_fp_race_model = (not is_post_quali) and race_fp_path.exists()
 
-    # Load XGBoost ranking models from JSON format
-    # Models trained with rank:pairwise — output relevance scores (higher = better)
+    # Load ranking models. Quali stays XGBoost (rank:pairwise). The RACE models
+    # can be CatBoost YetiRank (settings.RACE_MODEL_ALGORITHM) — both emit
+    # relevance scores where higher = better (P1), so the downstream grid-anchor
+    # blend and ranking are identical. Both .predict() take a named-column
+    # DataFrame, so the call site below is unchanged regardless of algorithm.
     quali_model = xgb.XGBRanker()
     quali_model.load_model(str(quali_path))
-    race_model = xgb.XGBRanker()
-    if use_fp_race_model:
-        race_model.load_model(str(race_fp_path))
-        print(f"  Phase: post-FP (no actual quali) -> using race_model_fp.json")
+
+    chosen_json = race_fp_path if use_fp_race_model else race_path
+    chosen_cbm = chosen_json.with_suffix(".cbm")
+    use_catboost_race = (RACE_MODEL_ALGORITHM == "catboost") and chosen_cbm.exists()
+    if use_catboost_race:
+        from catboost import CatBoost
+        race_model = CatBoost()
+        race_model.load_model(str(chosen_cbm))
+        algo_desc = f"CatBoost ({chosen_cbm.name})"
     else:
-        race_model.load_model(str(race_path))
-        phase_desc = "post-quali (actual quali known)" if is_post_quali else "post-FP (fallback; no race_model_fp.json)"
-        print(f"  Phase: {phase_desc} -> using race_model.json")
+        race_model = xgb.XGBRanker()
+        race_model.load_model(str(chosen_json))
+        algo_desc = f"XGBoost ({chosen_json.name})"
+    if use_fp_race_model:
+        print(f"  Phase: post-FP (no actual quali) -> {algo_desc}")
+    else:
+        phase_desc = "post-quali (actual quali known)" if is_post_quali else "post-FP (fallback; no race_model_fp)"
+        print(f"  Phase: {phase_desc} -> {algo_desc}")
 
     # Load feature column lists
     with open(feature_cols_path) as f:

@@ -50,6 +50,15 @@ JOLPICA_BASE_URL: str = "https://api.jolpi.ca/ergast/f1"
 MODEL_RANDOM_STATE: int = 42
 MIN_LONG_RUN_LAPS: int = 5
 
+# Algorithm for the RACE finish models (race_model + race_model_fp) ONLY.
+# Quali and sprint stay XGBoost (CatBoost showed no quali gain and was worse on
+# sprint in 97-fold walk-forward). "catboost" wins race -0.18 MAE (p=0.0001, all
+# 5 yrs) and race_fp -0.10 MAE (CI excludes zero); see data/experiments/
+# racefp_{xgb,cat}_my.json + catboost_recheck.json. 05_train_models.py trains and
+# saves BOTH formats every run (race_model.{json,cbm}); 06 loads per this flag, so
+# reverting is a one-line change back to "xgboost".
+RACE_MODEL_ALGORITHM: str = "catboost"  # "catboost" | "xgboost"
+
 # -- Sessions ------------------------------------------------------------------
 ALL_SESSIONS: list[str] = ["FP1", "FP2", "FP3", "Qualifying", "Race", "Sprint", "Sprint Shootout"]
 FP_SESSIONS: list[str] = ["FP1", "FP2", "FP3"]

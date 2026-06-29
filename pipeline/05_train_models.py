@@ -79,6 +79,7 @@ except ImportError:
 # See pipeline/04_build_model_inputs.py::merge_session_weather for column origins.
 WEATHER_QUALI_FEATURES = [
     "weather_was_wet_quali",
+    "weather_precip_minutes_quali",
     "weather_track_temp_quali",
     "weather_air_temp_quali",
     "weather_humidity_quali",
@@ -92,6 +93,7 @@ WEATHER_RACE_FEATURES = [
 ]
 WEATHER_SPRINT_FEATURES = [
     "weather_was_wet_sprint",
+    "weather_precip_minutes_sprint",
     "weather_track_temp_sprint",
     "weather_air_temp_sprint",
     "weather_humidity_sprint",
@@ -655,6 +657,29 @@ def rederive_quali_dependent_features(
 # Main
 # ============================================================
 
+def train_and_save_catboost_race(X, y_relevance, group_qids, out_path, label):
+    """Train a CatBoost YetiRank ranker for a race model and save it (.cbm).
+
+    Mirrors the EXACT config validated in validate_alt_algo_v2.py / the race_fp
+    back-test (YetiRank, 650 iters, lr 0.03, depth 6) AND that protocol's choice
+    of no per-group sample weights — so what ships equals what was back-tested.
+    Saved alongside the XGBoost .json so 06 selects via settings.RACE_MODEL_ALGORITHM
+    and reverting is one line. CatBoost handles NaN natively; passing a DataFrame
+    preserves feature names so inference aligns by column, not position. Rows must
+    already be sorted into contiguous race groups (callers sort before this).
+    """
+    from catboost import CatBoost, Pool
+    pool = Pool(data=X, label=np.asarray(y_relevance, dtype=float), group_id=group_qids)
+    model = CatBoost(dict(
+        loss_function="YetiRank", iterations=650, learning_rate=0.03, depth=6,
+        random_seed=MODEL_RANDOM_STATE, verbose=False, allow_writing_files=False,
+    ))
+    model.fit(pool)
+    model.save_model(str(out_path))
+    print(f"  Saved -> models/trained/{out_path.name} (CatBoost YetiRank, {label})")
+    return model
+
+
 def main() -> None:
     """Train all models using combined Jolpica priors + FP telemetry."""
     print("=" * 70)
@@ -902,6 +927,13 @@ def main() -> None:
     race_model.save_model(str(TRAINED_DIR / "race_model.json"))
     print(f"  Saved -> models/trained/race_model.json")
 
+    # ALSO train + save a CatBoost YetiRank race model (06 picks which to use via
+    # settings.RACE_MODEL_ALGORITHM). Same data/relevance/groups; no per-group
+    # weights to match the back-tested config.
+    train_and_save_catboost_race(
+        X_r, y_r_rel, r_groups, TRAINED_DIR / "race_model.cbm", "race"
+    )
+
     # ==================================================================
     # MODEL 2B: Race Position (FP-phase) — XGBoost trained on WF quali
     # ==================================================================
@@ -1032,6 +1064,11 @@ def main() -> None:
         # Save
         race_fp_model.save_model(str(TRAINED_DIR / "race_model_fp.json"))
         print(f"  Saved -> models/trained/race_model_fp.json")
+
+        # ALSO train + save a CatBoost YetiRank race_fp model (see flag note above).
+        train_and_save_catboost_race(
+            X_r_fp, y_r_fp, r_fp_groups, TRAINED_DIR / "race_model_fp.cbm", "race_fp"
+        )
 
     # ==================================================================
     # MODEL 3: FP Signal — ExtraTrees (confidence scoring)

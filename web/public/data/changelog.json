@@ -1,6 +1,16 @@
 {
   "entries": [
     {
+      "date": "2026-06-29",
+      "title": "Race-finish predictions upgraded to a stronger model",
+      "tags": ["model"],
+      "body": [
+        "Predicting where cars finish is the hardest part of what we do and the area with the most room to improve. We tested an alternative model type (CatBoost) head-to-head against our current one across every round of 2022 to 2026, using a strict no-peeking back-test where each race is predicted only from earlier data.",
+        "It predicts race finishing positions measurably better: about 5 percent less error on the post-qualifying model, and a smaller but real gain on the post-practice model that actually drives your team-lock decisions, improving in almost every season and most in 2026. Qualifying and sprint showed no gain, so those keep the existing model. We also folded the latest three rounds (Monaco, Spain, Austria) back into the training data now that there are enough races to balance Monaco's unusually high retirement count.",
+        "What changes for you: sharper race-finish predictions and the points and standings that follow from them, starting at the British Grand Prix. Confidence ranges are unaffected by the switch. The previous model stays in place behind a switch, so if a real weekend ever says otherwise we can revert instantly."
+      ]
+    },
+    {
       "date": "2026-06-28",
       "title": "DNF risk estimates retuned for a high-attrition season",
       "tags": ["model"],
