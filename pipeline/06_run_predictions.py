@@ -1149,7 +1149,10 @@ def run_predictions(
         except Exception:
             return None
 
-    race_model_used = race_fp_path if use_fp_race_model else race_path
+    # Record the model that ACTUALLY made the prediction (CatBoost .cbm when the
+    # flag selected it, else the XGBoost .json) so the audit trail / accuracy
+    # archive attribute the forecast to the right algorithm.
+    race_model_used = chosen_cbm if use_catboost_race else chosen_json
     metadata = {
         "round": round_num,
         "year": year,
@@ -1160,6 +1163,7 @@ def run_predictions(
         "skip_fp_flag": skip_fp,
         "force_flag": force,
         "race_model_used": race_model_used.name,
+        "race_model_algorithm": "catboost" if use_catboost_race else "xgboost",
         "quali_model_sha256_16": _file_sha256(quali_path),
         "race_model_sha256_16": _file_sha256(race_model_used),
         # Level 3: record exactly which weather values the model conditioned on,

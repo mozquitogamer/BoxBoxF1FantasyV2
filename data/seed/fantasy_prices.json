@@ -1,87 +1,87 @@
 {
   "season": 2026,
-  "last_updated": "2026-06-22",
-  "price_after_round": 9,
+  "last_updated": "2026-06-29",
+  "price_after_round": 10,
   "currency": "USD_millions",
   "drivers": {
     "RUS": {
-      "current_price": 27.9,
+      "current_price": 27.8,
       "starting_price": 27.4
     },
     "VER": {
-      "current_price": 28.0,
+      "current_price": 27.9,
       "starting_price": 27.7
     },
     "NOR": {
-      "current_price": 25.9,
+      "current_price": 25.6,
       "starting_price": 27.2
     },
     "PIA": {
-      "current_price": 25.0,
+      "current_price": 24.9,
       "starting_price": 25.5
     },
     "ANT": {
-      "current_price": 25.3,
+      "current_price": 25.4,
       "starting_price": 23.2
     },
     "LEC": {
-      "current_price": 23.5,
+      "current_price": 23.2,
       "starting_price": 22.8
     },
     "HAM": {
-      "current_price": 24.2,
+      "current_price": 24.5,
       "starting_price": 22.5
     },
     "HAD": {
-      "current_price": 12.1,
+      "current_price": 12.7,
       "starting_price": 15.1
     },
     "GAS": {
-      "current_price": 12.2,
+      "current_price": 12.8,
       "starting_price": 12.0
     },
     "SAI": {
-      "current_price": 12.0,
+      "current_price": 11.4,
       "starting_price": 12.0
     },
     "ALB": {
-      "current_price": 8.2,
+      "current_price": 7.6,
       "starting_price": 10.5
     },
     "ALO": {
-      "current_price": 6.2,
+      "current_price": 5.6,
       "starting_price": 10.0
     },
     "BEA": {
-      "current_price": 7.6,
+      "current_price": 7.0,
       "starting_price": 7.4
     },
     "OCO": {
-      "current_price": 10.3,
+      "current_price": 10.1,
       "starting_price": 8.0
     },
     "LIN": {
-      "current_price": 5.6,
+      "current_price": 6.2,
       "starting_price": 7.0
     },
     "COL": {
-      "current_price": 10.0,
+      "current_price": 9.8,
       "starting_price": 6.2
     },
     "LAW": {
-      "current_price": 8.7,
+      "current_price": 8.9,
       "starting_price": 7.0
     },
     "STR": {
-      "current_price": 4.2,
+      "current_price": 3.6,
       "starting_price": 7.0
     },
     "BOR": {
-      "current_price": 5.8,
+      "current_price": 6.0,
       "starting_price": 6.5
     },
     "PER": {
-      "current_price": 6.2,
+      "current_price": 5.6,
       "starting_price": 7.0
     },
     "HUL": {
@@ -89,53 +89,53 @@
       "starting_price": 6.0
     },
     "BOT": {
-      "current_price": 3.3,
+      "current_price": 3.0,
       "starting_price": 5.0
     }
   },
   "constructors": {
     "mercedes": {
-      "current_price": 31.4,
+      "current_price": 31.7,
       "starting_price": 29.3
     },
     "mclaren": {
-      "current_price": 29.8,
+      "current_price": 30.1,
       "starting_price": 28.9
     },
     "red_bull": {
-      "current_price": 29.7,
+      "current_price": 30.0,
       "starting_price": 28.2
     },
     "ferrari": {
-      "current_price": 25.4,
+      "current_price": 25.7,
       "starting_price": 23.3
     },
     "alpine": {
-      "current_price": 16.7,
+      "current_price": 17.3,
       "starting_price": 12.5
     },
     "williams": {
-      "current_price": 15.0,
+      "current_price": 14.4,
       "starting_price": 12.0
     },
     "aston_martin": {
-      "current_price": 6.9,
+      "current_price": 6.3,
       "starting_price": 9.5
     },
     "haas": {
-      "current_price": 10.4,
+      "current_price": 10.2,
       "starting_price": 8.0
     },
     "racing_bulls": {
-      "current_price": 10.5,
+      "current_price": 11.1,
       "starting_price": 6.3
     },
     "audi": {
-      "current_price": 4.4,
+      "current_price": 5.0,
       "starting_price": 5.5
     },
     "cadillac": {
-      "current_price": 5.4,
+      "current_price": 4.8,
       "starting_price": 5.0
     }
   },
@@ -458,6 +458,46 @@
         "cadillac": 5.4,
         "audi": 4.4,
         "aston_martin": 6.9
+      }
+    },
+    "10": {
+      "note": "After Austrian Grand Prix",
+      "drivers": {
+        "RUS": 27.8,
+        "VER": 27.9,
+        "NOR": 25.6,
+        "PIA": 24.9,
+        "ANT": 25.4,
+        "LEC": 23.2,
+        "HAM": 24.5,
+        "HAD": 12.7,
+        "GAS": 12.8,
+        "SAI": 11.4,
+        "ALB": 7.6,
+        "ALO": 5.6,
+        "BEA": 7.0,
+        "OCO": 10.1,
+        "LIN": 6.2,
+        "COL": 9.8,
+        "LAW": 8.9,
+        "STR": 3.6,
+        "BOR": 6.0,
+        "PER": 5.6,
+        "HUL": 3.0,
+        "BOT": 3.0
+      },
+      "constructors": {
+        "mercedes": 31.7,
+        "mclaren": 30.1,
+        "red_bull": 30.0,
+        "ferrari": 25.7,
+        "alpine": 17.3,
+        "williams": 14.4,
+        "aston_martin": 6.3,
+        "haas": 10.2,
+        "racing_bulls": 11.1,
+        "audi": 5.0,
+        "cadillac": 4.8
       }
     }
   }
