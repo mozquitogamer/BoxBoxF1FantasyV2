@@ -1,5 +1,5 @@
 {
-  "_comment": "MANUALLY-recorded official F1 Fantasy PIT-STOP points per constructor per round (bracket points + the +5 overall-fastest-stop bonus; race-fastest-lap is NOT included here). Round keys are INTERNAL (cancelled R4/R5 skipped; 'united states'/Miami=R6). Filled R1-R10 on 2026-06-29 from user-supplied official numbers. null = not provided (alpine R8/Monaco). Display not wired yet.",
+  "_comment": "MANUALLY-recorded official F1 Fantasy PIT-STOP points per constructor per round (bracket points + the +5 overall-fastest-stop bonus; race-fastest-lap NOT included). Round keys are INTERNAL (cancelled R4/R5 skipped; Miami=R6). Filled R1-R10 on 2026-06-29 from official numbers. 0 = scored nothing. NB: a team can get the +5 overall-fastest bonus with 0 bracket points (e.g. racing_bulls Austria R10 = 5). Display not wired yet.",
   "season": 2026,
   "last_updated": "2026-06-29",
   "rounds": {
@@ -73,7 +73,7 @@
       "ferrari": 5,
       "mclaren": 5,
       "red_bull": 0,
-      "alpine": null,
+      "alpine": 0,
       "racing_bulls": 0,
       "haas": 0,
       "williams": 0,
