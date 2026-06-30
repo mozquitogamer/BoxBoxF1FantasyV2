@@ -39,6 +39,7 @@ from config.settings import (
     is_race_completed,
     race_name_for_round,
     load_dotd_overrides,
+    official_pitstop_expected,
 )
 from config.track_classifications import (
     get_circuit_id_from_race_name,
@@ -534,6 +535,9 @@ def calculate_constructor_fantasy(
 
     is_sprint = round_num in SPRINT_ROUNDS_2026
     pitstop_priors = _load_pitstop_priors()
+    # Official-history expected pit points per team (shrunk mean of actual F1
+    # Fantasy pit points) — the reliable basis for future pit prediction.
+    official_pit_expected = official_pitstop_expected()
     n_teams = len(constructors)
     rows = []
 
@@ -569,11 +573,17 @@ def calculate_constructor_fantasy(
         combined_pos_change = int(d_data["expected_positions_gained_lost"].sum())
         combined_overtakes = int(d_data["expected_overtakes"].sum())
 
-        # Expected pit stop points from team priors
-        prior = pitstop_priors.get(cid, {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5})
-        expected_pit_pts = _expected_pitstop_points(
-            prior["mean"], prior["std"], prior["stops_per_race"], n_teams
-        )
+        # Expected pit stop points: prefer the official-history estimate (shrunk
+        # mean of this team's actual F1 Fantasy pit points — far more reliable
+        # than our OpenF1 time model, which misses null-stationary stops). Fall
+        # back to the time-prior when a team has no official history yet.
+        if cid in official_pit_expected:
+            expected_pit_pts = round(official_pit_expected[cid], 1)
+        else:
+            prior = pitstop_priors.get(cid, {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5})
+            expected_pit_pts = _expected_pitstop_points(
+                prior["mean"], prior["std"], prior["stops_per_race"], n_teams
+            )
 
         # DNF impact: how much DNF risk reduces the constructor's expected points
         # (driver race pts already include DNF adjustment — calculate what the

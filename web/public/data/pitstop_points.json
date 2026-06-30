@@ -1,0 +1,111 @@
+{
+  "_comment": "MANUALLY-recorded official F1 Fantasy PIT-STOP points per constructor per round (bracket points + the +5 overall-fastest-stop bonus; race-fastest-lap NOT included). Round keys are INTERNAL (cancelled R4/R5 skipped; Miami=R6). Filled R1-R10 on 2026-06-29 from official numbers. 0 = scored nothing. NB: a team can get the +5 overall-fastest bonus with 0 bracket points (e.g. racing_bulls Austria R10 = 5). Display not wired yet.",
+  "season": 2026,
+  "last_updated": "2026-06-29",
+  "rounds": {
+    "1": {
+      "mercedes": 15,
+      "ferrari": 5,
+      "mclaren": 2,
+      "red_bull": 5,
+      "alpine": 2,
+      "racing_bulls": 5,
+      "haas": 2,
+      "williams": 2,
+      "audi": 2,
+      "cadillac": 0,
+      "aston_martin": 0
+    },
+    "2": {
+      "mercedes": 2,
+      "ferrari": 10,
+      "mclaren": 0,
+      "red_bull": 2,
+      "alpine": 2,
+      "racing_bulls": 5,
+      "haas": 2,
+      "williams": 2,
+      "audi": 0,
+      "cadillac": 0,
+      "aston_martin": 2
+    },
+    "3": {
+      "mercedes": 5,
+      "ferrari": 15,
+      "mclaren": 5,
+      "red_bull": 2,
+      "alpine": 2,
+      "racing_bulls": 2,
+      "haas": 0,
+      "williams": 5,
+      "audi": 5,
+      "cadillac": 0,
+      "aston_martin": 2
+    },
+    "6": {
+      "mercedes": 10,
+      "ferrari": 0,
+      "mclaren": 5,
+      "red_bull": 5,
+      "alpine": 2,
+      "racing_bulls": 15,
+      "haas": 0,
+      "williams": 0,
+      "audi": 0,
+      "cadillac": 2,
+      "aston_martin": 2
+    },
+    "7": {
+      "mercedes": 0,
+      "ferrari": 0,
+      "mclaren": 5,
+      "red_bull": 2,
+      "alpine": 0,
+      "racing_bulls": 10,
+      "haas": 0,
+      "williams": 2,
+      "audi": 2,
+      "cadillac": 2,
+      "aston_martin": 2
+    },
+    "8": {
+      "mercedes": 15,
+      "ferrari": 5,
+      "mclaren": 5,
+      "red_bull": 0,
+      "alpine": 0,
+      "racing_bulls": 0,
+      "haas": 0,
+      "williams": 0,
+      "audi": 10,
+      "cadillac": 0,
+      "aston_martin": 2
+    },
+    "9": {
+      "mercedes": 5,
+      "ferrari": 2,
+      "mclaren": 15,
+      "red_bull": 5,
+      "alpine": 2,
+      "racing_bulls": 2,
+      "haas": 0,
+      "williams": 5,
+      "audi": 5,
+      "cadillac": 2,
+      "aston_martin": 2
+    },
+    "10": {
+      "mercedes": 5,
+      "ferrari": 10,
+      "mclaren": 5,
+      "red_bull": 10,
+      "alpine": 5,
+      "racing_bulls": 5,
+      "haas": 2,
+      "williams": 5,
+      "audi": 2,
+      "cadillac": 0,
+      "aston_martin": 0
+    }
+  }
+}

@@ -1,6 +1,16 @@
 {
   "entries": [
     {
+      "date": "2026-06-30",
+      "title": "Pit-stop points now use the official F1 Fantasy figures",
+      "tags": ["fix", "model"],
+      "body": [
+        "We used to estimate each constructor's pit-stop points from public timing data, but that data is too unreliable for this: stops under a safety car often have no recorded time, and the timing is rounded too coarsely to tell who was actually quickest. Checked against the official numbers, our estimate was frequently wrong, sometimes badly (we missed a 15-point haul one weekend, and computed zero for everyone at another).",
+        "Pit-stop points are now taken from the official F1 Fantasy figures, recorded by hand from the game. These feed the actual constructor scores behind the Season standings, Head-to-Head and Accuracy tabs, and they are also the basis for predicting each team's pit points in upcoming races, instead of the noisy timing estimate. Each team's season pit-points total is shown in the Pit Stop panel.",
+        "Net effect: constructor totals and standings are now correct, where before they were under-counting pit points, and upcoming-race pit predictions are grounded in each team's real record."
+      ]
+    },
+    {
       "date": "2026-06-29",
       "title": "Race-finish predictions upgraded to a stronger model",
       "tags": ["model"],

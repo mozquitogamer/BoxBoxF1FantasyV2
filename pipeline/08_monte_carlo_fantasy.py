@@ -54,6 +54,7 @@ from config.settings import (
     is_race_completed,
     race_name_for_round,
     load_dotd_overrides,
+    official_pitstop_history,
 )
 from config.track_classifications import (
     get_circuit_id_from_race_name,
@@ -1389,6 +1390,12 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
     When sim_arrays are provided, this does proper per-iteration simulation
     instead of approximating from summary statistics.
     """
+    # Per-team official pit-points history (reliable; our OpenF1 time model is
+    # too noisy). Each sim bootstraps a past official value — its mean matches
+    # the team's true average and the +5 overall-fastest bonus is already baked
+    # into those values. Falls back to the time-prior for teams with no history.
+    official_pit_history = official_pitstop_history()
+
     # Map constructor -> drivers (abbreviations)
     constructor_drivers: dict[str, list[str]] = {}
     for d in drivers_info.values():
@@ -1469,8 +1476,17 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
 
                 constructor_pts[sim] = d1_pts + d2_pts + quali_bonus
 
-            # Add pit stop points (sampled independently for each sim)
-            if pitstop_priors:
+            # Add pit stop points (sampled independently for each sim).
+            cid_hist = official_pit_history.get(cid)
+            if cid_hist:
+                # Bootstrap from this team's actual official pit points. Mean
+                # equals their true average; the +5 overall-fastest bonus is
+                # already inside these values, so no separate EV add-on.
+                hist_arr = np.asarray(cid_hist, dtype=float)
+                draws = hist_arr[rng.integers(0, len(hist_arr), size=n_sims)]
+                pit_stop_pts_arr[:] = draws
+                constructor_pts += draws
+            elif pitstop_priors:
                 prior = pitstop_priors.get(cid, {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5})
                 for sim in range(n_sims):
                     n_stops = 2 if rng.random() < (prior["stops_per_race"] - 1.0) else 1
@@ -1480,9 +1496,8 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
                         pit_pts += score_pitstop(t)
                     pit_stop_pts_arr[sim] = pit_pts
                     constructor_pts[sim] += pit_pts
-                # Note: fastest pit stop bonus requires comparing across all teams
-                # per-sim. For simplicity, estimate as expected value addition.
-                # With 11 teams, ~1/11 chance of being fastest each race.
+                # Fastest-stop bonus EV (only in the time-prior fallback; the
+                # official-history path already includes it).
                 fastest_bonus_ev = FASTEST_PITSTOP_BONUS / len(constructors_info)
                 constructor_pts += fastest_bonus_ev
                 pit_stop_pts_arr += fastest_bonus_ev

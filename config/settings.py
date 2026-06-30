@@ -206,6 +206,71 @@ def load_dotd_overrides(round_num: int) -> dict:
     return out
 
 
+def load_official_pitstop_points() -> dict:
+    """Return manually-recorded official F1 Fantasy pit-stop points per round.
+
+    Reads data/seed/pitstop_points.json — the pit-stop component of constructor
+    scoring (bracket points + the +5 overall-fastest-stop bonus). Returns
+    {round:int -> {constructor_id: points}}. Our OpenF1-derived pit points are
+    unreliable (null stationary times on SC/VSC stops, 1dp rounding), so these
+    official numbers are the ground truth: used for ACTUAL constructor scoring
+    (11_actual_fantasy_points) and as the prior for FUTURE expected pit points
+    (07_calculate_fantasy / 08_monte_carlo_fantasy).
+    """
+    import json
+    path = SEED_DIR / "pitstop_points.json"
+    if not path.exists():
+        return {}
+    try:
+        with open(path) as f:
+            data = json.load(f)
+    except Exception:
+        return {}
+    out = {}
+    for rnd, teams in (data.get("rounds", {}) or {}).items():
+        try:
+            r = int(rnd)
+        except (TypeError, ValueError):
+            continue
+        out[r] = {cid: v for cid, v in (teams or {}).items()
+                  if isinstance(v, (int, float))}
+    return out
+
+
+def official_pitstop_history() -> dict:
+    """Per-constructor list of official pit-stop points across recorded rounds.
+
+    Returns {constructor_id: [pts, ...]}. The reliable basis for FUTURE pit-point
+    estimation (our OpenF1 computation is too noisy). 08's MC bootstraps from
+    these lists; the per-race official value already includes the +5 overall-
+    fastest bonus when earned, so the distribution captures it naturally.
+    """
+    hist = {}
+    for _r, teams in load_official_pitstop_points().items():
+        for cid, pts in teams.items():
+            hist.setdefault(cid, []).append(pts)
+    return hist
+
+
+def official_pitstop_expected(prior_k: float = 3.0) -> dict:
+    """Shrunk per-constructor expected pit points from official history.
+
+    Mean of a team's official pit points, shrunk toward the field mean by
+    `prior_k` pseudo-races for stability. Used by 07 for the deterministic
+    expected pit-stop points. {} when no official data exists.
+    """
+    hist = official_pitstop_history()
+    if not hist:
+        return {}
+    allvals = [v for lst in hist.values() for v in lst]
+    field_mean = (sum(allvals) / len(allvals)) if allvals else 0.0
+    out = {}
+    for cid, lst in hist.items():
+        n = len(lst)
+        out[cid] = ((sum(lst) + prior_k * field_mean) / (n + prior_k)) if n else field_mean
+    return out
+
+
 def load_dnf_causes(year: int = CURRENT_SEASON) -> dict:
     """Return manual DNF cause overrides, keyed {round:int -> {jolpica_id: cause}}.
 

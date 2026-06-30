@@ -552,6 +552,19 @@ async function loadPitstopData() {
             window._dhlFastest = (dhl && dhl.rounds) ? dhl.rounds : null;
         }
     } catch (e) { /* DHL fastest-stop file absent — non-fatal */ }
+
+    // Official F1 Fantasy pit-stop points per round (manually recorded in
+    // data/pitstop_points.json). The authoritative figure — our OpenF1 stationary
+    // computation is too noisy (null SC/VSC stops, 1dp rounding), so actual
+    // constructor scoring AND future pit-point predictions now use these.
+    window._officialPitPoints = null;
+    try {
+        const ppResp = await fetch(cacheBust('data/pitstop_points.json'));
+        if (ppResp.ok) {
+            const pp = await ppResp.json();
+            window._officialPitPoints = (pp && pp.rounds) ? pp.rounds : null;
+        }
+    } catch (e) { /* official pit-points file absent — non-fatal */ }
 }
 
 // Compute pit stop stats for one constructor, broken out by scope.
@@ -2260,10 +2273,23 @@ function renderPitstopPanel() {
         const s = getConstructorPitStats(c.constructor_id);
         if (!s) continue;
         const team = TEAMS[c.constructor_id] || { name: c.name, color: '#666' };
+        // Season total of OFFICIAL F1 Fantasy pit-stop points (the figure used
+        // for actual scoring), summed across recorded rounds.
+        let officialPts = null;
+        const pp = window._officialPitPoints;
+        if (pp) {
+            let t = 0, any = false;
+            for (const rnd in pp) {
+                const v = pp[rnd][c.constructor_id];
+                if (v != null) { t += v; any = true; }
+            }
+            officialPts = any ? t : null;
+        }
         rows.push({
             id: c.constructor_id,
             name: c.full_name || c.name || team.name,
             color: team.color,
+            officialPts,
             ...s,
         });
     }
@@ -2322,6 +2348,10 @@ function renderPitstopPanel() {
             { key: 'totalStops',     label: 'Stops',          fmt: r => {
                 if (!r.missingStops) return r.totalStops;
                 return `${r.totalStops} <span style="color:var(--text-muted);font-size:0.9em;" title="${r.missingStops} stop(s) without recorded stationary time — typically during safety car / VSC, retirements, or penalty stops">(${r.missingStops} n/a)</span>`;
+            }},
+            { key: 'officialPts',    label: 'Official pts',    fmt: r => {
+                if (r.officialPts == null) return '<span style="color:var(--text-muted);">—</span>';
+                return `<span style="font-weight:700;" title="Official F1 Fantasy pit-stop points this season (bracket + fastest-stop bonus). This is the figure used for actual constructor scoring and future pit-point predictions — our timing-based estimate is too imprecise to trust.">${r.officialPts}</span>`;
             }},
         ];
 

@@ -626,6 +626,20 @@ def sync_official_points() -> None:
         print("  No official_fantasy_points.json seed file found, skipping")
 
 
+def sync_pitstop_points() -> None:
+    """Sync manually-recorded official pit-stop points from seed to web data."""
+    src = SEED_DIR / "pitstop_points.json"
+    dst = WEB_DATA_DIR / "pitstop_points.json"
+    if src.exists():
+        with open(src) as f:
+            data = json.load(f)
+        with open(dst, "w") as f:
+            json.dump(data, f, indent=2)
+        print(f"  Synced official pit-stop points ({len(data.get('rounds', {}))} rounds) -> {dst}")
+    else:
+        print("  No pitstop_points.json seed file found, skipping")
+
+
 def build_track_data_json() -> dict:
     """Export track classification data for frontend track similarity engine.
 
@@ -845,6 +859,7 @@ def main():
     # 3. Sync official fantasy points
     print("[3] Syncing official points...")
     sync_official_points()
+    sync_pitstop_points()
 
     # 4. Analysis files
     print("[4] Copying analysis files...")

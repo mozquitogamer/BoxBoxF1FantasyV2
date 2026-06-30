@@ -30,8 +30,8 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 55,
-      "price": 24.7,
-      "ppm": 2.23
+      "price": 25.4,
+      "ppm": 2.17
     },
     {
       "driver_id": "HAM",
@@ -59,8 +59,8 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 27,
-      "price": 23.6,
-      "ppm": 1.14
+      "price": 24.5,
+      "ppm": 1.1
     },
     {
       "driver_id": "HAD",
@@ -88,8 +88,8 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 23,
-      "price": 12.1,
-      "ppm": 1.9
+      "price": 12.7,
+      "ppm": 1.81
     },
     {
       "driver_id": "PIA",
@@ -117,7 +117,7 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 19,
-      "price": 25.0,
+      "price": 24.9,
       "ppm": 0.76
     },
     {
@@ -146,8 +146,8 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 17,
-      "price": 6.4,
-      "ppm": 2.66
+      "price": 6.2,
+      "ppm": 2.74
     },
     {
       "driver_id": "LAW",
@@ -175,8 +175,8 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 16,
-      "price": 7.9,
-      "ppm": 2.03
+      "price": 8.9,
+      "ppm": 1.8
     },
     {
       "driver_id": "ALO",
@@ -204,8 +204,8 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 15,
-      "price": 7.4,
-      "ppm": 2.03
+      "price": 5.6,
+      "ppm": 2.68
     },
     {
       "driver_id": "GAS",
@@ -233,8 +233,8 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 12,
-      "price": 12.2,
-      "ppm": 0.98
+      "price": 12.8,
+      "ppm": 0.94
     },
     {
       "driver_id": "OCO",
@@ -262,8 +262,8 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 12,
-      "price": 9.9,
-      "ppm": 1.21
+      "price": 10.1,
+      "ppm": 1.19
     },
     {
       "driver_id": "ALB",
@@ -291,8 +291,8 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 9,
-      "price": 9.0,
-      "ppm": 1.0
+      "price": 7.6,
+      "ppm": 1.18
     },
     {
       "driver_id": "PER",
@@ -320,8 +320,8 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 8,
-      "price": 7.0,
-      "ppm": 1.14
+      "price": 5.6,
+      "ppm": 1.43
     },
     {
       "driver_id": "BOR",
@@ -349,8 +349,8 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 5,
-      "price": 5.4,
-      "ppm": 0.93
+      "price": 6.0,
+      "ppm": 0.83
     },
     {
       "driver_id": "HUL",
@@ -378,8 +378,8 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 3,
-      "price": 3.8,
-      "ppm": 0.79
+      "price": 3.0,
+      "ppm": 1.0
     },
     {
       "driver_id": "RUS",
@@ -407,7 +407,7 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 0,
-      "price": 28.5,
+      "price": 27.8,
       "ppm": 0.0
     },
     {
@@ -436,7 +436,7 @@
       "dnf_penalty": 0,
       "sprint_points": 0,
       "total_points": 0,
-      "price": 8.8,
+      "price": 9.8,
       "ppm": 0.0
     },
     {
@@ -465,7 +465,7 @@
       "dnf_penalty": -20,
       "sprint_points": 0,
       "total_points": -11,
-      "price": 28.4,
+      "price": 27.9,
       "ppm": -0.39
     },
     {
@@ -494,8 +494,8 @@
       "dnf_penalty": -20,
       "sprint_points": 0,
       "total_points": -13,
-      "price": 24.1,
-      "ppm": -0.54
+      "price": 23.2,
+      "ppm": -0.56
     },
     {
       "driver_id": "NOR",
@@ -523,8 +523,8 @@
       "dnf_penalty": -20,
       "sprint_points": 0,
       "total_points": -17,
-      "price": 26.5,
-      "ppm": -0.64
+      "price": 25.6,
+      "ppm": -0.66
     },
     {
       "driver_id": "SAI",
@@ -552,8 +552,8 @@
       "dnf_penalty": -20,
       "sprint_points": 0,
       "total_points": -20,
-      "price": 12.8,
-      "ppm": -1.56
+      "price": 11.4,
+      "ppm": -1.75
     },
     {
       "driver_id": "STR",
@@ -581,8 +581,8 @@
       "dnf_penalty": -20,
       "sprint_points": 0,
       "total_points": -20,
-      "price": 5.4,
-      "ppm": -3.7
+      "price": 3.6,
+      "ppm": -5.56
     },
     {
       "driver_id": "BEA",
@@ -610,8 +610,8 @@
       "dnf_penalty": -20,
       "sprint_points": 0,
       "total_points": -20,
-      "price": 8.8,
-      "ppm": -2.27
+      "price": 7.0,
+      "ppm": -2.86
     },
     {
       "driver_id": "BOT",
@@ -639,8 +639,8 @@
       "dnf_penalty": -20,
       "sprint_points": 0,
       "total_points": -20,
-      "price": 4.5,
-      "ppm": -4.44
+      "price": 3.0,
+      "ppm": -6.67
     }
   ],
   "constructors": [
@@ -653,10 +653,11 @@
       "quali_bonus": 10,
       "race_points": 30,
       "sprint_points": 0,
-      "pitstop_points": 0,
-      "total_points": 55,
-      "price": 30.8,
-      "ppm": 1.79
+      "pitstop_points": 15,
+      "pitstop_points_source": "official",
+      "total_points": 70,
+      "price": 31.7,
+      "ppm": 2.21
     },
     {
       "constructor_id": "racing_bulls",
@@ -668,23 +669,10 @@
       "race_points": 32,
       "sprint_points": 0,
       "pitstop_points": 0,
+      "pitstop_points_source": "official",
       "total_points": 38,
-      "price": 9.3,
-      "ppm": 4.09
-    },
-    {
-      "constructor_id": "red_bull",
-      "name": "Red Bull",
-      "driver_1": "VER",
-      "driver_2": "HAD",
-      "quali_points": 15,
-      "quali_bonus": 10,
-      "race_points": -3,
-      "sprint_points": 0,
-      "pitstop_points": 5,
-      "total_points": 27,
-      "price": 29.3,
-      "ppm": 0.92
+      "price": 11.1,
+      "ppm": 3.42
     },
     {
       "constructor_id": "ferrari",
@@ -695,10 +683,56 @@
       "quali_bonus": 10,
       "race_points": -1,
       "sprint_points": 0,
+      "pitstop_points": 5,
+      "pitstop_points_source": "official",
+      "total_points": 29,
+      "price": 25.7,
+      "ppm": 1.13
+    },
+    {
+      "constructor_id": "red_bull",
+      "name": "Red Bull",
+      "driver_1": "VER",
+      "driver_2": "HAD",
+      "quali_points": 15,
+      "quali_bonus": 10,
+      "race_points": -3,
+      "sprint_points": 0,
       "pitstop_points": 0,
-      "total_points": 24,
-      "price": 24.8,
-      "ppm": 0.97
+      "pitstop_points_source": "official",
+      "total_points": 22,
+      "price": 30.0,
+      "ppm": 0.73
+    },
+    {
+      "constructor_id": "audi",
+      "name": "Audi",
+      "driver_1": "BOR",
+      "driver_2": "HUL",
+      "quali_points": 0,
+      "quali_bonus": 1,
+      "race_points": 8,
+      "sprint_points": 0,
+      "pitstop_points": 10,
+      "pitstop_points_source": "official",
+      "total_points": 19,
+      "price": 5.0,
+      "ppm": 3.8
+    },
+    {
+      "constructor_id": "mclaren",
+      "name": "McLaren",
+      "driver_1": "NOR",
+      "driver_2": "PIA",
+      "quali_points": 7,
+      "quali_bonus": 10,
+      "race_points": -5,
+      "sprint_points": 0,
+      "pitstop_points": 5,
+      "pitstop_points_source": "official",
+      "total_points": 17,
+      "price": 30.1,
+      "ppm": 0.56
     },
     {
       "constructor_id": "alpine",
@@ -710,37 +744,10 @@
       "race_points": 10,
       "sprint_points": 0,
       "pitstop_points": 0,
+      "pitstop_points_source": "official",
       "total_points": 17,
-      "price": 15.5,
-      "ppm": 1.1
-    },
-    {
-      "constructor_id": "mclaren",
-      "name": "McLaren",
-      "driver_1": "NOR",
-      "driver_2": "PIA",
-      "quali_points": 7,
-      "quali_bonus": 10,
-      "race_points": -5,
-      "sprint_points": 0,
-      "pitstop_points": 0,
-      "total_points": 12,
-      "price": 29.2,
-      "ppm": 0.41
-    },
-    {
-      "constructor_id": "audi",
-      "name": "Audi",
-      "driver_1": "BOR",
-      "driver_2": "HUL",
-      "quali_points": 0,
-      "quali_bonus": 1,
-      "race_points": 8,
-      "sprint_points": 0,
-      "pitstop_points": 0,
-      "total_points": 9,
-      "price": 4.4,
-      "ppm": 2.05
+      "price": 17.3,
+      "ppm": 0.98
     },
     {
       "constructor_id": "aston_martin",
@@ -751,10 +758,11 @@
       "quali_bonus": -1,
       "race_points": -5,
       "sprint_points": 0,
-      "pitstop_points": 0,
-      "total_points": -6,
-      "price": 7.3,
-      "ppm": -0.82
+      "pitstop_points": 2,
+      "pitstop_points_source": "official",
+      "total_points": -4,
+      "price": 6.3,
+      "ppm": -0.63
     },
     {
       "constructor_id": "williams",
@@ -766,9 +774,10 @@
       "race_points": -11,
       "sprint_points": 0,
       "pitstop_points": 0,
+      "pitstop_points_source": "official",
       "total_points": -8,
-      "price": 15.0,
-      "ppm": -0.53
+      "price": 14.4,
+      "ppm": -0.56
     },
     {
       "constructor_id": "haas",
@@ -780,9 +789,10 @@
       "race_points": -8,
       "sprint_points": 0,
       "pitstop_points": 0,
+      "pitstop_points_source": "official",
       "total_points": -9,
-      "price": 10.4,
-      "ppm": -0.87
+      "price": 10.2,
+      "ppm": -0.88
     },
     {
       "constructor_id": "cadillac",
@@ -794,9 +804,10 @@
       "race_points": -12,
       "sprint_points": 0,
       "pitstop_points": 0,
+      "pitstop_points_source": "official",
       "total_points": -13,
-      "price": 6.2,
-      "ppm": -2.1
+      "price": 4.8,
+      "ppm": -2.71
     }
   ]
 }

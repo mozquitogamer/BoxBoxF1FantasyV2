@@ -100,7 +100,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 37,
+          "points": 35,
           "is_dnf": false
         }
       ]
@@ -152,7 +152,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 36,
+          "points": 35,
           "is_dnf": false
         }
       ]
@@ -204,7 +204,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 10,
+          "points": 9,
           "is_dnf": false
         }
       ]
@@ -308,7 +308,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 14,
+          "points": 11,
           "is_dnf": false
         }
       ]
@@ -360,7 +360,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 0,
+          "points": 1,
           "is_dnf": false
         }
       ]
@@ -464,7 +464,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 6,
+          "points": 5,
           "is_dnf": false
         }
       ]
@@ -672,7 +672,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 9,
+          "points": 7,
           "is_dnf": false
         }
       ]
@@ -776,7 +776,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 9,
+          "points": 7,
           "is_dnf": false
         }
       ]
@@ -932,7 +932,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 18,
+          "points": 15,
           "is_dnf": false
         }
       ]
@@ -984,7 +984,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 24,
+          "points": 23,
           "is_dnf": false
         }
       ]
@@ -1036,7 +1036,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 10,
+          "points": 7,
           "is_dnf": false
         }
       ]
@@ -1140,7 +1140,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 7,
+          "points": 5,
           "is_dnf": false
         }
       ]
@@ -1152,7 +1152,7 @@
         {
           "round": 1,
           "circuit_id": "albert_park",
-          "points": 88
+          "points": 96
         },
         {
           "round": 2,
@@ -1177,17 +1177,17 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 55
+          "points": 70
         },
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 37
+          "points": 31
         },
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 83
+          "points": 85
         }
       ]
     },
@@ -1196,7 +1196,7 @@
         {
           "round": 1,
           "circuit_id": "albert_park",
-          "points": 79
+          "points": 69
         },
         {
           "round": 2,
@@ -1206,7 +1206,7 @@
         {
           "round": 3,
           "circuit_id": "suzuka",
-          "points": 85
+          "points": 75
         },
         {
           "round": 6,
@@ -1221,17 +1221,17 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 24
+          "points": 29
         },
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 40
+          "points": 34
         },
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 49
+          "points": 53
         }
       ]
     },
@@ -1240,27 +1240,27 @@
         {
           "round": 1,
           "circuit_id": "albert_park",
-          "points": 37
+          "points": 35
         },
         {
           "round": 2,
           "circuit_id": "shanghai",
-          "points": 42
+          "points": 43
         },
         {
           "round": 3,
           "circuit_id": "suzuka",
-          "points": 16
+          "points": 18
         },
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": -17
+          "points": -4
         },
         {
           "round": 7,
           "circuit_id": "villeneuve",
-          "points": 12
+          "points": 22
         },
         {
           "round": 8,
@@ -1275,7 +1275,51 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
+          "points": 28
+        }
+      ]
+    },
+    "red_bull": {
+      "rounds": [
+        {
+          "round": 1,
+          "circuit_id": "albert_park",
+          "points": 33
+        },
+        {
+          "round": 2,
+          "circuit_id": "shanghai",
+          "points": 14
+        },
+        {
+          "round": 3,
+          "circuit_id": "suzuka",
           "points": 25
+        },
+        {
+          "round": 6,
+          "circuit_id": "miami",
+          "points": 28
+        },
+        {
+          "round": 7,
+          "circuit_id": "villeneuve",
+          "points": 41
+        },
+        {
+          "round": 8,
+          "circuit_id": "monaco",
+          "points": 22
+        },
+        {
+          "round": 9,
+          "circuit_id": "catalunya",
+          "points": 58
+        },
+        {
+          "round": 10,
+          "circuit_id": "red_bull_ring",
+          "points": 68
         }
       ]
     },
@@ -1284,7 +1328,7 @@
         {
           "round": 1,
           "circuit_id": "albert_park",
-          "points": 31
+          "points": 33
         },
         {
           "round": 2,
@@ -1319,51 +1363,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 10
-        }
-      ]
-    },
-    "red_bull": {
-      "rounds": [
-        {
-          "round": 1,
-          "circuit_id": "albert_park",
-          "points": 28
-        },
-        {
-          "round": 2,
-          "circuit_id": "shanghai",
-          "points": 14
-        },
-        {
-          "round": 3,
-          "circuit_id": "suzuka",
-          "points": 25
-        },
-        {
-          "round": 6,
-          "circuit_id": "miami",
-          "points": 28
-        },
-        {
-          "round": 7,
-          "circuit_id": "villeneuve",
-          "points": 39
-        },
-        {
-          "round": 8,
-          "circuit_id": "monaco",
-          "points": 27
-        },
-        {
-          "round": 9,
-          "circuit_id": "catalunya",
-          "points": 64
-        },
-        {
-          "round": 10,
-          "circuit_id": "red_bull_ring",
-          "points": 61
+          "points": 13
         }
       ]
     },
@@ -1377,7 +1377,7 @@
         {
           "round": 2,
           "circuit_id": "shanghai",
-          "points": 45
+          "points": 43
         },
         {
           "round": 3,
@@ -1407,7 +1407,7 @@
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 15
+          "points": 20
         }
       ]
     },
@@ -1416,17 +1416,17 @@
         {
           "round": 1,
           "circuit_id": "albert_park",
-          "points": 22
+          "points": 20
         },
         {
           "round": 2,
           "circuit_id": "shanghai",
-          "points": 16
+          "points": 18
         },
         {
           "round": 3,
           "circuit_id": "suzuka",
-          "points": 8
+          "points": 9
         },
         {
           "round": 6,
@@ -1436,7 +1436,7 @@
         {
           "round": 7,
           "circuit_id": "villeneuve",
-          "points": -2
+          "points": 0
         },
         {
           "round": 8,
@@ -1446,12 +1446,12 @@
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 31
+          "points": 21
         },
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": -12
+          "points": -9
         }
       ]
     },
@@ -1460,7 +1460,7 @@
         {
           "round": 1,
           "circuit_id": "albert_park",
-          "points": 17
+          "points": 19
         },
         {
           "round": 2,
@@ -1470,12 +1470,12 @@
         {
           "round": 3,
           "circuit_id": "suzuka",
-          "points": 74
+          "points": 72
         },
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 106
+          "points": 109
         },
         {
           "round": 7,
@@ -1485,17 +1485,17 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 12
+          "points": 17
         },
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 57
+          "points": 67
         },
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 48
+          "points": 49
         }
       ]
     },
@@ -1504,7 +1504,7 @@
         {
           "round": 1,
           "circuit_id": "albert_park",
-          "points": -5
+          "points": -3
         },
         {
           "round": 2,
@@ -1514,7 +1514,7 @@
         {
           "round": 3,
           "circuit_id": "suzuka",
-          "points": 20
+          "points": 23
         },
         {
           "round": 6,
@@ -1524,22 +1524,22 @@
         {
           "round": 7,
           "circuit_id": "villeneuve",
-          "points": 9
+          "points": 11
         },
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 9
+          "points": 19
         },
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": 13
+          "points": -1
         },
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": 16
+          "points": 15
         }
       ]
     },
@@ -1563,12 +1563,12 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 19
+          "points": 21
         },
         {
           "round": 7,
           "circuit_id": "villeneuve",
-          "points": -4
+          "points": -2
         },
         {
           "round": 8,
@@ -1607,27 +1607,27 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 39
+          "points": 37
         },
         {
           "round": 7,
           "circuit_id": "villeneuve",
-          "points": -20
+          "points": -18
         },
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": -6
+          "points": -4
         },
         {
           "round": 9,
           "circuit_id": "catalunya",
-          "points": -36
+          "points": -39
         },
         {
           "round": 10,
           "circuit_id": "red_bull_ring",
-          "points": -11
+          "points": -14
         }
       ]
     }

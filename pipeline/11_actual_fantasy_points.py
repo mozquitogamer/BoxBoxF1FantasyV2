@@ -37,6 +37,7 @@ from config.settings import (
     SPRINT_ROUNDS_2026,
     CANCELLED_ROUNDS_2026,
     fastf1_round,
+    load_official_pitstop_points,
 )
 from config.fantasy_scoring import (
     calc_qualifying_points_driver,
@@ -468,6 +469,9 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
     dotd_winner = load_dotd_winner(round_num)
     if dotd_winner:
         print(f"  Driver of the Day: {dotd_winner} (+{RACE_DRIVER_OF_THE_DAY_BONUS} pts)")
+    # Official F1 Fantasy pit-stop points (ground truth; overrides our unreliable
+    # OpenF1 computation per constructor when recorded for this round).
+    official_pitstop_points = load_official_pitstop_points()
 
     # -- Load Jolpica race results (required) --
     results_data = load_jolpica_json(year, round_num, "results.json")
@@ -811,15 +815,23 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
         # Sprint: combined
         combined_sprint = d1.get("sprint_points", 0) + d2.get("sprint_points", 0)
 
-        # Pitstop points
-        team_pitstop_times = constructor_pitstops.get(cid, [])
-        pitstop_pts = calc_pitstop_points_constructor(team_pitstop_times)
-
-        # Fastest pitstop bonus
-        team_best = min(team_pitstop_times) if team_pitstop_times else 999.0
-        is_fastest_pit = (team_best == global_fastest_pitstop and team_best < 999.0)
-        pitstop_pts += calc_fastest_pitstop_bonus(is_fastest_pit)
-        pitstop_pts += calc_world_record_pitstop_bonus(team_best)
+        # Pitstop points — prefer the manually-recorded OFFICIAL F1 Fantasy value
+        # (data/seed/pitstop_points.json) over our OpenF1 computation, which is
+        # unreliable (null stationary times on SC/VSC stops, 1dp rounding cause
+        # both misses and over-counts). Fall back to the OpenF1 computation only
+        # when no official figure is recorded for this round.
+        official_pit_round = official_pitstop_points.get(round_num, {})
+        if cid in official_pit_round:
+            pitstop_pts = official_pit_round[cid]
+            pitstop_source = "official"
+        else:
+            team_pitstop_times = constructor_pitstops.get(cid, [])
+            pitstop_pts = calc_pitstop_points_constructor(team_pitstop_times)
+            team_best = min(team_pitstop_times) if team_pitstop_times else 999.0
+            is_fastest_pit = (team_best == global_fastest_pitstop and team_best < 999.0)
+            pitstop_pts += calc_fastest_pitstop_bonus(is_fastest_pit)
+            pitstop_pts += calc_world_record_pitstop_bonus(team_best)
+            pitstop_source = "computed"
 
         total_constructor = combined_quali + quali_bonus + combined_race + pitstop_pts + combined_sprint
         c_price = constructor_prices.get(cid, 0.0)
@@ -835,6 +847,7 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             "race_points": combined_race,
             "sprint_points": combined_sprint if is_sprint else 0,
             "pitstop_points": pitstop_pts,
+            "pitstop_points_source": pitstop_source,
             "total_points": total_constructor,
             "price": c_price,
             "ppm": c_ppm,
