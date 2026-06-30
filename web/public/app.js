@@ -44,8 +44,10 @@ const RACE_FLAGS = {
     'Abu Dhabi Grand Prix': '🇦🇪',
 };
 
-// -- 2026 F1 Fantasy Lock Deadlines (qualifying/sprint-quali start, UTC) --
-// Lock deadline = start of qualifying (or sprint qualifying for sprint weekends)
+// -- 2026 F1 Fantasy Lock Deadlines (UTC) --
+// Lock deadline = start of QUALIFYING on normal weekends, or the start of the
+// SPRINT RACE on sprint weekends (standard F1 Fantasy sprint rule — the lock is
+// the sprint race, not sprint qualifying). Sprint rounds: 2, 6, 7, 11, 14, 18.
 const LOCK_DEADLINES = [
     { round: 1,  race: 'Australian Grand Prix',      lock: '2026-03-07T05:00:00Z', sprint: false },
     { round: 2,  race: 'Chinese Grand Prix',          lock: '2026-03-13T07:30:00Z', sprint: true  },
@@ -57,7 +59,7 @@ const LOCK_DEADLINES = [
     { round: 8,  race: 'Monaco Grand Prix',            lock: '2026-06-06T14:00:00Z', sprint: false },
     { round: 9,  race: 'Spanish Grand Prix',           lock: '2026-06-13T13:00:00Z', sprint: false },
     { round: 10, race: 'Austrian Grand Prix',          lock: '2026-06-26T14:30:00Z', sprint: false },
-    { round: 11, race: 'British Grand Prix',           lock: '2026-07-04T14:00:00Z', sprint: true  },
+    { round: 11, race: 'British Grand Prix',           lock: '2026-07-04T12:00:00Z', sprint: true  },  // sprint race start (13:00 CET)
     { round: 12, race: 'Belgian Grand Prix',           lock: '2026-07-18T14:00:00Z', sprint: false },
     { round: 13, race: 'Hungarian Grand Prix',         lock: '2026-07-25T14:00:00Z', sprint: false },
     { round: 14, race: 'Dutch Grand Prix',             lock: '2026-08-22T13:00:00Z', sprint: true  },
