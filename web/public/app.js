@@ -59,7 +59,7 @@ const LOCK_DEADLINES = [
     { round: 8,  race: 'Monaco Grand Prix',            lock: '2026-06-06T14:00:00Z', sprint: false },
     { round: 9,  race: 'Spanish Grand Prix',           lock: '2026-06-13T13:00:00Z', sprint: false },
     { round: 10, race: 'Austrian Grand Prix',          lock: '2026-06-26T14:30:00Z', sprint: false },
-    { round: 11, race: 'British Grand Prix',           lock: '2026-07-04T12:00:00Z', sprint: true  },  // sprint race start (13:00 CET)
+    { round: 11, race: 'British Grand Prix',           lock: '2026-07-04T11:00:00Z', sprint: true  },  // sprint race start (13:00 CEST)
     { round: 12, race: 'Belgian Grand Prix',           lock: '2026-07-18T14:00:00Z', sprint: false },
     { round: 13, race: 'Hungarian Grand Prix',         lock: '2026-07-25T14:00:00Z', sprint: false },
     { round: 14, race: 'Dutch Grand Prix',             lock: '2026-08-22T13:00:00Z', sprint: true  },
