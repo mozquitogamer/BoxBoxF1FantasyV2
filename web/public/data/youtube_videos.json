@@ -1,7 +1,21 @@
 {
-  "updated": "2026-06-30T12:25:15Z",
+  "updated": "2026-07-01T13:11:50Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "0IBbi-pmmZY",
+      "title": "The Best F1 Fantasy Team for the British Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-06-30",
+      "thumbnail": "https://i.ytimg.com/vi/0IBbi-pmmZY/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=0IBbi-pmmZY"
+    },
+    {
+      "id": "4dDsgiAV71s",
+      "title": "F1 Fantasy Deadline Stream - British Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
+      "published": "2026-06-30",
+      "thumbnail": "https://i.ytimg.com/vi/4dDsgiAV71s/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=4dDsgiAV71s"
+    },
     {
       "id": "fMXQQrLUt2g",
       "title": "F1 Fantasy Deadline Stream - Austrian Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
@@ -15,20 +29,6 @@
       "published": "2026-06-27",
       "thumbnail": "https://i.ytimg.com/vi/EL7GTUId6mc/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=EL7GTUId6mc"
-    },
-    {
-      "id": "zy6M4dhdLVk",
-      "title": "F1 Fantasy Tips for the Austrian Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
-      "published": "2026-06-24",
-      "thumbnail": "https://i.ytimg.com/vi/zy6M4dhdLVk/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=zy6M4dhdLVk"
-    },
-    {
-      "id": "jyuQToLZh-w",
-      "title": "Final Thoughts after FP in Monaco! F1 Fantasy Tips - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
-      "published": "2026-06-06",
-      "thumbnail": "https://i.ytimg.com/vi/jyuQToLZh-w/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=jyuQToLZh-w"
     }
   ]
 }
