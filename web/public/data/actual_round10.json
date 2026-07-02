@@ -713,11 +713,11 @@
       "quali_bonus": 10,
       "race_points": 10,
       "sprint_points": 0,
-      "pitstop_points": 5,
+      "pitstop_points": 15,
       "pitstop_points_source": "official",
-      "total_points": 28,
+      "total_points": 38,
       "price": 11.1,
-      "ppm": 2.52
+      "ppm": 3.42
     },
     {
       "constructor_id": "alpine",

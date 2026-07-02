@@ -389,12 +389,21 @@ def parse_qualifying(data: dict) -> dict:
         else:
             best_session = "NONE"
 
+        # "Did not classify" in qualifying = no valid time in the mandatory Q1
+        # segment (a deleted Q1 lap, or no time at all). Ergast can then show
+        # later-segment times with an empty Q1 (e.g. HAD Miami R6: P22, Q1 empty
+        # but Q2/Q3 present). Officially that's the -5 no-time-set penalty, not
+        # the driver's classified-position points. This is the ONLY such case
+        # across 2026 R1-R10; a normal Q1-eliminated driver keeps their Q1 time.
+        no_time_set = not (q1 and q1.strip())
+
         quali_results[driver_id] = {
             "position": position,
             "best_session": best_session,
             "q1": q1,
             "q2": q2,
             "q3": q3,
+            "no_time_set": no_time_set,
         }
 
     return quali_results
@@ -628,11 +637,13 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
         quali = quali_map.get(jol_id, {})
         quali_position = quali.get("position")
         quali_best_session = quali.get("best_session", "Q1")
+        # No valid Q1 time = did not classify in qualifying -> -5 (not position pts)
+        quali_no_time = quali.get("no_time_set", False)
 
         if r["is_dns"]:
             # DNS drivers: keep qualifying points (they did qualify), but race = -20 same as DNF
             if quali_position is not None:
-                quali_pts = calc_qualifying_points_driver(quali_position)
+                quali_pts = calc_qualifying_points_driver(quali_position, no_time_set=quali_no_time)
             else:
                 quali_pts = QUALIFYING_NC_DSQ_PENALTY
             race_pts = RACE_DNF_DSQ_PENALTY  # DNS = same penalty as DNF (-20)
@@ -647,7 +658,7 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             overtakes = 0
         elif r["is_dnf"]:
             if quali_position is not None:
-                quali_pts = calc_qualifying_points_driver(quali_position)
+                quali_pts = calc_qualifying_points_driver(quali_position, no_time_set=quali_no_time)
             else:
                 quali_pts = QUALIFYING_NC_DSQ_PENALTY
             # Official F1 Fantasy: a retired driver KEEPS overtake points for
@@ -663,7 +674,7 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
         else:
             # Normal finisher (includes lapped drivers)
             if quali_position is not None:
-                quali_pts = calc_qualifying_points_driver(quali_position)
+                quali_pts = calc_qualifying_points_driver(quali_position, no_time_set=quali_no_time)
             else:
                 # Driver not in qualifying data = Not Classified (NC) = -5 penalty
                 # This happens when a driver didn't set a time, was excluded,

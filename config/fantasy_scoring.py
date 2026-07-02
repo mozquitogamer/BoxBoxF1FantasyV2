@@ -130,7 +130,9 @@ PITSTOP_TIME_POINTS: list[tuple[float, float, int]] = [
     (3.0, 999.0,   0),   # Over 3.0s
 ]
 
-FASTEST_PITSTOP_BONUS: int = 5
+FASTEST_PITSTOP_BONUS: int = 10  # overall-fastest stop of the race (2026: +10,
+                                 # confirmed vs official — racing_bulls Austria
+                                 # R10 = 5 bracket + 10 fastest = 15)
 PITSTOP_WORLD_RECORD_BONUS: int = 15
 PITSTOP_WORLD_RECORD_TIME: float = 1.80  # Current record: McLaren, Qatar 2023
 

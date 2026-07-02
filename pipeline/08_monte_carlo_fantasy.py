@@ -1424,7 +1424,7 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
     """
     # Per-team official pit-points history (reliable; our OpenF1 time model is
     # too noisy). Each sim bootstraps a past official value — its mean matches
-    # the team's true average and the +5 overall-fastest bonus is already baked
+    # the team's true average and the +10 overall-fastest bonus is already baked
     # into those values. Falls back to the time-prior for teams with no history.
     official_pit_history = official_pitstop_history()
 
@@ -1515,7 +1515,7 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
             cid_hist = official_pit_history.get(cid)
             if cid_hist:
                 # Bootstrap from this team's actual official pit points. Mean
-                # equals their true average; the +5 overall-fastest bonus is
+                # equals their true average; the +10 overall-fastest bonus is
                 # already inside these values, so no separate EV add-on.
                 hist_arr = np.asarray(cid_hist, dtype=float)
                 draws = hist_arr[rng.integers(0, len(hist_arr), size=n_sims)]

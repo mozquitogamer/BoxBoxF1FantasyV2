@@ -1145,9 +1145,9 @@
         },
         {
           "id": "HAD",
-          "ours": -11,
+          "ours": -16,
           "official": -16,
-          "diff": 5,
+          "diff": 0,
           "is_dnf": true,
           "status": "Retired",
           "overtakes": 6,
@@ -1208,9 +1208,9 @@
         },
         {
           "id": "red_bull",
-          "ours": 41,
+          "ours": 36,
           "official": 31,
-          "diff": 10,
+          "diff": 5,
           "missing": false
         },
         {
@@ -1265,17 +1265,17 @@
       ],
       "driver_summary": {
         "n": 22,
-        "n_exact": 20,
-        "mean_diff": 0.136,
-        "mean_abs_diff": 0.318,
-        "max_abs_diff": 5,
+        "n_exact": 21,
+        "mean_diff": -0.091,
+        "mean_abs_diff": 0.091,
+        "max_abs_diff": 2,
         "n_missing": 0
       },
       "constructor_summary": {
         "n": 11,
         "n_exact": 8,
-        "mean_diff": 1.636,
-        "mean_abs_diff": 2.0,
+        "mean_diff": 1.182,
+        "mean_abs_diff": 1.545,
         "max_abs_diff": 10,
         "n_missing": 0
       }
@@ -2502,9 +2502,9 @@
         },
         {
           "id": "racing_bulls",
-          "ours": 28,
+          "ours": 38,
           "official": 38,
-          "diff": -10,
+          "diff": 0,
           "missing": false
         },
         {
@@ -2553,22 +2553,22 @@
       },
       "constructor_summary": {
         "n": 11,
-        "n_exact": 10,
-        "mean_diff": -0.909,
-        "mean_abs_diff": 0.909,
-        "max_abs_diff": 10,
+        "n_exact": 11,
+        "mean_diff": 0.0,
+        "mean_abs_diff": 0.0,
+        "max_abs_diff": 0,
         "n_missing": 0
       }
     }
   ],
   "overall": {
-    "driver_exact": 167,
+    "driver_exact": 168,
     "driver_n": 176,
-    "driver_exact_pct": 94.9,
-    "driver_mean_abs_diff": 0.199,
-    "constructor_exact": 79,
+    "driver_exact_pct": 95.5,
+    "driver_mean_abs_diff": 0.17,
+    "constructor_exact": 80,
     "constructor_n": 88,
-    "constructor_exact_pct": 89.8,
-    "constructor_mean_abs_diff": 0.648
+    "constructor_exact_pct": 90.9,
+    "constructor_mean_abs_diff": 0.477
   }
 }

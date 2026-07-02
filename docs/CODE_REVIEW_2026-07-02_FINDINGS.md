@@ -48,17 +48,25 @@ exact.
   coverage **82.4%** (below the 90% target — driven by chaotic R2/R6/R8; NOT hand-
   tuned per plan), DNF-driver coverage 96.9%, bias +2.0, noise mult 1.30 → 1.45.
 
-**Documented residuals (not code bugs — flagged for user / data review):**
-- **R6 racing_bulls / red_bull / audi ±10 constructor** and **R6 HAD driver +5**
-  — HAD's `overtakes.csv` R6 race count (6) appears inconsistent with official
-  (~1), and the R6 (sprint) official constructor totals look internally
-  inconsistent with the official pit values on that weekend. The driver-level
-  scores match official; the gap is isolated to constructor aggregation there.
-  **ACTION: user to re-verify overtakes.csv row (round 4 = internal R6) for
-  hadjar and the R6 official constructor/pit figures.**
-- **R10 racing_bulls −10** — LAW+LIN match official exactly; the math forces
-  pit=15 but `pitstop_points.json` R10 racing_bulls = 5. **ACTION: user to
-  re-check that pit value vs the official constructor total (38).**
+**User-confirmed and FIXED (2026-07-02, second pass — final: drivers 95.5%,
+constructors 90.9% exact):**
+- **R6 HAD +5 → FIXED.** User confirmed HAD did not classify in qualifying (his
+  Q1 time was deleted; Ergast shows an empty Q1 with later times — the only such
+  case in R1-R10). Now scored −5 (no-time-set) via a new `no_time_set` flag in
+  `parse_qualifying` (missing Q1 time). HAD R6 exact; R6 drivers 21/22.
+- **R10 racing_bulls −10 → FIXED.** User confirmed the official pit was 15 =
+  5 (bracket) + 10 (overall-fastest). This revealed the **overall-fastest-stop
+  bonus is +10, not +5** — `FASTEST_PITSTOP_BONUS` corrected 5→10 and
+  `pitstop_points.json` R10 racing_bulls 5→15. R10 constructors 11/11 exact.
+
+**Remaining documented residuals (flagged for user data review):**
+- **R6 audi +10 / red_bull +5 (constructor quali teamwork bonus).** Both teams'
+  DRIVERS score exactly vs official, so the gap is isolated to the teamwork bonus
+  on this sprint weekend: our position-based one_q3 (+5) vs official's implied
+  lower tier (HUL P10 reached Q3 but official appears to count neither-Q2). Most
+  likely another official data-entry inconsistency like R10 racing_bulls was.
+  **ACTION: user to spot-check the R6 official constructor totals for audi
+  (−27) and red_bull (31).**
 - **R8 Monaco cluster** (GAS −13, PIA/LAW/HAD +3/+4) — post-penalty grid basis /
   fastest-lap attribution; pre-existing open investigation (A7).
 - **R10 OCO −1, R6 ANT −2, R7 HAD −3** — grid/positions-gained + sprint-overtake
