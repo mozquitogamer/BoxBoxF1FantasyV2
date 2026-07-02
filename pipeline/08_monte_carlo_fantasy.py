@@ -1462,6 +1462,7 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
 
             constructor_pts = np.zeros(n_sims)
             pit_stop_pts_arr = np.zeros(n_sims)
+            quali_bonus_arr = np.zeros(n_sims)  # track bonus directly (C6)
             for sim in range(n_sims):
                 d1_pts = all_total_pts[sim, d1_idx]
                 d2_pts = all_total_pts[sim, d2_idx]
@@ -1494,6 +1495,7 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
                 else:
                     quali_bonus = -1
 
+                quali_bonus_arr[sim] = quali_bonus
                 constructor_pts[sim] = d1_pts + d2_pts + quali_bonus
 
             # Add pit stop points (sampled independently for each sim).
@@ -1536,10 +1538,9 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
             combined_p25 = float(np.percentile(constructor_pts, 25))
             combined_p75 = float(np.percentile(constructor_pts, 75))
             combined_p95 = float(np.percentile(constructor_pts, 95))
-            # Compute mean quali bonus across sims for reporting
-            avg_quali_bonus = float(constructor_pts.mean()) - float(
-                (all_total_pts[:, d1_idx] + all_total_pts[:, d2_idx]).mean()
-            ) - avg_pit_stop_pts
+            # Mean quali teamwork bonus, tracked directly per sim (C6). The old
+            # subtraction method was contaminated by the per-sim DOTD removal.
+            avg_quali_bonus = float(quali_bonus_arr.mean())
 
         else:
             # Fallback: approximate from summary stats (no sim arrays)

@@ -106,6 +106,14 @@ RACE_DNF_DSQ_PENALTY: int = -20
 # (07_calculate_fantasy) and the Monte Carlo (08) so the two stay consistent.
 DNF_EXPECTED_PENALTY_FACTOR: float = 0.6
 
+# Retired drivers keep overtake points for passes made before retiring. Fitted
+# from the 32 true-DNF driver-rounds in 2026 R1-R10 (corrected actuals): overtake
+# count mean 3.6, std 3.2 (range 0-16, right-skewed). Used by 07 (deterministic
+# DNF expected value) and 08 (per-sim retiree overtake credit), so both include
+# the ~+3.6 pts a retiree earns on top of the -20 penalty. Re-fit after each race.
+RETIREE_OT_MEAN: float = 3.6
+RETIREE_OT_STD: float = 3.0
+
 # ==============================================================================
 # RACE — Constructors
 # ==============================================================================

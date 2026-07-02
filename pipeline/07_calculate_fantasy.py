@@ -53,6 +53,7 @@ from config.fantasy_scoring import (
     RACE_DRIVER_OF_THE_DAY_BONUS,
     RACE_DNF_DSQ_PENALTY,
     DNF_EXPECTED_PENALTY_FACTOR,
+    RETIREE_OT_MEAN,
     SPRINT_POSITION_POINTS,
     SPRINT_FASTEST_LAP_BONUS,
     SPRINT_DNF_DSQ_PENALTY,
@@ -343,21 +344,68 @@ def load_fantasy_prices() -> tuple[dict[str, float], dict[str, float]]:
 
 # -- Recent fantasy points for PPM --------------------------------------------
 
-def load_recent_fantasy_points(driver_abbrev: str, current_round: int) -> float:
-    """Load average fantasy points from the last 3 rounds."""
-    total, count = 0.0, 0
+_recent_pts_cache: dict[int, dict[str, list[float]]] = {}
+
+
+def _build_recent_pts(current_round: int) -> dict[str, list[float]]:
+    """Per-driver REAL points for the 3 rounds before current_round, cached.
+
+    Resolution order per round: official F1 Fantasy points -> computed actuals
+    -> our archived predicted total (last resort). Previously this averaged our
+    own PREDICTED totals (circular). Cached by current_round so the per-round
+    files are read once, not once per driver.
+    """
+    if current_round in _recent_pts_cache:
+        return _recent_pts_cache[current_round]
+
+    official = {}
+    off_path = SEED_DIR / "official_fantasy_points.json"
+    if off_path.exists():
+        try:
+            with open(off_path) as f:
+                official = json.load(f).get("rounds", {}) or {}
+        except Exception:
+            official = {}
+
+    per_driver: dict[str, list[float]] = {}
     for rnd in range(max(1, current_round - 3), current_round):
+        off_r = (official.get(str(rnd)) or {}).get("drivers", {}) or {}
+        act = {}
+        act_path = PREDICTIONS_DIR / f"round{rnd}" / "actual_fantasy_points.json"
+        if act_path.exists():
+            try:
+                with open(act_path) as f:
+                    for d in json.load(f).get("drivers", []):
+                        key = d.get("driver_abbrev") or d.get("driver_id")
+                        if key is not None:
+                            act[key] = d.get("total_points")
+            except Exception:
+                pass
+        pred = {}
         fp_path = PREDICTIONS_DIR / f"round{rnd}" / "fantasy_points.parquet"
         if fp_path.exists():
             try:
-                df = pd.read_parquet(fp_path)
-                row = df[df["driver_abbrev"] == driver_abbrev]
-                if not row.empty:
-                    total += row["total_expected_fantasy_points"].iloc[0]
-                    count += 1
+                dfp = pd.read_parquet(fp_path)
+                pred = dict(zip(dfp["driver_abbrev"], dfp["total_expected_fantasy_points"]))
             except Exception:
-                continue
-    return total / count if count > 0 else 0.0
+                pass
+        for k in set(off_r) | set(act) | set(pred):
+            v = off_r.get(k)
+            if v is None:
+                v = act.get(k)
+            if v is None:
+                v = pred.get(k)
+            if v is not None:
+                per_driver.setdefault(k, []).append(float(v))
+
+    _recent_pts_cache[current_round] = per_driver
+    return per_driver
+
+
+def load_recent_fantasy_points(driver_abbrev: str, current_round: int) -> float:
+    """Average REAL fantasy points over the last 3 rounds (official>actuals>pred)."""
+    vals = _build_recent_pts(current_round).get(driver_abbrev, [])
+    return sum(vals) / len(vals) if vals else 0.0
 
 
 # -- Driver fantasy calculation ------------------------------------------------
@@ -384,6 +432,43 @@ def calculate_driver_fantasy(
     if dotd_overrides:
         print(f"  Manual DOTD overrides: {dotd_overrides}")
 
+    # -- Pre-pass: normalize FL and DOTD probabilities across the field --
+    # Exactly one fastest lap and one DOTD are awarded per race, so the field
+    # probabilities must sum to 1.0. The raw per-driver tiers below summed to
+    # ~1.3 (FL) / ~1.1 (DOTD), inflating the deterministic breakdown. DOTD manual
+    # overrides are held at their exact value; the remaining drivers are scaled to
+    # fill (1 - sum_overrides).
+    def _raw_fl_prob(pr: int) -> float:
+        if pr <= 3: return 0.20
+        if pr <= 6: return 0.10
+        if pr <= 10: return 0.05
+        return 0.02
+
+    def _raw_dotd_prob(pr: int, pc: int) -> float:
+        if pc >= 5 or pr <= 3: return 0.12
+        if pr <= 6: return 0.08
+        return 0.03
+
+    raw_fl, raw_dotd = {}, {}
+    for _, prow in predictions.iterrows():
+        did = prow["driver_id"]
+        pr = int(prow["predicted_race_position"])
+        pc = int(prow["predicted_quali_position"]) - pr
+        raw_fl[did] = _raw_fl_prob(pr)
+        raw_dotd[did] = _raw_dotd_prob(pr, pc)
+
+    fl_sum = sum(raw_fl.values()) or 1.0
+    fl_norm = {k: v / fl_sum for k, v in raw_fl.items()}
+
+    override_ids = set(dotd_overrides.keys())
+    override_total = min(sum(dotd_overrides[d] for d in override_ids if d in raw_dotd), 1.0)
+    nonoverride_sum = sum(v for k, v in raw_dotd.items() if k not in override_ids) or 1.0
+    remainder = max(0.0, 1.0 - override_total)
+    dotd_norm = {}
+    for k, v in raw_dotd.items():
+        dotd_norm[k] = (dotd_overrides[k] if k in override_ids
+                        else v / nonoverride_sum * remainder)
+
     rows = []
     for _, row in predictions.iterrows():
         driver_id = row["driver_id"]  # Jolpica format
@@ -407,28 +492,13 @@ def calculate_driver_fantasy(
         est_overtakes = estimate_overtakes(pred_quali, pred_race, multiplier=ot_mult)
         overtake_pts = est_overtakes
 
-        # Fastest lap probability (based on predicted race position)
-        if pred_race <= 3:
-            fl_prob = 0.20
-        elif pred_race <= 6:
-            fl_prob = 0.10
-        elif pred_race <= 10:
-            fl_prob = 0.05
-        else:
-            fl_prob = 0.02
+        # Fastest lap & DOTD probabilities — field-normalized (sum to 1.0) in the
+        # pre-pass above so exactly one of each is awarded per race. DOTD manual
+        # overrides flow through fl_norm/dotd_norm at their exact value.
+        fl_prob = fl_norm.get(driver_id, 0.0)
         expected_fl_pts = fl_prob * RACE_FASTEST_LAP_BONUS
 
-        # DOTD probability (top finishers + big gainers)
-        if pos_change >= 5 or pred_race <= 3:
-            dotd_prob = 0.12
-        elif pred_race <= 6:
-            dotd_prob = 0.08
-        else:
-            dotd_prob = 0.03
-        # Manual override (e.g. home-hero fan-vote favourite) takes precedence so
-        # the displayed DOTD % matches the MC's forced DOTD rate.
-        if driver_id in dotd_overrides:
-            dotd_prob = dotd_overrides[driver_id]
+        dotd_prob = dotd_norm.get(driver_id, 0.0)
         expected_dotd_pts = dotd_prob * RACE_DRIVER_OF_THE_DAY_BONUS
 
         # DNF risk adjustment (per-driver %, capped at the season DNF cap in
@@ -443,7 +513,10 @@ def calculate_driver_fantasy(
             race_position_pts + pos_pts + overtake_pts +
             expected_fl_pts + expected_dotd_pts
         )
-        soft_dnf_penalty = RACE_DNF_DSQ_PENALTY * DNF_EXPECTED_PENALTY_FACTOR
+        # Softened penalty for the expected DNF outcome, plus the overtake points
+        # a retiree typically banks before retiring (~RETIREE_OT_MEAN), matching
+        # the corrected official rule (DNF = penalty + overtakes) and the MC.
+        soft_dnf_penalty = RACE_DNF_DSQ_PENALTY * DNF_EXPECTED_PENALTY_FACTOR + RETIREE_OT_MEAN
         expected_race_pts = (1 - dnf_prob) * race_pts_if_finish + dnf_prob * soft_dnf_penalty
 
         # -- Sprint (if applicable) --
@@ -599,7 +672,7 @@ def calculate_constructor_fantasy(
         for _, d_row in d_data.iterrows():
             dnf_prob = d_row.get("dnf_probability", 0.02)
             # The soft penalty the driver's race pts already includes
-            soft_penalty = RACE_DNF_DSQ_PENALTY * 0.6
+            soft_penalty = RACE_DNF_DSQ_PENALTY * DNF_EXPECTED_PENALTY_FACTOR
             # Impact = probability * penalty (negative value)
             dnf_impact += dnf_prob * soft_penalty
 

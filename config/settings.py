@@ -315,7 +315,13 @@ def load_dnf_causes(year: int = CURRENT_SEASON) -> dict:
         for abbrev, cause in (drivers or {}).items():
             if not cause or cause not in valid:
                 continue
-            jid = abbrev_to_jolpica.get(abbrev, abbrev)
+            jid = abbrev_to_jolpica.get(abbrev)
+            if jid is None:
+                # Unknown abbrev never joins to model_rows — warn instead of
+                # silently passing it through (would drop the cause label).
+                print(f"  [WARN] load_dnf_causes: unknown driver abbrev '{abbrev}' "
+                      f"(round {rnd}); no driver_ids.json mapping — cause skipped.")
+                continue
             out.setdefault(rnd, {})[jid] = cause
     return out
 
