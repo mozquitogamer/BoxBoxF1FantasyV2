@@ -59,18 +59,22 @@ constructors 90.9% exact):**
   bonus is +10, not +5** — `FASTEST_PITSTOP_BONUS` corrected 5→10 and
   `pitstop_points.json` R10 racing_bulls 5→15. R10 constructors 11/11 exact.
 
-**Remaining documented residuals (flagged for user data review):**
-- **R6 audi +10 / red_bull +5 (constructor quali teamwork bonus).** Both teams'
-  DRIVERS score exactly vs official, so the gap is isolated to the teamwork bonus
-  on this sprint weekend: our position-based one_q3 (+5) vs official's implied
-  lower tier (HUL P10 reached Q3 but official appears to count neither-Q2). Most
-  likely another official data-entry inconsistency like R10 racing_bulls was.
-  **ACTION: user to spot-check the R6 official constructor totals for audi
-  (−27) and red_bull (31).**
+**R6 audi/red_bull → FIXED (constructor DSQ/NC penalty rule).** User identified
+the real cause: F1 Fantasy applies a per-driver, per-session CONSTRUCTOR penalty
+(on top of summing the drivers' points) for a disqualification / non-
+classification — quali NC/DSQ −5, sprint DSQ −10, race DSQ −20. The
+`CONSTRUCTOR_*_DSQ_PENALTY` constants existed but 11 never applied them. Now
+applied via new `quali_no_time` / `sprint_is_dsq` driver flags. Verified: BOR
+sprint DSQ → audi −10 (−17→−27 exact); HAD quali NC → red_bull −5 (36→31 exact).
+These are the ONLY DSQ/NC events in R1-R10, so no other round is affected.
+Final: **drivers 95.5%, constructors 93.2% exact.**
+
+**Remaining documented residuals (small, sprint/grid data nuances):**
 - **R8 Monaco cluster** (GAS −13, PIA/LAW/HAD +3/+4) — post-penalty grid basis /
   fastest-lap attribution; pre-existing open investigation (A7).
-- **R10 OCO −1, R6 ANT −2, R7 HAD −3** — grid/positions-gained + sprint-overtake
-  sourcing nuances.
+- **R6 ANT −2 / mercedes −2** — ANT's `overtakes.csv` sprint count is 0 but
+  official implies ~2 (he lost 4 places grid P2→P6 yet scored +1 sprint).
+- **R10 OCO −1, R7 HAD −3** — grid/positions-gained + sprint-overtake sourcing.
 
 ---
 

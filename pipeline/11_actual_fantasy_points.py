@@ -57,6 +57,9 @@ from config.fantasy_scoring import (
     QUALIFYING_NC_DSQ_PENALTY,
     SPRINT_DNF_DSQ_PENALTY,
     SPRINT_OVERTAKE_POINTS,
+    CONSTRUCTOR_QUALI_DSQ_PENALTY,
+    CONSTRUCTOR_SPRINT_DSQ_PENALTY,
+    CONSTRUCTOR_RACE_DSQ_PENALTY,
 )
 
 # Telemetry-detected overtakes over-count (pit-cycle swaps, SC reshuffles, blue-flag
@@ -717,9 +720,11 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
         sprint_position = None
         sprint_grid = None
         sprint_overtakes = 0
+        sprint_is_dsq = False
         if is_sprint and jol_id in sprint_map:
             sr = sprint_map[jol_id]
             sprint_grid = sr["grid"]
+            sprint_is_dsq = bool(sr.get("is_dsq"))
             if sr["is_dns"]:
                 sprint_pts = SPRINT_DNF_DSQ_PENALTY  # DNS = same penalty as DNF (-10)
                 sprint_position = None
@@ -805,6 +810,8 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             "is_dnf": r["is_dnf"],
             "is_dsq": r["is_dsq"],
             "is_dns": r["is_dns"],
+            "quali_no_time": quali_no_time,   # NC in qualifying (no valid Q1 time)
+            "sprint_is_dsq": sprint_is_dsq,   # disqualified from the sprint
             "is_fastest_lap": r["is_fastest_lap"],
             "is_dotd": is_dotd,
             "overtakes": overtakes,
@@ -899,7 +906,23 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             pitstop_pts += calc_world_record_pitstop_bonus(team_best)
             pitstop_source = "computed"
 
-        total_constructor = combined_quali + quali_bonus + combined_race + pitstop_pts + combined_sprint
+        # Constructor DSQ / not-classified penalties. F1 Fantasy applies a
+        # per-driver, per-session penalty to the CONSTRUCTOR (on top of summing
+        # the drivers' own negative points) when a driver is disqualified or does
+        # not classify: quali NC/DSQ -5, sprint DSQ -10, race DSQ -20. Verified vs
+        # official R6: BOR sprint DSQ -> audi -10; HAD quali NC -> red_bull -5.
+        # (These are the only DSQ/NC events across 2026 R1-R10.)
+        dsq_penalty = 0
+        for d in (d1, d2):
+            if d.get("quali_no_time") or d.get("is_quali_dsq"):
+                dsq_penalty += CONSTRUCTOR_QUALI_DSQ_PENALTY
+            if d.get("sprint_is_dsq"):
+                dsq_penalty += CONSTRUCTOR_SPRINT_DSQ_PENALTY
+            if d.get("is_dsq"):  # race DSQ
+                dsq_penalty += CONSTRUCTOR_RACE_DSQ_PENALTY
+
+        total_constructor = (combined_quali + quali_bonus + combined_race
+                             + pitstop_pts + combined_sprint + dsq_penalty)
         c_price = constructor_prices.get(cid, 0.0)
         c_ppm = round(total_constructor / c_price, 2) if c_price > 0 else 0.0
 
