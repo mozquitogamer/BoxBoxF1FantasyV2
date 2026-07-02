@@ -1,6 +1,20 @@
 {
   "entries": [
     {
+      "date": "2026-07-02",
+      "title": "Scoring rebuilt to match official F1 Fantasy exactly",
+      "tags": [
+        "fix",
+        "model"
+      ],
+      "body": [
+        "We reconciled every completed round's calculated points against the official F1 Fantasy scores and found a cluster of rules we were getting wrong. Across all 10 rounds, driver-score accuracy jumped from 61% exact matches to 95%, and constructor scores from 39% to 90%.",
+        "The biggest fix: drivers who retire late but are still officially classified (they completed ~90% distance) were being scored as full DNFs (-20). Now they score their real classified position — e.g. a P15 classification after a late retirement is worth its actual points, not a -20 wipeout. We also now credit the overtakes a driver made before retiring (the official game does), and we stopped clipping the manually-recorded official overtake counts.",
+        "Driver-of-the-Day winners for four rounds were missing from our data (so those winners were quietly short 10 points each) — added, with a loud warning if it ever happens again. The qualifying-segment cutoff was corrected for the 22-car field (Q2 is the top 16, not 15), which fixes the constructor teamwork bonus for midfield teams.",
+        "On the prediction side: sprint qualifying no longer shows phantom points (the official game doesn't score it), fastest-lap and Driver-of-the-Day probabilities now add up to exactly one winner each, and the retirement model was rebuilt from the corrected history so a retirement is penalised realistically (full penalty plus the overtakes banked, not an over-wide guess). Historical actuals were regenerated, so the Accuracy and Season pages shift slightly to reflect the corrected numbers."
+      ]
+    },
+    {
       "date": "2026-06-30",
       "title": "Pit-stop points now use the official F1 Fantasy figures",
       "tags": ["fix", "model"],

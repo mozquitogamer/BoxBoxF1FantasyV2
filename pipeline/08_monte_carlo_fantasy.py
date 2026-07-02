@@ -69,6 +69,8 @@ from config.fantasy_scoring import (
     RACE_DRIVER_OF_THE_DAY_BONUS,
     RACE_DNF_DSQ_PENALTY,
     DNF_EXPECTED_PENALTY_FACTOR,
+    RETIREE_OT_MEAN,
+    RETIREE_OT_STD,
     SPRINT_POSITION_POINTS,
     SPRINT_POSITIONS_GAINED_PER_POS,
     SPRINT_FASTEST_LAP_BONUS,
@@ -186,20 +188,21 @@ TEAM_DNF_CORRELATION = 0.22  # base P(teammate elevated | one DNFs) for a FULLY-
 INCIDENT_DNF_BOOST = 0.012   # Base probability of a multi-car incident per sim
 DNF_MECH_SHARE_DEFAULT = 0.68  # field-average mechanical share of DNFs (fallback)
 
-# --- DNF severity (Phase 1, 2026-06-15) ---
-# When a driver is sampled as a DNF, the race-points hit isn't a fixed value —
-# real 2026 DNFs averaged a ~-20 race component (full retirement) with spread
-# (occasional late/partial DNFs keep a few points; grid-droppers lose more).
-# The old code applied a flat DNF_EXPECTED_PENALTY_FACTOR (0.6 -> -12), which was
-# both too soft AND gave zero spread, compressing the MC's low tail and leaving
-# actual DNF outcomes (mean ~-17 total) below the simulated P5 (only 42% covered).
-# Sample a severity multiplier on RACE_DNF_DSQ_PENALTY instead. Mean ~1.0 (full
-# penalty) reproduces the observed mean; the spread restores honest tail coverage.
+# --- DNF severity + retiree overtakes (re-fit 2026-07-02 on corrected actuals) ---
+# When a driver is sampled as a DNF, the race component is the FULL -20 penalty
+# PLUS the overtake points they banked before retiring. The corrected R1-R10
+# actuals (32 true-DNF driver-rounds) show the -20 is applied in full every time
+# (severity is a constant 1.0, std 0) — the real spread in DNF outcomes comes
+# entirely from the retiree OVERTAKE count (mean 3.6, std 3.2, range 0-16), not a
+# severity multiplier. So severity is now essentially fixed and the spread is
+# supplied by sampling retiree overtakes (RETIREE_OT_MEAN/STD from fantasy_scoring).
+# The old severity std of 0.30 (+/-6 pts on -20) was both too negative (ignored the
+# +3.6 overtake credit) and too wide; this matches the data far better.
 MC_DNF_SEVERITY = {
     "mean": 1.0,
-    "std": 0.30,
-    "min": 0.30,   # late DNF that still banked some running
-    "max": 1.70,   # early DNF + position losses
+    "std": 0.05,   # -20 is fixed in official scoring; tiny residual for the unseen
+    "min": 0.85,   # (we can't observe partial/late-DNF running from results alone)
+    "max": 1.15,
 }
 
 
@@ -884,13 +887,14 @@ def calc_driver_fantasy_points_sim(
 
     # Race points
     if is_dnf:
-        # Penalty severity is SAMPLED per sim (dnf_severity, see MC_DNF_SEVERITY):
-        # most DNFs cost the full ~-20 race component, some less (late) / more
-        # (grid-droppers). Quali points are still kept (quali happened first).
-        race_pts = RACE_DNF_DSQ_PENALTY * dnf_severity
+        # DNF = full -20 penalty (severity ~1.0, essentially fixed) PLUS the
+        # overtake points banked before retiring (`overtakes` is a retiree sample
+        # from the caller). Matches the corrected official rule (R10 retirees
+        # scored -20 + their overtakes). Quali points are kept (quali happened).
+        overtake_pts = overtakes
+        race_pts = RACE_DNF_DSQ_PENALTY * dnf_severity + overtake_pts
         race_finish_pts = 0
         pos_change_pts = 0
-        overtake_pts = 0
         fl_pts = 0
         dotd_pts = 0
     else:
@@ -923,7 +927,7 @@ def calc_driver_fantasy_points_sim(
         "total_pts": total,
         "race_finish_pts": race_finish_pts if not is_dnf else 0,
         "pos_change_pts": pos_change_pts if not is_dnf else 0,
-        "overtake_pts": overtake_pts if not is_dnf else 0,
+        "overtake_pts": overtake_pts,  # retirees keep overtake credit
         "fl_pts": fl_pts if not is_dnf else 0,
         "dotd_pts": dotd_pts if not is_dnf else 0,
     }
@@ -1197,6 +1201,15 @@ def run_simulations(
         overtakes = sample_overtakes(quali_positions, race_positions, dnf_mask, rng,
                                      driver_ids=driver_id_list, overtake_history=overtake_hist,
                                      overtake_mult=overtake_mult)
+        # Retirees keep the overtakes they made before retiring (sample_overtakes
+        # zeros DNFs). Draw from the fitted retiree distribution so mc_overtakes_mean
+        # and DNF race points both reflect the ~+3.6 credit (corrected official rule).
+        if dnf_mask.any():
+            dnf_ot = np.clip(
+                np.round(rng.normal(RETIREE_OT_MEAN, RETIREE_OT_STD, size=n_drivers)),
+                0, 15,
+            ).astype(int)
+            overtakes[dnf_mask] = dnf_ot[dnf_mask]
 
         # 5. Sample fastest lap & DOTD
         fl_idx = sample_fastest_lap(race_positions, dnf_mask, rng)

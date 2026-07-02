@@ -11,6 +11,61 @@ Companion execution plan: `docs/FIX_PLAN_2026-07-02_PROMPT.md`.
 
 ---
 
+## RESOLUTION (executed 2026-07-02, commits c955fb5..HEAD)
+
+The fix bundle was executed in full. Reconciliation vs official points:
+**drivers 60.8% → 94.9% exact (mean_abs 2.278 → 0.199); constructors 38.6% →
+89.8% (4.125 → 0.648).** R1/R2/R3/R9 are now 22/22 drivers + 11/11 constructors
+exact.
+
+- **A1/A2 FIXED** — DNF now decided by `positionText=="R"`; classified late-
+  retirees (LEC/ANT/BEA R9) score their real position; the `Lapped` override is
+  gone (ALB R9 correct).
+- **A3 FIXED** — retirees keep overtake points (R10 retirees −17 = −20+3).
+- **A4 FIXED** — official `overtakes.csv` counts used verbatim (uncapped); caps
+  apply only to telemetry. Estimation bases realigned to 07.
+- **A5 FIXED** — DOTD R3/R6/R9/R10 added; `11` warns on a missing completed round.
+- **A6 RESOLVED** — R1 STR was the same classified-retiree bug (posText=R,
+  status=Lapped), not stale data. R1 now 22/22 exact; no re-download needed.
+- **NEW (found during execution) FIXED** — the constructor quali teamwork bonus
+  used set-Q-time presence; F1 Fantasy counts the SEGMENT REACHED (final quali
+  position). Now position-based (Q3=top10, Q2≤16). Fixed Ferrari R9 (LEC P10, no
+  Q3 time → both-Q3 +10).
+- **B1 FIXED** — Q2 cutoff 15 → 16 (07 + MC sim + fallback). Unit-checked.
+- **B2 FIXED** — phantom sprint-quali points removed (07 total + driver cards +
+  CLAUDE.md). Verified live on R11 (0 drivers show SQ points).
+- **B3 FIXED** — 07 sprint DNF prob ×0.5 (matches MC).
+- **B4 FIXED** — MC fixes the sprint grid across sims when post-SQ
+  (`sprint_grid_is_actual` from 06); pre-SQ falls back to the proxy.
+- **B5 FIXED** — FL/DOTD field-normalized to sum to 1.0 (overrides fixed).
+- **B6 FIXED** — PPM from official→actuals→predicted with a per-round cache.
+- **C4/C5/C6 FIXED** — dnf_causes unknown-abbrev warning; `DNF_EXPECTED_PENALTY_
+  FACTOR` replaces hardcoded 0.6; MC constructor `quali_bonus` tracked directly.
+- **DNF model re-fit** — corrected actuals show DNF race points = −20 + overtakes
+  exactly (severity constant 1.0). MC severity tightened to ~fixed and the spread
+  now comes from sampled retiree overtakes (`RETIREE_OT_MEAN` 3.6, std 3.0, fitted
+  from 32 true-DNF driver-rounds). `calibrate_confidence` re-run: overall 90%
+  coverage **82.4%** (below the 90% target — driven by chaotic R2/R6/R8; NOT hand-
+  tuned per plan), DNF-driver coverage 96.9%, bias +2.0, noise mult 1.30 → 1.45.
+
+**Documented residuals (not code bugs — flagged for user / data review):**
+- **R6 racing_bulls / red_bull / audi ±10 constructor** and **R6 HAD driver +5**
+  — HAD's `overtakes.csv` R6 race count (6) appears inconsistent with official
+  (~1), and the R6 (sprint) official constructor totals look internally
+  inconsistent with the official pit values on that weekend. The driver-level
+  scores match official; the gap is isolated to constructor aggregation there.
+  **ACTION: user to re-verify overtakes.csv row (round 4 = internal R6) for
+  hadjar and the R6 official constructor/pit figures.**
+- **R10 racing_bulls −10** — LAW+LIN match official exactly; the math forces
+  pit=15 but `pitstop_points.json` R10 racing_bulls = 5. **ACTION: user to
+  re-check that pit value vs the official constructor total (38).**
+- **R8 Monaco cluster** (GAS −13, PIA/LAW/HAD +3/+4) — post-penalty grid basis /
+  fastest-lap attribution; pre-existing open investigation (A7).
+- **R10 OCO −1, R6 ANT −2, R7 HAD −3** — grid/positions-gained + sprint-overtake
+  sourcing nuances.
+
+---
+
 ## Headline evidence (ours vs official, per driver)
 
 Mean error ≈ −1.4 pts/driver; tails to ±27. Every mismatch decomposes into the findings below.

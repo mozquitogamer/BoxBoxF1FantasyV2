@@ -227,6 +227,8 @@ python pipeline/calibrate_confidence.py
 
 Before each round, update `data/seed/fantasy_prices.json` with current F1 Fantasy prices. After each round, update `data/seed/official_fantasy_points.json` with official points if available. The `price_history` object in `fantasy_prices.json` tracks prices after each round for the price tracker feature.
 
+**Post-race seed checklist (do all before/after re-running `11`):** (1) `official_fantasy_points.json` — official driver + constructor totals; (2) **`dotd_winners.json` — the round's Driver of the Day** (`11` prints a loud banner if a completed round has no entry; a missing winner silently costs them +10 and skews their constructor + accuracy figures); (3) `pitstop_points.json` — official pit points; (4) `dnf_causes_2026.json` — each retirement's cause; (5) `overtakes.csv` — official overtake counts (used verbatim, uncapped). **Verify with `python pipeline/reconcile_official_points.py`** — it diffs our computed actuals against the official points per round/driver/constructor and should show near-100% exact matches; investigate any new mismatch before shipping.
+
 ## Key Config Files
 
 - `config/settings.py` — All paths (`DATA_DIR`, `PREDICTIONS_DIR`, `WEB_DATA_DIR`, etc.), season constants, feature column lists, sprint/cancelled rounds
