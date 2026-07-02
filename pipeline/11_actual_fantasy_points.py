@@ -37,6 +37,7 @@ from config.settings import (
     SPRINT_ROUNDS_2026,
     CANCELLED_ROUNDS_2026,
     fastf1_round,
+    is_race_completed,
     load_official_pitstop_points,
 )
 from config.fantasy_scoring import (
@@ -510,6 +511,17 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
     dotd_winner = load_dotd_winner(round_num)
     if dotd_winner:
         print(f"  Driver of the Day: {dotd_winner} (+{RACE_DRIVER_OF_THE_DAY_BONUS} pts)")
+    else:
+        # A completed round with no DOTD entry silently costs the winner +10 and
+        # breaks their constructor/accuracy figures — warn loudly (this gap went
+        # unnoticed for 4 rounds). Only warn for a round whose race has happened.
+        if is_race_completed(round_num, year):
+            print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            print(f"  !!  NO Driver of the Day recorded for completed round {round_num}.")
+            print(f"  !!  The DOTD winner is missing +{RACE_DRIVER_OF_THE_DAY_BONUS} pts.")
+            print(f"  !!  Add it to data/seed/dotd_winners.json and re-run this script.")
+            print(f"  !!  Source: formula1.com/en/results/2026/awards/driver-of-the-day")
+            print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     # Official F1 Fantasy pit-stop points (ground truth; overrides our unreliable
     # OpenF1 computation per constructor when recorded for this round).
     official_pitstop_points = load_official_pitstop_points()
