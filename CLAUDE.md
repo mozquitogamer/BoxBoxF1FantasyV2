@@ -121,7 +121,7 @@ Callsites that apply this mapping:
 
 ## Fantasy Scoring (07_calculate_fantasy.py)
 
-**Drivers:** Qualifying position pts + race position pts + positions gained/lost + overtakes (+1 each) + fastest lap probability (10pts) + DOTD probability (10pts) - DNF risk (-20pts). Sprint weekends add sprint qualifying + sprint race with sprint-specific overtake estimation (~50% of race bases) and sprint-position-based FL probability.
+**Drivers:** Qualifying position pts + race position pts + positions gained/lost + overtakes (+1 each) + fastest lap probability (10pts) + DOTD probability (10pts) - DNF risk (-20pts). Sprint weekends add the sprint RACE only (position pts + gains/losses + overtakes + sprint FL); **sprint qualifying scores no points in official F1 Fantasy** — the sprint-quali position is used only as the sprint grid for positions-gained. Sprint DNF probability is half the race DNF prob (07 and the MC agree on `×0.5`). 2026 quali segments: Q3 = top 10, Q2 = P11-16, Q1 = P17-22 (Q2 cutoff is 16).
 
 **DOTD overrides (`data/seed/dotd_overrides.json`):** optional manual per-round DOTD probability for fan-vote favourites the heuristic can't see (e.g. home heroes). Keyed `{round: {jolpica_driver_id: prob}}`, loaded by `settings.load_dotd_overrides()`. Applied in BOTH `07` (displayed DOTD %) AND `08` MC (forces the driver as DOTD per-sim at that prob — which is what moves the displayed points, since export uses the MC mean). Constructor scoring still excludes DOTD. Remove the round entry to revert.
 

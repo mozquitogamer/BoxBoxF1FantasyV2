@@ -451,10 +451,12 @@ def calculate_driver_fantasy(
         sprint_race_pts = 0.0
 
         if is_sprint:
+            # predicted_sprint_quali_position is the sprint GRID (from sprint
+            # qualifying) — needed for positions-gained, but NOT itself scored:
+            # official F1 Fantasy awards no points for sprint-qualifying position
+            # (verified against official actuals). sprint_quali_pts stays 0.
             pred_sprint_quali = int(row.get("predicted_sprint_quali_position", pred_quali))
             pred_sprint = int(row.get("predicted_sprint_position", pred_race))
-
-            sprint_quali_pts = float(calc_qualifying_points_driver(pred_sprint_quali))
 
             sprint_pos_pts = SPRINT_POSITION_POINTS.get(pred_sprint, 0)
             sprint_pos_change = pred_sprint_quali - pred_sprint
@@ -471,10 +473,14 @@ def calculate_driver_fantasy(
                 sprint_fl_prob = 0.01
             expected_sprint_fl = sprint_fl_prob * SPRINT_FASTEST_LAP_BONUS
 
+            # Sprint DNF probability is half the race DNF prob (shorter race,
+            # fewer incidents) — matches the MC's `dnf_probs * 0.5` in 08 so the
+            # deterministic and simulated sprint expectations agree.
+            sprint_dnf_prob = dnf_prob * 0.5
             sprint_race_pts = (
-                (1 - dnf_prob) * (sprint_pos_pts + sprint_pos_change +
-                                  sprint_overtakes + expected_sprint_fl)
-                + dnf_prob * SPRINT_DNF_DSQ_PENALTY
+                (1 - sprint_dnf_prob) * (sprint_pos_pts + sprint_pos_change +
+                                         sprint_overtakes + expected_sprint_fl)
+                + sprint_dnf_prob * SPRINT_DNF_DSQ_PENALTY
             )
 
         total_pts = quali_pts + expected_race_pts + sprint_quali_pts + sprint_race_pts
@@ -554,8 +560,9 @@ def calculate_constructor_fantasy(
         combined_quali = d_data["expected_quali_pts"].sum()
         driver_positions = d_data["predicted_quali_position"].tolist()
         if len(driver_positions) >= 2:
-            d1_session = "Q3" if driver_positions[0] <= 10 else ("Q2" if driver_positions[0] <= 15 else "Q1")
-            d2_session = "Q3" if driver_positions[1] <= 10 else ("Q2" if driver_positions[1] <= 15 else "Q1")
+            # 2026: 22 cars, Q2 eliminates P11-16 -> Q2 cutoff is P16 (not 15).
+            d1_session = "Q3" if driver_positions[0] <= 10 else ("Q2" if driver_positions[0] <= 16 else "Q1")
+            d2_session = "Q3" if driver_positions[1] <= 10 else ("Q2" if driver_positions[1] <= 16 else "Q1")
             quali_bonus = calc_constructor_quali_bonus(d1_session, d2_session)
         else:
             quali_bonus = 0

@@ -1128,6 +1128,22 @@ def run_simulations(
     # Pre-compute unique constructors and per-driver constructor mapping for correlation
     unique_constructors = list(set(constructors))
 
+    # Sprint grid (B4): post-sprint-qualifying the sprint grid is KNOWN, so fix it
+    # every sim (positions-gained is measured from the real grid). Pre-SQ it's a
+    # proxy and we fall back to each sim's sampled Sunday-quali order.
+    sprint_grid_actual = None
+    if is_sprint:
+        is_actual = ("sprint_grid_is_actual" in pred_df.columns
+                     and bool(pred_df["sprint_grid_is_actual"].iloc[0]))
+        grid_col = ("sprint_grid" if "sprint_grid" in pred_df.columns
+                    else "predicted_sprint_quali_position"
+                    if "predicted_sprint_quali_position" in pred_df.columns else None)
+        if is_actual and grid_col is not None:
+            sprint_grid_actual = pred_df[grid_col].astype(int).values
+            print(f"  Sprint grid is ACTUAL (post-SQ, col={grid_col}) — fixed across sims")
+        else:
+            print(f"  Sprint grid is a pre-SQ proxy — resampled from Sunday quali per sim")
+
     for sim in range(n_sims):
         # 1. Sample qualifying positions (with teammate correlation)
         # Generate per-team shock for qualifying
@@ -1214,8 +1230,10 @@ def run_simulations(
                                                 team_shocks=sprint_team_shocks)
             sprint_dnf_mask = rng.random(n_drivers) < (dnf_probs * 0.5)  # Lower DNF in sprint
             sprint_positions[sprint_dnf_mask] = GRID_SIZE
+            # Sprint grid: fixed actual (post-SQ) or this sim's sampled quali (pre-SQ)
+            sprint_grid_for_sim = sprint_grid_actual if sprint_grid_actual is not None else quali_positions
             sprint_overtakes = sample_overtakes(
-                quali_positions, sprint_positions, sprint_dnf_mask, rng, is_sprint=True,
+                sprint_grid_for_sim, sprint_positions, sprint_dnf_mask, rng, is_sprint=True,
                 driver_ids=driver_id_list, overtake_history=overtake_hist,
                 overtake_mult=overtake_mult
             )
@@ -1238,7 +1256,8 @@ def run_simulations(
                 is_dnf=dnf_mask[i],
                 is_sprint_weekend=is_sprint,
                 sprint_pos=sprint_positions[i] if is_sprint else 0,
-                sprint_grid=quali_positions[i] if is_sprint else 0,
+                sprint_grid=(int(sprint_grid_actual[i]) if sprint_grid_actual is not None
+                             else quali_positions[i]) if is_sprint else 0,
                 sprint_overtakes=sprint_overtakes[i] if is_sprint else 0,
                 sprint_fastest_lap=(i == sprint_fl_idx) if is_sprint else False,
                 sprint_dnf=sprint_dnf_mask[i] if is_sprint else False,
@@ -1459,10 +1478,11 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
                 # Quali teamwork bonus (from actual simulated positions)
                 q1 = all_quali_pos[sim, d1_idx]
                 q2 = all_quali_pos[sim, d2_idx]
+                # 2026: 22 cars, Q2 eliminates P11-16 -> Q2 cutoff is P16 (not 15).
                 both_q3 = (q1 <= 10) and (q2 <= 10)
                 one_q3 = (q1 <= 10) or (q2 <= 10)
-                both_q2 = (q1 <= 15) and (q2 <= 15)
-                one_q2 = (q1 <= 15) or (q2 <= 15)
+                both_q2 = (q1 <= 16) and (q2 <= 16)
+                one_q2 = (q1 <= 16) or (q2 <= 16)
                 if both_q3:
                     quali_bonus = 10
                 elif one_q3:
@@ -1536,8 +1556,9 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
             q1 = d1.get("mc_quali_pos_mean", 15)
             q2 = d2.get("mc_quali_pos_mean", 15)
             def q_tier_probs(mean_pos):
+                # Q2 ramp reaches 0 at P18 (Q2 cutoff P16 in 2026's 22-car field).
                 p_q3 = max(0, min(1, (12 - mean_pos) / 5))
-                p_q2 = max(0, min(1 - p_q3, (17 - mean_pos) / 5))
+                p_q2 = max(0, min(1 - p_q3, (18 - mean_pos) / 5))
                 p_q1 = 1 - p_q3 - p_q2
                 return p_q3, p_q2, p_q1
             p1_q3, p1_q2, p1_q1 = q_tier_probs(q1)

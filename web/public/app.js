@@ -1466,7 +1466,8 @@ function driverCard(d, i) {
     const totalPts = d.expected_points;
     const qualiPct = totalPts > 0 ? (d.expected_points_quali / totalPts * 100) : 0;
     const racePct = totalPts > 0 ? (d.expected_points_race / totalPts * 100) : 0;
-    const sprintQualiPct = totalPts > 0 ? ((d.expected_points_sprint_quali || 0) / totalPts * 100) : 0;
+    // Sprint qualifying scores no points in official F1 Fantasy — only the
+    // sprint RACE is a scoring event. (SQ segment removed.)
     const sprintRacePct = totalPts > 0 ? ((d.expected_points_sprint_race || 0) / totalPts * 100) : 0;
 
     const confColor = d.confidence >= 80 ? 'var(--green)' :
@@ -1478,7 +1479,7 @@ function driverCard(d, i) {
     const posChange = d.expected_positions_gained_lost;
     const posIcon = posChange > 0 ? `+${posChange}` : posChange < 0 ? `${posChange}` : '0';
 
-    const hasSprintPts = d.expected_points_sprint_quali || d.expected_points_sprint_race;
+    const hasSprintPts = !!d.expected_points_sprint_race;
 
     // User-scenario "±" affordance: opens the per-pick slider popup. Shows the
     // active bump if non-zero so users see at a glance which picks they tweaked.
@@ -1519,7 +1520,6 @@ function driverCard(d, i) {
             <div class="pb-quali" style="width:${qualiPct}%"></div>
             <div class="pb-race" style="width:${racePct}%"></div>
             ${hasSprintPts ? `
-                <div class="pb-sprint-quali" style="width:${sprintQualiPct}%"></div>
                 <div class="pb-sprint-race" style="width:${sprintRacePct}%"></div>
             ` : ''}
         </div>
@@ -1527,8 +1527,7 @@ function driverCard(d, i) {
             <span><span class="legend-dot" style="background:#7c3aed"></span>Quali ${d.expected_points_quali}</span>
             <span><span class="legend-dot" style="background:var(--accent)"></span>Race ${d.expected_points_race}</span>
             ${hasSprintPts ? `
-                <span><span class="legend-dot" style="background:#06b6d4"></span>SQ ${d.expected_points_sprint_quali}</span>
-                <span><span class="legend-dot" style="background:#f59e0b"></span>SR ${d.expected_points_sprint_race}</span>
+                <span><span class="legend-dot" style="background:#f59e0b"></span>Sprint ${d.expected_points_sprint_race}</span>
             ` : ''}
         </div>
 

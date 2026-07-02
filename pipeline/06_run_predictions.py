@@ -1040,6 +1040,12 @@ def run_predictions(
             print(f"  No sprint qualifying data available — using predicted qualifying as sprint grid proxy")
             pred_df["sprint_grid"] = pred_df["predicted_quali_position"]
 
+        # Flag whether the sprint grid is the ACTUAL sprint-qualifying result
+        # (known, post-SQ) or a predicted proxy (pre-SQ). The MC (08) uses this:
+        # when actual, the sprint grid is fixed every simulation instead of being
+        # resampled from the Sunday-quali distribution.
+        pred_df["sprint_grid_is_actual"] = bool(sprint_grid_loaded)
+
         # Compute sprint-grid-derived features (formulas MUST match
         # 05_train_models.py sprint training block)
         sg = pred_df["sprint_grid"]
@@ -1105,7 +1111,7 @@ def run_predictions(
     ]
     if is_sprint:
         output_cols += ["predicted_sprint_position", "predicted_sprint_quali_position",
-                        "predicted_sprint_raw"]
+                        "predicted_sprint_raw", "sprint_grid", "sprint_grid_is_actual"]
 
     # Add key features for transparency
     extra = ["best_lap_time", "avg_lap_time", "pace_rank", "long_run_avg",
