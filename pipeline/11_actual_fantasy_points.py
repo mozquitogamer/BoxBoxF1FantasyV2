@@ -51,10 +51,54 @@ from config.fantasy_scoring import (
     RACE_POSITION_POINTS,
     RACE_FASTEST_LAP_BONUS,
     RACE_POSITIONS_GAINED_PER_POS,
+    RACE_OVERTAKE_POINTS,
     RACE_DRIVER_OF_THE_DAY_BONUS,
     QUALIFYING_NC_DSQ_PENALTY,
     SPRINT_DNF_DSQ_PENALTY,
+    SPRINT_OVERTAKE_POINTS,
 )
+
+# Telemetry-detected overtakes over-count (pit-cycle swaps, SC reshuffles, blue-flag
+# passes), so they're capped to a realistic ceiling. Official counts from
+# overtakes.csv are the in-game truth and are NEVER capped (see _resolve_overtakes).
+MAX_RACE_OVERTAKES = 8
+MAX_SPRINT_OVERTAKES = 5
+
+
+def _quali_session_from_position(pos):
+    """Segment reached in 2026 qualifying, from final quali POSITION.
+
+    22 cars: Q1 eliminates P17-22, Q2 eliminates P11-16, Q3 = top 10. F1
+    Fantasy's constructor teamwork bonus counts the segment a driver REACHED
+    (their quali classification), NOT whether they set a time in it — a P10 car
+    that set no Q3 lap (e.g. LEC R9) still counts as 'reached Q3'. Deriving from
+    set-time presence under-counted these; position is the correct basis and
+    also gives the right Q2 cutoff (16, not 15).
+    """
+    if pos is None:
+        return "Q1"
+    if pos <= 10:
+        return "Q3"
+    if pos <= 16:
+        return "Q2"
+    return "Q1"
+
+
+def _resolve_overtakes(abbrev: str, merged: dict, seed: dict, cap: int):
+    """Resolve a driver's overtake count with source-aware capping.
+
+    - overtakes.csv (official F1 Fantasy count) -> used verbatim, UNCAPPED.
+    - telemetry-detected only                   -> capped at `cap` (over-counts).
+    - no data                                    -> None (caller decides fallback).
+
+    `seed` is the overtakes.csv dict; `merged` is detected∪seed (seed already
+    checked first, so a `merged` hit here means detected-only).
+    """
+    if abbrev in seed:
+        return int(seed[abbrev])            # official — verbatim
+    if abbrev in merged:
+        return min(int(merged[abbrev]), cap)  # telemetry — capped
+    return None
 
 
 # ==============================================================================
@@ -278,21 +322,18 @@ def parse_race_results(data: dict) -> tuple[list[dict], str]:
         position_text = r.get("positionText", "")
         laps = int(r.get("laps", 0))
 
-        # Determine DNF/DSQ/DNS
-        is_dnf = status in ("Retired", "Accident", "Collision", "Engine", "Gearbox",
-                            "Hydraulics", "Brakes", "Suspension", "Electrical",
-                            "Mechanical", "Overheating", "Power Unit", "Spun off",
-                            "Wheel", "Puncture", "Oil leak", "Fuel pressure",
-                            "Water leak", "Transmission")
-        # Also catch generic retirement via positionText
-        if position_text == "R" and not is_dnf:
-            is_dnf = True
-        # Lapped drivers are classified finishers (they have a Time entry)
-        if status == "Lapped" or status == "+1 Lap" or status == "+2 Laps":
-            is_dnf = False
-
-        is_dsq = status == "Disqualified" or position_text == "D"
-        is_dns = status == "Did not start" or position_text == "W" or laps == 0
+        # Determine DNF/DSQ/DNS from positionText, NOT the status string.
+        # Jolpica classifies a car that completes ~90% distance with a NUMERIC
+        # positionText even if it retired late (status="Retired") — F1 scores it
+        # as a finisher on its classified position. Only positionText=="R" is a
+        # true (unclassified) retirement. This is the fix for classified late-
+        # retirees like LEC R9 (P15, retired lap 62) being mis-scored as -20, and
+        # for the old "status==Lapped" override wrongly un-DNF'ing genuine
+        # retirements (ALB R9: posText=R, status=Lapped). Verified against all
+        # 2026 races: NUM=classified finisher, R=DNF, W=DNS, D=DSQ.
+        is_dsq = position_text == "D" or status == "Disqualified"
+        is_dns = position_text == "W" or status == "Did not start" or laps == 0
+        is_dnf = (position_text == "R") and not is_dns and not is_dsq
 
         # Fastest lap: rank "1" in FastestLap
         fastest_lap = r.get("FastestLap", {})
@@ -403,11 +444,11 @@ def parse_sprint_results(data: dict) -> list[dict]:
         position_text = r.get("positionText", "")
         laps = int(r.get("laps", 0))
 
-        is_dnf = position_text == "R" or status in ("Retired", "Accident", "Collision")
-        if status == "Lapped":
-            is_dnf = False
-        is_dsq = status == "Disqualified" or position_text == "D"
-        is_dns = status == "Did not start" or position_text == "W" or laps == 0
+        # Same classification-aware rule as the race parser: numeric positionText
+        # = classified finisher (even if it retired late), "R" = true DNF.
+        is_dsq = position_text == "D" or status == "Disqualified"
+        is_dns = position_text == "W" or status == "Did not start" or laps == 0
+        is_dnf = (position_text == "R") and not is_dns and not is_dsq
 
         fastest_lap = r.get("FastestLap", {})
         is_fastest_lap = fastest_lap.get("rank") == "1"
@@ -597,14 +638,16 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
                 quali_pts = calc_qualifying_points_driver(quali_position)
             else:
                 quali_pts = QUALIFYING_NC_DSQ_PENALTY
-            race_pts = calc_race_points_driver(
-                finish_position=None,
-                grid_position=r["grid"],
-                is_dnf=True,
-            )
+            # Official F1 Fantasy: a retired driver KEEPS overtake points for
+            # passes made before retiring (proven exactly by R10 retirees: each
+            # scored -20 + 3 overtakes = -17). Resolve from official csv
+            # (uncapped) / telemetry (capped); NO estimation fallback for a car
+            # that didn't finish — an unrecorded retiree gets 0.
+            resolved_ot = _resolve_overtakes(abbrev, detected_race_ot, seed_race_ot, MAX_RACE_OVERTAKES)
+            overtakes = resolved_ot if resolved_ot is not None else 0
+            race_pts = RACE_DNF_DSQ_PENALTY + overtakes * RACE_OVERTAKE_POINTS
             race_position = None
             positions_gained = 0
-            overtakes = 0
         else:
             # Normal finisher (includes lapped drivers)
             if quali_position is not None:
@@ -617,25 +660,24 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
 
             race_position = r["position"]
             positions_gained = r["grid"] - race_position
-            # Use detected overtakes if available, otherwise estimate
-            # NOTE: Detected overtakes from telemetry include pit-cycle position
-            # swaps, safety car reshuffles, and blue-flag passes. Official F1
-            # Fantasy counts only genuine on-track overtakes, which are much fewer.
-            # We cap at MAX_RACE_OVERTAKES to stay realistic.
-            MAX_RACE_OVERTAKES = 8
-            if abbrev in detected_race_ot:
-                overtakes = min(detected_race_ot[abbrev], MAX_RACE_OVERTAKES)
+            # Overtakes: official csv (uncapped) > telemetry-detected (capped) >
+            # calibrated estimate. Caps apply ONLY to telemetry (it over-counts
+            # pit-cycle/SC/blue-flag passes); official csv counts are used verbatim.
+            resolved_ot = _resolve_overtakes(abbrev, detected_race_ot, seed_race_ot, MAX_RACE_OVERTAKES)
+            if resolved_ot is not None:
+                overtakes = resolved_ot
             else:
-                # Fallback: calibrated estimate (aligned with 07_calculate_fantasy.py)
+                # Fallback estimate — bases aligned with 07_calculate_fantasy.py
+                # (retuned 2026-06-28): base[bucket] + positions_gained.
                 pos_gained = max(0, positions_gained)
                 if r["grid"] <= 3:
-                    ot_base = 2
+                    ot_base = 6
                 elif r["grid"] <= 6:
                     ot_base = 4
                 elif r["grid"] <= 12:
-                    ot_base = 6
+                    ot_base = 4
                 else:
-                    ot_base = 7
+                    ot_base = 2
                 overtakes = min(ot_base + pos_gained, MAX_RACE_OVERTAKES)
 
             race_pts = calc_race_points_driver(
@@ -651,39 +693,44 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
         sprint_pts = 0
         sprint_position = None
         sprint_grid = None
+        sprint_overtakes = 0
         if is_sprint and jol_id in sprint_map:
             sr = sprint_map[jol_id]
             sprint_grid = sr["grid"]
             if sr["is_dns"]:
                 sprint_pts = SPRINT_DNF_DSQ_PENALTY  # DNS = same penalty as DNF (-10)
                 sprint_position = None
-            elif sr["is_dnf"] or sr["is_dsq"]:
+            elif sr["is_dsq"]:
                 sprint_pts = calc_sprint_points_driver(
-                    finish_position=None,
-                    grid_position=sr["grid"],
-                    is_dnf=sr["is_dnf"],
-                    is_dsq=sr["is_dsq"],
+                    finish_position=None, grid_position=sr["grid"], is_dsq=True,
                 )
+                sprint_position = None
+            elif sr["is_dnf"]:
+                # Sprint DNF keeps overtake credit (same rule as the race). No
+                # estimation fallback for a retiree; official csv uncapped.
+                resolved_sp = _resolve_overtakes(abbrev, detected_sprint_ot, seed_sprint_ot, MAX_SPRINT_OVERTAKES)
+                sprint_overtakes = resolved_sp if resolved_sp is not None else 0
+                sprint_pts = SPRINT_DNF_DSQ_PENALTY + sprint_overtakes * SPRINT_OVERTAKE_POINTS
                 sprint_position = None
             else:
                 sprint_position = sr["position"]
-                # Use detected sprint overtakes if available (capped)
-                MAX_SPRINT_OVERTAKES = 5
-                if abbrev in detected_sprint_ot:
-                    sprint_overtakes = min(detected_sprint_ot[abbrev], MAX_SPRINT_OVERTAKES)
+                # Official csv (uncapped) > detected (capped) > estimate.
+                resolved_sp = _resolve_overtakes(abbrev, detected_sprint_ot, seed_sprint_ot, MAX_SPRINT_OVERTAKES)
+                if resolved_sp is not None:
+                    sprint_overtakes = resolved_sp
                 else:
                     sprint_pos_gained = max(0, sr["grid"] - sr["position"])
                     # Sprint bases aligned with estimate_sprint_overtakes() in 07
+                    # (retuned 2026-06-28): base[bucket] + positions_gained.
                     if sr["grid"] <= 3:
-                        sprint_ot_base = 1
+                        sprint_ot_base = 2
                     elif sr["grid"] <= 6:
                         sprint_ot_base = 2
                     elif sr["grid"] <= 12:
                         sprint_ot_base = 3
                     else:
-                        sprint_ot_base = 4
-                    sprint_gains = max(0, sprint_pos_gained - 1)
-                    sprint_overtakes = min(sprint_ot_base + sprint_gains, MAX_SPRINT_OVERTAKES)
+                        sprint_ot_base = 2
+                    sprint_overtakes = min(sprint_ot_base + sprint_pos_gained, MAX_SPRINT_OVERTAKES)
                 sprint_pts = calc_sprint_points_driver(
                     finish_position=sr["position"],
                     grid_position=sr["grid"],
@@ -691,16 +738,18 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
                     is_fastest_lap=sr["is_fastest_lap"],
                 )
 
-        # Separate point components for output
-        if r["is_dns"]:
+        # Separate point components for output (must sum to race_pts)
+        if r["is_dns"] or r["is_dsq"]:
             position_pts = 0
             overtake_pts = 0
             fastest_lap_pts = 0
-            dnf_penalty = RACE_DNF_DSQ_PENALTY  # DNS = same penalty as DNF
+            dnf_penalty = RACE_DNF_DSQ_PENALTY  # DNS/DSQ = -20, no overtake credit
             race_finish_pts = 0
-        elif r["is_dnf"] or r["is_dsq"]:
+        elif r["is_dnf"]:
+            # Retiree keeps overtake points; components still sum to race_pts
+            # (-20 penalty + overtakes).
             position_pts = 0
-            overtake_pts = 0
+            overtake_pts = overtakes
             fastest_lap_pts = 0
             dnf_penalty = RACE_DNF_DSQ_PENALTY
             race_finish_pts = 0
@@ -736,7 +785,12 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             "is_fastest_lap": r["is_fastest_lap"],
             "is_dotd": is_dotd,
             "overtakes": overtakes,
-            "overtake_source": "detected" if abbrev in detected_race_ot and not (r["is_dnf"] or r["is_dsq"] or r["is_dns"]) else "estimated",
+            "overtake_source": (
+                "none" if (r["is_dsq"] or r["is_dns"])
+                else "official_csv" if abbrev in seed_race_ot
+                else "detected" if abbrev in detected_race_ot
+                else "estimated"
+            ),
             "positions_gained": positions_gained,
             "quali_points": quali_pts,
             "race_points": race_pts_with_dotd,
@@ -787,23 +841,12 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
         d2_quali = d2.get("quali_points", 0)
         combined_quali = d1_quali + d2_quali
 
-        # Quali bonus based on best session reached
-        d1_jol = None
-        d2_jol = None
-        for jol_id, abbrev in jolpica_to_abbrev.items():
-            if abbrev == d1_abbrev:
-                d1_jol = jol_id
-            if abbrev == d2_abbrev:
-                d2_jol = jol_id
-
-        d1_session = quali_map.get(d1_jol, {}).get("best_session", "Q1") if d1_jol else "Q1"
-        d2_session = quali_map.get(d2_jol, {}).get("best_session", "Q1") if d2_jol else "Q1"
-
-        # Handle DNS / no quali for session determination
-        if d1.get("is_dns") and d1.get("quali_position") is None:
-            d1_session = "Q1"
-        if d2.get("is_dns") and d2.get("quali_position") is None:
-            d2_session = "Q1"
+        # Quali bonus based on the qualifying SEGMENT each driver reached (their
+        # quali position), not on which Q-times they set. A driver who reaches Q3
+        # but sets no Q3 lap still counts as Q3 for the teamwork bonus (verified
+        # vs official: LEC R9 P10, no Q3 time -> Ferrari both-Q3 +10).
+        d1_session = _quali_session_from_position(d1.get("quali_position"))
+        d2_session = _quali_session_from_position(d2.get("quali_position"))
 
         quali_bonus = calc_constructor_quali_bonus(d1_session, d2_session)
 
