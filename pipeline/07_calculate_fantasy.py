@@ -137,10 +137,12 @@ def calculate_risk_ratings(predictions: pd.DataFrame) -> dict[str, float]:
                     if did not in season_dnfs:
                         season_dnfs[did] = [0, 0]
                     season_dnfs[did][1] += 1  # races completed
-                    # Check both is_dnf flag and status string
-                    is_dnf = d.get("is_dnf", False)
-                    status = d.get("status", "").upper()
-                    if is_dnf or status in ("DNF", "DSQ", "DNS", "RETIRED"):
+                    # Only a true in-race retirement is a reliability signal.
+                    # Classified-but-retired (numeric finish position), DNS, and
+                    # DSQ must NOT count — they double-penalize reliable cars and
+                    # inflate the field rate. Mirrors the corrected is_dnf rule in
+                    # 11_actual_fantasy_points.py and what the MC models as a DNF.
+                    if d.get("is_dnf", False):
                         season_dnfs[did][0] += 1
             except Exception:
                 continue
