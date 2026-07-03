@@ -88,12 +88,17 @@ overtakes 0→4; HAD Canada race overtakes 0→3 (web-confirmed: he finished P5
 after a 10s + stop-and-go penalty, classified not DNF — 67/68 laps). Final:
 **drivers 99.4% exact, constructors 100%**; R1-R9 all fully exact.
 
-**Last residual: R10 OCO −1 (lapped-driver position nuance).** User confirmed
-OCO qualified/started P15; he finished P16 (lapped by COL, a lead-lap car), so
-our −1 position is real and the csv agrees (net −1). But official credits 8
-(= 8 overtakes + 0 positions), i.e. it does NOT count the spot he lost while
-being lapped, OR he made 9 overtakes not 8. 1 point, 1 driver-round; awaiting
-user call on which.
+**R10 OCO → FIXED (reference-value data-entry error).** Our computed 7 was
+correct all along (quali P15 → 0, race P16 → 0, −1 position, +8 overtakes = 7);
+`official_fantasy_points.json` had OCO mis-entered as 8. Corrected to 7. No
+scoring change / no lapped-driver rule needed.
+
+## 🎯 FINAL: 100% reconciliation
+
+**All 10 completed rounds: 176/176 drivers AND 88/88 constructors exact vs
+official (mean_abs_diff 0.0).** Baseline was 60.8% / 38.6%. Every scoring rule
+now matches official F1 Fantasy, verified by `pipeline/reconcile_official_points.py`
+(the standing post-race gate).
 
 ---
 

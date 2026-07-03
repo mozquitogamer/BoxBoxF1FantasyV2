@@ -2326,8 +2326,8 @@
         {
           "id": "OCO",
           "ours": 7,
-          "official": 8,
-          "diff": -1,
+          "official": 7,
+          "diff": 0,
           "is_dnf": false,
           "status": "Lapped",
           "overtakes": 8,
@@ -2545,10 +2545,10 @@
       ],
       "driver_summary": {
         "n": 22,
-        "n_exact": 21,
-        "mean_diff": -0.045,
-        "mean_abs_diff": 0.045,
-        "max_abs_diff": 1,
+        "n_exact": 22,
+        "mean_diff": 0.0,
+        "mean_abs_diff": 0.0,
+        "max_abs_diff": 0,
         "n_missing": 0
       },
       "constructor_summary": {
@@ -2562,10 +2562,10 @@
     }
   ],
   "overall": {
-    "driver_exact": 175,
+    "driver_exact": 176,
     "driver_n": 176,
-    "driver_exact_pct": 99.4,
-    "driver_mean_abs_diff": 0.006,
+    "driver_exact_pct": 100.0,
+    "driver_mean_abs_diff": 0.0,
     "constructor_exact": 88,
     "constructor_n": 88,
     "constructor_exact_pct": 100.0,
