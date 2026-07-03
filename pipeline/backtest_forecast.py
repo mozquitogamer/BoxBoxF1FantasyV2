@@ -100,6 +100,7 @@ def reforecast_round(round_num: int, n_sims: int, seed: int) -> tuple[dict, dict
         overtake_mult=overtake_multiplier(circuit_id),
         position_noise_mult=position_noise_multiplier(circuit_id),
         dotd_overrides=load_dotd_overrides(round_num),
+        chaos_mult=f08.compute_chaos_noise_mult(circuit_id, is_sprint),
     )
     cons = f08.aggregate_constructors(
         results["drivers"], f08.load_drivers_info(), f08.load_constructors_info(),

@@ -178,6 +178,44 @@ TEAMMATE_CORRELATION_ALPHA = 0.35
 # ordering, not the MC's sampling — an 08 change can't lift a 06 limitation. Not
 # shipped. The real MC-layer lever is CI coverage on chaotic rounds (see below).
 
+# --- Chaos-aware position noise (2026-07-03) ---
+# CI coverage is fine on clean rounds (Suzuka/Austria 100%) but far too low on
+# CHAOTIC ones (Monaco 46%, sprint weekends 64-68%): big surprises fall outside
+# the P5-P95 band because the noise is calibrated to the average round. Widen the
+# position noise by a per-round chaos factor built from track + format signals
+# that empirically separate the low-coverage rounds: sprint format, safety-car
+# probability, and overtaking difficulty (Monaco's extreme value). alpha-style
+# strength is env-overridable (MC_CHAOS_STRENGTH) so the backtest gate can sweep.
+import os as _os
+MC_CHAOS_TUNABLES = {
+    # 2.0 chosen on the re-forecast gate: driver coverage 78%->86%, constructor
+    # 81%->88%, MAE slightly improved, rho held; clean rounds untouched (chaos~0).
+    # Beyond 2.0 driver coverage plateaus on the R8 Monaco model-miss outlier.
+    "strength": float(_os.environ.get("MC_CHAOS_STRENGTH", "2.0")),
+    "w_sprint": 0.50,   # sprint weekends: less practice, more variance
+    "w_sc": 0.45,       # safety-car probability (normalized)
+    "w_ovt": 0.30,      # overtaking difficulty (Monaco = 10, extreme)
+    "sc_pivot": 4.0, "sc_span": 5.0,     # SC 4->0 .. 9->1
+    "ovt_pivot": 6.0, "ovt_span": 4.0,   # ovt 6->0 .. 10->1
+    "score_cap": 1.0,   # max chaos score before strength
+    "quali_factor": 0.5,  # quali noise widened at half the race amount
+}
+
+
+def compute_chaos_noise_mult(circuit_id: str, is_sprint: bool) -> float:
+    """Race-noise multiplier (>=1) for an unpredictable round. 1.0 = clean."""
+    from config.track_classifications import TRACK_DATABASE
+    t = MC_CHAOS_TUNABLES
+    tf = TRACK_DATABASE.get(circuit_id, {})
+    sc = float(tf.get("safety_car_probability", 5))
+    ovt = float(tf.get("overtaking_difficulty", 5))
+    sc_norm = min(max((sc - t["sc_pivot"]) / t["sc_span"], 0.0), 1.0)
+    ovt_norm = min(max((ovt - t["ovt_pivot"]) / t["ovt_span"], 0.0), 1.0)
+    chaos = (t["w_sprint"] * (1.0 if is_sprint else 0.0)
+             + t["w_sc"] * sc_norm + t["w_ovt"] * ovt_norm)
+    chaos = min(chaos, t["score_cap"])
+    return 1.0 + t["strength"] * chaos
+
 # --- Correlated DNF modeling (Fix 1.5) ---
 # Trimmed 2026-06-05 (0.30 -> 0.15), then VALIDATED empirically 2026-06-15:
 # across 2020-2026, P(teammate DNF | this car DNF) = 0.198 vs a 0.136 base — a
@@ -956,6 +994,7 @@ def run_simulations(
     overtake_mult: float = 1.0,
     position_noise_mult: float = 1.0,
     dotd_overrides: dict | None = None,
+    chaos_mult: float = 1.0,
 ) -> dict:
     """Run Monte Carlo simulations and return aggregated results.
 
@@ -1090,6 +1129,15 @@ def run_simulations(
         cal_quali_noise *= position_noise_mult
         cal_race_noise *= position_noise_mult
         print(f"  Track position-noise damping: x{position_noise_mult:.2f}")
+
+    # Chaos-aware widening: on unpredictable rounds (sprint / high-SC / Monaco)
+    # the outcome spread is far larger than the calibrated noise, so CIs miss
+    # (coverage 46% at Monaco). Widen AFTER the stickiness damping so a chaotic-
+    # but-sticky track (Monaco) is widened net-up. Race full, quali at half.
+    if chaos_mult != 1.0:
+        cal_race_noise *= chaos_mult
+        cal_quali_noise *= (1.0 + (chaos_mult - 1.0) * MC_CHAOS_TUNABLES["quali_factor"])
+        print(f"  Chaos-aware noise widening: race x{chaos_mult:.2f}")
 
     # DNF probabilities from fantasy_df (matched by driver_abbrev)
     dnf_probs = np.zeros(n_drivers)
@@ -1859,6 +1907,11 @@ def main() -> None:
         print(f"  Track modifiers for {circuit_id}: overtakes x{ot_mult:.2f}, "
               f"position-noise x{pos_noise_mult:.2f}")
 
+    # Chaos-aware noise widener for unpredictable rounds (sprint / high-SC / Monaco)
+    chaos_mult = compute_chaos_noise_mult(circuit_id, is_sprint)
+    if chaos_mult > 1.0:
+        print(f"  Chaos noise widener for {circuit_id}: x{chaos_mult:.2f}")
+
     # Manual per-round DOTD overrides (judgment calls for fan-vote favourites).
     dotd_overrides = load_dotd_overrides(args.round)
 
@@ -1874,6 +1927,7 @@ def main() -> None:
         overtake_mult=ot_mult,
         position_noise_mult=pos_noise_mult,
         dotd_overrides=dotd_overrides,
+        chaos_mult=chaos_mult,
     )
 
     # Load pitstop priors for constructor simulation
