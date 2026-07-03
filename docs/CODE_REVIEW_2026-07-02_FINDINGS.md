@@ -73,11 +73,23 @@ Final: **drivers 95.5%, constructors 93.2% exact.**
 antonelli R6 (round 4) was a data-entry error (0 → 2). R6 now 22/22 + 11/11.
 Final: **drivers 96.0%, constructors 94.3% exact**; R1/R2/R3/R6/R9 fully exact.
 
-**Remaining documented residuals (small, sprint/grid data nuances):**
-- **R8 Monaco cluster** (GAS −13, PIA/LAW/HAD +3/+4) — post-penalty grid basis /
-  fastest-lap attribution; pre-existing open investigation (A7). The bulk of the
-  remaining season error.
-- **R10 OCO −1, R7 HAD −3** — grid/positions-gained + sprint-overtake sourcing.
+**R8 Monaco cluster → FIXED (stale Jolpica data).** Root cause was NOT a scoring
+rule: our cached `data/raw/jolpica/.../round8/results.json` was a provisional
+version that misplaced GAS at P7; he actually finished P3, which had shoved
+HAD/PIA/LAW/LIN each down one spot. FastF1 and the live Jolpica API both have the
+correct order. Re-downloaded R8 (also refreshed R7/R10, which were already
+correct) → GAS/HAD/PIA/LAW all exact. Final: **drivers 98.3%, constructors 97.7%
+exact**; R1/R2/R3/R6/R9 fully exact. (Note: raw jolpica is gitignored, so the
+correction lives in the committed web actuals; tracked `model_rows` still carry
+the old R8 order — negligible, picked up on the next 03a/03b rebuild + retrain.)
+
+**Remaining residuals (3 drivers, small overtake/grid data gaps — need user
+confirmation from the app, like ANT R6):**
+- **R8 LIN −4** — needs 4 race overtakes (`overtakes.csv` shows 0); he went
+  P15→P7 at Monaco.
+- **R7 HAD −3** — needs +3 (likely 3 race overtakes, csv 0; Canada sprint round).
+- **R10 OCO −1** — official credits 0 positions but we compute −1 (grid P15 →
+  finish P16); likely his start position was P16.
 
 ---
 

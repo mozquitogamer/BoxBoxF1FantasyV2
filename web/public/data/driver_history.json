@@ -400,7 +400,7 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 17,
+          "points": 14,
           "is_dnf": false
         },
         {
@@ -504,7 +504,7 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 12,
+          "points": 25,
           "is_dnf": false
         },
         {
@@ -764,7 +764,7 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 16,
+          "points": 13,
           "is_dnf": false
         },
         {
@@ -868,7 +868,7 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 23,
+          "points": 19,
           "is_dnf": false
         },
         {
@@ -972,7 +972,7 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 19,
+          "points": 16,
           "is_dnf": false
         },
         {
@@ -1265,7 +1265,7 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 22
+          "points": 18
         },
         {
           "round": 9,
@@ -1309,7 +1309,7 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 38
+          "points": 32
         },
         {
           "round": 9,
@@ -1397,7 +1397,7 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 17
+          "points": 30
         },
         {
           "round": 9,
@@ -1485,7 +1485,7 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 17
+          "points": 14
         },
         {
           "round": 9,

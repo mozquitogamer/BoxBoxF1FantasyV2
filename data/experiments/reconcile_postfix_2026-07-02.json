@@ -1655,9 +1655,9 @@
         },
         {
           "id": "PIA",
-          "ours": 19,
+          "ours": 16,
           "official": 16,
-          "diff": 3,
+          "diff": 0,
           "is_dnf": false,
           "status": "Finished",
           "overtakes": 0,
@@ -1675,9 +1675,9 @@
         },
         {
           "id": "LAW",
-          "ours": 16,
+          "ours": 13,
           "official": 13,
-          "diff": 3,
+          "diff": 0,
           "is_dnf": false,
           "status": "Finished",
           "overtakes": 0,
@@ -1715,9 +1715,9 @@
         },
         {
           "id": "GAS",
-          "ours": 12,
+          "ours": 25,
           "official": 25,
-          "diff": -13,
+          "diff": 0,
           "is_dnf": false,
           "status": "Finished",
           "overtakes": 2,
@@ -1745,9 +1745,9 @@
         },
         {
           "id": "HAD",
-          "ours": 23,
+          "ours": 19,
           "official": 19,
-          "diff": 4,
+          "diff": 0,
           "is_dnf": false,
           "status": "Finished",
           "overtakes": 0,
@@ -1755,9 +1755,9 @@
         },
         {
           "id": "LIN",
-          "ours": 17,
+          "ours": 14,
           "official": 18,
-          "diff": -1,
+          "diff": -4,
           "is_dnf": false,
           "status": "Finished",
           "overtakes": 0,
@@ -1841,30 +1841,30 @@
         },
         {
           "id": "mclaren",
-          "ours": 17,
+          "ours": 14,
           "official": 14,
-          "diff": 3,
+          "diff": 0,
           "missing": false
         },
         {
           "id": "red_bull",
-          "ours": 22,
+          "ours": 18,
           "official": 18,
-          "diff": 4,
+          "diff": 0,
           "missing": false
         },
         {
           "id": "alpine",
-          "ours": 17,
+          "ours": 30,
           "official": 30,
-          "diff": -13,
+          "diff": 0,
           "missing": false
         },
         {
           "id": "racing_bulls",
-          "ours": 38,
+          "ours": 32,
           "official": 36,
-          "diff": 2,
+          "diff": -4,
           "missing": false
         },
         {
@@ -1905,18 +1905,18 @@
       ],
       "driver_summary": {
         "n": 22,
-        "n_exact": 17,
+        "n_exact": 21,
         "mean_diff": -0.182,
-        "mean_abs_diff": 1.091,
-        "max_abs_diff": 13,
+        "mean_abs_diff": 0.182,
+        "max_abs_diff": 4,
         "n_missing": 0
       },
       "constructor_summary": {
         "n": 11,
-        "n_exact": 7,
+        "n_exact": 10,
         "mean_diff": -0.364,
-        "mean_abs_diff": 2.0,
-        "max_abs_diff": 13,
+        "mean_abs_diff": 0.364,
+        "max_abs_diff": 4,
         "n_missing": 0
       }
     },
@@ -2562,13 +2562,13 @@
     }
   ],
   "overall": {
-    "driver_exact": 169,
+    "driver_exact": 173,
     "driver_n": 176,
-    "driver_exact_pct": 96.0,
-    "driver_mean_abs_diff": 0.159,
-    "constructor_exact": 83,
+    "driver_exact_pct": 98.3,
+    "driver_mean_abs_diff": 0.045,
+    "constructor_exact": 86,
     "constructor_n": 88,
-    "constructor_exact_pct": 94.3,
-    "constructor_mean_abs_diff": 0.284
+    "constructor_exact_pct": 97.7,
+    "constructor_mean_abs_diff": 0.08
   }
 }
