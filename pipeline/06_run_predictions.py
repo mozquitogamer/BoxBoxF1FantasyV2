@@ -603,6 +603,74 @@ def _recompute_sim_features(df: pd.DataFrame, target_circuit: str) -> pd.DataFra
     return df
 
 
+def _load_actual_sprint_grid(pred_df: pd.DataFrame, round_num: int, year: int) -> bool:
+    """Populate pred_df['sprint_grid'] with the ACTUAL Sprint-Qualifying result.
+
+    Sprint Qualifying runs Friday, BEFORE main qualifying (Saturday) -> using it to
+    predict the main grid is leak-free, and it is a much stronger main-quali
+    predictor than FP pace on sprint weekends (validated). Called BEFORE the quali
+    prediction so the quali/race models can consume it as a feature. Returns True if
+    a grid was loaded; leaves sprint_grid absent/NaN otherwise. Deliberately does NOT
+    fall back to predicted quali (that fallback is applied later, for the sprint
+    model only — it would be circular to feed predicted quali back into the quali
+    model). Mirrors the loader that previously lived inline in the sprint block.
+    """
+    # Method 1: normalized sprint_results.csv (completed rounds)
+    sprint_csv = Path(JOLPICA_MODEL_ROWS_DIR).parent / "normalized" / str(year) / "sprint_results.csv"
+    if sprint_csv.exists():
+        sprint_res = pd.read_csv(sprint_csv)
+        sprint_res = sprint_res[sprint_res["round"] == round_num]
+        if not sprint_res.empty and "grid" in sprint_res.columns:
+            grid_map = dict(zip(sprint_res["driver_id"], sprint_res["grid"]))
+            pred_df["sprint_grid"] = pred_df["driver_id"].map(grid_map)
+            n = int(pred_df["sprint_grid"].notna().sum())
+            if n > 0:
+                print(f"  Loaded sprint grid from sprint_results.csv: {n}/{len(pred_df)} drivers")
+                return True
+    # Method 2: FastF1 Sprint Shootout / Sprint Qualifying (official Position, else fastest-lap rank)
+    try:
+        import fastf1
+        ff1_round = fastf1_round(round_num, year)
+        abbrev_to_jolpica, _ = load_driver_id_maps()
+        for sq_name in ["Sprint Shootout", "Sprint Qualifying", "SQ"]:
+            try:
+                sq_session = fastf1.get_session(year, ff1_round, sq_name)
+                sq_session.load(laps=True, telemetry=False, weather=False, messages=False)
+                sq_results = sq_session.results
+                if sq_results is None or sq_results.empty:
+                    continue
+                if ("Abbreviation" in sq_results.columns and "Position" in sq_results.columns
+                        and sq_results["Position"].notna().any()):
+                    for _, row in sq_results.iterrows():
+                        if pd.isna(row["Position"]):
+                            continue
+                        did = abbrev_to_jolpica.get(row["Abbreviation"])
+                        if did is not None:
+                            pred_df.loc[pred_df["driver_id"] == did, "sprint_grid"] = int(row["Position"])
+                    n = int(pred_df["sprint_grid"].notna().sum())
+                    if n > 0:
+                        print(f"  Loaded sprint grid from FastF1 {sq_name} results: {n}/{len(pred_df)} drivers")
+                        return True
+                laps = sq_session.laps
+                if laps is not None and not laps.empty and "LapTime" in laps.columns:
+                    fastest = (laps.dropna(subset=["LapTime"]).groupby("Driver")["LapTime"]
+                               .min().sort_values())
+                    if len(fastest) > 0:
+                        for rank, abbrev in enumerate(fastest.index, start=1):
+                            did = abbrev_to_jolpica.get(abbrev)
+                            if did is not None:
+                                pred_df.loc[pred_df["driver_id"] == did, "sprint_grid"] = rank
+                        n = int(pred_df["sprint_grid"].notna().sum())
+                        if n > 0:
+                            print(f"  Loaded sprint grid from FastF1 {sq_name} fastest laps: {n}/{len(pred_df)} drivers")
+                            return True
+            except Exception:
+                continue
+    except Exception as e:
+        print(f"  Could not load FastF1 sprint qualifying: {e}")
+    return False
+
+
 # -- Main prediction pipeline -------------------------------------------------
 
 def run_predictions(
@@ -789,6 +857,15 @@ def run_predictions(
     # Load FP signal model (optional, pkl format)
     fp_info = joblib.load(fp_model_path) if fp_model_path.exists() else None
 
+    # Load the ACTUAL Sprint-Qualifying grid (Fri) BEFORE the quali prediction so the
+    # quali/race models can use it as a feature (leak-free, strong signal; validated
+    # +0.31 quali MAE on sprint rounds). NaN when SQ hasn't happened yet -> models
+    # ignore it. The predicted-quali fallback for the sprint model is applied later
+    # (it would be circular to feed predicted quali back into the quali model).
+    sprint_grid_actual_loaded = (
+        _load_actual_sprint_grid(pred_df, round_num, year) if is_sprint else False
+    )
+
     # ---- Step 6: Predict qualifying ----
     print(f"\n[Step 6] Predicting qualifying positions...")
     # XGBoost requires ALL training features present (NaN is fine for missing)
@@ -958,14 +1035,16 @@ def run_predictions(
             "sprint_fp_features", sprint_feature_list
         )
 
-        # === Load actual sprint qualifying grid ===
-        # For sprint weekends, sprint qualifying (Shootout) happens BEFORE our deadline.
-        # This is analogous to how quali_position feeds the race model.
-        sprint_grid_loaded = False
+        # === Sprint grid (for the sprint model) ===
+        # The ACTUAL Sprint-Qualifying grid was already loaded BEFORE the quali
+        # prediction (so the quali/race models could consume it as a feature). Reuse
+        # that result here; Methods 1-2 below only re-run if it wasn't found, and
+        # Method 3 is the predicted-quali fallback (sprint model only).
+        sprint_grid_loaded = sprint_grid_actual_loaded
 
         # Method 1: Check normalized sprint_results.csv (for completed sprint rounds)
         sprint_csv = Path(JOLPICA_MODEL_ROWS_DIR).parent / "normalized" / str(year) / "sprint_results.csv"
-        if sprint_csv.exists():
+        if sprint_csv.exists() and not sprint_grid_loaded:
             sprint_res = pd.read_csv(sprint_csv)
             sprint_res = sprint_res[sprint_res["round"] == round_num]
             if not sprint_res.empty and "grid" in sprint_res.columns:

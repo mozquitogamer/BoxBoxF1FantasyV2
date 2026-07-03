@@ -113,8 +113,12 @@ QUALI_EXCLUDE = {
     # DNF / classification flags
     "is_classified", "is_dnf", "is_dns", "is_dsq",
     "dnf_mechanical", "dnf_collision", "dnf_driver_error",
-    # Sprint
-    "sprint_position", "sprint_points", "sprint_grid",
+    # Sprint: sprint_position/sprint_points come from the Saturday sprint RACE
+    # (after the fantasy lock) -> keep excluded. sprint_grid is the Sprint-Qualifying
+    # result (Friday, BEFORE main quali) -> a strong, leak-free predictor of the
+    # main grid on sprint weekends; NOW ADMITTED to quali/race (validated +0.31 quali
+    # MAE on sprint folds, non-sprint untouched). NaN on non-sprint rounds.
+    "sprint_position", "sprint_points",
     # Weight
     "sample_weight",
     # Race-specific form features (used only in race model)
