@@ -117,6 +117,11 @@ from config.track_similarity import get_similarity
 FP_QUALI_BLEND_TUNABLES = {
     "weight": 0.6,                 # base (normal tracks): 0 = pure model, 1 = pure FP pace
     "weight_hard_track": 0.80,     # FP weight at overtaking_difficulty 10 (Monaco)
+    "weight_sprint": 0.15,         # SPRINT weekends: only FP1 (short, quali-sim heavy) AND
+                                   # the actual Sprint-Qualifying grid is now a strong
+                                   # in-model quali signal -> lean FAR less on FP pace.
+                                   # Sweep on 23 sprint folds: min at 0.10, 0.15 robust;
+                                   # 0.15 vs 0.60 = -0.34 quali MAE (95% CI excludes 0).
     "hard_track_pivot": 6,         # at/below this difficulty, use base weight
     "min_drivers_with_pace": 10,   # need at least this many FP times to blend
     "pace_cols": ["best_lap_time", "best_3_lap_avg", "best_5_lap_avg"],  # composite; lower = faster
@@ -888,6 +893,12 @@ def run_predictions(
         target_circuit, fp_blend["weight"], fp_blend["weight_hard_track"],
         fp_blend["hard_track_pivot"],
     )
+    if is_sprint:
+        # Sprint weekends override the track-scaled base: FP is FP1-only and the
+        # actual Sprint-Qualifying grid is now an in-model quali feature, so a heavy
+        # FP-pace blend hurts (sweep on 23 sprint folds, w=0.15 vs 0.60 -0.34 MAE,
+        # 95% CI excludes 0). Only fires when this weekend is a sprint round.
+        w_fp = fp_blend["weight_sprint"]
     if w_fp > 0 and pace_cols:
         def _zscore_q(a: np.ndarray) -> np.ndarray:
             a = np.asarray(a, dtype=float)
