@@ -128,7 +128,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 40,
+          "points": 42,
           "is_dnf": false
         },
         {
@@ -1167,7 +1167,7 @@
         {
           "round": 6,
           "circuit_id": "miami",
-          "points": 102
+          "points": 104
         },
         {
           "round": 7,

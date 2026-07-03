@@ -69,11 +69,14 @@ sprint DSQ → audi −10 (−17→−27 exact); HAD quali NC → red_bull −5 
 These are the ONLY DSQ/NC events in R1-R10, so no other round is affected.
 Final: **drivers 95.5%, constructors 93.2% exact.**
 
+**R6 ANT → FIXED** — user confirmed the `overtakes.csv` sprint count for
+antonelli R6 (round 4) was a data-entry error (0 → 2). R6 now 22/22 + 11/11.
+Final: **drivers 96.0%, constructors 94.3% exact**; R1/R2/R3/R6/R9 fully exact.
+
 **Remaining documented residuals (small, sprint/grid data nuances):**
 - **R8 Monaco cluster** (GAS −13, PIA/LAW/HAD +3/+4) — post-penalty grid basis /
-  fastest-lap attribution; pre-existing open investigation (A7).
-- **R6 ANT −2 / mercedes −2** — ANT's `overtakes.csv` sprint count is 0 but
-  official implies ~2 (he lost 4 places grid P2→P6 yet scored +1 sprint).
+  fastest-lap attribution; pre-existing open investigation (A7). The bulk of the
+  remaining season error.
 - **R10 OCO −1, R7 HAD −3** — grid/positions-gained + sprint-overtake sourcing.
 
 ---

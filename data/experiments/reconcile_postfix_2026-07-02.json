@@ -965,9 +965,9 @@
       "drivers": [
         {
           "id": "ANT",
-          "ours": 40,
+          "ours": 42,
           "official": 42,
-          "diff": -2,
+          "diff": 0,
           "is_dnf": false,
           "status": "Finished",
           "overtakes": 6,
@@ -1187,9 +1187,9 @@
       "constructors": [
         {
           "id": "mercedes",
-          "ours": 102,
+          "ours": 104,
           "official": 104,
-          "diff": -2,
+          "diff": 0,
           "missing": false
         },
         {
@@ -1265,18 +1265,18 @@
       ],
       "driver_summary": {
         "n": 22,
-        "n_exact": 21,
-        "mean_diff": -0.091,
-        "mean_abs_diff": 0.091,
-        "max_abs_diff": 2,
+        "n_exact": 22,
+        "mean_diff": 0.0,
+        "mean_abs_diff": 0.0,
+        "max_abs_diff": 0,
         "n_missing": 0
       },
       "constructor_summary": {
         "n": 11,
-        "n_exact": 10,
-        "mean_diff": -0.182,
-        "mean_abs_diff": 0.182,
-        "max_abs_diff": 2,
+        "n_exact": 11,
+        "mean_diff": 0.0,
+        "mean_abs_diff": 0.0,
+        "max_abs_diff": 0,
         "n_missing": 0
       }
     },
@@ -2562,13 +2562,13 @@
     }
   ],
   "overall": {
-    "driver_exact": 168,
+    "driver_exact": 169,
     "driver_n": 176,
-    "driver_exact_pct": 95.5,
-    "driver_mean_abs_diff": 0.17,
-    "constructor_exact": 82,
+    "driver_exact_pct": 96.0,
+    "driver_mean_abs_diff": 0.159,
+    "constructor_exact": 83,
     "constructor_n": 88,
-    "constructor_exact_pct": 93.2,
-    "constructor_mean_abs_diff": 0.307
+    "constructor_exact_pct": 94.3,
+    "constructor_mean_abs_diff": 0.284
   }
 }
