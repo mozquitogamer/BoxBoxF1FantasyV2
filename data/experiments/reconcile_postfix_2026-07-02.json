@@ -1445,12 +1445,12 @@
         },
         {
           "id": "HAD",
-          "ours": 3,
+          "ours": 6,
           "official": 6,
-          "diff": -3,
+          "diff": 0,
           "is_dnf": false,
           "status": "Lapped",
-          "overtakes": 0,
+          "overtakes": 3,
           "missing": false
         },
         {
@@ -1528,9 +1528,9 @@
         },
         {
           "id": "red_bull",
-          "ours": 41,
+          "ours": 44,
           "official": 44,
-          "diff": -3,
+          "diff": 0,
           "missing": false
         },
         {
@@ -1585,18 +1585,18 @@
       ],
       "driver_summary": {
         "n": 22,
-        "n_exact": 21,
-        "mean_diff": -0.136,
-        "mean_abs_diff": 0.136,
-        "max_abs_diff": 3,
+        "n_exact": 22,
+        "mean_diff": 0.0,
+        "mean_abs_diff": 0.0,
+        "max_abs_diff": 0,
         "n_missing": 0
       },
       "constructor_summary": {
         "n": 11,
-        "n_exact": 10,
-        "mean_diff": -0.273,
-        "mean_abs_diff": 0.273,
-        "max_abs_diff": 3,
+        "n_exact": 11,
+        "mean_diff": 0.0,
+        "mean_abs_diff": 0.0,
+        "max_abs_diff": 0,
         "n_missing": 0
       }
     },
@@ -1755,12 +1755,12 @@
         },
         {
           "id": "LIN",
-          "ours": 14,
+          "ours": 18,
           "official": 18,
-          "diff": -4,
+          "diff": 0,
           "is_dnf": false,
           "status": "Finished",
-          "overtakes": 0,
+          "overtakes": 4,
           "missing": false
         },
         {
@@ -1862,9 +1862,9 @@
         },
         {
           "id": "racing_bulls",
-          "ours": 32,
+          "ours": 36,
           "official": 36,
-          "diff": -4,
+          "diff": 0,
           "missing": false
         },
         {
@@ -1905,18 +1905,18 @@
       ],
       "driver_summary": {
         "n": 22,
-        "n_exact": 21,
-        "mean_diff": -0.182,
-        "mean_abs_diff": 0.182,
-        "max_abs_diff": 4,
+        "n_exact": 22,
+        "mean_diff": 0.0,
+        "mean_abs_diff": 0.0,
+        "max_abs_diff": 0,
         "n_missing": 0
       },
       "constructor_summary": {
         "n": 11,
-        "n_exact": 10,
-        "mean_diff": -0.364,
-        "mean_abs_diff": 0.364,
-        "max_abs_diff": 4,
+        "n_exact": 11,
+        "mean_diff": 0.0,
+        "mean_abs_diff": 0.0,
+        "max_abs_diff": 0,
         "n_missing": 0
       }
     },
@@ -2562,13 +2562,13 @@
     }
   ],
   "overall": {
-    "driver_exact": 173,
+    "driver_exact": 175,
     "driver_n": 176,
-    "driver_exact_pct": 98.3,
-    "driver_mean_abs_diff": 0.045,
-    "constructor_exact": 86,
+    "driver_exact_pct": 99.4,
+    "driver_mean_abs_diff": 0.006,
+    "constructor_exact": 88,
     "constructor_n": 88,
-    "constructor_exact_pct": 97.7,
-    "constructor_mean_abs_diff": 0.08
+    "constructor_exact_pct": 100.0,
+    "constructor_mean_abs_diff": 0.0
   }
 }

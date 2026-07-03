@@ -83,13 +83,17 @@ exact**; R1/R2/R3/R6/R9 fully exact. (Note: raw jolpica is gitignored, so the
 correction lives in the committed web actuals; tracked `model_rows` still carry
 the old R8 order — negligible, picked up on the next 03a/03b rebuild + retrain.)
 
-**Remaining residuals (3 drivers, small overtake/grid data gaps — need user
-confirmation from the app, like ANT R6):**
-- **R8 LIN −4** — needs 4 race overtakes (`overtakes.csv` shows 0); he went
-  P15→P7 at Monaco.
-- **R7 HAD −3** — needs +3 (likely 3 race overtakes, csv 0; Canada sprint round).
-- **R10 OCO −1** — official credits 0 positions but we compute −1 (grid P15 →
-  finish P16); likely his start position was P16.
+**R8 LIN + R7 HAD → FIXED (user-confirmed overtakes.csv).** LIN Monaco race
+overtakes 0→4; HAD Canada race overtakes 0→3 (web-confirmed: he finished P5
+after a 10s + stop-and-go penalty, classified not DNF — 67/68 laps). Final:
+**drivers 99.4% exact, constructors 100%**; R1-R9 all fully exact.
+
+**Last residual: R10 OCO −1 (lapped-driver position nuance).** User confirmed
+OCO qualified/started P15; he finished P16 (lapped by COL, a lead-lap car), so
+our −1 position is real and the csv agrees (net −1). But official credits 8
+(= 8 overtakes + 0 positions), i.e. it does NOT count the spot he lost while
+being lapped, OR he made 9 overtakes not 8. 1 point, 1 driver-round; awaiting
+user call on which.
 
 ---
 

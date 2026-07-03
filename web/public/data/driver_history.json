@@ -400,7 +400,7 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 14,
+          "points": 18,
           "is_dnf": false
         },
         {
@@ -862,7 +862,7 @@
         {
           "round": 7,
           "circuit_id": "villeneuve",
-          "points": 3,
+          "points": 6,
           "is_dnf": false
         },
         {
@@ -1260,7 +1260,7 @@
         {
           "round": 7,
           "circuit_id": "villeneuve",
-          "points": 41
+          "points": 44
         },
         {
           "round": 8,
@@ -1309,7 +1309,7 @@
         {
           "round": 8,
           "circuit_id": "monaco",
-          "points": 32
+          "points": 36
         },
         {
           "round": 9,
