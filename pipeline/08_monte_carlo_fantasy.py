@@ -166,6 +166,18 @@ SPRINT_OVERTAKE_CV = 0.45  # Higher CV in sprints (more volatile, fewer laps)
 # and ~65% is individual (driver skill, luck, errors).
 TEAMMATE_CORRELATION_ALPHA = 0.35
 
+# --- Grid-conditioned race sampling: INVESTIGATED + REJECTED 2026-07-03 ---
+# Idea: within each sim, blend the race score toward THIS sim's sampled grid
+# (race_score = (1-a)*race_raw_z + a*grid_z) so the finish tracks the start,
+# instead of drawing quali and race from independent noise. Swept a in
+# {0,0.2,0.35,0.5,0.65} through the re-forecast gate (backtest_forecast.py
+# --reforecast): NULL RESULT — driver rho 0.574->0.575, MAE 12.61->12.52 (within
+# sim noise), coverage flat, constructor bias slightly worse. Root cause: the
+# race model (race_fp) already uses quali_position/grid_advantage as features, so
+# race_raw already encodes the grid; and the rho~0.57 ceiling is the MODEL's
+# ordering, not the MC's sampling — an 08 change can't lift a 06 limitation. Not
+# shipped. The real MC-layer lever is CI coverage on chaotic rounds (see below).
+
 # --- Correlated DNF modeling (Fix 1.5) ---
 # Trimmed 2026-06-05 (0.30 -> 0.15), then VALIDATED empirically 2026-06-15:
 # across 2020-2026, P(teammate DNF | this car DNF) = 0.198 vs a 0.136 base — a
