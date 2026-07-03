@@ -46,6 +46,74 @@ PHASE_FALLBACK = {
     "canonical": ["canonical"],
 }
 
+# Lazily-imported pipeline modules for the re-forecast gate (numbered filenames
+# can't be `import`ed normally).
+_PIPE = Path(__file__).resolve().parent
+_MODCACHE: dict = {}
+
+
+def _pipe_module(name: str, filename: str):
+    import importlib.util
+    if name in _MODCACHE:
+        return _MODCACHE[name]
+    spec = importlib.util.spec_from_file_location(name, _PIPE / filename)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    _MODCACHE[name] = m
+    return m
+
+
+def reforecast_round(round_num: int, n_sims: int, seed: int) -> tuple[dict, dict] | None:
+    """Re-run 07 scoring + 08 MC IN-PROCESS on this round's frozen positions with
+    the CURRENT code, returning ({abbrev: {pred,p5,p95}}, {cid: {pred,p5,p95}}).
+
+    Isolates a scoring/MC change: the positions (06 output) are held fixed and
+    only 07/08 are re-executed, so an old-vs-new run gates the change leak-free.
+    Weather resolves to inactive for historical rounds (weather.json is for the
+    live round), keeping conditions constant. No files are written.
+    """
+    import pandas as pd
+    from config.settings import (PREDICTIONS_DIR, SPRINT_ROUNDS_2026,
+                                 race_name_for_round, load_dotd_overrides)
+    from config.track_classifications import (get_circuit_id_from_race_name,
+                                             overtake_multiplier, position_noise_multiplier)
+
+    pred_path = PREDICTIONS_DIR / f"round{round_num}" / "predictions.parquet"
+    if not pred_path.exists():
+        return None
+    pred_df = pd.read_parquet(pred_path)
+
+    f07 = _pipe_module("bt_f07", "07_calculate_fantasy.py")
+    f08 = _pipe_module("bt_f08", "08_monte_carlo_fantasy.py")
+
+    is_sprint = round_num in SPRINT_ROUNDS_2026
+    # 07 deterministic scoring -> fantasy_df (carries dnf_probability the MC needs)
+    driver_fantasy = f07.calculate_driver_fantasy(pred_df, round_num)
+
+    # 08 Monte Carlo, wired exactly like 08.main()
+    calibration = f08.load_calibration(round_num=round_num)
+    weather = f08.load_weather_for_mc(round_num)  # inactive for past rounds
+    circuit_id = get_circuit_id_from_race_name(race_name_for_round(round_num))
+    results = f08.run_simulations(
+        pred_df=pred_df, fantasy_df=driver_fantasy, n_sims=n_sims, seed=seed,
+        is_sprint=is_sprint, calibration=calibration, weather=weather,
+        overtake_mult=overtake_multiplier(circuit_id),
+        position_noise_mult=position_noise_multiplier(circuit_id),
+        dotd_overrides=load_dotd_overrides(round_num),
+    )
+    cons = f08.aggregate_constructors(
+        results["drivers"], f08.load_drivers_info(), f08.load_constructors_info(),
+        f08.load_constructor_prices(), sim_arrays=results.get("_sim_arrays"),
+        pitstop_priors=f08.load_pitstop_priors(), n_sims=n_sims, seed=seed,
+    )
+    d_map = {d["driver_abbrev"]: {"pred": d["mc_total_mean"],
+                                  "p5": d["mc_total_p5"], "p95": d["mc_total_p95"]}
+             for d in results["drivers"]}
+    c_map = {c["constructor_id"]: {"pred": c["mc_total_mean"],
+                                   "p5": c["mc_total_p5"], "p95": c["mc_total_p95"]}
+             for c in cons}
+    return d_map, c_map
+
 
 def _spearman(forecast: list[float], actual: list[float]) -> float | None:
     """Spearman rank correlation without a scipy dependency (rank then Pearson)."""
@@ -175,17 +243,27 @@ def _metrics(pred_map: dict, actual_map: dict, topk: int = 5) -> dict:
     }
 
 
-def backtest_round(round_num: int, phase: str, official_round: dict) -> dict | None:
-    fc, resolved = load_forecast(round_num, phase)
-    if not fc:
-        return None
+def backtest_round(round_num: int, phase: str, official_round: dict,
+                   reforecast: bool = False, n_sims: int = 5000,
+                   seed: int = 42) -> dict | None:
     d_actual = official_round.get("drivers", {}) or {}
     c_actual = official_round.get("constructors", {}) or {}
+    if reforecast:
+        maps = reforecast_round(round_num, n_sims, seed)
+        if maps is None:
+            return None
+        d_map, c_map = maps
+        resolved = "reforecast"
+    else:
+        fc, resolved = load_forecast(round_num, phase)
+        if not fc:
+            return None
+        d_map, c_map = _driver_forecast_map(fc), _constructor_forecast_map(fc)
     return {
         "round": round_num,
         "phase": resolved,
-        "drivers": _metrics(_driver_forecast_map(fc), d_actual),
-        "constructors": _metrics(_constructor_forecast_map(fc), c_actual),
+        "drivers": _metrics(d_map, d_actual),
+        "constructors": _metrics(c_map, c_actual),
     }
 
 
@@ -219,14 +297,18 @@ def _aggregate(rounds: list[dict], which: str) -> dict:
     }
 
 
-def run(phase: str, official: dict) -> dict:
+def run(phase: str, official: dict, reforecast: bool = False,
+        n_sims: int = 5000, seed: int = 42) -> dict:
     rounds = []
     for rn in sorted(int(r) for r in official.keys()):
-        rd = backtest_round(rn, phase, official.get(str(rn), {}))
+        if reforecast:
+            print(f"  re-forecasting round {rn} ({n_sims} sims)...", flush=True)
+        rd = backtest_round(rn, phase, official.get(str(rn), {}),
+                            reforecast=reforecast, n_sims=n_sims, seed=seed)
         if rd:
             rounds.append(rd)
     return {
-        "phase_requested": phase,
+        "phase_requested": "reforecast" if reforecast else phase,
         "rounds": rounds,
         "aggregate_drivers": _aggregate(rounds, "drivers"),
         "aggregate_constructors": _aggregate(rounds, "constructors"),
@@ -267,6 +349,12 @@ def main() -> None:
                     help="Which forecast archive to score (default post_fp = actionable)")
     ap.add_argument("--compare", action="store_true",
                     help="Show pre_fp vs post_fp side by side")
+    ap.add_argument("--reforecast", action="store_true",
+                    help="Re-run 07+08 on frozen positions with CURRENT code "
+                         "(leak-free gate for scoring/MC changes)")
+    ap.add_argument("--sims", type=int, default=5000,
+                    help="MC simulations per round in --reforecast mode (default 5000)")
+    ap.add_argument("--seed", type=int, default=42, help="MC seed (default 42)")
     ap.add_argument("--json", type=str, default=None, help="Dump full results to this path")
     args = ap.parse_args()
 
@@ -275,7 +363,14 @@ def main() -> None:
         print("No official_fantasy_points.json found.")
         sys.exit(0)
 
-    if args.compare:
+    if args.reforecast:
+        print(f"Re-forecasting all completed rounds with current 07+08 code "
+              f"({args.sims} sims, seed {args.seed})...")
+        result = run(args.phase, official, reforecast=True,
+                     n_sims=args.sims, seed=args.seed)
+        print_report(result)
+        out = result
+    elif args.compare:
         results = {}
         for ph in ("pre_fp", "post_fp"):
             results[ph] = run(ph, official)
