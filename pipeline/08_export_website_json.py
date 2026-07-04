@@ -275,6 +275,10 @@ def build_predictions_json(round_num: int) -> dict | None:
             "number": info.get("number", 0),
             "predicted_quali": int(row["predicted_quali_position"]),
             "predicted_finish": int(row["predicted_race_position"]),
+            # projected_points = deterministic total (score if the predicted finishing
+            # order holds). expected_points is overwritten below with the risk-adjusted
+            # MC mean; we keep BOTH so the UI can show projected vs risk-adjusted.
+            "projected_points": round(float(row["total_expected_fantasy_points"]), 1),
             "expected_points": round(float(row["total_expected_fantasy_points"]), 1),
             "expected_points_quali": round(float(row.get("expected_quali_pts", row.get("expected_fantasy_points_from_quali", 0))), 1),
             "expected_points_race": round(float(row.get("expected_race_pts", row.get("expected_fantasy_points_from_race", 0))), 1),
@@ -377,6 +381,8 @@ def build_predictions_json(round_num: int) -> dict | None:
             "full_name": info.get("full_name", ""),
             "driver_1": row.get("driver_1", ""),
             "driver_2": row.get("driver_2", ""),
+            # projected_points = deterministic; expected_points overwritten below with MC mean.
+            "projected_points": round(float(row["total_expected_fantasy_points"]), 1),
             "expected_points": round(float(row["total_expected_fantasy_points"]), 1),
             "expected_points_quali": round(float(row.get("expected_quali_pts", 0)), 1),
             "expected_points_race": round(float(row.get("expected_race_pts", 0)), 1),

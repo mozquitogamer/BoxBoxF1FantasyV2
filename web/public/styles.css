@@ -432,6 +432,22 @@ select:focus, input:focus {
     color: var(--text-secondary);
 }
 
+/* Secondary risk-adjusted (Monte-Carlo mean) value shown next to the big
+   projected number in the points pill. */
+.points-adj {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: 1px solid rgba(128, 128, 128, 0.30);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+.points-adj-val { font-weight: 700; }
+.points-adj-label { font-size: 10px; font-weight: 500; opacity: 0.85; }
+
 /* Team-upgrade overlay badge — small +/- delta next to points-badge */
 .upgrade-delta {
     font-size: 11px;

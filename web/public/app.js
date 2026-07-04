@@ -1200,7 +1200,7 @@ function heroCard(label, driver, type) {
             <div class="hero-card-label">${icon} ${label}</div>
             <div class="hero-card-driver">${driver.name || driver.driver_id}</div>
             <div class="hero-card-team">${team.name}</div>
-            <div class="hero-card-pts">${driver.expected_points.toFixed(1)} pts</div>
+            <div class="hero-card-pts">${(typeof driver.projected_points === 'number' ? driver.projected_points : driver.expected_points).toFixed(1)} pts <span style="font-size:0.55em;font-weight:600;opacity:0.8;">proj · ${driver.expected_points.toFixed(1)} risk-adj</span></div>
             <div class="hero-card-meta">$${driver.current_price.toFixed(1)}M \u00b7 ${(driver.value_score||0).toFixed(2)} ppm</div>
         </div>
     `;
@@ -1505,15 +1505,18 @@ function driverCard(d, i) {
         </div>
         ${renderWeatherBadges()}
 
-        <div class="points-badge">
-            ${d.expected_points.toFixed(1)}
-            <span class="points-label">pts</span>
-            ${(typeof d.expected_points_adjusted === 'number' && Math.abs(d.points_delta || 0) >= 0.1) ? `
-                <span class="upgrade-delta ${d.points_delta > 0 ? 'pos' : 'neg'}"
-                      title="With manual team upgrade (pace bump ${d.pace_bump >= 0 ? '+' : ''}${d.pace_bump}): adjusted to ${d.expected_points_adjusted.toFixed(1)} pts (P${d.predicted_finish_adjusted} race)">
-                    ${d.points_delta > 0 ? '+' : ''}${d.points_delta.toFixed(1)}
-                </span>
-            ` : ''}
+        <div class="points-badge" title="Projected = points if the predicted finishing order holds (the 'if it goes to plan' score). Risk-adj = the Monte-Carlo average over 10,000 sims — it factors in DNFs, chaos and position swings, so it sits lower. The likely outcome is between the two; the P5–P95 range is shown below.">
+            ${(typeof d.projected_points === 'number' ? d.projected_points : d.expected_points).toFixed(1)}
+            <span class="points-label">proj</span>
+            <span class="points-adj">
+                <span class="points-adj-val">${d.expected_points.toFixed(1)}</span><span class="points-adj-label">risk-adj</span>
+                ${(typeof d.expected_points_adjusted === 'number' && Math.abs(d.points_delta || 0) >= 0.1) ? `
+                    <span class="upgrade-delta ${d.points_delta > 0 ? 'pos' : 'neg'}"
+                          title="With manual team upgrade (pace bump ${d.pace_bump >= 0 ? '+' : ''}${d.pace_bump}): risk-adjusted to ${d.expected_points_adjusted.toFixed(1)} pts (P${d.predicted_finish_adjusted} race)">
+                        ${d.points_delta > 0 ? '+' : ''}${d.points_delta.toFixed(1)}
+                    </span>
+                ` : ''}
+            </span>
         </div>
 
         <div class="points-breakdown">
@@ -2446,15 +2449,18 @@ function constructorCard(c, i) {
                 </div>
                 <div class="card-cost" title="Current F1 Fantasy price">$${c.current_price.toFixed(1)}M</div>
             </div>
-            <div class="points-badge">
-                ${c.expected_points.toFixed(1)}
-                <span class="points-label">pts</span>
-                ${(typeof c.expected_points_adjusted === 'number' && Math.abs(c.points_delta || 0) >= 0.1) ? `
-                    <span class="upgrade-delta ${c.points_delta > 0 ? 'pos' : 'neg'}"
-                          title="With manual team upgrade (pace bump ${c.pace_bump >= 0 ? '+' : ''}${c.pace_bump}): adjusted to ${c.expected_points_adjusted.toFixed(1)} pts">
-                        ${c.points_delta > 0 ? '+' : ''}${c.points_delta.toFixed(1)}
-                    </span>
-                ` : ''}
+            <div class="points-badge" title="Projected = points if the predicted result holds. Risk-adj = Monte-Carlo average over 10,000 sims (factors in DNFs, chaos and swings), so it sits lower.">
+                ${(typeof c.projected_points === 'number' ? c.projected_points : c.expected_points).toFixed(1)}
+                <span class="points-label">proj</span>
+                <span class="points-adj">
+                    <span class="points-adj-val">${c.expected_points.toFixed(1)}</span><span class="points-adj-label">risk-adj</span>
+                    ${(typeof c.expected_points_adjusted === 'number' && Math.abs(c.points_delta || 0) >= 0.1) ? `
+                        <span class="upgrade-delta ${c.points_delta > 0 ? 'pos' : 'neg'}"
+                              title="With manual team upgrade (pace bump ${c.pace_bump >= 0 ? '+' : ''}${c.pace_bump}): risk-adjusted to ${c.expected_points_adjusted.toFixed(1)} pts">
+                            ${c.points_delta > 0 ? '+' : ''}${c.points_delta.toFixed(1)}
+                        </span>
+                    ` : ''}
+                </span>
             </div>
         </div>
 
