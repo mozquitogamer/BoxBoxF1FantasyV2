@@ -206,6 +206,48 @@ def load_dotd_overrides(round_num: int) -> dict:
     return out
 
 
+def load_pace_overrides(round_num: int) -> dict:
+    """Return manual per-round position overrides for specific drivers.
+
+    Reads data/seed/pace_overrides.json — a judgment-call mechanism for weekends
+    where same-session evidence (FP race pace, sprint qualifying) clearly
+    contradicts the model's predicted position for a driver, and the deadline
+    leaves no time to retrain/gate a general fix. Keyed
+    {round -> {session -> {driver_abbrev: target_rank}}} where session is
+    'quali' | 'race' | 'sprint'. Returns the round's session dict or {}.
+
+    Consumed ONLY by 06_run_predictions.py, which places the named drivers at
+    their target ranks and re-ranks the field (reassigning raw scores so the
+    imposed order also flows to 08's MC re-rank). Because it runs in 06 before
+    scoring, every downstream artifact (07 fantasy, 08 MC, constructor totals,
+    export) inherits it consistently. Delete a round's entry to revert to pure
+    model output. This is an override, NOT a model change — no backtest claim.
+    """
+    import json
+    path = SEED_DIR / "pace_overrides.json"
+    if not path.exists():
+        return {}
+    try:
+        with open(path) as f:
+            data = json.load(f)
+    except Exception:
+        return {}
+    raw = data.get(str(round_num), {}) or {}
+    out = {}
+    for session, targets in raw.items():
+        if session not in ("quali", "race", "sprint") or not isinstance(targets, dict):
+            continue
+        clean = {}
+        for abbrev, rank in targets.items():
+            try:
+                clean[str(abbrev)] = int(rank)
+            except (TypeError, ValueError):
+                continue
+        if clean:
+            out[session] = clean
+    return out
+
+
 def load_official_pitstop_points() -> dict:
     """Return manually-recorded official F1 Fantasy pit-stop points per round.
 

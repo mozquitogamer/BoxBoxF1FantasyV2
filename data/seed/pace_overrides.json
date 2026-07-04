@@ -1,0 +1,10 @@
+{
+  "_comment": "Manual per-round position overrides. Keyed round -> session (quali|race|sprint) -> {driver_abbrev: target_rank}. A this-round judgment call for when same-weekend evidence contradicts the model and there's no time to gate a general fix. Consumed by 06_run_predictions.py; flows through 07/08/MC/export. Delete a round entry to revert to pure model. NOT a model change.",
+  "11": {
+    "_note": "R11 Silverstone sprint: McLaren clearly weak this weekend — NOR clean FP1 race pace only P8, PIA did zero clean race stints (no read), both sprint-qualified P6/P7. Model over-rated PIA to race P3 on one-lap pace + a McLaren-races-well prior. Move both McLarens back to their demonstrated level; VER/Ferrari/Mercedes fill in naturally (VER->P4).",
+    "race": {
+      "NOR": 6,
+      "PIA": 7
+    }
+  }
+}

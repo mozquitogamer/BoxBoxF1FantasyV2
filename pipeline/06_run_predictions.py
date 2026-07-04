@@ -46,6 +46,7 @@ from config.settings import (
     WEB_DATA_DIR,
     fastf1_round,
     is_race_completed,
+    load_pace_overrides,
 )
 from pipeline.feature_engineering import engineer_features
 from config.track_classifications import (
@@ -606,6 +607,60 @@ def _recompute_sim_features(df: pd.DataFrame, target_circuit: str) -> pd.DataFra
                 ) / sum(ws)
 
     return df
+
+
+def _apply_pace_overrides(pred_df: pd.DataFrame, round_num: int) -> pd.DataFrame:
+    """Impose manual per-round position overrides (data/seed/pace_overrides.json).
+
+    For each session with overrides, place the named drivers at their target ranks
+    and re-rank the field. Raw scores are REASSIGNED by the imposed order (the
+    sorted raw-score vector is mapped onto the new order) so that:
+      (a) the raw-score DISTRIBUTION / cluster gaps are preserved -> the MC noise
+          scale is unchanged, and
+      (b) predicted_<session>_raw matches the imposed order, so 08's MC (which
+          re-ranks from raw) prices each moved driver at their new grid slot.
+
+    A documented, this-round-only judgment call for weekends where same-session
+    evidence clearly contradicts the model. No seed entry -> pure model output.
+    Requires pred_df['driver_abbrev'] to be populated (called after that mapping).
+    """
+    cfg = load_pace_overrides(round_num)
+    if not cfg:
+        return pred_df
+    for session, targets in cfg.items():
+        raw_col = f"predicted_{session}_raw"
+        pos_col = f"predicted_{session}_position"
+        if raw_col not in pred_df.columns or not pred_df[raw_col].notna().any():
+            continue
+        order_df = pred_df[["driver_abbrev", raw_col]].dropna(subset=[raw_col])
+        n = len(order_df)
+        present = set(order_df["driver_abbrev"])
+        override = {d: r for d, r in targets.items() if d in present}
+        if not override:
+            continue
+        others = [d for d in order_df.sort_values(raw_col, ascending=False)["driver_abbrev"]
+                  if d not in override]
+        new_order = [None] * n
+        for d, rk in sorted(override.items(), key=lambda kv: kv[1]):
+            slot = max(1, min(n, rk)) - 1
+            while slot < n and new_order[slot] is not None:
+                slot += 1
+            if slot >= n:  # target beyond the field tail — back-fill from the end
+                slot = n - 1
+                while slot >= 0 and new_order[slot] is not None:
+                    slot -= 1
+            new_order[slot] = d
+        it = iter(others)
+        for i in range(n):
+            if new_order[i] is None:
+                new_order[i] = next(it)
+        sorted_raws = sorted(order_df[raw_col].values, reverse=True)
+        new_raw = {new_order[i]: sorted_raws[i] for i in range(n)}
+        pred_df[raw_col] = pred_df["driver_abbrev"].map(new_raw).fillna(pred_df[raw_col])
+        pred_df[pos_col] = pred_df[raw_col].rank(ascending=False, method="first").astype(int)
+        moved = ", ".join(f"{d}->P{rk}" for d, rk in sorted(override.items(), key=lambda kv: kv[1]))
+        print(f"  Pace override [{session}]: {moved}")
+    return pred_df
 
 
 def _load_actual_sprint_grid(pred_df: pd.DataFrame, round_num: int, year: int) -> bool:
@@ -1193,6 +1248,10 @@ def run_predictions(
     # Map driver_id back to abbreviation for readability
     _, jolpica_to_abbrev = load_driver_id_maps()
     pred_df["driver_abbrev"] = pred_df["driver_id"].map(jolpica_to_abbrev)
+
+    # Manual per-round position overrides (data/seed/pace_overrides.json) — applied
+    # LAST so the imposed order flows to every downstream artifact (07/08/MC/export).
+    pred_df = _apply_pace_overrides(pred_df, round_num)
 
     output_cols = [
         "driver_id", "driver_abbrev", "constructor_id",
