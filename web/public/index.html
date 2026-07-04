@@ -317,6 +317,14 @@
                             </select>
                         </div>
                         <div class="control-group">
+                            <label title="Which points number to rank on. Balanced (recommended) = average of Projected and Risk-adjusted. Projected = predicted finishing order (keeps predicted winners on top). Risk-adjusted = raw simulation mean (favours high-variance picks).">Points basis</label>
+                            <select id="pointsBasisOpt">
+                                <option value="projected">Projected</option>
+                                <option value="balanced" selected>Balanced</option>
+                                <option value="risk_adjusted">Risk-adjusted</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
                             <label title="Active chip for this gameweek">Chip</label>
                             <select id="chipSelect">
                                 <option value="none">No Chip</option>
@@ -374,6 +382,14 @@
                                     <option value="max_value">Max Value (Points/$M)</option>
                                     <option value="budget_gain">Budget Builder</option>
                                     <option value="balanced">Balanced</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label title="Which points number to rank on. Balanced (recommended) = average of Projected and Risk-adjusted. Projected = predicted finishing order (keeps predicted winners on top). Risk-adjusted = raw simulation mean (favours high-variance picks).">Points basis</label>
+                                <select id="pointsBasisTransfer">
+                                    <option value="projected">Projected</option>
+                                    <option value="balanced" selected>Balanced</option>
+                                    <option value="risk_adjusted">Risk-adjusted</option>
                                 </select>
                             </div>
                             <div class="control-group">
@@ -436,6 +452,14 @@
                                     <option value="max_points">Max Expected Points</option>
                                     <option value="balanced">Balanced</option>
                                     <option value="budget_gain">Budget Builder</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label title="Which points number to rank on. Balanced (recommended) = average of Projected and Risk-adjusted. Projected = predicted finishing order. Risk-adjusted = raw simulation mean. Applies to the current round; future rounds use ML horizon projections where available.">Points basis</label>
+                                <select id="pointsBasisMW">
+                                    <option value="projected">Projected</option>
+                                    <option value="balanced" selected>Balanced</option>
+                                    <option value="risk_adjusted">Risk-adjusted</option>
                                 </select>
                             </div>
                             <button class="btn-primary" id="runMultiWeekPlanner">Plan My Transfers</button>
@@ -822,6 +846,6 @@
             integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
             crossorigin="anonymous" async></script>
     <script src="scenarios.js?v=3"></script>
-    <script src="app.js?v=93"></script>
+    <script src="app.js?v=94"></script>
 </body>
 </html>

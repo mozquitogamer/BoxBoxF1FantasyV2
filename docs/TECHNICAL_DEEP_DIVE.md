@@ -505,6 +505,11 @@ Both are applied inside `06_run_predictions.py` and **overwrite the raw model sc
 
 > **Calibration honesty:** the *normal-track* values are backtested on 2026 data. The *hard-track* magnitudes (FP weight 0.80, grid-anchor 0.85) are domain-knowledge choices — there's no completed Monaco-tier round in 2026 yet to calibrate against. They're isolated one-line tunables; recalibrate after the first hard-track race via the Accuracy tab.
 
+**3. Manual per-round position overrides (`pace_overrides.json`).** A last-resort knob for weekends where same-session evidence clearly contradicts the model and there's no time to retrain or gate a general fix. `data/seed/pace_overrides.json` (keyed round → session → `{driver_abbrev: target_rank}`) is applied by `_apply_pace_overrides()` **last** — after both blends above, right before the parquet is written. It places the named drivers at their target ranks and re-ranks the field, then **reassigns the sorted raw-score vector onto the imposed order**: the raw-score *distribution* (cluster gaps → MC noise scale) is preserved, and `predicted_<session>_raw` is rewritten to match the new order so the Monte Carlo (which re-ranks from raw) prices each moved driver at their new grid slot. Non-overridden drivers keep their relative order and shuffle to fill vacated slots.
+
+- **R11 Silverstone (the shipped example):** McLaren was demonstrably weak that weekend (Norris's clean FP1 race pace only P8, Piastri zero clean race stints, both SQ'd P6/P7), but the model rated Piastri to race **P3** on one-lap pace + a "McLaren races well" prior. `race {NOR:6, PIA:7}` moved both McLarens to their demonstrated level (final order ANT-RUS-HAM-VER-LEC-NOR-PIA); Piastri **34.0 → 18.2** projected, Verstappen settled P4.
+- **This is an override, NOT a model change.** It carries no backtest claim — the general lesson (FP race pace is a weak finish predictor, MAE 6.4 vs 4.3) still holds, so the knob only overrides the specific drivers where the same-weekend evidence is unambiguous. No round entry → pure model output; auto-reverts next round. Full seed-file reference in `OPERATIONS_GUIDE.md`.
+
 ### Sprint inference
 
 When `is_sprint_weekend == True`:
@@ -710,6 +715,19 @@ Per constructor: P5/P25/P50/P75/P95 with per-iteration DOTD subtraction and pit-
 
 On the website: "MC 90% CI: -10 — 53 pts" means "in 90% of our 10K simulations, this driver scored between -10 and 53 fantasy points." Wide CI = high variance, narrow CI = predictable.
 
+### Projected vs Risk-adjusted (why the two headline numbers differ)
+
+`08_export_website_json.py` **overwrites** each entry's `expected_points` with the Monte Carlo mean, but first preserves the deterministic single-outcome total as `projected_points`. Every driver/constructor card shows **both** ("X proj · Y risk-adj"); the driver list defaults to sorting on `projected_points`, and the optimizer / PPM / value scores use the MC-mean `expected_points`.
+
+They diverge because of the same convexity the "Why Monte Carlo?" example opened with — and it has a **consistent direction** set by the shape of the position→points curve (steep at the front: `P1=25, P5=10, P10=1`; then **floored at 0 from P11 down**):
+
+- **Front-runners get compressed (risk-adj < projected).** A predicted winner sits at the P1 ceiling — noise can only shuffle him *down* the steep part, with no upside above P1. His MC mean falls well below his projected. *(R11: Antonelli 48.8 proj → 31.2 risk-adj.)*
+- **Midfield/back drivers get lifted (risk-adj > projected).** Their downside is floored (P11–P22 all score ~0, so a bad race can't cost them much) while the upside toward the points-paying front is real and steep. Their MC mean rises above projected.
+
+**Worked example — Lindblad, R11 (projected 10.4 → risk-adj 14.1, +3.7):** the tell is that his *mean simulated finish is P12.3* — **worse** than his P10 headline — yet his average points are **higher**. Points at his mean position (P12) = 0; the *average of points across his ±5-position spread* = +2.4 on race position points alone, because ~9% of sims he cracks the top 5 (P95 outcome +40) while the >50% of sims he finishes P11+ all floor at 0. Higher sampled overtakes in the chaos add the rest. It's a low-floor / high-ceiling lottery ticket, correctly priced by expected value.
+
+Because the MC re-ranks a fixed grid, **points are conserved**: every point the chaos strips off the compressed leaders lands on the lifted midfielders — the two effects are mirror images, amplified by the sprint chaos widener (`compute_chaos_noise_mult`, ×2.18 at R11). A direct per-position bias-correction to remove the gap was built and **failed the gate** (worse MAE + coverage — the gap is a genuine right-skew, not a fixable offset), so **showing both numbers is the honest resolution** rather than "correcting" one into the other. See §18 Known Limitations.
+
 ---
 
 ## 11. Overtake Estimation
@@ -843,6 +861,20 @@ The current implementation uses iterative branch-and-bound with budget pruning (
 | Balanced | total_points × 0.6 + (points/cost) × 50 | Mix |
 
 `lineupScore` is chip-aware — when a chip like 3x Boost is selected, the boosted points are passed in (best driver × 3 + second-best × 2) so the strategy ranks lineups according to the realistic post-chip score.
+
+### Points basis (shared across all three team tools)
+
+The "expected_points" that every strategy above sums is not read raw — it flows through `basisPoints(item)`, which returns one of three values based on the tool's **Points basis** dropdown:
+
+| Basis | Returns | Notes |
+|-------|---------|-------|
+| `projected` | `projected_points` | Deterministic finishing-order total; no MC compression |
+| `balanced` *(default)* | `(projected_points + expected_points) / 2` | Best expected-value proxy |
+| `risk_adjusted` | `expected_points` | Raw MC mean (legacy behavior) |
+
+**Why:** the MC mean (`expected_points`) compresses predicted winners (a predicted P1 can only shuffle down — see §10 *Projected vs Risk-adjusted*) and inflates cheap high-variance midfielders, which distorts *selection* — e.g. it will rank Verstappen above a predicted-winner Antonelli and suggest selling the winner. Ranking on `basisPoints` (Balanced/Projected) fixes this while leaving card **display** untouched (cards always show both numbers).
+
+`basisPoints` + `basisValue` (the per-$M analogue) live near `TA_TUNABLES` at the top of `app.js`. Each entry point — `runOptimizerSync`, `runTransferAdvisor`, `runMultiWeekPlanner` — sets the module-level `optimizeBasis` from its own dropdown (`pointsBasisOpt` / `pointsBasisTransfer` / `pointsBasisMW`, default `balanced`) at the start of a run, so the whole scoring pass (per-pick `score()`, lineup totals, boost-target pick, and the planner's current-round form seed) uses the chosen basis. `predictPriceChange` deliberately keeps reading the raw `expected_points` (price moves track the market's real-EV expectation, not the selection basis).
 
 ### Lock & Exclude
 
@@ -1046,6 +1078,10 @@ Sprint weekends only have FP1 (60 minutes vs 180). Lower-confidence predictions 
 ### Model weights vs corrected features
 
 The `_recompute_circuit_features` fix corrects feature inputs but doesn't change the model's learned weights. If the trained model heavily weights rolling-3 form vs circuit history, that ratio stays — we're just feeding correct circuit values now. Shifting the ratio requires retraining.
+
+### MC mean compression (projected vs risk-adjusted)
+
+Because the points curve is convex and floored at 0 past P10, the Monte Carlo **mean** systematically compresses predicted front-runners (a predicted winner can only shuffle down) and lifts predicted midfielders (floored downside, real upside). The re-forecast gate measures the front-runner side as a ~−3.6 pt under-prediction bias. A direct per-predicted-position bias correction (leave-one-round-out, current model) was built and **failed the gate** — it removed the bias but made MAE *and* P1–P3 coverage worse, because the gap is a genuine right-skew, not a fixable offset. The accepted resolution is to surface **both** `projected_points` (deterministic) and the MC-mean `expected_points` on every card (see §10), not to correct one into the other. Amplified on chaotic/sprint rounds by the position-noise widener.
 
 ---
 

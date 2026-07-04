@@ -31,7 +31,9 @@ Your starting point. Predicted fantasy points for every driver this round.
 
 ### Driver Cards
 
-- **Predicted points** — the ML model's best estimate for total fantasy points this round
+- **Predicted points** — shown as two numbers, "X proj · Y risk-adj":
+  - **Projected** — the score if the predicted finishing order holds (the single most-likely outcome). The driver list sorts on this by default.
+  - **Risk-adjusted** — the *average* score across 10,000 simulated races, so it accounts for DNFs, chaos, and upside/downside. This is the number the optimizer and value scores use.
 - **MC 90% CI** — the range covering 90% of simulated outcomes (e.g., "8 — 53 pts" means 5% chance below 8, 5% above 53)
 - **Predicted positions** — qualifying and race finish predictions; sprint positions on sprint weekends
 - **Scoring breakdown** — qualifying, race, overtakes, fastest lap, DOTD, DNF risk, and sprint (if sprint weekend)
@@ -45,7 +47,11 @@ The F1 Fantasy deadline is **before qualifying**, so the only live data we have 
 
 - **Practice pace drives the qualifying call.** We blend the model toward each driver's actual practice pace — and we use a *consistency* measure (their best lap **plus** their best-3-lap and best-5-lap averages), not just one hot lap, so a single tow-assisted banker doesn't fool it. On testing this predicts qualifying better than the model alone.
 - **Hard-to-overtake tracks behave like the real thing.** At circuits like Monaco where passing is nearly impossible, the predicted finish stays close to the grid (you can't gain places you can't physically take). At easy-overtaking tracks (Monza, Spa) pace fully decides the order.
-- **One quirk that's working as intended:** sometimes the predicted P2 driver shows *more* points than the predicted winner. That's the winner carrying a higher DNF (retirement) risk, which lowers their *expected* score — or the runner-up being a strong Driver-of-the-Day favourite. The points are being honest about risk and bonuses, not just position.
+- **Why "projected" and "risk-adjusted" can disagree (working as intended):** the two numbers pull apart in a consistent way because fantasy points are worth a lot at the front (P1=25, P5=10) but almost nothing past P10 (P11 and back score ~0).
+  - **A predicted winner usually shows a *lower* risk-adjusted number.** They're already at the top — any surprise can only move them *down* — and they carry the race's DNF risk. So it's normal for the predicted P2 to show more risk-adjusted points than the predicted winner (the runner-up may also be a Driver-of-the-Day favourite).
+  - **A midfield driver sometimes shows a *higher* risk-adjusted number than projected.** Someone predicted ~P10 has almost no downside (finishing P11–P22 all scores near zero) but real upside if chaos vaults them into the points — so their *average* across the simulations lands above their headline finish. It flags them as a low-floor / high-ceiling pick, most likely on chaotic or wet sprint weekends.
+
+  Neither is a glitch — the projected number is the tidy "if it goes to plan" score, and the risk-adjusted number is the honest average once retirements, bonuses and chaos are priced in. Showing both lets you see the safe pick vs the lottery ticket at a glance.
 
 ### Tips
 
@@ -99,6 +105,16 @@ Same layout as Drivers, for the 11 constructors.
 ## Optimizer Tab
 
 Three tools, switchable from the mode buttons at the top.
+
+### Points basis (all three tools)
+
+Each tool has a **Points basis** selector that controls *which* points number it ranks picks on. This matters because of the projected-vs-risk-adjusted split explained on the [Drivers tab](#driver-cards):
+
+- **Balanced** *(default, recommended)* — the average of projected and risk-adjusted. Keeps predicted winners at the top while still pricing in DNF/variance. Best all-round choice.
+- **Projected** — ranks purely on the predicted finishing order (the "big number" on the cards). Simplest and most intuitive.
+- **Risk-adjusted** — ranks on the raw 10,000-sim average.
+
+Why it's there: the risk-adjusted average *compresses* predicted winners (a predicted P1 can only finish lower) and *inflates* cheap high-variance midfielders. Ranking purely on it can produce odd advice like "sell your predicted race winner for a lower-projected driver." **Balanced** and **Projected** avoid that. Only the *ranking* changes — the cards always show both numbers. If a recommendation ever looks like it's downgrading your points, check this selector.
 
 ### 1. Lineup Optimizer
 

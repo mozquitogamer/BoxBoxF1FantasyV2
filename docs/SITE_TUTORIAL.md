@@ -392,7 +392,7 @@ This section is gold for retention — it pre-empts the exact things that make n
 **Where the numbers come from:** real F1 data → ML predicts quali & race → **10,000 race simulations** → official 2026 scoring. Every card is the *average* of 10,000 simulated races, plus the range.
 
 **Reading a driver card:**
-- Big number = predicted points (already includes everything).
+- Two numbers, "X proj · Y risk-adj": **projected** = the score if the predicted order holds (the "if it goes to plan" number, and the default sort); **risk-adjusted** = the average across the 10,000 sims (what the optimizer uses). A safe front-runner's risk-adj sits *below* projected; a low-floor/high-ceiling midfielder's can sit *above* it — that's the sims pricing in retirements and chaos, not a bug.
 - The range (90% CI) = where they land in 90% of simulations. **Wide = gamble, narrow = safe. Wide is honest, not broken.**
 - Confidence: ~65% = history only (early), ~90% = practice data in, ~95% = post-qualifying.
 

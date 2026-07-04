@@ -541,6 +541,24 @@ Manual per-round DOTD **probability** overrides for fan-vote favourites the posi
 
 Applied by **both** `07_calculate_fantasy.py` (sets the displayed DOTD %) and `08_monte_carlo_fantasy.py` (forces it in the sim — which is what actually moves the displayed points, since the export uses the MC mean). Constructor scoring still excludes DOTD. **Remove a round's entry to revert** that round to the automatic heuristic. This is a deliberate judgment-call knob — an override that doesn't pan out shows as a miss on the Accuracy tab.
 
+### `data/seed/pace_overrides.json` (optional — this-round position corrections)
+
+Manual per-round override of a driver's **predicted position** for a specific session, for weekends where same-session evidence (FP race pace, Sprint Qualifying) clearly contradicts the model and there's no time to retrain or gate a general fix. Keyed by internal round → session (`quali` | `race` | `sprint`) → `{driver_abbrev: target_rank}`:
+
+```json
+{
+  "11": {
+    "race": { "NOR": 6, "PIA": 7 }
+  }
+}
+```
+
+**How it works:** `06_run_predictions.py::_apply_pace_overrides` (loaded via `settings.load_pace_overrides`) runs **last**, after the model + all blends, right before the parquet is written. It places the named drivers at their target ranks and re-ranks the field. Crucially it **reassigns the sorted raw-score vector onto the new order** — so the raw-score *distribution* (cluster gaps, MC noise scale) is preserved *and* `predicted_<session>_raw` matches the imposed order. Because it runs inside `06` before scoring, **every downstream artifact inherits it consistently**: `07` fantasy points, the `08` Monte Carlo (which re-ranks from raw), constructor totals, and the export. Non-overridden drivers keep their relative order and simply shuffle up/down to fill the vacated slots.
+
+**Worked example (R11 Silverstone, the one shipped):** McLaren was clearly weak that weekend — Norris's clean FP1 race pace was only P8, Piastri did zero clean race stints (no read at all), and both sprint-qualified P6/P7 — but the model rated Piastri to race **P3** on one-lap pace plus a "McLaren races well" prior, above two Ferraris with demonstrably stronger race pace. The override `race {NOR:6, PIA:7}` moved both McLarens back to their demonstrated level; Verstappen / Ferrari / Mercedes filled in naturally (final order ANT-RUS-HAM-VER-LEC-NOR-PIA). Effect: Piastri **34.0 → 18.2** projected, Verstappen settled at P4, McLaren constructor dropped accordingly.
+
+**Remove a round's entry to revert** — with no entry the round is pure model output, so it auto-reverts on the next round. **Important framing:** this is a documented *this-round judgment call, not a model change*. Our own backtest says FP race pace is a *weak* finish predictor (MAE 6.4 vs the model's 4.3 — finishes are dominated by DNFs/strategy/lap-1 chaos), so the lever is **not** adopted as default behavior; use it only to override the specific drivers where the same-weekend evidence unambiguously contradicts the model. Like the DOTD override, a call that doesn't pan out shows as a miss on the Accuracy tab.
+
 ### `data/seed/races.json`
 
 The 2026 calendar with cancelled flags. Edit only if F1 cancels another race or adds a sprint round mid-season.
@@ -1139,6 +1157,8 @@ Default 10,000 sims runs in 30-60s on modern hardware. Reduce to `--simulations 
 
 ### Predictions look wildly wrong for one driver
 Run the diagnostic logic from the historical context: check the predictions parquet for raw scores, then check the corresponding row in `all_model_rows.parquet` for feature values. The `_recompute_circuit_features` function in `06_run_predictions.py` should now correctly populate `driver_circuit_exp` for the target circuit. If a driver's prediction looks wrong despite that, suspect: rolling form is genuinely against them, or there's a data gap (DNF in a recent race that wasn't classified properly).
+
+If the model is genuinely misreading *this weekend's* form (e.g. a team clearly slow in FP/Sprint Qualifying that the model still rates highly) and there's no time to gate a proper fix before the deadline, use the **`data/seed/pace_overrides.json`** knob to place the affected driver(s) at a target position for the round — it flows through scoring, the Monte Carlo, and constructors, and auto-reverts next round. See the seed-file reference under [§10 Manual Data](#10-manual-data-you-must-maintain). Keep it to cases where the same-weekend evidence is unambiguous — FP race pace is a *weak* default predictor, so this is a judgment-call override, not a routine step.
 
 ### OpenF1 API timeouts
 OpenF1 sometimes lags. Re-run `13_fetch_openf1_overtakes.py --year 2026 --round N` later, or rely on FastF1-method counts from `12_count_overtakes.py`.

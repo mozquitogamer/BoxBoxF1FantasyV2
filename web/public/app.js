@@ -141,6 +141,30 @@ const TA_TUNABLES = {
     transferPenalty: 10,   // F1 Fantasy: -10 pts per transfer beyond free count
 };
 
+// -- Optimization points basis --
+// The optimizer / transfer advisor / multi-week planner RANK picks on a chosen
+// "points basis" rather than always using the raw MC mean (expected_points). The
+// MC mean compresses predicted winners (a predicted P1 can only shuffle down) and
+// inflates cheap high-variance midfielders (Jensen effect on a floored points
+// curve), which distorts SELECTION — e.g. it will suggest selling a predicted
+// winner for a lower-projected driver. Each tool sets this from its "Points basis"
+// dropdown at the start of a run; display is unaffected (cards still show both).
+//   'projected'     -> deterministic finishing-order total (projected_points; no MC compression)
+//   'balanced'      -> mean of projected + risk-adjusted (DEFAULT; best expected-value proxy)
+//   'risk_adjusted' -> raw MC mean (expected_points; legacy behavior)
+let optimizeBasis = 'balanced';
+function basisPoints(item) {
+    const risk = (typeof item.expected_points === 'number') ? item.expected_points : 0;
+    const proj = (typeof item.projected_points === 'number') ? item.projected_points : risk;
+    if (optimizeBasis === 'projected') return proj;
+    if (optimizeBasis === 'risk_adjusted') return risk;
+    return (proj + risk) / 2; // balanced
+}
+function basisValue(item) {
+    const price = item.current_price || item.price || 0;
+    return price > 0 ? basisPoints(item) / price : 0;
+}
+
 // -- Deferred loading state --
 const _deferredLoaded = {};
 
@@ -2938,6 +2962,7 @@ function runOptimizer() {
 }
 
 function runOptimizerSync(budget, strategy, chip) {
+    optimizeBasis = document.getElementById('pointsBasisOpt')?.value || 'balanced';
     const numDriverSlots = 5;
     const effectiveBudget = chip === 'limitless' ? 999 : budget;
     // Cap the free-driver pool to top-N by strategy-aware score. C(15,5)=3,003
@@ -2949,13 +2974,13 @@ function runOptimizerSync(budget, strategy, chip) {
     // Per-pick score — used only for initial sort order, not for ranking.
     // Lineup-level ranking goes through lineupScore(...) which is chip-aware.
     function score(item) {
-        if (strategy === 'max_points') return item.expected_points;
-        if (strategy === 'max_value') return item.value_score;
+        if (strategy === 'max_points') return basisPoints(item);
+        if (strategy === 'max_value') return basisValue(item);
         if (strategy === 'budget_gain') {
             const pc = predictPriceChange(item, item.expected_points);
-            return pc.expectedChange * 100 + item.value_score * 5;
+            return pc.expectedChange * 100 + basisValue(item) * 5;
         }
-        return item.expected_points * 0.6 + item.value_score * 10 * 0.4;
+        return basisPoints(item) * 0.6 + basisValue(item) * 10 * 0.4;
     }
 
     // Scenario-aware view: when What-If bumps are active, score against the
@@ -3024,7 +3049,7 @@ function runOptimizerSync(budget, strategy, chip) {
             // Find boost targets by chip-adjusted points (apply no_negative floor first
             // so a negative driver isn't picked as the "best" boost candidate).
             const adjPts = d => {
-                let p = d.expected_points;
+                let p = basisPoints(d);
                 if (chip === 'no_negative' && p < 0) p = 0;
                 return p;
             };
@@ -3036,7 +3061,7 @@ function runOptimizerSync(budget, strategy, chip) {
             for (const d of allDrivers) driverPoints += adjPts(d);
             let constructorPoints = 0;
             for (const c of cp.items) {
-                let pts = c.expected_points;
+                let pts = basisPoints(c);
                 if (chip === 'no_negative' && pts < 0) pts = 0;
                 constructorPoints += pts;
             }
@@ -3688,6 +3713,7 @@ function runTransferAdvisor() {
     const freeTransfers = parseInt(document.getElementById('freeTransfers').value) || 0;
     const strategy = document.getElementById('transferStrategy').value;
     const chip = document.getElementById('transferChip').value;
+    optimizeBasis = document.getElementById('pointsBasisTransfer')?.value || 'balanced';
 
     // Validate team
     const currentDriverIds = myTeamDrivers.filter(Boolean);
@@ -3707,13 +3733,13 @@ function runTransferAdvisor() {
 
     // Score function
     function score(item) {
-        if (strategy === 'max_points') return item.expected_points;
-        if (strategy === 'max_value') return item.value_score;
+        if (strategy === 'max_points') return basisPoints(item);
+        if (strategy === 'max_value') return basisValue(item);
         if (strategy === 'budget_gain') {
             const pc = predictPriceChange(item, item.expected_points);
-            return pc.expectedChange * 100 + item.value_score * 5;
+            return pc.expectedChange * 100 + basisValue(item) * 5;
         }
-        return item.expected_points * 0.6 + item.value_score * 10 * 0.4;
+        return basisPoints(item) * 0.6 + basisValue(item) * 10 * 0.4;
     }
 
     // Apply chip modifiers to scoring
@@ -3722,7 +3748,7 @@ function runTransferAdvisor() {
     function chipAdjustedPoints(picks, boostedId, secondBoostedId) {
         let total = 0;
         for (const p of picks) {
-            let pts = p.expected_points;
+            let pts = basisPoints(p);
             if (chip === 'no_negative' && pts < 0) pts = 0;
             if (p.driver_id === boostedId) {
                 pts *= (chip === '3x_boost' ? 3 : 2);
@@ -3871,8 +3897,8 @@ function runTransferAdvisor() {
         }
         if (!isWildcard && transfersNeeded > maxTransfers) return;
 
-        // Find best boost drivers (sorted by expected points)
-        const sortedCombo = [...allDriversInLineup].sort((a, b) => b.expected_points - a.expected_points);
+        // Find best boost drivers (sorted by the active points basis)
+        const sortedCombo = [...allDriversInLineup].sort((a, b) => basisPoints(b) - basisPoints(a));
         const boostedDriver = sortedCombo[0];
         const secondBoostedDriver = (chip === '3x_boost' && sortedCombo.length > 1) ? sortedCombo[1] : null;
 
@@ -4403,7 +4429,7 @@ function projectScoresForRound(roundInfo, racesData) {
     // already filled by the P9 ML projection (driverScores[id] === null).
     for (const d of data.drivers) {
         if (driverScores[d.driver_id] != null) continue; // ML projection used
-        const basePts = d.expected_points || 0;
+        const basePts = basisPoints(d) || 0;
         const hist = (driverHistory && driverHistory.drivers[d.driver_id])
             ? driverHistory.drivers[d.driver_id].rounds
             : null;
@@ -4415,7 +4441,7 @@ function projectScoresForRound(roundInfo, racesData) {
     // Project constructor scores — same heuristic fallback rule.
     for (const c of data.constructors) {
         if (constructorScores[c.constructor_id] != null) continue;
-        const basePts = c.expected_points || 0;
+        const basePts = basisPoints(c) || 0;
         const hist = (driverHistory && driverHistory.constructors[c.constructor_id])
             ? driverHistory.constructors[c.constructor_id].rounds
             : null;
@@ -4692,6 +4718,7 @@ async function runMultiWeekPlanner() {
     const freeTransfers = parseInt(document.getElementById('mwFreeTransfers').value) || 2;
     const horizon = parseInt(document.getElementById('mwHorizon').value) || 3;
     const strategy = document.getElementById('mwStrategy').value;
+    optimizeBasis = document.getElementById('pointsBasisMW')?.value || 'balanced';
 
     // Get available chips
     const availableChips = [];
