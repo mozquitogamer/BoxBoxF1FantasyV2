@@ -1,14 +1,7 @@
 {
-  "updated": "2026-07-03T12:20:29Z",
+  "updated": "2026-07-04T11:47:21Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
-    {
-      "id": "0IBbi-pmmZY",
-      "title": "The Best F1 Fantasy Team for the British Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
-      "published": "2026-06-30",
-      "thumbnail": "https://i.ytimg.com/vi/0IBbi-pmmZY/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=0IBbi-pmmZY"
-    },
     {
       "id": "4dDsgiAV71s",
       "title": "F1 Fantasy Deadline Stream - British Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
@@ -17,18 +10,25 @@
       "url": "https://www.youtube.com/watch?v=4dDsgiAV71s"
     },
     {
+      "id": "9WM_WJsmtog",
+      "title": "Final Thoughts Post FP1 and SQ - British Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-07-03",
+      "thumbnail": "https://i.ytimg.com/vi/9WM_WJsmtog/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=9WM_WJsmtog"
+    },
+    {
+      "id": "0IBbi-pmmZY",
+      "title": "The Best F1 Fantasy Team for the British Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-06-30",
+      "thumbnail": "https://i.ytimg.com/vi/0IBbi-pmmZY/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=0IBbi-pmmZY"
+    },
+    {
       "id": "fMXQQrLUt2g",
       "title": "F1 Fantasy Deadline Stream - Austrian Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
       "published": "2026-06-28",
       "thumbnail": "https://i.ytimg.com/vi/fMXQQrLUt2g/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=fMXQQrLUt2g"
-    },
-    {
-      "id": "EL7GTUId6mc",
-      "title": "F1 Fantasy Final THOUGHTS - Austrian Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
-      "published": "2026-06-27",
-      "thumbnail": "https://i.ytimg.com/vi/EL7GTUId6mc/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=EL7GTUId6mc"
     }
   ]
 }
