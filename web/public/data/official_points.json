@@ -322,6 +322,46 @@
         "cadillac": -35,
         "aston_martin": -11
       }
+    },
+    "11": {
+      "race": "British Grand Prix",
+      "drivers": {
+        "VER": -3,
+        "RUS": 44,
+        "NOR": 38,
+        "PIA": 19,
+        "ANT": 23,
+        "LEC": 54,
+        "HAM": 33,
+        "HAD": 23,
+        "GAS": 23,
+        "SAI": 8,
+        "ALB": -13,
+        "ALO": 8,
+        "BEA": 13,
+        "OCO": 19,
+        "LIN": 18,
+        "COL": 27,
+        "LAW": 22,
+        "STR": 7,
+        "BOR": 16,
+        "PER": 7,
+        "HUL": -7,
+        "BOT": 5
+      },
+      "constructors": {
+        "mercedes": 92,
+        "mclaren": 72,
+        "red_bull": 32,
+        "ferrari": 92,
+        "alpine": 53,
+        "williams": 0,
+        "aston_martin": 16,
+        "haas": 33,
+        "racing_bulls": 55,
+        "audi": 17,
+        "cadillac": 13
+      }
     }
   }
 }

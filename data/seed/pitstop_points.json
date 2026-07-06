@@ -106,6 +106,19 @@
       "audi": 2,
       "cadillac": 0,
       "aston_martin": 0
+    },
+      "11": {
+      "mercedes": 15,
+      "ferrari": 5,
+      "mclaren": 5,
+      "red_bull": 2,
+      "alpine": 2,
+      "racing_bulls": 5,
+      "haas": 0,
+      "williams": 2,
+      "audi": 5,
+      "cadillac": 2,
+      "aston_martin": 2
     }
   }
 }
