@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-07-06T12:12:59.111326+00:00",
+  "generated_at": "2026-07-06T13:09:46.419730+00:00",
   "rounds": [
     {
       "round": 1,
@@ -88,7 +88,7 @@
       "name": "Belgian Grand Prix",
       "circuit": "Spa-Francorchamps",
       "date": "2026-07-19",
-      "has_predictions": false,
+      "has_predictions": true,
       "has_post_race": false,
       "has_actual": false
     },
