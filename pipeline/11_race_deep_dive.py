@@ -303,7 +303,11 @@ def compute_stint_analysis(clean: pd.DataFrame) -> dict:
         for stint_num, sg in drv_grp.groupby("Stint"):
             sg = sg.sort_values("LapNumber")
             fc = sg["fuel_corrected"].values
-            if len(fc) < 3:
+            # Keep short representative stints. Late safety-car/pit chaos can
+            # leave only two clean laps after filtering; hiding those stints
+            # makes the tyre table look incomplete even though FastF1 has the
+            # compound/stint transition.
+            if len(fc) < 2:
                 continue
 
             compound = str(sg["Compound"].iloc[0]) if "Compound" in sg.columns else "UNKNOWN"
@@ -316,8 +320,9 @@ def compute_stint_analysis(clean: pd.DataFrame) -> dict:
             x = lap_no - lap_no.min()
             slope, intercept, _, _, _ = sp_stats.linregress(x, fc)
 
-            start_pace = round(float(np.mean(fc[:3])), 3)
-            end_pace = round(float(np.mean(fc[-3:])), 3) if len(fc) >= 3 else start_pace
+            window = min(3, len(fc))
+            start_pace = round(float(np.mean(fc[:window])), 3)
+            end_pace = round(float(np.mean(fc[-window:])), 3)
 
             stints.append({
                 "stint": int(stint_num),
@@ -375,7 +380,7 @@ def detect_tyre_cliffs(stint_data: dict, clean: pd.DataFrame) -> dict:
 # ---------------------------------------------------------------------------
 
 def build_lap_data(clean: pd.DataFrame) -> dict:
-    """Return {driver: [{lap, time, fuel_corrected, compound, position}]}."""
+    """Return {driver: [{lap, time, fuel_corrected, compound, stint, position}]}."""
     out: dict[str, list[dict]] = {}
     for drv, grp in clean.groupby("Driver"):
         rows = []
@@ -387,6 +392,8 @@ def build_lap_data(clean: pd.DataFrame) -> dict:
             }
             if "Compound" in row.index and pd.notna(row["Compound"]):
                 entry["compound"] = str(row["Compound"])
+            if "Stint" in row.index and pd.notna(row["Stint"]):
+                entry["stint"] = int(row["Stint"])
             if "Position" in row.index and pd.notna(row["Position"]):
                 entry["position"] = int(row["Position"])
             rows.append(entry)

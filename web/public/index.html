@@ -30,7 +30,7 @@
 
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="stylesheet" href="styles.css?v=9">
+    <link rel="stylesheet" href="styles.css?v=10">
     <link rel="stylesheet" href="scenarios.css?v=3">
     <link rel="stylesheet" href="weather.css?v=2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -287,6 +287,7 @@
                     <button class="mode-btn active" data-mode="fresh">Build Fresh Lineup</button>
                     <button class="mode-btn" data-mode="transfers">Transfer Advisor</button>
                     <button class="mode-btn" data-mode="multiweek">Multi-Week Planner</button>
+                    <button class="mode-btn" data-mode="compare">Team Compare</button>
                 </div>
 
                 <!-- Fresh lineup mode controls -->
@@ -494,6 +495,47 @@
                         </div>
                     </div>
                     <div id="mwResults" class="hidden" style="margin-top:20px;"></div>
+                </div>
+
+                <!-- Team comparison mode controls -->
+                <div class="optimizer-mode hidden" id="mode-compare">
+                    <div class="tool-explainer">
+                        <details>
+                            <summary>How does Team Compare work?</summary>
+                            <p>Enter up to three complete teams and compare expected score, budget, projected price movement, and the 90% confidence floor/ceiling for this race.</p>
+                        </details>
+                    </div>
+                    <div class="my-team-section">
+                        <h3>Team Score Compare</h3>
+                        <p class="hint">Compare up to 3 candidate teams using the current round predictions.</p>
+                        <div class="my-team-controls compare-controls">
+                            <div class="control-group">
+                                <label>Budget ($M)</label>
+                                <input type="number" id="compareBudget" value="100.0" step="0.1" min="0">
+                            </div>
+                            <div class="control-group">
+                                <label title="Which points number to use for expected score. Balanced (recommended) = average of Projected and Risk-adjusted.">Points basis</label>
+                                <select id="pointsBasisCompare">
+                                    <option value="projected">Projected</option>
+                                    <option value="balanced" selected>Balanced</option>
+                                    <option value="risk_adjusted">Risk-adjusted</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label>Chip</label>
+                                <select id="compareChip">
+                                    <option value="none">No Chip</option>
+                                    <option value="limitless">Limitless</option>
+                                    <option value="3x_boost">3x Boost</option>
+                                    <option value="no_negative">No Negative</option>
+                                </select>
+                            </div>
+                            <button class="btn-primary" id="runTeamCompare">Compare Teams</button>
+                            <button class="share-team-btn" id="clearTeamCompare" type="button">Clear</button>
+                        </div>
+                        <div class="team-compare-grid" id="teamCompareGrid"></div>
+                        <div id="teamCompareResult" class="team-compare-result hidden"></div>
+                    </div>
                 </div>
 
                 <div class="optimizer-constraints">
@@ -846,6 +888,6 @@
             integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
             crossorigin="anonymous" async></script>
     <script src="scenarios.js?v=3"></script>
-    <script src="app.js?v=95"></script>
+    <script src="app.js?v=96"></script>
 </body>
 </html>

@@ -869,6 +869,7 @@ select:focus, input:focus {
 /* Optimizer mode toggle */
 .optimizer-mode-toggle {
     display: flex;
+    flex-wrap: wrap;
     gap: 4px;
     margin-bottom: 24px;
     background: var(--bg-secondary);
@@ -1000,6 +1001,140 @@ select:focus, input:focus {
     gap: 16px;
     align-items: end;
     flex-wrap: wrap;
+}
+
+/* Team Compare */
+.compare-controls {
+    margin-bottom: 16px;
+}
+.team-compare-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 14px;
+}
+.team-compare-editor,
+.team-compare-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+}
+.team-compare-editor-header,
+.team-compare-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.team-compare-editor-header h4,
+.team-compare-card-head h4 {
+    margin: 0;
+    font-size: 0.95rem;
+}
+.team-compare-mini-btn {
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-radius: var(--radius-xs);
+    padding: 5px 8px;
+    font: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+.team-compare-mini-btn:hover {
+    color: var(--text);
+    border-color: var(--accent);
+}
+.team-compare-slots {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+.team-compare-slots .my-team-slot {
+    width: auto;
+    min-height: 78px;
+}
+.team-compare-result {
+    margin-top: 18px;
+}
+.team-compare-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+.team-compare-card.over-budget {
+    border-color: var(--red, #ef4444);
+}
+.team-compare-card.incomplete {
+    opacity: 0.75;
+}
+.compare-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+}
+.compare-badge {
+    border-radius: 999px;
+    background: rgba(225, 6, 0, 0.14);
+    color: var(--accent);
+    border: 1px solid rgba(225, 6, 0, 0.35);
+    padding: 2px 6px;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+.team-compare-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.compare-big {
+    font-size: 1.75rem;
+    line-height: 1;
+    font-weight: 800;
+    color: var(--accent);
+}
+.compare-big.muted {
+    color: var(--text);
+}
+.compare-label {
+    margin-top: 4px;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+}
+.team-compare-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+.team-compare-metrics div {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    padding: 8px;
+}
+.team-compare-metrics span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+}
+.team-compare-metrics strong {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.92rem;
+}
+.team-compare-roster {
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+    padding-top: 10px;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    line-height: 1.45;
 }
 
 /* Transfer result cards */
@@ -1786,6 +1921,13 @@ table.sortable th.sort-desc::after {
         min-width: calc(33% - 6px);
         max-width: none;
         flex: 1 1 calc(33% - 6px);
+    }
+    .team-compare-grid,
+    .team-compare-cards {
+        grid-template-columns: 1fr;
+    }
+    .team-compare-slots {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 

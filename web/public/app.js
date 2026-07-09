@@ -92,12 +92,18 @@ let tableSortColumn = null;
 let tableSortAsc = true;
 let allLineups = [];
 let lineupsShown = 0;
+let lineupSearchTotal = 0;
 const LINEUPS_PER_PAGE = 10;
 // My Team state (for Transfer Advisor + Multi-Week Planner)
 let myTeamDrivers = [null, null, null, null, null];   // 5 driver_id slots
 let myTeamConstructors = [null, null];                  // 2 constructor_id slots
 let transferBudgetTouched = false;
 let mwBudgetTouched = false;
+let compareTeams = [
+    { name: 'Team A', drivers: [null, null, null, null, null], constructors: [null, null] },
+    { name: 'Team B', drivers: [null, null, null, null, null], constructors: [null, null] },
+    { name: 'Team C', drivers: [null, null, null, null, null], constructors: [null, null] },
+];
 // Multi-week planner data
 let trackData = null;
 let driverHistory = null;
@@ -109,6 +115,7 @@ let targetTeamDrivers = [null, null, null, null, null];
 let targetTeamConstructors = [null, null];
 // Slot picker mode: 'myTeam' or 'targetTeam'
 let slotPickerTarget = 'myTeam';
+let slotPickerCompareIndex = 0;
 
 // -- F1 Fantasy Price Change Thresholds --
 // PPM = cumulative_season_points / current_price
@@ -273,6 +280,7 @@ async function renderTabIfNeeded(tabName) {
         case 'optimizer':
             renderMyTeamGrid();
             renderTargetTeamGrid();
+            renderTeamCompareGrid();
             renderLockGrid();
             // Optimizer renders on button click, just mark ready
             _tabRendered.optimizer = true;
@@ -1014,6 +1022,23 @@ function setupControls() {
     const mwBudgetEl = document.getElementById('mwBudget');
     if (mwBudgetEl) {
         mwBudgetEl.addEventListener('input', () => { mwBudgetTouched = true; });
+    }
+
+    // Team compare
+    const runTeamCompareBtn = document.getElementById('runTeamCompare');
+    if (runTeamCompareBtn) runTeamCompareBtn.addEventListener('click', runTeamCompare);
+    const clearTeamCompareBtn = document.getElementById('clearTeamCompare');
+    if (clearTeamCompareBtn) {
+        clearTeamCompareBtn.addEventListener('click', () => {
+            compareTeams = compareTeams.map((t, i) => ({
+                name: `Team ${String.fromCharCode(65 + i)}`,
+                drivers: [null, null, null, null, null],
+                constructors: [null, null],
+            }));
+            renderTeamCompareGrid();
+            const resultEl = document.getElementById('teamCompareResult');
+            if (resultEl) resultEl.classList.add('hidden');
+        });
     }
 
     // Multi-week target team toggle
@@ -2813,6 +2838,63 @@ function lineupScore(strategy, totalPoints, totalCost, allDrivers, constructorsL
     return totalPoints * 0.6 + value * 50;
 }
 
+function adjustedBasisPoints(item, chip) {
+    let pts = basisPoints(item);
+    if (chip === 'no_negative' && pts < 0) pts = 0;
+    return pts;
+}
+
+function intervalPoints(item, key, chip) {
+    let pts;
+    if (key === 'p5') pts = item.mc_total_p5;
+    else if (key === 'p95') pts = item.mc_total_p95;
+    else pts = item.mc_total_mean;
+    if (typeof pts !== 'number') pts = (typeof item.expected_points === 'number') ? item.expected_points : 0;
+    if (chip === 'no_negative' && pts < 0) pts = 0;
+    return pts;
+}
+
+function getBoostTargets(drivers, chip) {
+    const sorted = [...drivers].sort((a, b) => adjustedBasisPoints(b, chip) - adjustedBasisPoints(a, chip));
+    return {
+        primary: sorted[0] || null,
+        secondary: (chip === '3x_boost' && sorted.length > 1) ? sorted[1] : null,
+    };
+}
+
+function scoreTeamPicks(drivers, constructorsList, chip) {
+    const { primary, secondary } = getBoostTargets(drivers, chip);
+    const primaryId = primary ? primary.driver_id : null;
+    const secondaryId = secondary ? secondary.driver_id : null;
+
+    function totalFor(kind) {
+        let total = 0;
+        for (const d of drivers) {
+            total += kind === 'basis' ? adjustedBasisPoints(d, chip) : intervalPoints(d, kind, chip);
+        }
+        for (const c of constructorsList) {
+            total += kind === 'basis' ? adjustedBasisPoints(c, chip) : intervalPoints(c, kind, chip);
+        }
+        if (primary) {
+            const p = kind === 'basis' ? adjustedBasisPoints(primary, chip) : intervalPoints(primary, kind, chip);
+            total += p * (chip === '3x_boost' ? 2 : 1);
+        }
+        if (secondary) {
+            const p = kind === 'basis' ? adjustedBasisPoints(secondary, chip) : intervalPoints(secondary, kind, chip);
+            total += p;
+        }
+        return total;
+    }
+
+    return {
+        expected: totalFor('basis'),
+        floor: totalFor('p5'),
+        ceiling: totalFor('p95'),
+        boostedDriverId: primaryId,
+        secondBoostedDriverId: secondaryId,
+    };
+}
+
 // Iterate k-combinations of `freeDrivers` (which MUST be sorted by current_price
 // ascending) with branch-and-bound budget pruning. Calls onComplete(comboArr,
 // comboCost) for each lineup that fits remainBudget. comboArr is mutated and
@@ -3008,6 +3090,7 @@ function runOptimizerSync(budget, strategy, chip) {
     constructors.sort((a, b) => b._score - a._score);
 
     allLineups = [];
+    lineupSearchTotal = 0;
 
     const cPairs = [];
     for (let i = 0; i < constructors.length; i++) {
@@ -3080,29 +3163,9 @@ function runOptimizerSync(budget, strategy, chip) {
             const allDrivers = [...lockedDriverList, ...combo];
             const totalCost = cp.cost + lockedDriverCost + comboCost;
 
-            // Find boost targets by chip-adjusted points (apply no_negative floor first
-            // so a negative driver isn't picked as the "best" boost candidate).
-            const adjPts = d => {
-                let p = basisPoints(d);
-                if (chip === 'no_negative' && p < 0) p = 0;
-                return p;
-            };
-            const sortedDrivers = [...allDrivers].sort((a, b) => adjPts(b) - adjPts(a));
-            const boostedDriver = sortedDrivers[0];
-            const secondBoostedDriver = (chip === '3x_boost' && sortedDrivers.length > 1) ? sortedDrivers[1] : null;
-
-            let driverPoints = 0;
-            for (const d of allDrivers) driverPoints += adjPts(d);
-            let constructorPoints = 0;
-            for (const c of cp.items) {
-                let pts = basisPoints(c);
-                if (chip === 'no_negative' && pts < 0) pts = 0;
-                constructorPoints += pts;
-            }
-            // Primary boost: 3x if 3x_boost else 2x → add (mult-1) extra.
-            const primaryBoostExtra = adjPts(boostedDriver) * (chip === '3x_boost' ? 2 : 1);
-            const secondBoostExtra = secondBoostedDriver ? adjPts(secondBoostedDriver) : 0; // 2x-1=1
-            const totalPoints = driverPoints + constructorPoints + primaryBoostExtra + secondBoostExtra;
+            lineupSearchTotal++;
+            const teamScore = scoreTeamPicks(allDrivers, cp.items, chip);
+            const totalPoints = teamScore.expected;
 
             const totalScore = lineupScore(strategy, totalPoints, totalCost, allDrivers, cp.items);
 
@@ -3112,8 +3175,8 @@ function runOptimizerSync(budget, strategy, chip) {
                 totalCost,
                 totalPoints,
                 totalScore,
-                boostedDriverId: boostedDriver.driver_id,
-                secondBoostedDriverId: secondBoostedDriver ? secondBoostedDriver.driver_id : null,
+                boostedDriverId: teamScore.boostedDriverId,
+                secondBoostedDriverId: teamScore.secondBoostedDriverId,
             });
         };
     }
@@ -3232,7 +3295,11 @@ function displayLineups(strategy) {
         `;
 
         document.getElementById('lineupCards').innerHTML = '';
-        document.getElementById('lineupCounter').textContent = `${total} valid lineup${total !== 1 ? 's' : ''} found`;
+        const searched = lineupSearchTotal || total;
+        document.getElementById('lineupCounter').textContent =
+            searched > total
+                ? `Showing top ${total} of ${searched.toLocaleString()} valid lineups`
+                : `${total} valid lineup${total !== 1 ? 's' : ''} found`;
     }
 
     // Render lineups from lineupsShown to end
@@ -3269,6 +3336,8 @@ function renderSingleLineup(lineup, index, strategy, budget) {
 
     const boostedId = lineup.boostedDriverId;
     const secondBoostedId = lineup.secondBoostedDriverId || null;
+    const chipSel = document.getElementById('chipSelect');
+    const activeChip = chipSel ? chipSel.value : 'none';
     const expandedClass = index === 0 ? ' expanded' : '';
     const shareDriverIds = lineup.drivers.map(d => d.driver_id).join(',');
     const shareConsIds = lineup.constructors.map(c => c.constructor_id).join(',');
@@ -3287,7 +3356,7 @@ function renderSingleLineup(lineup, index, strategy, budget) {
         <div class="lineup-details">
         <div class="lineup-picks-row">`;
 
-    lineup.drivers.sort((a, b) => b.expected_points - a.expected_points);
+    lineup.drivers.sort((a, b) => adjustedBasisPoints(b, activeChip) - adjustedBasisPoints(a, activeChip));
     lineup.drivers.forEach((d, i) => {
         const team = TEAMS[d.constructor] || { color: '#666', name: d.constructor };
         const locked = lockedDrivers.has(d.driver_id);
@@ -3295,10 +3364,8 @@ function renderSingleLineup(lineup, index, strategy, budget) {
         const isSecondBoosted = d.driver_id === secondBoostedId;
         const pc = predictPriceChange(d, d.expected_points);
         const changeColor = pc.expectedChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)';
-        const chipSel = document.getElementById('chipSelect');
-        const activeChip = chipSel ? chipSel.value : 'none';
         const boostMult = (isPrimaryBoosted && activeChip === '3x_boost') ? 3 : (isPrimaryBoosted || isSecondBoosted) ? 2 : 1;
-        const displayPts = (d.expected_points * boostMult).toFixed(1);
+        const displayPts = (adjustedBasisPoints(d, activeChip) * boostMult).toFixed(1);
         const isBoosted = isPrimaryBoosted || isSecondBoosted;
         const boostBadge = isBoosted ? `<span class="boost-badge">${boostMult}x</span>` : '';
         html += `
@@ -3332,7 +3399,7 @@ function renderSingleLineup(lineup, index, strategy, budget) {
                 <span class="pick-h-name">${(c.name || c.constructor_id).toUpperCase()}${locked ? ' \uD83D\uDD12' : ''}</span>
             </div>
             <div class="pick-h-team">${c.driver_1} & ${c.driver_2}</div>
-            <div class="pick-h-pts">${c.expected_points.toFixed(1)}<span class="pick-h-pts-label"> pts</span></div>
+            <div class="pick-h-pts">${adjustedBasisPoints(c, activeChip).toFixed(1)}<span class="pick-h-pts-label"> pts</span></div>
             <div class="pick-h-meta">
                 <span>$${c.current_price.toFixed(1)}M</span>
                 <span>Val: ${(c.value_score||0).toFixed(1)}x</span>
@@ -3628,10 +3695,234 @@ function syncBudgetInputsFromTeamCost(totalCost) {
     }
 }
 
+function renderTeamCompareGrid() {
+    if (!data) return;
+    const grid = document.getElementById('teamCompareGrid');
+    if (!grid) return;
+
+    grid.innerHTML = compareTeams.map((teamState, teamIdx) => {
+        let slots = '';
+        for (let i = 0; i < 5; i++) {
+            const did = teamState.drivers[i];
+            const driver = did ? data.drivers.find(d => d.driver_id === did) : null;
+            if (driver) {
+                const team = TEAMS[driver.constructor] || { color: '#666' };
+                slots += `<div class="my-team-slot filled compare-slot" style="--team-color:${team.color}" data-team="${teamIdx}" data-slot="driver" data-index="${i}">
+                    <div class="slot-label">Driver ${i + 1}</div>
+                    <div class="slot-name">${driver.name.split(' ').pop()}</div>
+                    <div class="slot-price">$${driver.current_price.toFixed(1)}M</div>
+                    <span class="slot-remove" data-team="${teamIdx}" data-slot="driver" data-index="${i}">&times;</span>
+                </div>`;
+            } else {
+                slots += `<div class="my-team-slot compare-slot" data-team="${teamIdx}" data-slot="driver" data-index="${i}">
+                    <div class="slot-label">Driver ${i + 1}</div>
+                    <div class="slot-name" style="color:var(--text-secondary)">+ Select</div>
+                </div>`;
+            }
+        }
+        for (let i = 0; i < 2; i++) {
+            const cid = teamState.constructors[i];
+            const con = cid ? data.constructors.find(c => c.constructor_id === cid) : null;
+            if (con) {
+                const team = TEAMS[con.constructor_id] || { color: '#666' };
+                slots += `<div class="my-team-slot filled compare-slot" style="--team-color:${team.color}" data-team="${teamIdx}" data-slot="constructor" data-index="${i}">
+                    <div class="slot-label">Constructor ${i + 1}</div>
+                    <div class="slot-name">${(con.name || con.constructor_id).toUpperCase()}</div>
+                    <div class="slot-price">$${con.current_price.toFixed(1)}M</div>
+                    <span class="slot-remove" data-team="${teamIdx}" data-slot="constructor" data-index="${i}">&times;</span>
+                </div>`;
+            } else {
+                slots += `<div class="my-team-slot compare-slot" data-team="${teamIdx}" data-slot="constructor" data-index="${i}">
+                    <div class="slot-label">Constructor ${i + 1}</div>
+                    <div class="slot-name" style="color:var(--text-secondary)">+ Select</div>
+                </div>`;
+            }
+        }
+        return `<div class="team-compare-editor">
+            <div class="team-compare-editor-header">
+                <h4>${teamState.name}</h4>
+                <button type="button" class="team-compare-mini-btn" data-copy-current="${teamIdx}">Use Current</button>
+            </div>
+            <div class="team-compare-slots">${slots}</div>
+        </div>`;
+    }).join('');
+
+    grid.querySelectorAll('.compare-slot').forEach(slot => {
+        slot.addEventListener('click', (e) => {
+            const teamIdx = parseInt(slot.dataset.team);
+            const type = slot.dataset.slot;
+            const idx = parseInt(slot.dataset.index);
+            if (e.target.classList.contains('slot-remove')) {
+                if (type === 'driver') compareTeams[teamIdx].drivers[idx] = null;
+                else compareTeams[teamIdx].constructors[idx] = null;
+                renderTeamCompareGrid();
+                return;
+            }
+            slotPickerTarget = 'compareTeam';
+            slotPickerCompareIndex = teamIdx;
+            showSlotPicker(type, idx);
+        });
+    });
+
+    grid.querySelectorAll('[data-copy-current]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const teamIdx = parseInt(e.currentTarget.dataset.copyCurrent);
+            compareTeams[teamIdx].drivers = [...myTeamDrivers];
+            compareTeams[teamIdx].constructors = [...myTeamConstructors];
+            renderTeamCompareGrid();
+        });
+    });
+}
+
+function compareTeamObjects(teamState, view) {
+    const drivers = teamState.drivers
+        .map(id => view.drivers.find(d => d.driver_id === id))
+        .filter(Boolean);
+    const constructorsList = teamState.constructors
+        .map(id => view.constructors.find(c => c.constructor_id === id))
+        .filter(Boolean);
+    return { drivers, constructorsList };
+}
+
+function analyzeCompareTeam(teamState, view, budget, chip) {
+    const { drivers, constructorsList } = compareTeamObjects(teamState, view);
+    const complete = drivers.length === 5 && constructorsList.length === 2;
+    if (!complete) {
+        return {
+            name: teamState.name,
+            complete: false,
+            filled: drivers.length + constructorsList.length,
+            drivers,
+            constructors: constructorsList,
+        };
+    }
+
+    const score = scoreTeamPicks(drivers, constructorsList, chip);
+    const picks = [...drivers, ...constructorsList];
+    const cost = picks.reduce((s, p) => s + (p.current_price || 0), 0);
+    const expGain = picks.reduce((s, p) => s + predictPriceChange(p, p.expected_points).expectedChange, 0);
+    const avgConfidence = drivers.reduce((s, d) => s + (d.confidence || 0), 0) / drivers.length;
+    const riskPicks = picks.filter(p => p.risk === 'HIGH' || p.risk === 'VERY HIGH');
+    const avgDnf = drivers.reduce((s, d) => s + (d.dnf_probability || 0), 0) / drivers.length;
+    const volatility = score.ceiling - score.floor;
+    const ppm = cost > 0 ? score.expected / cost : 0;
+    const biggestDownside = [...drivers].sort((a, b) =>
+        (intervalPoints(b, 'mean', chip) - intervalPoints(b, 'p5', chip)) -
+        (intervalPoints(a, 'mean', chip) - intervalPoints(a, 'p5', chip)))[0];
+    const boosted = drivers.find(d => d.driver_id === score.boostedDriverId);
+    const secondBoosted = score.secondBoostedDriverId ? drivers.find(d => d.driver_id === score.secondBoostedDriverId) : null;
+
+    return {
+        name: teamState.name,
+        complete: true,
+        drivers,
+        constructors: constructorsList,
+        cost,
+        bank: budget - cost,
+        overBudget: chip !== 'limitless' && cost > budget,
+        expected: score.expected,
+        floor: score.floor,
+        ceiling: score.ceiling,
+        volatility,
+        expGain,
+        ppm,
+        avgConfidence,
+        avgDnf,
+        riskCount: riskPicks.length,
+        biggestDownside,
+        boosted,
+        secondBoosted,
+    };
+}
+
+function runTeamCompare() {
+    if (!data) return;
+    optimizeBasis = document.getElementById('pointsBasisCompare')?.value || 'balanced';
+    const chip = document.getElementById('compareChip')?.value || 'none';
+    const budget = parseFloat(document.getElementById('compareBudget')?.value || '100');
+    const view = getScenarioView();
+    const results = compareTeams.map(t => analyzeCompareTeam(t, view, budget, chip));
+    const complete = results.filter(r => r.complete);
+    const resultEl = document.getElementById('teamCompareResult');
+    if (!resultEl) return;
+
+    resultEl.classList.remove('hidden');
+    if (complete.length === 0) {
+        resultEl.innerHTML = `${scenarioBannerHtml()}<div class="optimizer-warning">Select at least one complete team to compare.</div>`;
+        return;
+    }
+
+    const bestExpected = Math.max(...complete.map(r => r.expected));
+    const bestFloor = Math.max(...complete.map(r => r.floor));
+    const bestGain = Math.max(...complete.map(r => r.expGain));
+    const lowestVol = Math.min(...complete.map(r => r.volatility));
+
+    const cards = results.map(r => {
+        if (!r.complete) {
+            return `<div class="team-compare-card incomplete">
+                <div class="team-compare-card-head"><h4>${r.name}</h4><span>${r.filled}/7 picked</span></div>
+                <p class="hint">Complete all 5 drivers and 2 constructors to score this team.</p>
+            </div>`;
+        }
+        const gainColor = r.expGain >= 0 ? 'var(--green)' : 'var(--red, #ef4444)';
+        const bankColor = r.overBudget ? 'var(--red, #ef4444)' : 'var(--text)';
+        const badges = [
+            r.expected === bestExpected ? '<span class="compare-badge">Top score</span>' : '',
+            r.floor === bestFloor ? '<span class="compare-badge">Best floor</span>' : '',
+            r.expGain === bestGain ? '<span class="compare-badge">Best budget gain</span>' : '',
+            r.volatility === lowestVol ? '<span class="compare-badge">Steadiest</span>' : '',
+        ].join('');
+        const boostText = r.secondBoosted
+            ? `3x ${r.boosted.name.split(' ').pop()} + 2x ${r.secondBoosted.name.split(' ').pop()}`
+            : `2x ${r.boosted ? r.boosted.name.split(' ').pop() : '?'}`;
+        const downsideText = r.biggestDownside
+            ? `${r.biggestDownside.name.split(' ').pop()} widest driver downside`
+            : 'No downside signal';
+        const driverNames = r.drivers.map(d => d.name.split(' ').pop()).join(', ');
+        const conNames = r.constructors.map(c => (c.name || c.constructor_id).toUpperCase()).join(' + ');
+        return `<div class="team-compare-card ${r.overBudget ? 'over-budget' : ''}">
+            <div class="team-compare-card-head">
+                <h4>${r.name}</h4>
+                <div class="compare-badges">${badges}</div>
+            </div>
+            <div class="team-compare-main">
+                <div>
+                    <div class="compare-big">${r.expected.toFixed(1)}</div>
+                    <div class="compare-label" title="${boostText}">Expected pts</div>
+                </div>
+                <div>
+                    <div class="compare-big muted">$${r.cost.toFixed(1)}M</div>
+                    <div class="compare-label" style="color:${bankColor}">${r.bank >= 0 ? `$${r.bank.toFixed(1)}M left` : `$${Math.abs(r.bank).toFixed(1)}M over`}</div>
+                </div>
+            </div>
+            <div class="team-compare-metrics">
+                <div><span>90% floor</span><strong>${r.floor.toFixed(1)}</strong></div>
+                <div><span>90% ceiling</span><strong>${r.ceiling.toFixed(1)}</strong></div>
+                <div><span>Range</span><strong>${r.volatility.toFixed(1)}</strong></div>
+                <div><span>PPM</span><strong>${r.ppm.toFixed(2)}</strong></div>
+                <div><span>Exp budget</span><strong style="color:${gainColor}">${r.expGain >= 0 ? '+' : ''}${r.expGain.toFixed(1)}M</strong></div>
+                <div><span>Avg conf</span><strong>${r.avgConfidence.toFixed(0)}%</strong></div>
+                <div><span>Risk picks</span><strong>${r.riskCount}</strong></div>
+                <div><span>Avg DNF</span><strong>${(r.avgDnf * 100).toFixed(1)}%</strong></div>
+            </div>
+            <div class="team-compare-roster">
+                <div>${driverNames}</div>
+                <div>${conNames}</div>
+                <div>${downsideText}</div>
+            </div>
+        </div>`;
+    }).join('');
+
+    resultEl.innerHTML = `${scenarioBannerHtml()}<div class="team-compare-cards">${cards}</div>`;
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 function showSlotPicker(type, index) {
     const isTarget = slotPickerTarget === 'targetTeam';
-    const driverArr = isTarget ? targetTeamDrivers : myTeamDrivers;
-    const consArr = isTarget ? targetTeamConstructors : myTeamConstructors;
+    const isCompare = slotPickerTarget === 'compareTeam';
+    const compareState = compareTeams[slotPickerCompareIndex] || compareTeams[0];
+    const driverArr = isCompare ? compareState.drivers : isTarget ? targetTeamDrivers : myTeamDrivers;
+    const consArr = isCompare ? compareState.constructors : isTarget ? targetTeamConstructors : myTeamConstructors;
 
     const alreadySelected = type === 'driver'
         ? new Set(driverArr.filter(Boolean))
@@ -3667,7 +3958,8 @@ function showSlotPicker(type, index) {
             if (type === 'driver') driverArr[index] = id;
             else consArr[index] = id;
             overlay.remove();
-            if (isTarget) renderTargetTeamGrid();
+            if (isCompare) renderTeamCompareGrid();
+            else if (isTarget) renderTargetTeamGrid();
             else renderMyTeamGrid();
         });
     });

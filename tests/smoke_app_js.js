@@ -53,7 +53,10 @@ src += `
     hasRunTransferAdvisor: typeof runTransferAdvisor === 'function',
     hasPredictPriceChange: typeof predictPriceChange === 'function',
     hasRenderTransferCard: typeof renderTransferCard === 'function',
+    hasRunTeamCompare: typeof runTeamCompare === 'function',
+    hasScoreTeamPicks: typeof scoreTeamPicks === 'function',
     renderSwapRow: typeof renderSwapRow === 'function' ? renderSwapRow : null,
+    scoreTeamPicks: typeof scoreTeamPicks === 'function' ? scoreTeamPicks : null,
   };
 })();
 `;
@@ -85,6 +88,8 @@ for (const [k, label] of [
   ['hasRunTransferAdvisor', 'runTransferAdvisor'],
   ['hasPredictPriceChange', 'predictPriceChange'],
   ['hasRenderTransferCard', 'renderTransferCard'],
+  ['hasRunTeamCompare', 'runTeamCompare'],
+  ['hasScoreTeamPicks', 'scoreTeamPicks'],
 ]) {
   if (!S[k]) fail(`${label} is not defined as a function`);
 }
@@ -101,5 +106,22 @@ try {
   fail('renderSwapRow threw: ' + e.message);
 }
 
-console.log('PASS: app.js loads; TA_TUNABLES/MW_TUNABLES defined; key fns resolve; renderSwapRow runs.');
+// 4) Team Compare scoring helper includes normal 2x / 3x boost and CI totals.
+try {
+  const drivers = [
+    { driver_id: 'A', expected_points: 20, projected_points: 20, mc_total_p5: 5, mc_total_p95: 40 },
+    { driver_id: 'B', expected_points: 10, projected_points: 10, mc_total_p5: 0, mc_total_p95: 20 },
+  ];
+  const cons = [{ constructor_id: 'C', expected_points: 15, projected_points: 15, mc_total_p5: 2, mc_total_p95: 25 }];
+  const normal = S.scoreTeamPicks(drivers, cons, 'none');
+  const triple = S.scoreTeamPicks(drivers, cons, '3x_boost');
+  if (normal.boostedDriverId !== 'A') fail('scoreTeamPicks picked the wrong boost target');
+  if (normal.expected !== 65) fail(`scoreTeamPicks normal total mismatch: ${normal.expected}`);
+  if (triple.expected !== 95 || triple.secondBoostedDriverId !== 'B') fail('scoreTeamPicks 3x total/secondary mismatch');
+  if (normal.floor !== 12 || normal.ceiling !== 125) fail('scoreTeamPicks CI totals mismatch');
+} catch (e) {
+  fail('scoreTeamPicks threw: ' + e.message);
+}
+
+console.log('PASS: app.js loads; TA/MW tunables, transfer helpers, and Team Compare scoring resolve.');
 process.exit(0);
