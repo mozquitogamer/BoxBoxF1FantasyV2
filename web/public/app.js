@@ -96,6 +96,8 @@ const LINEUPS_PER_PAGE = 10;
 // My Team state (for Transfer Advisor + Multi-Week Planner)
 let myTeamDrivers = [null, null, null, null, null];   // 5 driver_id slots
 let myTeamConstructors = [null, null];                  // 2 constructor_id slots
+let transferBudgetTouched = false;
+let mwBudgetTouched = false;
 // Multi-week planner data
 let trackData = null;
 let driverHistory = null;
@@ -993,6 +995,10 @@ function setupControls() {
 
     // Transfer advisor
     document.getElementById('runTransferAdvisor').addEventListener('click', runTransferAdvisor);
+    const transferBudgetEl = document.getElementById('transferBudget');
+    if (transferBudgetEl) {
+        transferBudgetEl.addEventListener('input', () => { transferBudgetTouched = true; });
+    }
     const shareMyTeamBtn = document.getElementById('shareMyTeam');
     if (shareMyTeamBtn) {
         shareMyTeamBtn.addEventListener('click', () => {
@@ -1005,6 +1011,10 @@ function setupControls() {
 
     // Multi-week planner
     document.getElementById('runMultiWeekPlanner').addEventListener('click', runMultiWeekPlanner);
+    const mwBudgetEl = document.getElementById('mwBudget');
+    if (mwBudgetEl) {
+        mwBudgetEl.addEventListener('input', () => { mwBudgetTouched = true; });
+    }
 
     // Multi-week target team toggle
     const mwUseTargetCb = document.getElementById('mwUseTarget');
@@ -2965,11 +2975,9 @@ function runOptimizerSync(budget, strategy, chip) {
     optimizeBasis = document.getElementById('pointsBasisOpt')?.value || 'balanced';
     const numDriverSlots = 5;
     const effectiveBudget = chip === 'limitless' ? 999 : budget;
-    // Cap the free-driver pool to top-N by strategy-aware score. C(15,5)=3,003
-    // vs C(22,5)=26,334 — ~9× fewer combos with negligible accuracy loss
-    // because drivers ranked low by `_score` rarely belong in optimal lineups.
-    // Locked drivers always survive regardless of pool position.
-    const FREE_POOL = 15;
+    // Search the full free-driver pool. Budget pruning keeps the exhaustive
+    // C(22,5) x C(11,2) scan usable without hiding cheap enablers outside a
+    // score-ranked top-N list.
 
     // Per-pick score — used only for initial sort order, not for ranking.
     // Lineup-level ranking goes through lineupScore(...) which is chip-aware.
@@ -3022,9 +3030,8 @@ function runOptimizerSync(budget, strategy, chip) {
     const lockedDriverList = drivers.filter(d => lockedDrivers.has(d.driver_id));
     const lockedDriverIds = new Set(lockedDriverList.map(d => d.driver_id));
 
-    // Top-N free pool (B5), then re-sort by price ascending (B4 prerequisite).
+    // Full free-driver pool, re-sorted by price ascending for budget pruning.
     let freeDrivers = drivers.filter(d => !lockedDriverIds.has(d.driver_id));
-    if (freeDrivers.length > FREE_POOL) freeDrivers = freeDrivers.slice(0, FREE_POOL);
     freeDrivers.sort((a, b) => a.current_price - b.current_price);
     // Prefix sum of prices for cheapest-completion lookups in the pruner.
     const priceSum = [0];
@@ -3039,6 +3046,33 @@ function runOptimizerSync(budget, strategy, chip) {
     }
 
     const MAX_LINEUPS = 200;
+    let worstLineupIndex = -1;
+    let worstLineupScore = Infinity;
+
+    function refreshWorstLineup() {
+        worstLineupIndex = -1;
+        worstLineupScore = Infinity;
+        for (let i = 0; i < allLineups.length; i++) {
+            if (allLineups[i].totalScore < worstLineupScore) {
+                worstLineupScore = allLineups[i].totalScore;
+                worstLineupIndex = i;
+            }
+        }
+    }
+
+    function keepLineup(lineup) {
+        if (allLineups.length < MAX_LINEUPS) {
+            allLineups.push(lineup);
+            if (lineup.totalScore < worstLineupScore) {
+                worstLineupScore = lineup.totalScore;
+                worstLineupIndex = allLineups.length - 1;
+            }
+            return;
+        }
+        if (lineup.totalScore <= worstLineupScore) return;
+        allLineups[worstLineupIndex] = lineup;
+        refreshWorstLineup();
+    }
 
     // Per-cPair scoring + emit. Closed over cp via the outer loop.
     function makeOnComplete(cp) {
@@ -3072,7 +3106,7 @@ function runOptimizerSync(budget, strategy, chip) {
 
             const totalScore = lineupScore(strategy, totalPoints, totalCost, allDrivers, cp.items);
 
-            allLineups.push({
+            keepLineup({
                 drivers: allDrivers,
                 constructors: cp.items,
                 totalCost,
@@ -3531,13 +3565,10 @@ function renderMyTeamGrid() {
     }
     grid.innerHTML = html;
 
-    // Update budget display based on team cost
+    // Seed budget inputs from team cost until the user edits them. After that,
+    // slot changes must not erase bank/unspent budget that was typed manually.
     const totalCost = getMyTeamCost();
-    if (totalCost > 0) {
-        document.getElementById('transferBudget').value = totalCost.toFixed(1);
-        const mwBudgetEl = document.getElementById('mwBudget');
-        if (mwBudgetEl) mwBudgetEl.value = totalCost.toFixed(1);
-    }
+    syncBudgetInputsFromTeamCost(totalCost);
 
     // Click handlers for this grid
     function attachGridHandlers(gridEl) {
@@ -3582,6 +3613,19 @@ function getMyTeamCost() {
         if (c) cost += c.current_price;
     }
     return cost;
+}
+
+function syncBudgetInputsFromTeamCost(totalCost) {
+    if (totalCost <= 0) return;
+    const formatted = totalCost.toFixed(1);
+    const transferBudgetEl = document.getElementById('transferBudget');
+    if (transferBudgetEl && (!transferBudgetTouched || transferBudgetEl.value === '')) {
+        transferBudgetEl.value = formatted;
+    }
+    const mwBudgetEl = document.getElementById('mwBudget');
+    if (mwBudgetEl && (!mwBudgetTouched || mwBudgetEl.value === '')) {
+        mwBudgetEl.value = formatted;
+    }
 }
 
 function showSlotPicker(type, index) {
@@ -3789,7 +3833,7 @@ function runTransferAdvisor() {
         .filter(Boolean);
     if (currentDriverObjs.length === currentDriverIds.length &&
         currentConstructorObjs.length === currentConstructorIds.length) {
-        const currentSorted = [...currentDriverObjs].sort((a, b) => b.expected_points - a.expected_points);
+        const currentSorted = [...currentDriverObjs].sort((a, b) => basisPoints(b) - basisPoints(a));
         const curBoosted = currentSorted[0];
         const curSecondBoosted = (chip === '3x_boost' && currentSorted.length > 1) ? currentSorted[1] : null;
         const curAllPicks = [...currentDriverObjs, ...currentConstructorObjs];
@@ -4776,11 +4820,11 @@ async function runMultiWeekPlanner() {
             const driverConfidence = {};
             const constructorConfidence = {};
             for (const d of view.drivers) {
-                driverScores[d.driver_id] = d.expected_points || 0;
+                driverScores[d.driver_id] = basisPoints(d) || 0;
                 driverConfidence[d.driver_id] = 1.0;
             }
             for (const c of view.constructors) {
-                constructorScores[c.constructor_id] = c.expected_points || 0;
+                constructorScores[c.constructor_id] = basisPoints(c) || 0;
                 constructorConfidence[c.constructor_id] = 1.0;
             }
             return {
