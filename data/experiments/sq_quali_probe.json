@@ -1,0 +1,1806 @@
+{
+  "base": [
+    {
+      "mae": 3.7,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.49473684210526314,
+      "n": 20,
+      "season": 2022,
+      "round": 1,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.6,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5263157894736842,
+      "n": 20,
+      "season": 2022,
+      "round": 2,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.7,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5894736842105264,
+      "n": 20,
+      "season": 2022,
+      "round": 3,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.1,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.4421052631578947,
+      "n": 20,
+      "season": 2022,
+      "round": 4,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.2,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5789473684210527,
+      "n": 20,
+      "season": 2022,
+      "round": 5,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.2,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.7052631578947369,
+      "n": 20,
+      "season": 2022,
+      "round": 6,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.4,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6736842105263158,
+      "n": 20,
+      "season": 2022,
+      "round": 7,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.6,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.6631578947368422,
+      "n": 20,
+      "season": 2022,
+      "round": 8,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.7,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.35789473684210527,
+      "n": 20,
+      "season": 2022,
+      "round": 9,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.631578947368421,
+      "n": 20,
+      "season": 2022,
+      "round": 10,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.2,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5368421052631579,
+      "n": 20,
+      "season": 2022,
+      "round": 11,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.4,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5157894736842106,
+      "n": 20,
+      "season": 2022,
+      "round": 12,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.5,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.49473684210526314,
+      "n": 20,
+      "season": 2022,
+      "round": 13,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.3,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5473684210526316,
+      "n": 20,
+      "season": 2022,
+      "round": 14,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.1,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5684210526315789,
+      "n": 20,
+      "season": 2022,
+      "round": 15,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.6,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.6631578947368422,
+      "n": 20,
+      "season": 2022,
+      "round": 16,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.9,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6105263157894737,
+      "n": 20,
+      "season": 2022,
+      "round": 17,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.2,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.6947368421052632,
+      "n": 20,
+      "season": 2022,
+      "round": 18,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.7,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5789473684210527,
+      "n": 20,
+      "season": 2022,
+      "round": 19,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.2,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.7052631578947369,
+      "n": 20,
+      "season": 2022,
+      "round": 20,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.5,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.3473684210526316,
+      "n": 20,
+      "season": 2022,
+      "round": 21,
+      "is_sprint": true
+    },
+    {
+      "mae": 1.6,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.7789473684210527,
+      "n": 20,
+      "season": 2022,
+      "round": 22,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.8,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5789473684210527,
+      "n": 20,
+      "season": 2023,
+      "round": 1,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.4421052631578947,
+      "n": 20,
+      "season": 2023,
+      "round": 2,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.4,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.4736842105263158,
+      "n": 20,
+      "season": 2023,
+      "round": 3,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.9,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6000000000000001,
+      "n": 20,
+      "season": 2023,
+      "round": 4,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.8,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.4421052631578947,
+      "n": 20,
+      "season": 2023,
+      "round": 5,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.6,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.4842105263157895,
+      "n": 20,
+      "season": 2023,
+      "round": 6,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.5,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.37894736842105264,
+      "n": 20,
+      "season": 2023,
+      "round": 7,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.1,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.45263157894736844,
+      "n": 20,
+      "season": 2023,
+      "round": 8,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.7,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.6421052631578947,
+      "n": 20,
+      "season": 2023,
+      "round": 9,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.25,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5224292591605755,
+      "n": 20,
+      "season": 2023,
+      "round": 10,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.49473684210526314,
+      "n": 20,
+      "season": 2023,
+      "round": 11,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.5,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5473684210526316,
+      "n": 20,
+      "season": 2023,
+      "round": 12,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.45263157894736844,
+      "n": 20,
+      "season": 2023,
+      "round": 13,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.0,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5578947368421052,
+      "n": 20,
+      "season": 2023,
+      "round": 14,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.3,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5473684210526316,
+      "n": 20,
+      "season": 2023,
+      "round": 15,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.6,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6210526315789474,
+      "n": 20,
+      "season": 2023,
+      "round": 16,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.8,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5473684210526316,
+      "n": 20,
+      "season": 2023,
+      "round": 17,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.631578947368421,
+      "n": 20,
+      "season": 2023,
+      "round": 18,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.0,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5473684210526316,
+      "n": 20,
+      "season": 2023,
+      "round": 19,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.1,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5789473684210527,
+      "n": 20,
+      "season": 2023,
+      "round": 20,
+      "is_sprint": true
+    },
+    {
+      "mae": 4.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.35789473684210527,
+      "n": 20,
+      "season": 2023,
+      "round": 21,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.7,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6000000000000001,
+      "n": 20,
+      "season": 2023,
+      "round": 22,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.6,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6210526315789474,
+      "n": 20,
+      "season": 2024,
+      "round": 1,
+      "is_sprint": false
+    },
+    {
+      "mae": 1.7,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.768421052631579,
+      "n": 20,
+      "season": 2024,
+      "round": 2,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.3157894736842106,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6608187134502924,
+      "n": 19,
+      "season": 2024,
+      "round": 3,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.2,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6736842105263158,
+      "n": 20,
+      "season": 2024,
+      "round": 4,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.1,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5368421052631579,
+      "n": 20,
+      "season": 2024,
+      "round": 5,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.3,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.7052631578947369,
+      "n": 20,
+      "season": 2024,
+      "round": 6,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.7,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6105263157894737,
+      "n": 20,
+      "season": 2024,
+      "round": 7,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.3,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.582018728798217,
+      "n": 20,
+      "season": 2024,
+      "round": 8,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.5,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5263157894736842,
+      "n": 20,
+      "season": 2024,
+      "round": 9,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.3,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5894736842105264,
+      "n": 20,
+      "season": 2024,
+      "round": 10,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.2,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5789473684210527,
+      "n": 20,
+      "season": 2024,
+      "round": 11,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.6,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.4842105263157895,
+      "n": 20,
+      "season": 2024,
+      "round": 12,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.2,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5578947368421052,
+      "n": 20,
+      "season": 2024,
+      "round": 13,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.5,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6736842105263158,
+      "n": 20,
+      "season": 2024,
+      "round": 14,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.55,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.6279705236374593,
+      "n": 20,
+      "season": 2024,
+      "round": 15,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.2,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6947368421052632,
+      "n": 20,
+      "season": 2024,
+      "round": 16,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.75,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.46965862692213345,
+      "n": 20,
+      "season": 2024,
+      "round": 17,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.8,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6526315789473685,
+      "n": 20,
+      "season": 2024,
+      "round": 18,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.0,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5894736842105264,
+      "n": 20,
+      "season": 2024,
+      "round": 19,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.7,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.4105263157894737,
+      "n": 20,
+      "season": 2024,
+      "round": 20,
+      "is_sprint": false
+    },
+    {
+      "mae": 5.5,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.18947368421052632,
+      "n": 20,
+      "season": 2024,
+      "round": 21,
+      "is_sprint": true
+    },
+    {
+      "mae": 4.0,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.4421052631578947,
+      "n": 20,
+      "season": 2024,
+      "round": 22,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.4,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.49473684210526314,
+      "n": 20,
+      "season": 2024,
+      "round": 23,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.2,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5263157894736842,
+      "n": 20,
+      "season": 2024,
+      "round": 24,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.7,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6210526315789474,
+      "n": 20,
+      "season": 2025,
+      "round": 1,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.1,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5684210526315789,
+      "n": 20,
+      "season": 2025,
+      "round": 2,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.1,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.7052631578947369,
+      "n": 20,
+      "season": 2025,
+      "round": 3,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.4,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5789473684210527,
+      "n": 20,
+      "season": 2025,
+      "round": 4,
+      "is_sprint": false
+    },
+    {
+      "mae": 1.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.768421052631579,
+      "n": 20,
+      "season": 2025,
+      "round": 5,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.9,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6000000000000001,
+      "n": 20,
+      "season": 2025,
+      "round": 6,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.6,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.4736842105263158,
+      "n": 20,
+      "season": 2025,
+      "round": 7,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.3,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5263157894736842,
+      "n": 20,
+      "season": 2025,
+      "round": 8,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.210526315789474,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.6959064327485379,
+      "n": 19,
+      "season": 2025,
+      "round": 9,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.6,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5157894736842106,
+      "n": 20,
+      "season": 2025,
+      "round": 10,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.0,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5578947368421052,
+      "n": 20,
+      "season": 2025,
+      "round": 11,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.4,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5473684210526316,
+      "n": 20,
+      "season": 2025,
+      "round": 12,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.7,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.3368421052631579,
+      "n": 20,
+      "season": 2025,
+      "round": 13,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.9,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.4631578947368421,
+      "n": 20,
+      "season": 2025,
+      "round": 14,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.1,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.7263157894736842,
+      "n": 20,
+      "season": 2025,
+      "round": 15,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.1,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5684210526315789,
+      "n": 20,
+      "season": 2025,
+      "round": 16,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.0,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.43157894736842106,
+      "n": 20,
+      "season": 2025,
+      "round": 17,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.6,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.49473684210526314,
+      "n": 20,
+      "season": 2025,
+      "round": 18,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.4,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.4736842105263158,
+      "n": 20,
+      "season": 2025,
+      "round": 19,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.5,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6105263157894737,
+      "n": 20,
+      "season": 2025,
+      "round": 20,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.8947368421052633,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.40350877192982454,
+      "n": 19,
+      "season": 2025,
+      "round": 21,
+      "is_sprint": true
+    },
+    {
+      "mae": 4.6,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.2947368421052632,
+      "n": 20,
+      "season": 2025,
+      "round": 22,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.1,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5894736842105264,
+      "n": 20,
+      "season": 2025,
+      "round": 23,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.0,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5578947368421052,
+      "n": 20,
+      "season": 2025,
+      "round": 24,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.736842105263158,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6491228070175439,
+      "n": 19,
+      "season": 2026,
+      "round": 1,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.909090909090909,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6536796536796536,
+      "n": 22,
+      "season": 2026,
+      "round": 2,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.727272727272727,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6969696969696969,
+      "n": 22,
+      "season": 2026,
+      "round": 3,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.1818181818181817,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5930735930735931,
+      "n": 22,
+      "season": 2026,
+      "round": 6,
+      "is_sprint": true
+    },
+    {
+      "mae": 1.8181818181818181,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.774891774891775,
+      "n": 22,
+      "season": 2026,
+      "round": 7,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.8181818181818183,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6883116883116883,
+      "n": 22,
+      "season": 2026,
+      "round": 8,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.0,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.774891774891775,
+      "n": 22,
+      "season": 2026,
+      "round": 9,
+      "is_sprint": false
+    },
+    {
+      "mae": 1.0,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.8787878787878788,
+      "n": 22,
+      "season": 2026,
+      "round": 10,
+      "is_sprint": false
+    }
+  ],
+  "aug": [
+    {
+      "mae": 3.5,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.49473684210526314,
+      "n": 20,
+      "season": 2022,
+      "round": 1,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.4,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5368421052631579,
+      "n": 20,
+      "season": 2022,
+      "round": 2,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.9,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5789473684210527,
+      "n": 20,
+      "season": 2022,
+      "round": 3,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.5,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6842105263157895,
+      "n": 20,
+      "season": 2022,
+      "round": 4,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.0,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6000000000000001,
+      "n": 20,
+      "season": 2022,
+      "round": 5,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.1,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6947368421052632,
+      "n": 20,
+      "season": 2022,
+      "round": 6,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.4,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6842105263157895,
+      "n": 20,
+      "season": 2022,
+      "round": 7,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.5,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.6842105263157895,
+      "n": 20,
+      "season": 2022,
+      "round": 8,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.5,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.35789473684210527,
+      "n": 20,
+      "season": 2022,
+      "round": 9,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.631578947368421,
+      "n": 20,
+      "season": 2022,
+      "round": 10,
+      "is_sprint": false
+    },
+    {
+      "mae": 1.9,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.7157894736842105,
+      "n": 20,
+      "season": 2022,
+      "round": 11,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.1,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5263157894736842,
+      "n": 20,
+      "season": 2022,
+      "round": 12,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.6,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.4842105263157895,
+      "n": 20,
+      "season": 2022,
+      "round": 13,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.4,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5368421052631579,
+      "n": 20,
+      "season": 2022,
+      "round": 14,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.3,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5684210526315789,
+      "n": 20,
+      "season": 2022,
+      "round": 15,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.2,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.7263157894736842,
+      "n": 20,
+      "season": 2022,
+      "round": 16,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.0,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5894736842105264,
+      "n": 20,
+      "season": 2022,
+      "round": 17,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.3,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.6736842105263158,
+      "n": 20,
+      "season": 2022,
+      "round": 18,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.6,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5894736842105264,
+      "n": 20,
+      "season": 2022,
+      "round": 19,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.3,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6842105263157895,
+      "n": 20,
+      "season": 2022,
+      "round": 20,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.7,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.631578947368421,
+      "n": 20,
+      "season": 2022,
+      "round": 21,
+      "is_sprint": true
+    },
+    {
+      "mae": 1.5,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.8105263157894737,
+      "n": 20,
+      "season": 2022,
+      "round": 22,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.7,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5578947368421052,
+      "n": 20,
+      "season": 2023,
+      "round": 1,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.1,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.4105263157894737,
+      "n": 20,
+      "season": 2023,
+      "round": 2,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.5,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5368421052631579,
+      "n": 20,
+      "season": 2023,
+      "round": 3,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.631578947368421,
+      "n": 20,
+      "season": 2023,
+      "round": 4,
+      "is_sprint": true
+    },
+    {
+      "mae": 4.3,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.4105263157894737,
+      "n": 20,
+      "season": 2023,
+      "round": 5,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.4631578947368421,
+      "n": 20,
+      "season": 2023,
+      "round": 6,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.5,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.3684210526315789,
+      "n": 20,
+      "season": 2023,
+      "round": 7,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.4,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.43157894736842106,
+      "n": 20,
+      "season": 2023,
+      "round": 8,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.6,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.6105263157894737,
+      "n": 20,
+      "season": 2023,
+      "round": 9,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.15,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5224292591605755,
+      "n": 20,
+      "season": 2023,
+      "round": 10,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.5,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5368421052631579,
+      "n": 20,
+      "season": 2023,
+      "round": 11,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.6,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5578947368421052,
+      "n": 20,
+      "season": 2023,
+      "round": 12,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.45263157894736844,
+      "n": 20,
+      "season": 2023,
+      "round": 13,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.2,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5473684210526316,
+      "n": 20,
+      "season": 2023,
+      "round": 14,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.8,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6105263157894737,
+      "n": 20,
+      "season": 2023,
+      "round": 15,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.8,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6105263157894737,
+      "n": 20,
+      "season": 2023,
+      "round": 16,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.2,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.4842105263157895,
+      "n": 20,
+      "season": 2023,
+      "round": 17,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6000000000000001,
+      "n": 20,
+      "season": 2023,
+      "round": 18,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.1,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5368421052631579,
+      "n": 20,
+      "season": 2023,
+      "round": 19,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.2,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5473684210526316,
+      "n": 20,
+      "season": 2023,
+      "round": 20,
+      "is_sprint": true
+    },
+    {
+      "mae": 4.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.3684210526315789,
+      "n": 20,
+      "season": 2023,
+      "round": 21,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.0,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5789473684210527,
+      "n": 20,
+      "season": 2023,
+      "round": 22,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.7,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6000000000000001,
+      "n": 20,
+      "season": 2024,
+      "round": 1,
+      "is_sprint": false
+    },
+    {
+      "mae": 1.9,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.7473684210526316,
+      "n": 20,
+      "season": 2024,
+      "round": 2,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.1052631578947367,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6842105263157894,
+      "n": 19,
+      "season": 2024,
+      "round": 3,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.3,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6526315789473685,
+      "n": 20,
+      "season": 2024,
+      "round": 4,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.8,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6210526315789474,
+      "n": 20,
+      "season": 2024,
+      "round": 5,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.2,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.7052631578947369,
+      "n": 20,
+      "season": 2024,
+      "round": 6,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.9,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6105263157894737,
+      "n": 20,
+      "season": 2024,
+      "round": 7,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.1,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5926008875036393,
+      "n": 20,
+      "season": 2024,
+      "round": 8,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.9,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.4842105263157895,
+      "n": 20,
+      "season": 2024,
+      "round": 9,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.3,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6000000000000001,
+      "n": 20,
+      "season": 2024,
+      "round": 10,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.9,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6105263157894737,
+      "n": 20,
+      "season": 2024,
+      "round": 11,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.8,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.4842105263157895,
+      "n": 20,
+      "season": 2024,
+      "round": 12,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.5,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5157894736842106,
+      "n": 20,
+      "season": 2024,
+      "round": 13,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.4,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6736842105263158,
+      "n": 20,
+      "season": 2024,
+      "round": 14,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.25,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.7018494087712781,
+      "n": 20,
+      "season": 2024,
+      "round": 15,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.1,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.7157894736842105,
+      "n": 20,
+      "season": 2024,
+      "round": 16,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.75,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.43799624757906824,
+      "n": 20,
+      "season": 2024,
+      "round": 17,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.8,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6421052631578947,
+      "n": 20,
+      "season": 2024,
+      "round": 18,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.6,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6000000000000001,
+      "n": 20,
+      "season": 2024,
+      "round": 19,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.6,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.4421052631578947,
+      "n": 20,
+      "season": 2024,
+      "round": 20,
+      "is_sprint": false
+    },
+    {
+      "mae": 5.3,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.24210526315789474,
+      "n": 20,
+      "season": 2024,
+      "round": 21,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.5,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.5157894736842106,
+      "n": 20,
+      "season": 2024,
+      "round": 22,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.3,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5473684210526316,
+      "n": 20,
+      "season": 2024,
+      "round": 23,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.1,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5789473684210527,
+      "n": 20,
+      "season": 2024,
+      "round": 24,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.8,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5894736842105264,
+      "n": 20,
+      "season": 2025,
+      "round": 1,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.1,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5684210526315789,
+      "n": 20,
+      "season": 2025,
+      "round": 2,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.0,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.7157894736842105,
+      "n": 20,
+      "season": 2025,
+      "round": 3,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.0,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6210526315789474,
+      "n": 20,
+      "season": 2025,
+      "round": 4,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.1,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.7157894736842105,
+      "n": 20,
+      "season": 2025,
+      "round": 5,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.7,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6210526315789474,
+      "n": 20,
+      "season": 2025,
+      "round": 6,
+      "is_sprint": true
+    },
+    {
+      "mae": 3.3,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5157894736842106,
+      "n": 20,
+      "season": 2025,
+      "round": 7,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.3,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5263157894736842,
+      "n": 20,
+      "season": 2025,
+      "round": 8,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.210526315789474,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.7192982456140351,
+      "n": 19,
+      "season": 2025,
+      "round": 9,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.9,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.45263157894736844,
+      "n": 20,
+      "season": 2025,
+      "round": 10,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.0,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5684210526315789,
+      "n": 20,
+      "season": 2025,
+      "round": 11,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.3,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5473684210526316,
+      "n": 20,
+      "season": 2025,
+      "round": 12,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.5,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.3473684210526316,
+      "n": 20,
+      "season": 2025,
+      "round": 13,
+      "is_sprint": true
+    },
+    {
+      "mae": 4.4,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.38947368421052636,
+      "n": 20,
+      "season": 2025,
+      "round": 14,
+      "is_sprint": false
+    },
+    {
+      "mae": 1.7,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.7789473684210527,
+      "n": 20,
+      "season": 2025,
+      "round": 15,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.2,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5578947368421052,
+      "n": 20,
+      "season": 2025,
+      "round": 16,
+      "is_sprint": false
+    },
+    {
+      "mae": 4.4,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.39999999999999997,
+      "n": 20,
+      "season": 2025,
+      "round": 17,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.0,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5684210526315789,
+      "n": 20,
+      "season": 2025,
+      "round": 18,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.1,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5684210526315789,
+      "n": 20,
+      "season": 2025,
+      "round": 19,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.4,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6421052631578947,
+      "n": 20,
+      "season": 2025,
+      "round": 20,
+      "is_sprint": false
+    },
+    {
+      "mae": 3.8947368421052633,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.4152046783625731,
+      "n": 19,
+      "season": 2025,
+      "round": 21,
+      "is_sprint": true
+    },
+    {
+      "mae": 4.4,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.3368421052631579,
+      "n": 20,
+      "season": 2025,
+      "round": 22,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.9,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.5578947368421052,
+      "n": 20,
+      "season": 2025,
+      "round": 23,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.8,
+      "top3_acc": 1.0,
+      "kendall_tau": 0.5894736842105264,
+      "n": 20,
+      "season": 2025,
+      "round": 24,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.8421052631578947,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6257309941520467,
+      "n": 19,
+      "season": 2026,
+      "round": 1,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.4545454545454546,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.7229437229437229,
+      "n": 22,
+      "season": 2026,
+      "round": 2,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.727272727272727,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.6536796536796536,
+      "n": 22,
+      "season": 2026,
+      "round": 3,
+      "is_sprint": false
+    },
+    {
+      "mae": 2.8181818181818183,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6363636363636364,
+      "n": 22,
+      "season": 2026,
+      "round": 6,
+      "is_sprint": true
+    },
+    {
+      "mae": 1.8181818181818181,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.774891774891775,
+      "n": 22,
+      "season": 2026,
+      "round": 7,
+      "is_sprint": true
+    },
+    {
+      "mae": 2.6363636363636362,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.6536796536796536,
+      "n": 22,
+      "season": 2026,
+      "round": 8,
+      "is_sprint": false
+    },
+    {
+      "mae": 1.7272727272727273,
+      "top3_acc": 0.6666666666666666,
+      "kendall_tau": 0.8095238095238095,
+      "n": 22,
+      "season": 2026,
+      "round": 9,
+      "is_sprint": false
+    },
+    {
+      "mae": 1.0909090909090908,
+      "top3_acc": 0.3333333333333333,
+      "kendall_tau": 0.8614718614718614,
+      "n": 22,
+      "season": 2026,
+      "round": 10,
+      "is_sprint": false
+    }
+  ]
+}
