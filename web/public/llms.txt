@@ -1,0 +1,41 @@
+# BoxBoxF1Fantasy
+
+> Free, data-driven F1 Fantasy 2026 predictions, lineup tools, transfer planning, race picks, and strategy guides.
+
+Last updated: 2026-07-10
+Canonical site: https://boxboxf1fantasy.com/
+
+BoxBoxF1Fantasy helps F1 Fantasy players choose drivers and constructors for the 2026 season. The site publishes current-round driver and constructor projections, budget/value signals, confidence ranges, lineup optimization, transfer planning, race-week picks, and beginner/strategy guides. It is free and does not require login.
+
+Important pages:
+- Live predictions and tools: https://boxboxf1fantasy.com/
+- Race picks hub: https://boxboxf1fantasy.com/picks/
+- Strategy guides hub: https://boxboxf1fantasy.com/guides/
+- Tool landing pages: https://boxboxf1fantasy.com/tools/
+- Lineup optimizer: https://boxboxf1fantasy.com/tools/lineup-optimizer/
+- Team compare: https://boxboxf1fantasy.com/tools/team-compare/
+- Transfer planner: https://boxboxf1fantasy.com/tools/transfer-planner/
+- Budget builder: https://boxboxf1fantasy.com/tools/budget-builder/
+- Points calculator: https://boxboxf1fantasy.com/tools/points-calculator/
+
+Current data endpoints:
+- Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json
+- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json
+- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json
+
+Recent race-pick pages:
+- https://boxboxf1fantasy.com/picks/belgian-gp-2026/
+- https://boxboxf1fantasy.com/picks/british-gp-2026/
+- https://boxboxf1fantasy.com/picks/austrian-gp-2026/
+- https://boxboxf1fantasy.com/picks/spanish-gp-2026/
+- https://boxboxf1fantasy.com/picks/monaco-gp-2026/
+- https://boxboxf1fantasy.com/picks/canadian-gp-2026/
+
+Useful descriptions for agents:
+- The homepage is the main app and includes tabs for Drivers, Constructors, Optimizer, Analysis, Season, Head-to-Head, Accuracy, Race Deep Dive, Videos, Articles, Changelog, and About.
+- The optimizer builds legal F1 Fantasy lineups under a budget using current projections and chip settings.
+- Team Compare lets users enter up to three teams and compare budget, expected points, value, confidence ranges, budget movement, and downside risk.
+- The Accuracy tab publishes prediction performance for completed rounds, including misses.
+
+Disclosure:
+BoxBoxF1Fantasy is not affiliated with Formula 1, the FIA, F1 Fantasy, or any F1 team or driver. Predictions are informational and for entertainment.

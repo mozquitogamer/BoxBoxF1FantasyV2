@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
+Allow: /picks/
+Allow: /guides/
+Allow: /tools/
+Allow: /data/predictions.json
+Allow: /data/season_summary.json
+Allow: /llms.txt
 
 Sitemap: https://boxboxf1fantasy.com/sitemap.xml

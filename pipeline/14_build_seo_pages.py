@@ -24,6 +24,7 @@ import html
 import json
 import re
 import unicodedata
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -356,14 +357,82 @@ def render_index(entries: list) -> str:
 # --------------------------------------------------------------------------- #
 def write_sitemap(rel_paths: list[str]) -> None:
     """rel_paths: relative URLs like '', 'picks/', 'picks/monaco-gp-2026/', 'guides/'."""
+    lastmod = datetime.now(timezone.utc).date().isoformat()
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for p in rel_paths:
         u = f"{SITE}/{p}"
         pr = "1.0" if p == "" else "0.8"
-        lines.append(f"  <url><loc>{u}</loc><changefreq>weekly</changefreq><priority>{pr}</priority></url>")
+        lines.append(
+            f"  <url><loc>{u}</loc><lastmod>{lastmod}</lastmod>"
+            f"<changefreq>weekly</changefreq><priority>{pr}</priority></url>"
+        )
     lines.append("</urlset>\n")
     (WEB / "sitemap.xml").write_text("\n".join(lines), encoding="utf-8")
+
+
+def write_robots() -> None:
+    """Keep crawler hints explicit whenever SEO pages are regenerated."""
+    body = f"""User-agent: *
+Allow: /
+Allow: /picks/
+Allow: /guides/
+Allow: /tools/
+Allow: /data/predictions.json
+Allow: /data/season_summary.json
+Allow: /llms.txt
+
+Sitemap: {SITE}/sitemap.xml
+"""
+    (WEB / "robots.txt").write_text(body, encoding="utf-8")
+
+
+def write_llms_txt(rel_paths: list[str]) -> None:
+    """Plain-text site map for AI agents and answer engines."""
+    today = datetime.now(timezone.utc).date().isoformat()
+    picks = [p for p in rel_paths if p.startswith("picks/") and p != "picks/"][:6]
+    lines = [
+        "# BoxBoxF1Fantasy",
+        "",
+        "> Free, data-driven F1 Fantasy 2026 predictions, lineup tools, transfer planning, race picks, and strategy guides.",
+        "",
+        f"Last updated: {today}",
+        "Canonical site: https://boxboxf1fantasy.com/",
+        "",
+        "BoxBoxF1Fantasy helps F1 Fantasy players choose drivers and constructors for the 2026 season. The site publishes current-round driver and constructor projections, budget/value signals, confidence ranges, lineup optimization, transfer planning, race-week picks, and beginner/strategy guides. It is free and does not require login.",
+        "",
+        "Important pages:",
+        "- Live predictions and tools: https://boxboxf1fantasy.com/",
+        "- Race picks hub: https://boxboxf1fantasy.com/picks/",
+        "- Strategy guides hub: https://boxboxf1fantasy.com/guides/",
+        "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
+        "- Lineup optimizer: https://boxboxf1fantasy.com/tools/lineup-optimizer/",
+        "- Team compare: https://boxboxf1fantasy.com/tools/team-compare/",
+        "- Transfer planner: https://boxboxf1fantasy.com/tools/transfer-planner/",
+        "- Budget builder: https://boxboxf1fantasy.com/tools/budget-builder/",
+        "- Points calculator: https://boxboxf1fantasy.com/tools/points-calculator/",
+        "",
+        "Current data endpoints:",
+        "- Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json",
+        "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
+        "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
+        "",
+        "Recent race-pick pages:",
+    ]
+    lines.extend(f"- https://boxboxf1fantasy.com/{p}" for p in picks)
+    lines.extend([
+        "",
+        "Useful descriptions for agents:",
+        "- The homepage is the main app and includes tabs for Drivers, Constructors, Optimizer, Analysis, Season, Head-to-Head, Accuracy, Race Deep Dive, Videos, Articles, Changelog, and About.",
+        "- The optimizer builds legal F1 Fantasy lineups under a budget using current projections and chip settings.",
+        "- Team Compare lets users enter up to three teams and compare budget, expected points, value, confidence ranges, budget movement, and downside risk.",
+        "- The Accuracy tab publishes prediction performance for completed rounds, including misses.",
+        "",
+        "Disclosure:",
+        "BoxBoxF1Fantasy is not affiliated with Formula 1, the FIA, F1 Fantasy, or any F1 team or driver. Predictions are informational and for entertainment.",
+        "",
+    ])
+    (WEB / "llms.txt").write_text("\n".join(lines), encoding="utf-8")
 
 
 # --------------------------------------------------------------------------- #
@@ -628,6 +697,32 @@ TOOLS = [
         "cta": ("/#optimizer", "Open the Lineup Optimizer →"),
     },
     {
+        "base": "tools", "crumb": "Tools", "slug": "team-compare",
+        "crumb_self": "Team Compare",
+        "title": "F1 Fantasy Team Compare & Score Calculator (Free) | BoxBox",
+        "desc": "Free F1 Fantasy team compare tool: enter up to three candidate teams and compare budget, projected points, confidence range, price movement and downside risk.",
+        "h1": "F1 Fantasy Team Compare & Score Calculator",
+        "intro": '<p class="lede">Compare up to three possible F1 Fantasy teams side-by-side before you lock in transfers or chips.</p>',
+        "body": (
+            "<h2>What it compares</h2>"
+            "<p>Team Compare lets you enter full 5-driver, 2-constructor lineups and see how they stack up on expected points, total cost, budget left, projected budget gain, points-per-million, confidence range and worst-case downside.</p>"
+            "<h2>Why it helps</h2>"
+            "<p>The best-looking team is not always the best fantasy team. A lineup with slightly fewer headline points might have a stronger budget path, a safer floor, or better value for future transfers. Team Compare puts those trade-offs in one view.</p>"
+            "<h2>How to use it</h2>"
+            "<ul><li>Enter Team A, Team B and Team C, or copy your current Transfer Advisor team with <strong>Use Current</strong>.</li>"
+            "<li>Watch the live budget tracker while you add drivers and constructors.</li>"
+            "<li>Pick a points basis and chip, then compare team totals and per-pick contributions.</li></ul>"
+            '<div class="callout">Use it after the Optimizer if you have two or three realistic teams and want to understand the trade-off before making the final call.</div>'
+        ),
+        "faqs": [
+            ("Can I compare F1 Fantasy teams before choosing one?",
+             "Yes. BoxBox Team Compare lets you enter up to three full F1 Fantasy teams and compare projected score, budget, value, confidence range, price movement and downside risk side-by-side."),
+            ("Does Team Compare include the captain boost?",
+             "Yes. The comparison automatically applies the normal 2x boost to the highest-scoring driver by the selected points basis. With the 3x Boost chip, the top driver gets 3x and the second driver gets 2x."),
+        ],
+        "cta": ("/#optimizer", "Open Team Compare →"),
+    },
+    {
         "base": "tools", "crumb": "Tools", "slug": "transfer-planner",
         "crumb_self": "Transfer Planner",
         "title": "F1 Fantasy Transfer Planner & Advisor (Free) | BoxBox",
@@ -754,9 +849,12 @@ def main() -> None:
         rel_paths += [f"{base}/{it['slug']}/" for it in items]
 
     write_sitemap(rel_paths)
+    write_robots()
+    write_llms_txt(rel_paths)
 
     print(f"[14_build_seo_pages] wrote {written} race page(s) + {len(GUIDES)} guide(s) "
-          f"+ {len(TOOLS)} tool page(s) + 3 hubs + sitemap.xml ({len(rel_paths)} URLs)")
+          f"+ {len(TOOLS)} tool page(s) + 3 hubs + sitemap.xml ({len(rel_paths)} URLs) "
+          "+ robots.txt + llms.txt")
 
 
 if __name__ == "__main__":
