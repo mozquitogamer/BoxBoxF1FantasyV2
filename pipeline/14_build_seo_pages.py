@@ -406,6 +406,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Race picks hub: https://boxboxf1fantasy.com/picks/",
         "- Strategy guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
+        "- F1 Fantasy predictions: https://boxboxf1fantasy.com/tools/f1-fantasy-predictions/",
         "- Lineup optimizer: https://boxboxf1fantasy.com/tools/lineup-optimizer/",
         "- Team compare: https://boxboxf1fantasy.com/tools/team-compare/",
         "- Transfer planner: https://boxboxf1fantasy.com/tools/transfer-planner/",
@@ -672,6 +673,34 @@ GUIDES = [
 ]
 
 TOOLS = [
+    {
+        "base": "tools", "crumb": "Tools", "slug": "f1-fantasy-predictions",
+        "crumb_self": "Predictions",
+        "title": "F1 Fantasy Predictions 2026: Drivers, Constructors & Points | BoxBox",
+        "desc": "Free F1 Fantasy 2026 predictions for every race weekend: projected driver points, constructor points, confidence ranges, value ratings, race picks and optimizer tools.",
+        "h1": "F1 Fantasy Predictions 2026",
+        "intro": '<p class="lede">Free F1 Fantasy predictions for every 2026 race weekend: driver points, constructor points, confidence ranges, value ratings and race-week picks.</p>',
+        "body": (
+            "<h2>What you get</h2>"
+            "<p>BoxBox publishes current-round projections for every driver and constructor, including expected fantasy points, predicted qualifying and race positions, price/value signals, confidence intervals and risk notes.</p>"
+            "<h2>How to use the predictions</h2>"
+            "<ul><li>Start with the live driver and constructor cards to see projected points and confidence ranges.</li>"
+            "<li>Use the race-pick page for a quick summary of the best picks, best value options and captain/boost candidate.</li>"
+            "<li>Feed the projections into the Optimizer, Team Compare or Transfer Planner when you need an actual team decision.</li></ul>"
+            "<h2>Why the numbers change during a race weekend</h2>"
+            "<p>Before practice, projections lean on form, team strength, circuit profile and historical patterns. After free practice and qualifying, the site refreshes with new weekend evidence, so the order can move as real pace becomes clearer.</p>"
+            '<div class="callout">For the full ranked list, open the live <a href="/#drivers">Drivers</a> and <a href="/#constructors">Constructors</a> tabs. For a race-week shortcut, start with the <a href="/picks/">Race Picks</a> hub.</div>'
+        ),
+        "faqs": [
+            ("Where can I find F1 Fantasy predictions for this race?",
+             "The live BoxBox homepage shows current-round projections for all drivers and constructors, and the Race Picks hub has a crawlable summary page for each Grand Prix with top picks, value picks and constructor picks."),
+            ("Do the predictions update after practice?",
+             "Yes. Predictions are refreshed through the race weekend. Pre-practice projections use historical and season signals; after free practice and qualifying, the model can incorporate more current weekend evidence."),
+            ("Are the F1 Fantasy predictions free?",
+             "Yes. BoxBox predictions, race picks, optimizer tools and transfer tools are free with no login required."),
+        ],
+        "cta": ("/#drivers", "Open live F1 Fantasy predictions →"),
+    },
     {
         "base": "tools", "crumb": "Tools", "slug": "lineup-optimizer",
         "crumb_self": "Lineup Optimizer",
