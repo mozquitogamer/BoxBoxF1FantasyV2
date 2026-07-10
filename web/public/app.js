@@ -3852,7 +3852,10 @@ function renderTeamCompareGrid() {
         return `<div class="team-compare-editor">
             <div class="team-compare-editor-header">
                 <h4>${teamState.name}</h4>
-                <button type="button" class="team-compare-mini-btn" data-copy-current="${teamIdx}" title="Copy your current Transfer Advisor team into this comparison slot." aria-label="Copy your current Transfer Advisor team into ${teamState.name}">Use Current</button>
+                <div class="team-compare-copy-help">
+                    <button type="button" class="team-compare-mini-btn" data-copy-current="${teamIdx}" title="Copy your current Transfer Advisor team into this comparison slot." aria-describedby="copyCurrentHint-${teamIdx}" aria-label="Copy your current Transfer Advisor team into ${teamState.name}">Use Current</button>
+                    <span class="team-compare-tooltip" id="copyCurrentHint-${teamIdx}" role="tooltip">Copies the 5 drivers and 2 constructors from your Transfer Advisor current team into this comparison slot.</span>
+                </div>
             </div>
             <div class="team-compare-budget${budgetClass}">
                 <span>${budgetSummary.picked}/7 picked</span>

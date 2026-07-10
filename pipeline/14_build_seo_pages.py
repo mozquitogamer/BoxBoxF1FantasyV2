@@ -25,6 +25,7 @@ import json
 import re
 import unicodedata
 from datetime import datetime, timezone
+from email.utils import format_datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -157,6 +158,8 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 <meta name="twitter:site" content="@BoxBoxF1Fantasy">
 <meta name="twitter:image" content="{SITE}/og-image.png">
 <link rel="icon" type="image/png" href="/favicon.png">
+<link rel="alternate" type="application/rss+xml" title="BoxBoxF1Fantasy updates" href="/feed.xml">
+<link rel="alternate" type="application/feed+json" title="BoxBoxF1Fantasy updates" href="/feed.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -454,6 +457,8 @@ Allow: /guides/
 Allow: /tools/
 Allow: /about/
 Allow: /privacy/
+Allow: /feed.xml
+Allow: /feed.json
 Allow: /data/predictions.json
 Allow: /data/season_summary.json
 Allow: /llms.txt
@@ -484,6 +489,8 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
         "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
         "- Privacy policy: https://boxboxf1fantasy.com/privacy/",
+        "- RSS feed: https://boxboxf1fantasy.com/feed.xml",
+        "- JSON feed: https://boxboxf1fantasy.com/feed.json",
         "- F1 Fantasy predictions: https://boxboxf1fantasy.com/tools/f1-fantasy-predictions/",
         "- Best F1 Fantasy team: https://boxboxf1fantasy.com/tools/best-f1-fantasy-team/",
         "- F1 Fantasy captain picks: https://boxboxf1fantasy.com/tools/f1-fantasy-captain-picks/",
@@ -516,6 +523,61 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "",
     ])
     (WEB / "llms.txt").write_text("\n".join(lines), encoding="utf-8")
+
+
+def write_feeds(feed_items: list[dict]) -> None:
+    """Write RSS and JSON Feed files for crawlers, readers, and AI agents."""
+    now = datetime.now(timezone.utc)
+    rss_items = []
+    json_items = []
+    for item in feed_items:
+        title = item["title"]
+        url = item["url"]
+        summary = item["summary"]
+        updated = item.get("updated") or now
+        rss_items.append(
+            "<item>"
+            f"<title>{esc(title)}</title>"
+            f"<link>{esc(url)}</link>"
+            f"<guid isPermaLink=\"true\">{esc(url)}</guid>"
+            f"<description>{esc(summary)}</description>"
+            f"<pubDate>{format_datetime(updated)}</pubDate>"
+            "</item>"
+        )
+        json_items.append({
+            "id": url,
+            "url": url,
+            "title": title,
+            "summary": summary,
+            "date_published": updated.isoformat(),
+            "date_modified": updated.isoformat(),
+        })
+
+    rss = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n'
+        "<channel>\n"
+        "<title>BoxBoxF1Fantasy updates</title>\n"
+        f"<link>{SITE}/</link>\n"
+        "<description>Latest F1 Fantasy predictions, race picks, tools and guides from BoxBoxF1Fantasy.</description>\n"
+        "<language>en</language>\n"
+        f"<lastBuildDate>{format_datetime(now)}</lastBuildDate>\n"
+        f'<atom:link href="{SITE}/feed.xml" rel="self" type="application/rss+xml" />\n'
+        + "\n".join(rss_items)
+        + "\n</channel>\n</rss>\n"
+    )
+    (WEB / "feed.xml").write_text(rss, encoding="utf-8")
+
+    feed_json = {
+        "version": "https://jsonfeed.org/version/1.1",
+        "title": "BoxBoxF1Fantasy updates",
+        "home_page_url": f"{SITE}/",
+        "feed_url": f"{SITE}/feed.json",
+        "description": "Latest F1 Fantasy predictions, race picks, tools and guides from BoxBoxF1Fantasy.",
+        "language": "en",
+        "items": json_items,
+    }
+    (WEB / "feed.json").write_text(json.dumps(feed_json, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 # --------------------------------------------------------------------------- #
@@ -1083,6 +1145,16 @@ def main() -> None:
 
     # all sitemap URLs (relative): home + picks + guides + tools
     rel_paths = ["", "picks/"] + [f"picks/{e[0]}/" for e in entries]
+    now = datetime.now(timezone.utc)
+    feed_items = [
+        {
+            "title": f"F1 Fantasy Picks: {short_race(name)} {YEAR}",
+            "url": f"{SITE}/picks/{slug}/",
+            "summary": f"Race-week F1 Fantasy picks, projected points, value picks and constructor choices for {name}.",
+            "updated": now,
+        }
+        for slug, name, date, rn, is_current in entries[:8]
+    ]
 
     # --- static content: guides + tools + their hubs ---
     for base, crumb, items, hub in (
@@ -1098,6 +1170,19 @@ def main() -> None:
         (out_base / "index.html").write_text(render_list_hub(base, crumb, hub, items), encoding="utf-8")
         rel_paths.append(f"{base}/")
         rel_paths += [f"{base}/{it['slug']}/" for it in items]
+        feed_items.append({
+            "title": hub["h1"],
+            "url": f"{SITE}/{base}/",
+            "summary": hub["desc"],
+            "updated": now,
+        })
+        for it in items:
+            feed_items.append({
+                "title": it["h1"],
+                "url": f"{SITE}/{base}/{it['slug']}/",
+                "summary": it["desc"],
+                "updated": now,
+            })
 
     # --- static trust/compliance pages ---
     for page in STATIC_PAGES:
@@ -1105,15 +1190,22 @@ def main() -> None:
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "index.html").write_text(render_static_page(page), encoding="utf-8")
         rel_paths.append(f"{page['slug']}/")
+        feed_items.append({
+            "title": page["h1"],
+            "url": f"{SITE}/{page['slug']}/",
+            "summary": page["desc"],
+            "updated": now,
+        })
 
     write_sitemap(rel_paths)
     write_robots()
     write_llms_txt(rel_paths)
+    write_feeds(feed_items)
 
     print(f"[14_build_seo_pages] wrote {written} race page(s) + {len(GUIDES)} guide(s) "
           f"+ {len(TOOLS)} tool page(s) + {len(STATIC_PAGES)} static page(s) + 3 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
-          "+ robots.txt + llms.txt")
+          "+ robots.txt + llms.txt + feeds")
 
 
 if __name__ == "__main__":

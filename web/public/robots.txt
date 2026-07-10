@@ -5,6 +5,8 @@ Allow: /guides/
 Allow: /tools/
 Allow: /about/
 Allow: /privacy/
+Allow: /feed.xml
+Allow: /feed.json
 Allow: /data/predictions.json
 Allow: /data/season_summary.json
 Allow: /llms.txt
