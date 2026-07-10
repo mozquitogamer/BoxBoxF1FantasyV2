@@ -3853,8 +3853,8 @@ function renderTeamCompareGrid() {
             <div class="team-compare-editor-header">
                 <h4>${teamState.name}</h4>
                 <div class="team-compare-copy-help">
-                    <button type="button" class="team-compare-mini-btn" data-copy-current="${teamIdx}" title="Copy your current Transfer Advisor team into this comparison slot." aria-describedby="copyCurrentHint-${teamIdx}" aria-label="Copy your current Transfer Advisor team into ${teamState.name}">Use Current</button>
-                    <span class="team-compare-tooltip" id="copyCurrentHint-${teamIdx}" role="tooltip">Copies the 5 drivers and 2 constructors from your Transfer Advisor current team into this comparison slot.</span>
+                    <button type="button" class="team-compare-mini-btn" data-copy-current="${teamIdx}" title="Copy the team currently entered in Transfer Advisor into this comparison slot." aria-describedby="copyCurrentHint-${teamIdx}" aria-label="Copy the Transfer Advisor current team into ${teamState.name}">Use Current <span aria-hidden="true" class="team-compare-hint-dot">?</span></button>
+                    <span class="team-compare-tooltip" id="copyCurrentHint-${teamIdx}" role="tooltip">Copies the current Transfer Advisor lineup here: 5 driver slots and 2 constructor slots. If that team is blank, this slot will be blank too.</span>
                 </div>
             </div>
             <div class="team-compare-budget${budgetClass}">

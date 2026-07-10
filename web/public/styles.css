@@ -1070,10 +1070,29 @@ select:focus, input:focus {
     font: inherit;
     font-size: 0.75rem;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
 }
 .team-compare-mini-btn:hover {
     color: var(--text);
     border-color: var(--accent);
+}
+.team-compare-hint-dot {
+    display: inline-grid;
+    place-items: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    font-size: 0.65rem;
+    line-height: 1;
+}
+.team-compare-mini-btn:hover .team-compare-hint-dot,
+.team-compare-mini-btn:focus-visible .team-compare-hint-dot {
+    background: var(--accent);
+    color: #fff;
 }
 .team-compare-copy-help {
     position: relative;
