@@ -26,6 +26,7 @@ import re
 import unicodedata
 from datetime import datetime, timezone
 from email.utils import format_datetime
+from itertools import combinations
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -135,6 +136,94 @@ def breadcrumb_ld(items: list[tuple[str, str]]) -> dict:
             for i, (label, url) in enumerate(items, 1)
         ],
     }
+
+
+def _pts(item: dict) -> float:
+    return float(item.get("expected_points") or 0)
+
+
+def _price(item: dict) -> float:
+    return float(item.get("current_price") or 0)
+
+
+def suggested_lineup(pred: dict, budget: float = 100.0) -> dict | None:
+    """Best simple current-round lineup by expected points under a normal budget.
+
+    This is intentionally a plain public-prediction recommendation for crawlable
+    SEO pages. The live optimizer remains the full interactive tool with locks,
+    exclusions, chips and strategy modes.
+    """
+    drivers = pred.get("drivers", [])
+    constructors = pred.get("constructors", [])
+    if len(drivers) < 5 or len(constructors) < 2:
+        return None
+
+    con_pairs = []
+    for pair in combinations(constructors, 2):
+        con_pairs.append({
+            "items": pair,
+            "cost": sum(_price(c) for c in pair),
+            "points": sum(_pts(c) for c in pair),
+        })
+
+    best = None
+    for driver_combo in combinations(drivers, 5):
+        driver_cost = sum(_price(d) for d in driver_combo)
+        if driver_cost > budget:
+            continue
+        driver_points = sum(_pts(d) for d in driver_combo)
+        captain = max(driver_combo, key=_pts)
+        # Normal F1 Fantasy scoring doubles the best driver; add one extra copy.
+        boost_points = _pts(captain)
+        remaining = budget - driver_cost
+        for con_pair in con_pairs:
+            total_cost = driver_cost + con_pair["cost"]
+            if con_pair["cost"] > remaining:
+                continue
+            total_points = driver_points + con_pair["points"] + boost_points
+            if not best or total_points > best["points"]:
+                best = {
+                    "drivers": sorted(driver_combo, key=_pts, reverse=True),
+                    "constructors": sorted(con_pair["items"], key=_pts, reverse=True),
+                    "captain": captain,
+                    "cost": total_cost,
+                    "bank": budget - total_cost,
+                    "points": total_points,
+                    "unboosted_points": driver_points + con_pair["points"],
+                    "budget": budget,
+                }
+    return best
+
+
+def suggested_lineup_html(pred: dict) -> str:
+    lineup = suggested_lineup(pred)
+    if not lineup:
+        return ""
+
+    driver_rows = "".join(
+        f'<tr><td>{esc(d.get("name", d.get("driver_id", "")))}</td>'
+        f'<td>Driver{" / 2x boost" if d is lineup["captain"] else ""}</td>'
+        f'<td class="num">${_price(d):.1f}M</td>'
+        f'<td class="num">{_pts(d):.1f}</td></tr>'
+        for d in lineup["drivers"]
+    )
+    constructor_rows = "".join(
+        f'<tr><td>{esc(c.get("name", c.get("constructor_id", "")))}</td>'
+        '<td>Constructor</td>'
+        f'<td class="num">${_price(c):.1f}M</td>'
+        f'<td class="num">{_pts(c):.1f}</td></tr>'
+        for c in lineup["constructors"]
+    )
+    return (
+        "<h2>Suggested $100M lineup</h2>"
+        f'<p>This crawlable snapshot uses the current public projections and a normal 2x boost on <strong>{esc(lineup["captain"].get("name", "the top driver"))}</strong>. '
+        'For locks, exclusions, chips and custom budgets, use the live Optimizer.</p>'
+        '<table><thead><tr><th>Pick</th><th>Slot</th><th class="num">Price</th><th class="num">Base pts</th></tr></thead><tbody>'
+        + driver_rows + constructor_rows +
+        "</tbody></table>"
+        f'<div class="callout"><strong>Suggested team total:</strong> {lineup["points"]:.1f} pts with normal 2x boost &middot; '
+        f'<strong>Cost:</strong> ${lineup["cost"]:.1f}M &middot; <strong>Bank:</strong> ${lineup["bank"]:.1f}M.</div>'
+    )
 
 
 # GA4 snippet. Plain (non-f) string so the JS braces survive. Unlike the SPA,
@@ -384,6 +473,7 @@ def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
         + intro
         + cap_line
         + cta
+        + suggested_lineup_html(pred)
         + "<h2>Top driver picks</h2>"
         + f"<p>Ranked by predicted fantasy points for the {esc(short)}. PPM = points per $million (value).</p>"
         + drivers_table
@@ -978,7 +1068,7 @@ def _faq_html(faqs) -> str:
     return "".join(f'<p class="faq-q">{esc(q)}</p><p class="faq-a">{esc(a)}</p>' for q, a in faqs)
 
 
-def render_content_page(item: dict) -> str:
+def render_content_page(item: dict, current: dict | None = None) -> str:
     base = item["base"]            # "guides" or "tools"
     crumb = item["crumb"]          # "Guides" or "Tools"
     canonical = f"{SITE}/{base}/{item['slug']}/"
@@ -1006,11 +1096,12 @@ def render_content_page(item: dict) -> str:
         href, label = item["cta"]
         cta = f'<div class="btnrow"><a class="cta" href="{href}">{esc(label)}</a></div>'
     faq_section = (f"<h2>FAQ</h2>{_faq_html(faqs)}") if faqs else ""
+    dynamic = suggested_lineup_html(current) if current and item.get("slug") == "best-f1-fantasy-team" else ""
 
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/{base}/">{esc(crumb)}</a> &rsaquo; {esc(item["crumb_self"])}</p>'
         f'<h1>{esc(item["h1"])}</h1>'
-        + item["intro"] + cta + item["body"] + faq_section + cta
+        + item["intro"] + cta + dynamic + item["body"] + faq_section + cta
     )
     return page_head(item["title"], item["desc"], canonical, ld_block(ld_objs)) + body + FOOTER
 
@@ -1609,7 +1700,7 @@ def main() -> None:
         for it in items:
             d = out_base / it["slug"]
             d.mkdir(parents=True, exist_ok=True)
-            (d / "index.html").write_text(render_content_page(it), encoding="utf-8")
+            (d / "index.html").write_text(render_content_page(it, current), encoding="utf-8")
         (out_base / "index.html").write_text(render_list_hub(base, crumb, hub, items), encoding="utf-8")
         rel_paths.append(f"{base}/")
         rel_paths += [f"{base}/{it['slug']}/" for it in items]
