@@ -33,6 +33,7 @@ DATA = WEB / "data"
 PICKS = WEB / "picks"
 SITE = "https://boxboxf1fantasy.com"
 YEAR = 2026
+CONTACT_EMAIL = "boxboxf1fantasy@gmail.com"
 
 TOP_DRIVERS = 10      # rows in the "top picks" table
 VALUE_DRIVERS = 6     # rows in the "best value" table
@@ -173,7 +174,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 
 FOOTER = f"""</main>
 <footer class="footer"><div class="wrap">
-<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a></p>
+<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
@@ -451,6 +452,8 @@ Allow: /
 Allow: /picks/
 Allow: /guides/
 Allow: /tools/
+Allow: /about/
+Allow: /privacy/
 Allow: /data/predictions.json
 Allow: /data/season_summary.json
 Allow: /llms.txt
@@ -479,6 +482,8 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Race picks hub: https://boxboxf1fantasy.com/picks/",
         "- Strategy guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
+        "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
+        "- Privacy policy: https://boxboxf1fantasy.com/privacy/",
         "- F1 Fantasy predictions: https://boxboxf1fantasy.com/tools/f1-fantasy-predictions/",
         "- Best F1 Fantasy team: https://boxboxf1fantasy.com/tools/best-f1-fantasy-team/",
         "- F1 Fantasy captain picks: https://boxboxf1fantasy.com/tools/f1-fantasy-captain-picks/",
@@ -503,6 +508,8 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The optimizer builds legal F1 Fantasy lineups under a budget using current projections and chip settings.",
         "- Team Compare lets users enter up to three teams and compare budget, expected points, value, confidence ranges, budget movement, and downside risk.",
         "- The Accuracy tab publishes prediction performance for completed rounds, including misses.",
+        "- The About page explains independence, contact details, and how to use the site.",
+        "- The Privacy page describes analytics, local storage, advertising readiness, and contact details.",
         "",
         "Disclosure:",
         "BoxBoxF1Fantasy is not affiliated with Formula 1, the FIA, F1 Fantasy, or any F1 team or driver. Predictions are informational and for entertainment.",
@@ -583,6 +590,28 @@ def render_list_hub(base, crumb, hub, items) -> str:
         f'<ul class="racelist">{lis}</ul>'
     )
     return page_head(hub["title"], hub["desc"], canonical, ld) + body + FOOTER
+
+
+def render_static_page(page: dict) -> str:
+    canonical = f"{SITE}/{page['slug']}/"
+    ld = ld_block([
+        webpage_ld(page["title"], canonical, page["desc"], page.get("schema_type", "WebPage")),
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Home", "item": f"{SITE}/"},
+                {"@type": "ListItem", "position": 2, "name": page["crumb_self"], "item": canonical},
+            ],
+        },
+    ])
+    body = (
+        f'<p class="crumbs"><a href="/">Home</a> &rsaquo; {esc(page["crumb_self"])}</p>'
+        f'<h1>{esc(page["h1"])}</h1>'
+        + page["intro"]
+        + page["body"]
+    )
+    return page_head(page["title"], page["desc"], canonical, ld) + body + FOOTER
 
 
 GUIDES_HUB = {
@@ -963,6 +992,57 @@ TOOLS = [
     },
 ]
 
+STATIC_PAGES = [
+    {
+        "slug": "about",
+        "crumb_self": "About",
+        "title": "About BoxBoxF1Fantasy | Free F1 Fantasy Predictions & Tools",
+        "desc": "About BoxBoxF1Fantasy: a free, independent F1 Fantasy prediction site with driver and constructor projections, optimizer tools, race picks, accuracy tracking and contact details.",
+        "h1": "About BoxBoxF1Fantasy",
+        "schema_type": "AboutPage",
+        "intro": '<p class="lede">BoxBoxF1Fantasy is a free, independent F1 Fantasy prediction site built to help players make better driver, constructor, transfer and chip decisions.</p>',
+        "body": (
+            "<h2>What the site does</h2>"
+            "<p>BoxBox publishes current-round F1 Fantasy projections for every driver and constructor, race-week pick summaries, a lineup optimizer, Team Compare, transfer tools, budget/value signals, and an accuracy record for completed rounds.</p>"
+            "<h2>How to use it</h2>"
+            "<p>Start with the live predictions, then use the Optimizer or Team Compare when you need to turn those projections into an actual team. The race-pick pages give a quicker written summary for each Grand Prix, while the guides explain scoring, chips and strategy.</p>"
+            "<h2>Transparency</h2>"
+            "<p>The site is open about uncertainty. Driver cards and comparison tools show confidence ranges, risk notes and downside signals because F1 Fantasy depends on weather, safety cars, reliability, strategy and race incidents. The Accuracy tab keeps a public record of how predictions performed after completed rounds.</p>"
+            "<h2>Independence</h2>"
+            "<p>BoxBoxF1Fantasy is an independent fan-built site. It is not affiliated with, endorsed by, or connected to Formula 1, the FIA, F1 Fantasy, any F1 team, or any driver.</p>"
+            "<h2>Contact</h2>"
+            f'<p>Questions, corrections, bugs or partnership enquiries: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>'
+            '<div class="callout">For the live tools, go to <a href="/">Predictions &amp; Tools</a>. For crawlable race-week summaries, start at <a href="/picks/">Race Picks</a>.</div>'
+        ),
+    },
+    {
+        "slug": "privacy",
+        "crumb_self": "Privacy",
+        "title": "Privacy Policy | BoxBoxF1Fantasy",
+        "desc": "Privacy policy for BoxBoxF1Fantasy, covering analytics, cookies, local browser storage, advertising, external links and contact information.",
+        "h1": "Privacy Policy",
+        "schema_type": "WebPage",
+        "intro": '<p class="lede">This privacy policy explains what BoxBoxF1Fantasy collects and how the site uses it.</p>',
+        "body": (
+            f"<p><strong>Last updated:</strong> {datetime.now(timezone.utc).date().isoformat()}</p>"
+            "<h2>Information we collect</h2>"
+            "<p>BoxBoxF1Fantasy does not require an account and does not ask visitors to create a profile. If you email us, we receive the email address and any information you choose to include in the message.</p>"
+            "<h2>Analytics</h2>"
+            "<p>The site uses Google Analytics to understand aggregate traffic, page usage and engagement. Analytics data may include device/browser information, approximate location, referrer, pages viewed and interaction events. This helps improve the site and understand which pages are useful.</p>"
+            "<h2>Cookies and local storage</h2>"
+            "<p>Google Analytics may use cookies or similar technologies. The site may also use browser local storage for convenience features such as saved scenario settings or team inputs. These are stored in your browser and are used to make the tools work better for you.</p>"
+            "<h2>Advertising</h2>"
+            "<p>The site may add advertising in the future. If ads are added, ad partners may use cookies or similar technologies to measure performance, prevent fraud and personalize or limit ads according to their own policies and your browser settings.</p>"
+            "<h2>External links</h2>"
+            "<p>BoxBoxF1Fantasy links to third-party sites such as social platforms, YouTube, Ko-fi, PayPal and data sources. Those sites have their own privacy policies and practices.</p>"
+            "<h2>Data sharing</h2>"
+            "<p>We do not sell personal information. Aggregated analytics and operational information may be processed by service providers used to host, measure and maintain the site.</p>"
+            "<h2>Contact</h2>"
+            f'<p>For privacy questions, email <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>'
+        ),
+    },
+]
+
 
 # --------------------------------------------------------------------------- #
 # main
@@ -1019,12 +1099,20 @@ def main() -> None:
         rel_paths.append(f"{base}/")
         rel_paths += [f"{base}/{it['slug']}/" for it in items]
 
+    # --- static trust/compliance pages ---
+    for page in STATIC_PAGES:
+        out_dir = WEB / page["slug"]
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "index.html").write_text(render_static_page(page), encoding="utf-8")
+        rel_paths.append(f"{page['slug']}/")
+
     write_sitemap(rel_paths)
     write_robots()
     write_llms_txt(rel_paths)
 
     print(f"[14_build_seo_pages] wrote {written} race page(s) + {len(GUIDES)} guide(s) "
-          f"+ {len(TOOLS)} tool page(s) + 3 hubs + sitemap.xml ({len(rel_paths)} URLs) "
+          f"+ {len(TOOLS)} tool page(s) + {len(STATIC_PAGES)} static page(s) + 3 hubs "
+          f"+ sitemap.xml ({len(rel_paths)} URLs) "
           "+ robots.txt + llms.txt")
 
 

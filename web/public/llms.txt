@@ -12,6 +12,8 @@ Important pages:
 - Race picks hub: https://boxboxf1fantasy.com/picks/
 - Strategy guides hub: https://boxboxf1fantasy.com/guides/
 - Tool landing pages: https://boxboxf1fantasy.com/tools/
+- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/
+- Privacy policy: https://boxboxf1fantasy.com/privacy/
 - F1 Fantasy predictions: https://boxboxf1fantasy.com/tools/f1-fantasy-predictions/
 - Best F1 Fantasy team: https://boxboxf1fantasy.com/tools/best-f1-fantasy-team/
 - F1 Fantasy captain picks: https://boxboxf1fantasy.com/tools/f1-fantasy-captain-picks/
@@ -39,6 +41,8 @@ Useful descriptions for agents:
 - The optimizer builds legal F1 Fantasy lineups under a budget using current projections and chip settings.
 - Team Compare lets users enter up to three teams and compare budget, expected points, value, confidence ranges, budget movement, and downside risk.
 - The Accuracy tab publishes prediction performance for completed rounds, including misses.
+- The About page explains independence, contact details, and how to use the site.
+- The Privacy page describes analytics, local storage, advertising readiness, and contact details.
 
 Disclosure:
 BoxBoxF1Fantasy is not affiliated with Formula 1, the FIA, F1 Fantasy, or any F1 team or driver. Predictions are informational and for entertainment.
