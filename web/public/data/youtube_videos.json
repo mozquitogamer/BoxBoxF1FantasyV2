@@ -1,7 +1,14 @@
 {
-  "updated": "2026-07-08T11:58:19Z",
+  "updated": "2026-07-10T12:37:52Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "d0RuH8RFpk0",
+      "title": "The Best F1 Fantasy Team for the Belgian Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-07-08",
+      "thumbnail": "https://i.ytimg.com/vi/d0RuH8RFpk0/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=d0RuH8RFpk0"
+    },
     {
       "id": "4dDsgiAV71s",
       "title": "F1 Fantasy Deadline Stream - British Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
@@ -22,13 +29,6 @@
       "published": "2026-06-30",
       "thumbnail": "https://i.ytimg.com/vi/0IBbi-pmmZY/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=0IBbi-pmmZY"
-    },
-    {
-      "id": "fMXQQrLUt2g",
-      "title": "F1 Fantasy Deadline Stream - Austrian Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
-      "published": "2026-06-28",
-      "thumbnail": "https://i.ytimg.com/vi/fMXQQrLUt2g/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=fMXQQrLUt2g"
     }
   ]
 }
