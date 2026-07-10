@@ -973,7 +973,7 @@ select:focus, input:focus {
     max-height: 400px;
     overflow-y: auto;
     min-width: 280px;
-    max-width: 360px;
+    max-width: 420px;
 }
 .slot-picker h4 { margin-bottom: 12px; font-size: 14px; }
 .slot-picker-item {
@@ -994,6 +994,15 @@ select:focus, input:focus {
 }
 .slot-picker-item .sp-name { font-weight: 500; font-size: 0.85rem; flex: 1; }
 .slot-picker-item .sp-price { color: var(--text-secondary); font-size: 0.8rem; }
+.slot-picker-item .sp-bank {
+    color: var(--green);
+    font-size: 0.72rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.slot-picker-item .sp-bank.over-budget {
+    color: var(--red, #ef4444);
+}
 .slot-picker-item.disabled { opacity: 0.35; pointer-events: none; }
 
 .my-team-controls {
@@ -1046,6 +1055,41 @@ select:focus, input:focus {
 .team-compare-mini-btn:hover {
     color: var(--text);
     border-color: var(--accent);
+}
+.team-compare-budget {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+    align-items: center;
+    margin: -2px 0 12px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    background: var(--bg-secondary);
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+}
+.team-compare-budget strong {
+    color: var(--text);
+    font-size: 0.82rem;
+    text-align: center;
+}
+.team-compare-budget em {
+    color: var(--green);
+    font-style: normal;
+    font-weight: 700;
+}
+.team-compare-budget span:last-child {
+    grid-column: 1 / -1;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+}
+.team-compare-budget.over-budget {
+    border-color: rgba(239, 68, 68, 0.55);
+    background: rgba(239, 68, 68, 0.08);
+}
+.team-compare-budget.over-budget em {
+    color: var(--red, #ef4444);
 }
 .team-compare-slots {
     display: grid;

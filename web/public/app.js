@@ -1027,6 +1027,14 @@ function setupControls() {
     // Team compare
     const runTeamCompareBtn = document.getElementById('runTeamCompare');
     if (runTeamCompareBtn) runTeamCompareBtn.addEventListener('click', runTeamCompare);
+    const compareBudgetEl = document.getElementById('compareBudget');
+    if (compareBudgetEl) {
+        compareBudgetEl.addEventListener('input', () => renderTeamCompareGrid());
+    }
+    const compareChipEl = document.getElementById('compareChip');
+    if (compareChipEl) {
+        compareChipEl.addEventListener('change', () => renderTeamCompareGrid());
+    }
     const clearTeamCompareBtn = document.getElementById('clearTeamCompare');
     if (clearTeamCompareBtn) {
         clearTeamCompareBtn.addEventListener('click', () => {
@@ -3695,12 +3703,48 @@ function syncBudgetInputsFromTeamCost(totalCost) {
     }
 }
 
+function getCompareBudget() {
+    const value = parseFloat(document.getElementById('compareBudget')?.value || '100');
+    return Number.isFinite(value) ? value : 100;
+}
+
+function compareTeamCost(teamState, omit = {}) {
+    if (!data || !teamState) return 0;
+    let cost = 0;
+    teamState.drivers.forEach((id, idx) => {
+        if (!id || (omit.type === 'driver' && omit.index === idx)) return;
+        const driver = data.drivers.find(d => d.driver_id === id);
+        cost += driver?.current_price || 0;
+    });
+    teamState.constructors.forEach((id, idx) => {
+        if (!id || (omit.type === 'constructor' && omit.index === idx)) return;
+        const constructor = data.constructors.find(c => c.constructor_id === id);
+        cost += constructor?.current_price || 0;
+    });
+    return cost;
+}
+
+function compareTeamBudgetSummary(teamState, budget = getCompareBudget()) {
+    const cost = compareTeamCost(teamState);
+    const bank = budget - cost;
+    const picked = teamState.drivers.filter(Boolean).length + teamState.constructors.filter(Boolean).length;
+    return { cost, bank, picked, overBudget: bank < -0.0001 };
+}
+
 function renderTeamCompareGrid() {
     if (!data) return;
     const grid = document.getElementById('teamCompareGrid');
     if (!grid) return;
+    const budget = getCompareBudget();
+    const chip = document.getElementById('compareChip')?.value || 'none';
 
     grid.innerHTML = compareTeams.map((teamState, teamIdx) => {
+        const budgetSummary = compareTeamBudgetSummary(teamState, budget);
+        const budgetClass = budgetSummary.overBudget && chip !== 'limitless' ? ' over-budget' : '';
+        const budgetText = budgetSummary.bank >= 0
+            ? `$${budgetSummary.bank.toFixed(1)}M left`
+            : `$${Math.abs(budgetSummary.bank).toFixed(1)}M over`;
+        const chipNote = chip === 'limitless' ? '<span>Limitless ignores cap</span>' : '';
         let slots = '';
         for (let i = 0; i < 5; i++) {
             const did = teamState.drivers[i];
@@ -3742,6 +3786,12 @@ function renderTeamCompareGrid() {
             <div class="team-compare-editor-header">
                 <h4>${teamState.name}</h4>
                 <button type="button" class="team-compare-mini-btn" data-copy-current="${teamIdx}">Use Current</button>
+            </div>
+            <div class="team-compare-budget${budgetClass}">
+                <span>${budgetSummary.picked}/7 picked</span>
+                <strong>$${budgetSummary.cost.toFixed(1)}M spent</strong>
+                <em>${budgetText}</em>
+                ${chipNote}
             </div>
             <div class="team-compare-slots">${slots}</div>
         </div>`;
@@ -3929,6 +3979,8 @@ function showSlotPicker(type, index) {
         : new Set(consArr.filter(Boolean));
 
     const items = type === 'driver' ? data.drivers : data.constructors;
+    const compareBaseCost = isCompare ? compareTeamCost(compareState, { type, index }) : 0;
+    const compareBudget = getCompareBudget();
 
     const overlay = document.createElement('div');
     overlay.className = 'slot-picker-overlay';
@@ -3942,10 +3994,16 @@ function showSlotPicker(type, index) {
         const team = TEAMS[type === 'driver' ? item.constructor : item.constructor_id] || { color: '#666' };
         const name = type === 'driver' ? item.name : (item.name || item.constructor_id).toUpperCase();
         const disabled = alreadySelected.has(id) ? ' disabled' : '';
+        const price = item.current_price || 0;
+        const compareBank = compareBudget - compareBaseCost - price;
+        const compareBudgetHtml = isCompare
+            ? `<span class="sp-bank${compareBank < -0.0001 ? ' over-budget' : ''}">${compareBank >= 0 ? `Leaves $${compareBank.toFixed(1)}M` : `$${Math.abs(compareBank).toFixed(1)}M over`}</span>`
+            : '';
         html += `<div class="slot-picker-item${disabled}" data-id="${id}">
             <span class="sp-dot" style="background:${team.color}"></span>
             <span class="sp-name">${name}</span>
-            <span class="sp-price">$${item.current_price.toFixed(1)}M</span>
+            <span class="sp-price">$${price.toFixed(1)}M</span>
+            ${compareBudgetHtml}
         </div>`;
     });
     html += '</div>';
