@@ -226,6 +226,58 @@ def suggested_lineup_html(pred: dict) -> str:
     )
 
 
+def current_value_picks_html(pred: dict) -> str:
+    drivers = pred.get("drivers", [])
+    constructors = pred.get("constructors", [])
+    if not drivers and not constructors:
+        return ""
+
+    value_drivers = sorted(drivers, key=lambda d: d.get("value_score", -999), reverse=True)[:10]
+    budget_drivers = sorted(
+        [d for d in drivers if _price(d) <= 12.0],
+        key=lambda d: d.get("value_score", -999),
+        reverse=True,
+    )[:8]
+    value_constructors = sorted(constructors, key=lambda c: c.get("value_score", -999), reverse=True)[:8]
+
+    def driver_rows(items: list[dict]) -> str:
+        return "".join(
+            f'<tr><td><a href="/drivers/{plain_slug(d.get("name", d.get("driver_id", "driver")))}/">{esc(d.get("name", d.get("driver_id", "")))}</a></td>'
+            f'<td class="num">${_price(d):.1f}M</td>'
+            f'<td class="num">{_pts(d):.1f}</td>'
+            f'<td class="num">{d.get("value_score", 0):.2f}</td>'
+            f'<td class="num">P{d.get("predicted_quali", "-")}&rarr;P{d.get("predicted_finish", "-")}</td></tr>'
+            for d in items
+        )
+
+    con_rows = "".join(
+        f'<tr><td><a href="/constructors/{plain_slug(c.get("name", c.get("constructor_id", "constructor")))}/">{esc(c.get("name", c.get("constructor_id", "")))}</a></td>'
+        f'<td class="num">${_price(c):.1f}M</td>'
+        f'<td class="num">{_pts(c):.1f}</td>'
+        f'<td class="num">{c.get("expected_pit_stop_pts", 0):.1f}</td>'
+        f'<td class="num">{c.get("value_score", 0):.2f}</td></tr>'
+        for c in value_constructors
+    )
+
+    return (
+        "<h2>Best value drivers this week</h2>"
+        '<p>Sorted by projected points per million (PPM). These are not always the top raw scorers; they are the picks giving the most projected return for their price.</p>'
+        '<table><thead><tr><th>Driver</th><th class="num">Price</th><th class="num">Exp. pts</th><th class="num">PPM</th><th class="num">Quali&rarr;Race</th></tr></thead><tbody>'
+        + driver_rows(value_drivers) +
+        "</tbody></table>"
+        "<h2>Budget driver picks</h2>"
+        '<p>Cheap picks can unlock premium drivers or constructors elsewhere. This table filters to drivers at $12.0M or less, then sorts by value.</p>'
+        '<table><thead><tr><th>Driver</th><th class="num">Price</th><th class="num">Exp. pts</th><th class="num">PPM</th><th class="num">Quali&rarr;Race</th></tr></thead><tbody>'
+        + driver_rows(budget_drivers) +
+        "</tbody></table>"
+        "<h2>Best value constructors</h2>"
+        '<p>Constructor value includes both listed drivers, qualifying teamwork bonus, pit-stop points and DNF risk.</p>'
+        '<table><thead><tr><th>Constructor</th><th class="num">Price</th><th class="num">Exp. pts</th><th class="num">Pit pts</th><th class="num">PPM</th></tr></thead><tbody>'
+        + con_rows +
+        "</tbody></table>"
+    )
+
+
 # GA4 snippet. Plain (non-f) string so the JS braces survive. Unlike the SPA,
 # each static page is a real distinct URL, so we let gtag fire its automatic
 # page_view per page (no send_page_view:false) - they show up directly in GA's
@@ -874,6 +926,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- F1 Fantasy predictions: https://boxboxf1fantasy.com/tools/f1-fantasy-predictions/",
         "- Best F1 Fantasy team: https://boxboxf1fantasy.com/tools/best-f1-fantasy-team/",
         "- F1 Fantasy captain picks: https://boxboxf1fantasy.com/tools/f1-fantasy-captain-picks/",
+        "- F1 Fantasy value picks: https://boxboxf1fantasy.com/tools/f1-fantasy-value-picks/",
         "- Lineup optimizer: https://boxboxf1fantasy.com/tools/lineup-optimizer/",
         "- Team compare: https://boxboxf1fantasy.com/tools/team-compare/",
         "- Transfer planner: https://boxboxf1fantasy.com/tools/transfer-planner/",
@@ -1096,7 +1149,11 @@ def render_content_page(item: dict, current: dict | None = None) -> str:
         href, label = item["cta"]
         cta = f'<div class="btnrow"><a class="cta" href="{href}">{esc(label)}</a></div>'
     faq_section = (f"<h2>FAQ</h2>{_faq_html(faqs)}") if faqs else ""
-    dynamic = suggested_lineup_html(current) if current and item.get("slug") == "best-f1-fantasy-team" else ""
+    dynamic = ""
+    if current and item.get("slug") == "best-f1-fantasy-team":
+        dynamic = suggested_lineup_html(current)
+    elif current and item.get("slug") == "f1-fantasy-value-picks":
+        dynamic = current_value_picks_html(current)
 
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/{base}/">{esc(crumb)}</a> &rsaquo; {esc(item["crumb_self"])}</p>'
@@ -1415,6 +1472,32 @@ TOOLS = [
              "Yes. Team Compare marks the boosted driver contribution, including 2x, 3x and second-driver 2x behaviour when a chip applies."),
         ],
         "cta": ("/#drivers", "See captain pick projections →"),
+    },
+    {
+        "base": "tools", "crumb": "Tools", "slug": "f1-fantasy-value-picks",
+        "crumb_self": "Value Picks",
+        "title": "F1 Fantasy Value Picks 2026: Best Budget Picks This Week | BoxBox",
+        "desc": "Free F1 Fantasy value picks for the current race weekend: best points-per-million drivers, budget picks and constructor value based on live projections.",
+        "h1": "F1 Fantasy Value Picks This Week",
+        "intro": '<p class="lede">Find the best F1 Fantasy value picks for the current race weekend: drivers and constructors with the strongest projected points per million.</p>',
+        "body": (
+            "<h2>How to use value picks</h2>"
+            "<p>Value picks are not always the highest raw scorers. They are the drivers and constructors whose projected points are strongest relative to price, which helps you fit premium picks elsewhere without wasting budget.</p>"
+            "<h2>What PPM means</h2>"
+            "<p>PPM means points per million: expected fantasy points divided by price. A higher PPM means a pick is doing more work for each dollar of budget.</p>"
+            "<h2>When value matters most</h2>"
+            "<p>Value matters most when you are trying to squeeze in a premium captain, when your budget is tight, or when you want picks that may appreciate in price after the round.</p>"
+            '<div class="callout">For a full team built around value, open the <a href="/#optimizer">Optimizer</a> and choose the Max Value or Budget Builder strategy.</div>'
+        ),
+        "faqs": [
+            ("Who are the best F1 Fantasy value picks this week?",
+             "The best value picks are the current drivers and constructors with the strongest projected points per million. BoxBox lists them in the tables on this page and refreshes them when the prediction pipeline updates."),
+            ("What does PPM mean in F1 Fantasy?",
+             "PPM means points per million: expected fantasy points divided by current fantasy price. It is a quick way to compare value across cheap and expensive picks."),
+            ("Should I pick the highest PPM drivers or the highest projected points?",
+             "Use both. High projected points win the week, but high PPM picks make the budget work. The best lineups usually combine premium upside with two or three strong-value picks."),
+        ],
+        "cta": ("/#drivers", "Open live value rankings â†’"),
     },
     {
         "base": "tools", "crumb": "Tools", "slug": "lineup-optimizer",
