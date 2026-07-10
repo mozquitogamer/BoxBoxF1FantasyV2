@@ -74,6 +74,50 @@ def ld_block(objs: list) -> str:
     )
 
 
+def publisher_ld() -> dict:
+    return {
+        "@type": "Organization",
+        "name": "BoxBoxF1Fantasy",
+        "url": f"{SITE}/",
+        "logo": f"{SITE}/logo.png",
+    }
+
+
+def webpage_ld(name: str, url: str, desc: str, page_type: str = "WebPage") -> dict:
+    return {
+        "@context": "https://schema.org",
+        "@type": page_type,
+        "name": name,
+        "url": url,
+        "description": desc,
+        "inLanguage": "en",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "BoxBoxF1Fantasy",
+            "url": f"{SITE}/",
+        },
+        "publisher": publisher_ld(),
+    }
+
+
+def item_list_ld(name: str, url: str, items: list[tuple[str, str]]) -> dict:
+    return {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": name,
+        "url": url,
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": i,
+                "name": label,
+                "url": item_url,
+            }
+            for i, (label, item_url) in enumerate(items, 1)
+        ],
+    }
+
+
 # GA4 snippet. Plain (non-f) string so the JS braces survive. Unlike the SPA,
 # each static page is a real distinct URL, so we let gtag fire its automatic
 # page_view per page (no send_page_view:false) - they show up directly in GA's
@@ -271,6 +315,27 @@ def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
 
     ld = ld_block([
         {
+            **webpage_ld(title, canonical, desc, "Article"),
+            "headline": title,
+            "dateModified": gen_date or datetime.now(timezone.utc).date().isoformat(),
+            "about": [
+                "F1 Fantasy",
+                race,
+                f"{short} {YEAR}",
+                "Fantasy sports predictions",
+            ],
+        },
+        item_list_ld(
+            f"Top F1 Fantasy driver picks for {short} {YEAR}",
+            canonical,
+            [(d["name"], canonical) for d in by_pts[:TOP_DRIVERS]],
+        ),
+        item_list_ld(
+            f"Top F1 Fantasy constructor picks for {short} {YEAR}",
+            canonical,
+            [(c.get("name", c["constructor_id"]), canonical) for c in cons_by_pts[:TOP_CONSTRUCTORS]],
+        ),
+        {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
@@ -331,14 +396,22 @@ def render_index(entries: list) -> str:
             f'<span class="date">{esc(date)}</span></li>'
         )
 
-    ld = ld_block([{
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {"@type": "ListItem", "position": 1, "name": "Home", "item": f"{SITE}/"},
-            {"@type": "ListItem", "position": 2, "name": "F1 Fantasy Picks", "item": canonical},
-        ],
-    }])
+    ld = ld_block([
+        webpage_ld(title, canonical, desc, "CollectionPage"),
+        item_list_ld(
+            f"F1 Fantasy race picks pages for {YEAR}",
+            canonical,
+            [(f"{short_race(name)} {YEAR}", f"{SITE}/picks/{slug}/") for slug, name, date, rn, is_current in entries],
+        ),
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Home", "item": f"{SITE}/"},
+                {"@type": "ListItem", "position": 2, "name": "F1 Fantasy Picks", "item": canonical},
+            ],
+        },
+    ])
 
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; Picks</p>'
@@ -451,7 +524,9 @@ def render_content_page(item: dict) -> str:
     canonical = f"{SITE}/{base}/{item['slug']}/"
     faqs = item.get("faqs", [])
 
-    ld_objs = [{
+    ld_objs = [
+        webpage_ld(item["title"], canonical, item["desc"], "WebPage"),
+        {
         "@context": "https://schema.org", "@type": "BreadcrumbList",
         "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "Home", "item": f"{SITE}/"},
@@ -482,13 +557,21 @@ def render_content_page(item: dict) -> str:
 
 def render_list_hub(base, crumb, hub, items) -> str:
     canonical = f"{SITE}/{base}/"
-    ld = ld_block([{
-        "@context": "https://schema.org", "@type": "BreadcrumbList",
-        "itemListElement": [
-            {"@type": "ListItem", "position": 1, "name": "Home", "item": f"{SITE}/"},
-            {"@type": "ListItem", "position": 2, "name": crumb, "item": canonical},
-        ],
-    }])
+    ld = ld_block([
+        webpage_ld(hub["title"], canonical, hub["desc"], "CollectionPage"),
+        item_list_ld(
+            f"BoxBoxF1Fantasy {crumb}",
+            canonical,
+            [(it["crumb_self"], f"{SITE}/{base}/{it['slug']}/") for it in items],
+        ),
+        {
+            "@context": "https://schema.org", "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Home", "item": f"{SITE}/"},
+                {"@type": "ListItem", "position": 2, "name": crumb, "item": canonical},
+            ],
+        },
+    ])
     lis = "".join(
         f'<li><span><a href="/{base}/{it["slug"]}/">{esc(it["crumb_self"])}</a></span></li>'
         for it in items
