@@ -407,6 +407,8 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Strategy guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
         "- F1 Fantasy predictions: https://boxboxf1fantasy.com/tools/f1-fantasy-predictions/",
+        "- Best F1 Fantasy team: https://boxboxf1fantasy.com/tools/best-f1-fantasy-team/",
+        "- F1 Fantasy captain picks: https://boxboxf1fantasy.com/tools/f1-fantasy-captain-picks/",
         "- Lineup optimizer: https://boxboxf1fantasy.com/tools/lineup-optimizer/",
         "- Team compare: https://boxboxf1fantasy.com/tools/team-compare/",
         "- Transfer planner: https://boxboxf1fantasy.com/tools/transfer-planner/",
@@ -700,6 +702,63 @@ TOOLS = [
              "Yes. BoxBox predictions, race picks, optimizer tools and transfer tools are free with no login required."),
         ],
         "cta": ("/#drivers", "Open live F1 Fantasy predictions →"),
+    },
+    {
+        "base": "tools", "crumb": "Tools", "slug": "best-f1-fantasy-team",
+        "crumb_self": "Best Team",
+        "title": "Best F1 Fantasy Team 2026: Free Optimizer & Picks | BoxBox",
+        "desc": "Find the best F1 Fantasy team for the current race weekend with free driver and constructor projections, budget checks, chips, value ratings and a lineup optimizer.",
+        "h1": "Best F1 Fantasy Team 2026",
+        "intro": '<p class="lede">Looking for the best F1 Fantasy team this week? Use current driver and constructor projections, budget checks and chip settings to build a lineup that actually fits.</p>',
+        "body": (
+            "<h2>What makes a good F1 Fantasy team?</h2>"
+            "<p>The best team is not just the seven highest names on the points list. It has to fit your budget, use constructors efficiently, leave enough value for transfers, and put the 2x or 3x boost on the right driver.</p>"
+            "<h2>Fast way to build one</h2>"
+            "<ul><li>Open the Lineup Optimizer and set your real team budget.</li>"
+            "<li>Choose a strategy: Max Points, Balanced, Max Value or Budget Builder.</li>"
+            "<li>Lock any drivers or constructors you already know you want, and exclude picks you do not trust.</li>"
+            "<li>Run the optimizer, then compare two or three realistic teams in Team Compare before locking in.</li></ul>"
+            "<h2>What to check before deadline</h2>"
+            "<p>Before the lock deadline, review updated practice or qualifying information, DNF risk, price-change brackets, and whether a chip changes the best lineup. A team that was best pre-practice may not still be best after fresh weekend data arrives.</p>"
+            '<div class="callout">For race-specific suggestions, start with the <a href="/picks/">Race Picks</a> page. For the mathematically best legal lineup, use the <a href="/tools/lineup-optimizer/">Lineup Optimizer</a>.</div>'
+        ),
+        "faqs": [
+            ("What is the best F1 Fantasy team this week?",
+             "The best team depends on the current race, your budget, chips and any locked picks. BoxBox uses current-round projections to score legal 5-driver, 2-constructor lineups and find the strongest team for your settings."),
+            ("Should I use an optimizer for F1 Fantasy?",
+             "Yes, especially when budget is tight. A good optimizer checks the full driver and constructor combination space instead of guessing from the top projected scorers."),
+            ("How do I compare two F1 Fantasy teams?",
+             "Use Team Compare to enter up to three teams and compare expected points, budget, value, confidence range, projected budget gain and worst-case downside."),
+        ],
+        "cta": ("/#optimizer", "Find your best F1 Fantasy team →"),
+    },
+    {
+        "base": "tools", "crumb": "Tools", "slug": "f1-fantasy-captain-picks",
+        "crumb_self": "Captain Picks",
+        "title": "F1 Fantasy Captain Picks 2026: 2x & 3x Boost Advice | BoxBox",
+        "desc": "Free F1 Fantasy captain and boost pick advice for 2026: compare projected driver points, downside risk, confidence ranges and 3x Boost candidates.",
+        "h1": "F1 Fantasy Captain Picks 2026",
+        "intro": '<p class="lede">Pick the right boosted driver for the current F1 Fantasy round by comparing projected points, confidence range and downside risk.</p>',
+        "body": (
+            "<h2>What makes a good captain pick?</h2>"
+            "<p>Your boosted driver should combine high expected points with a strong floor. A driver with a huge ceiling but a wide downside can be worth a punt, but the safest captain is usually the top projected scorer with manageable DNF and volatility risk.</p>"
+            "<h2>2x, Autopilot and 3x Boost</h2>"
+            "<ul><li><strong>Normal round:</strong> your highest-scoring driver gets the 2x boost.</li>"
+            "<li><strong>Autopilot:</strong> the game automatically applies 2x to your best-scoring driver after the round.</li>"
+            "<li><strong>3x Boost:</strong> the top driver gets 3x and the second-best driver gets 2x, so your top two driver choices matter.</li></ul>"
+            "<h2>How BoxBox helps</h2>"
+            "<p>The driver cards show projected points, risk-adjusted points, confidence intervals and DNF risk. Team Compare also shows which driver receives the boost in a full team context, so you can see the real effect on your total score.</p>"
+            '<div class="callout">The best captain can change after practice or qualifying. Recheck the live <a href="/#drivers">Drivers</a> tab and the race-specific <a href="/picks/">Picks</a> page before the deadline.</div>'
+        ),
+        "faqs": [
+            ("Who should I captain in F1 Fantasy?",
+             "Usually the best captain is the highest projected driver with a strong confidence floor and acceptable DNF risk. BoxBox shows projected points and confidence ranges so you can balance upside and safety."),
+            ("How does 3x Boost work in F1 Fantasy?",
+             "With 3x Boost, your highest-scoring driver gets triple points and your second-highest driver gets double points. That makes your top two driver choices more important than usual."),
+            ("Does Team Compare show the boosted driver?",
+             "Yes. Team Compare marks the boosted driver contribution, including 2x, 3x and second-driver 2x behaviour when a chip applies."),
+        ],
+        "cta": ("/#drivers", "See captain pick projections →"),
     },
     {
         "base": "tools", "crumb": "Tools", "slug": "lineup-optimizer",
