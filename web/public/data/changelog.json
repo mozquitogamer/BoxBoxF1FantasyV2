@@ -1,6 +1,20 @@
 {
   "entries": [
     {
+      "date": "2026-07-10",
+      "title": "Team Compare added, with clearer budget and points breakdowns",
+      "tags": [
+        "feature",
+        "fix"
+      ],
+      "body": [
+        "The Optimizer tab now has a <strong>Team Compare</strong> mode. You can enter up to three candidate teams side-by-side and compare their expected score, budget used, budget left, projected price movement, points-per-million, confidence range, and downside risk for the current race.",
+        "The editor now shows your running budget while you build each team, so you can see exactly how much money is left before adding the next driver or constructor. The picker also previews whether each selection keeps the team under budget. Once a team is scored, the card shows a per-driver and per-constructor points contribution, including the automatic 2x captain boost and the 3x Boost chip behaviour where relevant.",
+        "The lineup tools also got a cleanup pass. A handful of optimizer and transfer-advisor edge cases were fixed so locks, exclusions, chip choices, and budget constraints behave more consistently across the different tools.",
+        "We also refreshed the Belgian Grand Prix prediction files and corrected missing supporting race data from the last round where public timing had only picked up part of a driver's tyre run. That keeps the Analysis and comparison views better aligned with the actual weekend data without changing the public-facing prediction method."
+      ]
+    },
+    {
       "date": "2026-07-02",
       "title": "Scoring rebuilt to match official F1 Fantasy exactly",
       "tags": [
