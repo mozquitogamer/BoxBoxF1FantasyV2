@@ -337,7 +337,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 
 FOOTER = f"""</main>
 <footer class="footer"><div class="wrap">
-<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
+<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
@@ -857,6 +857,185 @@ def render_constructor_page(constructor: dict, current: dict, rank: int, drivers
 
 
 # --------------------------------------------------------------------------- #
+# accuracy page
+# --------------------------------------------------------------------------- #
+def _mean(values: list[float]) -> float:
+    return sum(values) / len(values) if values else 0.0
+
+
+def build_accuracy_summary(season: dict) -> dict:
+    rows = []
+    driver_errors = []
+    constructor_errors = []
+    position_errors = []
+    ci_hits = 0
+    ci_total = 0
+    biggest_misses = []
+
+    for r in season.get("rounds", []):
+        if not (r.get("has_predictions") and r.get("has_actual")):
+            continue
+        rn = r["round"]
+        pred = load_json(DATA / f"predictions_round{rn}.json")
+        actual = load_json(DATA / f"actual_round{rn}.json")
+        if not pred or not actual:
+            continue
+
+        pred_drivers = {d["driver_id"]: d for d in pred.get("drivers", [])}
+        act_drivers = {d["driver_id"]: d for d in actual.get("drivers", [])}
+        round_driver_err = []
+        round_pos_err = []
+        round_ci_hits = 0
+        round_ci_total = 0
+
+        for did, p in pred_drivers.items():
+            a = act_drivers.get(did)
+            if not a:
+                continue
+            pred_pts = _pts(p)
+            actual_pts = float(a.get("total_points") or 0)
+            err = abs(pred_pts - actual_pts)
+            round_driver_err.append(err)
+            driver_errors.append(err)
+            biggest_misses.append({
+                "round": rn,
+                "race": pred.get("race", r.get("name", "")),
+                "name": p.get("name", did),
+                "pred": pred_pts,
+                "actual": actual_pts,
+                "err": err,
+            })
+            if p.get("predicted_finish") is not None and a.get("race_position") is not None:
+                pos_err = abs(float(p["predicted_finish"]) - float(a["race_position"]))
+                round_pos_err.append(pos_err)
+                position_errors.append(pos_err)
+            if p.get("mc_total_p5") is not None and p.get("mc_total_p95") is not None:
+                round_ci_total += 1
+                ci_total += 1
+                if float(p["mc_total_p5"]) <= actual_pts <= float(p["mc_total_p95"]):
+                    round_ci_hits += 1
+                    ci_hits += 1
+
+        pred_constructors = {c["constructor_id"]: c for c in pred.get("constructors", [])}
+        act_constructors = {c["constructor_id"]: c for c in actual.get("constructors", [])}
+        round_constructor_err = []
+        for cid, p in pred_constructors.items():
+            a = act_constructors.get(cid)
+            if not a:
+                continue
+            err = abs(_pts(p) - float(a.get("total_points") or 0))
+            round_constructor_err.append(err)
+            constructor_errors.append(err)
+
+        rows.append({
+            "round": rn,
+            "race": pred.get("race", r.get("name", "")),
+            "driver_mae": _mean(round_driver_err),
+            "constructor_mae": _mean(round_constructor_err),
+            "position_mae": _mean(round_pos_err),
+            "ci_coverage": (round_ci_hits / round_ci_total * 100) if round_ci_total else 0,
+            "driver_count": len(round_driver_err),
+            "constructor_count": len(round_constructor_err),
+        })
+
+    biggest_misses.sort(key=lambda x: x["err"], reverse=True)
+    return {
+        "rounds": rows,
+        "driver_mae": _mean(driver_errors),
+        "constructor_mae": _mean(constructor_errors),
+        "position_mae": _mean(position_errors),
+        "ci_coverage": (ci_hits / ci_total * 100) if ci_total else 0,
+        "ci_hits": ci_hits,
+        "ci_total": ci_total,
+        "driver_count": len(driver_errors),
+        "constructor_count": len(constructor_errors),
+        "biggest_misses": biggest_misses[:8],
+    }
+
+
+def render_accuracy_page(summary: dict) -> str:
+    canonical = f"{SITE}/accuracy/"
+    completed = len(summary["rounds"])
+    title = f"F1 Fantasy Prediction Accuracy {YEAR}: BoxBox Track Record"
+    desc = (
+        f"BoxBoxF1Fantasy prediction accuracy for completed {YEAR} rounds: driver points MAE, "
+        "constructor points MAE, race-position error and 90% confidence interval coverage."
+    )
+
+    round_rows = "".join(
+        f'<tr><td>R{r["round"]}</td><td>{esc(short_race(r["race"]))}</td>'
+        f'<td class="num">{r["driver_mae"]:.1f}</td>'
+        f'<td class="num">{r["constructor_mae"]:.1f}</td>'
+        f'<td class="num">{r["position_mae"]:.1f}</td>'
+        f'<td class="num">{r["ci_coverage"]:.0f}%</td></tr>'
+        for r in summary["rounds"]
+    )
+    miss_rows = "".join(
+        f'<tr><td>R{m["round"]}</td><td>{esc(m["name"])}</td>'
+        f'<td class="num">{m["pred"]:.1f}</td><td class="num">{m["actual"]:.0f}</td>'
+        f'<td class="num">{m["err"]:.1f}</td></tr>'
+        for m in summary["biggest_misses"]
+    )
+    faqs = [
+        ("How accurate are BoxBoxF1Fantasy predictions?",
+         f"Across the completed rounds currently published here, driver fantasy-point MAE is {summary['driver_mae']:.1f} points and race-position MAE is {summary['position_mae']:.1f} positions. This page updates when completed-round actuals are exported."),
+        ("What does MAE mean?",
+         "MAE means mean absolute error: the average size of the miss, ignoring whether the prediction was too high or too low. Lower is better."),
+        ("Why publish the misses?",
+         "Publishing misses keeps the model honest. F1 Fantasy is noisy, and weather, DNFs, safety cars, penalties and strategy can all create large errors."),
+    ]
+    ld = ld_block([
+        webpage_ld(title, canonical, desc, "WebPage"),
+        breadcrumb_ld([
+            ("Home", f"{SITE}/"),
+            ("Accuracy", canonical),
+        ]),
+        {
+            "@context": "https://schema.org",
+            "@type": "Dataset",
+            "name": f"BoxBoxF1Fantasy {YEAR} prediction accuracy",
+            "description": desc,
+            "url": canonical,
+            "creator": publisher_ld(),
+            "measurementTechnique": "Mean absolute error and confidence interval coverage computed from published prediction and actual-results JSON files.",
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        },
+    ])
+    body = (
+        '<p class="crumbs"><a href="/">Home</a> &rsaquo; Accuracy</p>'
+        f"<h1>F1 Fantasy Prediction Accuracy ({YEAR})</h1>"
+        f'<p class="lede">A public track record for BoxBoxF1Fantasy predictions across completed {YEAR} rounds. This page shows the misses as well as the hits.</p>'
+        '<p class="meta">Computed from the same prediction and actual-results JSON files used by the live Accuracy tab.</p>'
+        '<div class="btnrow"><a class="cta" href="/#accuracy">Open interactive Accuracy tab &rarr;</a></div>'
+        '<div class="callout">'
+        f'<strong>{completed} completed rounds analyzed.</strong> Driver points MAE: <strong>{summary["driver_mae"]:.1f}</strong> &middot; '
+        f'Constructor points MAE: <strong>{summary["constructor_mae"]:.1f}</strong> &middot; '
+        f'Race-position MAE: <strong>{summary["position_mae"]:.1f}</strong> &middot; '
+        f'90% CI coverage: <strong>{summary["ci_coverage"]:.0f}%</strong> ({summary["ci_hits"]}/{summary["ci_total"]}).'
+        '</div>'
+        '<h2>Round-by-round accuracy</h2>'
+        '<table><thead><tr><th>Round</th><th>Race</th><th class="num">Driver pts MAE</th><th class="num">Constructor pts MAE</th><th class="num">Finish pos MAE</th><th class="num">90% CI</th></tr></thead><tbody>'
+        + round_rows + "</tbody></table>"
+        '<h2>Biggest driver-point misses</h2>'
+        '<p>These are useful because they show where the model was most wrong, usually because of DNFs, penalties, strategy swings, weather or surprise race pace.</p>'
+        '<table><thead><tr><th>Round</th><th>Driver</th><th class="num">Pred.</th><th class="num">Actual</th><th class="num">Abs. miss</th></tr></thead><tbody>'
+        + miss_rows + "</tbody></table>"
+        '<h2>How to read this</h2>'
+        '<p>Fantasy-point accuracy is harder than finishing-position accuracy because fantasy scoring also includes qualifying, overtakes, positions gained, fastest lap, Driver of the Day, sprint scoring, constructors, pit stops and DNF penalties. Confidence interval coverage shows whether the uncertainty bands are calibrated, not whether every single pick was close.</p>'
+        "<h2>FAQ</h2>"
+        + _faq_html(faqs)
+    )
+    return page_head(title, desc, canonical, ld) + body + FOOTER
+
+
+# --------------------------------------------------------------------------- #
 # sitemap
 # --------------------------------------------------------------------------- #
 def write_sitemap(rel_paths: list[str]) -> None:
@@ -882,6 +1061,7 @@ Allow: /
 Allow: /picks/
 Allow: /drivers/
 Allow: /constructors/
+Allow: /accuracy/
 Allow: /guides/
 Allow: /tools/
 Allow: /about/
@@ -917,6 +1097,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Race picks hub: https://boxboxf1fantasy.com/picks/",
         "- Driver projections hub: https://boxboxf1fantasy.com/drivers/",
         "- Constructor projections hub: https://boxboxf1fantasy.com/constructors/",
+        "- Prediction accuracy: https://boxboxf1fantasy.com/accuracy/",
         "- Strategy guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
         "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
@@ -985,6 +1166,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Race picks hub: https://boxboxf1fantasy.com/picks/",
         "- Driver projections hub: https://boxboxf1fantasy.com/drivers/",
         "- Constructor projections hub: https://boxboxf1fantasy.com/constructors/",
+        "- Prediction accuracy: https://boxboxf1fantasy.com/accuracy/",
         "- Guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tools hub: https://boxboxf1fantasy.com/tools/",
         "- About: https://boxboxf1fantasy.com/about/",
@@ -1801,6 +1983,19 @@ def main() -> None:
                 "updated": now,
             })
 
+    # --- public accuracy / trust page ---
+    accuracy_summary = build_accuracy_summary(season)
+    accuracy_dir = WEB / "accuracy"
+    accuracy_dir.mkdir(parents=True, exist_ok=True)
+    (accuracy_dir / "index.html").write_text(render_accuracy_page(accuracy_summary), encoding="utf-8")
+    rel_paths.append("accuracy/")
+    feed_items.append({
+        "title": f"F1 Fantasy Prediction Accuracy {YEAR}",
+        "url": f"{SITE}/accuracy/",
+        "summary": f"Public BoxBoxF1Fantasy track record across {len(accuracy_summary['rounds'])} completed rounds: driver points MAE {accuracy_summary['driver_mae']:.1f}, constructor points MAE {accuracy_summary['constructor_mae']:.1f}, and 90% CI coverage {accuracy_summary['ci_coverage']:.0f}%.",
+        "updated": now,
+    })
+
     # --- static trust/compliance pages ---
     for page in STATIC_PAGES:
         out_dir = WEB / page["slug"]
@@ -1822,7 +2017,7 @@ def main() -> None:
 
     print(f"[14_build_seo_pages] wrote {written} race page(s) + {len(drivers_sorted)} driver page(s) "
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
-          f"+ {len(TOOLS)} tool page(s) + {len(STATIC_PAGES)} static page(s) + 5 hubs "
+          f"+ {len(TOOLS)} tool page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + 5 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
           "+ robots.txt + llms.txt + llms-full.txt + feeds")
 

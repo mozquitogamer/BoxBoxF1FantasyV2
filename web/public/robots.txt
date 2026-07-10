@@ -3,6 +3,7 @@ Allow: /
 Allow: /picks/
 Allow: /drivers/
 Allow: /constructors/
+Allow: /accuracy/
 Allow: /guides/
 Allow: /tools/
 Allow: /about/
