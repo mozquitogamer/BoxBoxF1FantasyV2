@@ -57,6 +57,12 @@ def short_race(name: str) -> str:
     return name.replace("Grand Prix", "GP").strip()
 
 
+def plain_slug(name: str) -> str:
+    """'Max Verstappen' -> 'max-verstappen'."""
+    s = unicodedata.normalize("NFKD", str(name).lower()).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+
+
 def load_json(path: Path):
     if not path.exists():
         return None
@@ -120,6 +126,17 @@ def item_list_ld(name: str, url: str, items: list[tuple[str, str]]) -> dict:
     }
 
 
+def breadcrumb_ld(items: list[tuple[str, str]]) -> dict:
+    return {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": i, "name": label, "item": url}
+            for i, (label, url) in enumerate(items, 1)
+        ],
+    }
+
+
 # GA4 snippet. Plain (non-f) string so the JS braces survive. Unlike the SPA,
 # each static page is a real distinct URL, so we let gtag fire its automatic
 # page_view per page (no send_page_view:false) - they show up directly in GA's
@@ -179,7 +196,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 
 FOOTER = f"""</main>
 <footer class="footer"><div class="wrap">
-<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
+<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
@@ -432,6 +449,272 @@ def render_index(entries: list) -> str:
 
 
 # --------------------------------------------------------------------------- #
+# driver + constructor pages
+# --------------------------------------------------------------------------- #
+def _driver_team_name(driver: dict, constructors_by_id: dict) -> str:
+    con = constructors_by_id.get(driver.get("constructor"), {})
+    return con.get("name") or str(driver.get("constructor", "")).replace("_", " ").title()
+
+
+def render_drivers_hub(current: dict) -> str:
+    drivers = sorted(current.get("drivers", []), key=lambda d: d.get("expected_points", 0), reverse=True)
+    constructors_by_id = {c["constructor_id"]: c for c in current.get("constructors", [])}
+    race = current.get("race", "the current race")
+    canonical = f"{SITE}/drivers/"
+    title = f"F1 Fantasy Driver Predictions {YEAR}: Points, Prices & Value | BoxBox"
+    desc = f"Current F1 Fantasy {YEAR} driver projections: expected points, prices, value ratings, predicted qualifying and race finish for every driver."
+    rows = []
+    for i, d in enumerate(drivers, 1):
+        url = f"/drivers/{plain_slug(d.get('name', d.get('driver_id', 'driver')))}/"
+        rows.append(
+            f'<tr><td class="num">{i}</td><td><a href="{url}">{esc(d.get("name", d.get("driver_id", "")))}</a></td>'
+            f'<td>{esc(_driver_team_name(d, constructors_by_id))}</td>'
+            f'<td class="num">${d.get("current_price", 0):.1f}M</td>'
+            f'<td class="num">{d.get("expected_points", 0):.1f}</td>'
+            f'<td class="num">{d.get("value_score", 0):.2f}</td>'
+            f'<td class="num">P{d.get("predicted_quali", "-")}&rarr;P{d.get("predicted_finish", "-")}</td></tr>'
+        )
+
+    ld = ld_block([
+        webpage_ld(title, canonical, desc, "CollectionPage"),
+        item_list_ld(
+            f"F1 Fantasy driver projections for {YEAR}",
+            canonical,
+            [(d.get("name", d.get("driver_id", "")), f"{SITE}/drivers/{plain_slug(d.get('name', d.get('driver_id', 'driver')))}/") for d in drivers],
+        ),
+        breadcrumb_ld([
+            ("Home", f"{SITE}/"),
+            ("Drivers", canonical),
+        ]),
+    ])
+    table = (
+        '<table><thead><tr><th class="num">#</th><th>Driver</th><th>Team</th>'
+        '<th class="num">Price</th><th class="num">Exp. pts</th><th class="num">PPM</th>'
+        '<th class="num">Quali&rarr;Race</th></tr></thead><tbody>'
+        + "".join(rows) + "</tbody></table>"
+    )
+    body = (
+        '<p class="crumbs"><a href="/">Home</a> &rsaquo; Drivers</p>'
+        f"<h1>F1 Fantasy Driver Predictions ({YEAR})</h1>"
+        f'<p class="lede">Current driver projections for the <strong>{esc(race)}</strong>: expected points, price, value, predicted qualifying position and predicted race finish for every F1 Fantasy driver.</p>'
+        '<p class="meta">These pages update whenever the prediction pipeline is exported.</p>'
+        '<div class="btnrow"><a class="cta" href="/#drivers">Open live driver cards &rarr;</a></div>'
+        + table
+    )
+    return page_head(title, desc, canonical, ld) + body + FOOTER
+
+
+def render_driver_page(driver: dict, current: dict, rank: int, constructors_by_id: dict) -> str:
+    name = driver.get("name", driver.get("driver_id", "Driver"))
+    team = _driver_team_name(driver, constructors_by_id)
+    race = current.get("race", "the current race")
+    short = short_race(race)
+    slug = plain_slug(name)
+    canonical = f"{SITE}/drivers/{slug}/"
+    title = f"{name} F1 Fantasy {YEAR}: Points, Price & Value | BoxBox"
+    desc = (
+        f"{name} F1 Fantasy {YEAR} projection: {driver.get('expected_points', 0):.1f} expected points "
+        f"for the {short}, ${driver.get('current_price', 0):.1f}M price, value rating and confidence range."
+    )
+    floor = driver.get("mc_total_p5", 0)
+    ceiling = driver.get("mc_total_p95", 0)
+    value_label = "strong value" if driver.get("value_score", 0) >= 1.0 else "premium upside" if driver.get("current_price", 0) >= 20 else "situational value"
+    dnf_pct = driver.get("dnf_probability", 0) * 100
+    cta = '<div class="btnrow"><a class="cta" href="/#drivers">See live driver cards &rarr;</a><a class="cta" href="/#optimizer" style="background:#1b212c;">Test in Optimizer &rarr;</a></div>'
+    stats = (
+        '<table><tbody>'
+        f'<tr><th>Current team</th><td>{esc(team)}</td></tr>'
+        f'<tr><th>Current price</th><td>${driver.get("current_price", 0):.1f}M</td></tr>'
+        f'<tr><th>Expected points</th><td>{driver.get("expected_points", 0):.1f}</td></tr>'
+        f'<tr><th>Projected points</th><td>{driver.get("projected_points", 0):.1f}</td></tr>'
+        f'<tr><th>Value rating</th><td>{driver.get("value_score", 0):.2f} PPM</td></tr>'
+        f'<tr><th>Predicted quali</th><td>P{driver.get("predicted_quali", "-")}</td></tr>'
+        f'<tr><th>Predicted finish</th><td>P{driver.get("predicted_finish", "-")}</td></tr>'
+        f'<tr><th>90% confidence range</th><td>{floor:.1f} to {ceiling:.1f} pts</td></tr>'
+        f'<tr><th>DNF probability</th><td>{dnf_pct:.0f}%</td></tr>'
+        f'<tr><th>Expected overtakes</th><td>{driver.get("expected_overtakes", 0):.1f}</td></tr>'
+        '</tbody></table>'
+    )
+    faqs = [
+        (f"How many F1 Fantasy points is {name} projected to score?",
+         f"{name} is currently projected for {driver.get('expected_points', 0):.1f} expected fantasy points at the {short}. The 90% simulation range is {floor:.1f} to {ceiling:.1f} points."),
+        (f"Is {name} good value in F1 Fantasy?",
+         f"{name} costs ${driver.get('current_price', 0):.1f}M and has a value rating of {driver.get('value_score', 0):.2f} points per million for this round, so the model currently treats this as {value_label}."),
+        (f"What team does {name} drive for?",
+         f"{name} is listed with {team} in the current BoxBoxF1Fantasy prediction file."),
+    ]
+    ld = ld_block([
+        {
+            **webpage_ld(title, canonical, desc, "ProfilePage"),
+            "mainEntity": {
+                "@type": "Person",
+                "name": name,
+                "affiliation": {"@type": "SportsTeam", "name": team},
+            },
+        },
+        breadcrumb_ld([
+            ("Home", f"{SITE}/"),
+            ("Drivers", f"{SITE}/drivers/"),
+            (name, canonical),
+        ]),
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        },
+    ])
+    body = (
+        f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/drivers/">Drivers</a> &rsaquo; {esc(name)}</p>'
+        f"<h1>{esc(name)} F1 Fantasy {YEAR}</h1>"
+        f'<p class="lede">{esc(name)} is ranked #{rank} by expected F1 Fantasy points for the <strong>{esc(race)}</strong>, with a current projection of <strong>{driver.get("expected_points", 0):.1f} points</strong>.</p>'
+        f'<p class="meta">Price ${driver.get("current_price", 0):.1f}M &middot; {esc(team)} &middot; predicted P{driver.get("predicted_quali", "-")} qualifying to P{driver.get("predicted_finish", "-")} race finish.</p>'
+        + cta
+        + "<h2>Current projection</h2>"
+        + stats
+        + "<h2>Fantasy read</h2>"
+        + f'<p>For this round, {esc(name)} profiles as <strong>{esc(value_label)}</strong>. The confidence range is wide because race outcomes can swing on reliability, safety cars, weather, strategy and incidents.</p>'
+        + "<h2>FAQ</h2>"
+        + _faq_html(faqs)
+        + cta
+    )
+    return page_head(title, desc, canonical, ld) + body + FOOTER
+
+
+def render_constructors_hub(current: dict) -> str:
+    constructors = sorted(current.get("constructors", []), key=lambda c: c.get("expected_points", 0), reverse=True)
+    race = current.get("race", "the current race")
+    canonical = f"{SITE}/constructors/"
+    title = f"F1 Fantasy Constructor Predictions {YEAR}: Points, Prices & Value | BoxBox"
+    desc = f"Current F1 Fantasy {YEAR} constructor projections: expected points, prices, pit-stop points, value ratings and risk for every constructor."
+    rows = []
+    for i, c in enumerate(constructors, 1):
+        url = f"/constructors/{plain_slug(c.get('name', c.get('constructor_id', 'constructor')))}/"
+        rows.append(
+            f'<tr><td class="num">{i}</td><td><a href="{url}">{esc(c.get("name", c.get("constructor_id", "")))}</a></td>'
+            f'<td class="num">${c.get("current_price", 0):.1f}M</td>'
+            f'<td class="num">{c.get("expected_points", 0):.1f}</td>'
+            f'<td class="num">{c.get("expected_pit_stop_pts", 0):.1f}</td>'
+            f'<td class="num">{c.get("value_score", 0):.2f}</td>'
+            f'<td class="num">{esc(c.get("risk", "-"))}</td></tr>'
+        )
+
+    ld = ld_block([
+        webpage_ld(title, canonical, desc, "CollectionPage"),
+        item_list_ld(
+            f"F1 Fantasy constructor projections for {YEAR}",
+            canonical,
+            [(c.get("name", c.get("constructor_id", "")), f"{SITE}/constructors/{plain_slug(c.get('name', c.get('constructor_id', 'constructor')))}/") for c in constructors],
+        ),
+        breadcrumb_ld([
+            ("Home", f"{SITE}/"),
+            ("Constructors", canonical),
+        ]),
+    ])
+    table = (
+        '<table><thead><tr><th class="num">#</th><th>Constructor</th><th class="num">Price</th>'
+        '<th class="num">Exp. pts</th><th class="num">Pit pts</th><th class="num">PPM</th>'
+        '<th class="num">Risk</th></tr></thead><tbody>'
+        + "".join(rows) + "</tbody></table>"
+    )
+    body = (
+        '<p class="crumbs"><a href="/">Home</a> &rsaquo; Constructors</p>'
+        f"<h1>F1 Fantasy Constructor Predictions ({YEAR})</h1>"
+        f'<p class="lede">Current constructor projections for the <strong>{esc(race)}</strong>: expected points, price, pit-stop points, value and risk for every F1 Fantasy constructor.</p>'
+        '<p class="meta">Constructors include both drivers scoring, qualifying teamwork bonus, pit-stop points and DNF risk.</p>'
+        '<div class="btnrow"><a class="cta" href="/#constructors">Open live constructor cards &rarr;</a></div>'
+        + table
+    )
+    return page_head(title, desc, canonical, ld) + body + FOOTER
+
+
+def render_constructor_page(constructor: dict, current: dict, rank: int, drivers_by_id: dict) -> str:
+    name = constructor.get("name", constructor.get("constructor_id", "Constructor"))
+    full_name = constructor.get("full_name", name)
+    race = current.get("race", "the current race")
+    short = short_race(race)
+    slug = plain_slug(name)
+    canonical = f"{SITE}/constructors/{slug}/"
+    title = f"{name} F1 Fantasy {YEAR}: Constructor Points, Price & Value | BoxBox"
+    desc = (
+        f"{name} F1 Fantasy {YEAR} constructor projection: {constructor.get('expected_points', 0):.1f} expected points "
+        f"for the {short}, ${constructor.get('current_price', 0):.1f}M price, pit-stop points and value rating."
+    )
+    driver_names = [
+        drivers_by_id.get(constructor.get("driver_1"), {}).get("name", constructor.get("driver_1", "")),
+        drivers_by_id.get(constructor.get("driver_2"), {}).get("name", constructor.get("driver_2", "")),
+    ]
+    driver_line = " and ".join([d for d in driver_names if d])
+    floor = constructor.get("mc_total_p5", 0)
+    ceiling = constructor.get("mc_total_p95", 0)
+    dnf_pct = constructor.get("dnf_probability", 0) * 100
+    cta = '<div class="btnrow"><a class="cta" href="/#constructors">See live constructor cards &rarr;</a><a class="cta" href="/#optimizer" style="background:#1b212c;">Test in Optimizer &rarr;</a></div>'
+    stats = (
+        '<table><tbody>'
+        f'<tr><th>Full team name</th><td>{esc(full_name)}</td></tr>'
+        f'<tr><th>Listed drivers</th><td>{esc(driver_line)}</td></tr>'
+        f'<tr><th>Current price</th><td>${constructor.get("current_price", 0):.1f}M</td></tr>'
+        f'<tr><th>Expected points</th><td>{constructor.get("expected_points", 0):.1f}</td></tr>'
+        f'<tr><th>Projected points</th><td>{constructor.get("projected_points", 0):.1f}</td></tr>'
+        f'<tr><th>Expected pit-stop points</th><td>{constructor.get("expected_pit_stop_pts", 0):.1f}</td></tr>'
+        f'<tr><th>Qualifying bonus</th><td>{constructor.get("quali_bonus", 0):.1f}</td></tr>'
+        f'<tr><th>Value rating</th><td>{constructor.get("value_score", 0):.2f} PPM</td></tr>'
+        f'<tr><th>90% confidence range</th><td>{floor:.1f} to {ceiling:.1f} pts</td></tr>'
+        f'<tr><th>DNF probability</th><td>{dnf_pct:.0f}%</td></tr>'
+        '</tbody></table>'
+    )
+    faqs = [
+        (f"How many F1 Fantasy points is {name} projected to score?",
+         f"{name} is currently projected for {constructor.get('expected_points', 0):.1f} expected fantasy points at the {short}. The 90% simulation range is {floor:.1f} to {ceiling:.1f} points."),
+        (f"Is {name} good value in F1 Fantasy?",
+         f"{name} costs ${constructor.get('current_price', 0):.1f}M and has a value rating of {constructor.get('value_score', 0):.2f} points per million for this round."),
+        (f"Which drivers count toward {name} constructor points?",
+         f"The current prediction file lists {driver_line} for {name}. Constructor points include both drivers' qualifying and race scoring, pit-stop points and the qualifying teamwork bonus."),
+    ]
+    ld = ld_block([
+        {
+            **webpage_ld(title, canonical, desc, "ProfilePage"),
+            "mainEntity": {
+                "@type": "SportsTeam",
+                "name": name,
+                "alternateName": full_name,
+                "athlete": [{"@type": "Person", "name": d} for d in driver_names if d],
+            },
+        },
+        breadcrumb_ld([
+            ("Home", f"{SITE}/"),
+            ("Constructors", f"{SITE}/constructors/"),
+            (name, canonical),
+        ]),
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        },
+    ])
+    body = (
+        f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/constructors/">Constructors</a> &rsaquo; {esc(name)}</p>'
+        f"<h1>{esc(name)} F1 Fantasy Constructor {YEAR}</h1>"
+        f'<p class="lede">{esc(name)} is ranked #{rank} by expected constructor points for the <strong>{esc(race)}</strong>, with a current projection of <strong>{constructor.get("expected_points", 0):.1f} points</strong>.</p>'
+        f'<p class="meta">Price ${constructor.get("current_price", 0):.1f}M &middot; listed drivers: {esc(driver_line)}.</p>'
+        + cta
+        + "<h2>Current projection</h2>"
+        + stats
+        + "<h2>Fantasy read</h2>"
+        + f'<p>{esc(name)} combines both listed drivers, pit-stop scoring, qualifying teamwork bonus and DNF exposure. That makes constructor value different from driver value, and often steadier than chasing one extra premium driver.</p>'
+        + "<h2>FAQ</h2>"
+        + _faq_html(faqs)
+        + cta
+    )
+    return page_head(title, desc, canonical, ld) + body + FOOTER
+
+
+# --------------------------------------------------------------------------- #
 # sitemap
 # --------------------------------------------------------------------------- #
 def write_sitemap(rel_paths: list[str]) -> None:
@@ -455,6 +738,8 @@ def write_robots() -> None:
     body = f"""User-agent: *
 Allow: /
 Allow: /picks/
+Allow: /drivers/
+Allow: /constructors/
 Allow: /guides/
 Allow: /tools/
 Allow: /about/
@@ -488,6 +773,8 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "Important pages:",
         "- Live predictions and tools: https://boxboxf1fantasy.com/",
         "- Race picks hub: https://boxboxf1fantasy.com/picks/",
+        "- Driver projections hub: https://boxboxf1fantasy.com/drivers/",
+        "- Constructor projections hub: https://boxboxf1fantasy.com/constructors/",
         "- Strategy guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
         "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
@@ -553,6 +840,8 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "## Best pages to send users to",
         "- Live predictions and tools: https://boxboxf1fantasy.com/",
         "- Race picks hub: https://boxboxf1fantasy.com/picks/",
+        "- Driver projections hub: https://boxboxf1fantasy.com/drivers/",
+        "- Constructor projections hub: https://boxboxf1fantasy.com/constructors/",
         "- Guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tools hub: https://boxboxf1fantasy.com/tools/",
         "- About: https://boxboxf1fantasy.com/about/",
@@ -1245,7 +1534,7 @@ def main() -> None:
     entries.sort(key=lambda e: e[3], reverse=True)
     (PICKS / "index.html").write_text(render_index(entries), encoding="utf-8")
 
-    # all sitemap URLs (relative): home + picks + guides + tools
+    # all sitemap URLs (relative): home + picks + drivers + constructors + guides + tools
     rel_paths = ["", "picks/"] + [f"picks/{e[0]}/" for e in entries]
     now = datetime.now(timezone.utc)
     feed_items = [
@@ -1257,6 +1546,58 @@ def main() -> None:
         }
         for slug, name, date, rn, is_current in entries[:8]
     ]
+
+    # --- current driver + constructor projection pages ---
+    drivers_sorted = sorted(current.get("drivers", []), key=lambda d: d.get("expected_points", 0), reverse=True)
+    constructors_sorted = sorted(current.get("constructors", []), key=lambda c: c.get("expected_points", 0), reverse=True)
+    constructors_by_id = {c["constructor_id"]: c for c in current.get("constructors", [])}
+    drivers_by_id = {d["driver_id"]: d for d in current.get("drivers", [])}
+
+    drivers_dir = WEB / "drivers"
+    drivers_dir.mkdir(parents=True, exist_ok=True)
+    (drivers_dir / "index.html").write_text(render_drivers_hub(current), encoding="utf-8")
+    rel_paths.append("drivers/")
+    feed_items.append({
+        "title": f"F1 Fantasy Driver Predictions {YEAR}",
+        "url": f"{SITE}/drivers/",
+        "summary": f"Current F1 Fantasy driver projections for {current.get('race', 'the current race')}: expected points, price, value and predicted finishing position.",
+        "updated": now,
+    })
+    for rank, driver in enumerate(drivers_sorted, 1):
+        slug = plain_slug(driver.get("name", driver.get("driver_id", "driver")))
+        out_dir = drivers_dir / slug
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "index.html").write_text(render_driver_page(driver, current, rank, constructors_by_id), encoding="utf-8")
+        rel_paths.append(f"drivers/{slug}/")
+        feed_items.append({
+            "title": f"{driver.get('name', driver.get('driver_id', 'Driver'))} F1 Fantasy {YEAR}",
+            "url": f"{SITE}/drivers/{slug}/",
+            "summary": f"Current F1 Fantasy projection for {driver.get('name', driver.get('driver_id', 'this driver'))}: {driver.get('expected_points', 0):.1f} expected points, ${driver.get('current_price', 0):.1f}M price and {driver.get('value_score', 0):.2f} PPM.",
+            "updated": now,
+        })
+
+    constructors_dir = WEB / "constructors"
+    constructors_dir.mkdir(parents=True, exist_ok=True)
+    (constructors_dir / "index.html").write_text(render_constructors_hub(current), encoding="utf-8")
+    rel_paths.append("constructors/")
+    feed_items.append({
+        "title": f"F1 Fantasy Constructor Predictions {YEAR}",
+        "url": f"{SITE}/constructors/",
+        "summary": f"Current F1 Fantasy constructor projections for {current.get('race', 'the current race')}: expected points, price, value, pit-stop points and risk.",
+        "updated": now,
+    })
+    for rank, constructor in enumerate(constructors_sorted, 1):
+        slug = plain_slug(constructor.get("name", constructor.get("constructor_id", "constructor")))
+        out_dir = constructors_dir / slug
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "index.html").write_text(render_constructor_page(constructor, current, rank, drivers_by_id), encoding="utf-8")
+        rel_paths.append(f"constructors/{slug}/")
+        feed_items.append({
+            "title": f"{constructor.get('name', constructor.get('constructor_id', 'Constructor'))} F1 Fantasy Constructor {YEAR}",
+            "url": f"{SITE}/constructors/{slug}/",
+            "summary": f"Current F1 Fantasy constructor projection for {constructor.get('name', constructor.get('constructor_id', 'this constructor'))}: {constructor.get('expected_points', 0):.1f} expected points, ${constructor.get('current_price', 0):.1f}M price and {constructor.get('value_score', 0):.2f} PPM.",
+            "updated": now,
+        })
 
     # --- static content: guides + tools + their hubs ---
     for base, crumb, items, hub in (
@@ -1305,8 +1646,9 @@ def main() -> None:
     write_llms_full(rel_paths, current, feed_items)
     write_feeds(feed_items)
 
-    print(f"[14_build_seo_pages] wrote {written} race page(s) + {len(GUIDES)} guide(s) "
-          f"+ {len(TOOLS)} tool page(s) + {len(STATIC_PAGES)} static page(s) + 3 hubs "
+    print(f"[14_build_seo_pages] wrote {written} race page(s) + {len(drivers_sorted)} driver page(s) "
+          f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
+          f"+ {len(TOOLS)} tool page(s) + {len(STATIC_PAGES)} static page(s) + 5 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
           "+ robots.txt + llms.txt + llms-full.txt + feeds")
 

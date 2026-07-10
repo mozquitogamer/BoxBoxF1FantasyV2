@@ -10,6 +10,8 @@ BoxBoxF1Fantasy helps F1 Fantasy players choose drivers and constructors for the
 Important pages:
 - Live predictions and tools: https://boxboxf1fantasy.com/
 - Race picks hub: https://boxboxf1fantasy.com/picks/
+- Driver projections hub: https://boxboxf1fantasy.com/drivers/
+- Constructor projections hub: https://boxboxf1fantasy.com/constructors/
 - Strategy guides hub: https://boxboxf1fantasy.com/guides/
 - Tool landing pages: https://boxboxf1fantasy.com/tools/
 - About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/

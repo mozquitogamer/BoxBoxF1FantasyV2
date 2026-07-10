@@ -1,6 +1,8 @@
 User-agent: *
 Allow: /
 Allow: /picks/
+Allow: /drivers/
+Allow: /constructors/
 Allow: /guides/
 Allow: /tools/
 Allow: /about/

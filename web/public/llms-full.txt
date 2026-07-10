@@ -13,6 +13,8 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 ## Best pages to send users to
 - Live predictions and tools: https://boxboxf1fantasy.com/
 - Race picks hub: https://boxboxf1fantasy.com/picks/
+- Driver projections hub: https://boxboxf1fantasy.com/drivers/
+- Constructor projections hub: https://boxboxf1fantasy.com/constructors/
 - Guides hub: https://boxboxf1fantasy.com/guides/
 - Tools hub: https://boxboxf1fantasy.com/tools/
 - About: https://boxboxf1fantasy.com/about/
@@ -70,6 +72,41 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - F1 Fantasy Picks: Canadian GP 2026: https://boxboxf1fantasy.com/picks/canadian-gp-2026/ - Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Canadian Grand Prix.
 - F1 Fantasy Picks: Miami GP 2026: https://boxboxf1fantasy.com/picks/miami-gp-2026/ - Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Miami Grand Prix.
 - F1 Fantasy Picks: Japanese GP 2026: https://boxboxf1fantasy.com/picks/japanese-gp-2026/ - Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Japanese Grand Prix.
+- F1 Fantasy Driver Predictions 2026: https://boxboxf1fantasy.com/drivers/ - Current F1 Fantasy driver projections for Belgian Grand Prix: expected points, price, value and predicted finishing position.
+- Max Verstappen F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/max-verstappen/ - Current F1 Fantasy projection for Max Verstappen: 22.6 expected points, $27.9M price and 0.81 PPM.
+- Kimi Antonelli F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/kimi-antonelli/ - Current F1 Fantasy projection for Kimi Antonelli: 20.1 expected points, $25.4M price and 0.79 PPM.
+- George Russell F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/george-russell/ - Current F1 Fantasy projection for George Russell: 18.3 expected points, $27.8M price and 0.66 PPM.
+- Lewis Hamilton F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/lewis-hamilton/ - Current F1 Fantasy projection for Lewis Hamilton: 16.5 expected points, $24.5M price and 0.67 PPM.
+- Oscar Piastri F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/oscar-piastri/ - Current F1 Fantasy projection for Oscar Piastri: 13.0 expected points, $24.9M price and 0.52 PPM.
+- Charles Leclerc F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/charles-leclerc/ - Current F1 Fantasy projection for Charles Leclerc: 10.3 expected points, $23.2M price and 0.44 PPM.
+- Arvid Lindblad F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/arvid-lindblad/ - Current F1 Fantasy projection for Arvid Lindblad: 8.1 expected points, $6.2M price and 1.31 PPM.
+- Isack Hadjar F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/isack-hadjar/ - Current F1 Fantasy projection for Isack Hadjar: 6.3 expected points, $12.7M price and 0.50 PPM.
+- Franco Colapinto F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/franco-colapinto/ - Current F1 Fantasy projection for Franco Colapinto: 6.1 expected points, $9.8M price and 0.62 PPM.
+- Gabriel Bortoleto F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/ - Current F1 Fantasy projection for Gabriel Bortoleto: 5.4 expected points, $6.0M price and 0.90 PPM.
+- Lando Norris F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/lando-norris/ - Current F1 Fantasy projection for Lando Norris: 3.6 expected points, $25.6M price and 0.14 PPM.
+- Esteban Ocon F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/esteban-ocon/ - Current F1 Fantasy projection for Esteban Ocon: 3.4 expected points, $10.1M price and 0.34 PPM.
+- Liam Lawson F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/liam-lawson/ - Current F1 Fantasy projection for Liam Lawson: 2.2 expected points, $8.9M price and 0.25 PPM.
+- Pierre Gasly F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/pierre-gasly/ - Current F1 Fantasy projection for Pierre Gasly: 1.6 expected points, $12.8M price and 0.12 PPM.
+- Carlos Sainz F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/carlos-sainz/ - Current F1 Fantasy projection for Carlos Sainz: -1.0 expected points, $11.4M price and -0.09 PPM.
+- Oliver Bearman F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/oliver-bearman/ - Current F1 Fantasy projection for Oliver Bearman: -3.3 expected points, $7.0M price and -0.47 PPM.
+- Sergio Perez F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/sergio-perez/ - Current F1 Fantasy projection for Sergio Perez: -3.6 expected points, $5.6M price and -0.64 PPM.
+- Nico Hulkenberg F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/nico-hulkenberg/ - Current F1 Fantasy projection for Nico Hulkenberg: -4.1 expected points, $3.0M price and -1.37 PPM.
+- Alex Albon F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/alex-albon/ - Current F1 Fantasy projection for Alex Albon: -6.3 expected points, $7.6M price and -0.83 PPM.
+- Fernando Alonso F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/fernando-alonso/ - Current F1 Fantasy projection for Fernando Alonso: -7.3 expected points, $5.6M price and -1.30 PPM.
+- Valtteri Bottas F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/valtteri-bottas/ - Current F1 Fantasy projection for Valtteri Bottas: -8.0 expected points, $3.0M price and -2.67 PPM.
+- Lance Stroll F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/lance-stroll/ - Current F1 Fantasy projection for Lance Stroll: -8.1 expected points, $3.6M price and -2.25 PPM.
+- F1 Fantasy Constructor Predictions 2026: https://boxboxf1fantasy.com/constructors/ - Current F1 Fantasy constructor projections for Belgian Grand Prix: expected points, price, value, pit-stop points and risk.
+- Mercedes F1 Fantasy Constructor 2026: https://boxboxf1fantasy.com/constructors/mercedes/ - Current F1 Fantasy constructor projection for Mercedes: 54.8 expected points, $31.7M price and 1.73 PPM.
+- Ferrari F1 Fantasy Constructor 2026: https://boxboxf1fantasy.com/constructors/ferrari/ - Current F1 Fantasy constructor projection for Ferrari: 41.0 expected points, $25.7M price and 1.60 PPM.
+- Red Bull F1 Fantasy Constructor 2026: https://boxboxf1fantasy.com/constructors/red-bull/ - Current F1 Fantasy constructor projection for Red Bull: 40.2 expected points, $30.0M price and 1.34 PPM.
+- McLaren F1 Fantasy Constructor 2026: https://boxboxf1fantasy.com/constructors/mclaren/ - Current F1 Fantasy constructor projection for McLaren: 29.0 expected points, $30.1M price and 0.96 PPM.
+- Racing Bulls F1 Fantasy Constructor 2026: https://boxboxf1fantasy.com/constructors/racing-bulls/ - Current F1 Fantasy constructor projection for Racing Bulls: 21.0 expected points, $11.1M price and 1.89 PPM.
+- Alpine F1 Fantasy Constructor 2026: https://boxboxf1fantasy.com/constructors/alpine/ - Current F1 Fantasy constructor projection for Alpine: 12.9 expected points, $17.3M price and 0.75 PPM.
+- Audi F1 Fantasy Constructor 2026: https://boxboxf1fantasy.com/constructors/audi/ - Current F1 Fantasy constructor projection for Audi: 7.3 expected points, $5.0M price and 1.46 PPM.
+- Haas F1 Fantasy Constructor 2026: https://boxboxf1fantasy.com/constructors/haas/ - Current F1 Fantasy constructor projection for Haas: 2.8 expected points, $10.2M price and 0.27 PPM.
+- Williams F1 Fantasy Constructor 2026: https://boxboxf1fantasy.com/constructors/williams/ - Current F1 Fantasy constructor projection for Williams: -3.3 expected points, $14.4M price and -0.23 PPM.
+- Cadillac F1 Fantasy Constructor 2026: https://boxboxf1fantasy.com/constructors/cadillac/ - Current F1 Fantasy constructor projection for Cadillac: -11.6 expected points, $4.8M price and -2.42 PPM.
+- Aston Martin F1 Fantasy Constructor 2026: https://boxboxf1fantasy.com/constructors/aston-martin/ - Current F1 Fantasy constructor projection for Aston Martin: -14.6 expected points, $6.3M price and -2.32 PPM.
 - F1 Fantasy Guides (2026): https://boxboxf1fantasy.com/guides/ - Free F1 Fantasy 2026 guides: how scoring works, how to win, chips explained, drivers vs constructors, and a beginner's how-to-play walkthrough.
 - How F1 Fantasy Scoring Works (2026): https://boxboxf1fantasy.com/guides/how-f1-fantasy-scoring-works/ - A clear breakdown of F1 Fantasy 2026 scoring: qualifying and race points, overtakes, fastest lap, Driver of the Day, DNF penalties, sprint scoring and how constructor points (pit stops + qualifying bonus) work.
 - How to Win F1 Fantasy: Strategy Guide (2026): https://boxboxf1fantasy.com/guides/how-to-win-f1-fantasy/ - Six proven F1 Fantasy strategies for 2026: build on value (PPM), grow your budget early, plan transfers ahead, time your chips, use constructors, and captain reliable upside.
