@@ -10,5 +10,6 @@ Allow: /feed.json
 Allow: /data/predictions.json
 Allow: /data/season_summary.json
 Allow: /llms.txt
+Allow: /llms-full.txt
 
 Sitemap: https://boxboxf1fantasy.com/sitemap.xml

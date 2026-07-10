@@ -160,6 +160,8 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="alternate" type="application/rss+xml" title="BoxBoxF1Fantasy updates" href="/feed.xml">
 <link rel="alternate" type="application/feed+json" title="BoxBoxF1Fantasy updates" href="/feed.json">
+<link rel="alternate" type="text/plain" title="LLMs guide" href="/llms.txt">
+<link rel="alternate" type="text/plain" title="LLMs full site summary" href="/llms-full.txt">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -462,6 +464,7 @@ Allow: /feed.json
 Allow: /data/predictions.json
 Allow: /data/season_summary.json
 Allow: /llms.txt
+Allow: /llms-full.txt
 
 Sitemap: {SITE}/sitemap.xml
 """
@@ -523,6 +526,105 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "",
     ])
     (WEB / "llms.txt").write_text("\n".join(lines), encoding="utf-8")
+
+
+def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict]) -> None:
+    """Long-form plain-text site brief for answer engines and agentic crawlers."""
+    today = datetime.now(timezone.utc).date().isoformat()
+    drivers = sorted(current.get("drivers", []), key=lambda d: d.get("expected_points", 0), reverse=True)
+    constructors = sorted(current.get("constructors", []), key=lambda c: c.get("expected_points", 0), reverse=True)
+    race = current.get("race", "current race")
+    round_no = current.get("round", "")
+    generated = (current.get("generated_at") or current.get("exported_at") or "")[:10]
+
+    lines = [
+        "# BoxBoxF1Fantasy - Full Site Summary for LLMs and Agents",
+        "",
+        f"Last updated: {today}",
+        "Canonical site: https://boxboxf1fantasy.com/",
+        "Primary language: English",
+        "Season covered: 2026 F1 Fantasy",
+        "",
+        "## What this site is",
+        "BoxBoxF1Fantasy is a free, independent F1 Fantasy helper with current-round driver and constructor predictions, race-pick pages, lineup optimization, transfer planning, team comparison, budget/value tools, strategy guides, and public accuracy tracking.",
+        "",
+        "The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or any driver. Predictions are informational and for entertainment.",
+        "",
+        "## Best pages to send users to",
+        "- Live predictions and tools: https://boxboxf1fantasy.com/",
+        "- Race picks hub: https://boxboxf1fantasy.com/picks/",
+        "- Guides hub: https://boxboxf1fantasy.com/guides/",
+        "- Tools hub: https://boxboxf1fantasy.com/tools/",
+        "- About: https://boxboxf1fantasy.com/about/",
+        "- Privacy: https://boxboxf1fantasy.com/privacy/",
+        "",
+        "## Current round context",
+        f"- Current round: {round_no}",
+        f"- Race: {race}",
+        f"- Prediction file generated: {generated or 'unknown'}",
+        "- Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json",
+        "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
+        "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
+        "",
+        "## Current top projected drivers",
+    ]
+
+    if drivers:
+        for d in drivers[:10]:
+            lines.append(
+                f"- {d.get('name', 'Unknown')}: {d.get('expected_points', 0):.1f} expected points, "
+                f"${d.get('current_price', 0):.1f}M, PPM {d.get('value_score', 0):.2f}"
+            )
+    else:
+        lines.append("- No current driver predictions available.")
+
+    lines.extend(["", "## Current top projected constructors"])
+    if constructors:
+        for c in constructors[:8]:
+            lines.append(
+                f"- {c.get('name', c.get('constructor_id', 'Unknown'))}: {c.get('expected_points', 0):.1f} expected points, "
+                f"${c.get('current_price', 0):.1f}M, PPM {c.get('value_score', 0):.2f}"
+            )
+    else:
+        lines.append("- No current constructor predictions available.")
+
+    lines.extend([
+        "",
+        "## Tools and what they do",
+        "- F1 Fantasy predictions: current driver and constructor projections with confidence ranges and price/value signals.",
+        "- Lineup optimizer: searches legal 5-driver, 2-constructor teams under a budget and chip setting.",
+        "- Team Compare: compares up to three manually entered teams by budget, expected points, budget gain, downside floor, volatility, and pick-level contribution.",
+        "- Transfer Advisor: compares possible transfers from a user's current team, including budget and transfer penalties.",
+        "- Multi-Week Transfer Planner: plans transfers across upcoming rounds using current predictions plus future-round projections.",
+        "- Budget Builder: highlights value picks and expected price movement.",
+        "- Points Calculator: helps estimate score components and understand scoring.",
+        "- Accuracy: shows post-race prediction performance and confidence coverage.",
+        "",
+        "## How predictions should be described",
+        "Use cautious language. Say the site publishes model-based projections, confidence ranges, and value signals. Do not present predictions as guarantees. F1 outcomes depend on weather, reliability, strategy, safety cars, incidents, penalties, upgrades, and session timing.",
+        "",
+        "## Page inventory with summaries",
+    ])
+
+    for item in feed_items:
+        lines.append(f"- {item['title']}: {item['url']} - {item['summary']}")
+
+    remaining_paths = [p for p in rel_paths if p and f"{SITE}/{p}" not in {item["url"] for item in feed_items}]
+    if remaining_paths:
+        lines.extend(["", "## Additional crawlable URLs"])
+        lines.extend(f"- https://boxboxf1fantasy.com/{p}" for p in remaining_paths)
+
+    lines.extend([
+        "",
+        "## Feeds",
+        "- RSS: https://boxboxf1fantasy.com/feed.xml",
+        "- JSON Feed: https://boxboxf1fantasy.com/feed.json",
+        "",
+        "## Contact",
+        f"- Email: {CONTACT_EMAIL}",
+        "",
+    ])
+    (WEB / "llms-full.txt").write_text("\n".join(lines), encoding="utf-8")
 
 
 def write_feeds(feed_items: list[dict]) -> None:
@@ -1200,12 +1302,13 @@ def main() -> None:
     write_sitemap(rel_paths)
     write_robots()
     write_llms_txt(rel_paths)
+    write_llms_full(rel_paths, current, feed_items)
     write_feeds(feed_items)
 
     print(f"[14_build_seo_pages] wrote {written} race page(s) + {len(GUIDES)} guide(s) "
           f"+ {len(TOOLS)} tool page(s) + {len(STATIC_PAGES)} static page(s) + 3 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
-          "+ robots.txt + llms.txt + feeds")
+          "+ robots.txt + llms.txt + llms-full.txt + feeds")
 
 
 if __name__ == "__main__":
