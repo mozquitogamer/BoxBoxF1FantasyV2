@@ -162,12 +162,15 @@ const TA_TUNABLES = {
 //   'balanced'      -> mean of projected + risk-adjusted (DEFAULT; best expected-value proxy)
 //   'risk_adjusted' -> raw MC mean (expected_points; legacy behavior)
 let optimizeBasis = 'balanced';
-function basisPoints(item) {
+function basisPointsFor(item, basis = optimizeBasis) {
     const risk = (typeof item.expected_points === 'number') ? item.expected_points : 0;
     const proj = (typeof item.projected_points === 'number') ? item.projected_points : risk;
-    if (optimizeBasis === 'projected') return proj;
-    if (optimizeBasis === 'risk_adjusted') return risk;
+    if (basis === 'projected') return proj;
+    if (basis === 'risk_adjusted') return risk;
     return (proj + risk) / 2; // balanced
+}
+function basisPoints(item) {
+    return basisPointsFor(item, optimizeBasis);
 }
 function basisValue(item) {
     const price = item.current_price || item.price || 0;
@@ -1034,6 +1037,10 @@ function setupControls() {
     const compareChipEl = document.getElementById('compareChip');
     if (compareChipEl) {
         compareChipEl.addEventListener('change', () => renderTeamCompareGrid());
+    }
+    const compareBasisEl = document.getElementById('pointsBasisCompare');
+    if (compareBasisEl) {
+        compareBasisEl.addEventListener('change', () => renderTeamCompareGrid());
     }
     const clearTeamCompareBtn = document.getElementById('clearTeamCompare');
     if (clearTeamCompareBtn) {
@@ -3731,12 +3738,70 @@ function compareTeamBudgetSummary(teamState, budget = getCompareBudget()) {
     return { cost, bank, picked, overBudget: bank < -0.0001 };
 }
 
+function comparePointsBasis() {
+    return document.getElementById('pointsBasisCompare')?.value || 'balanced';
+}
+
+function compareBasisLabel(basis = comparePointsBasis()) {
+    if (basis === 'projected') return 'Projected';
+    if (basis === 'risk_adjusted') return 'Risk-adj';
+    return 'Balanced';
+}
+
+function formatComparePts(value) {
+    return (typeof value === 'number' && Number.isFinite(value)) ? value.toFixed(1) : '0.0';
+}
+
+function comparePickBreakdown(item, type) {
+    if (!item) return '';
+    const parts = [];
+    if (typeof item.expected_points_quali === 'number') parts.push(`Q ${formatComparePts(item.expected_points_quali)}`);
+    if (typeof item.expected_points_race === 'number') parts.push(`R ${formatComparePts(item.expected_points_race)}`);
+    if (type === 'driver' && typeof item.expected_points_sprint_race === 'number') {
+        parts.push(`S ${formatComparePts(item.expected_points_sprint_race)}`);
+    }
+    if (type === 'constructor' && typeof item.expected_pit_stop_pts === 'number') {
+        parts.push(`Pit ${formatComparePts(item.expected_pit_stop_pts)}`);
+    }
+    return parts.join(' / ');
+}
+
+function comparePickPointsHtml(item, type, basis = comparePointsBasis()) {
+    const points = basisPointsFor(item, basis);
+    const breakdown = comparePickBreakdown(item, type);
+    const label = compareBasisLabel(basis);
+    return `<div class="slot-points">${formatComparePts(points)} pts <span>${label}</span></div>
+        ${breakdown ? `<div class="slot-breakdown">${breakdown}</div>` : ''}`;
+}
+
+function compareResultPickRow(item, type, score, chip) {
+    const name = type === 'driver'
+        ? item.name.split(' ').pop()
+        : (item.name || item.constructor_id).toUpperCase();
+    const base = adjustedBasisPoints(item, chip);
+    let multiplier = 1;
+    if (type === 'driver' && item.driver_id === score.boostedDriverId) {
+        multiplier = chip === '3x_boost' ? 3 : 2;
+    } else if (type === 'driver' && item.driver_id === score.secondBoostedDriverId) {
+        multiplier = 2;
+    }
+    const total = base * multiplier;
+    const multiplierHtml = multiplier > 1 ? `<span class="team-compare-multiplier">x${multiplier}</span>` : '';
+    const breakdown = comparePickBreakdown(item, type);
+    return `<div class="team-compare-pick-row">
+        <span>${name}${multiplierHtml}</span>
+        <strong>${formatComparePts(total)} pts</strong>
+        ${breakdown ? `<em>${breakdown}</em>` : ''}
+    </div>`;
+}
+
 function renderTeamCompareGrid() {
     if (!data) return;
     const grid = document.getElementById('teamCompareGrid');
     if (!grid) return;
     const budget = getCompareBudget();
     const chip = document.getElementById('compareChip')?.value || 'none';
+    const basis = comparePointsBasis();
 
     grid.innerHTML = compareTeams.map((teamState, teamIdx) => {
         const budgetSummary = compareTeamBudgetSummary(teamState, budget);
@@ -3755,6 +3820,7 @@ function renderTeamCompareGrid() {
                     <div class="slot-label">Driver ${i + 1}</div>
                     <div class="slot-name">${driver.name.split(' ').pop()}</div>
                     <div class="slot-price">$${driver.current_price.toFixed(1)}M</div>
+                    ${comparePickPointsHtml(driver, 'driver', basis)}
                     <span class="slot-remove" data-team="${teamIdx}" data-slot="driver" data-index="${i}">&times;</span>
                 </div>`;
             } else {
@@ -3773,6 +3839,7 @@ function renderTeamCompareGrid() {
                     <div class="slot-label">Constructor ${i + 1}</div>
                     <div class="slot-name">${(con.name || con.constructor_id).toUpperCase()}</div>
                     <div class="slot-price">$${con.current_price.toFixed(1)}M</div>
+                    ${comparePickPointsHtml(con, 'constructor', basis)}
                     <span class="slot-remove" data-team="${teamIdx}" data-slot="constructor" data-index="${i}">&times;</span>
                 </div>`;
             } else {
@@ -3880,6 +3947,8 @@ function analyzeCompareTeam(teamState, view, budget, chip) {
         avgDnf,
         riskCount: riskPicks.length,
         biggestDownside,
+        boostedDriverId: score.boostedDriverId,
+        secondBoostedDriverId: score.secondBoostedDriverId,
         boosted,
         secondBoosted,
     };
@@ -3928,8 +3997,10 @@ function runTeamCompare() {
         const downsideText = r.biggestDownside
             ? `${r.biggestDownside.name.split(' ').pop()} widest driver downside`
             : 'No downside signal';
-        const driverNames = r.drivers.map(d => d.name.split(' ').pop()).join(', ');
-        const conNames = r.constructors.map(c => (c.name || c.constructor_id).toUpperCase()).join(' + ');
+        const pickRows = [
+            ...r.drivers.map(d => compareResultPickRow(d, 'driver', r, chip)),
+            ...r.constructors.map(c => compareResultPickRow(c, 'constructor', r, chip)),
+        ].join('');
         return `<div class="team-compare-card ${r.overBudget ? 'over-budget' : ''}">
             <div class="team-compare-card-head">
                 <h4>${r.name}</h4>
@@ -3955,9 +4026,11 @@ function runTeamCompare() {
                 <div><span>Risk picks</span><strong>${r.riskCount}</strong></div>
                 <div><span>Avg DNF</span><strong>${(r.avgDnf * 100).toFixed(1)}%</strong></div>
             </div>
+            <div class="team-compare-pick-list" aria-label="${r.name} points breakdown">
+                <div class="team-compare-pick-list-title">${compareBasisLabel(optimizeBasis)} contribution</div>
+                ${pickRows}
+            </div>
             <div class="team-compare-roster">
-                <div>${driverNames}</div>
-                <div>${conNames}</div>
                 <div>${downsideText}</div>
             </div>
         </div>`;
