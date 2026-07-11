@@ -2311,6 +2311,82 @@ def _faq_html(faqs) -> str:
     return "".join(f'<p class="faq-q">{esc(q)}</p><p class="faq-a">{esc(a)}</p>' for q, a in faqs)
 
 
+GUIDE_HOWTO_STEPS = {
+    "how-f1-fantasy-scoring-works": [
+        ("Learn the driver scoring categories", "Review qualifying points, race finish points, positions gained or lost, overtakes, fastest lap, Driver of the Day and DNF penalties."),
+        ("Check sprint-weekend differences", "On sprint weekends, include sprint race points, sprint fastest lap and the smaller sprint DNF penalty."),
+        ("Account for constructor scoring", "Add both drivers' qualifying and race points, then include the qualifying teamwork bonus, pit-stop points and any DNF impact."),
+        ("Use the live cards for the current round", "Open the driver and constructor cards to see how BoxBox projects each scoring component for the upcoming race."),
+    ],
+    "how-to-win-f1-fantasy": [
+        ("Sort picks by value", "Use points per million to find drivers and constructors that return the most projected score for their price."),
+        ("Protect budget growth", "Target underpriced picks early and avoid holding assets likely to fall in value."),
+        ("Plan transfers ahead", "Compare the next few rounds before spending extra transfers that cost points."),
+        ("Time chips around high-upside rounds", "Use chips when the track, weekend format, confidence and driver ceiling make the upside worth it."),
+        ("Use the optimizer and planner", "Run the lineup optimizer, transfer advisor and multi-week planner before locking a team."),
+    ],
+    "f1-fantasy-chips-explained": [
+        ("Identify the chip effect", "Check whether the chip changes budget, transfer limits, multipliers, negatives or post-qualifying flexibility."),
+        ("Match the chip to the race weekend", "Look for sprint formats, high-upside premium drivers, chaotic weather, or qualifying uncertainty depending on the chip."),
+        ("Build the team around the chip", "Use the optimizer with the chip selected so multipliers and budget rules are scored correctly."),
+        ("Recheck before lock", "Confirm practice, qualifying, weather and DNF-risk signals before committing the chip."),
+    ],
+    "drivers-vs-constructors-f1-fantasy": [
+        ("Compare raw projected points", "Check whether premium drivers or constructors project better for the current round."),
+        ("Compare value", "Use points per million to see which picks do more work for the budget."),
+        ("Remember multiplier rules", "Only drivers can receive 2x or 3x boosts; constructors never get chip multipliers."),
+        ("Let the optimizer balance the budget", "Use the optimizer to test every legal driver-and-constructor combination under the same budget."),
+    ],
+    "f1-fantasy-for-beginners": [
+        ("Build a legal team", "Pick five drivers and two constructors while staying inside the budget."),
+        ("Understand how points are scored", "Learn the main scoring categories: qualifying, race result, overtakes, positions gained, fastest lap, Driver of the Day, DNFs and constructor pit stops."),
+        ("Check the lock deadline", "Make transfers before the qualifying or sprint-lock deadline shown on the site."),
+        ("Use transfers carefully", "Use free transfers first and avoid extra transfers unless the projected gain beats the penalty."),
+        ("Try the optimizer", "Use BoxBox predictions and the lineup optimizer to turn the projections into a legal team."),
+    ],
+}
+
+
+def guide_article_ld(item: dict, canonical: str) -> dict:
+    return {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": item["title"],
+        "name": item["h1"],
+        "description": item["desc"],
+        "url": canonical,
+        "mainEntityOfPage": canonical,
+        "inLanguage": "en",
+        "author": publisher_ld(),
+        "publisher": publisher_ld(),
+        "about": ["F1 Fantasy", "Formula 1", "Fantasy sports strategy"],
+        "dateModified": datetime.now(timezone.utc).date().isoformat(),
+    }
+
+
+def guide_howto_ld(item: dict, canonical: str) -> dict | None:
+    steps = GUIDE_HOWTO_STEPS.get(item.get("slug"))
+    if not steps:
+        return None
+    return {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": item["h1"],
+        "description": item["desc"],
+        "url": canonical,
+        "inLanguage": "en",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "position": i,
+                "name": name,
+                "text": text,
+            }
+            for i, (name, text) in enumerate(steps, 1)
+        ],
+    }
+
+
 def render_content_page(item: dict, current: dict | None = None) -> str:
     base = item["base"]            # "guides" or "tools"
     crumb = item["crumb"]          # "Guides" or "Tools"
@@ -2329,6 +2405,11 @@ def render_content_page(item: dict, current: dict | None = None) -> str:
     }]
     if base == "tools":
         ld_objs.append(software_application_ld(item, canonical))
+    if base == "guides":
+        ld_objs.append(guide_article_ld(item, canonical))
+        howto = guide_howto_ld(item, canonical)
+        if howto:
+            ld_objs.append(howto)
     if faqs:
         ld_objs.append({
             "@context": "https://schema.org", "@type": "FAQPage",
