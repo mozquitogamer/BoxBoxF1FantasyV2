@@ -1,0 +1,332 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "BoxBoxF1Fantasy Public Data",
+    "summary": "Public static JSON endpoints for F1 Fantasy predictions, race context, articles, videos and changelog data.",
+    "description": "BoxBoxF1Fantasy exposes static public JSON files used by the website. These endpoints are intended for browsers, search engines, answer engines, and AI agents that need current F1 Fantasy prediction context. Prediction data is model-based and informational, not guaranteed.",
+    "version": "2026.1",
+    "contact": {
+      "name": "BoxBoxF1Fantasy",
+      "email": "boxboxf1fantasy@gmail.com",
+      "url": "https://boxboxf1fantasy.com/about/"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://boxboxf1fantasy.com",
+      "description": "Production"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Public data",
+      "description": "Static JSON datasets used by the public website."
+    },
+    {
+      "name": "Discovery",
+      "description": "Human-readable and agent-readable discovery documents."
+    }
+  ],
+  "paths": {
+    "/data/": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Public data index",
+        "description": "Crawlable HTML index of public BoxBoxF1Fantasy JSON endpoints and dataset metadata.",
+        "operationId": "get_public_data_index",
+        "responses": {
+          "200": {
+            "description": "HTML public data index.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/articles.json": {
+      "get": {
+        "tags": [
+          "Public data"
+        ],
+        "summary": "Articles",
+        "description": "Machine-readable source for crawlable race previews, recaps and F1 Fantasy strategy articles.",
+        "operationId": "get_articles",
+        "responses": {
+          "200": {
+            "description": "Articles as JSON.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/changelog.json": {
+      "get": {
+        "tags": [
+          "Public data"
+        ],
+        "summary": "Changelog",
+        "description": "Machine-readable release notes for notable model, scoring, data and tool changes.",
+        "operationId": "get_changelog",
+        "responses": {
+          "200": {
+            "description": "Changelog as JSON.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/driver_history.json": {
+      "get": {
+        "tags": [
+          "Public data"
+        ],
+        "summary": "Driver and constructor history",
+        "description": "Historical fantasy scores and price movement used by season views, form tables and value context.",
+        "operationId": "get_driver_history",
+        "responses": {
+          "200": {
+            "description": "Driver and constructor history as JSON.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/horizon_projections.json": {
+      "get": {
+        "tags": [
+          "Public data"
+        ],
+        "summary": "Future-round horizon projections",
+        "description": "Forward-looking projections used by the multi-week transfer planner when planning beyond the current race.",
+        "operationId": "get_horizon_projections",
+        "responses": {
+          "200": {
+            "description": "Future-round horizon projections as JSON.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/predictions.json": {
+      "get": {
+        "tags": [
+          "Public data"
+        ],
+        "summary": "Current F1 Fantasy predictions",
+        "description": "Current-round driver and constructor projections, expected points, confidence ranges, prices, value scores and prediction metadata.",
+        "operationId": "get_predictions",
+        "responses": {
+          "200": {
+            "description": "Current F1 Fantasy predictions as JSON.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/season_summary.json": {
+      "get": {
+        "tags": [
+          "Public data"
+        ],
+        "summary": "Season summary",
+        "description": "Race calendar, completed-round flags, current prices and season-level driver/constructor context used by the site.",
+        "operationId": "get_season_summary",
+        "responses": {
+          "200": {
+            "description": "Season summary as JSON.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/track_data.json": {
+      "get": {
+        "tags": [
+          "Public data"
+        ],
+        "summary": "Track data",
+        "description": "Circuit metadata and track-classification features for current and future race-week context.",
+        "operationId": "get_track_data",
+        "responses": {
+          "200": {
+            "description": "Track data as JSON.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/weather.json": {
+      "get": {
+        "tags": [
+          "Public data"
+        ],
+        "summary": "Weather forecast",
+        "description": "Race-week weather forecast metadata used by the weather widget and weather-aware prediction notes.",
+        "operationId": "get_weather",
+        "responses": {
+          "200": {
+            "description": "Weather forecast as JSON.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/youtube_videos.json": {
+      "get": {
+        "tags": [
+          "Public data"
+        ],
+        "summary": "YouTube videos",
+        "description": "Latest BoxBoxF1Fantasy YouTube videos with title, publish date, thumbnail and URL.",
+        "operationId": "get_youtube_videos",
+        "responses": {
+          "200": {
+            "description": "YouTube videos as JSON.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feed.json": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "JSON feed",
+        "description": "JSON Feed of recent BoxBoxF1Fantasy pages and updates.",
+        "operationId": "get_json_feed",
+        "responses": {
+          "200": {
+            "description": "JSON Feed document.",
+            "content": {
+              "application/feed+json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/llms-full.txt": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Full LLM site summary",
+        "description": "Long-form plain-text site summary with current projections, page descriptions, and agent guidance.",
+        "operationId": "get_llms_full_txt",
+        "responses": {
+          "200": {
+            "description": "Full plain-text LLM guide.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/llms.txt": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "LLM site guide",
+        "description": "Plain-text summary of the most important BoxBoxF1Fantasy pages and data endpoints for AI assistants.",
+        "operationId": "get_llms_txt",
+        "responses": {
+          "200": {
+            "description": "Plain-text LLM guide.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Public data index",
+    "url": "https://boxboxf1fantasy.com/data/"
+  }
+}

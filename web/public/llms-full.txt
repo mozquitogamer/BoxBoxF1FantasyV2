@@ -22,6 +22,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Guides hub: https://boxboxf1fantasy.com/guides/
 - Tools hub: https://boxboxf1fantasy.com/tools/
 - Public data index: https://boxboxf1fantasy.com/data/
+- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json
 - About: https://boxboxf1fantasy.com/about/
 - Privacy: https://boxboxf1fantasy.com/privacy/
 
@@ -32,6 +33,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json
 - Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json
 - Public data index: https://boxboxf1fantasy.com/data/
+- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json
 - Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json
 - Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json
 - Track data JSON: https://boxboxf1fantasy.com/data/track_data.json
@@ -72,6 +74,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Videos: links recent YouTube drafts, deadline streams, top picks and race-week strategy explainers.
 - Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.
 - Public Data: documents the static JSON endpoints for agents, answer engines and power users.
+- OpenAPI: provides a machine-readable endpoint contract for the public JSON data and discovery files.
 
 ## How predictions should be described
 Use cautious language. Say the site publishes model-based projections, confidence ranges, and value signals. Do not present predictions as guarantees. F1 outcomes depend on weather, reliability, strategy, safety cars, incidents, penalties, upgrades, and session timing.

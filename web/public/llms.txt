@@ -19,6 +19,7 @@ Important pages:
 - Strategy guides hub: https://boxboxf1fantasy.com/guides/
 - Tool landing pages: https://boxboxf1fantasy.com/tools/
 - Public data index: https://boxboxf1fantasy.com/data/
+- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json
 - About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/
 - Privacy policy: https://boxboxf1fantasy.com/privacy/
 - RSS feed: https://boxboxf1fantasy.com/feed.xml
@@ -37,6 +38,7 @@ Current data endpoints:
 - Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json
 - Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json
 - Public data index: https://boxboxf1fantasy.com/data/
+- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json
 - Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json
 - Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json
 - Track data JSON: https://boxboxf1fantasy.com/data/track_data.json
@@ -59,6 +61,7 @@ Useful descriptions for agents:
 - The Videos page lists recent YouTube race-week drafts, deadline streams, picks and strategy videos.
 - The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.
 - The Public Data page documents the JSON endpoints that agents can fetch directly.
+- The OpenAPI document provides a machine-readable contract for the public static JSON endpoints.
 - The About page explains independence, contact details, and how to use the site.
 - The Privacy page describes analytics, local storage, advertising readiness, and contact details.
 

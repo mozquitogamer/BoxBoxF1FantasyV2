@@ -412,6 +412,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="alternate" type="application/rss+xml" title="BoxBoxF1Fantasy updates" href="/feed.xml">
 <link rel="alternate" type="application/feed+json" title="BoxBoxF1Fantasy updates" href="/feed.json">
+<link rel="service-desc" type="application/openapi+json" title="BoxBoxF1Fantasy public data OpenAPI" href="/openapi.json">
 <link rel="alternate" type="text/plain" title="LLMs guide" href="/llms.txt">
 <link rel="alternate" type="text/plain" title="LLMs full site summary" href="/llms-full.txt">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1675,8 +1676,14 @@ def render_data_page(current: dict, season: dict) -> str:
             "url": url,
             "creator": publisher_ld(),
             "encodingFormat": "application/json",
+            "distribution": {
+                "@type": "DataDownload",
+                "encodingFormat": "application/json",
+                "contentUrl": url,
+            },
             "dateModified": updated or datetime.now(timezone.utc).date().isoformat(),
             "isAccessibleForFree": True,
+            "termsOfUse": f"{SITE}/privacy/",
         })
 
     faqs = [
@@ -1722,7 +1729,7 @@ def render_data_page(current: dict, season: dict) -> str:
         f"<h1>BoxBoxF1Fantasy Public Data ({YEAR})</h1>"
         '<p class="lede">A crawlable index of public JSON files for agents, answer engines and power users who want to understand the data behind the site.</p>'
         f'<p class="meta">Current round: R{esc(round_no)} &middot; {esc(race)}</p>'
-        '<div class="callout">For natural-language navigation, start with <a href="/llms.txt">llms.txt</a> or the fuller <a href="/llms-full.txt">llms-full.txt</a>. For live projections, start with <a href="/data/predictions.json">predictions.json</a>.</div>'
+        '<div class="callout">For natural-language navigation, start with <a href="/llms.txt">llms.txt</a> or the fuller <a href="/llms-full.txt">llms-full.txt</a>. For machine-readable endpoint discovery, use <a href="/openapi.json">openapi.json</a>. For live projections, start with <a href="/data/predictions.json">predictions.json</a>.</div>'
         '<table><thead><tr><th>File</th><th>Dataset</th><th>Description</th><th class="num">Updated</th><th class="num">Bytes</th></tr></thead><tbody>'
         + "".join(rows)
         + "</tbody></table>"
@@ -1769,6 +1776,7 @@ Allow: /privacy/
 Allow: /data/
 Allow: /feed.xml
 Allow: /feed.json
+Allow: /openapi.json
 Allow: /data/predictions.json
 Allow: /data/season_summary.json
 Allow: /llms.txt
@@ -1777,6 +1785,122 @@ Allow: /llms-full.txt
 Sitemap: {SITE}/sitemap.xml
 """
     (WEB / "robots.txt").write_text(body, encoding="utf-8")
+
+
+def write_openapi() -> None:
+    """Machine-readable contract for public static data endpoints."""
+    paths = {}
+    for item in PUBLIC_DATASETS:
+        paths[f"/data/{item['file']}"] = {
+            "get": {
+                "tags": ["Public data"],
+                "summary": item["name"],
+                "description": item["desc"],
+                "operationId": "get_" + re.sub(r"[^a-zA-Z0-9_]", "_", item["file"].replace(".json", "")),
+                "responses": {
+                    "200": {
+                        "description": f"{item['name']} as JSON.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": True,
+                                }
+                            }
+                        },
+                    }
+                },
+            }
+        }
+
+    paths.update({
+        "/data/": {
+            "get": {
+                "tags": ["Discovery"],
+                "summary": "Public data index",
+                "description": "Crawlable HTML index of public BoxBoxF1Fantasy JSON endpoints and dataset metadata.",
+                "operationId": "get_public_data_index",
+                "responses": {
+                    "200": {
+                        "description": "HTML public data index.",
+                        "content": {"text/html": {"schema": {"type": "string"}}},
+                    }
+                },
+            }
+        },
+        "/llms.txt": {
+            "get": {
+                "tags": ["Discovery"],
+                "summary": "LLM site guide",
+                "description": "Plain-text summary of the most important BoxBoxF1Fantasy pages and data endpoints for AI assistants.",
+                "operationId": "get_llms_txt",
+                "responses": {
+                    "200": {
+                        "description": "Plain-text LLM guide.",
+                        "content": {"text/plain": {"schema": {"type": "string"}}},
+                    }
+                },
+            }
+        },
+        "/llms-full.txt": {
+            "get": {
+                "tags": ["Discovery"],
+                "summary": "Full LLM site summary",
+                "description": "Long-form plain-text site summary with current projections, page descriptions, and agent guidance.",
+                "operationId": "get_llms_full_txt",
+                "responses": {
+                    "200": {
+                        "description": "Full plain-text LLM guide.",
+                        "content": {"text/plain": {"schema": {"type": "string"}}},
+                    }
+                },
+            }
+        },
+        "/feed.json": {
+            "get": {
+                "tags": ["Discovery"],
+                "summary": "JSON feed",
+                "description": "JSON Feed of recent BoxBoxF1Fantasy pages and updates.",
+                "operationId": "get_json_feed",
+                "responses": {
+                    "200": {
+                        "description": "JSON Feed document.",
+                        "content": {"application/feed+json": {"schema": {"type": "object", "additionalProperties": True}}},
+                    }
+                },
+            }
+        },
+    })
+
+    doc = {
+        "openapi": "3.1.0",
+        "info": {
+            "title": "BoxBoxF1Fantasy Public Data",
+            "summary": "Public static JSON endpoints for F1 Fantasy predictions, race context, articles, videos and changelog data.",
+            "description": (
+                "BoxBoxF1Fantasy exposes static public JSON files used by the website. "
+                "These endpoints are intended for browsers, search engines, answer engines, and AI agents that need current F1 Fantasy prediction context. "
+                "Prediction data is model-based and informational, not guaranteed."
+            ),
+            "version": f"{YEAR}.1",
+            "contact": {
+                "name": "BoxBoxF1Fantasy",
+                "email": CONTACT_EMAIL,
+                "url": f"{SITE}/about/",
+            },
+        },
+        "servers": [{"url": SITE, "description": "Production"}],
+        "tags": [
+            {"name": "Public data", "description": "Static JSON datasets used by the public website."},
+            {"name": "Discovery", "description": "Human-readable and agent-readable discovery documents."},
+        ],
+        "paths": dict(sorted(paths.items())),
+        "externalDocs": {
+            "description": "Public data index",
+            "url": f"{SITE}/data/",
+        },
+    }
+    (WEB / "openapi.json").write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def write_llms_txt(rel_paths: list[str]) -> None:
@@ -1805,6 +1929,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Strategy guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
         "- Public data index: https://boxboxf1fantasy.com/data/",
+        "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
         "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
         "- Privacy policy: https://boxboxf1fantasy.com/privacy/",
         "- RSS feed: https://boxboxf1fantasy.com/feed.xml",
@@ -1823,6 +1948,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json",
         "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
         "- Public data index: https://boxboxf1fantasy.com/data/",
+        "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
         "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
         "- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json",
         "- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json",
@@ -1842,6 +1968,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The Videos page lists recent YouTube race-week drafts, deadline streams, picks and strategy videos.",
         "- The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.",
         "- The Public Data page documents the JSON endpoints that agents can fetch directly.",
+        "- The OpenAPI document provides a machine-readable contract for the public static JSON endpoints.",
         "- The About page explains independence, contact details, and how to use the site.",
         "- The Privacy page describes analytics, local storage, advertising readiness, and contact details.",
         "",
@@ -1886,6 +2013,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tools hub: https://boxboxf1fantasy.com/tools/",
         "- Public data index: https://boxboxf1fantasy.com/data/",
+        "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
         "- About: https://boxboxf1fantasy.com/about/",
         "- Privacy: https://boxboxf1fantasy.com/privacy/",
         "",
@@ -1896,6 +2024,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json",
         "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
         "- Public data index: https://boxboxf1fantasy.com/data/",
+        "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
         "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
         "- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json",
         "- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json",
@@ -1938,6 +2067,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Videos: links recent YouTube drafts, deadline streams, top picks and race-week strategy explainers.",
         "- Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.",
         "- Public Data: documents the static JSON endpoints for agents, answer engines and power users.",
+        "- OpenAPI: provides a machine-readable endpoint contract for the public JSON data and discovery files.",
         "",
         "## How predictions should be described",
         "Use cautious language. Say the site publishes model-based projections, confidence ranges, and value signals. Do not present predictions as guarantees. F1 outcomes depend on weather, reliability, strategy, safety cars, incidents, penalties, upgrades, and session timing.",
@@ -2851,6 +2981,7 @@ def main() -> None:
 
     write_sitemap(rel_paths)
     write_robots()
+    write_openapi()
     write_llms_txt(rel_paths)
     write_llms_full(rel_paths, current, feed_items)
     write_feeds(feed_items)
@@ -2859,7 +2990,7 @@ def main() -> None:
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
           f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
-          "+ robots.txt + llms.txt + llms-full.txt + feeds")
+          "+ robots.txt + openapi.json + llms.txt + llms-full.txt + feeds")
 
 
 if __name__ == "__main__":
