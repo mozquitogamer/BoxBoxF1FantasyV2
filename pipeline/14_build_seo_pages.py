@@ -1049,7 +1049,19 @@ def render_driver_page(driver: dict, current: dict, rank: int, constructors_by_i
             "mainEntity": {
                 "@type": "Person",
                 "name": name,
+                "url": canonical,
+                "identifier": driver.get("driver_id", slug),
+                "jobTitle": "Formula 1 driver",
+                "sport": "Formula 1",
                 "affiliation": {"@type": "SportsTeam", "name": team},
+                "memberOf": {"@type": "SportsTeam", "name": team},
+                "additionalProperty": [
+                    {"@type": "PropertyValue", "name": "F1 Fantasy price", "value": f"${driver.get('current_price', 0):.1f}M"},
+                    {"@type": "PropertyValue", "name": "Expected F1 Fantasy points", "value": round(float(driver.get("expected_points", 0)), 1)},
+                    {"@type": "PropertyValue", "name": "F1 Fantasy points per million", "value": round(float(driver.get("value_score", 0)), 2)},
+                    {"@type": "PropertyValue", "name": "Predicted qualifying position", "value": driver.get("predicted_quali", "-")},
+                    {"@type": "PropertyValue", "name": "Predicted race finish", "value": driver.get("predicted_finish", "-")},
+                ],
             },
         },
         breadcrumb_ld([
@@ -1180,7 +1192,24 @@ def render_constructor_page(constructor: dict, current: dict, rank: int, drivers
                 "@type": "SportsTeam",
                 "name": name,
                 "alternateName": full_name,
-                "athlete": [{"@type": "Person", "name": d} for d in driver_names if d],
+                "url": canonical,
+                "identifier": constructor.get("constructor_id", slug),
+                "sport": "Formula 1",
+                "athlete": [
+                    {
+                        "@type": "Person",
+                        "name": d,
+                        "url": f"{SITE}/drivers/{plain_slug(d)}/",
+                    }
+                    for d in driver_names if d
+                ],
+                "additionalProperty": [
+                    {"@type": "PropertyValue", "name": "F1 Fantasy price", "value": f"${constructor.get('current_price', 0):.1f}M"},
+                    {"@type": "PropertyValue", "name": "Expected F1 Fantasy points", "value": round(float(constructor.get("expected_points", 0)), 1)},
+                    {"@type": "PropertyValue", "name": "F1 Fantasy points per million", "value": round(float(constructor.get("value_score", 0)), 2)},
+                    {"@type": "PropertyValue", "name": "Expected pit-stop points", "value": round(float(constructor.get("expected_pit_stop_pts", 0)), 1)},
+                    {"@type": "PropertyValue", "name": "Qualifying teamwork bonus", "value": round(float(constructor.get("quali_bonus", 0)), 1)},
+                ],
             },
         },
         breadcrumb_ld([
