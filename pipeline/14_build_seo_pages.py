@@ -24,6 +24,7 @@ from __future__ import annotations
 import html
 import json
 import re
+import runpy
 import unicodedata
 from datetime import datetime, timezone
 from email.utils import format_datetime
@@ -235,6 +236,54 @@ def fmt_date(date_text: str) -> str:
 
 def _driver_name(driver: dict) -> str:
     return f"{driver.get('first_name', '').strip()} {driver.get('last_name', '').strip()}".strip() or driver.get("driver_id", "")
+
+
+def _circuit_coordinates() -> dict:
+    path = ROOT / "config" / "circuit_coordinates.py"
+    if not path.exists():
+        return {}
+    try:
+        return runpy.run_path(str(path)).get("CIRCUIT_COORDINATES", {})
+    except Exception:
+        return {}
+
+
+CIRCUIT_COORDINATES = _circuit_coordinates()
+
+
+def race_event_ld(race: str, race_date: str, circuit: str, canonical: str, desc: str) -> dict | None:
+    """Structured data that tells crawlers a race-pick page is about a real F1 event."""
+    if not race_date:
+        return None
+
+    today = datetime.now(timezone.utc).date().isoformat()
+    status = "https://schema.org/EventCompleted" if race_date < today else "https://schema.org/EventScheduled"
+    circuit_clean = clean_legacy_text(circuit or "")
+    place = {
+        "@type": "Place",
+        "name": circuit_clean or clean_legacy_text(race),
+    }
+    coords = CIRCUIT_COORDINATES.get(circuit_clean)
+    if coords:
+        lat, lon, _tz = coords
+        place["geo"] = {
+            "@type": "GeoCoordinates",
+            "latitude": lat,
+            "longitude": lon,
+        }
+
+    return {
+        "@context": "https://schema.org",
+        "@type": "SportsEvent",
+        "name": f"{clean_legacy_text(race)} {YEAR}",
+        "sport": "Formula 1",
+        "url": canonical,
+        "description": desc,
+        "startDate": race_date,
+        "eventStatus": status,
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "location": place,
+    }
 
 
 def suggested_lineup(pred: dict, budget: float = 100.0) -> dict | None:
@@ -572,7 +621,7 @@ def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
         f'<p class="faq-q">{esc(q)}</p><p class="faq-a">{esc(a)}</p>' for q, a in faqs
     )
 
-    ld = ld_block([
+    ld_objs = [
         {
             **webpage_ld(title, canonical, desc, "Article"),
             "headline": title,
@@ -612,7 +661,11 @@ def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
                 for q, a in faqs
             ],
         },
-    ])
+    ]
+    event = race_event_ld(race, pred.get("date", ""), pred.get("circuit", ""), canonical, desc)
+    if event:
+        ld_objs.append(event)
+    ld = ld_block(ld_objs)
 
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/picks/">Picks</a> &rsaquo; {esc(short)} {YEAR}</p>'
@@ -775,7 +828,7 @@ def render_future_race_page(pred: dict, horizon_generated_at: str = "") -> tuple
          "The page becomes sharper across race week: pre-FP predictions use priors, post-FP predictions add practice pace, and post-quali predictions can include the actual grid."),
     ]
 
-    ld = ld_block([
+    ld_objs = [
         {
             **webpage_ld(title, canonical, desc, "Article"),
             "headline": title,
@@ -805,7 +858,11 @@ def render_future_race_page(pred: dict, horizon_generated_at: str = "") -> tuple
                 for q, a in faqs
             ],
         },
-    ])
+    ]
+    event = race_event_ld(race, pred.get("date", ""), pred.get("circuit", ""), canonical, desc)
+    if event:
+        ld_objs.append(event)
+    ld = ld_block(ld_objs)
 
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/picks/">Picks</a> &rsaquo; {esc(short)} {YEAR}</p>'
