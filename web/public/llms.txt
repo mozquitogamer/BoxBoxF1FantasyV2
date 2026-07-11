@@ -39,6 +39,11 @@ Important pages:
 - Budget builder: https://boxboxf1fantasy.com/tools/budget-builder/
 - Points calculator: https://boxboxf1fantasy.com/tools/points-calculator/
 
+Crawler policy:
+- robots.txt intentionally allows search, answer-engine, and AI-agent crawlers.
+- Explicitly allowed AI/search user agents include: OAI-SearchBot, ChatGPT-User, GPTBot, OAI-AdsBot, Claude-SearchBot, Claude-User, ClaudeBot, PerplexityBot, Perplexity-User, Google-Extended.
+- Key discovery files for crawlers: /sitemap.xml, /llms.txt, /llms-full.txt, /search-index.json, /openapi.json, /.well-known/openapi.json.
+
 Current data endpoints:
 - Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json
 - Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json
@@ -74,6 +79,7 @@ Useful descriptions for agents:
 - The OpenAPI document provides a machine-readable contract for the public static JSON endpoints.
 - The search-index.json file gives agents a compact list of crawlable pages with title, description, type, path and canonical URL.
 - The web app manifest identifies BoxBoxF1Fantasy as an installable sports utility and exposes shortcuts to high-intent tools.
+- The robots.txt file explicitly welcomes major AI/search crawlers and points them toward sitemap, LLM, search-index, and OpenAPI discovery files.
 - The .well-known discovery files mirror the OpenAPI and LLM guides for crawlers and agent tooling.
 - The About page explains independence, contact details, and how to use the site.
 - The Privacy page describes analytics, local storage, advertising readiness, and contact details.

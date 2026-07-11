@@ -1963,6 +1963,24 @@ def render_data_page(current: dict, season: dict) -> str:
 # --------------------------------------------------------------------------- #
 # sitemap
 # --------------------------------------------------------------------------- #
+AI_CRAWLER_USER_AGENTS = [
+    # OpenAI: search visibility, user-requested fetches, model training, and ad landing-page validation.
+    "OAI-SearchBot",
+    "ChatGPT-User",
+    "GPTBot",
+    "OAI-AdsBot",
+    # Anthropic: Claude search, user-requested fetches, and model training.
+    "Claude-SearchBot",
+    "Claude-User",
+    "ClaudeBot",
+    # Perplexity: search visibility and user-requested fetches.
+    "PerplexityBot",
+    "Perplexity-User",
+    # Google generative-AI product controls; normal Google Search remains covered by User-agent: *.
+    "Google-Extended",
+]
+
+
 def write_sitemap(rel_paths: list[str]) -> None:
     """rel_paths: relative URLs like '', 'picks/', 'picks/monaco-gp-2026/', 'guides/'."""
     lastmod = datetime.now(timezone.utc).date().isoformat()
@@ -1981,7 +1999,14 @@ def write_sitemap(rel_paths: list[str]) -> None:
 
 def write_robots() -> None:
     """Keep crawler hints explicit whenever SEO pages are regenerated."""
-    body = f"""User-agent: *
+    ai_groups = "\n".join(
+        f"User-agent: {agent}\nAllow: /\n"
+        for agent in AI_CRAWLER_USER_AGENTS
+    )
+    body = f"""# BoxBoxF1Fantasy intentionally allows search, answer-engine, and AI-agent crawlers.
+# Discovery files: /sitemap.xml, /llms.txt, /llms-full.txt, /search-index.json, /openapi.json
+
+User-agent: *
 Allow: /
 Allow: /picks/
 Allow: /drivers/
@@ -2009,6 +2034,9 @@ Allow: /data/season_summary.json
 Allow: /llms.txt
 Allow: /llms-full.txt
 
+# Explicit AI/search crawler groups. Kept separate so crawler-specific robots
+# matching still receives a complete allow rule.
+{ai_groups}
 Sitemap: {SITE}/sitemap.xml
 """
     (WEB / "robots.txt").write_text(body, encoding="utf-8")
@@ -2350,6 +2378,8 @@ def write_search_index(rel_paths: list[str], current: dict) -> None:
             "openapi": f"{SITE}/openapi.json",
             "manifest": f"{SITE}/site.webmanifest",
             "public_data": f"{SITE}/data/",
+            "robots": f"{SITE}/robots.txt",
+            "allowed_ai_crawlers": AI_CRAWLER_USER_AGENTS,
         },
         "pages": pages,
     }
@@ -2438,6 +2468,11 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Budget builder: https://boxboxf1fantasy.com/tools/budget-builder/",
         "- Points calculator: https://boxboxf1fantasy.com/tools/points-calculator/",
         "",
+        "Crawler policy:",
+        "- robots.txt intentionally allows search, answer-engine, and AI-agent crawlers.",
+        "- Explicitly allowed AI/search user agents include: " + ", ".join(AI_CRAWLER_USER_AGENTS) + ".",
+        "- Key discovery files for crawlers: /sitemap.xml, /llms.txt, /llms-full.txt, /search-index.json, /openapi.json, /.well-known/openapi.json.",
+        "",
         "Current data endpoints:",
         "- Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json",
         "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
@@ -2470,6 +2505,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The OpenAPI document provides a machine-readable contract for the public static JSON endpoints.",
         "- The search-index.json file gives agents a compact list of crawlable pages with title, description, type, path and canonical URL.",
         "- The web app manifest identifies BoxBoxF1Fantasy as an installable sports utility and exposes shortcuts to high-intent tools.",
+        "- The robots.txt file explicitly welcomes major AI/search crawlers and points them toward sitemap, LLM, search-index, and OpenAPI discovery files.",
         "- The .well-known discovery files mirror the OpenAPI and LLM guides for crawlers and agent tooling.",
         "- The About page explains independence, contact details, and how to use the site.",
         "- The Privacy page describes analytics, local storage, advertising readiness, and contact details.",
@@ -2523,6 +2559,11 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Web app manifest: https://boxboxf1fantasy.com/site.webmanifest",
         "- About: https://boxboxf1fantasy.com/about/",
         "- Privacy: https://boxboxf1fantasy.com/privacy/",
+        "",
+        "## Crawler policy",
+        "- robots.txt intentionally allows search, answer-engine, and AI-agent crawlers.",
+        "- Explicitly allowed AI/search user agents include: " + ", ".join(AI_CRAWLER_USER_AGENTS) + ".",
+        "- Key discovery files for crawlers: /sitemap.xml, /llms.txt, /llms-full.txt, /search-index.json, /openapi.json, /.well-known/openapi.json.",
         "",
         "## Current round context",
         f"- Current round: {round_no}",

@@ -1,3 +1,6 @@
+# BoxBoxF1Fantasy intentionally allows search, answer-engine, and AI-agent crawlers.
+# Discovery files: /sitemap.xml, /llms.txt, /llms-full.txt, /search-index.json, /openapi.json
+
 User-agent: *
 Allow: /
 Allow: /picks/
@@ -25,5 +28,37 @@ Allow: /data/predictions.json
 Allow: /data/season_summary.json
 Allow: /llms.txt
 Allow: /llms-full.txt
+
+# Explicit AI/search crawler groups. Kept separate so crawler-specific robots
+# matching still receives a complete allow rule.
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-AdsBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
 
 Sitemap: https://boxboxf1fantasy.com/sitemap.xml

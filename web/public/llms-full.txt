@@ -31,6 +31,11 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - About: https://boxboxf1fantasy.com/about/
 - Privacy: https://boxboxf1fantasy.com/privacy/
 
+## Crawler policy
+- robots.txt intentionally allows search, answer-engine, and AI-agent crawlers.
+- Explicitly allowed AI/search user agents include: OAI-SearchBot, ChatGPT-User, GPTBot, OAI-AdsBot, Claude-SearchBot, Claude-User, ClaudeBot, PerplexityBot, Perplexity-User, Google-Extended.
+- Key discovery files for crawlers: /sitemap.xml, /llms.txt, /llms-full.txt, /search-index.json, /openapi.json, /.well-known/openapi.json.
+
 ## Current round context
 - Current round: 12
 - Race: Belgian Grand Prix

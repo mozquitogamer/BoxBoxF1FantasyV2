@@ -2,7 +2,7 @@
   "site": "https://boxboxf1fantasy.com",
   "name": "BoxBoxF1Fantasy",
   "description": "Free F1 Fantasy 2026 predictions, race picks, lineup optimizer, transfer tools, strategy guides, public data and accuracy tracking.",
-  "generated_at": "2026-07-11T10:11:19.606676+00:00",
+  "generated_at": "2026-07-11T20:00:14.289965+00:00",
   "language": "en",
   "current_round": 12,
   "current_race": "Belgian Grand Prix",
@@ -12,7 +12,20 @@
     "llms_full": "https://boxboxf1fantasy.com/llms-full.txt",
     "openapi": "https://boxboxf1fantasy.com/openapi.json",
     "manifest": "https://boxboxf1fantasy.com/site.webmanifest",
-    "public_data": "https://boxboxf1fantasy.com/data/"
+    "public_data": "https://boxboxf1fantasy.com/data/",
+    "robots": "https://boxboxf1fantasy.com/robots.txt",
+    "allowed_ai_crawlers": [
+      "OAI-SearchBot",
+      "ChatGPT-User",
+      "GPTBot",
+      "OAI-AdsBot",
+      "Claude-SearchBot",
+      "Claude-User",
+      "ClaudeBot",
+      "PerplexityBot",
+      "Perplexity-User",
+      "Google-Extended"
+    ]
   },
   "pages": [
     {
