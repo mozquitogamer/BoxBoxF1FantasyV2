@@ -127,6 +127,36 @@ def item_list_ld(name: str, url: str, items: list[tuple[str, str]]) -> dict:
     }
 
 
+def software_application_ld(item: dict, url: str) -> dict:
+    """Structured data for free browser tools, used on /tools/... pages."""
+    features = item.get("features") or [
+        f"{item['crumb_self']} for F1 Fantasy 2026",
+        "Free browser-based F1 Fantasy tool",
+        "No login required",
+    ]
+    return {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": item["crumb_self"],
+        "alternateName": item["title"],
+        "url": url,
+        "description": item["desc"],
+        "applicationCategory": "SportsApplication",
+        "applicationSubCategory": "Fantasy sports tool",
+        "operatingSystem": "Web browser",
+        "browserRequirements": "Requires JavaScript",
+        "isAccessibleForFree": True,
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+        },
+        "featureList": features,
+        "publisher": publisher_ld(),
+    }
+
+
 def breadcrumb_ld(items: list[tuple[str, str]]) -> dict:
     return {
         "@context": "https://schema.org",
@@ -1319,6 +1349,8 @@ def render_content_page(item: dict, current: dict | None = None) -> str:
             {"@type": "ListItem", "position": 3, "name": item["crumb_self"], "item": canonical},
         ],
     }]
+    if base == "tools":
+        ld_objs.append(software_application_ld(item, canonical))
     if faqs:
         ld_objs.append({
             "@context": "https://schema.org", "@type": "FAQPage",
@@ -1575,6 +1607,7 @@ TOOLS = [
         "crumb_self": "Predictions",
         "title": "F1 Fantasy Predictions 2026: Drivers, Constructors & Points | BoxBox",
         "desc": "Free F1 Fantasy 2026 predictions for every race weekend: projected driver points, constructor points, confidence ranges, value ratings, race picks and optimizer tools.",
+        "features": ["Driver and constructor projections", "Expected fantasy points", "Confidence ranges", "Value ratings", "Race-week picks"],
         "h1": "F1 Fantasy Predictions 2026",
         "intro": '<p class="lede">Free F1 Fantasy predictions for every 2026 race weekend: driver points, constructor points, confidence ranges, value ratings and race-week picks.</p>',
         "body": (
@@ -1603,6 +1636,7 @@ TOOLS = [
         "crumb_self": "Best Team",
         "title": "Best F1 Fantasy Team 2026: Free Optimizer & Picks | BoxBox",
         "desc": "Find the best F1 Fantasy team for the current race weekend with free driver and constructor projections, budget checks, chips, value ratings and a lineup optimizer.",
+        "features": ["Suggested F1 Fantasy lineup", "Budget check", "Captain boost context", "Driver and constructor projections", "No login required"],
         "h1": "Best F1 Fantasy Team 2026",
         "intro": '<p class="lede">Looking for the best F1 Fantasy team this week? Use current driver and constructor projections, budget checks and chip settings to build a lineup that actually fits.</p>',
         "body": (
@@ -1632,6 +1666,7 @@ TOOLS = [
         "crumb_self": "Captain Picks",
         "title": "F1 Fantasy Captain Picks 2026: 2x & 3x Boost Advice | BoxBox",
         "desc": "Free F1 Fantasy captain and boost pick advice for 2026: compare projected driver points, downside risk, confidence ranges and 3x Boost candidates.",
+        "features": ["Captain pick projections", "2x boost context", "3x Boost comparison", "Downside risk", "Confidence ranges"],
         "h1": "F1 Fantasy Captain Picks 2026",
         "intro": '<p class="lede">Pick the right boosted driver for the current F1 Fantasy round by comparing projected points, confidence range and downside risk.</p>',
         "body": (
@@ -1660,6 +1695,7 @@ TOOLS = [
         "crumb_self": "Value Picks",
         "title": "F1 Fantasy Value Picks 2026: Best Budget Picks This Week | BoxBox",
         "desc": "Free F1 Fantasy value picks for the current race weekend: best points-per-million drivers, budget picks and constructor value based on live projections.",
+        "features": ["Points-per-million rankings", "Budget driver picks", "Constructor value picks", "Projected price movement", "Current-round projections"],
         "h1": "F1 Fantasy Value Picks This Week",
         "intro": '<p class="lede">Find the best F1 Fantasy value picks for the current race weekend: drivers and constructors with the strongest projected points per million.</p>',
         "body": (
@@ -1686,6 +1722,7 @@ TOOLS = [
         "crumb_self": "Lineup Optimizer",
         "title": "F1 Fantasy Lineup Optimizer (Free) | BoxBox",
         "desc": "A free F1 Fantasy lineup optimizer that checks all 1.4 million legal 5-driver, 2-constructor teams within your budget and ranks the best lineups using ML predictions.",
+        "features": ["Lineup optimization", "Budget-constrained team search", "Lock and exclude picks", "Chip-aware scoring", "Strategy modes"],
         "h1": "F1 Fantasy Lineup Optimizer (Free)",
         "intro": '<p class="lede">Find the best F1 Fantasy team within your budget in about a second &mdash; free, no login.</p>',
         "body": (
@@ -1710,6 +1747,7 @@ TOOLS = [
         "crumb_self": "Team Compare",
         "title": "F1 Fantasy Team Compare & Score Calculator (Free) | BoxBox",
         "desc": "Free F1 Fantasy team compare tool: enter up to three candidate teams and compare budget, projected points, confidence range, price movement and downside risk.",
+        "features": ["Compare up to three teams", "Projected team score", "Budget remaining", "Worst-case downside", "Pick-level contribution"],
         "h1": "F1 Fantasy Team Compare & Score Calculator",
         "intro": '<p class="lede">Compare up to three possible F1 Fantasy teams side-by-side before you lock in transfers or chips.</p>',
         "body": (
@@ -1736,6 +1774,7 @@ TOOLS = [
         "crumb_self": "Transfer Planner",
         "title": "F1 Fantasy Transfer Planner & Advisor (Free) | BoxBox",
         "desc": "Free F1 Fantasy transfer tools: find your best one or two swaps this week, or plan transfers and chips across 2-5 upcoming rounds with a multi-week planner.",
+        "features": ["Transfer advisor", "Multi-week transfer planning", "Chip planning", "Budget propagation", "Transfer penalty comparison"],
         "h1": "F1 Fantasy Transfer Planner & Advisor",
         "intro": '<p class="lede">Make the right transfers &mdash; this week and several rounds ahead &mdash; without the &minus;10 guesswork.</p>',
         "body": (
@@ -1758,6 +1797,7 @@ TOOLS = [
         "crumb_self": "Budget Builder",
         "title": "F1 Fantasy Budget Builder: Grow Your Team Value (Free) | BoxBox",
         "desc": "Free F1 Fantasy budget builder: find the picks most likely to rise in price so your team value compounds, leaving more to spend on stars later in the season.",
+        "features": ["Budget growth strategy", "Projected price movement", "Value picks", "Points-per-million signals", "Team value planning"],
         "h1": "F1 Fantasy Budget Builder",
         "intro": '<p class="lede">Turn price rises into spending power. The Budget Builder finds picks likely to appreciate so your team value grows over the season.</p>',
         "body": (
@@ -1780,6 +1820,7 @@ TOOLS = [
         "crumb_self": "Points Calculator",
         "title": "F1 Fantasy Points Calculator & Predictions (Free) | BoxBox",
         "desc": "Free F1 Fantasy points calculator: see projected fantasy points for every driver and constructor this round, with a full breakdown of qualifying, race, overtakes and bonuses.",
+        "features": ["Projected fantasy points", "Driver point breakdowns", "Constructor point breakdowns", "Confidence intervals", "What-if sliders"],
         "h1": "F1 Fantasy Points Calculator & Predictions",
         "intro": '<p class="lede">See how many fantasy points every driver and constructor is projected to score this round &mdash; with the full breakdown.</p>',
         "body": (
