@@ -458,6 +458,76 @@ def current_value_picks_html(pred: dict) -> str:
     )
 
 
+def current_price_changes_html(pred: dict) -> str:
+    drivers = pred.get("drivers", [])
+    constructors = pred.get("constructors", [])
+    if not drivers and not constructors:
+        return ""
+
+    driver_risers = sorted(
+        drivers,
+        key=lambda d: (d.get("value_score", -999), d.get("expected_points", -999)),
+        reverse=True,
+    )[:8]
+    driver_pressure = sorted(
+        drivers,
+        key=lambda d: (d.get("value_score", 999), d.get("expected_points", 999)),
+    )[:8]
+    constructor_risers = sorted(
+        constructors,
+        key=lambda c: (c.get("value_score", -999), c.get("expected_points", -999)),
+        reverse=True,
+    )[:6]
+    constructor_pressure = sorted(
+        constructors,
+        key=lambda c: (c.get("value_score", 999), c.get("expected_points", 999)),
+    )[:6]
+
+    def driver_rows(items: list[dict], pressure: bool = False) -> str:
+        return "".join(
+            f'<tr><td><a href="/drivers/{plain_slug(d.get("name", d.get("driver_id", "driver")))}/">{esc(d.get("name", d.get("driver_id", "")))}</a></td>'
+            f'<td>{esc(d.get("constructor", ""))}</td>'
+            f'<td class="num">${_price(d):.1f}M</td>'
+            f'<td class="num">{_pts(d):.1f}</td>'
+            f'<td class="num">{d.get("value_score", 0):.2f}</td>'
+            f'<td>{esc("Drop-pressure watch" if pressure else "Rise watch")}</td></tr>'
+            for d in items
+        )
+
+    def constructor_rows(items: list[dict], pressure: bool = False) -> str:
+        return "".join(
+            f'<tr><td><a href="/constructors/{plain_slug(c.get("name", c.get("constructor_id", "constructor")))}/">{esc(c.get("name", c.get("constructor_id", "")))}</a></td>'
+            f'<td class="num">${_price(c):.1f}M</td>'
+            f'<td class="num">{_pts(c):.1f}</td>'
+            f'<td class="num">{float(c.get("expected_pit_stop_pts") or 0):.1f}</td>'
+            f'<td class="num">{c.get("value_score", 0):.2f}</td>'
+            f'<td>{esc("Drop-pressure watch" if pressure else "Rise watch")}</td></tr>'
+            for c in items
+        )
+
+    return (
+        f'<h2>Current price-change watchlist: {esc(pred.get("race", "current race"))}</h2>'
+        '<p>This crawlable watchlist uses public projection signals: expected points, current price and points-per-million/value rating. '
+        'It is a practical fantasy-budget screen, not an official price-change guarantee.</p>'
+        "<h3>Drivers most likely to attract price-rise interest</h3>"
+        '<table><thead><tr><th>Driver</th><th>Team</th><th class="num">Price</th><th class="num">Exp. pts</th><th class="num">Value</th><th>Signal</th></tr></thead><tbody>'
+        + driver_rows(driver_risers) +
+        "</tbody></table>"
+        "<h3>Drivers under price-drop pressure</h3>"
+        '<table><thead><tr><th>Driver</th><th>Team</th><th class="num">Price</th><th class="num">Exp. pts</th><th class="num">Value</th><th>Signal</th></tr></thead><tbody>'
+        + driver_rows(driver_pressure, pressure=True) +
+        "</tbody></table>"
+        "<h3>Constructor price-rise watch</h3>"
+        '<table><thead><tr><th>Constructor</th><th class="num">Price</th><th class="num">Exp. pts</th><th class="num">Pit pts</th><th class="num">Value</th><th>Signal</th></tr></thead><tbody>'
+        + constructor_rows(constructor_risers) +
+        "</tbody></table>"
+        "<h3>Constructors under price-drop pressure</h3>"
+        '<table><thead><tr><th>Constructor</th><th class="num">Price</th><th class="num">Exp. pts</th><th class="num">Pit pts</th><th class="num">Value</th><th>Signal</th></tr></thead><tbody>'
+        + constructor_rows(constructor_pressure, pressure=True) +
+        "</tbody></table>"
+    )
+
+
 def current_points_calculator_html(pred: dict) -> str:
     drivers = sorted(pred.get("drivers", []), key=_pts, reverse=True)
     constructors = sorted(pred.get("constructors", []), key=_pts, reverse=True)
@@ -2902,6 +2972,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Best F1 Fantasy team: https://boxboxf1fantasy.com/tools/best-f1-fantasy-team/",
         "- F1 Fantasy captain picks: https://boxboxf1fantasy.com/tools/f1-fantasy-captain-picks/",
         "- F1 Fantasy value picks: https://boxboxf1fantasy.com/tools/f1-fantasy-value-picks/",
+        "- F1 Fantasy price changes: https://boxboxf1fantasy.com/tools/f1-fantasy-price-changes/",
         "- Lineup optimizer: https://boxboxf1fantasy.com/tools/lineup-optimizer/",
         "- Team compare: https://boxboxf1fantasy.com/tools/team-compare/",
         "- Transfer planner: https://boxboxf1fantasy.com/tools/transfer-planner/",
@@ -3072,6 +3143,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Transfer Advisor: compares possible transfers from a user's current team, including budget and transfer penalties.",
         "- Multi-Week Transfer Planner: plans transfers across upcoming rounds using current predictions plus future-round projections.",
         "- Budget Builder: highlights value picks and expected price movement.",
+        "- Price Changes: watchlist for likely risers and drop-pressure picks based on current value signals.",
         "- Points Calculator: helps estimate score components and understand scoring.",
         "- Accuracy: shows post-race prediction performance and confidence coverage.",
         "- Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.",
@@ -3289,6 +3361,8 @@ def render_content_page(item: dict, current: dict | None = None) -> str:
         dynamic = current_captain_picks_html(current)
     elif current and item.get("slug") == "f1-fantasy-value-picks":
         dynamic = current_value_picks_html(current)
+    elif current and item.get("slug") == "f1-fantasy-price-changes":
+        dynamic = current_price_changes_html(current)
     elif current and item.get("slug") == "points-calculator":
         dynamic = current_points_calculator_html(current)
 
@@ -3639,6 +3713,33 @@ TOOLS = [
              "Use both. High projected points win the week, but high PPM picks make the budget work. The best lineups usually combine premium upside with two or three strong-value picks."),
         ],
         "cta": ("/#drivers", "Open live value rankings ->"),
+    },
+    {
+        "base": "tools", "crumb": "Tools", "slug": "f1-fantasy-price-changes",
+        "crumb_self": "Price Changes",
+        "title": "F1 Fantasy Price Changes 2026: Rise & Fall Watchlist | BoxBox",
+        "desc": "Free F1 Fantasy price-change watchlist for 2026: see drivers and constructors under price-rise or price-drop pressure based on current projections and value signals.",
+        "features": ["Price-change watchlist", "Likely risers", "Drop-pressure picks", "Driver and constructor value signals", "Current-round projections"],
+        "h1": "F1 Fantasy Price Changes: Rise & Fall Watchlist",
+        "intro": '<p class="lede">Track which F1 Fantasy drivers and constructors look underpriced, overpriced or under pressure before prices move.</p>',
+        "body": (
+            "<h2>How to read the watchlist</h2>"
+            "<p>F1 Fantasy prices usually reward picks that score well relative to their price and punish picks that underperform their cost. BoxBox turns the current projections into a simple watchlist: strong value picks sit on the rise side, while low-value or poor-scoring picks sit on the pressure side.</p>"
+            "<h2>Why price changes matter</h2>"
+            "<p>Budget growth compounds. Catching a few early risers can leave you with enough extra team value to afford stronger premium drivers or constructors later in the season. Avoiding likely fallers protects the spending power you already have.</p>"
+            "<h2>Use it with transfers</h2>"
+            "<p>Do not chase price rises blindly. A budget pick still needs to fit your score plan, transfer plan and chip timing. Use the watchlist alongside the Optimizer, Team Compare and Transfer Planner before making a move.</p>"
+            '<div class="callout">For the underlying projection details, open the live driver and constructor cards. For budget-first teams, use the <a href="/tools/budget-builder/">Budget Builder</a>.</div>'
+        ),
+        "faqs": [
+            ("Who is likely to rise in price in F1 Fantasy?",
+             "The best rise candidates are usually drivers and constructors with strong projected points relative to current price. The BoxBox watchlist ranks current picks by value signals and expected points to highlight likely price-rise interest."),
+            ("Who is likely to fall in price in F1 Fantasy?",
+             "Drop-pressure candidates are picks with weak projected points relative to current price. They may still be useful in a specific team, but they carry more budget-risk than strong value picks."),
+            ("Should I transfer only for price changes?",
+             "No. Price movement matters, but the best transfer also needs to improve points, fit your budget and avoid unnecessary transfer penalties. Use price-change signals as one input, not the whole decision."),
+        ],
+        "cta": ("/#drivers", "Open live price-change cards ->"),
     },
     {
         "base": "tools", "crumb": "Tools", "slug": "lineup-optimizer",
