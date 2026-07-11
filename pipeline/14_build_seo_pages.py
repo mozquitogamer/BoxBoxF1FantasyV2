@@ -393,7 +393,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 
 FOOTER = f"""</main>
 <footer class="footer"><div class="wrap">
-<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
+<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
@@ -1163,6 +1163,88 @@ def render_changelog_page(changelog: dict) -> str:
     return page_head(title, desc, canonical, ld) + body + FOOTER
 
 
+def render_videos_page(videos_data: dict) -> str:
+    """Crawlable YouTube index for recent F1 Fantasy videos."""
+    canonical = f"{SITE}/videos/"
+    videos = sorted(videos_data.get("videos", []), key=lambda v: v.get("published", ""), reverse=True)
+    title = f"F1 Fantasy Videos {YEAR}: Drafts, Tips & Strategy | BoxBox"
+    desc = "Latest BoxBoxF1Fantasy videos: F1 Fantasy team drafts, race-week tips, deadline streams, strategy notes and top picks."
+    channel_url = videos_data.get("channel_url") or "https://www.youtube.com/@BoxBoxF1Fantasy"
+
+    video_cards = []
+    video_ld = []
+    item_list = []
+    for i, video in enumerate(videos[:12], 1):
+        vid = clean_legacy_text(video.get("id", ""))
+        video_title = clean_legacy_text(video.get("title", "F1 Fantasy video"))
+        published = clean_legacy_text(video.get("published", ""))
+        url = video.get("url") or (f"https://www.youtube.com/watch?v={vid}" if vid else channel_url)
+        thumb = video.get("thumbnail") or (f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg" if vid else "")
+        embed = f"https://www.youtube.com/embed/{vid}" if vid else url
+        anchor = plain_slug(f"{published} {video_title}") or f"video-{i}"
+        thumb_html = (
+            f'<a href="{esc(url)}" rel="noopener" target="_blank">'
+            f'<img src="{esc(thumb)}" alt="{esc(video_title)} thumbnail" loading="lazy"></a>'
+            if thumb else ""
+        )
+        video_cards.append(
+            f'<article id="{anchor}" class="video-card">'
+            f"{thumb_html}"
+            f'<div><p class="meta">{esc(published)}</p>'
+            f'<h2><a href="{esc(url)}" rel="noopener" target="_blank">{esc(video_title)}</a></h2>'
+            '<p>Watch on YouTube for the latest F1 Fantasy draft thinking, race-week picks and deadline strategy.</p>'
+            "</div></article>"
+        )
+        item_list.append((video_title, f"{canonical}#{anchor}"))
+        video_ld.append({
+            "@context": "https://schema.org",
+            "@type": "VideoObject",
+            "name": video_title,
+            "description": f"BoxBoxF1Fantasy video about F1 Fantasy {YEAR} strategy, team drafts, race-week tips and picks.",
+            "thumbnailUrl": [thumb] if thumb else [],
+            "uploadDate": published,
+            "contentUrl": url,
+            "embedUrl": embed,
+            "publisher": publisher_ld(),
+        })
+
+    faqs = [
+        ("What are the BoxBoxF1Fantasy videos about?",
+         "The videos cover F1 Fantasy race-week drafts, team selection, top picks, budget strategy, deadline streams and how to use the site's data."),
+        ("Are the videos separate from the predictions on the site?",
+         "They use the same public projections and race-week context, but the videos add human explanation, draft examples and strategy discussion."),
+        ("Where is the YouTube channel?",
+         f"The channel is at {channel_url}. The crawlable videos page links to the latest videos and the live Videos tab on the site."),
+    ]
+    ld = ld_block([
+        webpage_ld(title, canonical, desc, "CollectionPage"),
+        item_list_ld(f"BoxBoxF1Fantasy {YEAR} videos", canonical, item_list),
+        breadcrumb_ld([
+            ("Home", f"{SITE}/"),
+            ("Videos", canonical),
+        ]),
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        },
+    ] + video_ld)
+    body = (
+        '<p class="crumbs"><a href="/">Home</a> &rsaquo; Videos</p>'
+        f"<h1>F1 Fantasy Videos ({YEAR})</h1>"
+        '<p class="lede">Latest BoxBoxF1Fantasy videos for race-week drafts, data-backed picks, deadline strategy and F1 Fantasy decision-making.</p>'
+        f'<p class="meta">Channel: <a href="{esc(channel_url)}" rel="noopener" target="_blank">{esc(channel_url)}</a></p>'
+        '<div class="btnrow"><a class="cta" href="/#videos">Open interactive Videos tab &rarr;</a></div>'
+        + ("".join(video_cards) if video_cards else '<p class="no-data">No videos available yet.</p>')
+        + "<h2>FAQ</h2>"
+        + _faq_html(faqs)
+    )
+    return page_head(title, desc, canonical, ld) + body + FOOTER
+
+
 # --------------------------------------------------------------------------- #
 # sitemap
 # --------------------------------------------------------------------------- #
@@ -1191,6 +1273,7 @@ Allow: /drivers/
 Allow: /constructors/
 Allow: /accuracy/
 Allow: /changelog/
+Allow: /videos/
 Allow: /guides/
 Allow: /tools/
 Allow: /about/
@@ -1228,6 +1311,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Constructor projections hub: https://boxboxf1fantasy.com/constructors/",
         "- Prediction accuracy: https://boxboxf1fantasy.com/accuracy/",
         "- Changelog: https://boxboxf1fantasy.com/changelog/",
+        "- Videos: https://boxboxf1fantasy.com/videos/",
         "- Strategy guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
         "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
@@ -1260,6 +1344,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Team Compare lets users enter up to three teams and compare budget, expected points, value, confidence ranges, budget movement, and downside risk.",
         "- The Accuracy tab publishes prediction performance for completed rounds, including misses.",
         "- The Changelog page publishes notable model, scoring, data and tool changes in plain English.",
+        "- The Videos page lists recent YouTube race-week drafts, deadline streams, picks and strategy videos.",
         "- The About page explains independence, contact details, and how to use the site.",
         "- The Privacy page describes analytics, local storage, advertising readiness, and contact details.",
         "",
@@ -1299,6 +1384,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Constructor projections hub: https://boxboxf1fantasy.com/constructors/",
         "- Prediction accuracy: https://boxboxf1fantasy.com/accuracy/",
         "- Changelog: https://boxboxf1fantasy.com/changelog/",
+        "- Videos: https://boxboxf1fantasy.com/videos/",
         "- Guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tools hub: https://boxboxf1fantasy.com/tools/",
         "- About: https://boxboxf1fantasy.com/about/",
@@ -1346,6 +1432,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Points Calculator: helps estimate score components and understand scoring.",
         "- Accuracy: shows post-race prediction performance and confidence coverage.",
         "- Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.",
+        "- Videos: links recent YouTube drafts, deadline streams, top picks and race-week strategy explainers.",
         "",
         "## How predictions should be described",
         "Use cautious language. Say the site publishes model-based projections, confidence ranges, and value signals. Do not present predictions as guarantees. F1 outcomes depend on weather, reliability, strategy, safety cars, incidents, penalties, upgrades, and session timing.",
@@ -2004,6 +2091,7 @@ def main() -> None:
     season = load_json(DATA / "season_summary.json")
     current = load_json(DATA / "predictions.json")
     changelog = load_json(DATA / "changelog.json") or {"entries": []}
+    videos_data = load_json(DATA / "youtube_videos.json") or {"videos": []}
     if not season or not current:
         print("[14_build_seo_pages] missing season_summary.json or predictions.json - run export first.")
         return
@@ -2156,6 +2244,21 @@ def main() -> None:
         "updated": now,
     })
 
+    # --- crawlable videos page ---
+    videos_dir = WEB / "videos"
+    videos_dir.mkdir(parents=True, exist_ok=True)
+    (videos_dir / "index.html").write_text(render_videos_page(videos_data), encoding="utf-8")
+    rel_paths.append("videos/")
+    latest_video = sorted(videos_data.get("videos", []), key=lambda v: v.get("published", ""), reverse=True)
+    latest_video = latest_video[0] if latest_video else {}
+    feed_items.append({
+        "title": f"F1 Fantasy Videos {YEAR}",
+        "url": f"{SITE}/videos/",
+        "summary": "Latest BoxBoxF1Fantasy YouTube videos for F1 Fantasy race-week drafts, deadline strategy, top picks and data-backed team decisions."
+                   + (f" Latest: {clean_legacy_text(latest_video.get('title', 'new video'))}." if latest_video else ""),
+        "updated": now,
+    })
+
     # --- static trust/compliance pages ---
     for page in STATIC_PAGES:
         out_dir = WEB / page["slug"]
@@ -2177,7 +2280,7 @@ def main() -> None:
 
     print(f"[14_build_seo_pages] wrote {written} race page(s) + {len(drivers_sorted)} driver page(s) "
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
-          f"+ {len(TOOLS)} tool page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + 5 hubs "
+          f"+ {len(TOOLS)} tool page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + 5 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
           "+ robots.txt + llms.txt + llms-full.txt + feeds")
 

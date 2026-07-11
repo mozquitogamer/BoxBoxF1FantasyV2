@@ -83,6 +83,22 @@ tbody tr:hover { background: #11151d; }
   margin: 16px 0;
 }
 .update-card h2 { margin-top: 0; }
+.video-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.video-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #080b10;
+}
+.video-card > div { padding: 14px 16px; }
+.video-card h2 { margin-top: 0; }
 
 .footer { border-top: 1px solid var(--border); margin-top: 40px; padding: 20px 0; color: var(--muted); font-size: 0.8rem; }
 .footer a { color: var(--muted); text-decoration: underline; }
