@@ -376,6 +376,35 @@ def suggested_lineup_html(pred: dict) -> str:
     )
 
 
+def current_captain_picks_html(pred: dict) -> str:
+    drivers = sorted(pred.get("drivers", []), key=_pts, reverse=True)[:8]
+    if not drivers:
+        return ""
+
+    rows = "".join(
+        f'<tr><td><a href="/drivers/{plain_slug(d.get("name", d.get("driver_id", "driver")))}/">{esc(d.get("name", d.get("driver_id", "")))}</a></td>'
+        f'<td class="num">{_pts(d):.1f}</td>'
+        f'<td class="num">{(_pts(d) * 2):.1f}</td>'
+        f'<td class="num">{(_pts(d) * 3):.1f}</td>'
+        f'<td class="num">{d.get("mc_total_p5", 0):.1f}&ndash;{d.get("mc_total_p95", 0):.1f}</td>'
+        f'<td class="num">{float(d.get("dnf_probability") or 0) * 100:.0f}%</td>'
+        f'<td class="num">P{d.get("predicted_quali", "-")}&rarr;P{d.get("predicted_finish", "-")}</td></tr>'
+        for d in drivers
+    )
+    leader = drivers[0]
+    return (
+        f'<h2>Current captain candidates: {esc(pred.get("race", "this race"))}</h2>'
+        '<p>This crawlable snapshot ranks the current top driver boost candidates by expected points. '
+        'Use the 90% range and DNF risk columns to separate safer captain picks from higher-volatility punts.</p>'
+        '<table><thead><tr><th>Driver</th><th class="num">Base pts</th><th class="num">2x pts</th><th class="num">3x pts</th>'
+        '<th class="num">90% range</th><th class="num">DNF risk</th><th class="num">Quali&rarr;Race</th></tr></thead><tbody>'
+        + rows +
+        "</tbody></table>"
+        f'<div class="callout"><strong>Top current boost candidate:</strong> {esc(leader.get("name", "the top projected driver"))} '
+        f'at {_pts(leader):.1f} base points, {(_pts(leader) * 2):.1f} with a normal 2x boost, or {(_pts(leader) * 3):.1f} with 3x Boost.</div>'
+    )
+
+
 def current_value_picks_html(pred: dict) -> str:
     drivers = pred.get("drivers", [])
     constructors = pred.get("constructors", [])
@@ -424,6 +453,48 @@ def current_value_picks_html(pred: dict) -> str:
         '<p>Constructor value includes both listed drivers, qualifying teamwork bonus, pit-stop points and DNF risk.</p>'
         '<table><thead><tr><th>Constructor</th><th class="num">Price</th><th class="num">Exp. pts</th><th class="num">Pit pts</th><th class="num">PPM</th></tr></thead><tbody>'
         + con_rows +
+        "</tbody></table>"
+    )
+
+
+def current_points_calculator_html(pred: dict) -> str:
+    drivers = sorted(pred.get("drivers", []), key=_pts, reverse=True)
+    constructors = sorted(pred.get("constructors", []), key=_pts, reverse=True)
+    if not drivers and not constructors:
+        return ""
+
+    driver_rows = "".join(
+        f'<tr><td><a href="/drivers/{plain_slug(d.get("name", d.get("driver_id", "driver")))}/">{esc(d.get("name", d.get("driver_id", "")))}</a></td>'
+        f'<td class="num">{_pts(d):.1f}</td>'
+        f'<td class="num">{float(d.get("expected_points_quali") or 0):.1f}</td>'
+        f'<td class="num">{float(d.get("expected_points_race") or 0):.1f}</td>'
+        f'<td class="num">{float(d.get("expected_overtakes") or 0):.1f}</td>'
+        f'<td class="num">{d.get("mc_total_p5", 0):.1f}&ndash;{d.get("mc_total_p95", 0):.1f}</td>'
+        f'<td class="num">${_price(d):.1f}M</td></tr>'
+        for d in drivers
+    )
+    constructor_rows = "".join(
+        f'<tr><td><a href="/constructors/{plain_slug(c.get("name", c.get("constructor_id", "constructor")))}/">{esc(c.get("name", c.get("constructor_id", "")))}</a></td>'
+        f'<td class="num">{_pts(c):.1f}</td>'
+        f'<td class="num">{float(c.get("expected_points_quali") or 0):.1f}</td>'
+        f'<td class="num">{float(c.get("expected_points_race") or 0):.1f}</td>'
+        f'<td class="num">{float(c.get("expected_pit_stop_pts") or 0):.1f}</td>'
+        f'<td class="num">{c.get("mc_total_p5", 0):.1f}&ndash;{c.get("mc_total_p95", 0):.1f}</td>'
+        f'<td class="num">${_price(c):.1f}M</td></tr>'
+        for c in constructors
+    )
+    return (
+        f'<h2>Projected points table: {esc(pred.get("race", "current race"))}</h2>'
+        '<p>Current expected fantasy points by pick, with the main scoring components exposed as crawlable data. '
+        'The live app has the full cards, scenario sliders and sorting controls.</p>'
+        '<table><thead><tr><th>Driver</th><th class="num">Exp. pts</th><th class="num">Quali</th><th class="num">Race</th>'
+        '<th class="num">Overtakes</th><th class="num">90% range</th><th class="num">Price</th></tr></thead><tbody>'
+        + driver_rows +
+        "</tbody></table>"
+        "<h2>Constructor projected points</h2>"
+        '<table><thead><tr><th>Constructor</th><th class="num">Exp. pts</th><th class="num">Quali</th><th class="num">Race</th>'
+        '<th class="num">Pit stops</th><th class="num">90% range</th><th class="num">Price</th></tr></thead><tbody>'
+        + constructor_rows +
         "</tbody></table>"
     )
 
@@ -2979,8 +3050,12 @@ def render_content_page(item: dict, current: dict | None = None) -> str:
     dynamic = ""
     if current and item.get("slug") == "best-f1-fantasy-team":
         dynamic = suggested_lineup_html(current)
+    elif current and item.get("slug") == "f1-fantasy-captain-picks":
+        dynamic = current_captain_picks_html(current)
     elif current and item.get("slug") == "f1-fantasy-value-picks":
         dynamic = current_value_picks_html(current)
+    elif current and item.get("slug") == "points-calculator":
+        dynamic = current_points_calculator_html(current)
 
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/{base}/">{esc(crumb)}</a> &rsaquo; {esc(item["crumb_self"])}</p>'
