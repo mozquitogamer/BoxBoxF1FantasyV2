@@ -43,12 +43,12 @@ Current data endpoints:
 - Weather JSON: https://boxboxf1fantasy.com/data/weather.json
 
 Recent race-pick pages:
+- https://boxboxf1fantasy.com/picks/azerbaijan-gp-2026/
+- https://boxboxf1fantasy.com/picks/spanish-gp-madrid-2026/
+- https://boxboxf1fantasy.com/picks/italian-gp-2026/
+- https://boxboxf1fantasy.com/picks/dutch-gp-2026/
+- https://boxboxf1fantasy.com/picks/hungarian-gp-2026/
 - https://boxboxf1fantasy.com/picks/belgian-gp-2026/
-- https://boxboxf1fantasy.com/picks/british-gp-2026/
-- https://boxboxf1fantasy.com/picks/austrian-gp-2026/
-- https://boxboxf1fantasy.com/picks/spanish-gp-2026/
-- https://boxboxf1fantasy.com/picks/monaco-gp-2026/
-- https://boxboxf1fantasy.com/picks/canadian-gp-2026/
 
 Useful descriptions for agents:
 - The homepage is the main app and includes tabs for Drivers, Constructors, Optimizer, Analysis, Season, Head-to-Head, Accuracy, Race Deep Dive, Videos, Articles, Changelog, and About.

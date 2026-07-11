@@ -77,14 +77,14 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 Use cautious language. Say the site publishes model-based projections, confidence ranges, and value signals. Do not present predictions as guarantees. F1 outcomes depend on weather, reliability, strategy, safety cars, incidents, penalties, upgrades, and session timing.
 
 ## Page inventory with summaries
+- F1 Fantasy Picks: Azerbaijan GP 2026: https://boxboxf1fantasy.com/picks/azerbaijan-gp-2026/ - Early horizon F1 Fantasy outlook, transfer-planning notes and projected picks for Azerbaijan Grand Prix.
+- F1 Fantasy Picks: Spanish GP (Madrid) 2026: https://boxboxf1fantasy.com/picks/spanish-gp-madrid-2026/ - Early horizon F1 Fantasy outlook, transfer-planning notes and projected picks for Spanish Grand Prix (Madrid).
+- F1 Fantasy Picks: Italian GP 2026: https://boxboxf1fantasy.com/picks/italian-gp-2026/ - Early horizon F1 Fantasy outlook, transfer-planning notes and projected picks for Italian Grand Prix.
+- F1 Fantasy Picks: Dutch GP 2026: https://boxboxf1fantasy.com/picks/dutch-gp-2026/ - Early horizon F1 Fantasy outlook, transfer-planning notes and projected picks for Dutch Grand Prix.
+- F1 Fantasy Picks: Hungarian GP 2026: https://boxboxf1fantasy.com/picks/hungarian-gp-2026/ - Early horizon F1 Fantasy outlook, transfer-planning notes and projected picks for Hungarian Grand Prix.
 - F1 Fantasy Picks: Belgian GP 2026: https://boxboxf1fantasy.com/picks/belgian-gp-2026/ - Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Belgian Grand Prix.
 - F1 Fantasy Picks: British GP 2026: https://boxboxf1fantasy.com/picks/british-gp-2026/ - Race-week F1 Fantasy picks, projected points, value picks and constructor choices for British Grand Prix.
 - F1 Fantasy Picks: Austrian GP 2026: https://boxboxf1fantasy.com/picks/austrian-gp-2026/ - Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Austrian Grand Prix.
-- F1 Fantasy Picks: Spanish GP 2026: https://boxboxf1fantasy.com/picks/spanish-gp-2026/ - Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Spanish Grand Prix.
-- F1 Fantasy Picks: Monaco GP 2026: https://boxboxf1fantasy.com/picks/monaco-gp-2026/ - Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Monaco Grand Prix.
-- F1 Fantasy Picks: Canadian GP 2026: https://boxboxf1fantasy.com/picks/canadian-gp-2026/ - Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Canadian Grand Prix.
-- F1 Fantasy Picks: Miami GP 2026: https://boxboxf1fantasy.com/picks/miami-gp-2026/ - Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Miami Grand Prix.
-- F1 Fantasy Picks: Japanese GP 2026: https://boxboxf1fantasy.com/picks/japanese-gp-2026/ - Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Japanese Grand Prix.
 - F1 Fantasy Driver Predictions 2026: https://boxboxf1fantasy.com/drivers/ - Current F1 Fantasy driver projections for Belgian Grand Prix: expected points, price, value and predicted finishing position.
 - Max Verstappen F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/max-verstappen/ - Current F1 Fantasy projection for Max Verstappen: 22.6 expected points, $27.9M price and 0.81 PPM.
 - Kimi Antonelli F1 Fantasy 2026: https://boxboxf1fantasy.com/drivers/kimi-antonelli/ - Current F1 Fantasy projection for Kimi Antonelli: 20.1 expected points, $25.4M price and 0.79 PPM.
@@ -150,6 +150,11 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 
 ## Additional crawlable URLs
 - https://boxboxf1fantasy.com/picks/
+- https://boxboxf1fantasy.com/picks/spanish-gp-2026/
+- https://boxboxf1fantasy.com/picks/monaco-gp-2026/
+- https://boxboxf1fantasy.com/picks/canadian-gp-2026/
+- https://boxboxf1fantasy.com/picks/miami-gp-2026/
+- https://boxboxf1fantasy.com/picks/japanese-gp-2026/
 - https://boxboxf1fantasy.com/picks/chinese-gp-2026/
 - https://boxboxf1fantasy.com/picks/australian-gp-2026/
 

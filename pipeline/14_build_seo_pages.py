@@ -2,8 +2,9 @@
 
 The website is a single-page app, so Google only ever sees one URL with mostly
 JS-rendered content. This script adds real, crawlable HTML *alongside* the app:
-one content-rich page per race that has predictions (e.g. /picks/monaco-gp-2026/),
-plus an index hub at /picks/, then refreshes sitemap.xml.
+content-rich race-week pages for races that have predictions, early outlook
+pages for upcoming horizon rounds, plus an index hub at /picks/, then refreshes
+sitemap.xml.
 
 Each page bakes the predictions into the HTML as real text (top driver and
 constructor picks, best value/PPM picks, a boost/captain pick, race-specific
@@ -69,6 +70,10 @@ def load_json(path: Path):
         return None
     with path.open(encoding="utf-8") as f:
         return json.load(f)
+
+
+def load_seed_json(name: str):
+    return load_json(ROOT / "data" / "seed" / name)
 
 
 def esc(x) -> str:
@@ -218,6 +223,18 @@ def _pts(item: dict) -> float:
 
 def _price(item: dict) -> float:
     return float(item.get("current_price") or 0)
+
+
+def fmt_date(date_text: str) -> str:
+    try:
+        dt = datetime.fromisoformat(str(date_text))
+        return f"{dt.strftime('%B')} {dt.day}, {dt.year}"
+    except ValueError:
+        return str(date_text)
+
+
+def _driver_name(driver: dict) -> str:
+    return f"{driver.get('first_name', '').strip()} {driver.get('last_name', '').strip()}".strip() or driver.get("driver_id", "")
 
 
 def suggested_lineup(pred: dict, budget: float = 100.0) -> dict | None:
@@ -620,19 +637,225 @@ def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
     return slug, page_head(title, desc, canonical, ld) + body + FOOTER
 
 
+def hydrate_horizon_round(
+    round_info: dict,
+    horizon_round: dict,
+    drivers_seed: dict,
+    constructors_seed: dict,
+    prices: dict,
+) -> dict:
+    """Convert compact horizon_projections.json data into a page-friendly shape."""
+    driver_prices = prices.get("drivers", {}) if isinstance(prices, dict) else {}
+    constructor_prices = prices.get("constructors", {}) if isinstance(prices, dict) else {}
+    constructor_names = {cid: c.get("name", cid.replace("_", " ").title()) for cid, c in constructors_seed.items()}
+
+    drivers = []
+    for driver_id, projection in (horizon_round.get("drivers") or {}).items():
+        seed = drivers_seed.get(driver_id, {})
+        constructor_id = seed.get("constructor_id", "")
+        price = float(driver_prices.get(driver_id, {}).get("current_price") or 0)
+        expected = float(projection.get("expected_points") or 0)
+        breakdown = projection.get("breakdown") or {}
+        drivers.append({
+            "driver_id": driver_id,
+            "name": _driver_name(seed) or driver_id,
+            "constructor": constructor_id,
+            "constructor_name": constructor_names.get(constructor_id, constructor_id.replace("_", " ").title()),
+            "number": seed.get("number"),
+            "predicted_quali": projection.get("predicted_quali"),
+            "predicted_finish": projection.get("predicted_race"),
+            "predicted_sprint": projection.get("predicted_sprint"),
+            "expected_points": expected,
+            "expected_points_quali": float(breakdown.get("quali_pts") or 0),
+            "expected_points_race": float(breakdown.get("race_pts") or 0),
+            "current_price": price,
+            "value_score": expected / price if price else 0,
+        })
+
+    constructors = []
+    for constructor_id, projection in (horizon_round.get("constructors") or {}).items():
+        seed = constructors_seed.get(constructor_id, {})
+        price = float(constructor_prices.get(constructor_id, {}).get("current_price") or 0)
+        expected = float(projection.get("expected_points") or 0)
+        constructor_drivers = list(projection.get("drivers") or [])
+        constructors.append({
+            "constructor_id": constructor_id,
+            "name": seed.get("name", constructor_id.replace("_", " ").title()),
+            "full_name": seed.get("full_name", seed.get("name", constructor_id)),
+            "driver_1": constructor_drivers[0] if len(constructor_drivers) > 0 else None,
+            "driver_2": constructor_drivers[1] if len(constructor_drivers) > 1 else None,
+            "expected_points": expected,
+            "current_price": price,
+            "value_score": expected / price if price else 0,
+        })
+
+    return {
+        "round": round_info.get("round", horizon_round.get("round")),
+        "race": clean_legacy_text(round_info.get("name", horizon_round.get("name", "Grand Prix"))),
+        "date": round_info.get("date", ""),
+        "circuit": clean_legacy_text(round_info.get("circuit", horizon_round.get("circuit", ""))),
+        "is_sprint": bool(round_info.get("sprint") or horizon_round.get("is_sprint")),
+        "generated_at": horizon_round.get("generated_at", ""),
+        "drivers": drivers,
+        "constructors": constructors,
+    }
+
+
+def render_future_race_page(pred: dict, horizon_generated_at: str = "") -> tuple[str, str]:
+    """Crawlable early-outlook page for future rounds from horizon projections."""
+    race = clean_legacy_text(pred["race"])
+    rn = pred["round"]
+    short = short_race(race)
+    slug = slugify(race)
+    canonical = f"{SITE}/picks/{slug}/"
+    race_date = fmt_date(pred.get("date", ""))
+    gen_date = (horizon_generated_at or pred.get("generated_at") or datetime.now(timezone.utc).isoformat())[:10]
+    sprint_note = " This is currently listed as a sprint weekend, so sprint scoring and chip timing may matter more than usual." if pred.get("is_sprint") else ""
+
+    drivers = sorted(pred.get("drivers", []), key=lambda d: d.get("expected_points", 0), reverse=True)
+    constructors = sorted(pred.get("constructors", []), key=lambda c: c.get("expected_points", 0), reverse=True)
+    value_drivers = sorted(drivers, key=lambda d: d.get("value_score", 0), reverse=True)
+    top3 = ", ".join(d["name"] for d in drivers[:3])
+    best_value = value_drivers[0] if value_drivers else None
+    captain = drivers[0] if drivers else None
+
+    title = f"F1 Fantasy {short} {YEAR}: Early Picks & Transfer Outlook | BoxBox"
+    desc = (f"Early F1 Fantasy outlook for the {race} {YEAR}: horizon projections, top drivers, "
+            f"constructor options and transfer-planning notes before race-week practice data arrives.")
+
+    driver_rows = []
+    for i, d in enumerate(drivers[:TOP_DRIVERS], 1):
+        driver_rows.append(
+            f'<tr><td class="num">{i}</td><td>{esc(d["name"])}</td><td>{esc(d.get("constructor_name", ""))}</td>'
+            f'<td class="num">${d.get("current_price", 0):.1f}M</td>'
+            f'<td class="num">P{d.get("predicted_quali", "-")}&rarr;P{d.get("predicted_finish", "-")}</td>'
+            f'<td class="num">{d.get("expected_points", 0):.1f}</td>'
+            f'<td class="num">{d.get("value_score", 0):.2f}</td></tr>'
+        )
+
+    constructor_rows = []
+    for c in constructors[:TOP_CONSTRUCTORS]:
+        driver_names = " / ".join(
+            d["name"] for did in [c.get("driver_1"), c.get("driver_2")]
+            for d in drivers if d.get("driver_id") == did
+        )
+        constructor_rows.append(
+            f'<tr><td>{esc(c.get("name", c.get("constructor_id", "")))}</td>'
+            f'<td>{esc(driver_names)}</td>'
+            f'<td class="num">${c.get("current_price", 0):.1f}M</td>'
+            f'<td class="num">{c.get("expected_points", 0):.1f}</td>'
+            f'<td class="num">{c.get("value_score", 0):.2f}</td></tr>'
+        )
+
+    value_rows = []
+    for d in value_drivers[:VALUE_DRIVERS]:
+        value_rows.append(
+            f'<tr><td>{esc(d["name"])}</td><td>{esc(d.get("constructor_name", ""))}</td>'
+            f'<td class="num">${d.get("current_price", 0):.1f}M</td>'
+            f'<td class="num">{d.get("expected_points", 0):.1f}</td>'
+            f'<td class="num">{d.get("value_score", 0):.2f}</td></tr>'
+        )
+
+    cap_line = ""
+    if captain:
+        cap_line = (
+            f'<div class="callout"><strong>Early top scorer: {esc(captain["name"])}</strong>'
+            f' &mdash; the horizon model currently has {esc(captain["name"])} as the top raw scorer for the {esc(short)} '
+            f'(~{captain.get("expected_points", 0):.0f} pts). Treat this as a transfer-planning signal until race-week practice data lands.</div>'
+        )
+
+    faqs = [
+        (f"Are these {short} picks final?",
+         "No. This is an early horizon outlook for planning transfers before race-week telemetry, weather and session results are available. The full race-week page updates when the prediction pipeline runs for the round."),
+        (f"Who are the early best F1 Fantasy picks for the {short}?",
+         f"The current horizon projection likes {top3 or 'the leading current-form picks'} as the top raw scorers. "
+         f"For value, {best_value['name'] if best_value else 'check the value table'} currently screens best by points per million."),
+        (f"When will the {short} predictions update?",
+         "The page becomes sharper across race week: pre-FP predictions use priors, post-FP predictions add practice pace, and post-quali predictions can include the actual grid."),
+    ]
+
+    ld = ld_block([
+        {
+            **webpage_ld(title, canonical, desc, "Article"),
+            "headline": title,
+            "dateModified": gen_date,
+            "about": ["F1 Fantasy", race, f"{short} {YEAR}", "F1 Fantasy transfer planning"],
+        },
+        item_list_ld(
+            f"Early F1 Fantasy driver outlook for {short} {YEAR}",
+            canonical,
+            [(d["name"], canonical) for d in drivers[:TOP_DRIVERS]],
+        ),
+        item_list_ld(
+            f"Early F1 Fantasy constructor outlook for {short} {YEAR}",
+            canonical,
+            [(c.get("name", c.get("constructor_id", "")), canonical) for c in constructors[:TOP_CONSTRUCTORS]],
+        ),
+        breadcrumb_ld([
+            ("Home", f"{SITE}/"),
+            ("F1 Fantasy Picks", f"{SITE}/picks/"),
+            (f"{short} {YEAR}", canonical),
+        ]),
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        },
+    ])
+
+    body = (
+        f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/picks/">Picks</a> &rsaquo; {esc(short)} {YEAR}</p>'
+        f"<h1>F1 Fantasy Early Outlook: {esc(race)} {YEAR}</h1>"
+        f'<p class="lede">Early, data-driven F1 Fantasy planning notes for the <strong>{esc(race)}</strong> '
+        f'(round {rn}, {YEAR}, scheduled for {esc(race_date)} at {esc(pred.get("circuit", ""))}). '
+        f'These horizon projections are designed for transfer planning before race-week practice data is available.{sprint_note}</p>'
+        f'<p class="meta">Horizon projection generated {esc(gen_date)} &middot; final race-week predictions will update when the pipeline runs for this round.</p>'
+        '<div class="callout"><strong>Early outlook, not final picks.</strong> Use this page to plan transfers and watch-list drivers. Recheck the live predictions after FP sessions, qualifying and weather updates.</div>'
+        + cap_line
+        + '<div class="btnrow"><a class="cta" href="/#optimizer">Open Transfer Planner &amp; Optimizer &rarr;</a><a class="cta" href="/data/horizon_projections.json" style="background:#1b212c;">View horizon JSON &rarr;</a></div>'
+        + "<h2>Early driver outlook</h2>"
+        + f"<p>Ranked by early projected fantasy points for the {esc(short)}. PPM = projected points per $million.</p>"
+        + '<table><thead><tr><th class="num">#</th><th>Driver</th><th>Team</th><th class="num">Price</th><th class="num">Quali&rarr;Race</th><th class="num">Early pts</th><th class="num">PPM</th></tr></thead><tbody>'
+        + "".join(driver_rows)
+        + "</tbody></table>"
+        + "<h2>Early value picks</h2>"
+        + "<p>These picks screen best on points per million in the horizon model, which can help when planning future budget shape.</p>"
+        + '<table><thead><tr><th>Driver</th><th>Team</th><th class="num">Price</th><th class="num">Early pts</th><th class="num">PPM</th></tr></thead><tbody>'
+        + "".join(value_rows)
+        + "</tbody></table>"
+        + "<h2>Early constructor outlook</h2>"
+        + "<p>Constructor values here are horizon projections before race-week pit-stop, weather and telemetry refinements.</p>"
+        + '<table><thead><tr><th>Constructor</th><th>Drivers</th><th class="num">Price</th><th class="num">Early pts</th><th class="num">PPM</th></tr></thead><tbody>'
+        + "".join(constructor_rows)
+        + "</tbody></table>"
+        + "<h2>How to use this before race week</h2>"
+        + "<ul><li>Use it to shortlist transfer targets several rounds ahead.</li><li>Check whether a premium pick is worth holding through this circuit profile.</li><li>Re-run decisions in the live Team Compare and Optimizer once race-week predictions are published.</li></ul>"
+        + "<h2>FAQ</h2>"
+        + _faq_html(faqs)
+    )
+    return slug, page_head(title, desc, canonical, ld) + body + FOOTER
+
+
 # --------------------------------------------------------------------------- #
 # index hub
 # --------------------------------------------------------------------------- #
 def render_index(entries: list) -> str:
-    """entries: list of (slug, race_name, date, round, is_current)."""
+    """entries: list of (slug, race_name, date, round, status)."""
     canonical = f"{SITE}/picks/"
     title = f"F1 Fantasy Picks by Race - {YEAR} Season | BoxBox"
     desc = (f"Free F1 Fantasy picks, tips and predictions for every {YEAR} Grand Prix - "
             f"top drivers, best value picks and constructors for each race.")
 
     items = []
-    for slug, name, date, rn, is_current in entries:
-        tag = '<span class="tag">This week</span>' if is_current else ""
+    for slug, name, date, rn, status in entries:
+        tag = ""
+        if status == "current":
+            tag = '<span class="tag">This week</span>'
+        elif status == "future":
+            tag = '<span class="tag">Early outlook</span>'
         items.append(
             f'<li><span><a href="/picks/{slug}/">{esc(short_race(name))} {YEAR}</a>{tag}</span>'
             f'<span class="date">{esc(date)}</span></li>'
@@ -643,7 +866,7 @@ def render_index(entries: list) -> str:
         item_list_ld(
             f"F1 Fantasy race picks pages for {YEAR}",
             canonical,
-            [(f"{short_race(name)} {YEAR}", f"{SITE}/picks/{slug}/") for slug, name, date, rn, is_current in entries],
+            [(f"{short_race(name)} {YEAR}", f"{SITE}/picks/{slug}/") for slug, name, date, rn, status in entries],
         ),
         {
             "@context": "https://schema.org",
@@ -2372,6 +2595,7 @@ STATIC_PAGES = [
 def main() -> None:
     season = load_json(DATA / "season_summary.json")
     current = load_json(DATA / "predictions.json")
+    horizon = load_json(DATA / "horizon_projections.json") or {"rounds": {}}
     changelog = load_json(DATA / "changelog.json") or {"entries": []}
     videos_data = load_json(DATA / "youtube_videos.json") or {"videos": []}
     articles_data = load_json(DATA / "articles.json") or {"articles": []}
@@ -2380,27 +2604,58 @@ def main() -> None:
         return
 
     current_round = current.get("round")
+    horizon_rounds = horizon.get("rounds") or {}
+    drivers_seed = {
+        d.get("driver_id"): d
+        for d in (load_seed_json("drivers.json") or {}).get("drivers", [])
+        if d.get("driver_id")
+    }
+    constructors_seed = {
+        c.get("constructor_id"): c
+        for c in (load_seed_json("constructors.json") or {}).get("constructors", [])
+        if c.get("constructor_id")
+    }
+    prices = load_seed_json("fantasy_prices.json") or {}
     PICKS.mkdir(parents=True, exist_ok=True)
 
     entries = []   # for the hub + sitemap
     written = 0
+    future_written = 0
     for r in season.get("rounds", []):
-        if not r.get("has_predictions"):
-            continue
         rn = r["round"]
-        is_current = (rn == current_round)
-        pred = current if is_current else load_json(DATA / f"predictions_round{rn}.json")
-        if not pred or not pred.get("drivers"):
-            print(f"  - round {rn}: no usable predictions, skipped")
+        if r.get("cancelled"):
+            continue
+        status = "archive"
+        if r.get("has_predictions"):
+            is_current = (rn == current_round)
+            status = "current" if is_current else "archive"
+            pred = current if is_current else load_json(DATA / f"predictions_round{rn}.json")
+            if not pred or not pred.get("drivers"):
+                print(f"  - round {rn}: no usable predictions, skipped")
+                continue
+            slug, page = render_race_page(pred, is_current)
+            race_name = pred.get("race", r["name"])
+            race_date = pred.get("date", r.get("date", ""))
+            written += 1
+        elif str(rn) in horizon_rounds:
+            status = "future"
+            pred = hydrate_horizon_round(r, horizon_rounds[str(rn)], drivers_seed, constructors_seed, prices)
+            if not pred.get("drivers"):
+                print(f"  - round {rn}: no usable horizon projections, skipped")
+                continue
+            slug, page = render_future_race_page(pred, horizon.get("generated_at", ""))
+            race_name = pred.get("race", r["name"])
+            race_date = pred.get("date", r.get("date", ""))
+            future_written += 1
+        else:
             continue
 
-        slug, page = render_race_page(pred, is_current)
         out_dir = PICKS / slug
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "index.html").write_text(page, encoding="utf-8")
-        entries.append((slug, pred.get("race", r["name"]), pred.get("date", r.get("date", "")), rn, is_current))
-        written += 1
-        print(f"  [OK] /picks/{slug}/  (round {rn}{', current' if is_current else ''})")
+        entries.append((slug, race_name, race_date, rn, status))
+        suffix = ", current" if status == "current" else ", early outlook" if status == "future" else ""
+        print(f"  [OK] /picks/{slug}/  (round {rn}{suffix})")
 
     # newest race first in the hub
     entries.sort(key=lambda e: e[3], reverse=True)
@@ -2413,10 +2668,14 @@ def main() -> None:
         {
             "title": f"F1 Fantasy Picks: {short_race(name)} {YEAR}",
             "url": f"{SITE}/picks/{slug}/",
-            "summary": f"Race-week F1 Fantasy picks, projected points, value picks and constructor choices for {name}.",
+            "summary": (
+                f"Early horizon F1 Fantasy outlook, transfer-planning notes and projected picks for {name}."
+                if status == "future" else
+                f"Race-week F1 Fantasy picks, projected points, value picks and constructor choices for {name}."
+            ),
             "updated": now,
         }
-        for slug, name, date, rn, is_current in entries[:8]
+        for slug, name, date, rn, status in entries[:8]
     ]
 
     # --- current driver + constructor projection pages ---
@@ -2596,7 +2855,7 @@ def main() -> None:
     write_llms_full(rel_paths, current, feed_items)
     write_feeds(feed_items)
 
-    print(f"[14_build_seo_pages] wrote {written} race page(s) + {len(drivers_sorted)} driver page(s) "
+    print(f"[14_build_seo_pages] wrote {written} prediction race page(s) + {future_written} future outlook page(s) + {len(drivers_sorted)} driver page(s) "
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
           f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
