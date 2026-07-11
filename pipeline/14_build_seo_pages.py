@@ -461,6 +461,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 <meta name="twitter:description" content="{esc(desc)}">
 <meta name="twitter:image" content="{SITE}/og-image.png">
 <link rel="icon" type="image/png" href="/favicon.png">
+<link rel="manifest" href="/site.webmanifest">
 <link rel="alternate" type="application/rss+xml" title="BoxBoxF1Fantasy updates" href="/feed.xml">
 <link rel="alternate" type="application/feed+json" title="BoxBoxF1Fantasy updates" href="/feed.json">
 <link rel="service-desc" type="application/openapi+json" title="BoxBoxF1Fantasy public data OpenAPI" href="/openapi.json">
@@ -1987,6 +1988,7 @@ Allow: /privacy/
 Allow: /data/
 Allow: /feed.xml
 Allow: /feed.json
+Allow: /site.webmanifest
 Allow: /openapi.json
 Allow: /.well-known/
 Allow: /.well-known/openapi.json
@@ -2085,6 +2087,20 @@ def write_openapi() -> None:
                 },
             }
         },
+        "/site.webmanifest": {
+            "get": {
+                "tags": ["Discovery"],
+                "summary": "Web app manifest",
+                "description": "Installability and identity metadata for the BoxBoxF1Fantasy web application.",
+                "operationId": "get_site_webmanifest",
+                "responses": {
+                    "200": {
+                        "description": "Web app manifest.",
+                        "content": {"application/manifest+json": {"schema": {"type": "object", "additionalProperties": True}}},
+                    }
+                },
+            }
+        },
         "/.well-known/openapi.json": {
             "get": {
                 "tags": ["Discovery"],
@@ -2160,6 +2176,72 @@ def write_openapi() -> None:
     (WEB / "openapi.json").write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def write_webmanifest() -> None:
+    """Write browser/agent-facing app identity metadata."""
+    manifest = {
+        "name": "BoxBoxF1Fantasy",
+        "short_name": "BoxBox",
+        "description": "Free F1 Fantasy 2026 predictions, race picks, lineup optimizer, transfer planner, public accuracy tracking and strategy guides.",
+        "id": "/",
+        "start_url": "/?utm_source=web_app_manifest",
+        "scope": "/",
+        "display": "standalone",
+        "display_override": ["window-controls-overlay", "standalone", "browser"],
+        "background_color": "#0a0d12",
+        "theme_color": "#0a0d12",
+        "orientation": "portrait-primary",
+        "lang": "en-US",
+        "dir": "ltr",
+        "categories": ["sports", "utilities", "productivity"],
+        "icons": [
+            {"src": "/favicon.png", "sizes": "32x32", "type": "image/png"},
+            {"src": "/logo.png", "sizes": "96x96", "type": "image/png", "purpose": "any maskable"},
+            {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+            {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+        ],
+        "screenshots": [
+            {
+                "src": "/og-image.png",
+                "sizes": "1200x630",
+                "type": "image/png",
+                "form_factor": "wide",
+                "label": "BoxBoxF1Fantasy predictions and tools",
+            }
+        ],
+        "shortcuts": [
+            {
+                "name": "Current Predictions",
+                "short_name": "Predictions",
+                "description": "Open the live F1 Fantasy driver and constructor predictions.",
+                "url": "/tools/f1-fantasy-predictions/?utm_source=web_app_manifest",
+                "icons": [{"src": "/logo.png", "sizes": "96x96", "type": "image/png"}],
+            },
+            {
+                "name": "Lineup Optimizer",
+                "short_name": "Optimizer",
+                "description": "Open the F1 Fantasy lineup optimizer.",
+                "url": "/tools/lineup-optimizer/?utm_source=web_app_manifest",
+                "icons": [{"src": "/logo.png", "sizes": "96x96", "type": "image/png"}],
+            },
+            {
+                "name": "Team Compare",
+                "short_name": "Compare",
+                "description": "Compare projected score, budget and downside risk for up to three teams.",
+                "url": "/tools/team-compare/?utm_source=web_app_manifest",
+                "icons": [{"src": "/logo.png", "sizes": "96x96", "type": "image/png"}],
+            },
+            {
+                "name": "Public Data",
+                "short_name": "Data",
+                "description": "Open the public JSON endpoint index for agents and developers.",
+                "url": "/data/?utm_source=web_app_manifest",
+                "icons": [{"src": "/logo.png", "sizes": "96x96", "type": "image/png"}],
+            },
+        ],
+    }
+    (WEB / "site.webmanifest").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def write_well_known() -> None:
     """Write extra discovery files for crawlers and agent tooling."""
     wk = WEB / ".well-known"
@@ -2226,6 +2308,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
         "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
+        "- Web app manifest: https://boxboxf1fantasy.com/site.webmanifest",
         "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
         "- Privacy policy: https://boxboxf1fantasy.com/privacy/",
         "- RSS feed: https://boxboxf1fantasy.com/feed.xml",
@@ -2248,6 +2331,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
         "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
+        "- Web app manifest: https://boxboxf1fantasy.com/site.webmanifest",
         "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
         "- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json",
         "- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json",
@@ -2268,6 +2352,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.",
         "- The Public Data page documents the JSON endpoints that agents can fetch directly.",
         "- The OpenAPI document provides a machine-readable contract for the public static JSON endpoints.",
+        "- The web app manifest identifies BoxBoxF1Fantasy as an installable sports utility and exposes shortcuts to high-intent tools.",
         "- The .well-known discovery files mirror the OpenAPI and LLM guides for crawlers and agent tooling.",
         "- The About page explains independence, contact details, and how to use the site.",
         "- The Privacy page describes analytics, local storage, advertising readiness, and contact details.",
@@ -2317,6 +2402,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
         "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
+        "- Web app manifest: https://boxboxf1fantasy.com/site.webmanifest",
         "- About: https://boxboxf1fantasy.com/about/",
         "- Privacy: https://boxboxf1fantasy.com/privacy/",
         "",
@@ -2331,6 +2417,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
         "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
+        "- Web app manifest: https://boxboxf1fantasy.com/site.webmanifest",
         "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
         "- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json",
         "- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json",
@@ -3379,6 +3466,7 @@ def main() -> None:
 
     write_sitemap(rel_paths)
     write_robots()
+    write_webmanifest()
     write_openapi()
     write_llms_txt(rel_paths)
     write_llms_full(rel_paths, current, feed_items)
@@ -3389,7 +3477,7 @@ def main() -> None:
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
           f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
-          "+ robots.txt + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
+          "+ robots.txt + site.webmanifest + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
 
 
 if __name__ == "__main__":

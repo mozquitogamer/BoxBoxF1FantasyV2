@@ -1,0 +1,112 @@
+{
+  "name": "BoxBoxF1Fantasy",
+  "short_name": "BoxBox",
+  "description": "Free F1 Fantasy 2026 predictions, race picks, lineup optimizer, transfer planner, public accuracy tracking and strategy guides.",
+  "id": "/",
+  "start_url": "/?utm_source=web_app_manifest",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "browser"
+  ],
+  "background_color": "#0a0d12",
+  "theme_color": "#0a0d12",
+  "orientation": "portrait-primary",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": [
+    "sports",
+    "utilities",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "BoxBoxF1Fantasy predictions and tools"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Current Predictions",
+      "short_name": "Predictions",
+      "description": "Open the live F1 Fantasy driver and constructor predictions.",
+      "url": "/tools/f1-fantasy-predictions/?utm_source=web_app_manifest",
+      "icons": [
+        {
+          "src": "/logo.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Lineup Optimizer",
+      "short_name": "Optimizer",
+      "description": "Open the F1 Fantasy lineup optimizer.",
+      "url": "/tools/lineup-optimizer/?utm_source=web_app_manifest",
+      "icons": [
+        {
+          "src": "/logo.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Team Compare",
+      "short_name": "Compare",
+      "description": "Compare projected score, budget and downside risk for up to three teams.",
+      "url": "/tools/team-compare/?utm_source=web_app_manifest",
+      "icons": [
+        {
+          "src": "/logo.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Public Data",
+      "short_name": "Data",
+      "description": "Open the public JSON endpoint index for agents and developers.",
+      "url": "/data/?utm_source=web_app_manifest",
+      "icons": [
+        {
+          "src": "/logo.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}

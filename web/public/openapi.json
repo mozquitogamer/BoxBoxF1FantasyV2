@@ -391,6 +391,29 @@
           }
         }
       }
+    },
+    "/site.webmanifest": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Web app manifest",
+        "description": "Installability and identity metadata for the BoxBoxF1Fantasy web application.",
+        "operationId": "get_site_webmanifest",
+        "responses": {
+          "200": {
+            "description": "Web app manifest.",
+            "content": {
+              "application/manifest+json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "externalDocs": {
