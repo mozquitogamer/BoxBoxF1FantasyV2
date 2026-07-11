@@ -93,6 +93,7 @@ MOJIBAKE_REPLACEMENTS = {
     "âˆ’": "-",
     "â˜°": "table",
     "ðŸ”—": "Share",
+    "SÃ£o": "São",
 }
 
 
@@ -243,7 +244,8 @@ def _circuit_coordinates() -> dict:
     if not path.exists():
         return {}
     try:
-        return runpy.run_path(str(path)).get("CIRCUIT_COORDINATES", {})
+        raw = runpy.run_path(str(path)).get("CIRCUIT_COORDINATES", {})
+        return {clean_legacy_text(k): v for k, v in raw.items()}
     except Exception:
         return {}
 
@@ -897,6 +899,127 @@ def render_future_race_page(pred: dict, horizon_generated_at: str = "") -> tuple
     return slug, page_head(title, desc, canonical, ld) + body + FOOTER
 
 
+def _feature_label(value, high: str, mid: str, low: str) -> str:
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return "Unknown"
+    if v >= 7:
+        return high
+    if v <= 4:
+        return low
+    return mid
+
+
+def _race_track_features(race_name: str, track_data: dict) -> tuple[str, dict]:
+    circuit_id = (track_data.get("race_circuit_map") or {}).get(race_name, "")
+    features = (track_data.get("track_features") or {}).get(circuit_id, {})
+    return circuit_id, features
+
+
+def render_calendar_race_page(round_info: dict, track_data: dict) -> tuple[str, str]:
+    """Crawlable calendar/strategy page for future races before horizon projections exist."""
+    race = clean_legacy_text(round_info.get("name", "Grand Prix"))
+    rn = round_info.get("round")
+    short = short_race(race)
+    slug = slugify(race)
+    canonical = f"{SITE}/picks/{slug}/"
+    race_date = fmt_date(round_info.get("date", ""))
+    circuit = clean_legacy_text(round_info.get("circuit", ""))
+    circuit_id, features = _race_track_features(race, track_data)
+    is_sprint = bool(round_info.get("sprint"))
+
+    title = f"F1 Fantasy {short} {YEAR}: Early Strategy Watchlist | BoxBox"
+    desc = (
+        f"Early F1 Fantasy strategy watchlist for the {race} {YEAR}: race date, sprint status, "
+        "circuit traits and what to monitor before projections are published."
+    )
+
+    overtaking = _feature_label(features.get("overtaking_difficulty"), "hard to pass", "moderate passing", "overtaking-friendly")
+    downforce = _feature_label(features.get("downforce_level"), "high downforce", "balanced downforce", "low downforce")
+    straight = _feature_label(features.get("straight_line_importance"), "straight-line speed matters", "balanced speed/handling", "less straight-line dependent")
+    safety_car = _feature_label(features.get("safety_car_probability"), "high safety-car risk", "moderate safety-car risk", "lower safety-car risk")
+    street = "street circuit" if features.get("is_street") else "permanent circuit"
+
+    rows = []
+    for label, key in [
+        ("Street circuit", "is_street"),
+        ("Overtaking difficulty", "overtaking_difficulty"),
+        ("Average corner speed", "avg_corner_speed"),
+        ("Straight-line importance", "straight_line_importance"),
+        ("Downforce level", "downforce_level"),
+        ("Turn 1 incident risk", "turn1_incident_risk"),
+        ("Safety-car probability", "safety_car_probability"),
+        ("Track evolution", "track_evolution"),
+        ("Grip level", "grip_level"),
+    ]:
+        value = features.get(key, "-")
+        if key == "is_street" and value != "-":
+            value = "Yes" if value else "No"
+        rows.append(f"<tr><th>{esc(label)}</th><td>{esc(value)}</td></tr>")
+    feature_table = "<table><tbody>" + "".join(rows) + "</tbody></table>" if rows else ""
+
+    faqs = [
+        (f"Are {short} F1 Fantasy predictions available yet?",
+         "Not yet. This is an early calendar and strategy watchlist page. BoxBox publishes full driver and constructor projections when the prediction pipeline reaches this round."),
+        (f"What should I watch before the {short}?",
+         f"Watch practice pace, qualifying confidence, DNF risk, weather and whether the {short} circuit traits favour overtaking, qualifying position or straight-line speed."),
+        (f"Will this page update with picks?",
+         "Yes. Once projections are exported for this round, this URL is replaced with the full race-pick page containing ranked driver picks, constructor picks, value picks and captain guidance."),
+    ]
+
+    ld_objs = [
+        {
+            **webpage_ld(title, canonical, desc, "Article"),
+            "headline": title,
+            "dateModified": datetime.now(timezone.utc).date().isoformat(),
+            "about": ["F1 Fantasy", race, f"{short} {YEAR}", "F1 Fantasy strategy"],
+        },
+        breadcrumb_ld([
+            ("Home", f"{SITE}/"),
+            ("F1 Fantasy Picks", f"{SITE}/picks/"),
+            (f"{short} {YEAR}", canonical),
+        ]),
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        },
+    ]
+    event = race_event_ld(race, round_info.get("date", ""), circuit, canonical, desc)
+    if event:
+        ld_objs.append(event)
+    ld = ld_block(ld_objs)
+
+    sprint_note = "It is currently listed as a sprint weekend, so chip timing and extra sprint scoring may matter more than usual." if is_sprint else "It is currently listed as a standard race weekend."
+    body = (
+        f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/picks/">Picks</a> &rsaquo; {esc(short)} {YEAR}</p>'
+        f"<h1>F1 Fantasy Strategy Watchlist: {esc(race)} {YEAR}</h1>"
+        f'<p class="lede">A crawlable early watchlist for the <strong>{esc(race)}</strong> '
+        f'(round {rn}, scheduled for {esc(race_date)} at {esc(circuit)}). Full race-week projections are not published for this round yet.</p>'
+        f'<p class="meta">Circuit profile: {esc(street)} &middot; {esc(overtaking)} &middot; {esc(downforce)} &middot; {esc(straight)} &middot; {esc(safety_car)}.</p>'
+        f'<div class="callout"><strong>Watchlist only.</strong> {esc(sprint_note)} Recheck this URL once the prediction pipeline reaches the round for ranked picks, value picks and captain guidance.</div>'
+        '<div class="btnrow"><a class="cta" href="/#optimizer">Open live Optimizer &amp; Planner &rarr;</a><a class="cta" href="/data/track_data.json" style="background:#1b212c;">View track data JSON &rarr;</a></div>'
+        "<h2>Fantasy strategy notes</h2>"
+        f"<p>The {esc(short)} currently screens as a {esc(street)} with {esc(overtaking)} conditions and {esc(safety_car)}. Before locking transfers, watch whether the weekend starts to reward qualifying position, DNF avoidance, straight-line speed or overtaking volume.</p>"
+        "<ul>"
+        f"<li><strong>Passing:</strong> {esc(overtaking.capitalize())}; this affects positions-gained and comeback potential.</li>"
+        f"<li><strong>Car profile:</strong> {esc(downforce.capitalize())} and {esc(straight)} can influence which teams suit the circuit.</li>"
+        f"<li><strong>Risk:</strong> {esc(safety_car.capitalize())}; high disruption can widen confidence ranges and make No Negative-style protection more attractive.</li>"
+        "</ul>"
+        "<h2>Circuit traits</h2>"
+        + feature_table
+        + "<h2>How to use this page before projections arrive</h2>"
+        "<ul><li>Use it as a transfer-planning placeholder for the later 2026 calendar.</li><li>Shortlist drivers and constructors that usually suit the circuit profile, then wait for BoxBox projections before making final moves.</li><li>Once the page updates, compare the new picks in Team Compare and the Multi-Week Planner.</li></ul>"
+        + "<h2>FAQ</h2>"
+        + _faq_html(faqs)
+    )
+    return slug, page_head(title, desc, canonical, ld) + body + FOOTER
+
+
 # --------------------------------------------------------------------------- #
 # index hub
 # --------------------------------------------------------------------------- #
@@ -914,6 +1037,8 @@ def render_index(entries: list) -> str:
             tag = '<span class="tag">This week</span>'
         elif status == "future":
             tag = '<span class="tag">Early outlook</span>'
+        elif status == "calendar":
+            tag = '<span class="tag">Watchlist</span>'
         items.append(
             f'<li><span><a href="/picks/{slug}/">{esc(short_race(name))} {YEAR}</a>{tag}</span>'
             f'<span class="date">{esc(date)}</span></li>'
@@ -2989,6 +3114,7 @@ def main() -> None:
     season = load_json(DATA / "season_summary.json")
     current = load_json(DATA / "predictions.json")
     horizon = load_json(DATA / "horizon_projections.json") or {"rounds": {}}
+    track_data = load_json(DATA / "track_data.json") or {}
     changelog = load_json(DATA / "changelog.json") or {"entries": []}
     videos_data = load_json(DATA / "youtube_videos.json") or {"videos": []}
     articles_data = load_json(DATA / "articles.json") or {"articles": []}
@@ -3014,6 +3140,7 @@ def main() -> None:
     entries = []   # for the hub + sitemap
     written = 0
     future_written = 0
+    calendar_written = 0
     for r in season.get("rounds", []):
         rn = r["round"]
         if r.get("cancelled"):
@@ -3040,6 +3167,12 @@ def main() -> None:
             race_name = pred.get("race", r["name"])
             race_date = pred.get("date", r.get("date", ""))
             future_written += 1
+        elif rn > current_round:
+            status = "calendar"
+            slug, page = render_calendar_race_page(r, track_data)
+            race_name = r["name"]
+            race_date = r.get("date", "")
+            calendar_written += 1
         else:
             continue
 
@@ -3064,6 +3197,8 @@ def main() -> None:
             "summary": (
                 f"Early horizon F1 Fantasy outlook, transfer-planning notes and projected picks for {name}."
                 if status == "future" else
+                f"Early F1 Fantasy calendar watchlist, circuit traits and strategy notes for {name}."
+                if status == "calendar" else
                 f"Race-week F1 Fantasy picks, projected points, value picks and constructor choices for {name}."
             ),
             "updated": now,
@@ -3250,7 +3385,7 @@ def main() -> None:
     write_well_known()
     write_feeds(feed_items)
 
-    print(f"[14_build_seo_pages] wrote {written} prediction race page(s) + {future_written} future outlook page(s) + {len(drivers_sorted)} driver page(s) "
+    print(f"[14_build_seo_pages] wrote {written} prediction race page(s) + {future_written} future outlook page(s) + {calendar_written} calendar watchlist page(s) + {len(drivers_sorted)} driver page(s) "
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
           f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
