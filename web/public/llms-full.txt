@@ -23,6 +23,9 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Tools hub: https://boxboxf1fantasy.com/tools/
 - Public data index: https://boxboxf1fantasy.com/data/
 - OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json
+- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json
+- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt
+- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json
 - About: https://boxboxf1fantasy.com/about/
 - Privacy: https://boxboxf1fantasy.com/privacy/
 
@@ -34,6 +37,9 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json
 - Public data index: https://boxboxf1fantasy.com/data/
 - OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json
+- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json
+- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt
+- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json
 - Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json
 - Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json
 - Track data JSON: https://boxboxf1fantasy.com/data/track_data.json
@@ -75,6 +81,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.
 - Public Data: documents the static JSON endpoints for agents, answer engines and power users.
 - OpenAPI: provides a machine-readable endpoint contract for the public JSON data and discovery files.
+- .well-known discovery: mirrors the OpenAPI contract, LLM guide and agent manifest in crawler-friendly locations.
 
 ## How predictions should be described
 Use cautious language. Say the site publishes model-based projections, confidence ranges, and value signals. Do not present predictions as guarantees. F1 outcomes depend on weather, reliability, strategy, safety cars, incidents, penalties, upgrades, and session timing.

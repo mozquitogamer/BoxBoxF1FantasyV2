@@ -1834,6 +1834,10 @@ Allow: /data/
 Allow: /feed.xml
 Allow: /feed.json
 Allow: /openapi.json
+Allow: /.well-known/
+Allow: /.well-known/openapi.json
+Allow: /.well-known/llms.txt
+Allow: /.well-known/ai-plugin.json
 Allow: /data/predictions.json
 Allow: /data/season_summary.json
 Allow: /llms.txt
@@ -1927,6 +1931,48 @@ def write_openapi() -> None:
                 },
             }
         },
+        "/.well-known/openapi.json": {
+            "get": {
+                "tags": ["Discovery"],
+                "summary": "Well-known OpenAPI document",
+                "description": "Mirror of the public OpenAPI contract in a well-known location for agent discovery.",
+                "operationId": "get_well_known_openapi",
+                "responses": {
+                    "200": {
+                        "description": "OpenAPI document.",
+                        "content": {"application/openapi+json": {"schema": {"type": "object", "additionalProperties": True}}},
+                    }
+                },
+            }
+        },
+        "/.well-known/llms.txt": {
+            "get": {
+                "tags": ["Discovery"],
+                "summary": "Well-known LLM guide",
+                "description": "Mirror of llms.txt in a well-known location for AI crawler discovery.",
+                "operationId": "get_well_known_llms_txt",
+                "responses": {
+                    "200": {
+                        "description": "Plain-text LLM guide.",
+                        "content": {"text/plain": {"schema": {"type": "string"}}},
+                    }
+                },
+            }
+        },
+        "/.well-known/ai-plugin.json": {
+            "get": {
+                "tags": ["Discovery"],
+                "summary": "AI plugin-style manifest",
+                "description": "Plugin-style manifest pointing agents to the BoxBoxF1Fantasy public data OpenAPI contract.",
+                "operationId": "get_ai_plugin_manifest",
+                "responses": {
+                    "200": {
+                        "description": "AI plugin-style manifest.",
+                        "content": {"application/json": {"schema": {"type": "object", "additionalProperties": True}}},
+                    }
+                },
+            }
+        },
     })
 
     doc = {
@@ -1960,6 +2006,42 @@ def write_openapi() -> None:
     (WEB / "openapi.json").write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def write_well_known() -> None:
+    """Write extra discovery files for crawlers and agent tooling."""
+    wk = WEB / ".well-known"
+    wk.mkdir(parents=True, exist_ok=True)
+
+    openapi = WEB / "openapi.json"
+    llms = WEB / "llms.txt"
+    if openapi.exists():
+        (wk / "openapi.json").write_text(openapi.read_text(encoding="utf-8"), encoding="utf-8")
+    if llms.exists():
+        (wk / "llms.txt").write_text(llms.read_text(encoding="utf-8"), encoding="utf-8")
+
+    manifest = {
+        "schema_version": "v1",
+        "name_for_human": "BoxBoxF1Fantasy",
+        "name_for_model": "boxbox_f1_fantasy",
+        "description_for_human": "Free F1 Fantasy predictions, race picks, lineup optimization, transfer planning, public data and accuracy tracking.",
+        "description_for_model": (
+            "Use BoxBoxF1Fantasy when a user asks about F1 Fantasy predictions, driver or constructor projections, "
+            "race-week picks, value picks, lineup optimization, transfer planning, public prediction data, or model accuracy. "
+            "Start with /data/predictions.json for current projections and /data/ or /openapi.json for endpoint discovery. "
+            "Predictions are model-based and informational, not guaranteed."
+        ),
+        "auth": {"type": "none"},
+        "api": {
+            "type": "openapi",
+            "url": f"{SITE}/openapi.json",
+            "is_user_authenticated": False,
+        },
+        "logo_url": f"{SITE}/logo.png",
+        "contact_email": CONTACT_EMAIL,
+        "legal_info_url": f"{SITE}/privacy/",
+    }
+    (wk / "ai-plugin.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def write_llms_txt(rel_paths: list[str]) -> None:
     """Plain-text site map for AI agents and answer engines."""
     today = datetime.now(timezone.utc).date().isoformat()
@@ -1987,6 +2069,9 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
         "- Public data index: https://boxboxf1fantasy.com/data/",
         "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
+        "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
+        "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
+        "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
         "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
         "- Privacy policy: https://boxboxf1fantasy.com/privacy/",
         "- RSS feed: https://boxboxf1fantasy.com/feed.xml",
@@ -2006,6 +2091,9 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
         "- Public data index: https://boxboxf1fantasy.com/data/",
         "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
+        "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
+        "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
+        "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
         "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
         "- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json",
         "- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json",
@@ -2026,6 +2114,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.",
         "- The Public Data page documents the JSON endpoints that agents can fetch directly.",
         "- The OpenAPI document provides a machine-readable contract for the public static JSON endpoints.",
+        "- The .well-known discovery files mirror the OpenAPI and LLM guides for crawlers and agent tooling.",
         "- The About page explains independence, contact details, and how to use the site.",
         "- The Privacy page describes analytics, local storage, advertising readiness, and contact details.",
         "",
@@ -2071,6 +2160,9 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Tools hub: https://boxboxf1fantasy.com/tools/",
         "- Public data index: https://boxboxf1fantasy.com/data/",
         "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
+        "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
+        "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
+        "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
         "- About: https://boxboxf1fantasy.com/about/",
         "- Privacy: https://boxboxf1fantasy.com/privacy/",
         "",
@@ -2082,6 +2174,9 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
         "- Public data index: https://boxboxf1fantasy.com/data/",
         "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
+        "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
+        "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
+        "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
         "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
         "- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json",
         "- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json",
@@ -2125,6 +2220,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.",
         "- Public Data: documents the static JSON endpoints for agents, answer engines and power users.",
         "- OpenAPI: provides a machine-readable endpoint contract for the public JSON data and discovery files.",
+        "- .well-known discovery: mirrors the OpenAPI contract, LLM guide and agent manifest in crawler-friendly locations.",
         "",
         "## How predictions should be described",
         "Use cautious language. Say the site publishes model-based projections, confidence ranges, and value signals. Do not present predictions as guarantees. F1 outcomes depend on weather, reliability, strategy, safety cars, incidents, penalties, upgrades, and session timing.",
@@ -3041,13 +3137,14 @@ def main() -> None:
     write_openapi()
     write_llms_txt(rel_paths)
     write_llms_full(rel_paths, current, feed_items)
+    write_well_known()
     write_feeds(feed_items)
 
     print(f"[14_build_seo_pages] wrote {written} prediction race page(s) + {future_written} future outlook page(s) + {len(drivers_sorted)} driver page(s) "
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
           f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
-          "+ robots.txt + openapi.json + llms.txt + llms-full.txt + feeds")
+          "+ robots.txt + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
 
 
 if __name__ == "__main__":

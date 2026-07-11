@@ -15,6 +15,10 @@ Allow: /data/
 Allow: /feed.xml
 Allow: /feed.json
 Allow: /openapi.json
+Allow: /.well-known/
+Allow: /.well-known/openapi.json
+Allow: /.well-known/llms.txt
+Allow: /.well-known/ai-plugin.json
 Allow: /data/predictions.json
 Allow: /data/season_summary.json
 Allow: /llms.txt
