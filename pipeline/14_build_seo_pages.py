@@ -393,7 +393,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 
 FOOTER = f"""</main>
 <footer class="footer"><div class="wrap">
-<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
+<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a> &middot; <a href="/articles/">Articles</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
@@ -1245,6 +1245,112 @@ def render_videos_page(videos_data: dict) -> str:
     return page_head(title, desc, canonical, ld) + body + FOOTER
 
 
+def _article_summary(article: dict) -> str:
+    raw = re.sub(r"<[^>]+>", " ", clean_legacy_text(article.get("content_html", "")))
+    raw = re.sub(r"\s+", " ", html.unescape(raw)).strip()
+    return raw[:220].rsplit(" ", 1)[0] + "..." if len(raw) > 220 else raw
+
+
+def render_article_page(article: dict) -> str:
+    """Crawlable long-form article page from web/public/data/articles.json."""
+    slug = plain_slug(article.get("slug") or article.get("title") or "article")
+    canonical = f"{SITE}/articles/{slug}/"
+    article_title = clean_legacy_text(article.get("title", "F1 Fantasy Article"))
+    published = clean_legacy_text(article.get("date", ""))
+    tags = [clean_legacy_text(t) for t in article.get("tags", []) if t]
+    desc = _article_summary(article) or f"BoxBoxF1Fantasy article: {article_title}."
+    title = f"{article_title} | BoxBoxF1Fantasy"
+    content = clean_legacy_text(article.get("content_html", ""))
+    tag_html = " ".join(f'<span class="tag">{esc(t)}</span>' for t in tags)
+
+    ld = ld_block([
+        webpage_ld(title, canonical, desc, "Article") | {
+            "headline": article_title,
+            "datePublished": published,
+            "dateModified": published,
+            "author": publisher_ld(),
+            "about": ["F1 Fantasy", "Fantasy sports strategy", "Formula 1"] + tags[:5],
+        },
+        breadcrumb_ld([
+            ("Home", f"{SITE}/"),
+            ("Articles", f"{SITE}/articles/"),
+            (article_title, canonical),
+        ]),
+    ])
+    body = (
+        '<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/articles/">Articles</a> &rsaquo; Article</p>'
+        f"<h1>{esc(article_title)}</h1>"
+        f'<p class="meta">{esc(published)}{(" &middot; " + tag_html) if tag_html else ""}</p>'
+        '<div class="article-body">'
+        + content
+        + "</div>"
+        '<div class="btnrow"><a class="cta" href="/#articles">Open interactive Articles tab &rarr;</a></div>'
+    )
+    return page_head(title, desc, canonical, ld) + body + FOOTER
+
+
+def render_articles_hub(articles_data: dict) -> str:
+    """Crawlable article index for race previews/recaps and fantasy analysis."""
+    canonical = f"{SITE}/articles/"
+    articles = sorted(articles_data.get("articles", []), key=lambda a: a.get("date", ""), reverse=True)
+    title = f"F1 Fantasy Articles {YEAR}: Race Recaps, Previews & Strategy | BoxBox"
+    desc = "BoxBoxF1Fantasy articles: race weekend previews, recaps, fantasy takeaways, strategy notes and data-backed F1 Fantasy analysis."
+
+    cards = []
+    item_list = []
+    for article in articles:
+        slug = plain_slug(article.get("slug") or article.get("title") or "article")
+        article_title = clean_legacy_text(article.get("title", "F1 Fantasy Article"))
+        published = clean_legacy_text(article.get("date", ""))
+        summary = _article_summary(article)
+        tags = " ".join(f'<span class="tag">{esc(clean_legacy_text(t))}</span>' for t in article.get("tags", [])[:4])
+        url = f"{SITE}/articles/{slug}/"
+        cards.append(
+            '<article class="article-card">'
+            f'<p class="meta">{esc(published)}{(" &middot; " + tags) if tags else ""}</p>'
+            f'<h2><a href="/articles/{slug}/">{esc(article_title)}</a></h2>'
+            f'<p>{esc(summary)}</p>'
+            f'<p><a href="/articles/{slug}/">Read article &rarr;</a></p>'
+            "</article>"
+        )
+        item_list.append((article_title, url))
+
+    faqs = [
+        ("What articles are published here?",
+         "The articles are race previews, recaps and F1 Fantasy strategy notes that explain the data, model context and fantasy takeaways in a more human format."),
+        ("Are articles different from race-pick pages?",
+         "Yes. Race-pick pages are concise current-round pick summaries. Articles are longer-form analysis, previews and recaps."),
+        ("Do articles update the prediction model?",
+         "No. Articles explain observations and strategy; the prediction pipeline and exported JSON remain the source of truth for current projections."),
+    ]
+    ld = ld_block([
+        webpage_ld(title, canonical, desc, "CollectionPage"),
+        item_list_ld(f"BoxBoxF1Fantasy {YEAR} articles", canonical, item_list),
+        breadcrumb_ld([
+            ("Home", f"{SITE}/"),
+            ("Articles", canonical),
+        ]),
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        },
+    ])
+    body = (
+        '<p class="crumbs"><a href="/">Home</a> &rsaquo; Articles</p>'
+        f"<h1>F1 Fantasy Articles ({YEAR})</h1>"
+        '<p class="lede">Race previews, recaps, fantasy takeaways and strategy notes from BoxBoxF1Fantasy.</p>'
+        '<div class="btnrow"><a class="cta" href="/#articles">Open interactive Articles tab &rarr;</a></div>'
+        + ("".join(cards) if cards else '<p class="no-data">No articles available yet.</p>')
+        + "<h2>FAQ</h2>"
+        + _faq_html(faqs)
+    )
+    return page_head(title, desc, canonical, ld) + body + FOOTER
+
+
 # --------------------------------------------------------------------------- #
 # sitemap
 # --------------------------------------------------------------------------- #
@@ -1274,6 +1380,7 @@ Allow: /constructors/
 Allow: /accuracy/
 Allow: /changelog/
 Allow: /videos/
+Allow: /articles/
 Allow: /guides/
 Allow: /tools/
 Allow: /about/
@@ -1312,6 +1419,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Prediction accuracy: https://boxboxf1fantasy.com/accuracy/",
         "- Changelog: https://boxboxf1fantasy.com/changelog/",
         "- Videos: https://boxboxf1fantasy.com/videos/",
+        "- Articles: https://boxboxf1fantasy.com/articles/",
         "- Strategy guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
         "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
@@ -1345,6 +1453,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The Accuracy tab publishes prediction performance for completed rounds, including misses.",
         "- The Changelog page publishes notable model, scoring, data and tool changes in plain English.",
         "- The Videos page lists recent YouTube race-week drafts, deadline streams, picks and strategy videos.",
+        "- The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.",
         "- The About page explains independence, contact details, and how to use the site.",
         "- The Privacy page describes analytics, local storage, advertising readiness, and contact details.",
         "",
@@ -1385,6 +1494,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Prediction accuracy: https://boxboxf1fantasy.com/accuracy/",
         "- Changelog: https://boxboxf1fantasy.com/changelog/",
         "- Videos: https://boxboxf1fantasy.com/videos/",
+        "- Articles: https://boxboxf1fantasy.com/articles/",
         "- Guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tools hub: https://boxboxf1fantasy.com/tools/",
         "- About: https://boxboxf1fantasy.com/about/",
@@ -1433,6 +1543,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Accuracy: shows post-race prediction performance and confidence coverage.",
         "- Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.",
         "- Videos: links recent YouTube drafts, deadline streams, top picks and race-week strategy explainers.",
+        "- Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.",
         "",
         "## How predictions should be described",
         "Use cautious language. Say the site publishes model-based projections, confidence ranges, and value signals. Do not present predictions as guarantees. F1 outcomes depend on weather, reliability, strategy, safety cars, incidents, penalties, upgrades, and session timing.",
@@ -2092,6 +2203,7 @@ def main() -> None:
     current = load_json(DATA / "predictions.json")
     changelog = load_json(DATA / "changelog.json") or {"entries": []}
     videos_data = load_json(DATA / "youtube_videos.json") or {"videos": []}
+    articles_data = load_json(DATA / "articles.json") or {"articles": []}
     if not season or not current:
         print("[14_build_seo_pages] missing season_summary.json or predictions.json - run export first.")
         return
@@ -2259,6 +2371,31 @@ def main() -> None:
         "updated": now,
     })
 
+    # --- crawlable articles hub + article pages ---
+    articles_dir = WEB / "articles"
+    articles_dir.mkdir(parents=True, exist_ok=True)
+    articles_sorted = sorted(articles_data.get("articles", []), key=lambda a: a.get("date", ""), reverse=True)
+    (articles_dir / "index.html").write_text(render_articles_hub(articles_data), encoding="utf-8")
+    rel_paths.append("articles/")
+    feed_items.append({
+        "title": f"F1 Fantasy Articles {YEAR}",
+        "url": f"{SITE}/articles/",
+        "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
+        "updated": now,
+    })
+    for article in articles_sorted:
+        slug = plain_slug(article.get("slug") or article.get("title") or "article")
+        out_dir = articles_dir / slug
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "index.html").write_text(render_article_page(article), encoding="utf-8")
+        rel_paths.append(f"articles/{slug}/")
+        feed_items.append({
+            "title": clean_legacy_text(article.get("title", "F1 Fantasy Article")),
+            "url": f"{SITE}/articles/{slug}/",
+            "summary": _article_summary(article),
+            "updated": now,
+        })
+
     # --- static trust/compliance pages ---
     for page in STATIC_PAGES:
         out_dir = WEB / page["slug"]
@@ -2280,7 +2417,7 @@ def main() -> None:
 
     print(f"[14_build_seo_pages] wrote {written} race page(s) + {len(drivers_sorted)} driver page(s) "
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
-          f"+ {len(TOOLS)} tool page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + 5 hubs "
+          f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + 6 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
           "+ robots.txt + llms.txt + llms-full.txt + feeds")
 

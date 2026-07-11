@@ -99,6 +99,20 @@ tbody tr:hover { background: #11151d; }
 }
 .video-card > div { padding: 14px 16px; }
 .video-card h2 { margin-top: 0; }
+.article-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 16px 0;
+}
+.article-card h2 { margin-top: 0; }
+.article-body blockquote {
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+  margin: 18px 0;
+  padding-left: 14px;
+}
 
 .footer { border-top: 1px solid var(--border); margin-top: 40px; padding: 20px 0; color: var(--muted); font-size: 0.8rem; }
 .footer a { color: var(--muted); text-decoration: underline; }

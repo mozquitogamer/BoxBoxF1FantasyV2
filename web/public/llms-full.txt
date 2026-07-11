@@ -18,6 +18,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Prediction accuracy: https://boxboxf1fantasy.com/accuracy/
 - Changelog: https://boxboxf1fantasy.com/changelog/
 - Videos: https://boxboxf1fantasy.com/videos/
+- Articles: https://boxboxf1fantasy.com/articles/
 - Guides hub: https://boxboxf1fantasy.com/guides/
 - Tools hub: https://boxboxf1fantasy.com/tools/
 - About: https://boxboxf1fantasy.com/about/
@@ -64,6 +65,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Accuracy: shows post-race prediction performance and confidence coverage.
 - Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.
 - Videos: links recent YouTube drafts, deadline streams, top picks and race-week strategy explainers.
+- Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.
 
 ## How predictions should be described
 Use cautious language. Say the site publishes model-based projections, confidence ranges, and value signals. Do not present predictions as guarantees. F1 outcomes depend on weather, reliability, strategy, safety cars, incidents, penalties, upgrades, and session timing.
@@ -131,6 +133,11 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - F1 Fantasy Prediction Accuracy 2026: https://boxboxf1fantasy.com/accuracy/ - Public BoxBoxF1Fantasy track record across 9 completed rounds: driver points MAE 12.0, constructor points MAE 18.7, and 90% CI coverage 79%.
 - BoxBoxF1Fantasy Changelog 2026: https://boxboxf1fantasy.com/changelog/ - Public release notes for BoxBoxF1Fantasy model updates, scoring fixes, data-quality improvements and feature releases. Latest: Team Compare added, with clearer budget and points breakdowns.
 - F1 Fantasy Videos 2026: https://boxboxf1fantasy.com/videos/ - Latest BoxBoxF1Fantasy YouTube videos for F1 Fantasy race-week drafts, deadline strategy, top picks and data-backed team decisions. Latest: The Best F1 Fantasy Team for the Belgian Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy.
+- F1 Fantasy Articles 2026: https://boxboxf1fantasy.com/articles/ - Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.
+- Round 3 — Japanese GP Recap & Miami Preview: https://boxboxf1fantasy.com/articles/2026-04-28-round3-japanese-gp-recap/ - Japan Delivered the Goods Who’d have thought that McLaren would be on the podium after a dismal first two races of the season? And we have a new championship leader. Kimi Antonelli leads over George Russell by 9...
+- Round 3 — Japanese Grand Prix Preview: https://boxboxf1fantasy.com/articles/2026-03-25-round-japanese-gp/ - Japanese Grand Prix Preview We are hot off a sprint weekend in China and we head into the Japanese Grand Prix. Some teams, including Aston Martin with their Honda power-unit, are bringing upgrades to table in hopes of...
+- Round 2 — Chinese Grand Prix Recap: https://boxboxf1fantasy.com/articles/2026-03-23-round2-chinese-gp/ - Shanghai Sprint Weekend Round 2 took the paddock to the Shanghai International Circuit for the first sprint weekend of the season. The sprint format added an extra layer of complexity for both teams and fantasy...
+- Round 1 — Australian Grand Prix Recap: https://boxboxf1fantasy.com/articles/2026-03-16-round1-australian-gp/ - Season Opener in Melbourne The 2026 Formula 1 season kicked off under the lights of Albert Park with a dramatically reshuffled grid under the new technical regulations. With wider cars, new aero rules, and 11 teams on...
 - About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/ - About BoxBoxF1Fantasy: a free, independent F1 Fantasy prediction site with driver and constructor projections, optimizer tools, race picks, accuracy tracking and contact details.
 - Privacy Policy: https://boxboxf1fantasy.com/privacy/ - Privacy policy for BoxBoxF1Fantasy, covering analytics, cookies, local browser storage, advertising, external links and contact information.
 

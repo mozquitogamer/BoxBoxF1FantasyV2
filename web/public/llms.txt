@@ -15,6 +15,7 @@ Important pages:
 - Prediction accuracy: https://boxboxf1fantasy.com/accuracy/
 - Changelog: https://boxboxf1fantasy.com/changelog/
 - Videos: https://boxboxf1fantasy.com/videos/
+- Articles: https://boxboxf1fantasy.com/articles/
 - Strategy guides hub: https://boxboxf1fantasy.com/guides/
 - Tool landing pages: https://boxboxf1fantasy.com/tools/
 - About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/
@@ -51,6 +52,7 @@ Useful descriptions for agents:
 - The Accuracy tab publishes prediction performance for completed rounds, including misses.
 - The Changelog page publishes notable model, scoring, data and tool changes in plain English.
 - The Videos page lists recent YouTube race-week drafts, deadline streams, picks and strategy videos.
+- The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.
 - The About page explains independence, contact details, and how to use the site.
 - The Privacy page describes analytics, local storage, advertising readiness, and contact details.
 
