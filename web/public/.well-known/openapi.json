@@ -96,6 +96,28 @@
         }
       }
     },
+    "/.well-known/security.txt": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Security contact file",
+        "description": "Security contact metadata for responsible vulnerability reporting.",
+        "operationId": "get_security_txt",
+        "responses": {
+          "200": {
+            "description": "security.txt file.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/data/": {
       "get": {
         "tags": [
@@ -674,6 +696,28 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/humans.txt": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Human-readable site ownership and contact file",
+        "description": "Plain-text ownership, contact, technology and disclosure notes for BoxBoxF1Fantasy.",
+        "operationId": "get_humans_txt",
+        "responses": {
+          "200": {
+            "description": "humans.txt file.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
                 }
               }
             }

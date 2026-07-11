@@ -1,0 +1,19 @@
+/* TEAM */
+Site: BoxBoxF1Fantasy
+Contact: boxboxf1fantasy@gmail.com
+Location: South Africa
+
+/* SITE */
+URL: https://boxboxf1fantasy.com/
+Last updated: 2026-07-11
+Language: English
+Purpose: Free F1 Fantasy predictions, race picks, lineup optimization, transfer planning, strategy guides, public data and accuracy tracking.
+Tech: Static HTML, vanilla JavaScript, Python data pipeline, machine-learning prediction models, Vercel hosting.
+Public data: https://boxboxf1fantasy.com/data/
+OpenAPI: https://boxboxf1fantasy.com/openapi.json
+LLM guide: https://boxboxf1fantasy.com/llms.txt
+Sitemap: https://boxboxf1fantasy.com/sitemap.xml
+
+/* DISCLOSURE */
+Independent fan-built site. Not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or any driver.
+Predictions are model-based and informational, not guaranteed.

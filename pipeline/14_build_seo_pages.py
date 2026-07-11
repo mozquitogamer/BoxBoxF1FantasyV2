@@ -547,6 +547,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 <link rel="alternate" type="text/plain" title="LLMs guide" href="/llms.txt">
 <link rel="alternate" type="text/plain" title="LLMs full site summary" href="/llms-full.txt">
 <link rel="alternate" type="application/json" title="BoxBoxF1Fantasy site index" href="/search-index.json">
+<link rel="author" type="text/plain" href="/humans.txt">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -2251,6 +2252,8 @@ Allow: /data/predictions.schema.json
 Allow: /data/season_summary.json
 Allow: /llms.txt
 Allow: /llms-full.txt
+Allow: /humans.txt
+Allow: /.well-known/security.txt
 
 # Explicit AI/search crawler groups. Kept separate so crawler-specific robots
 # matching still receives a complete allow rule.
@@ -2369,6 +2372,34 @@ def write_openapi() -> None:
                     "200": {
                         "description": "Web app manifest.",
                         "content": {"application/manifest+json": {"schema": {"type": "object", "additionalProperties": True}}},
+                    }
+                },
+            }
+        },
+        "/humans.txt": {
+            "get": {
+                "tags": ["Discovery"],
+                "summary": "Human-readable site ownership and contact file",
+                "description": "Plain-text ownership, contact, technology and disclosure notes for BoxBoxF1Fantasy.",
+                "operationId": "get_humans_txt",
+                "responses": {
+                    "200": {
+                        "description": "humans.txt file.",
+                        "content": {"text/plain": {"schema": {"type": "string"}}},
+                    }
+                },
+            }
+        },
+        "/.well-known/security.txt": {
+            "get": {
+                "tags": ["Discovery"],
+                "summary": "Security contact file",
+                "description": "Security contact metadata for responsible vulnerability reporting.",
+                "operationId": "get_security_txt",
+                "responses": {
+                    "200": {
+                        "description": "security.txt file.",
+                        "content": {"text/plain": {"schema": {"type": "string"}}},
                     }
                 },
             }
@@ -2514,6 +2545,47 @@ def write_webmanifest() -> None:
     (WEB / "site.webmanifest").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def write_trust_files() -> None:
+    """Write lightweight trust/contact files for humans, reviewers and crawlers."""
+    today = datetime.now(timezone.utc)
+    expires = today.replace(year=today.year + 1).isoformat(timespec="seconds").replace("+00:00", "Z")
+    humans = "\n".join([
+        "/* TEAM */",
+        "Site: BoxBoxF1Fantasy",
+        f"Contact: {CONTACT_EMAIL}",
+        "Location: South Africa",
+        "",
+        "/* SITE */",
+        f"URL: {SITE}/",
+        f"Last updated: {today.date().isoformat()}",
+        "Language: English",
+        "Purpose: Free F1 Fantasy predictions, race picks, lineup optimization, transfer planning, strategy guides, public data and accuracy tracking.",
+        "Tech: Static HTML, vanilla JavaScript, Python data pipeline, machine-learning prediction models, Vercel hosting.",
+        "Public data: https://boxboxf1fantasy.com/data/",
+        "OpenAPI: https://boxboxf1fantasy.com/openapi.json",
+        "LLM guide: https://boxboxf1fantasy.com/llms.txt",
+        "Sitemap: https://boxboxf1fantasy.com/sitemap.xml",
+        "",
+        "/* DISCLOSURE */",
+        "Independent fan-built site. Not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or any driver.",
+        "Predictions are model-based and informational, not guaranteed.",
+        "",
+    ])
+    (WEB / "humans.txt").write_text(humans, encoding="utf-8")
+
+    wk = WEB / ".well-known"
+    wk.mkdir(parents=True, exist_ok=True)
+    security = "\n".join([
+        f"Contact: mailto:{CONTACT_EMAIL}",
+        f"Expires: {expires}",
+        "Preferred-Languages: en",
+        f"Canonical: {SITE}/.well-known/security.txt",
+        f"Policy: {SITE}/privacy/",
+        "",
+    ])
+    (wk / "security.txt").write_text(security, encoding="utf-8")
+
+
 def page_kind_from_relpath(rel_path: str) -> str:
     path = rel_path.strip("/")
     if not path:
@@ -2600,6 +2672,8 @@ def write_search_index(rel_paths: list[str], current: dict) -> None:
             "public_data": f"{SITE}/data/",
             "predictions_schema": f"{SITE}/data/predictions.schema.json",
             "robots": f"{SITE}/robots.txt",
+            "humans": f"{SITE}/humans.txt",
+            "security": f"{SITE}/.well-known/security.txt",
             "allowed_ai_crawlers": AI_CRAWLER_USER_AGENTS,
         },
         "pages": pages,
@@ -2675,6 +2749,8 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
         "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
         "- Web app manifest: https://boxboxf1fantasy.com/site.webmanifest",
+        "- Humans/contact file: https://boxboxf1fantasy.com/humans.txt",
+        "- Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt",
         "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
         "- Privacy policy: https://boxboxf1fantasy.com/privacy/",
         "- RSS feed: https://boxboxf1fantasy.com/feed.xml",
@@ -2705,6 +2781,8 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
         "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
         "- Web app manifest: https://boxboxf1fantasy.com/site.webmanifest",
+        "- Humans/contact file: https://boxboxf1fantasy.com/humans.txt",
+        "- Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt",
         "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
         "- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json",
         "- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json",
@@ -2729,6 +2807,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The search-index.json file gives agents a compact list of crawlable pages with title, description, type, path and canonical URL.",
         "- The web app manifest identifies BoxBoxF1Fantasy as an installable sports utility and exposes shortcuts to high-intent tools.",
         "- The robots.txt file explicitly welcomes major AI/search crawlers and points them toward sitemap, LLM, search-index, and OpenAPI discovery files.",
+        "- The humans.txt and security.txt files provide plain-text contact and ownership signals for reviewers, crawlers, and responsible disclosure.",
         "- The .well-known discovery files mirror the OpenAPI and LLM guides for crawlers and agent tooling.",
         "- The About page explains independence, contact details, and how to use the site.",
         "- The Privacy page describes analytics, local storage, advertising readiness, and contact details.",
@@ -2780,6 +2859,8 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
         "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
         "- Web app manifest: https://boxboxf1fantasy.com/site.webmanifest",
+        "- Humans/contact file: https://boxboxf1fantasy.com/humans.txt",
+        "- Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt",
         "- About: https://boxboxf1fantasy.com/about/",
         "- Privacy: https://boxboxf1fantasy.com/privacy/",
         "",
@@ -2802,6 +2883,8 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
         "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
         "- Web app manifest: https://boxboxf1fantasy.com/site.webmanifest",
+        "- Humans/contact file: https://boxboxf1fantasy.com/humans.txt",
+        "- Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt",
         "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
         "- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json",
         "- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json",
@@ -3857,6 +3940,7 @@ def main() -> None:
     write_sitemap(rel_paths)
     write_robots()
     write_webmanifest()
+    write_trust_files()
     write_search_index(rel_paths, current)
     write_openapi()
     write_llms_txt(rel_paths)
@@ -3868,7 +3952,7 @@ def main() -> None:
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
           f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
-          "+ robots.txt + site.webmanifest + predictions.schema.json + search-index.json + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
+          "+ robots.txt + site.webmanifest + humans.txt + security.txt + predictions.schema.json + search-index.json + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
 
 
 if __name__ == "__main__":

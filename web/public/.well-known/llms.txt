@@ -25,6 +25,8 @@ Important pages:
 - Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt
 - Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json
 - Web app manifest: https://boxboxf1fantasy.com/site.webmanifest
+- Humans/contact file: https://boxboxf1fantasy.com/humans.txt
+- Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt
 - About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/
 - Privacy policy: https://boxboxf1fantasy.com/privacy/
 - RSS feed: https://boxboxf1fantasy.com/feed.xml
@@ -55,6 +57,8 @@ Current data endpoints:
 - Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt
 - Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json
 - Web app manifest: https://boxboxf1fantasy.com/site.webmanifest
+- Humans/contact file: https://boxboxf1fantasy.com/humans.txt
+- Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt
 - Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json
 - Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json
 - Track data JSON: https://boxboxf1fantasy.com/data/track_data.json
@@ -82,6 +86,7 @@ Useful descriptions for agents:
 - The search-index.json file gives agents a compact list of crawlable pages with title, description, type, path and canonical URL.
 - The web app manifest identifies BoxBoxF1Fantasy as an installable sports utility and exposes shortcuts to high-intent tools.
 - The robots.txt file explicitly welcomes major AI/search crawlers and points them toward sitemap, LLM, search-index, and OpenAPI discovery files.
+- The humans.txt and security.txt files provide plain-text contact and ownership signals for reviewers, crawlers, and responsible disclosure.
 - The .well-known discovery files mirror the OpenAPI and LLM guides for crawlers and agent tooling.
 - The About page explains independence, contact details, and how to use the site.
 - The Privacy page describes analytics, local storage, advertising readiness, and contact details.

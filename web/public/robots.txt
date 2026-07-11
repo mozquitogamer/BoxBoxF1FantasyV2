@@ -29,6 +29,8 @@ Allow: /data/predictions.schema.json
 Allow: /data/season_summary.json
 Allow: /llms.txt
 Allow: /llms-full.txt
+Allow: /humans.txt
+Allow: /.well-known/security.txt
 
 # Explicit AI/search crawler groups. Kept separate so crawler-specific robots
 # matching still receives a complete allow rule.
