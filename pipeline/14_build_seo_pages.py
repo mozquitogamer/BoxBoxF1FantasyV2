@@ -110,8 +110,29 @@ def publisher_ld() -> dict:
     return {
         "@type": "Organization",
         "name": "BoxBoxF1Fantasy",
+        "alternateName": ["BoxBox F1 Fantasy", "BoxBox"],
         "url": f"{SITE}/",
         "logo": f"{SITE}/logo.png",
+        "email": CONTACT_EMAIL,
+        "sameAs": [
+            "https://x.com/BoxBoxF1Fantasy",
+            "https://www.youtube.com/@BoxBoxF1Fantasy",
+            "https://www.tiktok.com/@boxboxf1fantasy",
+        ],
+        "knowsAbout": [
+            "F1 Fantasy",
+            "Formula 1",
+            "Fantasy sports strategy",
+            "F1 Fantasy predictions",
+            "F1 Fantasy lineup optimization",
+            "F1 Fantasy transfer planning",
+        ],
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "email": CONTACT_EMAIL,
+            "contactType": "customer support",
+            "availableLanguage": ["English"],
+        },
     }
 
 
