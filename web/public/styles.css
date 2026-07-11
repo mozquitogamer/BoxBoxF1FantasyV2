@@ -1097,6 +1097,7 @@ select:focus, input:focus {
 .team-compare-copy-help {
     position: relative;
     display: inline-flex;
+    align-items: center;
     flex: 0 0 auto;
 }
 .team-compare-tooltip {
@@ -1118,6 +1119,18 @@ select:focus, input:focus {
     transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
     pointer-events: none;
     z-index: 30;
+}
+.team-compare-tooltip::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    right: 18px;
+    width: 10px;
+    height: 10px;
+    background: var(--bg-primary);
+    border-left: 1px solid var(--border-light);
+    border-top: 1px solid var(--border-light);
+    transform: rotate(45deg);
 }
 .team-compare-copy-help:hover .team-compare-tooltip,
 .team-compare-copy-help:focus-within .team-compare-tooltip {
