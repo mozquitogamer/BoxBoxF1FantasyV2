@@ -75,6 +75,29 @@ def esc(x) -> str:
     return html.escape(str(x), quote=True)
 
 
+MOJIBAKE_REPLACEMENTS = {
+    "â€”": "-",
+    "â€“": "-",
+    "â€™": "'",
+    "â€œ": '"',
+    "â€": '"',
+    "â€˜": "'",
+    "â€¦": "...",
+    "â†’": "->",
+    "âˆ’": "-",
+    "â˜°": "table",
+    "ðŸ”—": "Share",
+}
+
+
+def clean_legacy_text(x) -> str:
+    """Repair a few old UTF-8 mojibake artifacts in legacy JSON copy."""
+    s = str(x)
+    for bad, good in MOJIBAKE_REPLACEMENTS.items():
+        s = s.replace(bad, good)
+    return s
+
+
 def ld_block(objs: list) -> str:
     return (
         '<script type="application/ld+json">\n'
@@ -370,7 +393,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 
 FOOTER = f"""</main>
 <footer class="footer"><div class="wrap">
-<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
+<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
@@ -1068,6 +1091,78 @@ def render_accuracy_page(summary: dict) -> str:
     return page_head(title, desc, canonical, ld) + body + FOOTER
 
 
+def render_changelog_page(changelog: dict) -> str:
+    """Crawlable public release notes for transparency, freshness and AI discovery."""
+    canonical = f"{SITE}/changelog/"
+    entries = sorted(changelog.get("entries", []), key=lambda e: e.get("date", ""), reverse=True)
+    title = f"BoxBoxF1Fantasy Changelog {YEAR}: Prediction & Tool Updates"
+    desc = "Public BoxBoxF1Fantasy changelog: model updates, scoring fixes, feature releases and data-quality notes for the F1 Fantasy prediction site."
+
+    latest = entries[0]["date"] if entries else datetime.now(timezone.utc).date().isoformat()
+    entry_cards = []
+    item_list = []
+    for i, entry in enumerate(entries[:30], 1):
+        date = clean_legacy_text(entry.get("date", ""))
+        entry_title = clean_legacy_text(entry.get("title", "Site update"))
+        tags = [
+            f'<span class="tag">{esc(clean_legacy_text(t))}</span>'
+            for t in entry.get("tags", [])
+        ]
+        body_parts = []
+        for part in entry.get("body", []):
+            cleaned = clean_legacy_text(part)
+            stripped = cleaned.lstrip().lower()
+            is_block = stripped.startswith(("<p", "<ul", "<ol", "<h", "<blockquote", "<table", "<div"))
+            body_parts.append(cleaned if is_block else f"<p>{cleaned}</p>")
+        body = "".join(body_parts)
+        anchor = plain_slug(f"{date} {entry_title}") or f"update-{i}"
+        entry_cards.append(
+            f'<article id="{anchor}" class="update-card">'
+            f'<p class="meta">{esc(date)}</p>'
+            f'<h2>{esc(entry_title)}</h2>'
+            f'<p>{" ".join(tags)}</p>'
+            f'<div>{body}</div>'
+            "</article>"
+        )
+        item_list.append((entry_title, f"{canonical}#{anchor}"))
+
+    faqs = [
+        ("Why publish a changelog?",
+         "The changelog keeps a public record of meaningful model, scoring, data and tool changes so users can understand why projections or accuracy numbers moved."),
+        ("Does the changelog reveal the full prediction method?",
+         "No. It explains user-visible changes and validation outcomes in plain English without publishing private implementation details or every model parameter."),
+        ("How often is BoxBoxF1Fantasy updated?",
+         "The prediction pipeline updates through race weekends as data arrives, and the changelog is updated when a notable feature, fix or model change ships."),
+    ]
+    ld = ld_block([
+        webpage_ld(title, canonical, desc, "CollectionPage"),
+        item_list_ld(f"BoxBoxF1Fantasy {YEAR} changelog entries", canonical, item_list[:20]),
+        breadcrumb_ld([
+            ("Home", f"{SITE}/"),
+            ("Changelog", canonical),
+        ]),
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        },
+    ])
+    body = (
+        '<p class="crumbs"><a href="/">Home</a> &rsaquo; Changelog</p>'
+        f"<h1>BoxBoxF1Fantasy Changelog ({YEAR})</h1>"
+        '<p class="lede">A public record of meaningful prediction, scoring, data and tool changes. It is written for players: transparent enough to explain what changed, without giving away private model details.</p>'
+        f'<p class="meta">Latest update: {esc(latest)} &middot; Showing {len(entries[:30])} recent entries.</p>'
+        '<div class="btnrow"><a class="cta" href="/#changelog">Open interactive Changelog tab &rarr;</a></div>'
+        + "".join(entry_cards)
+        + "<h2>FAQ</h2>"
+        + _faq_html(faqs)
+    )
+    return page_head(title, desc, canonical, ld) + body + FOOTER
+
+
 # --------------------------------------------------------------------------- #
 # sitemap
 # --------------------------------------------------------------------------- #
@@ -1095,6 +1190,7 @@ Allow: /picks/
 Allow: /drivers/
 Allow: /constructors/
 Allow: /accuracy/
+Allow: /changelog/
 Allow: /guides/
 Allow: /tools/
 Allow: /about/
@@ -1131,6 +1227,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Driver projections hub: https://boxboxf1fantasy.com/drivers/",
         "- Constructor projections hub: https://boxboxf1fantasy.com/constructors/",
         "- Prediction accuracy: https://boxboxf1fantasy.com/accuracy/",
+        "- Changelog: https://boxboxf1fantasy.com/changelog/",
         "- Strategy guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
         "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
@@ -1162,6 +1259,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The optimizer builds legal F1 Fantasy lineups under a budget using current projections and chip settings.",
         "- Team Compare lets users enter up to three teams and compare budget, expected points, value, confidence ranges, budget movement, and downside risk.",
         "- The Accuracy tab publishes prediction performance for completed rounds, including misses.",
+        "- The Changelog page publishes notable model, scoring, data and tool changes in plain English.",
         "- The About page explains independence, contact details, and how to use the site.",
         "- The Privacy page describes analytics, local storage, advertising readiness, and contact details.",
         "",
@@ -1200,6 +1298,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Driver projections hub: https://boxboxf1fantasy.com/drivers/",
         "- Constructor projections hub: https://boxboxf1fantasy.com/constructors/",
         "- Prediction accuracy: https://boxboxf1fantasy.com/accuracy/",
+        "- Changelog: https://boxboxf1fantasy.com/changelog/",
         "- Guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tools hub: https://boxboxf1fantasy.com/tools/",
         "- About: https://boxboxf1fantasy.com/about/",
@@ -1246,6 +1345,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Budget Builder: highlights value picks and expected price movement.",
         "- Points Calculator: helps estimate score components and understand scoring.",
         "- Accuracy: shows post-race prediction performance and confidence coverage.",
+        "- Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.",
         "",
         "## How predictions should be described",
         "Use cautious language. Say the site publishes model-based projections, confidence ranges, and value signals. Do not present predictions as guarantees. F1 outcomes depend on weather, reliability, strategy, safety cars, incidents, penalties, upgrades, and session timing.",
@@ -1903,6 +2003,7 @@ STATIC_PAGES = [
 def main() -> None:
     season = load_json(DATA / "season_summary.json")
     current = load_json(DATA / "predictions.json")
+    changelog = load_json(DATA / "changelog.json") or {"entries": []}
     if not season or not current:
         print("[14_build_seo_pages] missing season_summary.json or predictions.json - run export first.")
         return
@@ -2040,6 +2141,21 @@ def main() -> None:
         "updated": now,
     })
 
+    # --- crawlable changelog / freshness page ---
+    changelog_dir = WEB / "changelog"
+    changelog_dir.mkdir(parents=True, exist_ok=True)
+    (changelog_dir / "index.html").write_text(render_changelog_page(changelog), encoding="utf-8")
+    rel_paths.append("changelog/")
+    changelog_entries = sorted(changelog.get("entries", []), key=lambda e: e.get("date", ""), reverse=True)
+    latest_change = changelog_entries[0] if changelog_entries else {}
+    feed_items.append({
+        "title": f"BoxBoxF1Fantasy Changelog {YEAR}",
+        "url": f"{SITE}/changelog/",
+        "summary": "Public release notes for BoxBoxF1Fantasy model updates, scoring fixes, data-quality improvements and feature releases."
+                   + (f" Latest: {clean_legacy_text(latest_change.get('title', 'site update'))}." if latest_change else ""),
+        "updated": now,
+    })
+
     # --- static trust/compliance pages ---
     for page in STATIC_PAGES:
         out_dir = WEB / page["slug"]
@@ -2061,7 +2177,7 @@ def main() -> None:
 
     print(f"[14_build_seo_pages] wrote {written} race page(s) + {len(drivers_sorted)} driver page(s) "
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
-          f"+ {len(TOOLS)} tool page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + 5 hubs "
+          f"+ {len(TOOLS)} tool page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + 5 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
           "+ robots.txt + llms.txt + llms-full.txt + feeds")
 

@@ -16,6 +16,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Driver projections hub: https://boxboxf1fantasy.com/drivers/
 - Constructor projections hub: https://boxboxf1fantasy.com/constructors/
 - Prediction accuracy: https://boxboxf1fantasy.com/accuracy/
+- Changelog: https://boxboxf1fantasy.com/changelog/
 - Guides hub: https://boxboxf1fantasy.com/guides/
 - Tools hub: https://boxboxf1fantasy.com/tools/
 - About: https://boxboxf1fantasy.com/about/
@@ -60,6 +61,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Budget Builder: highlights value picks and expected price movement.
 - Points Calculator: helps estimate score components and understand scoring.
 - Accuracy: shows post-race prediction performance and confidence coverage.
+- Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.
 
 ## How predictions should be described
 Use cautious language. Say the site publishes model-based projections, confidence ranges, and value signals. Do not present predictions as guarantees. F1 outcomes depend on weather, reliability, strategy, safety cars, incidents, penalties, upgrades, and session timing.
@@ -125,6 +127,7 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - F1 Fantasy Budget Builder: https://boxboxf1fantasy.com/tools/budget-builder/ - Free F1 Fantasy budget builder: find the picks most likely to rise in price so your team value compounds, leaving more to spend on stars later in the season.
 - F1 Fantasy Points Calculator & Predictions: https://boxboxf1fantasy.com/tools/points-calculator/ - Free F1 Fantasy points calculator: see projected fantasy points for every driver and constructor this round, with a full breakdown of qualifying, race, overtakes and bonuses.
 - F1 Fantasy Prediction Accuracy 2026: https://boxboxf1fantasy.com/accuracy/ - Public BoxBoxF1Fantasy track record across 9 completed rounds: driver points MAE 12.0, constructor points MAE 18.7, and 90% CI coverage 79%.
+- BoxBoxF1Fantasy Changelog 2026: https://boxboxf1fantasy.com/changelog/ - Public release notes for BoxBoxF1Fantasy model updates, scoring fixes, data-quality improvements and feature releases. Latest: Team Compare added, with clearer budget and points breakdowns.
 - About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/ - About BoxBoxF1Fantasy: a free, independent F1 Fantasy prediction site with driver and constructor projections, optimizer tools, race picks, accuracy tracking and contact details.
 - Privacy Policy: https://boxboxf1fantasy.com/privacy/ - Privacy policy for BoxBoxF1Fantasy, covering analytics, cookies, local browser storage, advertising, external links and contact information.
 
