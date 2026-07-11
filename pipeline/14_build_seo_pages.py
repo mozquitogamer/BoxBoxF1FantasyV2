@@ -1822,6 +1822,13 @@ PUBLIC_DATASETS = [
         "file": "predictions.json",
         "name": "Current F1 Fantasy predictions",
         "desc": "Current-round driver and constructor projections, expected points, confidence ranges, prices, value scores and prediction metadata.",
+        "schema": "predictions.schema.json",
+    },
+    {
+        "file": "predictions.schema.json",
+        "name": "Prediction JSON schema",
+        "desc": "JSON Schema describing predictions.json for agents, developers and data consumers.",
+        "encoding": "application/schema+json",
     },
     {
         "file": "season_summary.json",
@@ -1882,10 +1889,13 @@ def render_data_page(current: dict, season: dict) -> str:
         updated = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).date().isoformat() if exists else ""
         size = path.stat().st_size if exists else 0
         url = f"{SITE}/data/{item['file']}"
+        encoding = item.get("encoding", "application/json")
+        schema_file = item.get("schema")
+        schema_link = f' <span class="meta">schema: <a href="/data/{esc(schema_file)}">{esc(schema_file)}</a></span>' if schema_file else ""
         rows.append(
             f'<tr><td><a href="/data/{esc(item["file"])}">{esc(item["file"])}</a></td>'
             f'<td>{esc(item["name"])}</td>'
-            f'<td>{esc(item["desc"])}</td>'
+            f'<td>{esc(item["desc"])}{schema_link}</td>'
             f'<td class="num">{esc(updated)}</td>'
             f'<td class="num">{size:,}</td></tr>'
         )
@@ -1896,10 +1906,10 @@ def render_data_page(current: dict, season: dict) -> str:
             "description": item["desc"],
             "url": url,
             "creator": publisher_ld(),
-            "encodingFormat": "application/json",
+            "encodingFormat": encoding,
             "distribution": {
                 "@type": "DataDownload",
-                "encodingFormat": "application/json",
+                "encodingFormat": encoding,
                 "contentUrl": url,
             },
             "dateModified": updated or datetime.now(timezone.utc).date().isoformat(),
@@ -1950,7 +1960,7 @@ def render_data_page(current: dict, season: dict) -> str:
         f"<h1>BoxBoxF1Fantasy Public Data ({YEAR})</h1>"
         '<p class="lede">A crawlable index of public JSON files for agents, answer engines and power users who want to understand the data behind the site.</p>'
         f'<p class="meta">Current round: R{esc(round_no)} &middot; {esc(race)}</p>'
-        '<div class="callout">For natural-language navigation, start with <a href="/llms.txt">llms.txt</a> or the fuller <a href="/llms-full.txt">llms-full.txt</a>. For machine-readable endpoint discovery, use <a href="/openapi.json">openapi.json</a>. For live projections, start with <a href="/data/predictions.json">predictions.json</a>.</div>'
+        '<div class="callout">For natural-language navigation, start with <a href="/llms.txt">llms.txt</a> or the fuller <a href="/llms-full.txt">llms-full.txt</a>. For machine-readable endpoint discovery, use <a href="/openapi.json">openapi.json</a>. For live projections, start with <a href="/data/predictions.json">predictions.json</a> and its <a href="/data/predictions.schema.json">JSON schema</a>.</div>'
         '<table><thead><tr><th>File</th><th>Dataset</th><th>Description</th><th class="num">Updated</th><th class="num">Bytes</th></tr></thead><tbody>'
         + "".join(rows)
         + "</tbody></table>"
@@ -1979,6 +1989,142 @@ AI_CRAWLER_USER_AGENTS = [
     # Google generative-AI product controls; normal Google Search remains covered by User-agent: *.
     "Google-Extended",
 ]
+
+
+def predictions_json_schema() -> dict:
+    """JSON Schema for the public current-round predictions endpoint."""
+    number = {"type": "number"}
+    nullable_number = {"type": ["number", "null"]}
+    integer = {"type": "integer"}
+    string = {"type": "string"}
+    risk = {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH"]}
+    percentile_fields = {
+        "mc_total_mean": number,
+        "mc_total_std": number,
+        "mc_total_p5": number,
+        "mc_total_p25": number,
+        "mc_total_p75": number,
+        "mc_total_p95": number,
+    }
+    driver_schema = {
+        "type": "object",
+        "additionalProperties": True,
+        "required": [
+            "driver_id", "name", "constructor", "predicted_quali", "predicted_finish",
+            "expected_points", "projected_points", "current_price", "value_score",
+        ],
+        "properties": {
+            "driver_id": string,
+            "name": string,
+            "constructor": string,
+            "number": integer,
+            "predicted_quali": integer,
+            "predicted_finish": integer,
+            "projected_points": number,
+            "expected_points": number,
+            "expected_points_quali": number,
+            "expected_points_race": number,
+            "confidence": number,
+            "risk": risk,
+            "risk_rating": number,
+            "dnf_probability": nullable_number,
+            "expected_overtakes": number,
+            "expected_positions_gained_lost": number,
+            "fastest_lap_probability": nullable_number,
+            "dotd_probability": nullable_number,
+            "points_per_million": number,
+            "value_score": number,
+            "current_price": number,
+            "raw_scores": {
+                "type": "object",
+                "additionalProperties": True,
+                "properties": {"quali": number, "race": number},
+            },
+            "mc_upside": number,
+            "mc_dnf_rate": number,
+            "mc_overtakes_mean": number,
+            "mc_quali_pts_mean": number,
+            "mc_race_pts_mean": number,
+            **percentile_fields,
+        },
+    }
+    constructor_schema = {
+        "type": "object",
+        "additionalProperties": True,
+        "required": [
+            "constructor_id", "name", "driver_1", "driver_2",
+            "expected_points", "projected_points", "current_price", "value_score",
+        ],
+        "properties": {
+            "constructor_id": string,
+            "name": string,
+            "full_name": string,
+            "driver_1": string,
+            "driver_2": string,
+            "projected_points": number,
+            "expected_points": number,
+            "expected_points_quali": number,
+            "expected_points_race": number,
+            "expected_pit_stop_pts": number,
+            "expected_dnf_impact": number,
+            "dnf_probability": nullable_number,
+            "quali_bonus": number,
+            "risk": risk,
+            "risk_rating": number,
+            "value_score": number,
+            "current_price": number,
+            "mc_pit_stop_pts": number,
+            "mc_dnf_prob": number,
+            **percentile_fields,
+        },
+    }
+    return {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": f"{SITE}/data/predictions.schema.json",
+        "title": "BoxBoxF1Fantasy current predictions",
+        "description": "Current-round F1 Fantasy driver and constructor projections, prices, confidence ranges, risk metrics and prediction metadata.",
+        "type": "object",
+        "additionalProperties": True,
+        "required": ["season", "round", "race", "drivers", "constructors"],
+        "properties": {
+            "season": integer,
+            "round": integer,
+            "race": string,
+            "circuit": string,
+            "date": string,
+            "phase": string,
+            "generated_at": string,
+            "exported_at": string,
+            "is_sprint_weekend": {"type": "boolean"},
+            "score_unit": {
+                "type": ["object", "number", "null"],
+                "additionalProperties": True,
+                "properties": {
+                    "quali_gap_median": number,
+                    "race_gap_median": number,
+                },
+            },
+            "calibration": {"type": "object", "additionalProperties": True},
+            "weather_adjustments": {"type": "object", "additionalProperties": True},
+            "drivers": {
+                "type": "array",
+                "description": "Driver projections sorted for the current race context.",
+                "items": driver_schema,
+            },
+            "constructors": {
+                "type": "array",
+                "description": "Constructor projections sorted for the current race context.",
+                "items": constructor_schema,
+            },
+        },
+    }
+
+
+def write_prediction_schema() -> None:
+    (DATA / "predictions.schema.json").write_text(
+        json.dumps(predictions_json_schema(), ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
 
 def write_sitemap(rel_paths: list[str]) -> None:
@@ -2030,6 +2176,7 @@ Allow: /.well-known/openapi.json
 Allow: /.well-known/llms.txt
 Allow: /.well-known/ai-plugin.json
 Allow: /data/predictions.json
+Allow: /data/predictions.schema.json
 Allow: /data/season_summary.json
 Allow: /llms.txt
 Allow: /llms-full.txt
@@ -2046,6 +2193,11 @@ def write_openapi() -> None:
     """Machine-readable contract for public static data endpoints."""
     paths = {}
     for item in PUBLIC_DATASETS:
+        encoding = item.get("encoding", "application/json")
+        response_schema = predictions_json_schema() if item["file"] == "predictions.json" else {
+            "type": "object",
+            "additionalProperties": True,
+        }
         paths[f"/data/{item['file']}"] = {
             "get": {
                 "tags": ["Public data"],
@@ -2056,11 +2208,8 @@ def write_openapi() -> None:
                     "200": {
                         "description": f"{item['name']} as JSON.",
                         "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "additionalProperties": True,
-                                }
+                            encoding: {
+                                "schema": response_schema
                             }
                         },
                     }
@@ -2378,6 +2527,7 @@ def write_search_index(rel_paths: list[str], current: dict) -> None:
             "openapi": f"{SITE}/openapi.json",
             "manifest": f"{SITE}/site.webmanifest",
             "public_data": f"{SITE}/data/",
+            "predictions_schema": f"{SITE}/data/predictions.schema.json",
             "robots": f"{SITE}/robots.txt",
             "allowed_ai_crawlers": AI_CRAWLER_USER_AGENTS,
         },
@@ -2475,6 +2625,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "",
         "Current data endpoints:",
         "- Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json",
+        "- Predictions JSON Schema: https://boxboxf1fantasy.com/data/predictions.schema.json",
         "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
         "- Public data index: https://boxboxf1fantasy.com/data/",
         "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
@@ -2503,6 +2654,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.",
         "- The Public Data page documents the JSON endpoints that agents can fetch directly.",
         "- The OpenAPI document provides a machine-readable contract for the public static JSON endpoints.",
+        "- The predictions.schema.json file documents the core predictions endpoint shape for agents and developers.",
         "- The search-index.json file gives agents a compact list of crawlable pages with title, description, type, path and canonical URL.",
         "- The web app manifest identifies BoxBoxF1Fantasy as an installable sports utility and exposes shortcuts to high-intent tools.",
         "- The robots.txt file explicitly welcomes major AI/search crawlers and points them toward sitemap, LLM, search-index, and OpenAPI discovery files.",
@@ -2570,6 +2722,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         f"- Race: {race}",
         f"- Prediction file generated: {generated or 'unknown'}",
         "- Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json",
+        "- Predictions JSON Schema: https://boxboxf1fantasy.com/data/predictions.schema.json",
         "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
         "- Public data index: https://boxboxf1fantasy.com/data/",
         "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
@@ -3369,6 +3522,8 @@ def main() -> None:
         print("[14_build_seo_pages] missing season_summary.json or predictions.json - run export first.")
         return
 
+    write_prediction_schema()
+
     current_round = current.get("round")
     horizon_rounds = horizon.get("rounds") or {}
     drivers_seed = {
@@ -3638,7 +3793,7 @@ def main() -> None:
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
           f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
-          "+ robots.txt + site.webmanifest + search-index.json + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
+          "+ robots.txt + site.webmanifest + predictions.schema.json + search-index.json + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
 
 
 if __name__ == "__main__":

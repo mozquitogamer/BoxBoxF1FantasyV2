@@ -41,6 +41,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Race: Belgian Grand Prix
 - Prediction file generated: 2026-07-09
 - Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json
+- Predictions JSON Schema: https://boxboxf1fantasy.com/data/predictions.schema.json
 - Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json
 - Public data index: https://boxboxf1fantasy.com/data/
 - OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json

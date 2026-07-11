@@ -224,6 +224,339 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://boxboxf1fantasy.com/data/predictions.schema.json",
+                  "title": "BoxBoxF1Fantasy current predictions",
+                  "description": "Current-round F1 Fantasy driver and constructor projections, prices, confidence ranges, risk metrics and prediction metadata.",
+                  "type": "object",
+                  "additionalProperties": true,
+                  "required": [
+                    "season",
+                    "round",
+                    "race",
+                    "drivers",
+                    "constructors"
+                  ],
+                  "properties": {
+                    "season": {
+                      "type": "integer"
+                    },
+                    "round": {
+                      "type": "integer"
+                    },
+                    "race": {
+                      "type": "string"
+                    },
+                    "circuit": {
+                      "type": "string"
+                    },
+                    "date": {
+                      "type": "string"
+                    },
+                    "phase": {
+                      "type": "string"
+                    },
+                    "generated_at": {
+                      "type": "string"
+                    },
+                    "exported_at": {
+                      "type": "string"
+                    },
+                    "is_sprint_weekend": {
+                      "type": "boolean"
+                    },
+                    "score_unit": {
+                      "type": [
+                        "object",
+                        "number",
+                        "null"
+                      ],
+                      "additionalProperties": true,
+                      "properties": {
+                        "quali_gap_median": {
+                          "type": "number"
+                        },
+                        "race_gap_median": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "calibration": {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "weather_adjustments": {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "drivers": {
+                      "type": "array",
+                      "description": "Driver projections sorted for the current race context.",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "required": [
+                          "driver_id",
+                          "name",
+                          "constructor",
+                          "predicted_quali",
+                          "predicted_finish",
+                          "expected_points",
+                          "projected_points",
+                          "current_price",
+                          "value_score"
+                        ],
+                        "properties": {
+                          "driver_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "constructor": {
+                            "type": "string"
+                          },
+                          "number": {
+                            "type": "integer"
+                          },
+                          "predicted_quali": {
+                            "type": "integer"
+                          },
+                          "predicted_finish": {
+                            "type": "integer"
+                          },
+                          "projected_points": {
+                            "type": "number"
+                          },
+                          "expected_points": {
+                            "type": "number"
+                          },
+                          "expected_points_quali": {
+                            "type": "number"
+                          },
+                          "expected_points_race": {
+                            "type": "number"
+                          },
+                          "confidence": {
+                            "type": "number"
+                          },
+                          "risk": {
+                            "type": "string",
+                            "enum": [
+                              "LOW",
+                              "MEDIUM",
+                              "HIGH"
+                            ]
+                          },
+                          "risk_rating": {
+                            "type": "number"
+                          },
+                          "dnf_probability": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "expected_overtakes": {
+                            "type": "number"
+                          },
+                          "expected_positions_gained_lost": {
+                            "type": "number"
+                          },
+                          "fastest_lap_probability": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "dotd_probability": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "points_per_million": {
+                            "type": "number"
+                          },
+                          "value_score": {
+                            "type": "number"
+                          },
+                          "current_price": {
+                            "type": "number"
+                          },
+                          "raw_scores": {
+                            "type": "object",
+                            "additionalProperties": true,
+                            "properties": {
+                              "quali": {
+                                "type": "number"
+                              },
+                              "race": {
+                                "type": "number"
+                              }
+                            }
+                          },
+                          "mc_upside": {
+                            "type": "number"
+                          },
+                          "mc_dnf_rate": {
+                            "type": "number"
+                          },
+                          "mc_overtakes_mean": {
+                            "type": "number"
+                          },
+                          "mc_quali_pts_mean": {
+                            "type": "number"
+                          },
+                          "mc_race_pts_mean": {
+                            "type": "number"
+                          },
+                          "mc_total_mean": {
+                            "type": "number"
+                          },
+                          "mc_total_std": {
+                            "type": "number"
+                          },
+                          "mc_total_p5": {
+                            "type": "number"
+                          },
+                          "mc_total_p25": {
+                            "type": "number"
+                          },
+                          "mc_total_p75": {
+                            "type": "number"
+                          },
+                          "mc_total_p95": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "constructors": {
+                      "type": "array",
+                      "description": "Constructor projections sorted for the current race context.",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "required": [
+                          "constructor_id",
+                          "name",
+                          "driver_1",
+                          "driver_2",
+                          "expected_points",
+                          "projected_points",
+                          "current_price",
+                          "value_score"
+                        ],
+                        "properties": {
+                          "constructor_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "full_name": {
+                            "type": "string"
+                          },
+                          "driver_1": {
+                            "type": "string"
+                          },
+                          "driver_2": {
+                            "type": "string"
+                          },
+                          "projected_points": {
+                            "type": "number"
+                          },
+                          "expected_points": {
+                            "type": "number"
+                          },
+                          "expected_points_quali": {
+                            "type": "number"
+                          },
+                          "expected_points_race": {
+                            "type": "number"
+                          },
+                          "expected_pit_stop_pts": {
+                            "type": "number"
+                          },
+                          "expected_dnf_impact": {
+                            "type": "number"
+                          },
+                          "dnf_probability": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "quali_bonus": {
+                            "type": "number"
+                          },
+                          "risk": {
+                            "type": "string",
+                            "enum": [
+                              "LOW",
+                              "MEDIUM",
+                              "HIGH"
+                            ]
+                          },
+                          "risk_rating": {
+                            "type": "number"
+                          },
+                          "value_score": {
+                            "type": "number"
+                          },
+                          "current_price": {
+                            "type": "number"
+                          },
+                          "mc_pit_stop_pts": {
+                            "type": "number"
+                          },
+                          "mc_dnf_prob": {
+                            "type": "number"
+                          },
+                          "mc_total_mean": {
+                            "type": "number"
+                          },
+                          "mc_total_std": {
+                            "type": "number"
+                          },
+                          "mc_total_p5": {
+                            "type": "number"
+                          },
+                          "mc_total_p25": {
+                            "type": "number"
+                          },
+                          "mc_total_p75": {
+                            "type": "number"
+                          },
+                          "mc_total_p95": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/predictions.schema.json": {
+      "get": {
+        "tags": [
+          "Public data"
+        ],
+        "summary": "Prediction JSON schema",
+        "description": "JSON Schema describing predictions.json for agents, developers and data consumers.",
+        "operationId": "get_predictions_schema",
+        "responses": {
+          "200": {
+            "description": "Prediction JSON schema as JSON.",
+            "content": {
+              "application/schema+json": {
+                "schema": {
                   "type": "object",
                   "additionalProperties": true
                 }

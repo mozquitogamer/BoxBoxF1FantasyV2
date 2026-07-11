@@ -25,6 +25,7 @@ Allow: /.well-known/openapi.json
 Allow: /.well-known/llms.txt
 Allow: /.well-known/ai-plugin.json
 Allow: /data/predictions.json
+Allow: /data/predictions.schema.json
 Allow: /data/season_summary.json
 Allow: /llms.txt
 Allow: /llms-full.txt

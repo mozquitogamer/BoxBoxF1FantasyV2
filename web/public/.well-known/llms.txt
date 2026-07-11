@@ -46,6 +46,7 @@ Crawler policy:
 
 Current data endpoints:
 - Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json
+- Predictions JSON Schema: https://boxboxf1fantasy.com/data/predictions.schema.json
 - Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json
 - Public data index: https://boxboxf1fantasy.com/data/
 - OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json
@@ -77,6 +78,7 @@ Useful descriptions for agents:
 - The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.
 - The Public Data page documents the JSON endpoints that agents can fetch directly.
 - The OpenAPI document provides a machine-readable contract for the public static JSON endpoints.
+- The predictions.schema.json file documents the core predictions endpoint shape for agents and developers.
 - The search-index.json file gives agents a compact list of crawlable pages with title, description, type, path and canonical URL.
 - The web app manifest identifies BoxBoxF1Fantasy as an installable sports utility and exposes shortcuts to high-intent tools.
 - The robots.txt file explicitly welcomes major AI/search crawlers and points them toward sitemap, LLM, search-index, and OpenAPI discovery files.
