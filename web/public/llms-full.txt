@@ -30,6 +30,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Web app manifest: https://boxboxf1fantasy.com/site.webmanifest
 - Humans/contact file: https://boxboxf1fantasy.com/humans.txt
 - Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt
+- IndexNow key location: https://boxboxf1fantasy.com/779753a5fbbf054b3ea496085a0ce1e4.txt
 - About: https://boxboxf1fantasy.com/about/
 - Privacy: https://boxboxf1fantasy.com/privacy/
 
@@ -54,6 +55,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Web app manifest: https://boxboxf1fantasy.com/site.webmanifest
 - Humans/contact file: https://boxboxf1fantasy.com/humans.txt
 - Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt
+- IndexNow key location: https://boxboxf1fantasy.com/779753a5fbbf054b3ea496085a0ce1e4.txt
 - Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json
 - Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json
 - Track data JSON: https://boxboxf1fantasy.com/data/track_data.json

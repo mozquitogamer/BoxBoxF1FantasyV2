@@ -966,6 +966,7 @@ No CLI args. Reads the already-exported `web/public/data/*.json` and generates s
 - **Per-race landing pages** under `web/public/picks/{slug}/index.html` (e.g. `/picks/monaco-gp-2026/`) — one per race with predictions — plus a `/picks/` hub. Each bakes the predictions into real HTML (top driver/constructor picks, best value/PPM picks, a boost/captain pick, a race FAQ + JSON-LD) and links into the SPA.
 - **Evergreen guides** under `web/public/guides/` (how scoring works, how to win, chips, drivers vs constructors, beginners) + a `/guides/` hub — content defined in the `GUIDES` list in the script.
 - **Tool landing pages** under `web/public/tools/` (lineup optimizer, transfer planner, budget builder, points calculator) + a `/tools/` hub — content in the `TOOLS` list.
+- **Crawler/agent discovery files** at `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt`, `search-index.json`, `openapi.json`, `.well-known/*`, `humans.txt`, `security.txt`, `site.webmanifest`, and the IndexNow key file.
 
 Targets recurring "[GP] f1 fantasy picks / tips" and evergreen "how to / scoring / optimizer" search traffic without changing the app. Appended **non-fatally** to the `pre_fp_predict`, `post_fp`, `post_quali` and `post_race` phases, so the pages refresh whenever predictions change. Pure stdlib; run standalone any time after an export:
 
@@ -973,7 +974,18 @@ Targets recurring "[GP] f1 fantasy picks / tips" and evergreen "how to / scoring
 python pipeline/14_build_seo_pages.py
 ```
 
-> The generated `web/public/{picks,guides,tools}/` HTML and `sitemap.xml` are build artifacts — commit them so Vercel serves them. The hubs are linked from the site footer (`/picks/`, `/guides/`, `/tools/`) so crawlers can discover every page. To edit guide/tool copy, change the `GUIDES`/`TOOLS` data at the top of the script and re-run.
+> The generated `web/public/{picks,guides,tools}/` HTML and discovery files are build artifacts — commit them so Vercel serves them. The hubs are linked from the site footer (`/picks/`, `/guides/`, `/tools/`) so crawlers can discover every page. To edit guide/tool copy, change the `GUIDES`/`TOOLS` data at the top of the script and re-run.
+
+### `pipeline/15_submit_indexnow.py` — IndexNow URL submission
+
+Run after the SEO pages have been deployed to production. It reads `web/public/sitemap.xml`, uses the generated IndexNow key file, and submits the changed URLs to `https://api.indexnow.org/indexnow`.
+
+```bash
+python pipeline/15_submit_indexnow.py --include-discovery --dry-run
+python pipeline/15_submit_indexnow.py --include-discovery
+```
+
+Use `--url https://boxboxf1fantasy.com/picks/example-gp-2026/` for a targeted one-page submission. A `200` or `202` response means the URL list was received; indexing is still at the search engine's discretion.
 
 ### `pipeline/youtube_videos.py` — Video curation
 

@@ -38,6 +38,7 @@ PICKS = WEB / "picks"
 SITE = "https://boxboxf1fantasy.com"
 YEAR = 2026
 CONTACT_EMAIL = "boxboxf1fantasy@gmail.com"
+INDEXNOW_KEY = "779753a5fbbf054b3ea496085a0ce1e4"
 
 TOP_DRIVERS = 10      # rows in the "top picks" table
 VALUE_DRIVERS = 6     # rows in the "best value" table
@@ -2254,6 +2255,7 @@ Allow: /llms.txt
 Allow: /llms-full.txt
 Allow: /humans.txt
 Allow: /.well-known/security.txt
+Allow: /{INDEXNOW_KEY}.txt
 
 # Explicit AI/search crawler groups. Kept separate so crawler-specific robots
 # matching still receives a complete allow rule.
@@ -2385,6 +2387,20 @@ def write_openapi() -> None:
                 "responses": {
                     "200": {
                         "description": "humans.txt file.",
+                        "content": {"text/plain": {"schema": {"type": "string"}}},
+                    }
+                },
+            }
+        },
+        f"/{INDEXNOW_KEY}.txt": {
+            "get": {
+                "tags": ["Discovery"],
+                "summary": "IndexNow verification key",
+                "description": "Plain-text IndexNow ownership verification key used for real-time indexing notifications.",
+                "operationId": "get_indexnow_key",
+                "responses": {
+                    "200": {
+                        "description": "IndexNow key file.",
                         "content": {"text/plain": {"schema": {"type": "string"}}},
                     }
                 },
@@ -2586,6 +2602,11 @@ def write_trust_files() -> None:
     (wk / "security.txt").write_text(security, encoding="utf-8")
 
 
+def write_indexnow_key() -> None:
+    """Publish the IndexNow ownership key at the site root."""
+    (WEB / f"{INDEXNOW_KEY}.txt").write_text(INDEXNOW_KEY, encoding="utf-8")
+
+
 def page_kind_from_relpath(rel_path: str) -> str:
     path = rel_path.strip("/")
     if not path:
@@ -2674,6 +2695,7 @@ def write_search_index(rel_paths: list[str], current: dict) -> None:
             "robots": f"{SITE}/robots.txt",
             "humans": f"{SITE}/humans.txt",
             "security": f"{SITE}/.well-known/security.txt",
+            "indexnow_key_location": f"{SITE}/{INDEXNOW_KEY}.txt",
             "allowed_ai_crawlers": AI_CRAWLER_USER_AGENTS,
         },
         "pages": pages,
@@ -2751,6 +2773,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Web app manifest: https://boxboxf1fantasy.com/site.webmanifest",
         "- Humans/contact file: https://boxboxf1fantasy.com/humans.txt",
         "- Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt",
+        f"- IndexNow key location: https://boxboxf1fantasy.com/{INDEXNOW_KEY}.txt",
         "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
         "- Privacy policy: https://boxboxf1fantasy.com/privacy/",
         "- RSS feed: https://boxboxf1fantasy.com/feed.xml",
@@ -2783,6 +2806,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Web app manifest: https://boxboxf1fantasy.com/site.webmanifest",
         "- Humans/contact file: https://boxboxf1fantasy.com/humans.txt",
         "- Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt",
+        f"- IndexNow key location: https://boxboxf1fantasy.com/{INDEXNOW_KEY}.txt",
         "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
         "- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json",
         "- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json",
@@ -2808,6 +2832,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The web app manifest identifies BoxBoxF1Fantasy as an installable sports utility and exposes shortcuts to high-intent tools.",
         "- The robots.txt file explicitly welcomes major AI/search crawlers and points them toward sitemap, LLM, search-index, and OpenAPI discovery files.",
         "- The humans.txt and security.txt files provide plain-text contact and ownership signals for reviewers, crawlers, and responsible disclosure.",
+        "- The IndexNow key file enables real-time URL update notifications to participating search engines after new pages ship.",
         "- The .well-known discovery files mirror the OpenAPI and LLM guides for crawlers and agent tooling.",
         "- The About page explains independence, contact details, and how to use the site.",
         "- The Privacy page describes analytics, local storage, advertising readiness, and contact details.",
@@ -2861,6 +2886,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Web app manifest: https://boxboxf1fantasy.com/site.webmanifest",
         "- Humans/contact file: https://boxboxf1fantasy.com/humans.txt",
         "- Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt",
+        f"- IndexNow key location: https://boxboxf1fantasy.com/{INDEXNOW_KEY}.txt",
         "- About: https://boxboxf1fantasy.com/about/",
         "- Privacy: https://boxboxf1fantasy.com/privacy/",
         "",
@@ -2885,6 +2911,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Web app manifest: https://boxboxf1fantasy.com/site.webmanifest",
         "- Humans/contact file: https://boxboxf1fantasy.com/humans.txt",
         "- Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt",
+        f"- IndexNow key location: https://boxboxf1fantasy.com/{INDEXNOW_KEY}.txt",
         "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
         "- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json",
         "- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json",
@@ -3941,6 +3968,7 @@ def main() -> None:
     write_robots()
     write_webmanifest()
     write_trust_files()
+    write_indexnow_key()
     write_search_index(rel_paths, current)
     write_openapi()
     write_llms_txt(rel_paths)
@@ -3952,7 +3980,7 @@ def main() -> None:
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
           f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
-          "+ robots.txt + site.webmanifest + humans.txt + security.txt + predictions.schema.json + search-index.json + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
+          "+ robots.txt + site.webmanifest + humans.txt + security.txt + IndexNow key + predictions.schema.json + search-index.json + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
 
 
 if __name__ == "__main__":

@@ -118,6 +118,28 @@
         }
       }
     },
+    "/779753a5fbbf054b3ea496085a0ce1e4.txt": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "IndexNow verification key",
+        "description": "Plain-text IndexNow ownership verification key used for real-time indexing notifications.",
+        "operationId": "get_indexnow_key",
+        "responses": {
+          "200": {
+            "description": "IndexNow key file.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/data/": {
       "get": {
         "tags": [
