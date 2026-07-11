@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-T3HS76FJ7W"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-T3HS76FJ7W');
+</script>
+<title>BoxBoxF1Fantasy Public Data: JSON Endpoints for F1 Fantasy 2026</title>
+<meta name="description" content="Public BoxBoxF1Fantasy JSON data index for agents and developers: predictions, season summary, driver history, track data, weather, articles, videos and changelog.">
+<link rel="canonical" href="https://boxboxf1fantasy.com/data/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0a0d12">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BoxBoxF1Fantasy">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="BoxBoxF1Fantasy Public Data: JSON Endpoints for F1 Fantasy 2026">
+<meta property="og:description" content="Public BoxBoxF1Fantasy JSON data index for agents and developers: predictions, season summary, driver history, track data, weather, articles, videos and changelog.">
+<meta property="og:url" content="https://boxboxf1fantasy.com/data/">
+<meta property="og:image" content="https://boxboxf1fantasy.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@BoxBoxF1Fantasy">
+<meta name="twitter:title" content="BoxBoxF1Fantasy Public Data: JSON Endpoints for F1 Fantasy 2026">
+<meta name="twitter:description" content="Public BoxBoxF1Fantasy JSON data index for agents and developers: predictions, season summary, driver history, track data, weather, articles, videos and changelog.">
+<meta name="twitter:image" content="https://boxboxf1fantasy.com/og-image.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="alternate" type="application/rss+xml" title="BoxBoxF1Fantasy updates" href="/feed.xml">
+<link rel="alternate" type="application/feed+json" title="BoxBoxF1Fantasy updates" href="/feed.json">
+<link rel="alternate" type="text/plain" title="LLMs guide" href="/llms.txt">
+<link rel="alternate" type="text/plain" title="LLMs full site summary" href="/llms-full.txt">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/picks/picks.css">
+<script type="application/ld+json">
+[
+ {
+  "@context": "https://schema.org",
+  "@type": "DataCatalog",
+  "name": "BoxBoxF1Fantasy Public Data: JSON Endpoints for F1 Fantasy 2026",
+  "url": "https://boxboxf1fantasy.com/data/",
+  "description": "Public BoxBoxF1Fantasy JSON data index for agents and developers: predictions, season summary, driver history, track data, weather, articles, videos and changelog.",
+  "inLanguage": "en",
+  "isPartOf": {
+   "@type": "WebSite",
+   "name": "BoxBoxF1Fantasy",
+   "url": "https://boxboxf1fantasy.com/"
+  },
+  "publisher": {
+   "@type": "Organization",
+   "name": "BoxBoxF1Fantasy",
+   "alternateName": [
+    "BoxBox F1 Fantasy",
+    "BoxBox"
+   ],
+   "url": "https://boxboxf1fantasy.com/",
+   "logo": "https://boxboxf1fantasy.com/logo.png",
+   "email": "boxboxf1fantasy@gmail.com",
+   "sameAs": [
+    "https://x.com/BoxBoxF1Fantasy",
+    "https://www.youtube.com/@BoxBoxF1Fantasy",
+    "https://www.tiktok.com/@boxboxf1fantasy"
+   ],
+   "knowsAbout": [
+    "F1 Fantasy",
+    "Formula 1",
+    "Fantasy sports strategy",
+    "F1 Fantasy predictions",
+    "F1 Fantasy lineup optimization",
+    "F1 Fantasy transfer planning"
+   ],
+   "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "boxboxf1fantasy@gmail.com",
+    "contactType": "customer support",
+    "availableLanguage": [
+     "English"
+    ]
+   }
+  }
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+   {
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": "https://boxboxf1fantasy.com/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Public Data",
+    "item": "https://boxboxf1fantasy.com/data/"
+   }
+  ]
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "BoxBoxF1Fantasy public JSON endpoints 2026",
+  "url": "https://boxboxf1fantasy.com/data/",
+  "itemListElement": [
+   {
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Current F1 Fantasy predictions",
+    "url": "https://boxboxf1fantasy.com/data/predictions.json"
+   },
+   {
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Season summary",
+    "url": "https://boxboxf1fantasy.com/data/season_summary.json"
+   },
+   {
+    "@type": "ListItem",
+    "position": 3,
+    "name": "Driver and constructor history",
+    "url": "https://boxboxf1fantasy.com/data/driver_history.json"
+   },
+   {
+    "@type": "ListItem",
+    "position": 4,
+    "name": "Track data",
+    "url": "https://boxboxf1fantasy.com/data/track_data.json"
+   },
+   {
+    "@type": "ListItem",
+    "position": 5,
+    "name": "Weather forecast",
+    "url": "https://boxboxf1fantasy.com/data/weather.json"
+   },
+   {
+    "@type": "ListItem",
+    "position": 6,
+    "name": "Future-round horizon projections",
+    "url": "https://boxboxf1fantasy.com/data/horizon_projections.json"
+   },
+   {
+    "@type": "ListItem",
+    "position": 7,
+    "name": "Changelog",
+    "url": "https://boxboxf1fantasy.com/data/changelog.json"
+   },
+   {
+    "@type": "ListItem",
+    "position": 8,
+    "name": "Articles",
+    "url": "https://boxboxf1fantasy.com/data/articles.json"
+   },
+   {
+    "@type": "ListItem",
+    "position": 9,
+    "name": "YouTube videos",
+    "url": "https://boxboxf1fantasy.com/data/youtube_videos.json"
+   }
+  ]
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+   {
+    "@type": "Question",
+    "name": "Can agents use these JSON files?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "Yes. These are public static JSON files used by the website itself. They can be fetched directly for current projections, season context, articles, videos and other public site data."
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "Are these predictions guaranteed?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "No. The data contains model-based projections and public site metadata. F1 Fantasy outcomes depend on weather, reliability, strategy, penalties and race incidents."
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "Which endpoint should an AI assistant read first?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "Start with predictions.json for the current round and season_summary.json for calendar and price context. Use llms.txt or llms-full.txt for a plain-English site map."
+    }
+   }
+  ]
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Current F1 Fantasy predictions",
+  "description": "Current-round driver and constructor projections, expected points, confidence ranges, prices, value scores and prediction metadata.",
+  "url": "https://boxboxf1fantasy.com/data/predictions.json",
+  "creator": {
+   "@type": "Organization",
+   "name": "BoxBoxF1Fantasy",
+   "alternateName": [
+    "BoxBox F1 Fantasy",
+    "BoxBox"
+   ],
+   "url": "https://boxboxf1fantasy.com/",
+   "logo": "https://boxboxf1fantasy.com/logo.png",
+   "email": "boxboxf1fantasy@gmail.com",
+   "sameAs": [
+    "https://x.com/BoxBoxF1Fantasy",
+    "https://www.youtube.com/@BoxBoxF1Fantasy",
+    "https://www.tiktok.com/@boxboxf1fantasy"
+   ],
+   "knowsAbout": [
+    "F1 Fantasy",
+    "Formula 1",
+    "Fantasy sports strategy",
+    "F1 Fantasy predictions",
+    "F1 Fantasy lineup optimization",
+    "F1 Fantasy transfer planning"
+   ],
+   "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "boxboxf1fantasy@gmail.com",
+    "contactType": "customer support",
+    "availableLanguage": [
+     "English"
+    ]
+   }
+  },
+  "encodingFormat": "application/json",
+  "dateModified": "2026-07-09",
+  "isAccessibleForFree": true
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Season summary",
+  "description": "Race calendar, completed-round flags, current prices and season-level driver/constructor context used by the site.",
+  "url": "https://boxboxf1fantasy.com/data/season_summary.json",
+  "creator": {
+   "@type": "Organization",
+   "name": "BoxBoxF1Fantasy",
+   "alternateName": [
+    "BoxBox F1 Fantasy",
+    "BoxBox"
+   ],
+   "url": "https://boxboxf1fantasy.com/",
+   "logo": "https://boxboxf1fantasy.com/logo.png",
+   "email": "boxboxf1fantasy@gmail.com",
+   "sameAs": [
+    "https://x.com/BoxBoxF1Fantasy",
+    "https://www.youtube.com/@BoxBoxF1Fantasy",
+    "https://www.tiktok.com/@boxboxf1fantasy"
+   ],
+   "knowsAbout": [
+    "F1 Fantasy",
+    "Formula 1",
+    "Fantasy sports strategy",
+    "F1 Fantasy predictions",
+    "F1 Fantasy lineup optimization",
+    "F1 Fantasy transfer planning"
+   ],
+   "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "boxboxf1fantasy@gmail.com",
+    "contactType": "customer support",
+    "availableLanguage": [
+     "English"
+    ]
+   }
+  },
+  "encodingFormat": "application/json",
+  "dateModified": "2026-07-09",
+  "isAccessibleForFree": true
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Driver and constructor history",
+  "description": "Historical fantasy scores and price movement used by season views, form tables and value context.",
+  "url": "https://boxboxf1fantasy.com/data/driver_history.json",
+  "creator": {
+   "@type": "Organization",
+   "name": "BoxBoxF1Fantasy",
+   "alternateName": [
+    "BoxBox F1 Fantasy",
+    "BoxBox"
+   ],
+   "url": "https://boxboxf1fantasy.com/",
+   "logo": "https://boxboxf1fantasy.com/logo.png",
+   "email": "boxboxf1fantasy@gmail.com",
+   "sameAs": [
+    "https://x.com/BoxBoxF1Fantasy",
+    "https://www.youtube.com/@BoxBoxF1Fantasy",
+    "https://www.tiktok.com/@boxboxf1fantasy"
+   ],
+   "knowsAbout": [
+    "F1 Fantasy",
+    "Formula 1",
+    "Fantasy sports strategy",
+    "F1 Fantasy predictions",
+    "F1 Fantasy lineup optimization",
+    "F1 Fantasy transfer planning"
+   ],
+   "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "boxboxf1fantasy@gmail.com",
+    "contactType": "customer support",
+    "availableLanguage": [
+     "English"
+    ]
+   }
+  },
+  "encodingFormat": "application/json",
+  "dateModified": "2026-07-09",
+  "isAccessibleForFree": true
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Track data",
+  "description": "Circuit metadata and track-classification features for current and future race-week context.",
+  "url": "https://boxboxf1fantasy.com/data/track_data.json",
+  "creator": {
+   "@type": "Organization",
+   "name": "BoxBoxF1Fantasy",
+   "alternateName": [
+    "BoxBox F1 Fantasy",
+    "BoxBox"
+   ],
+   "url": "https://boxboxf1fantasy.com/",
+   "logo": "https://boxboxf1fantasy.com/logo.png",
+   "email": "boxboxf1fantasy@gmail.com",
+   "sameAs": [
+    "https://x.com/BoxBoxF1Fantasy",
+    "https://www.youtube.com/@BoxBoxF1Fantasy",
+    "https://www.tiktok.com/@boxboxf1fantasy"
+   ],
+   "knowsAbout": [
+    "F1 Fantasy",
+    "Formula 1",
+    "Fantasy sports strategy",
+    "F1 Fantasy predictions",
+    "F1 Fantasy lineup optimization",
+    "F1 Fantasy transfer planning"
+   ],
+   "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "boxboxf1fantasy@gmail.com",
+    "contactType": "customer support",
+    "availableLanguage": [
+     "English"
+    ]
+   }
+  },
+  "encodingFormat": "application/json",
+  "dateModified": "2026-07-09",
+  "isAccessibleForFree": true
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Weather forecast",
+  "description": "Race-week weather forecast metadata used by the weather widget and weather-aware prediction notes.",
+  "url": "https://boxboxf1fantasy.com/data/weather.json",
+  "creator": {
+   "@type": "Organization",
+   "name": "BoxBoxF1Fantasy",
+   "alternateName": [
+    "BoxBox F1 Fantasy",
+    "BoxBox"
+   ],
+   "url": "https://boxboxf1fantasy.com/",
+   "logo": "https://boxboxf1fantasy.com/logo.png",
+   "email": "boxboxf1fantasy@gmail.com",
+   "sameAs": [
+    "https://x.com/BoxBoxF1Fantasy",
+    "https://www.youtube.com/@BoxBoxF1Fantasy",
+    "https://www.tiktok.com/@boxboxf1fantasy"
+   ],
+   "knowsAbout": [
+    "F1 Fantasy",
+    "Formula 1",
+    "Fantasy sports strategy",
+    "F1 Fantasy predictions",
+    "F1 Fantasy lineup optimization",
+    "F1 Fantasy transfer planning"
+   ],
+   "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "boxboxf1fantasy@gmail.com",
+    "contactType": "customer support",
+    "availableLanguage": [
+     "English"
+    ]
+   }
+  },
+  "encodingFormat": "application/json",
+  "dateModified": "2026-07-11",
+  "isAccessibleForFree": true
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Future-round horizon projections",
+  "description": "Forward-looking projections used by the multi-week transfer planner when planning beyond the current race.",
+  "url": "https://boxboxf1fantasy.com/data/horizon_projections.json",
+  "creator": {
+   "@type": "Organization",
+   "name": "BoxBoxF1Fantasy",
+   "alternateName": [
+    "BoxBox F1 Fantasy",
+    "BoxBox"
+   ],
+   "url": "https://boxboxf1fantasy.com/",
+   "logo": "https://boxboxf1fantasy.com/logo.png",
+   "email": "boxboxf1fantasy@gmail.com",
+   "sameAs": [
+    "https://x.com/BoxBoxF1Fantasy",
+    "https://www.youtube.com/@BoxBoxF1Fantasy",
+    "https://www.tiktok.com/@boxboxf1fantasy"
+   ],
+   "knowsAbout": [
+    "F1 Fantasy",
+    "Formula 1",
+    "Fantasy sports strategy",
+    "F1 Fantasy predictions",
+    "F1 Fantasy lineup optimization",
+    "F1 Fantasy transfer planning"
+   ],
+   "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "boxboxf1fantasy@gmail.com",
+    "contactType": "customer support",
+    "availableLanguage": [
+     "English"
+    ]
+   }
+  },
+  "encodingFormat": "application/json",
+  "dateModified": "2026-07-09",
+  "isAccessibleForFree": true
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Changelog",
+  "description": "Machine-readable release notes for notable model, scoring, data and tool changes.",
+  "url": "https://boxboxf1fantasy.com/data/changelog.json",
+  "creator": {
+   "@type": "Organization",
+   "name": "BoxBoxF1Fantasy",
+   "alternateName": [
+    "BoxBox F1 Fantasy",
+    "BoxBox"
+   ],
+   "url": "https://boxboxf1fantasy.com/",
+   "logo": "https://boxboxf1fantasy.com/logo.png",
+   "email": "boxboxf1fantasy@gmail.com",
+   "sameAs": [
+    "https://x.com/BoxBoxF1Fantasy",
+    "https://www.youtube.com/@BoxBoxF1Fantasy",
+    "https://www.tiktok.com/@boxboxf1fantasy"
+   ],
+   "knowsAbout": [
+    "F1 Fantasy",
+    "Formula 1",
+    "Fantasy sports strategy",
+    "F1 Fantasy predictions",
+    "F1 Fantasy lineup optimization",
+    "F1 Fantasy transfer planning"
+   ],
+   "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "boxboxf1fantasy@gmail.com",
+    "contactType": "customer support",
+    "availableLanguage": [
+     "English"
+    ]
+   }
+  },
+  "encodingFormat": "application/json",
+  "dateModified": "2026-07-10",
+  "isAccessibleForFree": true
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Articles",
+  "description": "Machine-readable source for crawlable race previews, recaps and F1 Fantasy strategy articles.",
+  "url": "https://boxboxf1fantasy.com/data/articles.json",
+  "creator": {
+   "@type": "Organization",
+   "name": "BoxBoxF1Fantasy",
+   "alternateName": [
+    "BoxBox F1 Fantasy",
+    "BoxBox"
+   ],
+   "url": "https://boxboxf1fantasy.com/",
+   "logo": "https://boxboxf1fantasy.com/logo.png",
+   "email": "boxboxf1fantasy@gmail.com",
+   "sameAs": [
+    "https://x.com/BoxBoxF1Fantasy",
+    "https://www.youtube.com/@BoxBoxF1Fantasy",
+    "https://www.tiktok.com/@boxboxf1fantasy"
+   ],
+   "knowsAbout": [
+    "F1 Fantasy",
+    "Formula 1",
+    "Fantasy sports strategy",
+    "F1 Fantasy predictions",
+    "F1 Fantasy lineup optimization",
+    "F1 Fantasy transfer planning"
+   ],
+   "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "boxboxf1fantasy@gmail.com",
+    "contactType": "customer support",
+    "availableLanguage": [
+     "English"
+    ]
+   }
+  },
+  "encodingFormat": "application/json",
+  "dateModified": "2026-04-28",
+  "isAccessibleForFree": true
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "YouTube videos",
+  "description": "Latest BoxBoxF1Fantasy YouTube videos with title, publish date, thumbnail and URL.",
+  "url": "https://boxboxf1fantasy.com/data/youtube_videos.json",
+  "creator": {
+   "@type": "Organization",
+   "name": "BoxBoxF1Fantasy",
+   "alternateName": [
+    "BoxBox F1 Fantasy",
+    "BoxBox"
+   ],
+   "url": "https://boxboxf1fantasy.com/",
+   "logo": "https://boxboxf1fantasy.com/logo.png",
+   "email": "boxboxf1fantasy@gmail.com",
+   "sameAs": [
+    "https://x.com/BoxBoxF1Fantasy",
+    "https://www.youtube.com/@BoxBoxF1Fantasy",
+    "https://www.tiktok.com/@boxboxf1fantasy"
+   ],
+   "knowsAbout": [
+    "F1 Fantasy",
+    "Formula 1",
+    "Fantasy sports strategy",
+    "F1 Fantasy predictions",
+    "F1 Fantasy lineup optimization",
+    "F1 Fantasy transfer planning"
+   ],
+   "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "boxboxf1fantasy@gmail.com",
+    "contactType": "customer support",
+    "availableLanguage": [
+     "English"
+    ]
+   }
+  },
+  "encodingFormat": "application/json",
+  "dateModified": "2026-07-10",
+  "isAccessibleForFree": true
+ }
+]
+</script>
+</head>
+<body>
+<div class="topbar"><div class="wrap">
+  <a class="brand" href="/">BoxBox<span class="ac">F1</span>Fantasy</a>
+  <a class="cta" href="/">Open live predictions &amp; tools &rarr;</a>
+</div></div>
+<main class="wrap">
+<p class="crumbs"><a href="/">Home</a> &rsaquo; Public Data</p><h1>BoxBoxF1Fantasy Public Data (2026)</h1><p class="lede">A crawlable index of public JSON files for agents, answer engines and power users who want to understand the data behind the site.</p><p class="meta">Current round: R12 &middot; Belgian Grand Prix</p><div class="callout">For natural-language navigation, start with <a href="/llms.txt">llms.txt</a> or the fuller <a href="/llms-full.txt">llms-full.txt</a>. For live projections, start with <a href="/data/predictions.json">predictions.json</a>.</div><table><thead><tr><th>File</th><th>Dataset</th><th>Description</th><th class="num">Updated</th><th class="num">Bytes</th></tr></thead><tbody><tr><td><a href="/data/predictions.json">predictions.json</a></td><td>Current F1 Fantasy predictions</td><td>Current-round driver and constructor projections, expected points, confidence ranges, prices, value scores and prediction metadata.</td><td class="num">2026-07-09</td><td class="num">33,533</td></tr><tr><td><a href="/data/season_summary.json">season_summary.json</a></td><td>Season summary</td><td>Race calendar, completed-round flags, current prices and season-level driver/constructor context used by the site.</td><td class="num">2026-07-09</td><td class="num">11,906</td></tr><tr><td><a href="/data/driver_history.json">driver_history.json</a></td><td>Driver and constructor history</td><td>Historical fantasy scores and price movement used by season views, form tables and value context.</td><td class="num">2026-07-09</td><td class="num">39,304</td></tr><tr><td><a href="/data/track_data.json">track_data.json</a></td><td>Track data</td><td>Circuit metadata and track-classification features for current and future race-week context.</td><td class="num">2026-07-09</td><td class="num">7,949</td></tr><tr><td><a href="/data/weather.json">weather.json</a></td><td>Weather forecast</td><td>Race-week weather forecast metadata used by the weather widget and weather-aware prediction notes.</td><td class="num">2026-07-11</td><td class="num">8,584</td></tr><tr><td><a href="/data/horizon_projections.json">horizon_projections.json</a></td><td>Future-round horizon projections</td><td>Forward-looking projections used by the multi-week transfer planner when planning beyond the current race.</td><td class="num">2026-07-09</td><td class="num">54,074</td></tr><tr><td><a href="/data/changelog.json">changelog.json</a></td><td>Changelog</td><td>Machine-readable release notes for notable model, scoring, data and tool changes.</td><td class="num">2026-07-10</td><td class="num">42,329</td></tr><tr><td><a href="/data/articles.json">articles.json</a></td><td>Articles</td><td>Machine-readable source for crawlable race previews, recaps and F1 Fantasy strategy articles.</td><td class="num">2026-04-28</td><td class="num">21,514</td></tr><tr><td><a href="/data/youtube_videos.json">youtube_videos.json</a></td><td>YouTube videos</td><td>Latest BoxBoxF1Fantasy YouTube videos with title, publish date, thumbnail and URL.</td><td class="num">2026-07-10</td><td class="num">1,433</td></tr></tbody></table><h2>FAQ</h2><p class="faq-q">Can agents use these JSON files?</p><p class="faq-a">Yes. These are public static JSON files used by the website itself. They can be fetched directly for current projections, season context, articles, videos and other public site data.</p><p class="faq-q">Are these predictions guaranteed?</p><p class="faq-a">No. The data contains model-based projections and public site metadata. F1 Fantasy outcomes depend on weather, reliability, strategy, penalties and race incidents.</p><p class="faq-q">Which endpoint should an AI assistant read first?</p><p class="faq-a">Start with predictions.json for the current round and season_summary.json for calendar and price context. Use llms.txt or llms-full.txt for a plain-English site map.</p></main>
+<footer class="footer"><div class="wrap">
+<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a> &middot; <a href="/articles/">Articles</a> &middot; <a href="/data/">Data</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
+<p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the 2026 season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
+<p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
+</div></footer>
+</body>
+</html>

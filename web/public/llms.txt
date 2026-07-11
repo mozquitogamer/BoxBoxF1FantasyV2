@@ -18,6 +18,7 @@ Important pages:
 - Articles: https://boxboxf1fantasy.com/articles/
 - Strategy guides hub: https://boxboxf1fantasy.com/guides/
 - Tool landing pages: https://boxboxf1fantasy.com/tools/
+- Public data index: https://boxboxf1fantasy.com/data/
 - About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/
 - Privacy policy: https://boxboxf1fantasy.com/privacy/
 - RSS feed: https://boxboxf1fantasy.com/feed.xml
@@ -35,7 +36,11 @@ Important pages:
 Current data endpoints:
 - Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json
 - Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json
+- Public data index: https://boxboxf1fantasy.com/data/
 - Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json
+- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json
+- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json
+- Weather JSON: https://boxboxf1fantasy.com/data/weather.json
 
 Recent race-pick pages:
 - https://boxboxf1fantasy.com/picks/belgian-gp-2026/
@@ -53,6 +58,7 @@ Useful descriptions for agents:
 - The Changelog page publishes notable model, scoring, data and tool changes in plain English.
 - The Videos page lists recent YouTube race-week drafts, deadline streams, picks and strategy videos.
 - The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.
+- The Public Data page documents the JSON endpoints that agents can fetch directly.
 - The About page explains independence, contact details, and how to use the site.
 - The Privacy page describes analytics, local storage, advertising readiness, and contact details.
 

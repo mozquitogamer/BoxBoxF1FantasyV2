@@ -21,6 +21,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Articles: https://boxboxf1fantasy.com/articles/
 - Guides hub: https://boxboxf1fantasy.com/guides/
 - Tools hub: https://boxboxf1fantasy.com/tools/
+- Public data index: https://boxboxf1fantasy.com/data/
 - About: https://boxboxf1fantasy.com/about/
 - Privacy: https://boxboxf1fantasy.com/privacy/
 
@@ -30,7 +31,11 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Prediction file generated: 2026-07-09
 - Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json
 - Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json
+- Public data index: https://boxboxf1fantasy.com/data/
 - Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json
+- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json
+- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json
+- Weather JSON: https://boxboxf1fantasy.com/data/weather.json
 
 ## Current top projected drivers
 - Max Verstappen: 22.6 expected points, $27.9M, PPM 0.81
@@ -66,6 +71,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.
 - Videos: links recent YouTube drafts, deadline streams, top picks and race-week strategy explainers.
 - Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.
+- Public Data: documents the static JSON endpoints for agents, answer engines and power users.
 
 ## How predictions should be described
 Use cautious language. Say the site publishes model-based projections, confidence ranges, and value signals. Do not present predictions as guarantees. F1 outcomes depend on weather, reliability, strategy, safety cars, incidents, penalties, upgrades, and session timing.
@@ -138,6 +144,7 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - Round 3 — Japanese Grand Prix Preview: https://boxboxf1fantasy.com/articles/2026-03-25-round-japanese-gp/ - Japanese Grand Prix Preview We are hot off a sprint weekend in China and we head into the Japanese Grand Prix. Some teams, including Aston Martin with their Honda power-unit, are bringing upgrades to table in hopes of...
 - Round 2 — Chinese Grand Prix Recap: https://boxboxf1fantasy.com/articles/2026-03-23-round2-chinese-gp/ - Shanghai Sprint Weekend Round 2 took the paddock to the Shanghai International Circuit for the first sprint weekend of the season. The sprint format added an extra layer of complexity for both teams and fantasy...
 - Round 1 — Australian Grand Prix Recap: https://boxboxf1fantasy.com/articles/2026-03-16-round1-australian-gp/ - Season Opener in Melbourne The 2026 Formula 1 season kicked off under the lights of Albert Park with a dramatically reshuffled grid under the new technical regulations. With wider cars, new aero rules, and 11 teams on...
+- BoxBoxF1Fantasy Public Data 2026: https://boxboxf1fantasy.com/data/ - Public JSON endpoint index for BoxBoxF1Fantasy predictions, season summary, driver history, track data, weather, articles, videos and changelog.
 - About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/ - About BoxBoxF1Fantasy: a free, independent F1 Fantasy prediction site with driver and constructor projections, optimizer tools, race picks, accuracy tracking and contact details.
 - Privacy Policy: https://boxboxf1fantasy.com/privacy/ - Privacy policy for BoxBoxF1Fantasy, covering analytics, cookies, local browser storage, advertising, external links and contact information.
 

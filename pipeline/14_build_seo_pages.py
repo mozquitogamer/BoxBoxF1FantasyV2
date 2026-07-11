@@ -414,7 +414,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 
 FOOTER = f"""</main>
 <footer class="footer"><div class="wrap">
-<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a> &middot; <a href="/articles/">Articles</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
+<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a> &middot; <a href="/articles/">Articles</a> &middot; <a href="/data/">Data</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
@@ -1372,6 +1372,143 @@ def render_articles_hub(articles_data: dict) -> str:
     return page_head(title, desc, canonical, ld) + body + FOOTER
 
 
+PUBLIC_DATASETS = [
+    {
+        "file": "predictions.json",
+        "name": "Current F1 Fantasy predictions",
+        "desc": "Current-round driver and constructor projections, expected points, confidence ranges, prices, value scores and prediction metadata.",
+    },
+    {
+        "file": "season_summary.json",
+        "name": "Season summary",
+        "desc": "Race calendar, completed-round flags, current prices and season-level driver/constructor context used by the site.",
+    },
+    {
+        "file": "driver_history.json",
+        "name": "Driver and constructor history",
+        "desc": "Historical fantasy scores and price movement used by season views, form tables and value context.",
+    },
+    {
+        "file": "track_data.json",
+        "name": "Track data",
+        "desc": "Circuit metadata and track-classification features for current and future race-week context.",
+    },
+    {
+        "file": "weather.json",
+        "name": "Weather forecast",
+        "desc": "Race-week weather forecast metadata used by the weather widget and weather-aware prediction notes.",
+    },
+    {
+        "file": "horizon_projections.json",
+        "name": "Future-round horizon projections",
+        "desc": "Forward-looking projections used by the multi-week transfer planner when planning beyond the current race.",
+    },
+    {
+        "file": "changelog.json",
+        "name": "Changelog",
+        "desc": "Machine-readable release notes for notable model, scoring, data and tool changes.",
+    },
+    {
+        "file": "articles.json",
+        "name": "Articles",
+        "desc": "Machine-readable source for crawlable race previews, recaps and F1 Fantasy strategy articles.",
+    },
+    {
+        "file": "youtube_videos.json",
+        "name": "YouTube videos",
+        "desc": "Latest BoxBoxF1Fantasy YouTube videos with title, publish date, thumbnail and URL.",
+    },
+]
+
+
+def render_data_page(current: dict, season: dict) -> str:
+    """Crawlable index for public JSON endpoints used by AI agents and power users."""
+    canonical = f"{SITE}/data/"
+    race = current.get("race", "current race")
+    round_no = current.get("round", "")
+    title = f"BoxBoxF1Fantasy Public Data: JSON Endpoints for F1 Fantasy {YEAR}"
+    desc = "Public BoxBoxF1Fantasy JSON data index for agents and developers: predictions, season summary, driver history, track data, weather, articles, videos and changelog."
+
+    rows = []
+    dataset_ld = []
+    for item in PUBLIC_DATASETS:
+        path = DATA / item["file"]
+        exists = path.exists()
+        updated = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).date().isoformat() if exists else ""
+        size = path.stat().st_size if exists else 0
+        url = f"{SITE}/data/{item['file']}"
+        rows.append(
+            f'<tr><td><a href="/data/{esc(item["file"])}">{esc(item["file"])}</a></td>'
+            f'<td>{esc(item["name"])}</td>'
+            f'<td>{esc(item["desc"])}</td>'
+            f'<td class="num">{esc(updated)}</td>'
+            f'<td class="num">{size:,}</td></tr>'
+        )
+        dataset_ld.append({
+            "@context": "https://schema.org",
+            "@type": "Dataset",
+            "name": item["name"],
+            "description": item["desc"],
+            "url": url,
+            "creator": publisher_ld(),
+            "encodingFormat": "application/json",
+            "dateModified": updated or datetime.now(timezone.utc).date().isoformat(),
+            "isAccessibleForFree": True,
+        })
+
+    faqs = [
+        ("Can agents use these JSON files?",
+         "Yes. These are public static JSON files used by the website itself. They can be fetched directly for current projections, season context, articles, videos and other public site data."),
+        ("Are these predictions guaranteed?",
+         "No. The data contains model-based projections and public site metadata. F1 Fantasy outcomes depend on weather, reliability, strategy, penalties and race incidents."),
+        ("Which endpoint should an AI assistant read first?",
+         "Start with predictions.json for the current round and season_summary.json for calendar and price context. Use llms.txt or llms-full.txt for a plain-English site map."),
+    ]
+    ld = ld_block([
+        webpage_ld(title, canonical, desc, "DataCatalog"),
+        breadcrumb_ld([
+            ("Home", f"{SITE}/"),
+            ("Public Data", canonical),
+        ]),
+        {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": f"BoxBoxF1Fantasy public JSON endpoints {YEAR}",
+            "url": canonical,
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": i,
+                    "name": item["name"],
+                    "url": f"{SITE}/data/{item['file']}",
+                }
+                for i, item in enumerate(PUBLIC_DATASETS, 1)
+            ],
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        },
+    ] + dataset_ld)
+    body = (
+        '<p class="crumbs"><a href="/">Home</a> &rsaquo; Public Data</p>'
+        f"<h1>BoxBoxF1Fantasy Public Data ({YEAR})</h1>"
+        '<p class="lede">A crawlable index of public JSON files for agents, answer engines and power users who want to understand the data behind the site.</p>'
+        f'<p class="meta">Current round: R{esc(round_no)} &middot; {esc(race)}</p>'
+        '<div class="callout">For natural-language navigation, start with <a href="/llms.txt">llms.txt</a> or the fuller <a href="/llms-full.txt">llms-full.txt</a>. For live projections, start with <a href="/data/predictions.json">predictions.json</a>.</div>'
+        '<table><thead><tr><th>File</th><th>Dataset</th><th>Description</th><th class="num">Updated</th><th class="num">Bytes</th></tr></thead><tbody>'
+        + "".join(rows)
+        + "</tbody></table>"
+        "<h2>FAQ</h2>"
+        + _faq_html(faqs)
+    )
+    return page_head(title, desc, canonical, ld) + body + FOOTER
+
+
 # --------------------------------------------------------------------------- #
 # sitemap
 # --------------------------------------------------------------------------- #
@@ -1406,6 +1543,7 @@ Allow: /guides/
 Allow: /tools/
 Allow: /about/
 Allow: /privacy/
+Allow: /data/
 Allow: /feed.xml
 Allow: /feed.json
 Allow: /data/predictions.json
@@ -1443,6 +1581,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Articles: https://boxboxf1fantasy.com/articles/",
         "- Strategy guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
+        "- Public data index: https://boxboxf1fantasy.com/data/",
         "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
         "- Privacy policy: https://boxboxf1fantasy.com/privacy/",
         "- RSS feed: https://boxboxf1fantasy.com/feed.xml",
@@ -1460,7 +1599,11 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "Current data endpoints:",
         "- Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json",
         "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
+        "- Public data index: https://boxboxf1fantasy.com/data/",
         "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
+        "- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json",
+        "- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json",
+        "- Weather JSON: https://boxboxf1fantasy.com/data/weather.json",
         "",
         "Recent race-pick pages:",
     ]
@@ -1475,6 +1618,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The Changelog page publishes notable model, scoring, data and tool changes in plain English.",
         "- The Videos page lists recent YouTube race-week drafts, deadline streams, picks and strategy videos.",
         "- The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.",
+        "- The Public Data page documents the JSON endpoints that agents can fetch directly.",
         "- The About page explains independence, contact details, and how to use the site.",
         "- The Privacy page describes analytics, local storage, advertising readiness, and contact details.",
         "",
@@ -1518,6 +1662,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Articles: https://boxboxf1fantasy.com/articles/",
         "- Guides hub: https://boxboxf1fantasy.com/guides/",
         "- Tools hub: https://boxboxf1fantasy.com/tools/",
+        "- Public data index: https://boxboxf1fantasy.com/data/",
         "- About: https://boxboxf1fantasy.com/about/",
         "- Privacy: https://boxboxf1fantasy.com/privacy/",
         "",
@@ -1527,7 +1672,11 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         f"- Prediction file generated: {generated or 'unknown'}",
         "- Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json",
         "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
+        "- Public data index: https://boxboxf1fantasy.com/data/",
         "- Changelog JSON: https://boxboxf1fantasy.com/data/changelog.json",
+        "- Driver history JSON: https://boxboxf1fantasy.com/data/driver_history.json",
+        "- Track data JSON: https://boxboxf1fantasy.com/data/track_data.json",
+        "- Weather JSON: https://boxboxf1fantasy.com/data/weather.json",
         "",
         "## Current top projected drivers",
     ]
@@ -1565,6 +1714,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.",
         "- Videos: links recent YouTube drafts, deadline streams, top picks and race-week strategy explainers.",
         "- Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.",
+        "- Public Data: documents the static JSON endpoints for agents, answer engines and power users.",
         "",
         "## How predictions should be described",
         "Use cautious language. Say the site publishes model-based projections, confidence ranges, and value signals. Do not present predictions as guarantees. F1 outcomes depend on weather, reliability, strategy, safety cars, incidents, penalties, upgrades, and session timing.",
@@ -2417,6 +2567,16 @@ def main() -> None:
             "updated": now,
         })
 
+    # --- public data/API index for agents and power users ---
+    (DATA / "index.html").write_text(render_data_page(current, season), encoding="utf-8")
+    rel_paths.append("data/")
+    feed_items.append({
+        "title": f"BoxBoxF1Fantasy Public Data {YEAR}",
+        "url": f"{SITE}/data/",
+        "summary": "Public JSON endpoint index for BoxBoxF1Fantasy predictions, season summary, driver history, track data, weather, articles, videos and changelog.",
+        "updated": now,
+    })
+
     # --- static trust/compliance pages ---
     for page in STATIC_PAGES:
         out_dir = WEB / page["slug"]
@@ -2438,7 +2598,7 @@ def main() -> None:
 
     print(f"[14_build_seo_pages] wrote {written} race page(s) + {len(drivers_sorted)} driver page(s) "
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
-          f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + 6 hubs "
+          f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
           "+ robots.txt + llms.txt + llms-full.txt + feeds")
 

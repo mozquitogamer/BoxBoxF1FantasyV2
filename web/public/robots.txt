@@ -11,6 +11,7 @@ Allow: /guides/
 Allow: /tools/
 Allow: /about/
 Allow: /privacy/
+Allow: /data/
 Allow: /feed.xml
 Allow: /feed.json
 Allow: /data/predictions.json
