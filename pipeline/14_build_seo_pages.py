@@ -336,6 +336,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 <meta name="theme-color" content="#0a0d12">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="BoxBoxF1Fantasy">
+<meta property="og:locale" content="en_US">
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}">
 <meta property="og:url" content="{canonical}">
@@ -344,6 +345,8 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@BoxBoxF1Fantasy">
+<meta name="twitter:title" content="{esc(title)}">
+<meta name="twitter:description" content="{esc(desc)}">
 <meta name="twitter:image" content="{SITE}/og-image.png">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="alternate" type="application/rss+xml" title="BoxBoxF1Fantasy updates" href="/feed.xml">
@@ -1715,7 +1718,7 @@ TOOLS = [
             ("Should I pick the highest PPM drivers or the highest projected points?",
              "Use both. High projected points win the week, but high PPM picks make the budget work. The best lineups usually combine premium upside with two or three strong-value picks."),
         ],
-        "cta": ("/#drivers", "Open live value rankings â†’"),
+        "cta": ("/#drivers", "Open live value rankings ->"),
     },
     {
         "base": "tools", "crumb": "Tools", "slug": "lineup-optimizer",
