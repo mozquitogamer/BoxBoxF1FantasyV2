@@ -392,6 +392,29 @@
         }
       }
     },
+    "/search-index.json": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Machine-readable site index",
+        "description": "Compact JSON index of crawlable BoxBoxF1Fantasy pages with titles, descriptions, canonicals, page types and headings.",
+        "operationId": "get_search_index",
+        "responses": {
+          "200": {
+            "description": "JSON page index.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/site.webmanifest": {
       "get": {
         "tags": [

@@ -15,6 +15,7 @@ Allow: /data/
 Allow: /feed.xml
 Allow: /feed.json
 Allow: /site.webmanifest
+Allow: /search-index.json
 Allow: /openapi.json
 Allow: /.well-known/
 Allow: /.well-known/openapi.json

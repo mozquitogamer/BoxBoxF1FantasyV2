@@ -90,6 +90,14 @@ MOJIBAKE_REPLACEMENTS = {
     "â€˜": "'",
     "â€¦": "...",
     "â†’": "->",
+    "â€”": "-",
+    "â€“": "-",
+    "â€™": "'",
+    "â€œ": '"',
+    "â€": '"',
+    "â€˜": "'",
+    "â€¦": "...",
+    "â†’": "->",
     "âˆ’": "-",
     "â˜°": "table",
     "ðŸ”—": "Share",
@@ -467,6 +475,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 <link rel="service-desc" type="application/openapi+json" title="BoxBoxF1Fantasy public data OpenAPI" href="/openapi.json">
 <link rel="alternate" type="text/plain" title="LLMs guide" href="/llms.txt">
 <link rel="alternate" type="text/plain" title="LLMs full site summary" href="/llms-full.txt">
+<link rel="alternate" type="application/json" title="BoxBoxF1Fantasy site index" href="/search-index.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -1989,6 +1998,7 @@ Allow: /data/
 Allow: /feed.xml
 Allow: /feed.json
 Allow: /site.webmanifest
+Allow: /search-index.json
 Allow: /openapi.json
 Allow: /.well-known/
 Allow: /.well-known/openapi.json
@@ -2031,6 +2041,20 @@ def write_openapi() -> None:
         }
 
     paths.update({
+        "/search-index.json": {
+            "get": {
+                "tags": ["Discovery"],
+                "summary": "Machine-readable site index",
+                "description": "Compact JSON index of crawlable BoxBoxF1Fantasy pages with titles, descriptions, canonicals, page types and headings.",
+                "operationId": "get_search_index",
+                "responses": {
+                    "200": {
+                        "description": "JSON page index.",
+                        "content": {"application/json": {"schema": {"type": "object", "additionalProperties": True}}},
+                    }
+                },
+            }
+        },
         "/data/": {
             "get": {
                 "tags": ["Discovery"],
@@ -2242,6 +2266,96 @@ def write_webmanifest() -> None:
     (WEB / "site.webmanifest").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def page_kind_from_relpath(rel_path: str) -> str:
+    path = rel_path.strip("/")
+    if not path:
+        return "home_app"
+    first = path.split("/", 1)[0]
+    if path == "picks":
+        return "race_picks_hub"
+    if path.startswith("picks/"):
+        return "race_picks_page"
+    if path == "drivers":
+        return "driver_hub"
+    if path.startswith("drivers/"):
+        return "driver_projection_page"
+    if path == "constructors":
+        return "constructor_hub"
+    if path.startswith("constructors/"):
+        return "constructor_projection_page"
+    if path == "tools":
+        return "tools_hub"
+    if path.startswith("tools/"):
+        return "tool_page"
+    if path == "guides":
+        return "guides_hub"
+    if path.startswith("guides/"):
+        return "guide_page"
+    if path == "articles":
+        return "articles_hub"
+    if path.startswith("articles/"):
+        return "article_page"
+    return {
+        "accuracy": "accuracy_page",
+        "changelog": "changelog_page",
+        "videos": "videos_page",
+        "data": "data_catalog",
+        "about": "about_page",
+        "privacy": "privacy_page",
+    }.get(first, "web_page")
+
+
+def extract_html_field(pattern: str, source: str) -> str:
+    m = re.search(pattern, source, re.I | re.S)
+    if not m:
+        return ""
+    text = re.sub(r"<[^>]+>", " ", m.group(1))
+    return clean_legacy_text(re.sub(r"\s+", " ", html.unescape(text)).strip())
+
+
+def write_search_index(rel_paths: list[str], current: dict) -> None:
+    """Write a compact page index for answer engines, agents and internal search."""
+    pages = []
+    for rel_path in rel_paths:
+        html_path = WEB / "index.html" if rel_path == "" else WEB / rel_path / "index.html"
+        if not html_path.exists():
+            continue
+        source = html_path.read_text(encoding="utf-8")
+        title = extract_html_field(r"<title>(.*?)</title>", source)
+        desc = extract_html_field(r'<meta\s+name="description"\s+content="([^"]*)"', source)
+        canonical = extract_html_field(r'<link\s+rel="canonical"\s+href="([^"]*)"', source)
+        h1 = extract_html_field(r"<h1[^>]*>(.*?)</h1>", source)
+        page_url = canonical or f"{SITE}/{rel_path}"
+        pages.append({
+            "url": page_url,
+            "path": "/" if rel_path == "" else f"/{rel_path}",
+            "title": title,
+            "description": desc,
+            "h1": h1,
+            "type": page_kind_from_relpath(rel_path),
+        })
+
+    index = {
+        "site": SITE,
+        "name": "BoxBoxF1Fantasy",
+        "description": f"Free F1 Fantasy {YEAR} predictions, race picks, lineup optimizer, transfer tools, strategy guides, public data and accuracy tracking.",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "language": "en",
+        "current_round": current.get("round"),
+        "current_race": current.get("race"),
+        "discovery": {
+            "sitemap": f"{SITE}/sitemap.xml",
+            "llms": f"{SITE}/llms.txt",
+            "llms_full": f"{SITE}/llms-full.txt",
+            "openapi": f"{SITE}/openapi.json",
+            "manifest": f"{SITE}/site.webmanifest",
+            "public_data": f"{SITE}/data/",
+        },
+        "pages": pages,
+    }
+    (WEB / "search-index.json").write_text(json.dumps(index, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def write_well_known() -> None:
     """Write extra discovery files for crawlers and agent tooling."""
     wk = WEB / ".well-known"
@@ -2305,6 +2419,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
         "- Public data index: https://boxboxf1fantasy.com/data/",
         "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
+        "- Machine-readable page index: https://boxboxf1fantasy.com/search-index.json",
         "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
         "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
@@ -2328,6 +2443,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
         "- Public data index: https://boxboxf1fantasy.com/data/",
         "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
+        "- Machine-readable page index: https://boxboxf1fantasy.com/search-index.json",
         "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
         "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
@@ -2352,6 +2468,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.",
         "- The Public Data page documents the JSON endpoints that agents can fetch directly.",
         "- The OpenAPI document provides a machine-readable contract for the public static JSON endpoints.",
+        "- The search-index.json file gives agents a compact list of crawlable pages with title, description, type, path and canonical URL.",
         "- The web app manifest identifies BoxBoxF1Fantasy as an installable sports utility and exposes shortcuts to high-intent tools.",
         "- The .well-known discovery files mirror the OpenAPI and LLM guides for crawlers and agent tooling.",
         "- The About page explains independence, contact details, and how to use the site.",
@@ -2399,6 +2516,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Tools hub: https://boxboxf1fantasy.com/tools/",
         "- Public data index: https://boxboxf1fantasy.com/data/",
         "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
+        "- Machine-readable page index: https://boxboxf1fantasy.com/search-index.json",
         "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
         "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
@@ -2414,6 +2532,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
         "- Public data index: https://boxboxf1fantasy.com/data/",
         "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
+        "- Machine-readable page index: https://boxboxf1fantasy.com/search-index.json",
         "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
         "- Agent manifest: https://boxboxf1fantasy.com/.well-known/ai-plugin.json",
@@ -3467,6 +3586,7 @@ def main() -> None:
     write_sitemap(rel_paths)
     write_robots()
     write_webmanifest()
+    write_search_index(rel_paths, current)
     write_openapi()
     write_llms_txt(rel_paths)
     write_llms_full(rel_paths, current, feed_items)
@@ -3477,7 +3597,7 @@ def main() -> None:
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
           f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
-          "+ robots.txt + site.webmanifest + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
+          "+ robots.txt + site.webmanifest + search-index.json + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
 
 
 if __name__ == "__main__":
