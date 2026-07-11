@@ -162,6 +162,29 @@
         }
       }
     },
+    "/data/ai-summary.json": {
+      "get": {
+        "tags": [
+          "Public data"
+        ],
+        "summary": "AI answer summary",
+        "description": "Compact current-round answer pack for AI agents: top drivers, constructors, value picks, captain pick, confidence ranges, downside notes and a sample legal lineup.",
+        "operationId": "get_ai_summary",
+        "responses": {
+          "200": {
+            "description": "AI answer summary as JSON.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/data/articles.json": {
       "get": {
         "tags": [

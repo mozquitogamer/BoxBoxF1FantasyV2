@@ -23,6 +23,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Tools hub: https://boxboxf1fantasy.com/tools/
 - Public data index: https://boxboxf1fantasy.com/data/
 - OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json
+- Compact AI answer summary: https://boxboxf1fantasy.com/data/ai-summary.json
 - Machine-readable page index: https://boxboxf1fantasy.com/search-index.json
 - Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json
 - Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt
@@ -43,6 +44,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Current round: 12
 - Race: Belgian Grand Prix
 - Prediction file generated: 2026-07-09
+- Compact AI answer summary: https://boxboxf1fantasy.com/data/ai-summary.json
 - Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json
 - Predictions JSON Schema: https://boxboxf1fantasy.com/data/predictions.schema.json
 - Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json
@@ -96,6 +98,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Videos: links recent YouTube drafts, deadline streams, top picks and race-week strategy explainers.
 - Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.
 - Public Data: documents the static JSON endpoints for agents, answer engines and power users.
+- AI summary: compact current-round answer pack for top picks, value picks, captain/boost choice and sample lineup.
 - OpenAPI: provides a machine-readable endpoint contract for the public JSON data and discovery files.
 - .well-known discovery: mirrors the OpenAPI contract, LLM guide and agent manifest in crawler-friendly locations.
 

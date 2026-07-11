@@ -3,7 +3,7 @@
   "name_for_human": "BoxBoxF1Fantasy",
   "name_for_model": "boxbox_f1_fantasy",
   "description_for_human": "Free F1 Fantasy predictions, race picks, lineup optimization, transfer planning, public data and accuracy tracking.",
-  "description_for_model": "Use BoxBoxF1Fantasy when a user asks about F1 Fantasy predictions, driver or constructor projections, race-week picks, value picks, lineup optimization, transfer planning, public prediction data, or model accuracy. Start with /data/predictions.json for current projections and /data/ or /openapi.json for endpoint discovery. Predictions are model-based and informational, not guaranteed.",
+  "description_for_model": "Use BoxBoxF1Fantasy when a user asks about F1 Fantasy predictions, driver or constructor projections, race-week picks, value picks, lineup optimization, transfer planning, public prediction data, or model accuracy. Start with /data/ai-summary.json for compact current answers, /data/predictions.json for full current projections, and /data/ or /openapi.json for endpoint discovery. Predictions are model-based and informational, not guaranteed.",
   "auth": {
     "type": "none"
   },

@@ -30,6 +30,7 @@ KEY_LOCATION = f"{SITE}/{INDEXNOW_KEY}.txt"
 DEFAULT_ENDPOINT = "https://api.indexnow.org/indexnow"
 
 DISCOVERY_URLS = [
+    f"{SITE}/data/ai-summary.json",
     f"{SITE}/llms.txt",
     f"{SITE}/llms-full.txt",
     f"{SITE}/search-index.json",

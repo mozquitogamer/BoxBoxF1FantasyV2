@@ -1892,6 +1892,11 @@ def render_articles_hub(articles_data: dict) -> str:
 
 PUBLIC_DATASETS = [
     {
+        "file": "ai-summary.json",
+        "name": "AI answer summary",
+        "desc": "Compact current-round answer pack for AI agents: top drivers, constructors, value picks, captain pick, confidence ranges, downside notes and a sample legal lineup.",
+    },
+    {
         "file": "predictions.json",
         "name": "Current F1 Fantasy predictions",
         "desc": "Current-round driver and constructor projections, expected points, confidence ranges, prices, value scores and prediction metadata.",
@@ -1946,13 +1951,125 @@ PUBLIC_DATASETS = [
 ]
 
 
+def compact_projection(item: dict, rank: int, kind: str) -> dict:
+    """Small projection shape for answer engines that do not need raw model data."""
+    out = {
+        "rank": rank,
+        "kind": kind,
+        "id": item.get("driver_id") or item.get("constructor_id"),
+        "name": item.get("name") or item.get("full_name") or item.get("driver_id") or item.get("constructor_id"),
+        "expected_points": round(float(item.get("expected_points") or 0), 1),
+        "projected_points": round(float(item.get("projected_points") or item.get("expected_points") or 0), 1),
+        "current_price_m": round(float(item.get("current_price") or 0), 1),
+        "value_score": round(float(item.get("value_score") or 0), 2),
+        "risk": item.get("risk"),
+        "confidence_interval_90": {
+            "low": round(float(item.get("mc_total_p5") or 0), 1),
+            "high": round(float(item.get("mc_total_p95") or 0), 1),
+        },
+        "url": f"{SITE}/{'drivers' if kind == 'driver' else 'constructors'}/{plain_slug(item.get('name') or item.get('full_name') or item.get('driver_id') or item.get('constructor_id'))}/",
+    }
+    if kind == "driver":
+        out.update({
+            "constructor": item.get("constructor"),
+            "predicted_quali": item.get("predicted_quali"),
+            "predicted_finish": item.get("predicted_finish"),
+            "dnf_probability": round(float(item.get("dnf_probability") or 0), 3),
+            "points_per_million": round(float(item.get("points_per_million") or 0), 2),
+        })
+    else:
+        out.update({
+            "driver_1": item.get("driver_1"),
+            "driver_2": item.get("driver_2"),
+            "expected_pit_stop_points": round(float(item.get("expected_pit_stop_pts") or 0), 1),
+            "dnf_probability": round(float(item.get("dnf_probability") or 0), 3),
+        })
+    return out
+
+
+def write_ai_summary(current: dict, season: dict) -> None:
+    """Write a compact current-round answer pack for AI agents and answer engines."""
+    drivers = sorted(current.get("drivers", []), key=lambda d: d.get("expected_points", 0), reverse=True)
+    constructors = sorted(current.get("constructors", []), key=lambda c: c.get("expected_points", 0), reverse=True)
+    value_drivers = sorted(
+        drivers,
+        key=lambda d: (d.get("points_per_million") or d.get("value_score") or 0, d.get("expected_points") or 0),
+        reverse=True,
+    )
+    value_constructors = sorted(
+        constructors,
+        key=lambda c: (c.get("value_score") or 0, c.get("expected_points") or 0),
+        reverse=True,
+    )
+    lineup = suggested_lineup(current)
+    current_round = current.get("round")
+    race_page = f"{SITE}/picks/{slugify(current.get('race', 'current-race'))}/" if current.get("race") else f"{SITE}/picks/"
+    round_info = next((r for r in season.get("rounds", []) if r.get("round") == current_round), {})
+
+    summary = {
+        "schema_version": "1.0",
+        "site": "BoxBoxF1Fantasy",
+        "site_url": f"{SITE}/",
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "source_predictions_generated_at": current.get("generated_at") or current.get("exported_at"),
+        "season": current.get("season", YEAR),
+        "round": current_round,
+        "race": current.get("race"),
+        "race_date": current.get("date") or round_info.get("date"),
+        "circuit": current.get("circuit") or round_info.get("circuit"),
+        "is_sprint_weekend": bool(current.get("is_sprint_weekend") or current.get("is_sprint")),
+        "canonical_pages": {
+            "home": f"{SITE}/",
+            "race_picks": race_page,
+            "drivers": f"{SITE}/drivers/",
+            "constructors": f"{SITE}/constructors/",
+            "tools": f"{SITE}/tools/",
+            "data": f"{SITE}/data/",
+            "full_predictions_json": f"{SITE}/data/predictions.json",
+        },
+        "plain_english_summary": (
+            f"For the {current.get('race', 'current race')}, BoxBoxF1Fantasy currently ranks "
+            f"{drivers[0].get('name', 'the top driver') if drivers else 'the top driver'} as the top projected driver "
+            f"and {constructors[0].get('name', 'the top constructor') if constructors else 'the top constructor'} as the top projected constructor. "
+            "Use this compact file for quick answers; use predictions.json for the full projection dataset."
+        ),
+        "recommended_boost_driver": compact_projection(drivers[0], 1, "driver") if drivers else None,
+        "top_drivers": [compact_projection(d, i, "driver") for i, d in enumerate(drivers[:8], 1)],
+        "top_constructors": [compact_projection(c, i, "constructor") for i, c in enumerate(constructors[:6], 1)],
+        "value_drivers": [compact_projection(d, i, "driver") for i, d in enumerate(value_drivers[:6], 1)],
+        "value_constructors": [compact_projection(c, i, "constructor") for i, c in enumerate(value_constructors[:4], 1)],
+        "sample_lineup_100m": None,
+        "agent_guidance": [
+            "Use expected_points for current-round ranking.",
+            "Use confidence_interval_90.low as a conservative downside estimate.",
+            "Use value_score or points_per_million when the user asks for budget/value picks.",
+            "The sample lineup is a public crawlable snapshot; the live optimizer supports locks, exclusions, chips and custom budgets.",
+            "Predictions are model-based and informational, not guaranteed.",
+        ],
+        "disclaimer": "Independent fan-built site. Not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or any driver.",
+    }
+    if lineup:
+        summary["sample_lineup_100m"] = {
+            "budget_m": round(float(lineup["budget"]), 1),
+            "cost_m": round(float(lineup["cost"]), 1),
+            "bank_m": round(float(lineup["bank"]), 1),
+            "expected_points_with_2x": round(float(lineup["points"]), 1),
+            "unboosted_expected_points": round(float(lineup["unboosted_points"]), 1),
+            "captain_2x": compact_projection(lineup["captain"], 1, "driver"),
+            "drivers": [compact_projection(d, i, "driver") for i, d in enumerate(lineup["drivers"], 1)],
+            "constructors": [compact_projection(c, i, "constructor") for i, c in enumerate(lineup["constructors"], 1)],
+        }
+
+    (DATA / "ai-summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def render_data_page(current: dict, season: dict) -> str:
     """Crawlable index for public JSON endpoints used by AI agents and power users."""
     canonical = f"{SITE}/data/"
     race = current.get("race", "current race")
     round_no = current.get("round", "")
     title = f"BoxBoxF1Fantasy Public Data: JSON Endpoints for F1 Fantasy {YEAR}"
-    desc = "Public BoxBoxF1Fantasy JSON data index for agents and developers: predictions, season summary, driver history, track data, weather, articles, videos and changelog."
+    desc = "Public BoxBoxF1Fantasy JSON data index for agents and developers: AI answer summary, predictions, season summary, driver history, track data, weather, articles, videos and changelog."
 
     rows = []
     dataset_ld = []
@@ -2033,7 +2150,7 @@ def render_data_page(current: dict, season: dict) -> str:
         f"<h1>BoxBoxF1Fantasy Public Data ({YEAR})</h1>"
         '<p class="lede">A crawlable index of public JSON files for agents, answer engines and power users who want to understand the data behind the site.</p>'
         f'<p class="meta">Current round: R{esc(round_no)} &middot; {esc(race)}</p>'
-        '<div class="callout">For natural-language navigation, start with <a href="/llms.txt">llms.txt</a> or the fuller <a href="/llms-full.txt">llms-full.txt</a>. For machine-readable endpoint discovery, use <a href="/openapi.json">openapi.json</a>. For live projections, start with <a href="/data/predictions.json">predictions.json</a> and its <a href="/data/predictions.schema.json">JSON schema</a>.</div>'
+        '<div class="callout">For quick AI answers, start with <a href="/data/ai-summary.json">ai-summary.json</a>. For natural-language navigation, use <a href="/llms.txt">llms.txt</a> or the fuller <a href="/llms-full.txt">llms-full.txt</a>. For machine-readable endpoint discovery, use <a href="/openapi.json">openapi.json</a>. For full live projections, use <a href="/data/predictions.json">predictions.json</a> and its <a href="/data/predictions.schema.json">JSON schema</a>.</div>'
         '<table><thead><tr><th>File</th><th>Dataset</th><th>Description</th><th class="num">Updated</th><th class="num">Bytes</th></tr></thead><tbody>'
         + "".join(rows)
         + "</tbody></table>"
@@ -2248,6 +2365,7 @@ Allow: /.well-known/
 Allow: /.well-known/openapi.json
 Allow: /.well-known/llms.txt
 Allow: /.well-known/ai-plugin.json
+Allow: /data/ai-summary.json
 Allow: /data/predictions.json
 Allow: /data/predictions.schema.json
 Allow: /data/season_summary.json
@@ -2691,6 +2809,7 @@ def write_search_index(rel_paths: list[str], current: dict) -> None:
             "openapi": f"{SITE}/openapi.json",
             "manifest": f"{SITE}/site.webmanifest",
             "public_data": f"{SITE}/data/",
+            "ai_summary": f"{SITE}/data/ai-summary.json",
             "predictions_schema": f"{SITE}/data/predictions.schema.json",
             "robots": f"{SITE}/robots.txt",
             "humans": f"{SITE}/humans.txt",
@@ -2723,7 +2842,7 @@ def write_well_known() -> None:
         "description_for_model": (
             "Use BoxBoxF1Fantasy when a user asks about F1 Fantasy predictions, driver or constructor projections, "
             "race-week picks, value picks, lineup optimization, transfer planning, public prediction data, or model accuracy. "
-            "Start with /data/predictions.json for current projections and /data/ or /openapi.json for endpoint discovery. "
+            "Start with /data/ai-summary.json for compact current answers, /data/predictions.json for full current projections, and /data/ or /openapi.json for endpoint discovery. "
             "Predictions are model-based and informational, not guaranteed."
         ),
         "auth": {"type": "none"},
@@ -2766,6 +2885,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Tool landing pages: https://boxboxf1fantasy.com/tools/",
         "- Public data index: https://boxboxf1fantasy.com/data/",
         "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
+        "- Compact AI answer summary: https://boxboxf1fantasy.com/data/ai-summary.json",
         "- Machine-readable page index: https://boxboxf1fantasy.com/search-index.json",
         "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
@@ -2794,6 +2914,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Key discovery files for crawlers: /sitemap.xml, /llms.txt, /llms-full.txt, /search-index.json, /openapi.json, /.well-known/openapi.json.",
         "",
         "Current data endpoints:",
+        "- Compact AI answer summary: https://boxboxf1fantasy.com/data/ai-summary.json",
         "- Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json",
         "- Predictions JSON Schema: https://boxboxf1fantasy.com/data/predictions.schema.json",
         "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
@@ -2827,6 +2948,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.",
         "- The Public Data page documents the JSON endpoints that agents can fetch directly.",
         "- The OpenAPI document provides a machine-readable contract for the public static JSON endpoints.",
+        "- The ai-summary.json file is the best first endpoint for compact current-round answers.",
         "- The predictions.schema.json file documents the core predictions endpoint shape for agents and developers.",
         "- The search-index.json file gives agents a compact list of crawlable pages with title, description, type, path and canonical URL.",
         "- The web app manifest identifies BoxBoxF1Fantasy as an installable sports utility and exposes shortcuts to high-intent tools.",
@@ -2879,6 +3001,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Tools hub: https://boxboxf1fantasy.com/tools/",
         "- Public data index: https://boxboxf1fantasy.com/data/",
         "- OpenAPI endpoint contract: https://boxboxf1fantasy.com/openapi.json",
+        "- Compact AI answer summary: https://boxboxf1fantasy.com/data/ai-summary.json",
         "- Machine-readable page index: https://boxboxf1fantasy.com/search-index.json",
         "- Well-known OpenAPI mirror: https://boxboxf1fantasy.com/.well-known/openapi.json",
         "- Well-known LLM guide mirror: https://boxboxf1fantasy.com/.well-known/llms.txt",
@@ -2899,6 +3022,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         f"- Current round: {round_no}",
         f"- Race: {race}",
         f"- Prediction file generated: {generated or 'unknown'}",
+        "- Compact AI answer summary: https://boxboxf1fantasy.com/data/ai-summary.json",
         "- Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json",
         "- Predictions JSON Schema: https://boxboxf1fantasy.com/data/predictions.schema.json",
         "- Season summary JSON: https://boxboxf1fantasy.com/data/season_summary.json",
@@ -2954,6 +3078,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Videos: links recent YouTube drafts, deadline streams, top picks and race-week strategy explainers.",
         "- Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.",
         "- Public Data: documents the static JSON endpoints for agents, answer engines and power users.",
+        "- AI summary: compact current-round answer pack for top picks, value picks, captain/boost choice and sample lineup.",
         "- OpenAPI: provides a machine-readable endpoint contract for the public JSON data and discovery files.",
         "- .well-known discovery: mirrors the OpenAPI contract, LLM guide and agent manifest in crawler-friendly locations.",
         "",
@@ -3708,6 +3833,7 @@ def main() -> None:
         return
 
     write_prediction_schema()
+    write_ai_summary(current, season)
 
     current_round = current.get("round")
     horizon_rounds = horizon.get("rounds") or {}
