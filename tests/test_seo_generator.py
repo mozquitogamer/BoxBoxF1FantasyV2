@@ -91,3 +91,32 @@ def test_current_race_page_is_phase_honest_and_explains_autopilot():
     assert "July 18, 2026 14:00 UTC" in html
     assert "Autopilot</strong> instead protects you by applying 2x to your best actual scorer" in html
     assert "updated through race week" not in html
+
+
+def test_current_weather_distinguishes_latest_feed_from_model_snapshot():
+    pred = race_week_predictions()
+    pred["race"] = "Belgian Grand Prix"
+    pred["weather_adjustments"] = {
+        "is_active": True,
+        "rain_risk": "MEDIUM",
+        "source": "2026-07-09T19:22:55Z",
+    }
+    weather = {
+        "round": 12,
+        "overall_rain_risk": "HIGH",
+        "last_updated": "2026-07-12T18:51:57Z",
+        "sessions": [
+            {"name": "FP2", "rain_probability": 71, "rain_risk": "HIGH", "avg_temp": 20.6, "weather_description": "Light drizzle"},
+            {"name": "Qualifying", "rain_probability": 42, "rain_risk": "MEDIUM", "avg_temp": 20.5, "weather_description": "Mainly clear"},
+            {"name": "Race", "rain_probability": 22, "rain_risk": "LOW", "avg_temp": 18.1, "weather_description": "Partly cloudy"},
+        ],
+    }
+
+    html = seo.current_weather_html(pred, weather)
+
+    assert "Belgian GP weather outlook" in html
+    assert "FP2:</strong> 71% rain probability" in html
+    assert "Race:</strong> 22% rain probability" in html
+    assert "earlier medium-risk weather snapshot from July 9, 2026" in html
+    assert "newer forecast has not yet been applied" in html
+    assert "/data/weather.json" in html

@@ -880,6 +880,70 @@ FOOTER = f"""</main>
 # --------------------------------------------------------------------------- #
 # per-race page
 # --------------------------------------------------------------------------- #
+def current_weather_html(pred: dict, weather: dict | None) -> str:
+    if not weather or weather.get("round") != pred.get("round"):
+        return ""
+
+    sessions = [s for s in weather.get("sessions", []) if s.get("name")]
+    if not sessions:
+        return ""
+
+    by_name = {str(s["name"]).lower(): s for s in sessions}
+    wettest = max(sessions, key=lambda s: float(s.get("rain_probability") or 0))
+    featured = [wettest]
+    for name in ("qualifying", "race"):
+        session = by_name.get(name)
+        if session and session not in featured:
+            featured.append(session)
+
+    session_items = []
+    for session in featured:
+        probability = float(session.get("rain_probability") or 0)
+        risk = str(session.get("rain_risk") or "unknown").lower()
+        description = str(session.get("weather_description") or "forecast conditions").lower()
+        temperature = session.get("avg_temp")
+        temp_copy = f", around {float(temperature):.1f}&deg;C" if temperature is not None else ""
+        session_items.append(
+            f'<li><strong>{esc(session["name"])}:</strong> {probability:.0f}% rain probability '
+            f'({esc(risk)} risk), {esc(description)}{temp_copy}.</li>'
+        )
+
+    updated_date = source_date(weather.get("last_updated"))
+    updated_copy = fmt_date(updated_date) if updated_date else "the latest available update"
+    model_weather = pred.get("weather_adjustments") or {}
+    model_weather_date = source_date(model_weather.get("source"))
+    if model_weather.get("is_active"):
+        model_risk = str(model_weather.get("rain_risk") or "weather").lower()
+        if updated_date and model_weather_date and updated_date > model_weather_date:
+            impact = (
+                f'The published points and confidence ranges used an earlier {esc(model_risk)}-risk weather snapshot '
+                f'from {esc(fmt_date(model_weather_date))}. This newer forecast has not yet been applied to the model; '
+                'the next prediction run will recalculate the weather adjustment.'
+            )
+        else:
+            impact = (
+                f'The published points and confidence ranges include the model\'s {esc(model_risk)}-risk weather adjustment.'
+            )
+    else:
+        impact = (
+            'The published points and confidence ranges do not currently include a weather adjustment; '
+            'check again after the next prediction run.'
+        )
+
+    overall = str(weather.get("overall_rain_risk") or "unknown").lower()
+    return (
+        f'<h2>{esc(short_race(pred.get("race", "Current race")))} weather outlook</h2>'
+        '<div class="update-card">'
+        f'<p><strong>Latest forecast:</strong> Updated {esc(updated_copy)} from Open-Meteo. '
+        f'The highest rain risk across the weekend is currently rated {esc(overall)}.</p>'
+        '<ul>' + "".join(session_items) + '</ul>'
+        f'<p><strong>Prediction impact:</strong> {impact}</p>'
+        '<p class="meta">Weather forecasts can move quickly. '
+        '<a href="/data/weather.json">View the machine-readable weather feed</a>.</p>'
+        '</div>'
+    )
+
+
 def current_race_brief_html(pred: dict) -> str:
     drivers = pred.get("drivers", [])
     constructors = pred.get("constructors", [])
@@ -937,7 +1001,7 @@ def current_race_brief_html(pred: dict) -> str:
     )
 
 
-def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
+def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) -> tuple[str, str]:
     race = pred["race"]
     rn = pred["round"]
     short = short_race(race)
@@ -958,8 +1022,8 @@ def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
 
     title = f"F1 Fantasy {short} {YEAR}: Picks, Captain & Tips | BoxBox"
     if is_current:
-        desc = (f"F1 Fantasy picks for the {race} {YEAR}: driver and constructor projections, "
-                f"value picks, boost choice and a suggested lineup, with the current forecast phase and risk watch.")
+        desc = (f"F1 Fantasy {short} {YEAR} picks: driver and constructor projections, best values, "
+                f"boost choice, optimized lineup, weather forecast and risk outlook.")
     else:
         desc = (f"Our F1 Fantasy predictions for the {race} {YEAR} (round {rn}): top driver "
                 f"and constructor picks, best value (PPM) picks and the captain pick.")
@@ -1066,11 +1130,20 @@ def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
         f'<p class="faq-q">{esc(q)}</p><p class="faq-a">{esc(a)}</p>' for q, a in faqs
     )
 
+    weather_date = (
+        source_date(weather.get("last_updated"))
+        if is_current and weather and weather.get("round") == rn
+        else None
+    )
     ld_objs = [
         {
             **webpage_ld(title, canonical, desc, "Article"),
             "headline": title,
-            "dateModified": max(gen_date or LINEUP_CONTENT_LASTMOD, LINEUP_CONTENT_LASTMOD),
+            "dateModified": max(
+                gen_date or LINEUP_CONTENT_LASTMOD,
+                LINEUP_CONTENT_LASTMOD,
+                weather_date or LINEUP_CONTENT_LASTMOD,
+            ),
             "about": [
                 "F1 Fantasy",
                 race,
@@ -1119,6 +1192,7 @@ def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
         + cap_line
         + cta
         + (current_race_brief_html(pred) if is_current else "")
+        + (current_weather_html(pred, weather) if is_current else "")
         + suggested_lineup_html(pred)
         + "<h2>Top driver picks</h2>"
         + f"<p>Ranked by predicted fantasy points for the {esc(short)}. PPM = points per $million (value).</p>"
@@ -4313,6 +4387,7 @@ STATIC_PAGES = [
 def main() -> None:
     season = load_json(DATA / "season_summary.json")
     current = load_json(DATA / "predictions.json")
+    current_weather = load_json(DATA / "weather.json") or {}
     horizon = load_json(DATA / "horizon_projections.json") or {"rounds": {}}
     track_data = load_json(DATA / "track_data.json") or {}
     changelog = load_json(DATA / "changelog.json") or {"entries": []}
@@ -4363,12 +4438,17 @@ def main() -> None:
             if not pred or not pred.get("drivers"):
                 print(f"  - round {rn}: no usable predictions, skipped")
                 continue
-            slug, page = render_race_page(pred, is_current)
+            slug, page = render_race_page(pred, is_current, current_weather if is_current else None)
             race_name = pred.get("race", r["name"])
             race_date = pred.get("date", r.get("date", ""))
             page_lastmod = max(
                 source_date(pred.get("exported_at"), pred.get("generated_at")) or LINEUP_CONTENT_LASTMOD,
                 LINEUP_CONTENT_LASTMOD,
+                (
+                    source_date(current_weather.get("last_updated")) or LINEUP_CONTENT_LASTMOD
+                    if is_current and current_weather.get("round") == rn
+                    else LINEUP_CONTENT_LASTMOD
+                ),
             )
             written += 1
         elif str(rn) in horizon_rounds:
