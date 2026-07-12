@@ -473,8 +473,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Official points, plus actuals only when an official round is incomplete.
     ensureDriversData().then(() => {
         showFallbackBanner();
-        // Hero value picks and driver price brackets both use actual score history.
-        renderHero();
+        // Re-render driver price brackets once official score history is ready.
         renderDrivers();
     });
     ensureWeatherData().then(() => renderWeather());
