@@ -289,3 +289,23 @@ def test_topical_hubs_publish_current_context_guidance_and_faq_schema():
     assert '"@type": "FAQPage"' in picks_html
     assert '"@type": "FAQPage"' in drivers_html
     assert '"@type": "FAQPage"' in constructors_html
+
+
+def test_methodology_and_about_publish_trust_correction_and_schema_signals():
+    methodology = next(page for page in seo.STATIC_PAGES if page["slug"] == "methodology")
+    about = next(page for page in seo.STATIC_PAGES if page["slug"] == "about")
+
+    methodology_html = seo.render_static_page(methodology)
+    about_html = seo.render_static_page(about)
+
+    assert "Race-week forecast phases" in methodology_html
+    assert "Validation and leakage safeguards" in methodology_html
+    assert "Corrections and version accountability" in methodology_html
+    assert "without publishing proprietary feature weights" in methodology_html
+    assert '"@type": "TechArticle"' in methodology_html
+    assert '"dateModified": "2026-07-13"' in methodology_html
+    assert '"@type": "FAQPage"' in methodology_html
+    assert "Corrections and accountability" in about_html
+    assert "/methodology/" in about_html
+    assert '"@type": "Organization"' in about_html
+    assert '"@type": "FAQPage"' in about_html

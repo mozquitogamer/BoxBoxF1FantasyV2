@@ -12,6 +12,7 @@ Allow: /videos/
 Allow: /articles/
 Allow: /guides/
 Allow: /tools/
+Allow: /methodology/
 Allow: /about/
 Allow: /privacy/
 Allow: /data/

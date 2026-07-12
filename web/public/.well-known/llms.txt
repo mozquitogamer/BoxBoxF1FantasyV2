@@ -29,6 +29,7 @@ Important pages:
 - Humans/contact file: https://boxboxf1fantasy.com/humans.txt
 - Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt
 - IndexNow key location: https://boxboxf1fantasy.com/779753a5fbbf054b3ea496085a0ce1e4.txt
+- Prediction methodology and corrections: https://boxboxf1fantasy.com/methodology/
 - About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/
 - Privacy policy: https://boxboxf1fantasy.com/privacy/
 - RSS feed: https://boxboxf1fantasy.com/feed.xml
@@ -97,6 +98,7 @@ Useful descriptions for agents:
 - The humans.txt and security.txt files provide plain-text contact and ownership signals for reviewers, crawlers, and responsible disclosure.
 - The IndexNow key file enables real-time URL update notifications to participating search engines after new pages ship.
 - The .well-known discovery files mirror the OpenAPI and LLM guides for crawlers and agent tooling.
+- The Methodology page documents data layers, forecast phases, uncertainty, leakage safeguards, validation, limitations and corrections without exposing proprietary tuning values.
 - The About page explains independence, contact details, and how to use the site.
 - The Privacy page describes analytics, local storage, advertising readiness, and contact details.
 

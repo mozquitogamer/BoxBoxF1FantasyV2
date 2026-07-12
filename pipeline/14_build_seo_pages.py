@@ -42,7 +42,7 @@ CONTACT_EMAIL = "boxboxf1fantasy@gmail.com"
 INDEXNOW_KEY = "779753a5fbbf054b3ea496085a0ce1e4"
 # Bump only when generated page templates, metadata, structured data or links
 # receive a significant site-wide content change.
-SEO_CONTENT_LASTMOD = "2026-07-12"
+SEO_CONTENT_LASTMOD = "2026-07-13"
 LINEUP_CONTENT_LASTMOD = "2026-07-13"
 
 TOP_DRIVERS = 10      # rows in the "top picks" table
@@ -869,7 +869,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 
 FOOTER = f"""</main>
 <footer class="footer"><div class="wrap">
-<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a> &middot; <a href="/articles/">Articles</a> &middot; <a href="/data/">Data</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
+<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a> &middot; <a href="/articles/">Articles</a> &middot; <a href="/data/">Data</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/methodology/">Methodology</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
@@ -3184,6 +3184,7 @@ Allow: /videos/
 Allow: /articles/
 Allow: /guides/
 Allow: /tools/
+Allow: /methodology/
 Allow: /about/
 Allow: /privacy/
 Allow: /data/
@@ -3527,6 +3528,7 @@ def write_trust_files() -> None:
         "Purpose: Free F1 Fantasy predictions, race picks, lineup optimization, transfer planning, strategy guides, public data and accuracy tracking.",
         "Tech: Static HTML, vanilla JavaScript, Python data pipeline, machine-learning prediction models, Vercel hosting.",
         "Public data: https://boxboxf1fantasy.com/data/",
+        "Methodology: https://boxboxf1fantasy.com/methodology/",
         "OpenAPI: https://boxboxf1fantasy.com/openapi.json",
         "LLM guide: https://boxboxf1fantasy.com/llms.txt",
         "Sitemap: https://boxboxf1fantasy.com/sitemap.xml",
@@ -3590,6 +3592,7 @@ def page_kind_from_relpath(rel_path: str) -> str:
         "changelog": "changelog_page",
         "videos": "videos_page",
         "data": "data_catalog",
+        "methodology": "methodology_page",
         "about": "about_page",
         "privacy": "privacy_page",
     }.get(first, "web_page")
@@ -3725,6 +3728,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Humans/contact file: https://boxboxf1fantasy.com/humans.txt",
         "- Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt",
         f"- IndexNow key location: https://boxboxf1fantasy.com/{INDEXNOW_KEY}.txt",
+        "- Prediction methodology and corrections: https://boxboxf1fantasy.com/methodology/",
         "- About BoxBoxF1Fantasy: https://boxboxf1fantasy.com/about/",
         "- Privacy policy: https://boxboxf1fantasy.com/privacy/",
         "- RSS feed: https://boxboxf1fantasy.com/feed.xml",
@@ -3790,6 +3794,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The humans.txt and security.txt files provide plain-text contact and ownership signals for reviewers, crawlers, and responsible disclosure.",
         "- The IndexNow key file enables real-time URL update notifications to participating search engines after new pages ship.",
         "- The .well-known discovery files mirror the OpenAPI and LLM guides for crawlers and agent tooling.",
+        "- The Methodology page documents data layers, forecast phases, uncertainty, leakage safeguards, validation, limitations and corrections without exposing proprietary tuning values.",
         "- The About page explains independence, contact details, and how to use the site.",
         "- The Privacy page describes analytics, local storage, advertising readiness, and contact details.",
         "",
@@ -3844,6 +3849,7 @@ def write_llms_full(rel_paths: list[str], current: dict) -> None:
         "- Humans/contact file: https://boxboxf1fantasy.com/humans.txt",
         "- Security contact file: https://boxboxf1fantasy.com/.well-known/security.txt",
         f"- IndexNow key location: https://boxboxf1fantasy.com/{INDEXNOW_KEY}.txt",
+        "- Methodology: https://boxboxf1fantasy.com/methodology/",
         "- About: https://boxboxf1fantasy.com/about/",
         "- Privacy: https://boxboxf1fantasy.com/privacy/",
         "",
@@ -4224,8 +4230,18 @@ def render_list_hub(base, crumb, hub, items, current: dict | None = None) -> str
 
 def render_static_page(page: dict) -> str:
     canonical = f"{SITE}/{page['slug']}/"
-    ld = ld_block([
-        webpage_ld(page["title"], canonical, page["desc"], page.get("schema_type", "WebPage")),
+    schema_type = page.get("schema_type", "WebPage")
+    primary = webpage_ld(page["title"], canonical, page["desc"], schema_type)
+    if schema_type in {"Article", "TechArticle"}:
+        primary.update({
+            "headline": page["h1"],
+            "datePublished": page.get("published", page.get("lastmod", SEO_CONTENT_LASTMOD)),
+            "dateModified": page.get("lastmod", SEO_CONTENT_LASTMOD),
+            "author": publisher_ld(),
+            "about": page.get("about", ["F1 Fantasy", "Prediction methodology"]),
+        })
+    ld_objs = [
+        primary,
         {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
@@ -4234,12 +4250,29 @@ def render_static_page(page: dict) -> str:
                 {"@type": "ListItem", "position": 2, "name": page["crumb_self"], "item": canonical},
             ],
         },
-    ])
+    ]
+    if page["slug"] == "about":
+        organization = publisher_ld()
+        organization["@context"] = "https://schema.org"
+        ld_objs.append(organization)
+    faqs = page.get("faqs", [])
+    if faqs:
+        ld_objs.append({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q,
+                 "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        })
+    ld = ld_block(ld_objs)
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; {esc(page["crumb_self"])}</p>'
         f'<h1>{esc(page["h1"])}</h1>'
         + page["intro"]
         + page["body"]
+        + (f'<h2>{esc(page.get("faq_heading", "FAQ"))}</h2>{_faq_html(faqs)}' if faqs else "")
     )
     return page_head(page["title"], page["desc"], canonical, ld) + body + FOOTER
 
@@ -4802,17 +4835,93 @@ STATIC_PAGES = [
         "intro": '<p class="lede">BoxBoxF1Fantasy is a free, independent F1 Fantasy prediction site built to help players make better driver, constructor, transfer and chip decisions.</p>',
         "body": (
             "<h2>What the site does</h2>"
-            "<p>BoxBox publishes current-round F1 Fantasy projections for every driver and constructor, race-week pick summaries, a lineup optimizer, Team Compare, transfer tools, budget/value signals, and an accuracy record for completed rounds.</p>"
+            "<p>BoxBox publishes current-round F1 Fantasy projections for every driver and constructor, race-week pick summaries, a lineup optimizer, Team Compare, transfer tools, budget/value signals, and an accuracy record for completed rounds. The goal is to turn a large amount of race, practice, price and reliability data into decisions a fantasy player can inspect rather than a single unexplained pick.</p>"
             "<h2>How to use it</h2>"
-            "<p>Start with the live predictions, then use the Optimizer or Team Compare when you need to turn those projections into an actual team. The race-pick pages give a quicker written summary for each Grand Prix, while the guides explain scoring, chips and strategy.</p>"
-            "<h2>Transparency</h2>"
-            "<p>The site is open about uncertainty. Driver cards and comparison tools show confidence ranges, risk notes and downside signals because F1 Fantasy depends on weather, safety cars, reliability, strategy and race incidents. The Accuracy tab keeps a public record of how predictions performed after completed rounds.</p>"
+            '<p>Start with the <a href="/">live predictions</a>, then use the <a href="/tools/lineup-optimizer/">Optimizer</a> or <a href="/tools/team-compare/">Team Compare</a> when you need to turn those projections into an actual team. The <a href="/picks/">race-pick pages</a> give a quicker written summary for each Grand Prix, while the <a href="/guides/">guides</a> explain scoring, chips and strategy.</p>'
+            "<h2>How the predictions are produced</h2>"
+            '<p>The site combines historical race results and reliability, current-season form, circuit characteristics, F1 practice telemetry when available, weather context and fantasy scoring rules. Ranking models estimate qualifying and race positions; deterministic scoring and a 10,000-run simulation convert those positions into fantasy projections and confidence ranges. The public <a href="/methodology/">prediction methodology</a> explains the process, update phases, safeguards and limitations without publishing proprietary tuning values.</p>'
+            "<h2>Transparency commitments</h2>"
+            '<p>The site is open about uncertainty. Driver and constructor profiles show deterministic projections, risk-adjusted means, confidence ranges, DNF probabilities, value and recent completed-round form. The <a href="/accuracy/">Accuracy page</a> keeps a public record of performance, including misses, while the <a href="/changelog/">Changelog</a> records material model, scoring, data and product changes in plain English.</p>'
+            "<p>Forecast pages state whether they are pre-practice, post-practice or post-qualifying. A newer weather feed is not presented as if it had already been applied to an older model run. Historical and current projections are kept separate so readers can tell observed results from forecasts.</p>"
+            "<h2>Corrections and accountability</h2>"
+            f'<p>If a result, rule, price, source or explanation appears wrong, email <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> with the page and issue. Reproducible errors are corrected in the source data or generator, affected pages are rebuilt, and material changes are documented in the Changelog. Prediction archives and the public accuracy record are not silently rewritten to make past forecasts look better.</p>'
             "<h2>Independence</h2>"
-            "<p>BoxBoxF1Fantasy is an independent fan-built site. It is not affiliated with, endorsed by, or connected to Formula 1, the FIA, F1 Fantasy, any F1 team, or any driver.</p>"
+            "<p>BoxBoxF1Fantasy is an independent fan-built site. It is not affiliated with, endorsed by, or connected to Formula 1, the FIA, F1 Fantasy, any F1 team, or any driver. Team and driver rankings are model outputs rather than paid placements. Predictions are informational and for entertainment; they are never guarantees.</p>"
+            "<h2>Public and machine-readable access</h2>"
+            '<p>The crawlable pages are backed by a <a href="/data/">public data catalog</a>, compact <a href="/data/ai-summary.json">AI summary</a>, JSON schema, OpenAPI description, search index, RSS/JSON feeds and LLM guidance. These resources let search engines, chatbots and developers identify the current round, source timestamps, canonical pages and uncertainty fields directly.</p>'
             "<h2>Contact</h2>"
             f'<p>Questions, corrections, bugs or partnership enquiries: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>'
-            '<div class="callout">For the live tools, go to <a href="/">Predictions &amp; Tools</a>. For crawlable race-week summaries, start at <a href="/picks/">Race Picks</a>.</div>'
+            '<div class="callout">For the live tools, go to <a href="/">Predictions &amp; Tools</a>. For crawlable race-week summaries, start at <a href="/picks/">Race Picks</a>. For sources, validation and correction standards, read <a href="/methodology/">Methodology</a>.</div>'
         ),
+        "faq_heading": "About BoxBoxF1Fantasy FAQ",
+        "faqs": [
+            ("Who runs BoxBoxF1Fantasy?",
+             "BoxBoxF1Fantasy is an independently maintained fan project. It is not operated by Formula 1, the FIA, F1 Fantasy, any team or any driver. Contact and correction requests go to boxboxf1fantasy@gmail.com."),
+            ("Are BoxBox F1 Fantasy predictions guaranteed?",
+             "No. They are model-based estimates for entertainment and decision support. Weather, reliability, safety cars, penalties, strategy and incidents can produce outcomes outside the expected range."),
+            ("Does BoxBox publish prediction accuracy?",
+             "Yes. The Accuracy page records completed-round performance and confidence-range coverage, including misses. Material model and data changes are documented in the Changelog."),
+        ],
+    },
+    {
+        "slug": "methodology",
+        "crumb_self": "Methodology",
+        "title": "F1 Fantasy Prediction Methodology & Accuracy | BoxBox",
+        "desc": "How BoxBox builds F1 Fantasy predictions: data sources, model phases, fantasy scoring, Monte Carlo ranges, validation, safeguards and corrections.",
+        "h1": "BoxBoxF1Fantasy Prediction Methodology",
+        "published": "2026-07-13",
+        "lastmod": SEO_CONTENT_LASTMOD,
+        "schema_type": "TechArticle",
+        "about": ["F1 Fantasy", "Formula 1 prediction models", "Monte Carlo simulation", "Prediction accuracy"],
+        "intro": '<p class="lede">A transparent explanation of how BoxBox turns public F1 data into driver, constructor and lineup projections &mdash; what changes during a race weekend, how uncertainty is represented, and how errors are corrected.</p>',
+        "body": (
+            "<h2>What the system predicts</h2>"
+            "<p>The pipeline first estimates qualifying and race finishing order for each driver. A separate fantasy layer converts those outcomes into expected points from qualifying, race position, positions gained or lost, overtakes, fastest lap, Driver of the Day, DNFs, constructor teamwork and pit stops. The lineup tools then compare legal combinations under the user's budget and chip settings.</p>"
+            "<p>Expected points are estimates, not promises. The deterministic projection represents one central finishing-order scenario. The risk-adjusted mean comes from repeated simulations that include uncertainty and adverse outcomes, which is why it can be materially lower than the deterministic figure.</p>"
+            "<h2>Data sources and feature layers</h2>"
+            "<p>The model uses public motorsport and weather data collected through FastF1, Jolpica, OpenF1 and Open-Meteo, alongside manually maintained fantasy prices and rules. Public outputs and source timestamps are documented in the <a href=\"/data/\">data catalog</a>.</p>"
+            "<ul><li><strong>Historical priors:</strong> recent driver and constructor form, reliability, teammate comparisons, circuit experience and track-similarity signals.</li>"
+            "<li><strong>Practice telemetry:</strong> lap, sector, long-run and tyre-degradation features when current-weekend free-practice data exists.</li>"
+            "<li><strong>Session and weather context:</strong> qualifying grid when available, rain risk, temperature and track characteristics.</li>"
+            "<li><strong>Fantasy context:</strong> current prices, official scoring rules, pit-stop expectations, overtakes and DNF exposure.</li></ul>"
+            "<h2>Prediction models</h2>"
+            "<p>Gradient-boosted ranking models estimate relative qualifying and race order rather than treating every driver as an unrelated regression problem. The race forecast uses the appropriate qualifying input for the current phase: a predicted grid before qualifying or the actual grid afterward. Practice pace can refine the qualifying view once telemetry exists.</p>"
+            "<p>The public explanation intentionally describes model families, data availability and behavior without publishing proprietary feature weights, manual ratings or tuning constants. That keeps the process understandable without turning the page into a recipe for reproducing every internal adjustment.</p>"
+            "<h2>Race-week forecast phases</h2>"
+            "<ul><li><strong>Pre-practice:</strong> historical priors, current-season form, reliability and circuit context; no current-weekend practice telemetry.</li>"
+            "<li><strong>Post-practice:</strong> current-weekend practice pace is included. This is the primary actionable forecast before the usual fantasy lock.</li>"
+            "<li><strong>Post-qualifying:</strong> the actual qualifying grid can be included, but the normal fantasy deadline has usually passed, so this phase is mainly retrospective.</li></ul>"
+            "<p>Every current race and profile page labels its phase. Data feeds can refresh at different times; for example, a weather forecast may be newer than the model run. When that happens, the page says the newer feed has not yet been applied rather than implying otherwise.</p>"
+            "<h2>Fantasy scoring layer</h2>"
+            '<p>The scoring implementation follows the current fantasy rules documented in the <a href="/guides/how-f1-fantasy-scoring-works/">scoring guide</a>. Drivers can score through qualifying, the race, overtakes, position changes and bonuses, with penalties for DNFs or disqualification. Constructors combine both drivers plus qualifying teamwork and pit-stop points. Driver boost multipliers never increase constructor totals.</p>'
+            "<h2>Monte Carlo uncertainty</h2>"
+            "<p>The fantasy simulation runs 10,000 scenarios for each round. It perturbs model scores, re-ranks the field and samples events such as DNFs, overtakes, fastest lap, Driver of the Day and constructor pit outcomes. Published P5 and P95 values form the displayed 90% interval; they are downside and upside markers, not best- and worst-case guarantees.</p>"
+            "<p>DNF risk includes driver-level reliability and incident exposure, with limited team correlation for shared mechanical failures. Weather can widen position uncertainty and retirement risk. These mechanisms are deliberately probabilistic because a single race cannot be forecast as one fixed script.</p>"
+            "<h2>Validation and leakage safeguards</h2>"
+            "<p>Historical rolling features are shifted so a training row cannot use the result it is trying to predict. Race-week archives are phase-labelled, and completed-round guards prevent an already-run race from being silently overwritten by a later model. Model and data changes are assessed against walk-forward or completed-round evidence where available rather than judged only on in-sample fit.</p>"
+            '<p>The <a href="/accuracy/">Accuracy page</a> publishes error and confidence-interval coverage for completed rounds. The <a href="/changelog/">Changelog</a> records meaningful changes to models, scoring, data and tools. Accuracy evidence grows through the season; a small number of races should not be treated as proof that any model is permanently superior.</p>'
+            "<h2>Corrections and version accountability</h2>"
+            f'<p>Report a suspected data, rule or explanation error to <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> with the affected URL. Reproducible problems are fixed at the source or generator, affected outputs are rebuilt, and material changes are recorded publicly. Historical forecasts are preserved for accountability instead of being rewritten after the result is known.</p>'
+            "<h2>Known limitations</h2>"
+            "<ul><li>Practice programmes, fuel loads and tyre plans are not fully observable.</li><li>Weather forecasts change and may update after a model run.</li>"
+            "<li>Upgrades, penalties, strategic calls, safety cars and incidents can invalidate the expected order.</li><li>Fan-voted Driver of the Day and exact overtake counts are inherently difficult to predict.</li>"
+            "<li>Fantasy prices and rules can change; the official game remains the final authority.</li></ul>"
+            "<h2>Using the outputs responsibly</h2>"
+            '<p>Use expected points as one input, then inspect the confidence range, DNF probability, value, phase and budget effect. Compare complete teams in <a href="/tools/team-compare/">Team Compare</a> or the <a href="/tools/lineup-optimizer/">Optimizer</a>. The site is independent, informational and intended for entertainment.</p>'
+        ),
+        "faq_heading": "Prediction methodology FAQ",
+        "faqs": [
+            ("Does BoxBox use current-weekend practice data?",
+             "Yes, after free-practice data is available and the post-practice pipeline runs. Pre-practice forecasts explicitly exclude current-weekend telemetry and rely on historical and current-season priors."),
+            ("What does the 90% confidence interval mean?",
+             "The displayed P5-to-P95 range contains the middle 90% of simulated fantasy outcomes. It is a probabilistic downside/upside range, not a guarantee that the actual result must fall inside it."),
+            ("How does BoxBox prevent result leakage?",
+             "Historical rolling features are shifted so each training row uses only information available before that result. Completed-round and archive safeguards also prevent later data from silently replacing historical forecasts."),
+            ("Why are all model weights not published?",
+             "The site publishes model families, data layers, phase behavior, uncertainty, validation and limitations while keeping proprietary feature weights, manual ratings and tuning constants private."),
+            ("How can I report a prediction-data error?",
+             "Email boxboxf1fantasy@gmail.com with the page and issue. Reproducible source or rule errors are corrected, affected pages are rebuilt and material changes are documented in the Changelog."),
+        ],
     },
     {
         "slug": "privacy",

@@ -10,6 +10,7 @@ Language: English
 Purpose: Free F1 Fantasy predictions, race picks, lineup optimization, transfer planning, strategy guides, public data and accuracy tracking.
 Tech: Static HTML, vanilla JavaScript, Python data pipeline, machine-learning prediction models, Vercel hosting.
 Public data: https://boxboxf1fantasy.com/data/
+Methodology: https://boxboxf1fantasy.com/methodology/
 OpenAPI: https://boxboxf1fantasy.com/openapi.json
 LLM guide: https://boxboxf1fantasy.com/llms.txt
 Sitemap: https://boxboxf1fantasy.com/sitemap.xml
