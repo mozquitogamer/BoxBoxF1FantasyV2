@@ -329,3 +329,8 @@ def test_belgian_model_briefing_is_dated_sourced_and_phase_honest():
     assert '"wordCount":' in html
     assert '"https://boxboxf1fantasy.com/data/predictions.json"' in html
     assert '"https://boxboxf1fantasy.com/methodology/"' in html
+    assert 'property="og:type" content="article"' in html
+    assert 'property="og:image" content="https://boxboxf1fantasy.com/images/belgian-gp-2026-fantasy-forecast.png"' in html
+    assert '"@type": "ImageObject"' in html
+    assert 'src="/images/belgian-gp-2026-fantasy-forecast.png"' in html
+    assert 'loading="lazy"' in html

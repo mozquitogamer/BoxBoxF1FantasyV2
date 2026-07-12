@@ -17,6 +17,7 @@ Output: web/public/data/articles.json
 
 import json
 import re
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -48,6 +49,15 @@ def md_to_html(md: str) -> str:
     in_p = False
 
     def inline(text):
+        # Images (fixed social-card ratio prevents layout shift in article pages)
+        text = re.sub(
+            r"!\[([^\]]*)\]\(([^)]+)\)",
+            lambda m: (
+                f'<img src="{escape(m.group(2), quote=True)}" alt="{escape(m.group(1), quote=True)}" '
+                'width="1200" height="630" loading="lazy" decoding="async">'
+            ),
+            text,
+        )
         # Bold
         text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
         text = re.sub(r"__(.+?)__", r"<strong>\1</strong>", text)
@@ -55,7 +65,7 @@ def md_to_html(md: str) -> str:
         text = re.sub(r"\*(.+?)\*", r"<em>\1</em>", text)
         text = re.sub(r"_(.+?)_", r"<em>\1</em>", text)
         # Links
-        text = re.sub(r"\[(.+?)\]\((.+?)\)", r'<a href="\2">\1</a>', text)
+        text = re.sub(r"(?<!!)\[(.+?)\]\((.+?)\)", r'<a href="\2">\1</a>', text)
         # Inline code
         text = re.sub(r"`(.+?)`", r"<code>\1</code>", text)
         return text
@@ -173,6 +183,8 @@ def build():
 
         tags = [t.strip() for t in meta.get("tags", "").split(",") if t.strip()]
         sources = [source.strip() for source in meta.get("sources", "").split(",") if source.strip()]
+        image = meta.get("image", "").strip()
+        image_alt = meta.get("image_alt", "").strip()
         round_num = None
         if "round" in meta:
             try:
@@ -190,6 +202,9 @@ def build():
         }
         if sources:
             article["sources"] = sources
+        if image:
+            article["image"] = image
+            article["image_alt"] = image_alt or article["title"]
         articles.append(article)
 
     generated_slugs = {article["slug"] for article in articles}

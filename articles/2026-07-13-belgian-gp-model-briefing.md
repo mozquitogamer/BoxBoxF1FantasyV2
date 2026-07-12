@@ -4,11 +4,15 @@ date: 2026-07-13
 round: 12
 tags: preview, belgian gp, model briefing, max verstappen, strategy
 sources: /data/predictions.json, /data/driver_history.json, /data/weather.json, /methodology/
+image: /images/belgian-gp-2026-fantasy-forecast.png
+image_alt: Belgian GP 2026 F1 Fantasy expected points and 90 percent simulation ranges for the top eight drivers
 ---
 
 Why does Max Verstappen lead BoxBox's Belgian GP F1 Fantasy forecast after scoring -3 points at Silverstone? The short answer is upside, not certainty.
 
 This is a dated **pre-practice briefing** based on the model run generated on July 9, 2026. It does not include current-weekend practice telemetry. For the newest phase, weather and lineup, use the [live Belgian GP picks page](/picks/belgian-gp-2026/).
+
+![Belgian GP 2026 F1 Fantasy expected points and 90 percent simulation ranges for the top eight drivers](/images/belgian-gp-2026-fantasy-forecast.png)
 
 ## The short answer
 

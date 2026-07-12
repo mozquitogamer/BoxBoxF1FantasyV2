@@ -819,7 +819,18 @@ gtag('config', 'G-T3HS76FJ7W');
 </script>"""
 
 
-def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
+def page_head(
+    title: str,
+    desc: str,
+    canonical: str,
+    extra_ld: str = "",
+    image_url: str | None = None,
+    image_alt: str = "BoxBoxF1Fantasy F1 Fantasy predictions and tools",
+    og_type: str = "website",
+) -> str:
+    image_url = image_url or f"{SITE}/og-image.png"
+    if image_url.startswith("/"):
+        image_url = f"{SITE}{image_url}"
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -831,20 +842,22 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 <link rel="canonical" href="{canonical}">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#0a0d12">
-<meta property="og:type" content="website">
+<meta property="og:type" content="{esc(og_type)}">
 <meta property="og:site_name" content="BoxBoxF1Fantasy">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}">
 <meta property="og:url" content="{canonical}">
-<meta property="og:image" content="{SITE}/og-image.png">
+<meta property="og:image" content="{esc(image_url)}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{esc(image_alt)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@BoxBoxF1Fantasy">
 <meta name="twitter:title" content="{esc(title)}">
 <meta name="twitter:description" content="{esc(desc)}">
-<meta name="twitter:image" content="{SITE}/og-image.png">
+<meta name="twitter:image" content="{esc(image_url)}">
+<meta name="twitter:image:alt" content="{esc(image_alt)}">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="manifest" href="/site.webmanifest">
 <link rel="alternate" type="application/rss+xml" title="BoxBoxF1Fantasy updates" href="/feed.xml">
@@ -2630,6 +2643,9 @@ def render_article_page(article: dict) -> str:
     published = clean_legacy_text(article.get("date", ""))
     tags = [clean_legacy_text(t) for t in article.get("tags", []) if t]
     sources = [source for source in article.get("sources", []) if source]
+    article_image = clean_legacy_text(article.get("image", ""))
+    image_alt = clean_legacy_text(article.get("image_alt", article_title))
+    absolute_image = f"{SITE}{article_image}" if article_image.startswith("/") else article_image
     desc = _article_meta_description(article) or f"BoxBoxF1Fantasy article: {article_title}."
     title = f"{article_title} | BoxBoxF1Fantasy"
     content = clean_legacy_text(article.get("content_html", ""))
@@ -2651,6 +2667,14 @@ def render_article_page(article: dict) -> str:
             source if str(source).startswith(("http://", "https://")) else f"{SITE}{source}"
             for source in sources
         ]
+    if absolute_image:
+        article_schema["image"] = {
+            "@type": "ImageObject",
+            "url": absolute_image,
+            "width": 1200,
+            "height": 630,
+            "caption": image_alt,
+        }
     ld = ld_block([
         article_schema,
         breadcrumb_ld([
@@ -2668,7 +2692,15 @@ def render_article_page(article: dict) -> str:
         + "</div>"
         '<div class="btnrow"><a class="cta" href="/#articles">Open interactive Articles tab &rarr;</a></div>'
     )
-    return page_head(title, desc, canonical, ld) + body + FOOTER
+    return page_head(
+        title,
+        desc,
+        canonical,
+        ld,
+        image_url=article_image or None,
+        image_alt=image_alt,
+        og_type="article",
+    ) + body + FOOTER
 
 
 def render_articles_hub(articles_data: dict) -> str:
@@ -4980,6 +5012,16 @@ def main() -> None:
     if not season or not current:
         print("[14_build_seo_pages] missing season_summary.json or predictions.json - run export first.")
         return
+
+    chart_helpers = runpy.run_path(str(ROOT / "pipeline" / "16_build_seo_charts.py"))
+    chart_name = chart_helpers["chart_slug"](
+        current.get("race", "current-race"),
+        int(current.get("season") or YEAR),
+    )
+    chart_helpers["build_current_forecast_chart"](
+        current,
+        WEB / "images" / chart_name,
+    )
 
     write_homepage_prediction_snapshot(current)
     write_prediction_schema()
