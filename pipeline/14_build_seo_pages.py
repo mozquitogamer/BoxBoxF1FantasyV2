@@ -3556,7 +3556,7 @@ GUIDES = [
             "<li><strong>Fastest lap:</strong> +10.</li><li><strong>Driver of the Day:</strong> +10.</li>"
             "<li><strong>DNF / disqualification:</strong> &minus;20.</li></ul>"
             "<h2>Sprint weekends</h2>"
-            f"<p>On {YEAR}'s six sprint weekends you also score sprint qualifying and a sprint race. The sprint race pays P1 = 8 down to P8 = 1 (P9+ = 0), the sprint fastest lap is +5, and a sprint DNF costs &minus;10 rather than &minus;20.</p>"
+            f"<p>On {YEAR}'s six sprint weekends, only the sprint race adds fantasy points; sprint qualifying itself does not score. The sprint race pays P1 = 8 down to P8 = 1 (P9+ = 0), the sprint fastest lap is +5, and a sprint DNF costs &minus;10 rather than &minus;20.</p>"
             "<h2>Constructor points</h2>"
             "<p>A constructor scores <strong>both of its drivers'</strong> qualifying and race points (Driver of the Day is excluded), plus two things individual drivers don't get:</p>"
             "<ul><li><strong>Qualifying teamwork bonus</strong> &mdash; both cars reach Q3: +10; one reaches Q3: +5; both reach Q2: +3; one reaches Q2: +1; neither escapes Q1: &minus;1.</li>"
@@ -3672,14 +3672,14 @@ GUIDES = [
             "<h2>Chips</h2>"
             '<p>You also have one-off power-up chips for the season (3x Boost, Wild Card, Limitless and more). See the <a href="/guides/f1-fantasy-chips-explained/">chips guide</a> for what each does and when to use it.</p>'
             "<h2>Deadlines</h2>"
-            "<p>Your team locks at the <strong>start of qualifying</strong> (or sprint qualifying on a sprint weekend). Make your changes before then &mdash; there's a lock-deadline countdown in the BoxBox site header.</p>"
+            "<p>Your team locks at the <strong>start of qualifying</strong> on a normal weekend, or at the <strong>sprint race start</strong> on the 2026 sprint weekends. Make your changes before then &mdash; there is a lock-deadline countdown in the BoxBox site header and a <a href=\"/tools/f1-fantasy-deadline/\">full deadline calendar</a>.</p>"
             "<h2>Scoring in a nutshell</h2>"
             '<p>Points come from qualifying and race position, positions gained, overtakes, fastest lap, Driver of the Day, and constructor pit stops &mdash; minus a penalty for DNFs. The full detail is in <a href="/guides/how-f1-fantasy-scoring-works/">how scoring works</a>.</p>'
             '<div class="callout">Ready to pick a team? BoxBox gives you free, data-driven projections for every driver and constructor, plus an <a href="/#optimizer">Optimizer</a> that builds the best lineup within your budget.</div>'
         ),
         "faqs": [
             ("How does F1 Fantasy work?",
-             "You have a budget to pick 5 drivers and 2 constructors. They score fantasy points each race weekend based on qualifying and race results, overtakes, fastest laps and more. You can make transfers between rounds and play one-off chips, and your team locks at the start of qualifying."),
+             "You have a budget to pick 5 drivers and 2 constructors. They score fantasy points each race weekend based on qualifying and race results, overtakes, fastest laps and more. You can make transfers between rounds and play one-off chips. Team lock is qualifying start on normal weekends and sprint race start on the 2026 sprint weekends."),
             ("How many drivers and constructors do you pick in F1 Fantasy?",
              "Five drivers and two constructors, within your budget."),
         ],
