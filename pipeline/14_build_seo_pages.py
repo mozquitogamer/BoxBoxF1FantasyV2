@@ -39,6 +39,9 @@ SITE = "https://boxboxf1fantasy.com"
 YEAR = 2026
 CONTACT_EMAIL = "boxboxf1fantasy@gmail.com"
 INDEXNOW_KEY = "779753a5fbbf054b3ea496085a0ce1e4"
+# Bump only when generated page templates, metadata, structured data or links
+# receive a significant site-wide content change.
+SEO_CONTENT_LASTMOD = "2026-07-12"
 
 TOP_DRIVERS = 10      # rows in the "top picks" table
 VALUE_DRIVERS = 6     # rows in the "best value" table
@@ -242,6 +245,18 @@ def fmt_date(date_text: str) -> str:
         return f"{dt.strftime('%B')} {dt.day}, {dt.year}"
     except ValueError:
         return str(date_text)
+
+
+def source_date(*values) -> str | None:
+    """Return the first valid source date as YYYY-MM-DD for sitemap freshness."""
+    for value in values:
+        if not value:
+            continue
+        try:
+            return datetime.fromisoformat(str(value).replace("Z", "+00:00")).date().isoformat()
+        except ValueError:
+            continue
+    return None
 
 
 def fmt_utc_datetime(date_text: str) -> str:
@@ -2601,18 +2616,15 @@ def write_prediction_schema() -> None:
     )
 
 
-def write_sitemap(rel_paths: list[str]) -> None:
+def write_sitemap(rel_paths: list[str], lastmods: dict[str, str]) -> None:
     """rel_paths: relative URLs like '', 'picks/', 'picks/monaco-gp-2026/', 'guides/'."""
-    lastmod = datetime.now(timezone.utc).date().isoformat()
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for p in rel_paths:
         u = f"{SITE}/{p}"
-        pr = "1.0" if p == "" else "0.8"
-        lines.append(
-            f"  <url><loc>{u}</loc><lastmod>{lastmod}</lastmod>"
-            f"<changefreq>weekly</changefreq><priority>{pr}</priority></url>"
-        )
+        lastmod = lastmods.get(p)
+        modified = f"<lastmod>{lastmod}</lastmod>" if lastmod else ""
+        lines.append(f"  <url><loc>{u}</loc>{modified}</url>")
     lines.append("</urlset>\n")
     (WEB / "sitemap.xml").write_text("\n".join(lines), encoding="utf-8")
 
@@ -3253,7 +3265,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
     (WEB / "llms.txt").write_text("\n".join(lines), encoding="utf-8")
 
 
-def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict]) -> None:
+def write_llms_full(rel_paths: list[str], current: dict) -> None:
     """Long-form plain-text site brief for answer engines and agentic crawlers."""
     today = datetime.now(timezone.utc).date().isoformat()
     drivers = sorted(current.get("drivers", []), key=lambda d: d.get("expected_points", 0), reverse=True)
@@ -3378,13 +3390,16 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "## Page inventory with summaries",
     ])
 
-    for item in feed_items:
-        lines.append(f"- {item['title']}: {item['url']} - {item['summary']}")
-
-    remaining_paths = [p for p in rel_paths if p and f"{SITE}/{p}" not in {item["url"] for item in feed_items}]
-    if remaining_paths:
-        lines.extend(["", "## Additional crawlable URLs"])
-        lines.extend(f"- https://boxboxf1fantasy.com/{p}" for p in remaining_paths)
+    search_index = load_json(WEB / "search-index.json") or {}
+    indexed_pages = search_index.get("pages") or []
+    if indexed_pages:
+        for page in indexed_pages:
+            lines.append(
+                f"- {page.get('title', page.get('path', 'Page'))}: {page.get('url', SITE + page.get('path', '/'))}"
+                f" - {page.get('description', '')}"
+            )
+    else:
+        lines.extend(f"- https://boxboxf1fantasy.com/{p}" for p in rel_paths)
 
     lines.extend([
         "",
@@ -3402,6 +3417,12 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
 def write_feeds(feed_items: list[dict]) -> None:
     """Write RSS and JSON Feed files for crawlers, readers, and AI agents."""
     now = datetime.now(timezone.utc)
+    unique_items = {item["url"]: item for item in feed_items}
+    feed_items = sorted(
+        unique_items.values(),
+        key=lambda item: item.get("updated") or datetime.min.replace(tzinfo=timezone.utc),
+        reverse=True,
+    )[:50]
     rss_items = []
     json_items = []
     for item in feed_items:
@@ -3423,7 +3444,6 @@ def write_feeds(feed_items: list[dict]) -> None:
             "url": url,
             "title": title,
             "summary": summary,
-            "date_published": updated.isoformat(),
             "date_modified": updated.isoformat(),
         })
 
@@ -4150,6 +4170,7 @@ STATIC_PAGES = [
         "title": "About BoxBoxF1Fantasy | Free F1 Fantasy Predictions & Tools",
         "desc": "About BoxBoxF1Fantasy, an independent site with free F1 Fantasy predictions, optimizer tools, race picks, public accuracy and contact details.",
         "h1": "About BoxBoxF1Fantasy",
+        "lastmod": SEO_CONTENT_LASTMOD,
         "schema_type": "AboutPage",
         "intro": '<p class="lede">BoxBoxF1Fantasy is a free, independent F1 Fantasy prediction site built to help players make better driver, constructor, transfer and chip decisions.</p>',
         "body": (
@@ -4172,10 +4193,11 @@ STATIC_PAGES = [
         "title": "Privacy Policy | BoxBoxF1Fantasy",
         "desc": "Privacy policy for BoxBoxF1Fantasy, covering analytics, cookies, local browser storage, advertising, external links and contact information.",
         "h1": "Privacy Policy",
+        "lastmod": SEO_CONTENT_LASTMOD,
         "schema_type": "WebPage",
         "intro": '<p class="lede">This privacy policy explains what BoxBoxF1Fantasy collects and how the site uses it.</p>',
         "body": (
-            f"<p><strong>Last updated:</strong> {datetime.now(timezone.utc).date().isoformat()}</p>"
+            f"<p><strong>Last updated:</strong> {SEO_CONTENT_LASTMOD}</p>"
             "<h2>Information we collect</h2>"
             "<p>BoxBoxF1Fantasy does not require an account and does not ask visitors to create a profile. If you email us, we receive the email address and any information you choose to include in the message.</p>"
             "<h2>Analytics</h2>"
@@ -4228,6 +4250,11 @@ def main() -> None:
     }
     prices = load_seed_json("fantasy_prices.json") or {}
     PICKS.mkdir(parents=True, exist_ok=True)
+    current_lastmod = source_date(current.get("exported_at"), current.get("generated_at"), season.get("generated_at"))
+    horizon_lastmod = source_date(horizon.get("generated_at"))
+    lastmods: dict[str, str] = {}
+    if current_lastmod:
+        lastmods[""] = current_lastmod
 
     entries = []   # for the hub + sitemap
     written = 0
@@ -4237,6 +4264,7 @@ def main() -> None:
         rn = r["round"]
         if r.get("cancelled"):
             continue
+        page_lastmod = None
         status = "archive"
         if r.get("has_predictions"):
             is_current = (rn == current_round)
@@ -4248,6 +4276,7 @@ def main() -> None:
             slug, page = render_race_page(pred, is_current)
             race_name = pred.get("race", r["name"])
             race_date = pred.get("date", r.get("date", ""))
+            page_lastmod = source_date(pred.get("exported_at"), pred.get("generated_at"))
             written += 1
         elif str(rn) in horizon_rounds:
             status = "future"
@@ -4258,6 +4287,7 @@ def main() -> None:
             slug, page = render_future_race_page(pred, horizon.get("generated_at", ""))
             race_name = pred.get("race", r["name"])
             race_date = pred.get("date", r.get("date", ""))
+            page_lastmod = horizon_lastmod
             future_written += 1
         elif rn > current_round:
             status = "calendar"
@@ -4272,16 +4302,24 @@ def main() -> None:
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "index.html").write_text(page, encoding="utf-8")
         entries.append((slug, race_name, race_date, rn, status))
+        if page_lastmod:
+            lastmods[f"picks/{slug}/"] = page_lastmod
         suffix = ", current" if status == "current" else ", early outlook" if status == "future" else ""
         print(f"  [OK] /picks/{slug}/  (round {rn}{suffix})")
 
     # newest race first in the hub
     entries.sort(key=lambda e: e[3], reverse=True)
     (PICKS / "index.html").write_text(render_index(entries), encoding="utf-8")
+    pick_lastmods = [lastmods.get(f"picks/{e[0]}/") for e in entries]
+    pick_lastmods = [d for d in pick_lastmods if d]
+    if pick_lastmods:
+        lastmods["picks/"] = max(pick_lastmods)
 
     # all sitemap URLs (relative): home + picks + drivers + constructors + guides + tools
     rel_paths = ["", "picks/"] + [f"picks/{e[0]}/" for e in entries]
     now = datetime.now(timezone.utc)
+    feed_entries = [e for e in entries if e[4] in {"current", "future"}]
+    feed_entries.sort(key=lambda e: (e[4] != "current", e[3]))
     feed_items = [
         {
             "title": f"F1 Fantasy Picks: {short_race(name)} {YEAR}",
@@ -4295,7 +4333,7 @@ def main() -> None:
             ),
             "updated": now,
         }
-        for slug, name, date, rn, status in entries[:8]
+        for slug, name, date, rn, status in feed_entries
     ]
 
     # --- current driver + constructor projection pages ---
@@ -4308,6 +4346,8 @@ def main() -> None:
     drivers_dir.mkdir(parents=True, exist_ok=True)
     (drivers_dir / "index.html").write_text(render_drivers_hub(current), encoding="utf-8")
     rel_paths.append("drivers/")
+    if current_lastmod:
+        lastmods["drivers/"] = current_lastmod
     feed_items.append({
         "title": f"F1 Fantasy Driver Predictions {YEAR}",
         "url": f"{SITE}/drivers/",
@@ -4320,17 +4360,15 @@ def main() -> None:
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "index.html").write_text(render_driver_page(driver, current, rank, constructors_by_id), encoding="utf-8")
         rel_paths.append(f"drivers/{slug}/")
-        feed_items.append({
-            "title": f"{driver.get('name', driver.get('driver_id', 'Driver'))} F1 Fantasy {YEAR}",
-            "url": f"{SITE}/drivers/{slug}/",
-            "summary": f"Current F1 Fantasy projection for {driver.get('name', driver.get('driver_id', 'this driver'))}: {driver.get('expected_points', 0):.1f} expected points, ${driver.get('current_price', 0):.1f}M price and {driver.get('value_score', 0):.2f} PPM.",
-            "updated": now,
-        })
+        if current_lastmod:
+            lastmods[f"drivers/{slug}/"] = current_lastmod
 
     constructors_dir = WEB / "constructors"
     constructors_dir.mkdir(parents=True, exist_ok=True)
     (constructors_dir / "index.html").write_text(render_constructors_hub(current), encoding="utf-8")
     rel_paths.append("constructors/")
+    if current_lastmod:
+        lastmods["constructors/"] = current_lastmod
     feed_items.append({
         "title": f"F1 Fantasy Constructor Predictions {YEAR}",
         "url": f"{SITE}/constructors/",
@@ -4343,12 +4381,8 @@ def main() -> None:
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "index.html").write_text(render_constructor_page(constructor, current, rank, drivers_by_id), encoding="utf-8")
         rel_paths.append(f"constructors/{slug}/")
-        feed_items.append({
-            "title": f"{constructor.get('name', constructor.get('constructor_id', 'Constructor'))} F1 Fantasy Constructor {YEAR}",
-            "url": f"{SITE}/constructors/{slug}/",
-            "summary": f"Current F1 Fantasy constructor projection for {constructor.get('name', constructor.get('constructor_id', 'this constructor'))}: {constructor.get('expected_points', 0):.1f} expected points, ${constructor.get('current_price', 0):.1f}M price and {constructor.get('value_score', 0):.2f} PPM.",
-            "updated": now,
-        })
+        if current_lastmod:
+            lastmods[f"constructors/{slug}/"] = current_lastmod
 
     # --- static content: guides + tools + their hubs ---
     for base, crumb, items, hub in (
@@ -4364,6 +4398,15 @@ def main() -> None:
         (out_base / "index.html").write_text(render_list_hub(base, crumb, hub, items), encoding="utf-8")
         rel_paths.append(f"{base}/")
         rel_paths += [f"{base}/{it['slug']}/" for it in items]
+        if base == "tools" and current_lastmod:
+            current_tool_slugs = {
+                "f1-fantasy-predictions", "best-f1-fantasy-team", "f1-fantasy-captain-picks",
+                "f1-fantasy-value-picks", "f1-fantasy-price-changes", "f1-fantasy-dnf-risk",
+                "points-calculator",
+            }
+            for it in items:
+                if it["slug"] in current_tool_slugs:
+                    lastmods[f"tools/{it['slug']}/"] = current_lastmod
         feed_items.append({
             "title": hub["h1"],
             "url": f"{SITE}/{base}/",
@@ -4384,6 +4427,11 @@ def main() -> None:
     accuracy_dir.mkdir(parents=True, exist_ok=True)
     (accuracy_dir / "index.html").write_text(render_accuracy_page(accuracy_summary), encoding="utf-8")
     rel_paths.append("accuracy/")
+    accuracy_rounds = {r.get("round") for r in accuracy_summary.get("rounds", [])}
+    accuracy_dates = [source_date(r.get("date")) for r in season.get("rounds", []) if r.get("round") in accuracy_rounds]
+    accuracy_dates = [d for d in accuracy_dates if d]
+    if accuracy_dates:
+        lastmods["accuracy/"] = max(accuracy_dates)
     feed_items.append({
         "title": f"F1 Fantasy Prediction Accuracy {YEAR}",
         "url": f"{SITE}/accuracy/",
@@ -4398,6 +4446,9 @@ def main() -> None:
     rel_paths.append("changelog/")
     changelog_entries = sorted(changelog.get("entries", []), key=lambda e: e.get("date", ""), reverse=True)
     latest_change = changelog_entries[0] if changelog_entries else {}
+    changelog_lastmod = source_date(latest_change.get("date"))
+    if changelog_lastmod:
+        lastmods["changelog/"] = changelog_lastmod
     feed_items.append({
         "title": f"BoxBoxF1Fantasy Changelog {YEAR}",
         "url": f"{SITE}/changelog/",
@@ -4413,6 +4464,9 @@ def main() -> None:
     rel_paths.append("videos/")
     latest_video = sorted(videos_data.get("videos", []), key=lambda v: v.get("published", ""), reverse=True)
     latest_video = latest_video[0] if latest_video else {}
+    video_lastmod = source_date(latest_video.get("published"))
+    if video_lastmod:
+        lastmods["videos/"] = video_lastmod
     feed_items.append({
         "title": f"F1 Fantasy Videos {YEAR}",
         "url": f"{SITE}/videos/",
@@ -4427,6 +4481,10 @@ def main() -> None:
     articles_sorted = sorted(articles_data.get("articles", []), key=lambda a: a.get("date", ""), reverse=True)
     (articles_dir / "index.html").write_text(render_articles_hub(articles_data), encoding="utf-8")
     rel_paths.append("articles/")
+    article_dates = [source_date(a.get("date")) for a in articles_sorted]
+    article_dates = [d for d in article_dates if d]
+    if article_dates:
+        lastmods["articles/"] = max(article_dates)
     feed_items.append({
         "title": f"F1 Fantasy Articles {YEAR}",
         "url": f"{SITE}/articles/",
@@ -4439,6 +4497,9 @@ def main() -> None:
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "index.html").write_text(render_article_page(article), encoding="utf-8")
         rel_paths.append(f"articles/{slug}/")
+        article_lastmod = source_date(article.get("date"))
+        if article_lastmod:
+            lastmods[f"articles/{slug}/"] = article_lastmod
         feed_items.append({
             "title": clean_legacy_text(article.get("title", "F1 Fantasy Article")),
             "url": f"{SITE}/articles/{slug}/",
@@ -4449,6 +4510,8 @@ def main() -> None:
     # --- public data/API index for agents and power users ---
     (DATA / "index.html").write_text(render_data_page(current, season), encoding="utf-8")
     rel_paths.append("data/")
+    if current_lastmod:
+        lastmods["data/"] = current_lastmod
     feed_items.append({
         "title": f"BoxBoxF1Fantasy Public Data {YEAR}",
         "url": f"{SITE}/data/",
@@ -4462,14 +4525,17 @@ def main() -> None:
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "index.html").write_text(render_static_page(page), encoding="utf-8")
         rel_paths.append(f"{page['slug']}/")
-        feed_items.append({
-            "title": page["h1"],
-            "url": f"{SITE}/{page['slug']}/",
-            "summary": page["desc"],
-            "updated": now,
-        })
+        static_lastmod = source_date(page.get("lastmod"))
+        if static_lastmod:
+            lastmods[f"{page['slug']}/"] = static_lastmod
 
-    write_sitemap(rel_paths)
+    for path in rel_paths:
+        lastmods[path] = max(lastmods.get(path, SEO_CONTENT_LASTMOD), SEO_CONTENT_LASTMOD)
+    for item in feed_items:
+        rel_path = item["url"].removeprefix(f"{SITE}/")
+        item_lastmod = lastmods.get(rel_path, SEO_CONTENT_LASTMOD)
+        item["updated"] = datetime.fromisoformat(item_lastmod).replace(tzinfo=timezone.utc)
+    write_sitemap(rel_paths, lastmods)
     write_robots()
     write_webmanifest()
     write_trust_files()
@@ -4477,7 +4543,7 @@ def main() -> None:
     write_search_index(rel_paths, current)
     write_openapi()
     write_llms_txt(rel_paths)
-    write_llms_full(rel_paths, current, feed_items)
+    write_llms_full(rel_paths, current)
     write_well_known()
     write_feeds(feed_items)
 

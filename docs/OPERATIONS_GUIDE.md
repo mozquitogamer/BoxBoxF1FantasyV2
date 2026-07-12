@@ -975,6 +975,8 @@ python pipeline/14_build_seo_pages.py
 ```
 
 > The generated `web/public/{picks,guides,tools}/` HTML and discovery files are build artifacts — commit them so Vercel serves them. The hubs are linked from the site footer (`/picks/`, `/guides/`, `/tools/`) so crawlers can discover every page. To edit guide/tool copy, change the `GUIDES`/`TOOLS` data at the top of the script and re-run.
+>
+> Sitemap and feed freshness is source-derived. `SEO_CONTENT_LASTMOD` is the fallback date for a significant site-wide template, metadata, structured-data or internal-link release. Bump it only for one of those real content changes, never merely because the generator ran. Prediction, article, changelog and video dates advance their own dynamic pages independently.
 
 ### `pipeline/15_submit_indexnow.py` — IndexNow URL submission
 
