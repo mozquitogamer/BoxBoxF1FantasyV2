@@ -880,6 +880,63 @@ FOOTER = f"""</main>
 # --------------------------------------------------------------------------- #
 # per-race page
 # --------------------------------------------------------------------------- #
+def current_race_brief_html(pred: dict) -> str:
+    drivers = pred.get("drivers", [])
+    constructors = pred.get("constructors", [])
+    if not drivers or not constructors:
+        return ""
+
+    phase = str(pred.get("phase") or "pre_fp").lower()
+    phase_copy = {
+        "pre_fp": (
+            "Pre-practice forecast",
+            "No current-weekend free-practice telemetry is included yet. This is the priors-based baseline; the actionable forecast will update after the weekend's practice sessions.",
+        ),
+        "post_fp": (
+            "Post-practice forecast",
+            "Current-weekend free-practice telemetry is included. This is the primary actionable forecast before the fantasy lock.",
+        ),
+        "post_quali": (
+            "Post-qualifying forecast",
+            "The actual qualifying grid is included. The fantasy lock has normally passed, so treat this as retrospective race analysis.",
+        ),
+    }
+    phase_label, phase_detail = phase_copy.get(phase, (phase.replace("_", " ").title(), "Check the live app for the latest model stage."))
+    generated = fmt_date((pred.get("generated_at") or pred.get("exported_at") or "")[:10])
+
+    by_expected = sorted(drivers, key=_pts, reverse=True)
+    leader = by_expected[0]
+    value = max(drivers, key=lambda d: float(d.get("value_score") or 0))
+    safest = max(drivers, key=lambda d: float(d.get("mc_total_p5") or -999))
+    upside = max(drivers, key=lambda d: float(d.get("mc_total_p95") or 0) - _pts(d))
+    constructor = max(constructors, key=_pts)
+    risk_pool = by_expected[:10]
+    risk_watch = max(risk_pool, key=lambda d: float(d.get("dnf_probability") or 0))
+
+    deadline = next((d for d in load_lock_deadlines() if d.get("round") == pred.get("round")), None)
+    deadline_html = ""
+    if deadline:
+        deadline_html = (
+            f'<li><strong>Team lock:</strong> {esc(fmt_utc_datetime(deadline["lock"]))} '
+            f'({"Sprint start" if deadline.get("sprint") else "qualifying start"}).</li>'
+        )
+
+    return (
+        f'<h2>{esc(short_race(pred.get("race", "Current race")))} race-week brief</h2>'
+        '<div class="update-card">'
+        f'<p><strong>Forecast stage:</strong> {esc(phase_label)} &middot; model run {esc(generated)}. {esc(phase_detail)}</p>'
+        '<ul>'
+        f'<li><strong>Top risk-adjusted driver:</strong> <a href="/drivers/{plain_slug(leader.get("name", "driver"))}/">{esc(leader.get("name", "Driver"))}</a> at {_pts(leader):.1f} expected points.</li>'
+        f'<li><strong>Strongest downside floor:</strong> <a href="/drivers/{plain_slug(safest.get("name", "driver"))}/">{esc(safest.get("name", "Driver"))}</a> has the highest driver P5 outcome ({float(safest.get("mc_total_p5") or 0):.1f} pts) in the 90% interval.</li>'
+        f'<li><strong>Largest upside gap:</strong> <a href="/drivers/{plain_slug(upside.get("name", "driver"))}/">{esc(upside.get("name", "Driver"))}</a> reaches {float(upside.get("mc_total_p95") or 0):.1f} pts at P95 versus {_pts(upside):.1f} expected.</li>'
+        f'<li><strong>Best points-per-million:</strong> <a href="/drivers/{plain_slug(value.get("name", "driver"))}/">{esc(value.get("name", "Driver"))}</a> at {float(value.get("value_score") or 0):.2f} PPM and ${_price(value):.1f}M.</li>'
+        f'<li><strong>Top constructor:</strong> <a href="/constructors/{plain_slug(constructor.get("name", "constructor"))}/">{esc(constructor.get("name", "Constructor"))}</a> at {_pts(constructor):.1f} expected points.</li>'
+        f'<li><strong>Risk watch among the top ten:</strong> <a href="/drivers/{plain_slug(risk_watch.get("name", "driver"))}/">{esc(risk_watch.get("name", "Driver"))}</a> carries the highest modeled DNF probability ({float(risk_watch.get("dnf_probability") or 0) * 100:.0f}%).</li>'
+        + deadline_html +
+        '</ul></div>'
+    )
+
+
 def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
     race = pred["race"]
     rn = pred["round"]
@@ -902,7 +959,7 @@ def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
     title = f"F1 Fantasy {short} {YEAR}: Picks, Captain & Tips | BoxBox"
     if is_current:
         desc = (f"F1 Fantasy picks for the {race} {YEAR}: driver and constructor projections, "
-                f"value picks, captain choice and a suggested lineup. Updated for race week.")
+                f"value picks, boost choice and a suggested lineup, with the current forecast phase and risk watch.")
     else:
         desc = (f"Our F1 Fantasy predictions for the {race} {YEAR} (round {rn}): top driver "
                 f"and constructor picks, best value (PPM) picks and the captain pick.")
@@ -961,14 +1018,16 @@ def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
     cap_line = ""
     if captain:
         cap_line = (
-            f'<div class="callout"><strong>Boost / captain pick: {esc(captain["name"])}</strong>'
-            f' &mdash; our highest projected scorer at the {esc(short)} '
-            f'(~{captain.get("expected_points",0):.0f} pts). This is the driver to put your '
-            f'<strong>3x Boost</strong> or <strong>Autopilot</strong> chip on. For value, '
+            f'<div class="callout"><strong>Leading boost candidate: {esc(captain["name"])}</strong>'
+            f' &mdash; our highest risk-adjusted expected scorer at the {esc(short)} '
+            f'(~{captain.get("expected_points",0):.0f} pts). If you use <strong>3x Boost</strong>, this is the model\'s leading candidate. '
+            f'<strong>Autopilot</strong> instead protects you by applying 2x to your best actual scorer. For value, '
             f'{esc(best_value["name"]) if best_value else "see the table"} offers the best points per million.</div>'
         )
 
-    when = (f"Predictions for the upcoming round &mdash; updated through race week."
+    phase = str(pred.get("phase") or "pre_fp").lower()
+    phase_label = {"pre_fp": "pre-practice", "post_fp": "post-practice", "post_quali": "post-qualifying"}.get(phase, phase.replace("_", "-"))
+    when = (f"This is the current {esc(phase_label)} forecast for the upcoming round."
             if is_current else
             f"Our archived predictions for round {rn}. The race has run &mdash; "
             f'see how the model did in the <a href="/#accuracy">Accuracy</a> tab.')
@@ -1011,7 +1070,7 @@ def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
         {
             **webpage_ld(title, canonical, desc, "Article"),
             "headline": title,
-            "dateModified": gen_date or datetime.now(timezone.utc).date().isoformat(),
+            "dateModified": max(gen_date or LINEUP_CONTENT_LASTMOD, LINEUP_CONTENT_LASTMOD),
             "about": [
                 "F1 Fantasy",
                 race,
@@ -1059,6 +1118,7 @@ def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
         + intro
         + cap_line
         + cta
+        + (current_race_brief_html(pred) if is_current else "")
         + suggested_lineup_html(pred)
         + "<h2>Top driver picks</h2>"
         + f"<p>Ranked by predicted fantasy points for the {esc(short)}. PPM = points per $million (value).</p>"

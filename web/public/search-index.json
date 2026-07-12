@@ -2,7 +2,7 @@
   "site": "https://boxboxf1fantasy.com",
   "name": "BoxBoxF1Fantasy",
   "description": "Free F1 Fantasy 2026 predictions, race picks, lineup optimizer, transfer tools, strategy guides, public data and accuracy tracking.",
-  "generated_at": "2026-07-12T22:14:03.214157+00:00",
+  "generated_at": "2026-07-12T22:23:01.957409+00:00",
   "language": "en",
   "current_round": 12,
   "current_race": "Belgian Grand Prix",
@@ -149,7 +149,7 @@
       "url": "https://boxboxf1fantasy.com/picks/belgian-gp-2026/",
       "path": "/picks/belgian-gp-2026/",
       "title": "F1 Fantasy Belgian GP 2026: Picks, Captain & Tips | BoxBox",
-      "description": "F1 Fantasy picks for the Belgian Grand Prix 2026: driver and constructor projections, value picks, captain choice and a suggested lineup. Updated for race week.",
+      "description": "F1 Fantasy picks for the Belgian Grand Prix 2026: driver and constructor projections, value picks, boost choice and a suggested lineup, with the current forecast phase and risk watch.",
       "h1": "F1 Fantasy Picks: Belgian Grand Prix 2026",
       "type": "race_picks_page"
     },

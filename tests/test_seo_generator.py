@@ -28,6 +28,29 @@ def current_predictions():
     }
 
 
+def race_week_predictions():
+    pred = current_predictions()
+    pred.update({
+        "round": 12,
+        "date": "2026-07-19",
+        "circuit": "Circuit de Spa-Francorchamps",
+        "phase": "pre_fp",
+        "generated_at": "2026-07-09T20:41:21Z",
+    })
+    for i, driver in enumerate(pred["drivers"]):
+        driver["value_score"] = 1.5 - i * 0.1
+        driver["mc_total_p5"] = -10 - i
+        driver["mc_total_p95"] = 40 + i
+        driver["dnf_probability"] = 0.05 + i * 0.02
+        driver["constructor"] = "X"
+        driver["predicted_quali"] = i + 1
+        driver["predicted_finish"] = i + 1
+    for constructor in pred["constructors"]:
+        constructor["value_score"] = 1.0
+        constructor["expected_pit_stop_pts"] = 3.0
+    return pred
+
+
 def test_suggested_lineup_matches_balanced_basis_and_normal_boost():
     lineup = seo.suggested_lineup(current_predictions())
     assert lineup is not None
@@ -59,3 +82,12 @@ def test_optimizer_page_includes_current_snapshot_and_item_list_schema():
 def test_guide_modified_date_uses_controlled_content_date():
     guide = seo.GUIDES[0]
     assert seo.guide_article_ld(guide, "https://example.com/guide/")["dateModified"] == seo.SEO_CONTENT_LASTMOD
+
+
+def test_current_race_page_is_phase_honest_and_explains_autopilot():
+    _slug, html = seo.render_race_page(race_week_predictions(), True)
+    assert "Pre-practice forecast" in html
+    assert "No current-weekend free-practice telemetry is included yet" in html
+    assert "July 18, 2026 14:00 UTC" in html
+    assert "Autopilot</strong> instead protects you by applying 2x to your best actual scorer" in html
+    assert "updated through race week" not in html
