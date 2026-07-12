@@ -361,10 +361,20 @@ select:focus, input:focus {
 }
 
 /* The raw HTML carries compact prediction cards for crawlers and no-JS users.
-   Keep that changing region out of the visual flow while the live app hydrates,
-   then reveal the complete cards once so slow connections do not see a jump. */
-.js-enabled #tab-drivers.is-hydrating > :not(.seo-intro) {
-    visibility: hidden;
+   Reserve the settled live-tool footprint while JavaScript upgrades that HTML,
+   avoiding a page-height jump on throttled connections. No-JS visitors do not
+   receive the js-enabled class, so the crawlable snapshot stays visible. */
+.driver-live-region {
+    display: flow-root;
+}
+.js-enabled .driver-live-region.is-hydrating {
+    content-visibility: hidden;
+    contain-intrinsic-size: 5896px;
+}
+@media (max-width: 768px) {
+    .js-enabled .driver-live-region.is-hydrating {
+        contain-intrinsic-size: 15580px;
+    }
 }
 
 .driver-card {

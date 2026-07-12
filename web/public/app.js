@@ -456,7 +456,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderHero();
     renderWeather();
     renderDrivers();
-    document.getElementById('tab-drivers')?.classList.remove('is-hydrating');
+    document.getElementById('driverLiveRegion')?.classList.remove('is-hydrating');
 
     // Deep links: ?team= pre-fills the Transfer Advisor; ?driver= / ?constructor=
     // jump to and highlight a single prediction card.
