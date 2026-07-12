@@ -1,6 +1,13 @@
 /* Styling for the static SEO landing pages under /picks/.
    Self-contained dark theme matching the main app's brand colours.
    Loaded from same-origin so it satisfies the site CSP (style-src 'self'). */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 300 900;
+  font-display: optional;
+  src: url('/fonts/inter-latin.woff2') format('woff2');
+}
 :root {
   --bg: #0a0d12;
   --card: #12161f;

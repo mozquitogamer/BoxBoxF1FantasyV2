@@ -1,3 +1,11 @@
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 300 900;
+    font-display: optional;
+    src: url('/fonts/inter-latin.woff2') format('woff2');
+}
+
 /* ============================================================
    BoxBoxF1Fantasy — Styles
    Dark F1-themed design with team color accents

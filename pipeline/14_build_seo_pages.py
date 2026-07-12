@@ -844,9 +844,7 @@ def page_head(title: str, desc: str, canonical: str, extra_ld: str = "") -> str:
 <link rel="alternate" type="text/plain" title="LLMs full site summary" href="/llms-full.txt">
 <link rel="alternate" type="application/json" title="BoxBoxF1Fantasy site index" href="/search-index.json">
 <link rel="author" type="text/plain" href="/humans.txt">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/picks/picks.css">
 {extra_ld}
 </head>
