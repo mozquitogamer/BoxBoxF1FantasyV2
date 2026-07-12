@@ -212,7 +212,7 @@ const _deferredLoaded = {};
 async function ensureLoaded(key, loadFn) {
     if (_deferredLoaded[key]) return;
     _deferredLoaded[key] = true;
-    await loadFn();
+    return loadFn();
 }
 
 function showTabSpinner(tabId) {
@@ -418,9 +418,14 @@ function renderChangelog() {
 
 // -- Init --
 document.addEventListener('DOMContentLoaded', async () => {
-    // Phase 1: Load only essential data for home page (Drivers tab)
-    await loadData();
-    await loadSeasonData();
+    // Phase 1: Fetch the compact home-page inputs in parallel. Official score
+    // history is needed before the first driver-card render to avoid repainting
+    // the entire grid when price brackets become available.
+    await Promise.all([
+        loadData(),
+        loadSeasonData(),
+        ensureLoaded('officialPoints', loadOfficialPoints),
+    ]);
 
     // User-scenarios overlay: load LocalStorage state (per round, auto-cleared
     // when the round changes). When the user dials a slider, we re-render the
@@ -469,12 +474,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (e) {}
     _tabRendered.drivers = true;
 
-    // Phase 3: Load deferred data in background (non-blocking)
-    // Official points, plus actuals only when an official round is incomplete.
-    ensureDriversData().then(() => {
+    // Phase 3: Load full actuals only when an official round is incomplete.
+    ensureDriversData().then(fallbackRoundCount => {
         showFallbackBanner();
-        // Re-render driver price brackets once official score history is ready.
-        renderDrivers();
+        if (fallbackRoundCount > 0) renderDrivers();
     });
     ensureWeatherData().then(() => renderWeather());
 
@@ -506,11 +509,12 @@ function officialRoundHasCompleteScores(roundNum) {
 }
 
 async function preloadPriceScoreFallbackData() {
-    if (!seasonSummary?.rounds) return;
-    const promises = seasonSummary.rounds
+    if (!seasonSummary?.rounds) return 0;
+    const fallbackRounds = seasonSummary.rounds
         .filter(r => r.has_actual && !officialRoundHasCompleteScores(r.round))
-        .map(r => loadActualData(r.round));
-    await Promise.all(promises);
+        .map(r => r.round);
+    await Promise.all(fallbackRounds.map(loadActualData));
+    return fallbackRounds.length;
 }
 
 async function loadOfficialPoints() {
