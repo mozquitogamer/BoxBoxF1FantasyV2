@@ -1065,7 +1065,7 @@ Vercel (auto-detects push, redeploys)
 boxboxf1fantasy.com (live within ~30-60 seconds)
 ```
 
-No build step. Vercel serves the contents of `web/public/` as-is. Static JSON in `web/public/data/` is loaded client-side by `app.js`.
+No build step. The Vercel project root is `web/`; its active config is `web/vercel.json`, and Vercel serves `web/public/` as-is. Static JSON in `web/public/data/` is loaded client-side by `app.js`.
 
 ### What lives where
 

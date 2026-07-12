@@ -188,7 +188,7 @@ BoxBoxF1FantasyV2/
 ├── dashboard/                         # Streamlit analytics dashboard (internal use)
 ├── .github/workflows/
 │   └── weather-update.yml             # Automated weather forecast every 6 hours
-├── vercel.json                        # Vercel deployment config
+├── web/vercel.json                    # Active Vercel config (project root is web/)
 ├── requirements.txt                   # Python dependencies
 └── CLAUDE.md                          # AI-agent context file (system overview)
 ```

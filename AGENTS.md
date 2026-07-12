@@ -78,7 +78,7 @@ BoxBoxF1FantasyV2/
 │       └── driver_history.json       # Per-driver/constructor actual points history
 ├── docs/                             # Technical documentation + user guide
 ├── dashboard/                        # Streamlit analytics dashboard
-└── vercel.json                       # Vercel deployment config
+└── web/vercel.json                   # Active Vercel config (project root is web/)
 ```
 
 ## Architecture: Two-Layer Feature System (+ weather conditioning)
