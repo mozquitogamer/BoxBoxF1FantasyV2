@@ -145,3 +145,17 @@ def test_current_weather_distinguishes_latest_feed_from_model_snapshot():
     assert "earlier medium-risk weather snapshot from July 9, 2026" in html
     assert "newer forecast has not yet been applied" in html
     assert "/data/weather.json" in html
+
+
+def test_directory_hubs_explain_resources_and_publish_faq_schema():
+    current = race_week_predictions()
+    tools_html = seo.render_list_hub("tools", "Tools", seo.TOOLS_HUB, seo.TOOLS, current)
+    guides_html = seo.render_list_hub("guides", "Guides", seo.GUIDES_HUB, seo.GUIDES, current)
+
+    assert "Choose a tool for the decision you need to make" in tools_html
+    assert "Current round: Test Grand Prix" in tools_html
+    assert "/picks/test-gp-2026/" in tools_html
+    assert 'class="listing-summary"' in tools_html
+    assert "Where should a new F1 Fantasy player start?" in guides_html
+    assert '"@type": "FAQPage"' in tools_html
+    assert '"@type": "FAQPage"' in guides_html

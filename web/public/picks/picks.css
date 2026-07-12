@@ -52,6 +52,9 @@ h3 { font-size: 1.02rem; margin: 18px 0 6px; color: var(--text); }
 p { margin: 10px 0; }
 ul, ol { color: var(--text); padding-left: 22px; margin: 8px 0; }
 li { margin: 5px 0; }
+main.wrap > p a,
+main.wrap > ul:not(.racelist) a,
+main.wrap > ol a { text-decoration: underline; text-underline-offset: 2px; }
 .footnav { margin: 0 0 8px; }
 .footnav a { color: var(--muted); }
 .lede { color: var(--text); font-size: 1.02rem; margin: 0 0 8px; }
@@ -83,6 +86,13 @@ tbody tr:hover { background: #11151d; }
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
 }
 .racelist .date { color: var(--muted); font-size: 0.82rem; }
+.listing-summary {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
 .tag { display: inline-block; background: var(--accent); color: #fff; font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
 .update-card {
   background: var(--card);

@@ -1025,7 +1025,7 @@ def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) 
         desc = (f"F1 Fantasy {short} {YEAR} picks: driver and constructor projections, best values, "
                 f"boost choice, optimized lineup, weather forecast and risk outlook.")
     else:
-        desc = (f"Our F1 Fantasy predictions for the {race} {YEAR} (round {rn}): top driver "
+        desc = (f"Our F1 Fantasy predictions for the {short} {YEAR} (round {rn}): top driver "
                 f"and constructor picks, best value (PPM) picks and the captain pick.")
 
     # --- top drivers table ---
@@ -1481,7 +1481,7 @@ def render_calendar_race_page(round_info: dict, track_data: dict) -> tuple[str, 
 
     title = f"F1 Fantasy {short} {YEAR}: Strategy Watchlist | BoxBox"
     desc = (
-        f"Early F1 Fantasy strategy watchlist for the {race} {YEAR}: race date, sprint status, "
+        f"Early F1 Fantasy strategy watchlist for the {short} {YEAR}: race date, sprint status, "
         "circuit traits and what to monitor before projections are published."
     )
 
@@ -3806,9 +3806,10 @@ def render_content_page(item: dict, current: dict | None = None) -> str:
     return page_head(item["title"], item["desc"], canonical, ld_block(ld_objs)) + body + FOOTER
 
 
-def render_list_hub(base, crumb, hub, items) -> str:
+def render_list_hub(base, crumb, hub, items, current: dict | None = None) -> str:
     canonical = f"{SITE}/{base}/"
-    ld = ld_block([
+    faqs = hub.get("faqs", [])
+    ld_objs = [
         webpage_ld(hub["title"], canonical, hub["desc"], "CollectionPage"),
         item_list_ld(
             f"BoxBoxF1Fantasy {crumb}",
@@ -3822,16 +3823,41 @@ def render_list_hub(base, crumb, hub, items) -> str:
                 {"@type": "ListItem", "position": 2, "name": crumb, "item": canonical},
             ],
         },
-    ])
+    ]
+    if faqs:
+        ld_objs.append({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q,
+                 "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        })
+    ld = ld_block(ld_objs)
     lis = "".join(
-        f'<li><span><a href="/{base}/{it["slug"]}/">{esc(it["crumb_self"])}</a></span></li>'
+        f'<li><span><a href="/{base}/{it["slug"]}/"><strong>{esc(it["crumb_self"])}</strong></a>'
+        f'<small class="listing-summary">{esc(it["desc"])}</small></span></li>'
         for it in items
     )
+    current_html = ""
+    if base == "tools" and current and current.get("race"):
+        race = current["race"]
+        current_html = (
+            f'<div class="callout"><strong>Current round: {esc(race)}.</strong> '
+            f'<a href="/picks/{slugify(race)}/">Read the race-week picks</a>, '
+            '<a href="/tools/lineup-optimizer/">build an optimized lineup</a>, or '
+            '<a href="/tools/team-compare/">compare up to three teams</a> before lock.</div>'
+        )
+    faq_section = (f'<h2>F1 Fantasy {esc(crumb.lower())} FAQ</h2>{_faq_html(faqs)}') if faqs else ""
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; {esc(crumb)}</p>'
         f'<h1>{esc(hub["h1"])}</h1>{hub["intro"]}'
         '<div class="btnrow"><a class="cta" href="/">Open live predictions &amp; tools &rarr;</a></div>'
-        f'<ul class="racelist">{lis}</ul>'
+        + current_html
+        + f'<h2>Browse all {esc(crumb.lower())}</h2><ul class="racelist">{lis}</ul>'
+        + hub.get("body", "")
+        + faq_section
     )
     return page_head(hub["title"], hub["desc"], canonical, ld) + body + FOOTER
 
@@ -3864,12 +3890,57 @@ GUIDES_HUB = {
     "h1": f"F1 Fantasy Guides ({YEAR})",
     "intro": '<p class="lede">Everything you need to play F1 Fantasy well in '
              f'{YEAR} &mdash; how scoring works, how to win, what the chips do, and where to spend your budget.</p>',
+    "body": (
+        "<h2>Where should a new F1 Fantasy player start?</h2>"
+        '<p>Begin with the <a href="/guides/f1-fantasy-for-beginners/">beginner guide</a> for the team format, budget, transfers and deadlines. '
+        'Then use the <a href="/guides/how-f1-fantasy-scoring-works/">2026 scoring guide</a> to understand why qualifying, overtakes, positions gained, DNFs and pit stops can make two similarly priced picks score very differently.</p>'
+        "<h2>Turn the rules into weekly decisions</h2>"
+        '<p>The <a href="/guides/how-to-win-f1-fantasy/">strategy guide</a> covers value, budget growth, transfer timing and dependable upside. '
+        'The <a href="/guides/f1-fantasy-chips-explained/">chips guide</a> explains all six chips, while the '
+        '<a href="/guides/drivers-vs-constructors-f1-fantasy/">drivers-versus-constructors guide</a> helps decide where the budget should go.</p>'
+        "<h2>Use guides together with current race data</h2>"
+        '<p>Rules and strategy are the stable layer; race-week projections are the changing layer. Check the '
+        '<a href="/picks/">current race picks</a> after practice, review confidence ranges and DNF risk, then use the '
+        '<a href="/tools/lineup-optimizer/">Optimizer</a> with your real budget near the lock deadline.</p>'
+    ),
+    "faqs": [
+        ("Which F1 Fantasy guide should a beginner read first?",
+         "Start with the beginner guide for team structure, budgets, transfers, chips and deadlines. Read the scoring guide next so you understand where driver and constructor points come from."),
+        ("Are these F1 Fantasy guides updated for 2026?",
+         "Yes. The guides describe the 2026 team format, scoring, sprint treatment, chip set and deadline behavior used by the BoxBox tools. The official game remains the final authority if its rules change."),
+        ("How do I turn F1 Fantasy strategy into a team?",
+         "Use the guides to choose a strategy, check the current race projections and uncertainty, then run the free lineup optimizer with your actual budget, locks, exclusions and chip choice."),
+    ],
 }
 TOOLS_HUB = {
     "title": "Free F1 Fantasy Tools 2026: Optimizer & Planner | BoxBox",
     "desc": "Free F1 Fantasy tools: a lineup optimizer, transfer planner, budget builder and points projections, all powered by machine-learning predictions.",
     "h1": "Free F1 Fantasy Tools",
     "intro": '<p class="lede">A free toolkit for F1 Fantasy, powered by machine-learning predictions and a 10,000-run race simulation &mdash; build the best lineup, plan transfers, grow your budget and check projected points.</p>',
+    "body": (
+        "<h2>Choose a tool for the decision you need to make</h2>"
+        '<ul><li><strong>Starting from scratch:</strong> use the <a href="/tools/lineup-optimizer/">Lineup Optimizer</a> to search every legal team within your budget.</li>'
+        '<li><strong>Choosing between drafts:</strong> use <a href="/tools/team-compare/">Team Compare</a> for up to three lineups, including expected points, downside, budget and projected price gain.</li>'
+        '<li><strong>Improving an existing team:</strong> use the <a href="/tools/transfer-planner/">Transfer Planner</a> to compare swaps and multi-round plans.</li>'
+        '<li><strong>Growing team value:</strong> combine the <a href="/tools/budget-builder/">Budget Builder</a> with the <a href="/tools/f1-fantasy-price-changes/">price-change outlook</a>.</li>'
+        '<li><strong>Checking one assumption:</strong> inspect <a href="/tools/f1-fantasy-predictions/">projections</a>, '
+        '<a href="/tools/f1-fantasy-value-picks/">value picks</a>, <a href="/tools/f1-fantasy-dnf-risk/">DNF risk</a> or the '
+        '<a href="/tools/f1-fantasy-deadline/">deadline calendar</a> directly.</li></ul>'
+        "<h2>When do the tools update?</h2>"
+        '<p>Before practice, the models use historical form, track fit, reliability and other priors. After free practice, current-weekend pace sharpens the actionable forecast. '
+        'Weather, DNF risk, prices and session results can move the best lineup, so recheck the current prediction phase before team lock.</p>'
+        "<h2>Why show confidence ranges as well as expected points?</h2>"
+        '<p>One projected total can hide very different outcomes. BoxBox combines deterministic projections with 10,000 simulations and publishes downside and upside ranges, '
+        'so you can distinguish a dependable pick from a volatile one instead of treating every forecast as certain.</p>'
+    ),
+    "faqs": [
+        ("Are the BoxBox F1 Fantasy tools free?",
+         "Yes. The predictions, optimizer, team comparison, transfer planning, budget tools and supporting data are free and require no login."),
+        ("Which F1 Fantasy tool should I use to build a team?",
+         "Use the Lineup Optimizer when starting from scratch. Use Team Compare when choosing among two or three drafts, and use the Transfer Planner when improving a team you already own."),
+        ("Do the F1 Fantasy tools update after practice?",
+         "Yes. The prediction pipeline can move from a priors-based pre-practice forecast to a post-practice forecast that includes current-weekend pace. The page states the active phase so you can judge freshness."),
+    ],
 }
 
 GUIDES = [
@@ -4035,7 +4106,7 @@ TOOLS = [
         "base": "tools", "crumb": "Tools", "slug": "f1-fantasy-predictions",
         "crumb_self": "Predictions",
         "title": "F1 Fantasy Predictions 2026: Drivers & Teams | BoxBox",
-        "desc": "Free F1 Fantasy 2026 predictions for every race weekend: projected driver points, constructor points, confidence ranges, value ratings, race picks and optimizer tools.",
+        "desc": "Free F1 Fantasy 2026 predictions: projected driver and constructor points, confidence ranges, value ratings, race picks and optimizer tools.",
         "features": ["Driver and constructor projections", "Expected fantasy points", "Confidence ranges", "Value ratings", "Race-week picks"],
         "h1": "F1 Fantasy Predictions 2026",
         "intro": '<p class="lede">Free F1 Fantasy predictions for every 2026 race weekend: driver points, constructor points, confidence ranges, value ratings and race-week picks.</p>',
@@ -4234,7 +4305,7 @@ TOOLS = [
         "lastmod": LINEUP_CONTENT_LASTMOD,
         "crumb_self": "Lineup Optimizer",
         "title": "Free F1 Fantasy Team Optimizer 2026 | BoxBox",
-        "desc": "A free F1 Fantasy lineup optimizer that checks all 1.4 million legal 5-driver, 2-constructor teams within your budget and ranks the best lineups using ML predictions.",
+        "desc": "Free F1 Fantasy optimizer checking 1.4 million legal teams within your budget using ML projections, chips, locks, exclusions and four strategies.",
         "features": ["Lineup optimization", "Budget-constrained team search", "Lock and exclude picks", "Chip-aware scoring", "Strategy modes"],
         "h1": "Free F1 Fantasy Team Optimizer 2026",
         "intro": '<p class="lede">Find the best F1 Fantasy team within your budget in about a second &mdash; free, no login.</p>',
@@ -4600,7 +4671,7 @@ def main() -> None:
             d = out_base / it["slug"]
             d.mkdir(parents=True, exist_ok=True)
             (d / "index.html").write_text(render_content_page(it, current), encoding="utf-8")
-        (out_base / "index.html").write_text(render_list_hub(base, crumb, hub, items), encoding="utf-8")
+        (out_base / "index.html").write_text(render_list_hub(base, crumb, hub, items, current), encoding="utf-8")
         rel_paths.append(f"{base}/")
         rel_paths += [f"{base}/{it['slug']}/" for it in items]
         if base == "tools" and current_lastmod:
