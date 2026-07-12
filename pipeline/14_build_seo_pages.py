@@ -244,6 +244,14 @@ def fmt_date(date_text: str) -> str:
         return str(date_text)
 
 
+def fmt_utc_datetime(date_text: str) -> str:
+    try:
+        dt = datetime.fromisoformat(str(date_text).replace("Z", "+00:00")).astimezone(timezone.utc)
+        return f"{dt.strftime('%B')} {dt.day}, {dt.year} {dt.strftime('%H:%M')} UTC"
+    except ValueError:
+        return str(date_text)
+
+
 def _driver_name(driver: dict) -> str:
     return f"{driver.get('first_name', '').strip()} {driver.get('last_name', '').strip()}".strip() or driver.get("driver_id", "")
 
@@ -260,6 +268,31 @@ def _circuit_coordinates() -> dict:
 
 
 CIRCUIT_COORDINATES = _circuit_coordinates()
+
+
+def load_lock_deadlines() -> list[dict]:
+    """Read the SPA lock-deadline table so static SEO pages match the live countdown."""
+    app_js = WEB / "app.js"
+    if not app_js.exists():
+        return []
+    text = app_js.read_text(encoding="utf-8")
+    match = re.search(r"const LOCK_DEADLINES = \[(.*?)\];", text, re.S)
+    if not match:
+        return []
+    entries = []
+    pattern = re.compile(
+        r"\{\s*round:\s*(?P<round>\d+),\s*race:\s*'(?P<race>[^']+)',\s*lock:\s*'(?P<lock>[^']+)',\s*sprint:\s*(?P<sprint>true|false)(?P<rest>[^}]*)\}",
+        re.S,
+    )
+    for m in pattern.finditer(match.group(1)):
+        entries.append({
+            "round": int(m.group("round")),
+            "race": m.group("race"),
+            "lock": m.group("lock"),
+            "sprint": m.group("sprint") == "true",
+            "cancelled": "cancelled: true" in m.group("rest"),
+        })
+    return entries
 
 
 def race_event_ld(race: str, race_date: str, circuit: str, canonical: str, desc: str) -> dict | None:
@@ -524,6 +557,58 @@ def current_price_changes_html(pred: dict) -> str:
         "<h3>Constructors under price-drop pressure</h3>"
         '<table><thead><tr><th>Constructor</th><th class="num">Price</th><th class="num">Exp. pts</th><th class="num">Pit pts</th><th class="num">Value</th><th>Signal</th></tr></thead><tbody>'
         + constructor_rows(constructor_pressure, pressure=True) +
+        "</tbody></table>"
+    )
+
+
+def current_deadlines_html() -> str:
+    deadlines = load_lock_deadlines()
+    if not deadlines:
+        return ""
+
+    now = datetime.now(timezone.utc)
+    active = [d for d in deadlines if not d.get("cancelled")]
+    next_deadline = None
+    for d in active:
+        try:
+            lock_dt = datetime.fromisoformat(d["lock"].replace("Z", "+00:00")).astimezone(timezone.utc)
+        except ValueError:
+            continue
+        if lock_dt > now:
+            next_deadline = d | {"lock_dt": lock_dt}
+            break
+
+    rows = []
+    for d in deadlines:
+        lock_text = fmt_utc_datetime(d["lock"])
+        if d.get("cancelled"):
+            status = "Cancelled"
+        else:
+            try:
+                status = "Upcoming" if datetime.fromisoformat(d["lock"].replace("Z", "+00:00")).astimezone(timezone.utc) > now else "Past"
+            except ValueError:
+                status = ""
+        lock_type = "Sprint race lock" if d.get("sprint") else "Qualifying lock"
+        rows.append(
+            f'<tr><td>R{d["round"]}</td><td>{esc(d["race"])}</td><td>{esc(lock_type)}</td>'
+            f'<td class="num">{esc(lock_text)}</td><td>{esc(status)}</td></tr>'
+        )
+
+    if next_deadline:
+        next_html = (
+            f'<div class="callout"><strong>Next F1 Fantasy deadline:</strong> R{next_deadline["round"]} '
+            f'{esc(next_deadline["race"])} locks at <strong>{esc(fmt_utc_datetime(next_deadline["lock"]))}</strong>. '
+            f'This is a {"sprint race" if next_deadline.get("sprint") else "qualifying"} lock deadline.</div>'
+        )
+    else:
+        next_html = '<div class="callout"><strong>No upcoming 2026 lock deadline is currently listed.</strong> Check the live app for the latest season state.</div>'
+
+    return (
+        "<h2>F1 Fantasy lock deadline table</h2>"
+        + next_html +
+        "<p>Times are shown in UTC. The live site header converts the next deadline to your browser's local time and counts down automatically.</p>"
+        '<table><thead><tr><th>Round</th><th>Race</th><th>Deadline type</th><th class="num">Lock time</th><th>Status</th></tr></thead><tbody>'
+        + "".join(rows) +
         "</tbody></table>"
     )
 
@@ -2971,6 +3056,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- F1 Fantasy predictions: https://boxboxf1fantasy.com/tools/f1-fantasy-predictions/",
         "- Best F1 Fantasy team: https://boxboxf1fantasy.com/tools/best-f1-fantasy-team/",
         "- F1 Fantasy captain picks: https://boxboxf1fantasy.com/tools/f1-fantasy-captain-picks/",
+        "- F1 Fantasy deadline: https://boxboxf1fantasy.com/tools/f1-fantasy-deadline/",
         "- F1 Fantasy value picks: https://boxboxf1fantasy.com/tools/f1-fantasy-value-picks/",
         "- F1 Fantasy price changes: https://boxboxf1fantasy.com/tools/f1-fantasy-price-changes/",
         "- Lineup optimizer: https://boxboxf1fantasy.com/tools/lineup-optimizer/",
@@ -3138,6 +3224,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "",
         "## Tools and what they do",
         "- F1 Fantasy predictions: current driver and constructor projections with confidence ranges and price/value signals.",
+        "- Deadline: current and full-season F1 Fantasy lock times, including sprint-weekend deadline context.",
         "- Lineup optimizer: searches legal 5-driver, 2-constructor teams under a budget and chip setting.",
         "- Team Compare: compares up to three manually entered teams by budget, expected points, budget gain, downside floor, volatility, and pick-level contribution.",
         "- Transfer Advisor: compares possible transfers from a user's current team, including budget and transfer penalties.",
@@ -3363,6 +3450,8 @@ def render_content_page(item: dict, current: dict | None = None) -> str:
         dynamic = current_value_picks_html(current)
     elif current and item.get("slug") == "f1-fantasy-price-changes":
         dynamic = current_price_changes_html(current)
+    elif item.get("slug") == "f1-fantasy-deadline":
+        dynamic = current_deadlines_html()
     elif current and item.get("slug") == "points-calculator":
         dynamic = current_points_calculator_html(current)
 
@@ -3686,6 +3775,34 @@ TOOLS = [
              "Yes. Team Compare marks the boosted driver contribution, including 2x, 3x and second-driver 2x behaviour when a chip applies."),
         ],
         "cta": ("/#drivers", "See captain pick projections →"),
+    },
+    {
+        "base": "tools", "crumb": "Tools", "slug": "f1-fantasy-deadline",
+        "crumb_self": "Deadline",
+        "title": "F1 Fantasy Deadline 2026: Lock Times & Race Calendar | BoxBox",
+        "desc": "F1 Fantasy 2026 deadline tracker: see each race lock time, sprint-weekend lock rule, next deadline and the full season deadline table.",
+        "features": ["F1 Fantasy lock deadlines", "Next race countdown context", "Sprint-weekend lock rules", "2026 race calendar", "UTC lock times"],
+        "h1": "F1 Fantasy Deadline 2026: Lock Times & Race Calendar",
+        "intro": '<p class="lede">Do not miss team lock. Check the next F1 Fantasy deadline and every 2026 race-week lock time in one place.</p>',
+        "body": (
+            "<h2>When does F1 Fantasy lock?</h2>"
+            "<p>On a normal race weekend, F1 Fantasy locks at the start of qualifying. On the 2026 sprint weekends listed here, the lock is the sprint race start, so always check the specific race row before making transfers or playing chips.</p>"
+            "<h2>How to use the deadline table</h2>"
+            "<p>Use the UTC table below as the crawlable season reference, then open the live site header for a local-time countdown. Make transfers, compare teams, and set chips before the listed lock time.</p>"
+            "<h2>What to check before lock</h2>"
+            "<ul><li>Review the latest prediction phase: pre-practice, post-practice or post-qualifying.</li>"
+            "<li>Check weather, DNF risk, price-change watchlists and confidence ranges.</li>"
+            "<li>Use Team Compare or the Optimizer for the final team choice before the deadline.</li></ul>"
+        ),
+        "faqs": [
+            ("When is the next F1 Fantasy deadline?",
+             "The table on this page shows the next upcoming F1 Fantasy lock deadline and the full 2026 race calendar. Times are listed in UTC, and the live BoxBox site header shows a local countdown."),
+            ("Does F1 Fantasy lock before qualifying?",
+             "On normal weekends, the team lock is at qualifying. On the 2026 sprint weekends listed here, the deadline is the sprint race start, so check the specific race row before making transfers."),
+            ("What should I do before the F1 Fantasy deadline?",
+             "Before lock, check updated projections, confidence ranges, DNF risk, weather, price-change signals and chip settings. Then compare your final team options in the Optimizer or Team Compare."),
+        ],
+        "cta": ("/", "Open live deadline countdown ->"),
     },
     {
         "base": "tools", "crumb": "Tools", "slug": "f1-fantasy-value-picks",
