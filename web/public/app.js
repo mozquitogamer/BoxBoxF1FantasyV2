@@ -88,6 +88,7 @@ let predictionsCache = {};
 let actualCache = {};
 let officialPointsData = null;   // official F1 Fantasy points per round
 let weatherData = null;          // weather forecast for current race weekend
+let chartJsPromise = null;        // loaded only when Race Deep Dive needs charts
 let tableSortColumn = null;
 let tableSortAsc = true;
 let allLineups = [];
@@ -134,6 +135,34 @@ const PPM_RATINGS = {
     POOR: 0.6,     // >= 0.6 PPM = Poor
     // < 0.6 = Terrible
 };
+
+function ensureChartJs() {
+    if (window.Chart) return Promise.resolve(true);
+    if (chartJsPromise) return chartJsPromise;
+
+    chartJsPromise = new Promise(resolve => {
+        const script = document.createElement('script');
+        const timeout = window.setTimeout(() => {
+            chartJsPromise = null;
+            resolve(false);
+        }, 8000);
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js';
+        script.integrity = 'sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC';
+        script.crossOrigin = 'anonymous';
+        script.async = true;
+        script.onload = () => {
+            window.clearTimeout(timeout);
+            resolve(!!window.Chart);
+        };
+        script.onerror = () => {
+            window.clearTimeout(timeout);
+            chartJsPromise = null;
+            resolve(false);
+        };
+        document.head.appendChild(script);
+    });
+    return chartJsPromise;
+}
 
 // -- Transfer Advisor tunables --
 // All advisor search constants in one place (mirrors MW_TUNABLES). The driver
@@ -8171,6 +8200,7 @@ async function renderDeepDive(roundNum) {
     if (!el) return;
     el.innerHTML = '<p class="no-data">Loading deep dive data...</p>';
 
+    const chartLoad = ensureChartJs();
     const dd = await loadDeepDiveData(roundNum);
     if (!dd || !dd.driver_metrics) {
         el.innerHTML = '<p class="no-data">No deep dive data available for this round.</p>';
@@ -8491,7 +8521,8 @@ async function renderDeepDive(roundNum) {
         h.addEventListener('click', () => h.parentElement.classList.toggle('open'));
     });
 
-    // Render charts
+    // Render charts after the tab-only Chart.js dependency is ready.
+    await chartLoad;
     renderDDCharts(dd, sorted);
 }
 

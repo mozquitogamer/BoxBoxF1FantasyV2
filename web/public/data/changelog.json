@@ -1,6 +1,19 @@
 {
   "entries": [
     {
+      "date": "2026-07-12",
+      "title": "Faster first load and better search discovery",
+      "tags": [
+        "feature",
+        "infra"
+      ],
+      "body": [
+        "BoxBox now has crawlable pages for race picks, every driver and constructor, strategy guides, deadlines, price changes, value picks, DNF risk, projected points and the main lineup tools. The live homepage also includes the current predictions in its initial page content, so search engines and answer tools can understand the useful data without waiting for the interactive app to load.",
+        "Search and agent discovery received a full cleanup: unique page titles and descriptions, canonical URL redirects, accurate sitemap dates, cleaner update feeds, structured data, public endpoint documentation and dedicated discovery files for AI assistants. These changes improve how the site can be found and cited; they do not change the prediction model or scoring calculations.",
+        "The first visit is lighter too. The chart library used by Race Deep Dive now loads only when that tab is opened, instead of being downloaded on every homepage visit. The Deep Dive charts behave as before, while the main predictions screen has less JavaScript to fetch and process."
+      ]
+    },
+    {
       "date": "2026-07-10",
       "title": "Team Compare added, with clearer budget and points breakdowns",
       "tags": [
