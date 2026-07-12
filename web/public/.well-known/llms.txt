@@ -39,6 +39,7 @@ Important pages:
 - F1 Fantasy deadline: https://boxboxf1fantasy.com/tools/f1-fantasy-deadline/
 - F1 Fantasy value picks: https://boxboxf1fantasy.com/tools/f1-fantasy-value-picks/
 - F1 Fantasy price changes: https://boxboxf1fantasy.com/tools/f1-fantasy-price-changes/
+- F1 Fantasy DNF risk: https://boxboxf1fantasy.com/tools/f1-fantasy-dnf-risk/
 - Lineup optimizer: https://boxboxf1fantasy.com/tools/lineup-optimizer/
 - Team compare: https://boxboxf1fantasy.com/tools/team-compare/
 - Transfer planner: https://boxboxf1fantasy.com/tools/transfer-planner/

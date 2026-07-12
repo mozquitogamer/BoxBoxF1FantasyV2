@@ -94,6 +94,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Multi-Week Transfer Planner: plans transfers across upcoming rounds using current predictions plus future-round projections.
 - Budget Builder: highlights value picks and expected price movement.
 - Price Changes: watchlist for likely risers and drop-pressure picks based on current value signals.
+- DNF Risk: current driver and constructor reliability estimates with Monte Carlo downside floors and upside ranges.
 - Points Calculator: helps estimate score components and understand scoring.
 - Accuracy: shows post-race prediction performance and confidence coverage.
 - Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.
@@ -164,6 +165,7 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - F1 Fantasy Deadline 2026: Lock Times & Race Calendar: https://boxboxf1fantasy.com/tools/f1-fantasy-deadline/ - F1 Fantasy 2026 deadline tracker: see each race lock time, sprint-weekend lock rule, next deadline and the full season deadline table.
 - F1 Fantasy Value Picks This Week: https://boxboxf1fantasy.com/tools/f1-fantasy-value-picks/ - Free F1 Fantasy value picks for the current race weekend: best points-per-million drivers, budget picks and constructor value based on live projections.
 - F1 Fantasy Price Changes: Rise & Fall Watchlist: https://boxboxf1fantasy.com/tools/f1-fantasy-price-changes/ - Free F1 Fantasy price-change watchlist for 2026: see drivers and constructors under price-rise or price-drop pressure based on current projections and value signals.
+- F1 Fantasy DNF Risk & Reliability 2026: https://boxboxf1fantasy.com/tools/f1-fantasy-dnf-risk/ - Current F1 Fantasy DNF risk for every driver and constructor, with reliability bands, expected points and Monte Carlo downside floors.
 - F1 Fantasy Lineup Optimizer (Free): https://boxboxf1fantasy.com/tools/lineup-optimizer/ - A free F1 Fantasy lineup optimizer that checks all 1.4 million legal 5-driver, 2-constructor teams within your budget and ranks the best lineups using ML predictions.
 - F1 Fantasy Team Compare & Score Calculator: https://boxboxf1fantasy.com/tools/team-compare/ - Free F1 Fantasy team compare tool: enter up to three candidate teams and compare budget, projected points, confidence range, price movement and downside risk.
 - F1 Fantasy Transfer Planner & Advisor: https://boxboxf1fantasy.com/tools/transfer-planner/ - Free F1 Fantasy transfer tools: find your best one or two swaps this week, or plan transfers and chips across 2-5 upcoming rounds with a multi-week planner.

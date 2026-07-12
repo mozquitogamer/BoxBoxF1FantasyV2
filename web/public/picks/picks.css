@@ -121,4 +121,11 @@ tbody tr:hover { background: #11151d; }
   h1 { font-size: 1.5rem; }
   .topbar .cta { padding: 7px 11px; font-size: 0.8rem; }
   th, td { padding: 7px 6px; font-size: 0.84rem; }
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
 }

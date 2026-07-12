@@ -561,6 +561,68 @@ def current_price_changes_html(pred: dict) -> str:
     )
 
 
+def current_dnf_risk_html(pred: dict) -> str:
+    drivers = pred.get("drivers", [])
+    constructors = pred.get("constructors", [])
+    if not drivers:
+        return ""
+
+    constructor_names = {
+        c.get("constructor_id"): c.get("name", c.get("constructor_id", ""))
+        for c in constructors
+    }
+    ranked_drivers = sorted(
+        drivers,
+        key=lambda d: (float(d.get("dnf_probability") or 0), -_pts(d)),
+        reverse=True,
+    )
+    ranked_constructors = sorted(
+        constructors,
+        key=lambda c: (float(c.get("dnf_probability") or 0), -_pts(c)),
+        reverse=True,
+    )
+
+    driver_rows = "".join(
+        f'<tr><td><a href="/drivers/{plain_slug(d.get("name", d.get("driver_id", "driver")))}/">{esc(d.get("name", d.get("driver_id", "")))}</a></td>'
+        f'<td>{esc(constructor_names.get(d.get("constructor"), str(d.get("constructor", "")).replace("_", " ").title()))}</td>'
+        f'<td class="num"><strong>{float(d.get("dnf_probability") or 0) * 100:.0f}%</strong></td>'
+        f'<td>{esc(d.get("risk", "-"))}</td>'
+        f'<td class="num">{_pts(d):.1f}</td>'
+        f'<td class="num">{float(d.get("mc_total_p5") or 0):.1f}</td>'
+        f'<td class="num">{float(d.get("mc_total_p95") or 0):.1f}</td>'
+        f'<td class="num">${_price(d):.1f}M</td></tr>'
+        for d in ranked_drivers
+    )
+    constructor_rows = "".join(
+        f'<tr><td><a href="/constructors/{plain_slug(c.get("name", c.get("constructor_id", "constructor")))}/">{esc(c.get("name", c.get("constructor_id", "")))}</a></td>'
+        f'<td class="num"><strong>{float(c.get("dnf_probability") or 0) * 100:.0f}%</strong></td>'
+        f'<td>{esc(c.get("risk", "-"))}</td>'
+        f'<td class="num">{_pts(c):.1f}</td>'
+        f'<td class="num">{float(c.get("mc_total_p5") or 0):.1f}</td>'
+        f'<td class="num">{float(c.get("mc_total_p95") or 0):.1f}</td>'
+        f'<td class="num">${_price(c):.1f}M</td></tr>'
+        for c in ranked_constructors
+    )
+
+    riskiest = ranked_drivers[0]
+    safest = min(ranked_drivers, key=lambda d: (float(d.get("dnf_probability") or 0), -_pts(d)))
+    return (
+        f'<h2>Current F1 Fantasy DNF risk: {esc(pred.get("race", "current race"))}</h2>'
+        f'<div class="callout"><strong>Current range:</strong> {esc(riskiest.get("name", "Highest-risk driver"))} has the highest published DNF risk at '
+        f'{float(riskiest.get("dnf_probability") or 0) * 100:.0f}%, while {esc(safest.get("name", "the lowest-risk driver"))} is lowest at '
+        f'{float(safest.get("dnf_probability") or 0) * 100:.0f}%.</div>'
+        '<p>DNF risk is an estimated probability, not a prediction that a retirement will happen. The downside floor is the 5th percentile from the 10,000-run simulation: roughly one outcome in twenty is worse.</p>'
+        '<table><thead><tr><th>Driver</th><th>Team</th><th class="num">DNF risk</th><th>Risk band</th><th class="num">Exp. pts</th><th class="num">P5 floor</th><th class="num">P95 upside</th><th class="num">Price</th></tr></thead><tbody>'
+        + driver_rows +
+        '</tbody></table>'
+        '<h2>Constructor reliability and downside</h2>'
+        '<p>The constructor DNF figure is the average driver risk for that team, not the probability that at least one car retires. Constructor floors also include both drivers, qualifying teamwork, pit stops and simulated race outcomes.</p>'
+        '<table><thead><tr><th>Constructor</th><th class="num">Avg. DNF risk</th><th>Risk band</th><th class="num">Exp. pts</th><th class="num">P5 floor</th><th class="num">P95 upside</th><th class="num">Price</th></tr></thead><tbody>'
+        + constructor_rows +
+        '</tbody></table>'
+    )
+
+
 def current_deadlines_html() -> str:
     deadlines = load_lock_deadlines()
     if not deadlines:
@@ -3126,6 +3188,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- F1 Fantasy deadline: https://boxboxf1fantasy.com/tools/f1-fantasy-deadline/",
         "- F1 Fantasy value picks: https://boxboxf1fantasy.com/tools/f1-fantasy-value-picks/",
         "- F1 Fantasy price changes: https://boxboxf1fantasy.com/tools/f1-fantasy-price-changes/",
+        "- F1 Fantasy DNF risk: https://boxboxf1fantasy.com/tools/f1-fantasy-dnf-risk/",
         "- Lineup optimizer: https://boxboxf1fantasy.com/tools/lineup-optimizer/",
         "- Team compare: https://boxboxf1fantasy.com/tools/team-compare/",
         "- Transfer planner: https://boxboxf1fantasy.com/tools/transfer-planner/",
@@ -3298,6 +3361,7 @@ def write_llms_full(rel_paths: list[str], current: dict, feed_items: list[dict])
         "- Multi-Week Transfer Planner: plans transfers across upcoming rounds using current predictions plus future-round projections.",
         "- Budget Builder: highlights value picks and expected price movement.",
         "- Price Changes: watchlist for likely risers and drop-pressure picks based on current value signals.",
+        "- DNF Risk: current driver and constructor reliability estimates with Monte Carlo downside floors and upside ranges.",
         "- Points Calculator: helps estimate score components and understand scoring.",
         "- Accuracy: shows post-race prediction performance and confidence coverage.",
         "- Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.",
@@ -3517,6 +3581,8 @@ def render_content_page(item: dict, current: dict | None = None) -> str:
         dynamic = current_value_picks_html(current)
     elif current and item.get("slug") == "f1-fantasy-price-changes":
         dynamic = current_price_changes_html(current)
+    elif current and item.get("slug") == "f1-fantasy-dnf-risk":
+        dynamic = current_dnf_risk_html(current)
     elif item.get("slug") == "f1-fantasy-deadline":
         dynamic = current_deadlines_html()
     elif current and item.get("slug") == "points-calculator":
@@ -3924,6 +3990,33 @@ TOOLS = [
              "No. Price movement matters, but the best transfer also needs to improve points, fit your budget and avoid unnecessary transfer penalties. Use price-change signals as one input, not the whole decision."),
         ],
         "cta": ("/#drivers", "Open live price-change cards ->"),
+    },
+    {
+        "base": "tools", "crumb": "Tools", "slug": "f1-fantasy-dnf-risk",
+        "crumb_self": "DNF Risk",
+        "title": "F1 Fantasy DNF Risk 2026: Driver Reliability | BoxBox",
+        "desc": "Current F1 Fantasy DNF risk for every driver and constructor, with reliability bands, expected points and Monte Carlo downside floors.",
+        "features": ["Driver DNF probabilities", "Constructor reliability", "Monte Carlo downside floors", "Risk bands", "No Negative chip context"],
+        "h1": "F1 Fantasy DNF Risk & Reliability 2026",
+        "intro": '<p class="lede">Compare current retirement risk and downside for every F1 Fantasy driver and constructor before choosing your team or playing No Negative.</p>',
+        "body": (
+            "<h2>What DNF risk means</h2>"
+            "<p>DNF risk estimates the chance that a driver does not finish. It feeds the projected score and the simulation range because a retirement can turn a strong pick into a negative fantasy result. It is a probability, not a guarantee.</p>"
+            "<h2>How to use the downside floor</h2>"
+            "<p>The P5 floor is the fifth percentile from 10,000 simulated weekends. It is a useful stress test: compare it with expected points and P95 upside to see whether a pick is steady or volatile.</p>"
+            "<h2>When No Negative becomes useful</h2>"
+            "<p>No Negative protects driver scores below zero. It becomes more attractive when several drivers in your real team combine elevated DNF risk with negative P5 floors, especially on wet or high-attrition weekends. Do not judge the chip from one risky driver alone.</p>"
+            '<div class="callout">Use this table alongside <a href="/tools/team-compare/">Team Compare</a>: the safer team is not always the highest projected team, but it may have a much better downside profile.</div>'
+        ),
+        "faqs": [
+            ("Which F1 Fantasy driver has the highest DNF risk?",
+             "The current table is sorted from highest to lowest published DNF risk and updates with the prediction pipeline. Check the top row for the latest race-week estimate."),
+            ("Should I use No Negative when DNF risk is high?",
+             "Consider No Negative when several drivers in your actual team have elevated retirement risk and negative downside floors. Weather and expected race chaos matter too, so use the full team profile rather than one driver."),
+            ("How often does BoxBox update DNF risk?",
+             "DNF estimates update with the race-week prediction pipeline as current-season reliability, recent form, weekend conditions and new session data become available."),
+        ],
+        "cta": ("/#drivers", "Open live driver risk cards ->"),
     },
     {
         "base": "tools", "crumb": "Tools", "slug": "lineup-optimizer",
