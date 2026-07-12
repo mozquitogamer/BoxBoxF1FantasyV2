@@ -815,11 +815,10 @@ def render_race_page(pred: dict, is_current: bool) -> tuple[str, str]:
     best_value = by_val[0] if by_val else None
     top3 = ", ".join(d["name"] for d in by_pts[:3])
 
-    title = f"F1 Fantasy {short} {YEAR}: Best Picks, Captain & Tips | BoxBox"
+    title = f"F1 Fantasy {short} {YEAR}: Picks, Captain & Tips | BoxBox"
     if is_current:
-        desc = (f"Free F1 Fantasy picks for the upcoming {race} {YEAR}: top driver and "
-                f"constructor predictions, best value (PPM) picks, the boost/captain pick "
-                f"and a suggested lineup. Updated for race week.")
+        desc = (f"F1 Fantasy picks for the {race} {YEAR}: driver and constructor projections, "
+                f"value picks, captain choice and a suggested lineup. Updated for race week.")
     else:
         desc = (f"Our F1 Fantasy predictions for the {race} {YEAR} (round {rn}): top driver "
                 f"and constructor picks, best value (PPM) picks and the captain pick.")
@@ -1076,9 +1075,9 @@ def render_future_race_page(pred: dict, horizon_generated_at: str = "") -> tuple
     best_value = value_drivers[0] if value_drivers else None
     captain = drivers[0] if drivers else None
 
-    title = f"F1 Fantasy {short} {YEAR}: Early Picks & Transfer Outlook | BoxBox"
-    desc = (f"Early F1 Fantasy outlook for the {race} {YEAR}: horizon projections, top drivers, "
-            f"constructor options and transfer-planning notes before race-week practice data arrives.")
+    title = f"F1 Fantasy {short} {YEAR}: Early Picks | BoxBox"
+    desc = (f"Early F1 Fantasy outlook for {race} {YEAR}: projected drivers, constructors and "
+            f"transfer notes before race-week practice data arrives.")
 
     driver_rows = []
     for i, d in enumerate(drivers[:TOP_DRIVERS], 1):
@@ -1230,7 +1229,7 @@ def render_calendar_race_page(round_info: dict, track_data: dict) -> tuple[str, 
     circuit_id, features = _race_track_features(race, track_data)
     is_sprint = bool(round_info.get("sprint"))
 
-    title = f"F1 Fantasy {short} {YEAR}: Early Strategy Watchlist | BoxBox"
+    title = f"F1 Fantasy {short} {YEAR}: Strategy Watchlist | BoxBox"
     desc = (
         f"Early F1 Fantasy strategy watchlist for the {race} {YEAR}: race date, sprint status, "
         "circuit traits and what to monitor before projections are published."
@@ -1387,7 +1386,7 @@ def render_drivers_hub(current: dict) -> str:
     constructors_by_id = {c["constructor_id"]: c for c in current.get("constructors", [])}
     race = current.get("race", "the current race")
     canonical = f"{SITE}/drivers/"
-    title = f"F1 Fantasy Driver Predictions {YEAR}: Points, Prices & Value | BoxBox"
+    title = f"F1 Fantasy Drivers {YEAR}: Points, Prices & Value | BoxBox"
     desc = f"Current F1 Fantasy {YEAR} driver projections: expected points, prices, value ratings, predicted qualifying and race finish for every driver."
     rows = []
     for i, d in enumerate(drivers, 1):
@@ -1525,7 +1524,7 @@ def render_constructors_hub(current: dict) -> str:
     constructors = sorted(current.get("constructors", []), key=lambda c: c.get("expected_points", 0), reverse=True)
     race = current.get("race", "the current race")
     canonical = f"{SITE}/constructors/"
-    title = f"F1 Fantasy Constructor Predictions {YEAR}: Points, Prices & Value | BoxBox"
+    title = f"F1 Fantasy Constructors {YEAR}: Points & Value | BoxBox"
     desc = f"Current F1 Fantasy {YEAR} constructor projections: expected points, prices, pit-stop points, value ratings and risk for every constructor."
     rows = []
     for i, c in enumerate(constructors, 1):
@@ -1575,7 +1574,7 @@ def render_constructor_page(constructor: dict, current: dict, rank: int, drivers
     short = short_race(race)
     slug = plain_slug(name)
     canonical = f"{SITE}/constructors/{slug}/"
-    title = f"{name} F1 Fantasy {YEAR}: Constructor Points, Price & Value | BoxBox"
+    title = f"{name} F1 Fantasy {YEAR}: Points, Price & Value | BoxBox"
     desc = (
         f"{name} F1 Fantasy {YEAR} constructor projection: {constructor.get('expected_points', 0):.1f} expected points "
         f"for the {short}, ${constructor.get('current_price', 0):.1f}M price, pit-stop points and value rating."
@@ -2008,6 +2007,11 @@ def _article_summary(article: dict) -> str:
     return raw[:220].rsplit(" ", 1)[0] + "..." if len(raw) > 220 else raw
 
 
+def _article_meta_description(article: dict) -> str:
+    summary = _article_summary(article)
+    return summary[:155].rsplit(" ", 1)[0] + "..." if len(summary) > 155 else summary
+
+
 def render_article_page(article: dict) -> str:
     """Crawlable long-form article page from web/public/data/articles.json."""
     slug = plain_slug(article.get("slug") or article.get("title") or "article")
@@ -2015,7 +2019,7 @@ def render_article_page(article: dict) -> str:
     article_title = clean_legacy_text(article.get("title", "F1 Fantasy Article"))
     published = clean_legacy_text(article.get("date", ""))
     tags = [clean_legacy_text(t) for t in article.get("tags", []) if t]
-    desc = _article_summary(article) or f"BoxBoxF1Fantasy article: {article_title}."
+    desc = _article_meta_description(article) or f"BoxBoxF1Fantasy article: {article_title}."
     title = f"{article_title} | BoxBoxF1Fantasy"
     content = clean_legacy_text(article.get("content_html", ""))
     tag_html = " ".join(f'<span class="tag">{esc(t)}</span>' for t in tags)
@@ -2050,7 +2054,7 @@ def render_articles_hub(articles_data: dict) -> str:
     """Crawlable article index for race previews/recaps and fantasy analysis."""
     canonical = f"{SITE}/articles/"
     articles = sorted(articles_data.get("articles", []), key=lambda a: a.get("date", ""), reverse=True)
-    title = f"F1 Fantasy Articles {YEAR}: Race Recaps, Previews & Strategy | BoxBox"
+    title = f"F1 Fantasy Articles {YEAR}: Recaps & Strategy | BoxBox"
     desc = "BoxBoxF1Fantasy articles: race weekend previews, recaps, fantasy takeaways, strategy notes and data-backed F1 Fantasy analysis."
 
     cards = []
@@ -2287,7 +2291,7 @@ def render_data_page(current: dict, season: dict) -> str:
     race = current.get("race", "current race")
     round_no = current.get("round", "")
     title = f"BoxBoxF1Fantasy Public Data: JSON Endpoints for F1 Fantasy {YEAR}"
-    desc = "Public BoxBoxF1Fantasy JSON data index for agents and developers: AI answer summary, predictions, season summary, driver history, track data, weather, articles, videos and changelog."
+    desc = "Public BoxBoxF1Fantasy JSON data for agents and developers: predictions, AI summary, season context, history, weather, articles and videos."
 
     rows = []
     dataset_ld = []
@@ -3586,7 +3590,7 @@ GUIDES_HUB = {
              f'{YEAR} &mdash; how scoring works, how to win, what the chips do, and where to spend your budget.</p>',
 }
 TOOLS_HUB = {
-    "title": "Free F1 Fantasy Tools: Optimizer, Transfer Planner & More | BoxBox",
+    "title": "Free F1 Fantasy Tools 2026: Optimizer & Planner | BoxBox",
     "desc": "Free F1 Fantasy tools: a lineup optimizer, transfer planner, budget builder and points projections, all powered by machine-learning predictions.",
     "h1": "Free F1 Fantasy Tools",
     "intro": '<p class="lede">A free toolkit for F1 Fantasy, powered by machine-learning predictions and a 10,000-run race simulation &mdash; build the best lineup, plan transfers, grow your budget and check projected points.</p>',
@@ -3597,7 +3601,7 @@ GUIDES = [
         "base": "guides", "crumb": "Guides", "slug": "how-f1-fantasy-scoring-works",
         "crumb_self": "How scoring works",
         "title": f"How F1 Fantasy Scoring Works ({YEAR}) | BoxBox",
-        "desc": f"A clear breakdown of F1 Fantasy {YEAR} scoring: qualifying and race points, overtakes, fastest lap, Driver of the Day, DNF penalties, sprint scoring and how constructor points (pit stops + qualifying bonus) work.",
+        "desc": f"F1 Fantasy {YEAR} scoring explained: qualifying, race and sprint points, overtakes, bonuses, DNF penalties, constructors and pit stops.",
         "h1": f"How F1 Fantasy Scoring Works ({YEAR})",
         "intro": '<p class="lede">Here is exactly how points are scored in F1 Fantasy for the '
                  f'{YEAR} season &mdash; for drivers, constructors and sprint weekends.</p>',
@@ -3641,7 +3645,7 @@ GUIDES = [
         "base": "guides", "crumb": "Guides", "slug": "how-to-win-f1-fantasy",
         "crumb_self": "How to win",
         "title": f"How to Win F1 Fantasy: Strategy Guide ({YEAR}) | BoxBox",
-        "desc": f"Six proven F1 Fantasy strategies for {YEAR}: build on value (PPM), grow your budget early, plan transfers ahead, time your chips, use constructors, and captain reliable upside.",
+        "desc": f"Six F1 Fantasy strategies for {YEAR}: find value, grow budget, plan transfers, time chips, use constructors well and captain reliable upside.",
         "h1": f"How to Win F1 Fantasy: Strategy Guide ({YEAR})",
         "intro": '<p class="lede">Consistency and value win F1 Fantasy leagues &mdash; not chasing one big week. Here are the six habits that actually move you up the table.</p>',
         "body": (
@@ -3696,8 +3700,8 @@ GUIDES = [
     {
         "base": "guides", "crumb": "Guides", "slug": "drivers-vs-constructors-f1-fantasy",
         "crumb_self": "Drivers vs constructors",
-        "title": "Drivers vs Constructors in F1 Fantasy: Which Matters More? | BoxBox",
-        "desc": "Is it better to spend on drivers or constructors in F1 Fantasy? How constructor scoring (both drivers + pit stops + qualifying bonus) compares to a premium driver's ceiling.",
+        "title": "F1 Fantasy Drivers vs Constructors: Which Is Better? | BoxBox",
+        "desc": "Should you spend more on F1 Fantasy drivers or constructors? Compare driver upside with two-car scoring, pit stops and constructor bonuses.",
         "h1": "Drivers vs Constructors in F1 Fantasy",
         "intro": '<p class="lede">The honest answer: you need both, and the best teams balance them. But here\'s how to weigh the trade-off.</p>',
         "body": (
@@ -3754,7 +3758,7 @@ TOOLS = [
     {
         "base": "tools", "crumb": "Tools", "slug": "f1-fantasy-predictions",
         "crumb_self": "Predictions",
-        "title": "F1 Fantasy Predictions 2026: Drivers, Constructors & Points | BoxBox",
+        "title": "F1 Fantasy Predictions 2026: Drivers & Teams | BoxBox",
         "desc": "Free F1 Fantasy 2026 predictions for every race weekend: projected driver points, constructor points, confidence ranges, value ratings, race picks and optimizer tools.",
         "features": ["Driver and constructor projections", "Expected fantasy points", "Confidence ranges", "Value ratings", "Race-week picks"],
         "h1": "F1 Fantasy Predictions 2026",
@@ -4023,7 +4027,7 @@ TOOLS = [
         "base": "tools", "crumb": "Tools", "slug": "points-calculator",
         "crumb_self": "Points Calculator",
         "title": "F1 Fantasy Points Calculator & Predictions (Free) | BoxBox",
-        "desc": "Free F1 Fantasy points calculator: see projected fantasy points for every driver and constructor this round, with a full breakdown of qualifying, race, overtakes and bonuses.",
+        "desc": "Free F1 Fantasy points calculator with current driver and constructor projections, qualifying and race breakdowns, overtakes and bonuses.",
         "features": ["Projected fantasy points", "Driver point breakdowns", "Constructor point breakdowns", "Confidence intervals", "What-if sliders"],
         "h1": "F1 Fantasy Points Calculator & Predictions",
         "intro": '<p class="lede">See how many fantasy points every driver and constructor is projected to score this round &mdash; with the full breakdown.</p>',
@@ -4051,7 +4055,7 @@ STATIC_PAGES = [
         "slug": "about",
         "crumb_self": "About",
         "title": "About BoxBoxF1Fantasy | Free F1 Fantasy Predictions & Tools",
-        "desc": "About BoxBoxF1Fantasy: a free, independent F1 Fantasy prediction site with driver and constructor projections, optimizer tools, race picks, accuracy tracking and contact details.",
+        "desc": "About BoxBoxF1Fantasy, an independent site with free F1 Fantasy predictions, optimizer tools, race picks, public accuracy and contact details.",
         "h1": "About BoxBoxF1Fantasy",
         "schema_type": "AboutPage",
         "intro": '<p class="lede">BoxBoxF1Fantasy is a free, independent F1 Fantasy prediction site built to help players make better driver, constructor, transfer and chip decisions.</p>',

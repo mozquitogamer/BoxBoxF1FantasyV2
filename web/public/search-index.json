@@ -2,7 +2,7 @@
   "site": "https://boxboxf1fantasy.com",
   "name": "BoxBoxF1Fantasy",
   "description": "Free F1 Fantasy 2026 predictions, race picks, lineup optimizer, transfer tools, strategy guides, public data and accuracy tracking.",
-  "generated_at": "2026-07-12T16:02:10.425801+00:00",
+  "generated_at": "2026-07-12T16:11:24.172232+00:00",
   "language": "en",
   "current_round": 12,
   "current_race": "Belgian Grand Prix",
@@ -37,7 +37,7 @@
       "url": "https://boxboxf1fantasy.com/",
       "path": "/",
       "title": "Free F1 Fantasy 2026 Predictions, Optimizer & Tips | BoxBox",
-      "description": "Free, data-driven F1 Fantasy 2026 tools: machine-learning driver & constructor predictions, a lineup optimizer, transfer planner and weekly tips — with a public accuracy record. Updated every race weekend.",
+      "description": "Free F1 Fantasy 2026 predictions, optimizer, transfer planner and weekly picks, powered by data with a transparent public accuracy record.",
       "h1": "F1 Fantasy 2026 Predictions, Optimizer & Tips",
       "type": "home_app"
     },
@@ -52,7 +52,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/abu-dhabi-gp-2026/",
       "path": "/picks/abu-dhabi-gp-2026/",
-      "title": "F1 Fantasy Abu Dhabi GP 2026: Early Strategy Watchlist | BoxBox",
+      "title": "F1 Fantasy Abu Dhabi GP 2026: Strategy Watchlist | BoxBox",
       "description": "Early F1 Fantasy strategy watchlist for the Abu Dhabi Grand Prix 2026: race date, sprint status, circuit traits and what to monitor before projections are published.",
       "h1": "F1 Fantasy Strategy Watchlist: Abu Dhabi Grand Prix 2026",
       "type": "race_picks_page"
@@ -60,7 +60,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/qatar-gp-2026/",
       "path": "/picks/qatar-gp-2026/",
-      "title": "F1 Fantasy Qatar GP 2026: Early Strategy Watchlist | BoxBox",
+      "title": "F1 Fantasy Qatar GP 2026: Strategy Watchlist | BoxBox",
       "description": "Early F1 Fantasy strategy watchlist for the Qatar Grand Prix 2026: race date, sprint status, circuit traits and what to monitor before projections are published.",
       "h1": "F1 Fantasy Strategy Watchlist: Qatar Grand Prix 2026",
       "type": "race_picks_page"
@@ -68,7 +68,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/las-vegas-gp-2026/",
       "path": "/picks/las-vegas-gp-2026/",
-      "title": "F1 Fantasy Las Vegas GP 2026: Early Strategy Watchlist | BoxBox",
+      "title": "F1 Fantasy Las Vegas GP 2026: Strategy Watchlist | BoxBox",
       "description": "Early F1 Fantasy strategy watchlist for the Las Vegas Grand Prix 2026: race date, sprint status, circuit traits and what to monitor before projections are published.",
       "h1": "F1 Fantasy Strategy Watchlist: Las Vegas Grand Prix 2026",
       "type": "race_picks_page"
@@ -76,7 +76,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/brazilian-gp-2026/",
       "path": "/picks/brazilian-gp-2026/",
-      "title": "F1 Fantasy Brazilian GP 2026: Early Strategy Watchlist | BoxBox",
+      "title": "F1 Fantasy Brazilian GP 2026: Strategy Watchlist | BoxBox",
       "description": "Early F1 Fantasy strategy watchlist for the Brazilian Grand Prix 2026: race date, sprint status, circuit traits and what to monitor before projections are published.",
       "h1": "F1 Fantasy Strategy Watchlist: Brazilian Grand Prix 2026",
       "type": "race_picks_page"
@@ -84,7 +84,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/mexican-gp-2026/",
       "path": "/picks/mexican-gp-2026/",
-      "title": "F1 Fantasy Mexican GP 2026: Early Strategy Watchlist | BoxBox",
+      "title": "F1 Fantasy Mexican GP 2026: Strategy Watchlist | BoxBox",
       "description": "Early F1 Fantasy strategy watchlist for the Mexican Grand Prix 2026: race date, sprint status, circuit traits and what to monitor before projections are published.",
       "h1": "F1 Fantasy Strategy Watchlist: Mexican Grand Prix 2026",
       "type": "race_picks_page"
@@ -92,7 +92,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/united-states-gp-2026/",
       "path": "/picks/united-states-gp-2026/",
-      "title": "F1 Fantasy United States GP 2026: Early Strategy Watchlist | BoxBox",
+      "title": "F1 Fantasy United States GP 2026: Strategy Watchlist | BoxBox",
       "description": "Early F1 Fantasy strategy watchlist for the United States Grand Prix 2026: race date, sprint status, circuit traits and what to monitor before projections are published.",
       "h1": "F1 Fantasy Strategy Watchlist: United States Grand Prix 2026",
       "type": "race_picks_page"
@@ -100,7 +100,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/singapore-gp-2026/",
       "path": "/picks/singapore-gp-2026/",
-      "title": "F1 Fantasy Singapore GP 2026: Early Strategy Watchlist | BoxBox",
+      "title": "F1 Fantasy Singapore GP 2026: Strategy Watchlist | BoxBox",
       "description": "Early F1 Fantasy strategy watchlist for the Singapore Grand Prix 2026: race date, sprint status, circuit traits and what to monitor before projections are published.",
       "h1": "F1 Fantasy Strategy Watchlist: Singapore Grand Prix 2026",
       "type": "race_picks_page"
@@ -108,55 +108,55 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/azerbaijan-gp-2026/",
       "path": "/picks/azerbaijan-gp-2026/",
-      "title": "F1 Fantasy Azerbaijan GP 2026: Early Picks & Transfer Outlook | BoxBox",
-      "description": "Early F1 Fantasy outlook for the Azerbaijan Grand Prix 2026: horizon projections, top drivers, constructor options and transfer-planning notes before race-week practice data arrives.",
+      "title": "F1 Fantasy Azerbaijan GP 2026: Early Picks | BoxBox",
+      "description": "Early F1 Fantasy outlook for Azerbaijan Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.",
       "h1": "F1 Fantasy Early Outlook: Azerbaijan Grand Prix 2026",
       "type": "race_picks_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/picks/spanish-gp-madrid-2026/",
       "path": "/picks/spanish-gp-madrid-2026/",
-      "title": "F1 Fantasy Spanish GP (Madrid) 2026: Early Picks & Transfer Outlook | BoxBox",
-      "description": "Early F1 Fantasy outlook for the Spanish Grand Prix (Madrid) 2026: horizon projections, top drivers, constructor options and transfer-planning notes before race-week practice data arrives.",
+      "title": "F1 Fantasy Spanish GP (Madrid) 2026: Early Picks | BoxBox",
+      "description": "Early F1 Fantasy outlook for Spanish Grand Prix (Madrid) 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.",
       "h1": "F1 Fantasy Early Outlook: Spanish Grand Prix (Madrid) 2026",
       "type": "race_picks_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/picks/italian-gp-2026/",
       "path": "/picks/italian-gp-2026/",
-      "title": "F1 Fantasy Italian GP 2026: Early Picks & Transfer Outlook | BoxBox",
-      "description": "Early F1 Fantasy outlook for the Italian Grand Prix 2026: horizon projections, top drivers, constructor options and transfer-planning notes before race-week practice data arrives.",
+      "title": "F1 Fantasy Italian GP 2026: Early Picks | BoxBox",
+      "description": "Early F1 Fantasy outlook for Italian Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.",
       "h1": "F1 Fantasy Early Outlook: Italian Grand Prix 2026",
       "type": "race_picks_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/picks/dutch-gp-2026/",
       "path": "/picks/dutch-gp-2026/",
-      "title": "F1 Fantasy Dutch GP 2026: Early Picks & Transfer Outlook | BoxBox",
-      "description": "Early F1 Fantasy outlook for the Dutch Grand Prix 2026: horizon projections, top drivers, constructor options and transfer-planning notes before race-week practice data arrives.",
+      "title": "F1 Fantasy Dutch GP 2026: Early Picks | BoxBox",
+      "description": "Early F1 Fantasy outlook for Dutch Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.",
       "h1": "F1 Fantasy Early Outlook: Dutch Grand Prix 2026",
       "type": "race_picks_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/picks/hungarian-gp-2026/",
       "path": "/picks/hungarian-gp-2026/",
-      "title": "F1 Fantasy Hungarian GP 2026: Early Picks & Transfer Outlook | BoxBox",
-      "description": "Early F1 Fantasy outlook for the Hungarian Grand Prix 2026: horizon projections, top drivers, constructor options and transfer-planning notes before race-week practice data arrives.",
+      "title": "F1 Fantasy Hungarian GP 2026: Early Picks | BoxBox",
+      "description": "Early F1 Fantasy outlook for Hungarian Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.",
       "h1": "F1 Fantasy Early Outlook: Hungarian Grand Prix 2026",
       "type": "race_picks_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/picks/belgian-gp-2026/",
       "path": "/picks/belgian-gp-2026/",
-      "title": "F1 Fantasy Belgian GP 2026: Best Picks, Captain & Tips | BoxBox",
-      "description": "Free F1 Fantasy picks for the upcoming Belgian Grand Prix 2026: top driver and constructor predictions, best value (PPM) picks, the boost/captain pick and a suggested lineup. Updated for race week.",
+      "title": "F1 Fantasy Belgian GP 2026: Picks, Captain & Tips | BoxBox",
+      "description": "F1 Fantasy picks for the Belgian Grand Prix 2026: driver and constructor projections, value picks, captain choice and a suggested lineup. Updated for race week.",
       "h1": "F1 Fantasy Picks: Belgian Grand Prix 2026",
       "type": "race_picks_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/picks/british-gp-2026/",
       "path": "/picks/british-gp-2026/",
-      "title": "F1 Fantasy British GP 2026: Best Picks, Captain & Tips | BoxBox",
+      "title": "F1 Fantasy British GP 2026: Picks, Captain & Tips | BoxBox",
       "description": "Our F1 Fantasy predictions for the British Grand Prix 2026 (round 11): top driver and constructor picks, best value (PPM) picks and the captain pick.",
       "h1": "F1 Fantasy Picks: British Grand Prix 2026",
       "type": "race_picks_page"
@@ -164,7 +164,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/austrian-gp-2026/",
       "path": "/picks/austrian-gp-2026/",
-      "title": "F1 Fantasy Austrian GP 2026: Best Picks, Captain & Tips | BoxBox",
+      "title": "F1 Fantasy Austrian GP 2026: Picks, Captain & Tips | BoxBox",
       "description": "Our F1 Fantasy predictions for the Austrian Grand Prix 2026 (round 10): top driver and constructor picks, best value (PPM) picks and the captain pick.",
       "h1": "F1 Fantasy Picks: Austrian Grand Prix 2026",
       "type": "race_picks_page"
@@ -172,7 +172,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/spanish-gp-2026/",
       "path": "/picks/spanish-gp-2026/",
-      "title": "F1 Fantasy Spanish GP 2026: Best Picks, Captain & Tips | BoxBox",
+      "title": "F1 Fantasy Spanish GP 2026: Picks, Captain & Tips | BoxBox",
       "description": "Our F1 Fantasy predictions for the Spanish Grand Prix 2026 (round 9): top driver and constructor picks, best value (PPM) picks and the captain pick.",
       "h1": "F1 Fantasy Picks: Spanish Grand Prix 2026",
       "type": "race_picks_page"
@@ -180,7 +180,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/monaco-gp-2026/",
       "path": "/picks/monaco-gp-2026/",
-      "title": "F1 Fantasy Monaco GP 2026: Best Picks, Captain & Tips | BoxBox",
+      "title": "F1 Fantasy Monaco GP 2026: Picks, Captain & Tips | BoxBox",
       "description": "Our F1 Fantasy predictions for the Monaco Grand Prix 2026 (round 8): top driver and constructor picks, best value (PPM) picks and the captain pick.",
       "h1": "F1 Fantasy Picks: Monaco Grand Prix 2026",
       "type": "race_picks_page"
@@ -188,7 +188,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/canadian-gp-2026/",
       "path": "/picks/canadian-gp-2026/",
-      "title": "F1 Fantasy Canadian GP 2026: Best Picks, Captain & Tips | BoxBox",
+      "title": "F1 Fantasy Canadian GP 2026: Picks, Captain & Tips | BoxBox",
       "description": "Our F1 Fantasy predictions for the Canadian Grand Prix 2026 (round 7): top driver and constructor picks, best value (PPM) picks and the captain pick.",
       "h1": "F1 Fantasy Picks: Canadian Grand Prix 2026",
       "type": "race_picks_page"
@@ -196,7 +196,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/miami-gp-2026/",
       "path": "/picks/miami-gp-2026/",
-      "title": "F1 Fantasy Miami GP 2026: Best Picks, Captain & Tips | BoxBox",
+      "title": "F1 Fantasy Miami GP 2026: Picks, Captain & Tips | BoxBox",
       "description": "Our F1 Fantasy predictions for the Miami Grand Prix 2026 (round 6): top driver and constructor picks, best value (PPM) picks and the captain pick.",
       "h1": "F1 Fantasy Picks: Miami Grand Prix 2026",
       "type": "race_picks_page"
@@ -204,7 +204,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/japanese-gp-2026/",
       "path": "/picks/japanese-gp-2026/",
-      "title": "F1 Fantasy Japanese GP 2026: Best Picks, Captain & Tips | BoxBox",
+      "title": "F1 Fantasy Japanese GP 2026: Picks, Captain & Tips | BoxBox",
       "description": "Our F1 Fantasy predictions for the Japanese Grand Prix 2026 (round 3): top driver and constructor picks, best value (PPM) picks and the captain pick.",
       "h1": "F1 Fantasy Picks: Japanese Grand Prix 2026",
       "type": "race_picks_page"
@@ -212,7 +212,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/chinese-gp-2026/",
       "path": "/picks/chinese-gp-2026/",
-      "title": "F1 Fantasy Chinese GP 2026: Best Picks, Captain & Tips | BoxBox",
+      "title": "F1 Fantasy Chinese GP 2026: Picks, Captain & Tips | BoxBox",
       "description": "Our F1 Fantasy predictions for the Chinese Grand Prix 2026 (round 2): top driver and constructor picks, best value (PPM) picks and the captain pick.",
       "h1": "F1 Fantasy Picks: Chinese Grand Prix 2026",
       "type": "race_picks_page"
@@ -220,7 +220,7 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/australian-gp-2026/",
       "path": "/picks/australian-gp-2026/",
-      "title": "F1 Fantasy Australian GP 2026: Best Picks, Captain & Tips | BoxBox",
+      "title": "F1 Fantasy Australian GP 2026: Picks, Captain & Tips | BoxBox",
       "description": "Our F1 Fantasy predictions for the Australian Grand Prix 2026 (round 1): top driver and constructor picks, best value (PPM) picks and the captain pick.",
       "h1": "F1 Fantasy Picks: Australian Grand Prix 2026",
       "type": "race_picks_page"
@@ -228,7 +228,7 @@
     {
       "url": "https://boxboxf1fantasy.com/drivers/",
       "path": "/drivers/",
-      "title": "F1 Fantasy Driver Predictions 2026: Points, Prices & Value | BoxBox",
+      "title": "F1 Fantasy Drivers 2026: Points, Prices & Value | BoxBox",
       "description": "Current F1 Fantasy 2026 driver projections: expected points, prices, value ratings, predicted qualifying and race finish for every driver.",
       "h1": "F1 Fantasy Driver Predictions (2026)",
       "type": "driver_hub"
@@ -412,7 +412,7 @@
     {
       "url": "https://boxboxf1fantasy.com/constructors/",
       "path": "/constructors/",
-      "title": "F1 Fantasy Constructor Predictions 2026: Points, Prices & Value | BoxBox",
+      "title": "F1 Fantasy Constructors 2026: Points & Value | BoxBox",
       "description": "Current F1 Fantasy 2026 constructor projections: expected points, prices, pit-stop points, value ratings and risk for every constructor.",
       "h1": "F1 Fantasy Constructor Predictions (2026)",
       "type": "constructor_hub"
@@ -420,7 +420,7 @@
     {
       "url": "https://boxboxf1fantasy.com/constructors/mercedes/",
       "path": "/constructors/mercedes/",
-      "title": "Mercedes F1 Fantasy 2026: Constructor Points, Price & Value | BoxBox",
+      "title": "Mercedes F1 Fantasy 2026: Points, Price & Value | BoxBox",
       "description": "Mercedes F1 Fantasy 2026 constructor projection: 54.8 expected points for the Belgian GP, $31.7M price, pit-stop points and value rating.",
       "h1": "Mercedes F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
@@ -428,7 +428,7 @@
     {
       "url": "https://boxboxf1fantasy.com/constructors/ferrari/",
       "path": "/constructors/ferrari/",
-      "title": "Ferrari F1 Fantasy 2026: Constructor Points, Price & Value | BoxBox",
+      "title": "Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox",
       "description": "Ferrari F1 Fantasy 2026 constructor projection: 41.0 expected points for the Belgian GP, $25.7M price, pit-stop points and value rating.",
       "h1": "Ferrari F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
@@ -436,7 +436,7 @@
     {
       "url": "https://boxboxf1fantasy.com/constructors/red-bull/",
       "path": "/constructors/red-bull/",
-      "title": "Red Bull F1 Fantasy 2026: Constructor Points, Price & Value | BoxBox",
+      "title": "Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox",
       "description": "Red Bull F1 Fantasy 2026 constructor projection: 40.2 expected points for the Belgian GP, $30.0M price, pit-stop points and value rating.",
       "h1": "Red Bull F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
@@ -444,7 +444,7 @@
     {
       "url": "https://boxboxf1fantasy.com/constructors/mclaren/",
       "path": "/constructors/mclaren/",
-      "title": "McLaren F1 Fantasy 2026: Constructor Points, Price & Value | BoxBox",
+      "title": "McLaren F1 Fantasy 2026: Points, Price & Value | BoxBox",
       "description": "McLaren F1 Fantasy 2026 constructor projection: 29.0 expected points for the Belgian GP, $30.1M price, pit-stop points and value rating.",
       "h1": "McLaren F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
@@ -452,7 +452,7 @@
     {
       "url": "https://boxboxf1fantasy.com/constructors/racing-bulls/",
       "path": "/constructors/racing-bulls/",
-      "title": "Racing Bulls F1 Fantasy 2026: Constructor Points, Price & Value | BoxBox",
+      "title": "Racing Bulls F1 Fantasy 2026: Points, Price & Value | BoxBox",
       "description": "Racing Bulls F1 Fantasy 2026 constructor projection: 21.0 expected points for the Belgian GP, $11.1M price, pit-stop points and value rating.",
       "h1": "Racing Bulls F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
@@ -460,7 +460,7 @@
     {
       "url": "https://boxboxf1fantasy.com/constructors/alpine/",
       "path": "/constructors/alpine/",
-      "title": "Alpine F1 Fantasy 2026: Constructor Points, Price & Value | BoxBox",
+      "title": "Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox",
       "description": "Alpine F1 Fantasy 2026 constructor projection: 12.9 expected points for the Belgian GP, $17.3M price, pit-stop points and value rating.",
       "h1": "Alpine F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
@@ -468,7 +468,7 @@
     {
       "url": "https://boxboxf1fantasy.com/constructors/audi/",
       "path": "/constructors/audi/",
-      "title": "Audi F1 Fantasy 2026: Constructor Points, Price & Value | BoxBox",
+      "title": "Audi F1 Fantasy 2026: Points, Price & Value | BoxBox",
       "description": "Audi F1 Fantasy 2026 constructor projection: 7.3 expected points for the Belgian GP, $5.0M price, pit-stop points and value rating.",
       "h1": "Audi F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
@@ -476,7 +476,7 @@
     {
       "url": "https://boxboxf1fantasy.com/constructors/haas/",
       "path": "/constructors/haas/",
-      "title": "Haas F1 Fantasy 2026: Constructor Points, Price & Value | BoxBox",
+      "title": "Haas F1 Fantasy 2026: Points, Price & Value | BoxBox",
       "description": "Haas F1 Fantasy 2026 constructor projection: 2.8 expected points for the Belgian GP, $10.2M price, pit-stop points and value rating.",
       "h1": "Haas F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
@@ -484,7 +484,7 @@
     {
       "url": "https://boxboxf1fantasy.com/constructors/williams/",
       "path": "/constructors/williams/",
-      "title": "Williams F1 Fantasy 2026: Constructor Points, Price & Value | BoxBox",
+      "title": "Williams F1 Fantasy 2026: Points, Price & Value | BoxBox",
       "description": "Williams F1 Fantasy 2026 constructor projection: -3.3 expected points for the Belgian GP, $14.4M price, pit-stop points and value rating.",
       "h1": "Williams F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
@@ -492,7 +492,7 @@
     {
       "url": "https://boxboxf1fantasy.com/constructors/cadillac/",
       "path": "/constructors/cadillac/",
-      "title": "Cadillac F1 Fantasy 2026: Constructor Points, Price & Value | BoxBox",
+      "title": "Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox",
       "description": "Cadillac F1 Fantasy 2026 constructor projection: -11.6 expected points for the Belgian GP, $4.8M price, pit-stop points and value rating.",
       "h1": "Cadillac F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
@@ -500,7 +500,7 @@
     {
       "url": "https://boxboxf1fantasy.com/constructors/aston-martin/",
       "path": "/constructors/aston-martin/",
-      "title": "Aston Martin F1 Fantasy 2026: Constructor Points, Price & Value | BoxBox",
+      "title": "Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox",
       "description": "Aston Martin F1 Fantasy 2026 constructor projection: -14.6 expected points for the Belgian GP, $6.3M price, pit-stop points and value rating.",
       "h1": "Aston Martin F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
@@ -517,7 +517,7 @@
       "url": "https://boxboxf1fantasy.com/guides/how-f1-fantasy-scoring-works/",
       "path": "/guides/how-f1-fantasy-scoring-works/",
       "title": "How F1 Fantasy Scoring Works (2026) | BoxBox",
-      "description": "A clear breakdown of F1 Fantasy 2026 scoring: qualifying and race points, overtakes, fastest lap, Driver of the Day, DNF penalties, sprint scoring and how constructor points (pit stops + qualifying bonus) work.",
+      "description": "F1 Fantasy 2026 scoring explained: qualifying, race and sprint points, overtakes, bonuses, DNF penalties, constructors and pit stops.",
       "h1": "How F1 Fantasy Scoring Works (2026)",
       "type": "guide_page"
     },
@@ -525,7 +525,7 @@
       "url": "https://boxboxf1fantasy.com/guides/how-to-win-f1-fantasy/",
       "path": "/guides/how-to-win-f1-fantasy/",
       "title": "How to Win F1 Fantasy: Strategy Guide (2026) | BoxBox",
-      "description": "Six proven F1 Fantasy strategies for 2026: build on value (PPM), grow your budget early, plan transfers ahead, time your chips, use constructors, and captain reliable upside.",
+      "description": "Six F1 Fantasy strategies for 2026: find value, grow budget, plan transfers, time chips, use constructors well and captain reliable upside.",
       "h1": "How to Win F1 Fantasy: Strategy Guide (2026)",
       "type": "guide_page"
     },
@@ -540,8 +540,8 @@
     {
       "url": "https://boxboxf1fantasy.com/guides/drivers-vs-constructors-f1-fantasy/",
       "path": "/guides/drivers-vs-constructors-f1-fantasy/",
-      "title": "Drivers vs Constructors in F1 Fantasy: Which Matters More? | BoxBox",
-      "description": "Is it better to spend on drivers or constructors in F1 Fantasy? How constructor scoring (both drivers + pit stops + qualifying bonus) compares to a premium driver's ceiling.",
+      "title": "F1 Fantasy Drivers vs Constructors: Which Is Better? | BoxBox",
+      "description": "Should you spend more on F1 Fantasy drivers or constructors? Compare driver upside with two-car scoring, pit stops and constructor bonuses.",
       "h1": "Drivers vs Constructors in F1 Fantasy",
       "type": "guide_page"
     },
@@ -556,7 +556,7 @@
     {
       "url": "https://boxboxf1fantasy.com/tools/",
       "path": "/tools/",
-      "title": "Free F1 Fantasy Tools: Optimizer, Transfer Planner & More | BoxBox",
+      "title": "Free F1 Fantasy Tools 2026: Optimizer & Planner | BoxBox",
       "description": "Free F1 Fantasy tools: a lineup optimizer, transfer planner, budget builder and points projections, all powered by machine-learning predictions.",
       "h1": "Free F1 Fantasy Tools",
       "type": "tools_hub"
@@ -564,7 +564,7 @@
     {
       "url": "https://boxboxf1fantasy.com/tools/f1-fantasy-predictions/",
       "path": "/tools/f1-fantasy-predictions/",
-      "title": "F1 Fantasy Predictions 2026: Drivers, Constructors & Points | BoxBox",
+      "title": "F1 Fantasy Predictions 2026: Drivers & Teams | BoxBox",
       "description": "Free F1 Fantasy 2026 predictions for every race weekend: projected driver points, constructor points, confidence ranges, value ratings, race picks and optimizer tools.",
       "h1": "F1 Fantasy Predictions 2026",
       "type": "tool_page"
@@ -645,7 +645,7 @@
       "url": "https://boxboxf1fantasy.com/tools/points-calculator/",
       "path": "/tools/points-calculator/",
       "title": "F1 Fantasy Points Calculator & Predictions (Free) | BoxBox",
-      "description": "Free F1 Fantasy points calculator: see projected fantasy points for every driver and constructor this round, with a full breakdown of qualifying, race, overtakes and bonuses.",
+      "description": "Free F1 Fantasy points calculator with current driver and constructor projections, qualifying and race breakdowns, overtakes and bonuses.",
       "h1": "F1 Fantasy Points Calculator & Predictions",
       "type": "tool_page"
     },
@@ -676,7 +676,7 @@
     {
       "url": "https://boxboxf1fantasy.com/articles/",
       "path": "/articles/",
-      "title": "F1 Fantasy Articles 2026: Race Recaps, Previews & Strategy | BoxBox",
+      "title": "F1 Fantasy Articles 2026: Recaps & Strategy | BoxBox",
       "description": "BoxBoxF1Fantasy articles: race weekend previews, recaps, fantasy takeaways, strategy notes and data-backed F1 Fantasy analysis.",
       "h1": "F1 Fantasy Articles (2026)",
       "type": "articles_hub"
@@ -685,7 +685,7 @@
       "url": "https://boxboxf1fantasy.com/articles/2026-04-28-round3-japanese-gp-recap/",
       "path": "/articles/2026-04-28-round3-japanese-gp-recap/",
       "title": "Round 3 — Japanese GP Recap & Miami Preview | BoxBoxF1Fantasy",
-      "description": "Japan Delivered the Goods Who’d have thought that McLaren would be on the podium after a dismal first two races of the season? And we have a new championship leader. Kimi Antonelli leads over George Russell by 9...",
+      "description": "Japan Delivered the Goods Who’d have thought that McLaren would be on the podium after a dismal first two races of the season? And we have a new...",
       "h1": "Round 3 — Japanese GP Recap & Miami Preview",
       "type": "article_page"
     },
@@ -693,7 +693,7 @@
       "url": "https://boxboxf1fantasy.com/articles/2026-03-25-round-japanese-gp/",
       "path": "/articles/2026-03-25-round-japanese-gp/",
       "title": "Round 3 — Japanese Grand Prix Preview | BoxBoxF1Fantasy",
-      "description": "Japanese Grand Prix Preview We are hot off a sprint weekend in China and we head into the Japanese Grand Prix. Some teams, including Aston Martin with their Honda power-unit, are bringing upgrades to table in hopes of...",
+      "description": "Japanese Grand Prix Preview We are hot off a sprint weekend in China and we head into the Japanese Grand Prix. Some teams, including Aston Martin with...",
       "h1": "Round 3 — Japanese Grand Prix Preview",
       "type": "article_page"
     },
@@ -701,7 +701,7 @@
       "url": "https://boxboxf1fantasy.com/articles/2026-03-23-round2-chinese-gp/",
       "path": "/articles/2026-03-23-round2-chinese-gp/",
       "title": "Round 2 — Chinese Grand Prix Recap | BoxBoxF1Fantasy",
-      "description": "Shanghai Sprint Weekend Round 2 took the paddock to the Shanghai International Circuit for the first sprint weekend of the season. The sprint format added an extra layer of complexity for both teams and fantasy...",
+      "description": "Shanghai Sprint Weekend Round 2 took the paddock to the Shanghai International Circuit for the first sprint weekend of the season. The sprint format added...",
       "h1": "Round 2 — Chinese Grand Prix Recap",
       "type": "article_page"
     },
@@ -709,7 +709,7 @@
       "url": "https://boxboxf1fantasy.com/articles/2026-03-16-round1-australian-gp/",
       "path": "/articles/2026-03-16-round1-australian-gp/",
       "title": "Round 1 — Australian Grand Prix Recap | BoxBoxF1Fantasy",
-      "description": "Season Opener in Melbourne The 2026 Formula 1 season kicked off under the lights of Albert Park with a dramatically reshuffled grid under the new technical regulations. With wider cars, new aero rules, and 11 teams on...",
+      "description": "Season Opener in Melbourne The 2026 Formula 1 season kicked off under the lights of Albert Park with a dramatically reshuffled grid under the new...",
       "h1": "Round 1 — Australian Grand Prix Recap",
       "type": "article_page"
     },
@@ -717,7 +717,7 @@
       "url": "https://boxboxf1fantasy.com/data/",
       "path": "/data/",
       "title": "BoxBoxF1Fantasy Public Data: JSON Endpoints for F1 Fantasy 2026",
-      "description": "Public BoxBoxF1Fantasy JSON data index for agents and developers: AI answer summary, predictions, season summary, driver history, track data, weather, articles, videos and changelog.",
+      "description": "Public BoxBoxF1Fantasy JSON data for agents and developers: predictions, AI summary, season context, history, weather, articles and videos.",
       "h1": "BoxBoxF1Fantasy Public Data (2026)",
       "type": "data_catalog"
     },
@@ -725,7 +725,7 @@
       "url": "https://boxboxf1fantasy.com/about/",
       "path": "/about/",
       "title": "About BoxBoxF1Fantasy | Free F1 Fantasy Predictions & Tools",
-      "description": "About BoxBoxF1Fantasy: a free, independent F1 Fantasy prediction site with driver and constructor projections, optimizer tools, race picks, accuracy tracking and contact details.",
+      "description": "About BoxBoxF1Fantasy, an independent site with free F1 Fantasy predictions, optimizer tools, race picks, public accuracy and contact details.",
       "h1": "About BoxBoxF1Fantasy",
       "type": "about_page"
     },

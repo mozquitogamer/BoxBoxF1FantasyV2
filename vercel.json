@@ -2,6 +2,7 @@
   "buildCommand": "",
   "installCommand": "",
   "framework": null,
+  "trailingSlash": true,
   "rewrites": [
     { "source": "/(.*)", "destination": "/$1" }
   ],
