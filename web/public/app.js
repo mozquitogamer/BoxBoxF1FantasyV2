@@ -238,9 +238,10 @@ function removeTabSpinner(tabId) {
 
 // -- Tab-specific data loaders (lazy) --
 async function ensureDriversData() {
-    // Drivers tab needs official points + actual data for price change predictions
+    // Price forecasts normally need only the compact official-points file. Fetch
+    // full per-round actuals strictly as a fallback for missing/incomplete rounds.
     await ensureLoaded('officialPoints', loadOfficialPoints);
-    await ensureLoaded('actualData', preloadActualData);
+    await ensureLoaded('priceScoreFallbacks', preloadPriceScoreFallbackData);
 }
 
 async function ensureAnalysisData() {
@@ -469,10 +470,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     _tabRendered.drivers = true;
 
     // Phase 3: Load deferred data in background (non-blocking)
-    // Official points + actuals needed for price change brackets on driver cards
+    // Official points, plus actuals only when an official round is incomplete.
     ensureDriversData().then(() => {
         showFallbackBanner();
-        // Re-render drivers if price change data was missing initially
+        // Hero value picks and driver price brackets both use actual score history.
+        renderHero();
         renderDrivers();
     });
     ensureWeatherData().then(() => renderWeather());
@@ -485,10 +487,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function preloadActualData() {
-    // Preload all available actual round data for price change predictions
+    // Full actual results are required by analysis, accuracy, and deep-dive tabs.
     if (!seasonSummary || !seasonSummary.rounds) return;
     const promises = seasonSummary.rounds
         .filter(r => r.has_actual)
+        .map(r => loadActualData(r.round));
+    await Promise.all(promises);
+}
+
+function officialRoundHasCompleteScores(roundNum) {
+    const roundData = officialPointsData?.rounds?.[String(roundNum)];
+    if (!roundData || !data) return false;
+
+    const hasEveryScore = (items, idField, scores) =>
+        !!scores && items.every(item => scores[item[idField]] != null);
+
+    return hasEveryScore(data.drivers || [], 'driver_id', roundData.drivers)
+        && hasEveryScore(data.constructors || [], 'constructor_id', roundData.constructors);
+}
+
+async function preloadPriceScoreFallbackData() {
+    if (!seasonSummary?.rounds) return;
+    const promises = seasonSummary.rounds
+        .filter(r => r.has_actual && !officialRoundHasCompleteScores(r.round))
         .map(r => loadActualData(r.round));
     await Promise.all(promises);
 }

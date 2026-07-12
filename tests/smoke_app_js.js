@@ -55,8 +55,14 @@ src += `
     hasRenderTransferCard: typeof renderTransferCard === 'function',
     hasRunTeamCompare: typeof runTeamCompare === 'function',
     hasScoreTeamPicks: typeof scoreTeamPicks === 'function',
+    hasOfficialRoundCoverageCheck: typeof officialRoundHasCompleteScores === 'function',
     renderSwapRow: typeof renderSwapRow === 'function' ? renderSwapRow : null,
     scoreTeamPicks: typeof scoreTeamPicks === 'function' ? scoreTeamPicks : null,
+    officialRoundHasCompleteScores: typeof officialRoundHasCompleteScores === 'function' ? officialRoundHasCompleteScores : null,
+    setPriceLoaderState(nextData, nextOfficialPoints) {
+      data = nextData;
+      officialPointsData = nextOfficialPoints;
+    },
   };
 })();
 `;
@@ -90,6 +96,7 @@ for (const [k, label] of [
   ['hasRenderTransferCard', 'renderTransferCard'],
   ['hasRunTeamCompare', 'runTeamCompare'],
   ['hasScoreTeamPicks', 'scoreTeamPicks'],
+  ['hasOfficialRoundCoverageCheck', 'officialRoundHasCompleteScores'],
 ]) {
   if (!S[k]) fail(`${label} is not defined as a function`);
 }
@@ -123,5 +130,25 @@ try {
   fail('scoreTeamPicks threw: ' + e.message);
 }
 
-console.log('PASS: app.js loads; TA/MW tunables, transfer helpers, and Team Compare scoring resolve.');
+// 5) Landing-page price history skips full actual files only when official
+// scores cover every current driver and constructor.
+try {
+  const current = {
+    drivers: [{ driver_id: 'A' }, { driver_id: 'B' }],
+    constructors: [{ constructor_id: 'C' }],
+  };
+  S.setPriceLoaderState(current, {
+    rounds: { '1': { drivers: { A: 10, B: 0 }, constructors: { C: 20 } } },
+  });
+  if (!S.officialRoundHasCompleteScores(1)) fail('complete official round was treated as incomplete');
+
+  S.setPriceLoaderState(current, {
+    rounds: { '1': { drivers: { A: 10 }, constructors: { C: 20 } } },
+  });
+  if (S.officialRoundHasCompleteScores(1)) fail('incomplete official round skipped its actual-data fallback');
+} catch (e) {
+  fail('official score coverage check threw: ' + e.message);
+}
+
+console.log('PASS: app.js loads; optimizer helpers, Team Compare scoring, and price-history fallback checks resolve.');
 process.exit(0);
