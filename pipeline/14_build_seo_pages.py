@@ -42,6 +42,7 @@ INDEXNOW_KEY = "779753a5fbbf054b3ea496085a0ce1e4"
 # Bump only when generated page templates, metadata, structured data or links
 # receive a significant site-wide content change.
 SEO_CONTENT_LASTMOD = "2026-07-12"
+LINEUP_CONTENT_LASTMOD = "2026-07-13"
 
 TOP_DRIVERS = 10      # rows in the "top picks" table
 VALUE_DRIVERS = 6     # rows in the "best value" table
@@ -235,6 +236,14 @@ def _pts(item: dict) -> float:
     return float(item.get("expected_points") or 0)
 
 
+def _balanced_pts(item: dict) -> float:
+    """Match the live optimizer's default Balanced points basis."""
+    risk_adjusted = _pts(item)
+    projected = item.get("projected_points")
+    projected = float(projected) if projected is not None else risk_adjusted
+    return (projected + risk_adjusted) / 2
+
+
 def _price(item: dict) -> float:
     return float(item.get("current_price") or 0)
 
@@ -346,7 +355,7 @@ def race_event_ld(race: str, race_date: str, circuit: str, canonical: str, desc:
 
 
 def suggested_lineup(pred: dict, budget: float = 100.0) -> dict | None:
-    """Best simple current-round lineup by expected points under a normal budget.
+    """Best current-round Balanced lineup under a normal budget.
 
     This is intentionally a plain public-prediction recommendation for crawlable
     SEO pages. The live optimizer remains the full interactive tool with locks,
@@ -362,7 +371,7 @@ def suggested_lineup(pred: dict, budget: float = 100.0) -> dict | None:
         con_pairs.append({
             "items": pair,
             "cost": sum(_price(c) for c in pair),
-            "points": sum(_pts(c) for c in pair),
+            "points": sum(_balanced_pts(c) for c in pair),
         })
 
     best = None
@@ -370,10 +379,10 @@ def suggested_lineup(pred: dict, budget: float = 100.0) -> dict | None:
         driver_cost = sum(_price(d) for d in driver_combo)
         if driver_cost > budget:
             continue
-        driver_points = sum(_pts(d) for d in driver_combo)
-        captain = max(driver_combo, key=_pts)
+        driver_points = sum(_balanced_pts(d) for d in driver_combo)
+        captain = max(driver_combo, key=_balanced_pts)
         # Normal F1 Fantasy scoring doubles the best driver; add one extra copy.
-        boost_points = _pts(captain)
+        boost_points = _balanced_pts(captain)
         remaining = budget - driver_cost
         for con_pair in con_pairs:
             total_cost = driver_cost + con_pair["cost"]
@@ -382,8 +391,8 @@ def suggested_lineup(pred: dict, budget: float = 100.0) -> dict | None:
             total_points = driver_points + con_pair["points"] + boost_points
             if not best or total_points > best["points"]:
                 best = {
-                    "drivers": sorted(driver_combo, key=_pts, reverse=True),
-                    "constructors": sorted(con_pair["items"], key=_pts, reverse=True),
+                    "drivers": sorted(driver_combo, key=_balanced_pts, reverse=True),
+                    "constructors": sorted(con_pair["items"], key=_balanced_pts, reverse=True),
                     "captain": captain,
                     "cost": total_cost,
                     "bank": budget - total_cost,
@@ -400,27 +409,27 @@ def suggested_lineup_html(pred: dict) -> str:
         return ""
 
     driver_rows = "".join(
-        f'<tr><td>{esc(d.get("name", d.get("driver_id", "")))}</td>'
+        f'<tr><td><a href="/drivers/{plain_slug(d.get("name", d.get("driver_id", "driver")))}/">{esc(d.get("name", d.get("driver_id", "")))}</a></td>'
         f'<td>Driver{" / 2x boost" if d is lineup["captain"] else ""}</td>'
         f'<td class="num">${_price(d):.1f}M</td>'
-        f'<td class="num">{_pts(d):.1f}</td></tr>'
+        f'<td class="num">{_balanced_pts(d):.1f}</td></tr>'
         for d in lineup["drivers"]
     )
     constructor_rows = "".join(
-        f'<tr><td>{esc(c.get("name", c.get("constructor_id", "")))}</td>'
+        f'<tr><td><a href="/constructors/{plain_slug(c.get("name", c.get("constructor_id", "constructor")))}/">{esc(c.get("name", c.get("constructor_id", "")))}</a></td>'
         '<td>Constructor</td>'
         f'<td class="num">${_price(c):.1f}M</td>'
-        f'<td class="num">{_pts(c):.1f}</td></tr>'
+        f'<td class="num">{_balanced_pts(c):.1f}</td></tr>'
         for c in lineup["constructors"]
     )
     return (
-        "<h2>Suggested $100M lineup</h2>"
-        f'<p>This crawlable snapshot uses the current public projections and a normal 2x boost on <strong>{esc(lineup["captain"].get("name", "the top driver"))}</strong>. '
+        f'<h2>Current optimized team: {esc(pred.get("race", "this round"))}</h2>'
+        f'<p>This crawlable $100M snapshot uses the live optimizer\'s default <strong>Balanced</strong> basis &mdash; the mean of deterministic projected points and the risk-adjusted simulation mean &mdash; with a normal 2x boost on <strong>{esc(lineup["captain"].get("name", "the top driver"))}</strong>. '
         'For locks, exclusions, chips and custom budgets, use the live Optimizer.</p>'
-        '<table><thead><tr><th>Pick</th><th>Slot</th><th class="num">Price</th><th class="num">Base pts</th></tr></thead><tbody>'
+        '<table><thead><tr><th>Pick</th><th>Slot</th><th class="num">Price</th><th class="num">Balanced pts</th></tr></thead><tbody>'
         + driver_rows + constructor_rows +
         "</tbody></table>"
-        f'<div class="callout"><strong>Suggested team total:</strong> {lineup["points"]:.1f} pts with normal 2x boost &middot; '
+        f'<div class="callout"><strong>Optimized team total:</strong> {lineup["points"]:.1f} balanced pts with normal 2x boost &middot; '
         f'<strong>Cost:</strong> ${lineup["cost"]:.1f}M &middot; <strong>Bank:</strong> ${lineup["bank"]:.1f}M.</div>'
     )
 
@@ -2340,7 +2349,8 @@ def write_ai_summary(current: dict, season: dict) -> None:
             "Use expected_points for current-round ranking.",
             "Use confidence_interval_90.low as a conservative downside estimate.",
             "Use value_score or points_per_million when the user asks for budget/value picks.",
-            "The sample lineup is a public crawlable snapshot; the live optimizer supports locks, exclusions, chips and custom budgets.",
+            "The sample lineup uses the Balanced basis: the mean of projected_points and expected_points for each pick.",
+            "The sample lineup is a public crawlable snapshot; the live optimizer supports other points bases, locks, exclusions, chips and custom budgets.",
             "Predictions are model-based and informational, not guaranteed.",
         ],
         "disclaimer": "Independent fan-built site. Not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or any driver.",
@@ -2350,8 +2360,9 @@ def write_ai_summary(current: dict, season: dict) -> None:
             "budget_m": round(float(lineup["budget"]), 1),
             "cost_m": round(float(lineup["cost"]), 1),
             "bank_m": round(float(lineup["bank"]), 1),
-            "expected_points_with_2x": round(float(lineup["points"]), 1),
-            "unboosted_expected_points": round(float(lineup["unboosted_points"]), 1),
+            "points_basis": "balanced",
+            "balanced_points_with_2x": round(float(lineup["points"]), 1),
+            "unboosted_balanced_points": round(float(lineup["unboosted_points"]), 1),
             "captain_2x": compact_projection(lineup["captain"], 1, "driver"),
             "drivers": [compact_projection(d, i, "driver") for i, d in enumerate(lineup["drivers"], 1)],
             "constructors": [compact_projection(c, i, "constructor") for i, c in enumerate(lineup["constructors"], 1)],
@@ -3528,7 +3539,7 @@ def guide_article_ld(item: dict, canonical: str) -> dict:
         "author": publisher_ld(),
         "publisher": publisher_ld(),
         "about": ["F1 Fantasy", "Formula 1", "Fantasy sports strategy"],
-        "dateModified": datetime.now(timezone.utc).date().isoformat(),
+        "dateModified": item.get("lastmod", SEO_CONTENT_LASTMOD),
     }
 
 
@@ -3573,6 +3584,21 @@ def render_content_page(item: dict, current: dict | None = None) -> str:
     }]
     if base == "tools":
         ld_objs.append(software_application_ld(item, canonical))
+        if current and item.get("slug") in {"best-f1-fantasy-team", "lineup-optimizer"}:
+            lineup = suggested_lineup(current)
+            if lineup:
+                lineup_items = [
+                    (d.get("name", d.get("driver_id", "Driver")), f'{SITE}/drivers/{plain_slug(d.get("name", d.get("driver_id", "driver")))}/')
+                    for d in lineup["drivers"]
+                ] + [
+                    (c.get("name", c.get("constructor_id", "Constructor")), f'{SITE}/constructors/{plain_slug(c.get("name", c.get("constructor_id", "constructor")))}/')
+                    for c in lineup["constructors"]
+                ]
+                ld_objs.append(item_list_ld(
+                    f'Optimized F1 Fantasy team for {current.get("race", "the current round")}',
+                    canonical,
+                    lineup_items,
+                ))
     if base == "guides":
         ld_objs.append(guide_article_ld(item, canonical))
         howto = guide_howto_ld(item, canonical)
@@ -3591,7 +3617,7 @@ def render_content_page(item: dict, current: dict | None = None) -> str:
         cta = f'<div class="btnrow"><a class="cta" href="{href}">{esc(label)}</a></div>'
     faq_section = (f"<h2>FAQ</h2>{_faq_html(faqs)}") if faqs else ""
     dynamic = ""
-    if current and item.get("slug") == "best-f1-fantasy-team":
+    if current and item.get("slug") in {"best-f1-fantasy-team", "lineup-optimizer"}:
         dynamic = suggested_lineup_html(current)
     elif current and item.get("slug") == "f1-fantasy-captain-picks":
         dynamic = current_captain_picks_html(current)
@@ -3870,6 +3896,7 @@ TOOLS = [
     },
     {
         "base": "tools", "crumb": "Tools", "slug": "best-f1-fantasy-team",
+        "lastmod": LINEUP_CONTENT_LASTMOD,
         "crumb_self": "Best Team",
         "title": "Best F1 Fantasy Team 2026: Free Optimizer & Picks | BoxBox",
         "desc": "Find the best F1 Fantasy team for the current race weekend with free driver and constructor projections, budget checks, chips, value ratings and a lineup optimizer.",
@@ -4038,11 +4065,12 @@ TOOLS = [
     },
     {
         "base": "tools", "crumb": "Tools", "slug": "lineup-optimizer",
+        "lastmod": LINEUP_CONTENT_LASTMOD,
         "crumb_self": "Lineup Optimizer",
-        "title": "F1 Fantasy Lineup Optimizer (Free) | BoxBox",
+        "title": "Free F1 Fantasy Team Optimizer 2026 | BoxBox",
         "desc": "A free F1 Fantasy lineup optimizer that checks all 1.4 million legal 5-driver, 2-constructor teams within your budget and ranks the best lineups using ML predictions.",
         "features": ["Lineup optimization", "Budget-constrained team search", "Lock and exclude picks", "Chip-aware scoring", "Strategy modes"],
-        "h1": "F1 Fantasy Lineup Optimizer (Free)",
+        "h1": "Free F1 Fantasy Team Optimizer 2026",
         "intro": '<p class="lede">Find the best F1 Fantasy team within your budget in about a second &mdash; free, no login.</p>',
         "body": (
             "<h2>What it does</h2>"
@@ -4051,6 +4079,10 @@ TOOLS = [
             "<ul><li>Set your budget and pick a strategy: Max Points, Max Value, Budget Builder or Balanced.</li>"
             "<li>Left-click any driver or constructor to <strong>lock</strong> them in; right-click to <strong>exclude</strong> them.</li>"
             "<li>Select a chip (3x Boost, Limitless, etc.) and the optimizer builds the team that makes the most of it.</li></ul>"
+            "<h2>Why Balanced is the default</h2>"
+            "<p>Balanced averages the deterministic finishing-order projection with the risk-adjusted Monte Carlo mean. It keeps genuine upside visible without letting DNF risk, weather uncertainty or one optimistic scenario dominate the team recommendation. You can switch to Projected or Risk-Adjusted inside the live tool.</p>"
+            "<h2>Why the best lineup changes</h2>"
+            "<p>Practice pace, weather, qualifying position, DNF risk and fantasy prices can all move the optimum. The snapshot above updates with the current prediction export; rerun the live optimizer near the lock deadline for the latest team and your exact budget.</p>"
             '<div class="callout">Already have a team? Use the built-in <strong>Transfer Advisor</strong> to find your best one or two swaps, or the <strong>Multi-Week Planner</strong> to plan several rounds ahead.</div>'
         ),
         "faqs": [
@@ -4274,7 +4306,10 @@ def main() -> None:
             slug, page = render_race_page(pred, is_current)
             race_name = pred.get("race", r["name"])
             race_date = pred.get("date", r.get("date", ""))
-            page_lastmod = source_date(pred.get("exported_at"), pred.get("generated_at"))
+            page_lastmod = max(
+                source_date(pred.get("exported_at"), pred.get("generated_at")) or LINEUP_CONTENT_LASTMOD,
+                LINEUP_CONTENT_LASTMOD,
+            )
             written += 1
         elif str(rn) in horizon_rounds:
             status = "future"
@@ -4400,11 +4435,16 @@ def main() -> None:
             current_tool_slugs = {
                 "f1-fantasy-predictions", "best-f1-fantasy-team", "f1-fantasy-captain-picks",
                 "f1-fantasy-value-picks", "f1-fantasy-price-changes", "f1-fantasy-dnf-risk",
-                "points-calculator",
+                "lineup-optimizer", "points-calculator",
             }
             for it in items:
                 if it["slug"] in current_tool_slugs:
                     lastmods[f"tools/{it['slug']}/"] = current_lastmod
+        for it in items:
+            content_lastmod = source_date(it.get("lastmod"))
+            if content_lastmod:
+                key = f"{base}/{it['slug']}/"
+                lastmods[key] = max(lastmods.get(key, content_lastmod), content_lastmod)
         feed_items.append({
             "title": hub["h1"],
             "url": f"{SITE}/{base}/",

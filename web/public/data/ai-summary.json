@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "site": "BoxBoxF1Fantasy",
   "site_url": "https://boxboxf1fantasy.com/",
-  "generated_at": "2026-07-12T21:53:24Z",
+  "generated_at": "2026-07-12T22:13:53Z",
   "source_predictions_generated_at": "2026-07-09T20:41:21.847688+00:00",
   "season": 2026,
   "round": 12,
@@ -545,55 +545,77 @@
   ],
   "sample_lineup_100m": {
     "budget_m": 100.0,
-    "cost_m": 99.1,
-    "bank_m": 0.9,
-    "expected_points_with_2x": 137.8,
-    "unboosted_expected_points": 117.7,
+    "cost_m": 98.6,
+    "bank_m": 1.4,
+    "points_basis": "balanced",
+    "balanced_points_with_2x": 169.3,
+    "unboosted_balanced_points": 138.4,
     "captain_2x": {
       "rank": 1,
       "kind": "driver",
-      "id": "ANT",
-      "name": "Kimi Antonelli",
-      "expected_points": 20.1,
-      "projected_points": 29.1,
-      "current_price_m": 25.4,
-      "value_score": 0.79,
-      "risk": "LOW",
+      "id": "VER",
+      "name": "Max Verstappen",
+      "expected_points": 22.6,
+      "projected_points": 39.1,
+      "current_price_m": 27.9,
+      "value_score": 0.81,
+      "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": -10.4,
-        "high": 46.0
+        "low": -12.9,
+        "high": 53.0
       },
-      "url": "https://boxboxf1fantasy.com/drivers/kimi-antonelli/",
-      "constructor": "mercedes",
-      "predicted_quali": 1,
-      "predicted_finish": 3,
-      "dnf_probability": 0.08,
-      "points_per_million": 0.71
+      "url": "https://boxboxf1fantasy.com/drivers/max-verstappen/",
+      "constructor": "red_bull",
+      "predicted_quali": 3,
+      "predicted_finish": 1,
+      "dnf_probability": 0.14,
+      "points_per_million": 0.74
     },
     "drivers": [
       {
         "rank": 1,
         "kind": "driver",
-        "id": "ANT",
-        "name": "Kimi Antonelli",
-        "expected_points": 20.1,
-        "projected_points": 29.1,
-        "current_price_m": 25.4,
-        "value_score": 0.79,
-        "risk": "LOW",
+        "id": "VER",
+        "name": "Max Verstappen",
+        "expected_points": 22.6,
+        "projected_points": 39.1,
+        "current_price_m": 27.9,
+        "value_score": 0.81,
+        "risk": "MEDIUM",
         "confidence_interval_90": {
-          "low": -10.4,
-          "high": 46.0
+          "low": -12.9,
+          "high": 53.0
         },
-        "url": "https://boxboxf1fantasy.com/drivers/kimi-antonelli/",
-        "constructor": "mercedes",
-        "predicted_quali": 1,
-        "predicted_finish": 3,
-        "dnf_probability": 0.08,
-        "points_per_million": 0.71
+        "url": "https://boxboxf1fantasy.com/drivers/max-verstappen/",
+        "constructor": "red_bull",
+        "predicted_quali": 3,
+        "predicted_finish": 1,
+        "dnf_probability": 0.14,
+        "points_per_million": 0.74
       },
       {
         "rank": 2,
+        "kind": "driver",
+        "id": "HAD",
+        "name": "Isack Hadjar",
+        "expected_points": 6.3,
+        "projected_points": 14.7,
+        "current_price_m": 12.7,
+        "value_score": 0.5,
+        "risk": "MEDIUM",
+        "confidence_interval_90": {
+          "low": -17.1,
+          "high": 41.0
+        },
+        "url": "https://boxboxf1fantasy.com/drivers/isack-hadjar/",
+        "constructor": "red_bull",
+        "predicted_quali": 7,
+        "predicted_finish": 6,
+        "dnf_probability": 0.2,
+        "points_per_million": 1.57
+      },
+      {
+        "rank": 3,
         "kind": "driver",
         "id": "LIN",
         "name": "Arvid Lindblad",
@@ -612,27 +634,6 @@
         "predicted_finish": 10,
         "dnf_probability": 0.06,
         "points_per_million": 1.83
-      },
-      {
-        "rank": 3,
-        "kind": "driver",
-        "id": "COL",
-        "name": "Franco Colapinto",
-        "expected_points": 6.1,
-        "projected_points": 5.5,
-        "current_price_m": 9.8,
-        "value_score": 0.62,
-        "risk": "LOW",
-        "confidence_interval_90": {
-          "low": -16.6,
-          "high": 32.0
-        },
-        "url": "https://boxboxf1fantasy.com/drivers/franco-colapinto/",
-        "constructor": "alpine",
-        "predicted_quali": 12,
-        "predicted_finish": 11,
-        "dnf_probability": 0.06,
-        "points_per_million": 1.56
       },
       {
         "rank": 4,
@@ -658,23 +659,23 @@
       {
         "rank": 5,
         "kind": "driver",
-        "id": "LAW",
-        "name": "Liam Lawson",
-        "expected_points": 2.2,
-        "projected_points": 6.5,
-        "current_price_m": 8.9,
-        "value_score": 0.25,
-        "risk": "MEDIUM",
+        "id": "HUL",
+        "name": "Nico Hulkenberg",
+        "expected_points": -4.1,
+        "projected_points": 0.8,
+        "current_price_m": 3.0,
+        "value_score": -1.37,
+        "risk": "HIGH",
         "confidence_interval_90": {
-          "low": -18.0,
-          "high": 29.0
+          "low": -19.7,
+          "high": 26.0
         },
-        "url": "https://boxboxf1fantasy.com/drivers/liam-lawson/",
-        "constructor": "racing_bulls",
-        "predicted_quali": 9,
-        "predicted_finish": 9,
-        "dnf_probability": 0.14,
-        "points_per_million": 1.42
+        "url": "https://boxboxf1fantasy.com/drivers/nico-hulkenberg/",
+        "constructor": "audi",
+        "predicted_quali": 13,
+        "predicted_finish": 12,
+        "dnf_probability": 0.28,
+        "points_per_million": -1.89
       }
     ],
     "constructors": [
@@ -724,7 +725,8 @@
     "Use expected_points for current-round ranking.",
     "Use confidence_interval_90.low as a conservative downside estimate.",
     "Use value_score or points_per_million when the user asks for budget/value picks.",
-    "The sample lineup is a public crawlable snapshot; the live optimizer supports locks, exclusions, chips and custom budgets.",
+    "The sample lineup uses the Balanced basis: the mean of projected_points and expected_points for each pick.",
+    "The sample lineup is a public crawlable snapshot; the live optimizer supports other points bases, locks, exclusions, chips and custom budgets.",
     "Predictions are model-based and informational, not guaranteed."
   ],
   "disclaimer": "Independent fan-built site. Not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or any driver."

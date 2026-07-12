@@ -2,7 +2,7 @@
   "site": "https://boxboxf1fantasy.com",
   "name": "BoxBoxF1Fantasy",
   "description": "Free F1 Fantasy 2026 predictions, race picks, lineup optimizer, transfer tools, strategy guides, public data and accuracy tracking.",
-  "generated_at": "2026-07-12T21:53:30.290354+00:00",
+  "generated_at": "2026-07-12T22:14:03.214157+00:00",
   "language": "en",
   "current_round": 12,
   "current_race": "Belgian Grand Prix",
@@ -620,9 +620,9 @@
     {
       "url": "https://boxboxf1fantasy.com/tools/lineup-optimizer/",
       "path": "/tools/lineup-optimizer/",
-      "title": "F1 Fantasy Lineup Optimizer (Free) | BoxBox",
+      "title": "Free F1 Fantasy Team Optimizer 2026 | BoxBox",
       "description": "A free F1 Fantasy lineup optimizer that checks all 1.4 million legal 5-driver, 2-constructor teams within your budget and ranks the best lineups using ML predictions.",
-      "h1": "F1 Fantasy Lineup Optimizer (Free)",
+      "h1": "Free F1 Fantasy Team Optimizer 2026",
       "type": "tool_page"
     },
     {

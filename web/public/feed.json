@@ -11,7 +11,21 @@
       "url": "https://boxboxf1fantasy.com/picks/belgian-gp-2026/",
       "title": "F1 Fantasy Picks: Belgian GP 2026",
       "summary": "Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Belgian Grand Prix.",
-      "date_modified": "2026-07-12T00:00:00+00:00"
+      "date_modified": "2026-07-13T00:00:00+00:00"
+    },
+    {
+      "id": "https://boxboxf1fantasy.com/tools/best-f1-fantasy-team/",
+      "url": "https://boxboxf1fantasy.com/tools/best-f1-fantasy-team/",
+      "title": "Best F1 Fantasy Team 2026",
+      "summary": "Find the best F1 Fantasy team for the current race weekend with free driver and constructor projections, budget checks, chips, value ratings and a lineup optimizer.",
+      "date_modified": "2026-07-13T00:00:00+00:00"
+    },
+    {
+      "id": "https://boxboxf1fantasy.com/tools/lineup-optimizer/",
+      "url": "https://boxboxf1fantasy.com/tools/lineup-optimizer/",
+      "title": "Free F1 Fantasy Team Optimizer 2026",
+      "summary": "A free F1 Fantasy lineup optimizer that checks all 1.4 million legal 5-driver, 2-constructor teams within your budget and ranks the best lineups using ML predictions.",
+      "date_modified": "2026-07-13T00:00:00+00:00"
     },
     {
       "id": "https://boxboxf1fantasy.com/picks/hungarian-gp-2026/",
@@ -119,13 +133,6 @@
       "date_modified": "2026-07-12T00:00:00+00:00"
     },
     {
-      "id": "https://boxboxf1fantasy.com/tools/best-f1-fantasy-team/",
-      "url": "https://boxboxf1fantasy.com/tools/best-f1-fantasy-team/",
-      "title": "Best F1 Fantasy Team 2026",
-      "summary": "Find the best F1 Fantasy team for the current race weekend with free driver and constructor projections, budget checks, chips, value ratings and a lineup optimizer.",
-      "date_modified": "2026-07-12T00:00:00+00:00"
-    },
-    {
       "id": "https://boxboxf1fantasy.com/tools/f1-fantasy-captain-picks/",
       "url": "https://boxboxf1fantasy.com/tools/f1-fantasy-captain-picks/",
       "title": "F1 Fantasy Captain Picks 2026",
@@ -158,13 +165,6 @@
       "url": "https://boxboxf1fantasy.com/tools/f1-fantasy-dnf-risk/",
       "title": "F1 Fantasy DNF Risk & Reliability 2026",
       "summary": "Current F1 Fantasy DNF risk for every driver and constructor, with reliability bands, expected points and Monte Carlo downside floors.",
-      "date_modified": "2026-07-12T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/tools/lineup-optimizer/",
-      "url": "https://boxboxf1fantasy.com/tools/lineup-optimizer/",
-      "title": "F1 Fantasy Lineup Optimizer (Free)",
-      "summary": "A free F1 Fantasy lineup optimizer that checks all 1.4 million legal 5-driver, 2-constructor teams within your budget and ranks the best lineups using ML predictions.",
       "date_modified": "2026-07-12T00:00:00+00:00"
     },
     {
