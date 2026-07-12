@@ -882,7 +882,7 @@ def page_head(
 
 FOOTER = f"""</main>
 <footer class="footer"><div class="wrap">
-<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a> &middot; <a href="/articles/">Articles</a> &middot; <a href="/data/">Data</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/methodology/">Methodology</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
+<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/stats/">Points &amp; Prices</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a> &middot; <a href="/articles/">Articles</a> &middot; <a href="/data/">Data</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/methodology/">Methodology</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
@@ -3037,6 +3037,223 @@ def render_data_page(current: dict, season: dict) -> str:
     return page_head(title, desc, canonical, ld) + body + FOOTER
 
 
+def _season_asset_rows(history_group: dict, prices_group: dict) -> list[dict]:
+    """Combine recorded fantasy scores with current price data for one asset type."""
+    rows = []
+    for asset_id, price_info in (prices_group or {}).items():
+        recorded = (history_group or {}).get(asset_id, {}).get("rounds", [])
+        recorded = sorted(recorded, key=lambda item: int(item.get("round") or 0))
+        scores = [float(item.get("points") or 0) for item in recorded]
+        current_price = float(price_info.get("current_price") or 0)
+        total = sum(scores)
+        average = total / len(scores) if scores else 0
+        recent = scores[-3:]
+        recent_average = sum(recent) / len(recent) if recent else 0
+        best = max(recorded, key=lambda item: float(item.get("points") or 0), default={})
+        rows.append({
+            "id": asset_id,
+            "name": price_info.get("name") or asset_id,
+            "rounds": len(scores),
+            "total": total,
+            "average": average,
+            "recent": recent,
+            "recent_average": recent_average,
+            "best_points": float(best.get("points") or 0),
+            "best_round": best.get("round"),
+            "current_price": current_price,
+            "starting_price": float(price_info.get("starting_price") or current_price),
+            "price_change": float(price_info.get("price_change") or 0),
+            "average_ppm": average / current_price if current_price else 0,
+        })
+    return sorted(rows, key=lambda item: (item["total"], item["average"]), reverse=True)
+
+
+def _price_change(value: float) -> str:
+    return f"{value:+.1f}M"
+
+
+def _score(value: float) -> str:
+    return f"{value:.0f}" if float(value).is_integer() else f"{value:.1f}"
+
+
+def render_fantasy_stats_page(season: dict, driver_history: dict) -> str:
+    """Render the crawlable season fantasy-points and price-form tracker."""
+    canonical = f"{SITE}/stats/"
+    title = f"F1 Fantasy Points & Price Tracker {YEAR} | BoxBox"
+    desc = (
+        f"F1 Fantasy {YEAR} driver and constructor points, current prices, season changes, "
+        "points per race and last-three form, updated after each Grand Prix."
+    )
+    drivers = _season_asset_rows(
+        driver_history.get("drivers") or {}, season.get("driver_prices") or {}
+    )
+    constructors = _season_asset_rows(
+        driver_history.get("constructors") or {}, season.get("constructor_prices") or {}
+    )
+    completed = sorted(
+        [item for item in season.get("rounds", []) if item.get("has_actual")],
+        key=lambda item: int(item.get("round") or 0),
+    )
+    latest = completed[-1] if completed else {}
+    first = completed[0] if completed else {}
+    latest_name = short_race(latest.get("name", "the latest completed race"))
+    updated = source_date(season.get("generated_at"), latest.get("date")) or SEO_CONTENT_LASTMOD
+
+    driver_leader = drivers[0] if drivers else {}
+    constructor_leader = constructors[0] if constructors else {}
+    recent_leader = max(drivers, key=lambda item: item["recent_average"], default={})
+    price_riser = max(drivers + constructors, key=lambda item: item["price_change"], default={})
+    faqs = [
+        (
+            "Are these Formula 1 championship points?",
+            "No. These are recorded points from the official F1 Fantasy game. They include fantasy scoring such as qualifying, positions gained, overtakes, bonuses, penalties and constructor scoring; they are different from World Championship points.",
+        ),
+        (
+            "Do the driver totals include a 2x or 3x boost?",
+            "No. Driver rows show the recorded base fantasy score for the asset. A manager's 2x or 3x multiplier depends on that manager's lineup and is not added to the season table.",
+        ),
+        (
+            "How is points per million calculated?",
+            "Season value divides average recorded points per race by the asset's current price. It is a backward-looking comparison, not the current-race projection used by the optimizer.",
+        ),
+        (
+            "When are the points and prices updated?",
+            "The tracker is rebuilt after completed races when recorded fantasy scores and the latest game prices are available. Provisional game data can change, so the official F1 Fantasy game remains the final authority.",
+        ),
+    ]
+    dataset = {
+        "@context": "https://schema.org",
+        "@type": "Dataset",
+        "name": f"F1 Fantasy {YEAR} driver and constructor points and prices",
+        "description": desc,
+        "url": canonical,
+        "inLanguage": "en",
+        "isAccessibleForFree": True,
+        "dateModified": updated,
+        "creator": publisher_ld(),
+        "publisher": publisher_ld(),
+        "about": ["F1 Fantasy", "Fantasy sports statistics", f"{YEAR} Formula 1 season"],
+        "variableMeasured": [
+            "Recorded fantasy points",
+            "Average fantasy points per race",
+            "Current fantasy price",
+            "Fantasy price change",
+            "Average points per million",
+        ],
+        "distribution": [
+            {
+                "@type": "DataDownload",
+                "encodingFormat": "application/json",
+                "contentUrl": f"{SITE}/data/driver_history.json",
+                "name": "Recorded driver and constructor fantasy points by round",
+            },
+            {
+                "@type": "DataDownload",
+                "encodingFormat": "application/json",
+                "contentUrl": f"{SITE}/data/season_summary.json",
+                "name": "Current and starting fantasy prices",
+            },
+        ],
+    }
+    if first.get("date") and latest.get("date"):
+        dataset["temporalCoverage"] = f"{first['date']}/{latest['date']}"
+    ld = ld_block([
+        webpage_ld(title, canonical, desc, "CollectionPage"),
+        dataset,
+        item_list_ld(
+            f"{YEAR} F1 Fantasy driver points ranking",
+            canonical,
+            [(item["name"], f"{SITE}/drivers/{plain_slug(item['name'])}/") for item in drivers],
+        ),
+        item_list_ld(
+            f"{YEAR} F1 Fantasy constructor points ranking",
+            canonical,
+            [(item["name"], f"{SITE}/constructors/{plain_slug(item['name'])}/") for item in constructors],
+        ),
+        breadcrumb_ld([("Home", f"{SITE}/"), ("Points & Prices", canonical)]),
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": question,
+                    "acceptedAnswer": {"@type": "Answer", "text": answer},
+                }
+                for question, answer in faqs
+            ],
+        },
+    ])
+    summary_cards = "".join([
+        '<div class="season-stat"><span>Driver points leader</span>'
+        f'<strong><a href="/drivers/{plain_slug(driver_leader.get("name", ""))}/">{esc(driver_leader.get("name", "-"))}</a></strong>'
+        f'<em>{_score(driver_leader.get("total", 0))} pts</em></div>',
+        '<div class="season-stat"><span>Constructor points leader</span>'
+        f'<strong><a href="/constructors/{plain_slug(constructor_leader.get("name", ""))}/">{esc(constructor_leader.get("name", "-"))}</a></strong>'
+        f'<em>{_score(constructor_leader.get("total", 0))} pts</em></div>',
+        '<div class="season-stat"><span>Best last-three driver form</span>'
+        f'<strong><a href="/drivers/{plain_slug(recent_leader.get("name", ""))}/">{esc(recent_leader.get("name", "-"))}</a></strong>'
+        f'<em>{recent_leader.get("recent_average", 0):.1f} pts/race</em></div>',
+        '<div class="season-stat"><span>Largest season price rise</span>'
+        f'<strong>{esc(price_riser.get("name", "-"))}</strong>'
+        f'<em>{_price_change(price_riser.get("price_change", 0))}</em></div>',
+    ])
+
+    def table_rows(items: list[dict], entity_type: str) -> str:
+        rows = []
+        for rank, item in enumerate(items, 1):
+            profile = f"/{entity_type}/{plain_slug(item['name'])}/"
+            recent_scores = ", ".join(_score(score) for score in item["recent"]) or "-"
+            change_class = "gain" if item["price_change"] > 0 else "loss" if item["price_change"] < 0 else ""
+            rows.append(
+                f'<tr><td class="num">{rank}</td>'
+                f'<th scope="row"><a href="{profile}">{esc(item["name"])}</a></th>'
+                f'<td class="num"><strong>{_score(item["total"])}</strong></td>'
+                f'<td class="num">{item["average"]:.1f}</td>'
+                f'<td class="num" title="Recorded points in the latest three completed races">{recent_scores}<br><small>{item["recent_average"]:.1f} avg</small></td>'
+                f'<td class="num">${item["current_price"]:.1f}M</td>'
+                f'<td class="num {change_class}">{_price_change(item["price_change"])}</td>'
+                f'<td class="num">{item["average_ppm"]:.2f}</td></tr>'
+            )
+        return "".join(rows)
+
+    table_head = (
+        '<thead><tr><th class="num">Rank</th><th>Asset</th><th class="num">Season pts</th>'
+        '<th class="num">Pts/race</th><th class="num">Last 3</th><th class="num">Price</th>'
+        '<th class="num">Season change</th><th class="num">Avg PPM</th></tr></thead>'
+    )
+    body = (
+        '<p class="crumbs"><a href="/">Home</a> &rsaquo; Points &amp; Prices</p>'
+        f'<h1>F1 Fantasy Points &amp; Price Tracker {YEAR}</h1>'
+        f'<p class="lede">Recorded F1 Fantasy scores, current prices and price form for every {YEAR} driver and constructor.</p>'
+        f'<p class="meta">Updated through {esc(latest_name)} &middot; {len(completed)} completed rounds &middot; Data refreshed {esc(fmt_date(updated))}</p>'
+        '<div class="callout"><strong>Fantasy scoring, not championship standings.</strong> These are recorded base F1 Fantasy points. Current-race forecasts live on the '
+        '<a href="/drivers/">driver</a> and <a href="/constructors/">constructor</a> prediction pages.</div>'
+        f'<div class="season-stats">{summary_cards}</div>'
+        f'<h2>{YEAR} F1 Fantasy driver points</h2>'
+        '<p>Ranked by recorded season fantasy points. Last 3 lists the latest three completed-race scores from oldest to newest; the smaller figure is their average.</p>'
+        f'<table aria-label="{YEAR} F1 Fantasy driver points and prices">{table_head}<tbody>{table_rows(drivers, "drivers")}</tbody></table>'
+        f'<h2>{YEAR} F1 Fantasy constructor points</h2>'
+        '<p>Constructor scores include the official constructor scoring components. Driver boost multipliers are never added to constructor totals.</p>'
+        f'<table aria-label="{YEAR} F1 Fantasy constructor points and prices">{table_head}<tbody>{table_rows(constructors, "constructors")}</tbody></table>'
+        '<h2>How to use points and price form</h2>'
+        '<p><strong>Season points</strong> rewards what has already happened. <strong>Pts/race</strong> makes assets easier to compare across the same completed schedule. '
+        '<strong>Last-three form</strong> highlights recent scoring without pretending one race defines a trend. <strong>Average PPM</strong> divides average points per race by the current price, so it is a backward-looking value measure.</p>'
+        '<p>For the next lineup decision, combine this record with the <a href="/picks/">current race forecast</a>, confidence ranges, DNF risk and your available budget. '
+        'A strong season asset can still be a poor fit for one circuit, and a recent price rise does not guarantee another increase.</p>'
+        '<h2>Sources and update policy</h2>'
+        '<p>Recorded scores come from the site\'s post-race fantasy history and are reconciled against manually entered official F1 Fantasy totals where available. '
+        'Prices come from the latest <a href="/data/season_summary.json">season summary</a>. The underlying round-by-round values are available in '
+        '<a href="/data/driver_history.json">driver_history.json</a>, and the <a href="/changelog/">Changelog</a> records material corrections.</p>'
+        '<p>Provisional scores and prices may be revised by the official game. BoxBoxF1Fantasy is independent, and the official F1 Fantasy game remains the final authority.</p>'
+        '<h2>F1 Fantasy points and prices FAQ</h2>'
+        + _faq_html(faqs)
+        + '<div class="btnrow"><a class="cta" href="/#season">Open the interactive Season view &rarr;</a>'
+        '<a class="secondary" href="/tools/f1-fantasy-price-changes/">Current price outlook &rarr;</a></div>'
+    )
+    return page_head(title, desc, canonical, ld) + body + FOOTER
+
+
 # --------------------------------------------------------------------------- #
 # sitemap
 # --------------------------------------------------------------------------- #
@@ -3221,6 +3438,7 @@ Allow: /
 Allow: /picks/
 Allow: /drivers/
 Allow: /constructors/
+Allow: /stats/
 Allow: /accuracy/
 Allow: /changelog/
 Allow: /videos/
@@ -3618,6 +3836,8 @@ def page_kind_from_relpath(rel_path: str) -> str:
         return "constructor_hub"
     if path.startswith("constructors/"):
         return "constructor_projection_page"
+    if path == "stats":
+        return "fantasy_points_price_tracker"
     if path == "tools":
         return "tools_hub"
     if path.startswith("tools/"):
@@ -3754,6 +3974,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- Race picks hub: https://boxboxf1fantasy.com/picks/",
         "- Driver projections hub: https://boxboxf1fantasy.com/drivers/",
         "- Constructor projections hub: https://boxboxf1fantasy.com/constructors/",
+        "- 2026 fantasy points and price tracker: https://boxboxf1fantasy.com/stats/",
         "- Prediction accuracy: https://boxboxf1fantasy.com/accuracy/",
         "- Changelog: https://boxboxf1fantasy.com/changelog/",
         "- Videos: https://boxboxf1fantasy.com/videos/",
@@ -3824,6 +4045,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The optimizer builds legal F1 Fantasy lineups under a budget using current projections and chip settings.",
         "- Team Compare lets users enter up to three teams and compare budget, expected points, value, confidence ranges, budget movement, and downside risk.",
         "- The Accuracy tab publishes prediction performance for completed rounds, including misses.",
+        "- The Points and Prices page publishes recorded season fantasy totals, current prices, price movement, recent form, and backward-looking value for every driver and constructor.",
         "- The Changelog page publishes notable model, scoring, data and tool changes in plain English.",
         "- The Videos page lists recent YouTube race-week drafts, deadline streams, picks and strategy videos.",
         "- The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.",
@@ -3875,6 +4097,7 @@ def write_llms_full(rel_paths: list[str], current: dict) -> None:
         "- Race picks hub: https://boxboxf1fantasy.com/picks/",
         "- Driver projections hub: https://boxboxf1fantasy.com/drivers/",
         "- Constructor projections hub: https://boxboxf1fantasy.com/constructors/",
+        "- 2026 fantasy points and price tracker: https://boxboxf1fantasy.com/stats/",
         "- Prediction accuracy: https://boxboxf1fantasy.com/accuracy/",
         "- Changelog: https://boxboxf1fantasy.com/changelog/",
         "- Videos: https://boxboxf1fantasy.com/videos/",
@@ -3960,6 +4183,7 @@ def write_llms_full(rel_paths: list[str], current: dict) -> None:
         "- DNF Risk: current driver and constructor reliability estimates with Monte Carlo downside floors and upside ranges.",
         "- Points Calculator: helps estimate score components and understand scoring.",
         "- Accuracy: shows post-race prediction performance and confidence coverage.",
+        "- Points and Prices: season-long recorded F1 Fantasy totals, current prices, price movement, last-three form, and average value for all drivers and constructors.",
         "- Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.",
         "- Videos: links recent YouTube drafts, deadline streams, top picks and race-week strategy explainers.",
         "- Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.",
@@ -5192,6 +5416,31 @@ def main() -> None:
         if current_lastmod:
             lastmods[f"constructors/{slug}/"] = current_lastmod
 
+    # --- season-long recorded fantasy points, prices and recent form ---
+    stats_dir = WEB / "stats"
+    stats_dir.mkdir(parents=True, exist_ok=True)
+    (stats_dir / "index.html").write_text(
+        render_fantasy_stats_page(season, driver_history), encoding="utf-8"
+    )
+    rel_paths.append("stats/")
+    stats_dates = [
+        source_date(season.get("generated_at")),
+        *[
+            source_date(round_info.get("date"))
+            for round_info in season.get("rounds", [])
+            if round_info.get("has_actual")
+        ],
+    ]
+    stats_dates = [date for date in stats_dates if date]
+    if stats_dates:
+        lastmods["stats/"] = max(stats_dates)
+    feed_items.append({
+        "title": f"F1 Fantasy Points & Price Tracker {YEAR}",
+        "url": f"{SITE}/stats/",
+        "summary": f"Recorded {YEAR} F1 Fantasy driver and constructor points, current prices, season price movement, last-three form and average value.",
+        "updated": now,
+    })
+
     # --- static content: guides + tools + their hubs ---
     for base, crumb, items, hub in (
         ("guides", "Guides", GUIDES, GUIDES_HUB),
@@ -5361,7 +5610,7 @@ def main() -> None:
     write_feeds(feed_items)
 
     print(f"[14_build_seo_pages] wrote {written} prediction race page(s) + {future_written} future outlook page(s) + {calendar_written} calendar watchlist page(s) + {len(drivers_sorted)} driver page(s) "
-          f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
+          f"+ {len(constructors_sorted)} constructor page(s) + points-and-prices page + {len(GUIDES)} guide(s) "
           f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
           "+ homepage prediction snapshot + robots.txt + site.webmanifest + humans.txt + security.txt + IndexNow key + predictions.schema.json + search-index.json + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")

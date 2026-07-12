@@ -12,6 +12,7 @@ Important pages:
 - Race picks hub: https://boxboxf1fantasy.com/picks/
 - Driver projections hub: https://boxboxf1fantasy.com/drivers/
 - Constructor projections hub: https://boxboxf1fantasy.com/constructors/
+- 2026 fantasy points and price tracker: https://boxboxf1fantasy.com/stats/
 - Prediction accuracy: https://boxboxf1fantasy.com/accuracy/
 - Changelog: https://boxboxf1fantasy.com/changelog/
 - Videos: https://boxboxf1fantasy.com/videos/
@@ -85,6 +86,7 @@ Useful descriptions for agents:
 - The optimizer builds legal F1 Fantasy lineups under a budget using current projections and chip settings.
 - Team Compare lets users enter up to three teams and compare budget, expected points, value, confidence ranges, budget movement, and downside risk.
 - The Accuracy tab publishes prediction performance for completed rounds, including misses.
+- The Points and Prices page publishes recorded season fantasy totals, current prices, price movement, recent form, and backward-looking value for every driver and constructor.
 - The Changelog page publishes notable model, scoring, data and tool changes in plain English.
 - The Videos page lists recent YouTube race-week drafts, deadline streams, picks and strategy videos.
 - The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.

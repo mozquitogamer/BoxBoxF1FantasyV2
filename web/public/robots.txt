@@ -6,6 +6,7 @@ Allow: /
 Allow: /picks/
 Allow: /drivers/
 Allow: /constructors/
+Allow: /stats/
 Allow: /accuracy/
 Allow: /changelog/
 Allow: /videos/

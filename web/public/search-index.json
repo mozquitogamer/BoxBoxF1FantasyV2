@@ -2,7 +2,7 @@
   "site": "https://boxboxf1fantasy.com",
   "name": "BoxBoxF1Fantasy",
   "description": "Free F1 Fantasy 2026 predictions, race picks, lineup optimizer, transfer tools, strategy guides, public data and accuracy tracking.",
-  "generated_at": "2026-07-12T23:39:50.345642+00:00",
+  "generated_at": "2026-07-12T23:57:28.900336+00:00",
   "language": "en",
   "current_round": 12,
   "current_race": "Belgian Grand Prix",
@@ -504,6 +504,14 @@
       "description": "Aston Martin F1 Fantasy 2026 constructor projection: -14.6 expected points for the Belgian GP, $6.3M price, pit-stop points and value rating.",
       "h1": "Aston Martin F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/stats/",
+      "path": "/stats/",
+      "title": "F1 Fantasy Points & Price Tracker 2026 | BoxBox",
+      "description": "F1 Fantasy 2026 driver and constructor points, current prices, season changes, points per race and last-three form, updated after each Grand Prix.",
+      "h1": "F1 Fantasy Points & Price Tracker 2026",
+      "type": "fantasy_points_price_tracker"
     },
     {
       "url": "https://boxboxf1fantasy.com/guides/",

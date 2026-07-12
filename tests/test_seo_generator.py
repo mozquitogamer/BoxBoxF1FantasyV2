@@ -311,6 +311,47 @@ def test_methodology_and_about_publish_trust_correction_and_schema_signals():
     assert '"@type": "FAQPage"' in about_html
 
 
+def test_fantasy_stats_page_ranks_recorded_points_prices_and_form():
+    season = {
+        "generated_at": "2026-07-09T20:41:22Z",
+        "rounds": [
+            {"round": 1, "name": "Opening Grand Prix", "date": "2026-03-08", "has_actual": True},
+            {"round": 2, "name": "Latest Grand Prix", "date": "2026-03-15", "has_actual": True},
+        ],
+        "driver_prices": {
+            "A": {"name": "Driver A", "current_price": 10.0, "starting_price": 9.0, "price_change": 1.0},
+            "B": {"name": "Driver B", "current_price": 20.0, "starting_price": 20.5, "price_change": -0.5},
+        },
+        "constructor_prices": {
+            "team_x": {"name": "Team X", "current_price": 25.0, "starting_price": 23.0, "price_change": 2.0},
+        },
+    }
+    history = {
+        "drivers": {
+            "A": {"rounds": [{"round": 1, "points": 10}, {"round": 2, "points": 30}]},
+            "B": {"rounds": [{"round": 1, "points": 15}, {"round": 2, "points": 5}]},
+        },
+        "constructors": {
+            "team_x": {"rounds": [{"round": 1, "points": 50}, {"round": 2, "points": 70}]},
+        },
+    }
+
+    html = seo.render_fantasy_stats_page(season, history)
+
+    assert "F1 Fantasy Points &amp; Price Tracker 2026" in html
+    assert "Fantasy scoring, not championship standings" in html
+    assert 'href="/drivers/driver-a/">Driver A</a>' in html
+    assert 'href="/constructors/team-x/">Team X</a>' in html
+    assert "40</strong>" in html
+    assert "10, 30<br><small>20.0 avg" in html
+    assert "+1.0M" in html
+    assert 'aria-label="2026 F1 Fantasy driver points and prices"' in html
+    assert '"@type": "Dataset"' in html
+    assert '"temporalCoverage": "2026-03-08/2026-03-15"' in html
+    assert '"@type": "FAQPage"' in html
+    assert seo.page_kind_from_relpath("stats/") == "fantasy_points_price_tracker"
+
+
 def test_belgian_model_briefing_is_dated_sourced_and_phase_honest():
     articles_data = json.loads((seo.DATA / "articles.json").read_text(encoding="utf-8"))
     briefing = next(

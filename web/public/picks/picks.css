@@ -104,6 +104,27 @@ tbody tr:hover { background: #11151d; }
 .update-card h2 { margin-top: 0; }
 .update-card li a,
 .update-card p a { text-decoration: underline; text-underline-offset: 2px; }
+.season-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0 26px;
+}
+.season-stat {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 13px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.season-stat span { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; }
+.season-stat strong { overflow-wrap: anywhere; }
+.season-stat em { color: var(--accent2); font-size: 0.86rem; font-style: normal; font-variant-numeric: tabular-nums; }
+td.gain { color: #53d18d; }
+td.loss { color: #ff7b72; }
+td small { color: var(--muted); font-size: 0.72rem; }
 .callout a { text-decoration: underline; text-underline-offset: 2px; }
 .article-body a { text-decoration: underline; text-underline-offset: 2px; }
 .article-body img {
@@ -149,6 +170,7 @@ tbody tr:hover { background: #11151d; }
 .footer a { color: var(--muted); text-decoration: underline; }
 
 @media (max-width: 600px) {
+  .season-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   h1 { font-size: 1.5rem; }
   .topbar .cta { padding: 7px 11px; font-size: 0.8rem; }
   th, td { padding: 7px 6px; font-size: 0.84rem; }

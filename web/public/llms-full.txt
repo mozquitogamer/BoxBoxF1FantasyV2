@@ -15,6 +15,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Race picks hub: https://boxboxf1fantasy.com/picks/
 - Driver projections hub: https://boxboxf1fantasy.com/drivers/
 - Constructor projections hub: https://boxboxf1fantasy.com/constructors/
+- 2026 fantasy points and price tracker: https://boxboxf1fantasy.com/stats/
 - Prediction accuracy: https://boxboxf1fantasy.com/accuracy/
 - Changelog: https://boxboxf1fantasy.com/changelog/
 - Videos: https://boxboxf1fantasy.com/videos/
@@ -98,6 +99,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - DNF Risk: current driver and constructor reliability estimates with Monte Carlo downside floors and upside ranges.
 - Points Calculator: helps estimate score components and understand scoring.
 - Accuracy: shows post-race prediction performance and confidence coverage.
+- Points and Prices: season-long recorded F1 Fantasy totals, current prices, price movement, last-three form, and average value for all drivers and constructors.
 - Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.
 - Videos: links recent YouTube drafts, deadline streams, top picks and race-week strategy explainers.
 - Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.
@@ -169,6 +171,7 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - Williams F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/williams/ - Williams F1 Fantasy 2026 constructor projection: -3.3 expected points for the Belgian GP, $14.4M price, pit-stop points and value rating.
 - Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/cadillac/ - Cadillac F1 Fantasy 2026 constructor projection: -11.6 expected points for the Belgian GP, $4.8M price, pit-stop points and value rating.
 - Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/aston-martin/ - Aston Martin F1 Fantasy 2026 constructor projection: -14.6 expected points for the Belgian GP, $6.3M price, pit-stop points and value rating.
+- F1 Fantasy Points & Price Tracker 2026 | BoxBox: https://boxboxf1fantasy.com/stats/ - F1 Fantasy 2026 driver and constructor points, current prices, season changes, points per race and last-three form, updated after each Grand Prix.
 - F1 Fantasy Guides 2026: Scoring, Strategy & Chips | BoxBox: https://boxboxf1fantasy.com/guides/ - Free F1 Fantasy 2026 guides: how scoring works, how to win, chips explained, drivers vs constructors, and a beginner's how-to-play walkthrough.
 - How F1 Fantasy Scoring Works (2026) | BoxBox: https://boxboxf1fantasy.com/guides/how-f1-fantasy-scoring-works/ - F1 Fantasy 2026 scoring explained: qualifying, race and sprint points, overtakes, bonuses, DNF penalties, constructors and pit stops.
 - How to Win F1 Fantasy: Strategy Guide (2026) | BoxBox: https://boxboxf1fantasy.com/guides/how-to-win-f1-fantasy/ - Six F1 Fantasy strategies for 2026: find value, grow budget, plan transfers, time chips, use constructors well and captain reliable upside.
