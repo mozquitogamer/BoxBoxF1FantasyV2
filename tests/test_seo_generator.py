@@ -1,4 +1,6 @@
 import importlib.util
+import json
+import re
 from pathlib import Path
 
 
@@ -91,6 +93,29 @@ def test_current_race_page_is_phase_honest_and_explains_autopilot():
     assert "July 18, 2026 14:00 UTC" in html
     assert "Autopilot</strong> instead protects you by applying 2x to your best actual scorer" in html
     assert "updated through race week" not in html
+
+
+def test_race_rankings_link_profiles_and_item_lists_target_entities():
+    _slug, html = seo.render_race_page(race_week_predictions(), True)
+
+    assert '<a href="/drivers/driver-b/">Driver B</a>' in html
+    assert '<a href="/constructors/team-x/">Team X</a>' in html
+    ld_match = re.search(
+        r'<script type="application/ld\+json">\s*(.*?)\s*</script>',
+        html,
+        re.DOTALL,
+    )
+    assert ld_match is not None
+    objects = json.loads(ld_match.group(1))
+    item_lists = [obj for obj in objects if obj.get("@type") == "ItemList"]
+    assert len(item_lists) == 2
+    driver_urls = [item["url"] for item in item_lists[0]["itemListElement"]]
+    constructor_urls = [item["url"] for item in item_lists[1]["itemListElement"]]
+    assert "https://boxboxf1fantasy.com/drivers/driver-b/" in driver_urls
+    assert "https://boxboxf1fantasy.com/constructors/team-x/" in constructor_urls
+    assert all("/picks/test-gp-2026/" not in url for url in driver_urls + constructor_urls)
+    article = next(obj for obj in objects if obj.get("@type") == "Article")
+    assert article["author"]["name"] == "BoxBoxF1Fantasy"
 
 
 def test_current_weather_distinguishes_latest_feed_from_model_snapshot():

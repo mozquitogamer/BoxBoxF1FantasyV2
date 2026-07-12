@@ -1032,8 +1032,11 @@ def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) 
     drows = []
     for i, d in enumerate(by_pts[:TOP_DRIVERS], 1):
         team = cmap.get(d.get("constructor"), str(d.get("constructor", "")).title())
+        driver_url = f'/drivers/{plain_slug(d["name"])}/'
+        team_url = f'/constructors/{plain_slug(team)}/'
         drows.append(
-            f'<tr><td class="num">{i}</td><td>{esc(d["name"])}</td><td>{esc(team)}</td>'
+            f'<tr><td class="num">{i}</td><td><a href="{driver_url}">{esc(d["name"])}</a></td>'
+            f'<td><a href="{team_url}">{esc(team)}</a></td>'
             f'<td class="num">${d.get("current_price",0):.1f}M</td>'
             f'<td class="num">P{d.get("predicted_quali","-")}&rarr;P{d.get("predicted_finish","-")}</td>'
             f'<td class="num">{d.get("expected_points",0):.1f}</td>'
@@ -1050,8 +1053,11 @@ def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) 
     vrows = []
     for d in by_val[:VALUE_DRIVERS]:
         team = cmap.get(d.get("constructor"), str(d.get("constructor", "")).title())
+        driver_url = f'/drivers/{plain_slug(d["name"])}/'
+        team_url = f'/constructors/{plain_slug(team)}/'
         vrows.append(
-            f'<tr><td>{esc(d["name"])}</td><td>{esc(team)}</td>'
+            f'<tr><td><a href="{driver_url}">{esc(d["name"])}</a></td>'
+            f'<td><a href="{team_url}">{esc(team)}</a></td>'
             f'<td class="num">${d.get("current_price",0):.1f}M</td>'
             f'<td class="num">{d.get("expected_points",0):.1f}</td>'
             f'<td class="num">{d.get("value_score",0):.2f}</td></tr>'
@@ -1065,8 +1071,10 @@ def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) 
     # --- constructors table ---
     crows = []
     for c in cons_by_pts[:TOP_CONSTRUCTORS]:
+        constructor_name = c.get("name", c["constructor_id"])
+        constructor_url = f'/constructors/{plain_slug(constructor_name)}/'
         crows.append(
-            f'<tr><td>{esc(c.get("name", c["constructor_id"]))}</td>'
+            f'<tr><td><a href="{constructor_url}">{esc(constructor_name)}</a></td>'
             f'<td class="num">${c.get("current_price",0):.1f}M</td>'
             f'<td class="num">{c.get("expected_points",0):.1f}</td>'
             f'<td class="num">{c.get("expected_pit_stop_pts",0):.1f}</td>'
@@ -1144,6 +1152,7 @@ def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) 
                 LINEUP_CONTENT_LASTMOD,
                 weather_date or LINEUP_CONTENT_LASTMOD,
             ),
+            "author": publisher_ld(),
             "about": [
                 "F1 Fantasy",
                 race,
@@ -1154,12 +1163,18 @@ def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) 
         item_list_ld(
             f"Top F1 Fantasy driver picks for {short} {YEAR}",
             canonical,
-            [(d["name"], canonical) for d in by_pts[:TOP_DRIVERS]],
+            [(d["name"], f'{SITE}/drivers/{plain_slug(d["name"])}/') for d in by_pts[:TOP_DRIVERS]],
         ),
         item_list_ld(
             f"Top F1 Fantasy constructor picks for {short} {YEAR}",
             canonical,
-            [(c.get("name", c["constructor_id"]), canonical) for c in cons_by_pts[:TOP_CONSTRUCTORS]],
+            [
+                (
+                    c.get("name", c["constructor_id"]),
+                    f'{SITE}/constructors/{plain_slug(c.get("name", c["constructor_id"]))}/',
+                )
+                for c in cons_by_pts[:TOP_CONSTRUCTORS]
+            ],
         ),
         {
             "@context": "https://schema.org",
@@ -1299,8 +1314,12 @@ def render_future_race_page(pred: dict, horizon_generated_at: str = "") -> tuple
 
     driver_rows = []
     for i, d in enumerate(drivers[:TOP_DRIVERS], 1):
+        driver_url = f'/drivers/{plain_slug(d["name"])}/'
+        constructor_name = d.get("constructor_name", "")
+        constructor_url = f'/constructors/{plain_slug(constructor_name)}/'
         driver_rows.append(
-            f'<tr><td class="num">{i}</td><td>{esc(d["name"])}</td><td>{esc(d.get("constructor_name", ""))}</td>'
+            f'<tr><td class="num">{i}</td><td><a href="{driver_url}">{esc(d["name"])}</a></td>'
+            f'<td><a href="{constructor_url}">{esc(constructor_name)}</a></td>'
             f'<td class="num">${d.get("current_price", 0):.1f}M</td>'
             f'<td class="num">P{d.get("predicted_quali", "-")}&rarr;P{d.get("predicted_finish", "-")}</td>'
             f'<td class="num">{d.get("expected_points", 0):.1f}</td>'
@@ -1309,12 +1328,14 @@ def render_future_race_page(pred: dict, horizon_generated_at: str = "") -> tuple
 
     constructor_rows = []
     for c in constructors[:TOP_CONSTRUCTORS]:
+        constructor_name = c.get("name", c.get("constructor_id", ""))
+        constructor_url = f'/constructors/{plain_slug(constructor_name)}/'
         driver_names = " / ".join(
             d["name"] for did in [c.get("driver_1"), c.get("driver_2")]
             for d in drivers if d.get("driver_id") == did
         )
         constructor_rows.append(
-            f'<tr><td>{esc(c.get("name", c.get("constructor_id", "")))}</td>'
+            f'<tr><td><a href="{constructor_url}">{esc(constructor_name)}</a></td>'
             f'<td>{esc(driver_names)}</td>'
             f'<td class="num">${c.get("current_price", 0):.1f}M</td>'
             f'<td class="num">{c.get("expected_points", 0):.1f}</td>'
@@ -1323,8 +1344,12 @@ def render_future_race_page(pred: dict, horizon_generated_at: str = "") -> tuple
 
     value_rows = []
     for d in value_drivers[:VALUE_DRIVERS]:
+        driver_url = f'/drivers/{plain_slug(d["name"])}/'
+        constructor_name = d.get("constructor_name", "")
+        constructor_url = f'/constructors/{plain_slug(constructor_name)}/'
         value_rows.append(
-            f'<tr><td>{esc(d["name"])}</td><td>{esc(d.get("constructor_name", ""))}</td>'
+            f'<tr><td><a href="{driver_url}">{esc(d["name"])}</a></td>'
+            f'<td><a href="{constructor_url}">{esc(constructor_name)}</a></td>'
             f'<td class="num">${d.get("current_price", 0):.1f}M</td>'
             f'<td class="num">{d.get("expected_points", 0):.1f}</td>'
             f'<td class="num">{d.get("value_score", 0):.2f}</td></tr>'
@@ -1353,17 +1378,24 @@ def render_future_race_page(pred: dict, horizon_generated_at: str = "") -> tuple
             **webpage_ld(title, canonical, desc, "Article"),
             "headline": title,
             "dateModified": gen_date,
+            "author": publisher_ld(),
             "about": ["F1 Fantasy", race, f"{short} {YEAR}", "F1 Fantasy transfer planning"],
         },
         item_list_ld(
             f"Early F1 Fantasy driver outlook for {short} {YEAR}",
             canonical,
-            [(d["name"], canonical) for d in drivers[:TOP_DRIVERS]],
+            [(d["name"], f'{SITE}/drivers/{plain_slug(d["name"])}/') for d in drivers[:TOP_DRIVERS]],
         ),
         item_list_ld(
             f"Early F1 Fantasy constructor outlook for {short} {YEAR}",
             canonical,
-            [(c.get("name", c.get("constructor_id", "")), canonical) for c in constructors[:TOP_CONSTRUCTORS]],
+            [
+                (
+                    c.get("name", c.get("constructor_id", "")),
+                    f'{SITE}/constructors/{plain_slug(c.get("name", c.get("constructor_id", "constructor")))}/',
+                )
+                for c in constructors[:TOP_CONSTRUCTORS]
+            ],
         ),
         breadcrumb_ld([
             ("Home", f"{SITE}/"),
