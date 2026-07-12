@@ -208,3 +208,54 @@ def test_driver_profile_uses_unique_projection_breakdown_and_history():
     assert "/constructors/team-x/" in html
     assert "How has Driver B scored in F1 Fantasy this season?" in html
     assert '"name": "2026 recorded fantasy points"' in html
+
+
+def test_constructor_profile_uses_driver_breakdown_and_history():
+    current = race_week_predictions()
+    constructor = current["constructors"][0]
+    constructor.update({
+        "driver_1": "A",
+        "driver_2": "B",
+        "expected_points_quali": 20,
+        "expected_points_race": 35,
+        "expected_dnf_impact": -4,
+        "dnf_probability": 0.15,
+        "risk": "MEDIUM",
+        "mc_total_p5": 5,
+        "mc_total_p95": 80,
+    })
+    history = {
+        "rounds": [
+            {"round": 1, "points": 80},
+            {"round": 2, "points": 100},
+            {"round": 3, "points": 40},
+            {"round": 6, "points": 90},
+        ],
+    }
+    round_names = {
+        1: {"name": "Australian Grand Prix"},
+        2: {"name": "Chinese Grand Prix"},
+        3: {"name": "Japanese Grand Prix"},
+        6: {"name": "Miami Grand Prix"},
+    }
+    drivers = {d["driver_id"]: d for d in current["drivers"]}
+    html = seo.render_constructor_page(
+        constructor,
+        current,
+        1,
+        drivers,
+        history,
+        round_names,
+    )
+
+    assert "Where the constructor projection comes from" in html
+    assert "Qualifying contribution estimate</th><td>20.0 pts" in html
+    assert "Driver contribution outlook" in html
+    assert 'href="/drivers/driver-a/"' in html
+    assert "Driver boost multipliers never increase Team X" in html
+    assert "2026 constructor form" in html
+    assert "310 fantasy points" in html
+    assert "77.5 per round on average" in html
+    assert "latest three-round average is 76.7" in html
+    assert "How has Team X scored in F1 Fantasy this season?" in html
+    assert '"name": "2026 recorded constructor fantasy points"' in html

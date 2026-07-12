@@ -1914,7 +1914,14 @@ def render_constructors_hub(current: dict) -> str:
     return page_head(title, desc, canonical, ld) + body + FOOTER
 
 
-def render_constructor_page(constructor: dict, current: dict, rank: int, drivers_by_id: dict) -> str:
+def render_constructor_page(
+    constructor: dict,
+    current: dict,
+    rank: int,
+    drivers_by_id: dict,
+    history: dict | None = None,
+    rounds_by_num: dict | None = None,
+) -> str:
     name = constructor.get("name", constructor.get("constructor_id", "Constructor"))
     full_name = constructor.get("full_name", name)
     race = current.get("race", "the current race")
@@ -1926,29 +1933,116 @@ def render_constructor_page(constructor: dict, current: dict, rank: int, drivers
         f"{name} F1 Fantasy {YEAR} constructor projection: {constructor.get('expected_points', 0):.1f} expected points "
         f"for the {short}, ${constructor.get('current_price', 0):.1f}M price, pit-stop points and value rating."
     )
+    driver_objects = [
+        drivers_by_id.get(constructor.get("driver_1"), {}),
+        drivers_by_id.get(constructor.get("driver_2"), {}),
+    ]
     driver_names = [
-        drivers_by_id.get(constructor.get("driver_1"), {}).get("name", constructor.get("driver_1", "")),
-        drivers_by_id.get(constructor.get("driver_2"), {}).get("name", constructor.get("driver_2", "")),
+        driver.get("name") or constructor.get(f"driver_{i}", "")
+        for i, driver in enumerate(driver_objects, 1)
     ]
     driver_line = " and ".join([d for d in driver_names if d])
+    driver_line_html = " and ".join(
+        f'<a href="/drivers/{plain_slug(driver_name)}/">{esc(driver_name)}</a>'
+        for driver_name in driver_names if driver_name
+    )
     floor = constructor.get("mc_total_p5", 0)
     ceiling = constructor.get("mc_total_p95", 0)
     dnf_pct = constructor.get("dnf_probability", 0) * 100
+    value_order = sorted(current.get("constructors", []), key=lambda c: c.get("value_score", 0), reverse=True)
+    value_rank = next((i for i, c in enumerate(value_order, 1) if c.get("constructor_id") == constructor.get("constructor_id")), rank)
+    phase = str(current.get("phase") or "pre_fp").lower()
+    phase_label = {
+        "pre_fp": "pre-practice",
+        "post_fp": "post-practice",
+        "post_quali": "post-qualifying",
+    }.get(phase, phase.replace("_", "-"))
+    race_url = f'/picks/{slugify(race)}/'
     cta = '<div class="btnrow"><a class="cta" href="/#constructors">See live constructor cards &rarr;</a><a class="cta" href="/#optimizer" style="background:#1b212c;">Test in Optimizer &rarr;</a></div>'
     stats = (
         '<table><tbody>'
         f'<tr><th>Full team name</th><td>{esc(full_name)}</td></tr>'
-        f'<tr><th>Listed drivers</th><td>{esc(driver_line)}</td></tr>'
+        f'<tr><th>Listed drivers</th><td>{driver_line_html}</td></tr>'
         f'<tr><th>Current price</th><td>${constructor.get("current_price", 0):.1f}M</td></tr>'
         f'<tr><th>Expected points</th><td>{constructor.get("expected_points", 0):.1f}</td></tr>'
         f'<tr><th>Projected points</th><td>{constructor.get("projected_points", 0):.1f}</td></tr>'
         f'<tr><th>Expected pit-stop points</th><td>{constructor.get("expected_pit_stop_pts", 0):.1f}</td></tr>'
         f'<tr><th>Qualifying bonus</th><td>{constructor.get("quali_bonus", 0):.1f}</td></tr>'
-        f'<tr><th>Value rating</th><td>{constructor.get("value_score", 0):.2f} PPM</td></tr>'
+        f'<tr><th>Value rating</th><td>{constructor.get("value_score", 0):.2f} PPM (#{value_rank} of {len(value_order)})</td></tr>'
         f'<tr><th>90% confidence range</th><td>{floor:.1f} to {ceiling:.1f} pts</td></tr>'
         f'<tr><th>DNF probability</th><td>{dnf_pct:.0f}%</td></tr>'
         '</tbody></table>'
     )
+    scoring = (
+        '<table><tbody>'
+        f'<tr><th>Qualifying contribution estimate</th><td>{float(constructor.get("expected_points_quali", 0)):.1f} pts</td></tr>'
+        f'<tr><th>Race contribution estimate</th><td>{float(constructor.get("expected_points_race", 0)):.1f} pts</td></tr>'
+        f'<tr><th>Expected pit-stop points</th><td>{float(constructor.get("expected_pit_stop_pts", 0)):.1f} pts</td></tr>'
+        f'<tr><th>Qualifying teamwork bonus</th><td>{float(constructor.get("quali_bonus", 0)):.1f} pts</td></tr>'
+        f'<tr><th>Expected DNF impact</th><td>{float(constructor.get("expected_dnf_impact", 0)):.1f} pts</td></tr>'
+        f'<tr><th>Model risk band</th><td>{esc(constructor.get("risk", "Unknown"))}</td></tr>'
+        '</tbody></table>'
+    )
+    driver_rows = "".join(
+        f'<tr><td><a href="/drivers/{plain_slug(driver.get("name", driver.get("driver_id", "driver")))}/">'
+        f'{esc(driver.get("name", driver.get("driver_id", "Driver")))}</a></td>'
+        f'<td class="num">${float(driver.get("current_price", 0)):.1f}M</td>'
+        f'<td class="num">{float(driver.get("expected_points", 0)):.1f}</td>'
+        f'<td class="num">P{driver.get("predicted_quali", "-")}&rarr;P{driver.get("predicted_finish", "-")}</td>'
+        f'<td class="num">{float(driver.get("dnf_probability", 0)) * 100:.0f}%</td></tr>'
+        for driver in driver_objects if driver
+    )
+    drivers_table = (
+        '<table><thead><tr><th>Driver</th><th class="num">Price</th><th class="num">Exp. pts</th>'
+        '<th class="num">Quali&rarr;Race</th><th class="num">DNF risk</th></tr></thead><tbody>'
+        + driver_rows + '</tbody></table>'
+    )
+
+    history_rounds = sorted(
+        (history or {}).get("rounds", []),
+        key=lambda row: int(row.get("round", 0)),
+    )
+    history_html = ""
+    history_faq = None
+    history_properties = []
+    if history_rounds:
+        points = [float(row.get("points", 0)) for row in history_rounds]
+        season_average = sum(points) / len(points)
+        recent = history_rounds[-3:]
+        recent_average = sum(float(row.get("points", 0)) for row in recent) / len(recent)
+        best = max(history_rounds, key=lambda row: float(row.get("points", 0)))
+        worst = min(history_rounds, key=lambda row: float(row.get("points", 0)))
+        round_names = rounds_by_num or {}
+
+        def history_race(row: dict) -> str:
+            round_info = round_names.get(int(row.get("round", 0)), {})
+            return short_race(round_info.get("name") or str(row.get("circuit_id", "Race")).replace("_", " ").title())
+
+        trend = "above" if recent_average > season_average + 1 else "below" if recent_average < season_average - 1 else "in line with"
+        recent_rows = "".join(
+            f'<tr><td>R{int(row.get("round", 0))}</td><td>{esc(history_race(row))}</td>'
+            f'<td class="num">{float(row.get("points", 0)):.0f}</td></tr>'
+            for row in reversed(history_rounds[-5:])
+        )
+        history_html = (
+            f'<p>BoxBox\'s completed-round history records <strong>{sum(points):.0f} fantasy points</strong> for {esc(name)} '
+            f'across {len(points)} rounds in {YEAR}: {season_average:.1f} per round on average and a {median(points):.1f}-point median. '
+            f'The latest three-round average is {recent_average:.1f}, which is {trend} the season average.</p>'
+            '<table><thead><tr><th>Round</th><th>Race</th><th class="num">Constructor pts</th></tr></thead><tbody>'
+            + recent_rows + '</tbody></table>'
+            f'<p><strong>Season range:</strong> best result {float(best.get("points", 0)):.0f} points at the {esc(history_race(best))}; '
+            f'lowest result {float(worst.get("points", 0)):.0f} at the {esc(history_race(worst))}.</p>'
+            '<p class="meta">Completed-round values come from the site\'s exported constructor-history dataset and are separate from the current forecast.</p>'
+        )
+        history_faq = (
+            f"How has {name} scored in F1 Fantasy this season?",
+            f"BoxBox's completed-round history records {sum(points):.0f} points across {len(points)} rounds for {name}, an average of {season_average:.1f} per round. The latest three-round average is {recent_average:.1f}.",
+        )
+        history_properties = [
+            {"@type": "PropertyValue", "name": f"{YEAR} recorded constructor fantasy points", "value": round(sum(points), 1)},
+            {"@type": "PropertyValue", "name": f"{YEAR} constructor points per completed round", "value": round(season_average, 1)},
+            {"@type": "PropertyValue", "name": "Latest three-round constructor average", "value": round(recent_average, 1)},
+        ]
     faqs = [
         (f"How many F1 Fantasy points is {name} projected to score?",
          f"{name} is currently projected for {constructor.get('expected_points', 0):.1f} expected fantasy points at the {short}. The 90% simulation range is {floor:.1f} to {ceiling:.1f} points."),
@@ -1957,9 +2051,12 @@ def render_constructor_page(constructor: dict, current: dict, rank: int, drivers
         (f"Which drivers count toward {name} constructor points?",
          f"The current prediction file lists {driver_line} for {name}. Constructor points include both drivers' qualifying and race scoring, pit-stop points and the qualifying teamwork bonus."),
     ]
+    if history_faq:
+        faqs.append(history_faq)
     ld = ld_block([
         {
             **webpage_ld(title, canonical, desc, "ProfilePage"),
+            "dateModified": source_date(current.get("exported_at"), current.get("generated_at")) or LINEUP_CONTENT_LASTMOD,
             "mainEntity": {
                 "@type": "SportsTeam",
                 "name": name,
@@ -1981,7 +2078,7 @@ def render_constructor_page(constructor: dict, current: dict, rank: int, drivers
                     {"@type": "PropertyValue", "name": "F1 Fantasy points per million", "value": round(float(constructor.get("value_score", 0)), 2)},
                     {"@type": "PropertyValue", "name": "Expected pit-stop points", "value": round(float(constructor.get("expected_pit_stop_pts", 0)), 1)},
                     {"@type": "PropertyValue", "name": "Qualifying teamwork bonus", "value": round(float(constructor.get("quali_bonus", 0)), 1)},
-                ],
+                ] + history_properties,
             },
         },
         breadcrumb_ld([
@@ -2002,12 +2099,29 @@ def render_constructor_page(constructor: dict, current: dict, rank: int, drivers
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/constructors/">Constructors</a> &rsaquo; {esc(name)}</p>'
         f"<h1>{esc(name)} F1 Fantasy Constructor {YEAR}</h1>"
         f'<p class="lede">{esc(name)} is ranked #{rank} by expected constructor points for the <strong>{esc(race)}</strong>, with a current projection of <strong>{constructor.get("expected_points", 0):.1f} points</strong>.</p>'
-        f'<p class="meta">Price ${constructor.get("current_price", 0):.1f}M &middot; listed drivers: {esc(driver_line)}.</p>'
+        f'<p class="meta">{esc(phase_label.title())} forecast &middot; Price ${constructor.get("current_price", 0):.1f}M &middot; listed drivers: {driver_line_html}.</p>'
         + cta
         + "<h2>Current projection</h2>"
         + stats
-        + "<h2>Fantasy read</h2>"
-        + f'<p>{esc(name)} combines both listed drivers, pit-stop scoring, qualifying teamwork bonus and DNF exposure. That makes constructor value different from driver value, and often steadier than chasing one extra premium driver.</p>'
+        + f'<p>Against all {len(value_order)} constructors, {esc(name)} ranks <strong>#{rank} for expected points</strong> and '
+        f'<strong>#{value_rank} for points per million</strong>. The deterministic projection is {float(constructor.get("projected_points", 0)):.1f} points, '
+        f'while the risk-adjusted simulation mean is {float(constructor.get("expected_points", 0)):.1f}.</p>'
+        + "<h2>Where the constructor projection comes from</h2>"
+        + scoring
+        + '<p>These contribution estimates describe the scoring inputs around the deterministic forecast. They should not be added together and treated as the '
+        'risk-adjusted mean, because the Monte Carlo simulation also samples correlated driver outcomes, DNFs and pit-stop results.</p>'
+        + "<h2>Driver contribution outlook</h2>"
+        + drivers_table
+        + f'<p>Constructor scoring uses both listed drivers plus constructor-only bonuses. Driver boost multipliers never increase {esc(name)}\'s constructor total.</p>'
+        + "<h2>Risk and upside</h2>"
+        + f'<p>The 90% constructor interval runs from <strong>{float(floor):.1f}</strong> to <strong>{float(ceiling):.1f} points</strong>, '
+        f'around a {float(constructor.get("expected_points", 0)):.1f}-point mean. The modeled DNF probability is {dnf_pct:.0f}% and the current risk band is '
+        f'<strong>{esc(constructor.get("risk", "Unknown"))}</strong>. Both cars, pit execution, weather and race incidents can widen the result.</p>'
+        + ("<h2>2026 constructor form</h2>" + history_html if history_html else "")
+        + "<h2>Use this projection</h2>"
+        + f'<p>Open the <a href="{race_url}">{esc(short)} picks page</a> for full race context, compare {esc(name)} with the '
+        f'<a href="/constructors/">constructor field</a>, inspect {driver_line_html}, or test the team in the live Optimizer. '
+        f'This page currently reflects the {esc(phase_label)} model stage.</p>'
         + "<h2>FAQ</h2>"
         + _faq_html(faqs)
         + cta
@@ -4758,7 +4872,11 @@ def main() -> None:
         slug = plain_slug(constructor.get("name", constructor.get("constructor_id", "constructor")))
         out_dir = constructors_dir / slug
         out_dir.mkdir(parents=True, exist_ok=True)
-        (out_dir / "index.html").write_text(render_constructor_page(constructor, current, rank, drivers_by_id), encoding="utf-8")
+        history = (driver_history.get("constructors") or {}).get(constructor.get("constructor_id"), {})
+        (out_dir / "index.html").write_text(
+            render_constructor_page(constructor, current, rank, drivers_by_id, history, rounds_by_num),
+            encoding="utf-8",
+        )
         rel_paths.append(f"constructors/{slug}/")
         if current_lastmod:
             lastmods[f"constructors/{slug}/"] = current_lastmod
