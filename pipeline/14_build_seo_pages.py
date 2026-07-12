@@ -2,9 +2,9 @@
 
 The website is a single-page app, so Google only ever sees one URL with mostly
 JS-rendered content. This script adds real, crawlable HTML *alongside* the app:
-content-rich race-week pages for races that have predictions, early outlook
-pages for upcoming horizon rounds, plus an index hub at /picks/, then refreshes
-sitemap.xml.
+a current-prediction snapshot in the homepage's initial HTML, content-rich
+race-week pages for races that have predictions, early outlook pages for
+upcoming horizon rounds, plus an index hub at /picks/, then refreshes sitemap.xml.
 
 Each page bakes the predictions into the HTML as real text (top driver and
 constructor picks, best value/PPM picks, a boost/captain pick, race-specific
@@ -629,6 +629,8 @@ def current_points_calculator_html(pred: dict) -> str:
         f'<td class="num">${_price(d):.1f}M</td></tr>'
         for d in drivers
     )
+
+
     constructor_rows = "".join(
         f'<tr><td><a href="/constructors/{plain_slug(c.get("name", c.get("constructor_id", "constructor")))}/">{esc(c.get("name", c.get("constructor_id", "")))}</a></td>'
         f'<td class="num">{_pts(c):.1f}</td>'
@@ -653,6 +655,67 @@ def current_points_calculator_html(pred: dict) -> str:
         + constructor_rows +
         "</tbody></table>"
     )
+
+
+def write_homepage_prediction_snapshot(current: dict) -> None:
+    """Pre-render current driver cards for crawlers and no-JavaScript visitors."""
+    home = WEB / "index.html"
+    if not home.exists():
+        return
+
+    start = "<!-- SEO_CURRENT_PREDICTIONS_START -->"
+    end = "<!-- SEO_CURRENT_PREDICTIONS_END -->"
+    source = home.read_text(encoding="utf-8")
+    if start not in source or end not in source:
+        raise RuntimeError("Homepage current-prediction snapshot markers are missing")
+
+    race = current.get("race", "Current race")
+    constructors = {
+        c.get("constructor_id"): c.get("name", c.get("constructor_id", ""))
+        for c in current.get("constructors", [])
+    }
+    drivers = sorted(
+        current.get("drivers", []),
+        key=lambda d: float(d.get("projected_points", d.get("expected_points", 0)) or 0),
+        reverse=True,
+    )
+    cards = []
+    for i, d in enumerate(drivers):
+        name = d.get("name", d.get("driver_id", "Driver"))
+        constructor_id = d.get("constructor", "")
+        constructor_name = constructors.get(constructor_id, constructor_id.replace("_", " ").title())
+        projected = float(d.get("projected_points", d.get("expected_points", 0)) or 0)
+        expected = float(d.get("expected_points", 0) or 0)
+        price = float(d.get("current_price", 0) or 0)
+        p5 = d.get("mc_total_p5")
+        p95 = d.get("mc_total_p95")
+        range_html = (
+            f'<div class="stat"><div class="stat-value">{float(p5):.0f} to {float(p95):.0f}</div>'
+            '<div class="stat-label">90% range</div></div>'
+            if p5 is not None and p95 is not None else ""
+        )
+        cards.append(
+            f'<article class="driver-card" data-driver-id="{esc(d.get("driver_id", ""))}" style="--i:{i}">'
+            '<div class="card-header"><div class="driver-info">'
+            f'<h3><a href="/drivers/{plain_slug(name)}/">{esc(name)}</a></h3>'
+            f'<div class="driver-team"><a href="/constructors/{plain_slug(constructor_name)}/">{esc(constructor_name)}</a> &middot; {esc(short_race(race))}</div>'
+            f'<div class="card-cost">${price:.1f}M</div></div>'
+            f'<div class="driver-number">{esc(d.get("number", ""))}</div></div>'
+            f'<div class="points-badge">{projected:.1f}<span class="points-label">projected</span>'
+            f'<span class="points-adj"><span class="points-adj-val">{expected:.1f}</span><span class="points-adj-label">risk-adjusted</span></span></div>'
+            '<div class="card-stats">'
+            f'<div class="stat"><div class="stat-value">P{esc(d.get("predicted_quali", "-"))}</div><div class="stat-label">Quali</div></div>'
+            f'<div class="stat"><div class="stat-value">P{esc(d.get("predicted_finish", "-"))}</div><div class="stat-label">Race</div></div>'
+            f'<div class="stat"><div class="stat-value">{esc(d.get("confidence", "-"))}%</div><div class="stat-label">Confidence</div></div>'
+            f'{range_html}</div></article>'
+        )
+
+    snapshot = start + "\n" + "\n".join(cards) + "\n" + end
+    pattern = re.compile(re.escape(start) + r".*?" + re.escape(end), re.S)
+    updated, count = pattern.subn(snapshot, source, count=1)
+    if count != 1:
+        raise RuntimeError("Could not update homepage current-prediction snapshot")
+    home.write_text(updated, encoding="utf-8")
 
 
 # GA4 snippet. Plain (non-f) string so the JS braces survive. Unlike the SPA,
@@ -4050,6 +4113,7 @@ def main() -> None:
         print("[14_build_seo_pages] missing season_summary.json or predictions.json - run export first.")
         return
 
+    write_homepage_prediction_snapshot(current)
     write_prediction_schema()
     write_ai_summary(current, season)
 
@@ -4324,7 +4388,7 @@ def main() -> None:
           f"+ {len(constructors_sorted)} constructor page(s) + {len(GUIDES)} guide(s) "
           f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
           f"+ sitemap.xml ({len(rel_paths)} URLs) "
-          "+ robots.txt + site.webmanifest + humans.txt + security.txt + IndexNow key + predictions.schema.json + search-index.json + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
+          "+ homepage prediction snapshot + robots.txt + site.webmanifest + humans.txt + security.txt + IndexNow key + predictions.schema.json + search-index.json + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
 
 
 if __name__ == "__main__":
