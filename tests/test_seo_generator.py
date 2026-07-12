@@ -259,3 +259,33 @@ def test_constructor_profile_uses_driver_breakdown_and_history():
     assert "latest three-round average is 76.7" in html
     assert "How has Team X scored in F1 Fantasy this season?" in html
     assert '"name": "2026 recorded constructor fantasy points"' in html
+
+
+def test_topical_hubs_publish_current_context_guidance_and_faq_schema():
+    current = race_week_predictions()
+    for i, constructor in enumerate(current["constructors"]):
+        constructor["mc_total_p5"] = 10 - i
+    entries = [
+        ("test-gp-2026", "Test Grand Prix", "2026-07-19", 12, "current"),
+        ("future-gp-2026", "Future Grand Prix", "2026-07-26", 13, "future"),
+    ]
+    weather = {
+        "round": 12,
+        "sessions": [{"name": "Race", "rain_probability": 35, "rain_risk": "MEDIUM"}],
+    }
+
+    picks_html = seo.render_index(entries, current, weather)
+    drivers_html = seo.render_drivers_hub(current)
+    constructors_html = seo.render_constructors_hub(current)
+
+    assert "Current F1 Fantasy picks: Test Grand Prix" in picks_html
+    assert "Latest race forecast: 35% rain probability" in picks_html
+    assert "How race-pick pages change through the weekend" in picks_html
+    assert "Current driver rankings" in drivers_html
+    assert "Driver B leads expected points at 60.0" in drivers_html
+    assert 'href="/constructors/team-x/"' in drivers_html
+    assert "Current constructor rankings" in constructors_html
+    assert "How to read the constructor table" in constructors_html
+    assert '"@type": "FAQPage"' in picks_html
+    assert '"@type": "FAQPage"' in drivers_html
+    assert '"@type": "FAQPage"' in constructors_html

@@ -1574,7 +1574,26 @@ def render_calendar_race_page(round_info: dict, track_data: dict) -> tuple[str, 
 # --------------------------------------------------------------------------- #
 # index hub
 # --------------------------------------------------------------------------- #
-def render_index(entries: list) -> str:
+def forecast_phase_details(current: dict) -> tuple[str, str]:
+    phase = str(current.get("phase") or "pre_fp").lower()
+    details = {
+        "pre_fp": (
+            "Pre-practice",
+            "This baseline uses priors and does not yet include current-weekend free-practice telemetry.",
+        ),
+        "post_fp": (
+            "Post-practice",
+            "Current-weekend free-practice telemetry is included; this is the primary actionable forecast before lock.",
+        ),
+        "post_quali": (
+            "Post-qualifying",
+            "The actual qualifying grid is included; the normal fantasy lock has usually passed.",
+        ),
+    }
+    return details.get(phase, (phase.replace("_", " ").title(), "Check the current race page for model-stage details."))
+
+
+def render_index(entries: list, current: dict | None = None, weather: dict | None = None) -> str:
     """entries: list of (slug, race_name, date, round, status)."""
     canonical = f"{SITE}/picks/"
     title = f"F1 Fantasy Picks by Race - {YEAR} Season | BoxBox"
@@ -1595,6 +1614,14 @@ def render_index(entries: list) -> str:
             f'<span class="date">{esc(date)}</span></li>'
         )
 
+    faqs = [
+        ("Where can I find the latest F1 Fantasy picks?",
+         "Open the race marked This week for current driver, constructor, value, risk and optimized-team guidance. The page states whether the forecast is pre-practice, post-practice or post-qualifying."),
+        ("When do BoxBox F1 Fantasy race picks update?",
+         "Race pages can update before practice, after free practice and after qualifying. The post-practice version is the main actionable forecast before the normal team lock."),
+        ("Are future-race picks final recommendations?",
+         "No. Early outlook and watchlist pages are for transfer planning. Recheck the race page when current-weekend telemetry, weather and session results are available."),
+    ]
     ld = ld_block([
         webpage_ld(title, canonical, desc, "CollectionPage"),
         item_list_ld(
@@ -1610,7 +1637,50 @@ def render_index(entries: list) -> str:
                 {"@type": "ListItem", "position": 2, "name": "F1 Fantasy Picks", "item": canonical},
             ],
         },
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q,
+                 "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        },
     ])
+
+    current_html = ""
+    if current and current.get("drivers") and current.get("constructors"):
+        drivers = sorted(current["drivers"], key=_pts, reverse=True)
+        constructors = sorted(current["constructors"], key=_pts, reverse=True)
+        leader = drivers[0]
+        value = max(drivers, key=lambda d: float(d.get("value_score") or 0))
+        safest = max(drivers, key=lambda d: float(d.get("mc_total_p5") or -999))
+        top_constructor = constructors[0]
+        phase_label, phase_detail = forecast_phase_details(current)
+        race = current.get("race", "Current race")
+        race_link = f'/picks/{slugify(race)}/'
+        race_weather = None
+        if weather and weather.get("round") == current.get("round"):
+            race_weather = next((s for s in weather.get("sessions", []) if str(s.get("name", "")).lower() == "race"), None)
+        weather_copy = ""
+        if race_weather:
+            weather_copy = (
+                f' Latest race forecast: {float(race_weather.get("rain_probability") or 0):.0f}% rain probability '
+                f'({esc(str(race_weather.get("rain_risk") or "unknown").lower())} risk).'
+            )
+        current_html = (
+            f'<h2>Current F1 Fantasy picks: {esc(race)}</h2>'
+            '<div class="update-card">'
+            f'<p><strong>{esc(phase_label)} forecast.</strong> {esc(phase_detail)}{weather_copy}</p>'
+            '<ul>'
+            f'<li><strong>Top expected driver:</strong> <a href="/drivers/{plain_slug(leader["name"])}/">{esc(leader["name"])}</a> at {_pts(leader):.1f} points.</li>'
+            f'<li><strong>Best points-per-million driver:</strong> <a href="/drivers/{plain_slug(value["name"])}/">{esc(value["name"])}</a> at {float(value.get("value_score") or 0):.2f} PPM.</li>'
+            f'<li><strong>Strongest driver P5 floor:</strong> <a href="/drivers/{plain_slug(safest["name"])}/">{esc(safest["name"])}</a> at {float(safest.get("mc_total_p5") or 0):.1f} points.</li>'
+            f'<li><strong>Top expected constructor:</strong> <a href="/constructors/{plain_slug(top_constructor.get("name", "constructor"))}/">{esc(top_constructor.get("name", "Constructor"))}</a> at {_pts(top_constructor):.1f} points.</li>'
+            '</ul>'
+            f'<p><a href="{race_link}">Open the complete {esc(short_race(race))} picks, weather, optimized team and risk outlook</a>.</p>'
+            '</div>'
+        )
 
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; Picks</p>'
@@ -1619,7 +1689,18 @@ def render_index(entries: list) -> str:
         f"the model's top drivers, best value (PPM) options and constructors for each race. "
         f"Pick a round below, or jump into the live predictions and tools.</p>"
         '<div class="btnrow"><a class="cta" href="/">Open live predictions &amp; tools &rarr;</a></div>'
+        + current_html
+        + "<h2>Browse every 2026 race</h2>"
         f'<ul class="racelist">{"".join(items)}</ul>'
+        + "<h2>How race-pick pages change through the weekend</h2>"
+        + "<p><strong>Pre-practice</strong> pages establish the baseline from historical form, track fit and reliability. "
+        "<strong>Post-practice</strong> pages add current-weekend pace and are the main version to use before lock. "
+        "<strong>Post-qualifying</strong> pages can use the actual grid but are normally retrospective because the team deadline has passed.</p>"
+        + "<h2>How to use the rankings</h2>"
+        + '<p>Expected points are the risk-adjusted simulation mean, while PPM measures value per $million. Read both alongside the 90% confidence range, DNF probability, price and forecast phase. '
+        'Use the <a href="/tools/lineup-optimizer/">Optimizer</a> for a legal team within your budget and <a href="/tools/team-compare/">Team Compare</a> when choosing between drafts.</p>'
+        + "<h2>F1 Fantasy race-picks FAQ</h2>"
+        + _faq_html(faqs)
     )
     return page_head(title, desc, canonical, ld) + body + FOOTER
 
@@ -1642,15 +1723,25 @@ def render_drivers_hub(current: dict) -> str:
     rows = []
     for i, d in enumerate(drivers, 1):
         url = f"/drivers/{plain_slug(d.get('name', d.get('driver_id', 'driver')))}/"
+        team_name = _driver_team_name(d, constructors_by_id)
+        team_url = f"/constructors/{plain_slug(team_name)}/"
         rows.append(
             f'<tr><td class="num">{i}</td><td><a href="{url}">{esc(d.get("name", d.get("driver_id", "")))}</a></td>'
-            f'<td>{esc(_driver_team_name(d, constructors_by_id))}</td>'
+            f'<td><a href="{team_url}">{esc(team_name)}</a></td>'
             f'<td class="num">${d.get("current_price", 0):.1f}M</td>'
             f'<td class="num">{d.get("expected_points", 0):.1f}</td>'
             f'<td class="num">{d.get("value_score", 0):.2f}</td>'
             f'<td class="num">P{d.get("predicted_quali", "-")}&rarr;P{d.get("predicted_finish", "-")}</td></tr>'
         )
 
+    faqs = [
+        ("Who is the top projected F1 Fantasy driver right now?",
+         f"For the current {race} forecast, {drivers[0]['name']} ranks first at {float(drivers[0].get('expected_points', 0)):.1f} expected points. Recheck the forecast phase before lock because practice and weather can move the order."),
+        ("What does PPM mean in F1 Fantasy?",
+         "PPM means expected points per million of fantasy price. It helps identify budget-efficient drivers, but should be read alongside total expected points, downside risk and team-building constraints."),
+        ("Are these driver rankings championship standings?",
+         "No. These are current-round F1 Fantasy projections, not Formula 1 championship standings. They rank expected fantasy output for the named race weekend."),
+    ]
     ld = ld_block([
         webpage_ld(title, canonical, desc, "CollectionPage"),
         item_list_ld(
@@ -1662,6 +1753,15 @@ def render_drivers_hub(current: dict) -> str:
             ("Home", f"{SITE}/"),
             ("Drivers", canonical),
         ]),
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q,
+                 "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        },
     ])
     table = (
         '<table><thead><tr><th class="num">#</th><th>Driver</th><th>Team</th>'
@@ -1669,13 +1769,29 @@ def render_drivers_hub(current: dict) -> str:
         '<th class="num">Quali&rarr;Race</th></tr></thead><tbody>'
         + "".join(rows) + "</tbody></table>"
     )
+    phase_label, phase_detail = forecast_phase_details(current)
+    best_value = max(drivers, key=lambda d: float(d.get("value_score") or 0))
+    safest = max(drivers, key=lambda d: float(d.get("mc_total_p5") or -999))
     body = (
         '<p class="crumbs"><a href="/">Home</a> &rsaquo; Drivers</p>'
         f"<h1>F1 Fantasy Driver Predictions ({YEAR})</h1>"
         f'<p class="lede">Current driver projections for the <strong>{esc(race)}</strong>: expected points, price, value, predicted qualifying position and predicted race finish for every F1 Fantasy driver.</p>'
-        '<p class="meta">These pages update whenever the prediction pipeline is exported.</p>'
+        f'<p class="meta">{esc(phase_label)} forecast. These pages update whenever the prediction pipeline is exported.</p>'
         '<div class="btnrow"><a class="cta" href="/#drivers">Open live driver cards &rarr;</a></div>'
+        f'<div class="update-card"><p><strong>Current read:</strong> {esc(drivers[0]["name"])} leads expected points at {float(drivers[0].get("expected_points", 0)):.1f}; '
+        f'<a href="/drivers/{plain_slug(best_value["name"])}/">{esc(best_value["name"])}</a> leads value at {float(best_value.get("value_score") or 0):.2f} PPM; '
+        f'<a href="/drivers/{plain_slug(safest["name"])}/">{esc(safest["name"])}</a> has the strongest P5 downside floor at {float(safest.get("mc_total_p5") or 0):.1f}. '
+        f'{esc(phase_detail)}</p></div>'
+        '<h2>Current driver rankings</h2>'
         + table
+        + "<h2>How to read the driver table</h2>"
+        + "<p><strong>Expected points</strong> are the risk-adjusted simulation mean for this race. <strong>PPM</strong> shows points per $million and helps find budget value. "
+        "The qualifying-to-race column shows the predicted movement that can create positions-gained or positions-lost scoring. Open any driver for their 90% range, DNF risk, scoring components and recent fantasy form.</p>"
+        + "<h2>Expected points versus value</h2>"
+        + '<p>The highest-scoring driver is not automatically the best roster decision. Premium drivers offer more raw upside, while cheaper high-PPM drivers can release budget for constructors or a stronger boosted driver. '
+        'Use the <a href="/tools/lineup-optimizer/">Optimizer</a> to evaluate the complete seven-asset team rather than selecting each slot independently.</p>'
+        + "<h2>F1 Fantasy driver FAQ</h2>"
+        + _faq_html(faqs)
     )
     return page_head(title, desc, canonical, ld) + body + FOOTER
 
@@ -1885,6 +2001,14 @@ def render_constructors_hub(current: dict) -> str:
             f'<td class="num">{esc(c.get("risk", "-"))}</td></tr>'
         )
 
+    faqs = [
+        ("Who is the top projected F1 Fantasy constructor right now?",
+         f"For the current {race} forecast, {constructors[0]['name']} ranks first at {float(constructors[0].get('expected_points', 0)):.1f} expected points. Review price, value, risk and both drivers before choosing a pair."),
+        ("How do constructors score in F1 Fantasy?",
+         "Constructors combine both listed drivers' qualifying and race scoring, qualifying teamwork bonuses and pit-stop points, with DNF exposure. Driver boost multipliers do not increase constructor totals."),
+        ("Should I pick the highest-scoring or best-value constructor?",
+         "It depends on the whole lineup. Raw expected points favor premium teams, while PPM identifies budget efficiency. Compare complete legal teams because saving on one constructor can fund a stronger driver or second constructor."),
+    ]
     ld = ld_block([
         webpage_ld(title, canonical, desc, "CollectionPage"),
         item_list_ld(
@@ -1896,6 +2020,15 @@ def render_constructors_hub(current: dict) -> str:
             ("Home", f"{SITE}/"),
             ("Constructors", canonical),
         ]),
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": q,
+                 "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faqs
+            ],
+        },
     ])
     table = (
         '<table><thead><tr><th class="num">#</th><th>Constructor</th><th class="num">Price</th>'
@@ -1903,13 +2036,29 @@ def render_constructors_hub(current: dict) -> str:
         '<th class="num">Risk</th></tr></thead><tbody>'
         + "".join(rows) + "</tbody></table>"
     )
+    phase_label, phase_detail = forecast_phase_details(current)
+    best_value = max(constructors, key=lambda c: float(c.get("value_score") or 0))
+    safest = max(constructors, key=lambda c: float(c.get("mc_total_p5") or -999))
     body = (
         '<p class="crumbs"><a href="/">Home</a> &rsaquo; Constructors</p>'
         f"<h1>F1 Fantasy Constructor Predictions ({YEAR})</h1>"
         f'<p class="lede">Current constructor projections for the <strong>{esc(race)}</strong>: expected points, price, pit-stop points, value and risk for every F1 Fantasy constructor.</p>'
-        '<p class="meta">Constructors include both drivers scoring, qualifying teamwork bonus, pit-stop points and DNF risk.</p>'
+        f'<p class="meta">{esc(phase_label)} forecast. Constructors include both drivers scoring, qualifying teamwork bonus, pit-stop points and DNF risk.</p>'
         '<div class="btnrow"><a class="cta" href="/#constructors">Open live constructor cards &rarr;</a></div>'
+        f'<div class="update-card"><p><strong>Current read:</strong> {esc(constructors[0]["name"])} leads expected points at {float(constructors[0].get("expected_points", 0)):.1f}; '
+        f'<a href="/constructors/{plain_slug(best_value.get("name", "constructor"))}/">{esc(best_value.get("name", "Constructor"))}</a> leads value at {float(best_value.get("value_score") or 0):.2f} PPM; '
+        f'<a href="/constructors/{plain_slug(safest.get("name", "constructor"))}/">{esc(safest.get("name", "Constructor"))}</a> has the strongest P5 downside floor at {float(safest.get("mc_total_p5") or 0):.1f}. '
+        f'{esc(phase_detail)}</p></div>'
+        '<h2>Current constructor rankings</h2>'
         + table
+        + "<h2>How to read the constructor table</h2>"
+        + "<p><strong>Expected points</strong> are the risk-adjusted simulation mean. <strong>Pit points</strong> estimate constructor-only pit-stop scoring, while "
+        "<strong>PPM</strong> measures expected points per $million. Open a team profile for both driver projections, qualifying and race components, the 90% interval and recent constructor form.</p>"
+        + "<h2>Why constructors change the best lineup</h2>"
+        + '<p>Each constructor combines two cars plus teamwork and pit-stop scoring, so the best pair cannot be chosen from driver rankings alone. A cheaper high-value constructor may free enough budget for a premium driver; a premium constructor can offer more raw points across both cars. '
+        'Use the <a href="/tools/lineup-optimizer/">Optimizer</a> or <a href="/tools/team-compare/">Team Compare</a> to judge the full seven-asset roster.</p>'
+        + "<h2>F1 Fantasy constructor FAQ</h2>"
+        + _faq_html(faqs)
     )
     return page_head(title, desc, canonical, ld) + body + FOOTER
 
@@ -4797,7 +4946,7 @@ def main() -> None:
 
     # newest race first in the hub
     entries.sort(key=lambda e: e[3], reverse=True)
-    (PICKS / "index.html").write_text(render_index(entries), encoding="utf-8")
+    (PICKS / "index.html").write_text(render_index(entries, current, current_weather), encoding="utf-8")
     pick_lastmods = [lastmods.get(f"picks/{e[0]}/") for e in entries]
     pick_lastmods = [d for d in pick_lastmods if d]
     if pick_lastmods:
