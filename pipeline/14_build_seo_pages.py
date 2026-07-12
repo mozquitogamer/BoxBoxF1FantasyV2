@@ -30,6 +30,7 @@ from datetime import datetime, timezone
 from email.utils import format_datetime
 from itertools import combinations
 from pathlib import Path
+from statistics import median
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web" / "public"
@@ -1679,7 +1680,14 @@ def render_drivers_hub(current: dict) -> str:
     return page_head(title, desc, canonical, ld) + body + FOOTER
 
 
-def render_driver_page(driver: dict, current: dict, rank: int, constructors_by_id: dict) -> str:
+def render_driver_page(
+    driver: dict,
+    current: dict,
+    rank: int,
+    constructors_by_id: dict,
+    history: dict | None = None,
+    rounds_by_num: dict | None = None,
+) -> str:
     name = driver.get("name", driver.get("driver_id", "Driver"))
     team = _driver_team_name(driver, constructors_by_id)
     race = current.get("race", "the current race")
@@ -1695,14 +1703,24 @@ def render_driver_page(driver: dict, current: dict, rank: int, constructors_by_i
     ceiling = driver.get("mc_total_p95", 0)
     value_label = "strong value" if driver.get("value_score", 0) >= 1.0 else "premium upside" if driver.get("current_price", 0) >= 20 else "situational value"
     dnf_pct = driver.get("dnf_probability", 0) * 100
+    value_order = sorted(current.get("drivers", []), key=lambda d: d.get("value_score", 0), reverse=True)
+    value_rank = next((i for i, d in enumerate(value_order, 1) if d.get("driver_id") == driver.get("driver_id")), rank)
+    phase = str(current.get("phase") or "pre_fp").lower()
+    phase_label = {
+        "pre_fp": "pre-practice",
+        "post_fp": "post-practice",
+        "post_quali": "post-qualifying",
+    }.get(phase, phase.replace("_", "-"))
+    team_url = f'/constructors/{plain_slug(team)}/'
+    race_url = f'/picks/{slugify(race)}/'
     cta = '<div class="btnrow"><a class="cta" href="/#drivers">See live driver cards &rarr;</a><a class="cta" href="/#optimizer" style="background:#1b212c;">Test in Optimizer &rarr;</a></div>'
     stats = (
         '<table><tbody>'
-        f'<tr><th>Current team</th><td>{esc(team)}</td></tr>'
+        f'<tr><th>Current team</th><td><a href="{team_url}">{esc(team)}</a></td></tr>'
         f'<tr><th>Current price</th><td>${driver.get("current_price", 0):.1f}M</td></tr>'
         f'<tr><th>Expected points</th><td>{driver.get("expected_points", 0):.1f}</td></tr>'
         f'<tr><th>Projected points</th><td>{driver.get("projected_points", 0):.1f}</td></tr>'
-        f'<tr><th>Value rating</th><td>{driver.get("value_score", 0):.2f} PPM</td></tr>'
+        f'<tr><th>Value rating</th><td>{driver.get("value_score", 0):.2f} PPM (#{value_rank} of {len(value_order)})</td></tr>'
         f'<tr><th>Predicted quali</th><td>P{driver.get("predicted_quali", "-")}</td></tr>'
         f'<tr><th>Predicted finish</th><td>P{driver.get("predicted_finish", "-")}</td></tr>'
         f'<tr><th>90% confidence range</th><td>{floor:.1f} to {ceiling:.1f} pts</td></tr>'
@@ -1710,6 +1728,65 @@ def render_driver_page(driver: dict, current: dict, rank: int, constructors_by_i
         f'<tr><th>Expected overtakes</th><td>{driver.get("expected_overtakes", 0):.1f}</td></tr>'
         '</tbody></table>'
     )
+    scoring = (
+        '<table><tbody>'
+        f'<tr><th>Expected qualifying contribution</th><td>{driver.get("expected_points_quali", 0):.1f} pts</td></tr>'
+        f'<tr><th>Expected race contribution</th><td>{driver.get("expected_points_race", 0):.1f} pts</td></tr>'
+        f'<tr><th>Expected positions gained/lost</th><td>{float(driver.get("expected_positions_gained_lost", 0)):+.1f}</td></tr>'
+        f'<tr><th>Fastest-lap probability</th><td>{float(driver.get("fastest_lap_probability", 0)) * 100:.0f}%</td></tr>'
+        f'<tr><th>Driver of the Day probability</th><td>{float(driver.get("dotd_probability", 0)) * 100:.0f}%</td></tr>'
+        f'<tr><th>Model confidence</th><td>{float(driver.get("confidence", 0)):.0f}%</td></tr>'
+        f'<tr><th>Risk band</th><td>{esc(driver.get("risk", "Unknown"))}</td></tr>'
+        '</tbody></table>'
+    )
+
+    history_rounds = sorted(
+        (history or {}).get("rounds", []),
+        key=lambda row: int(row.get("round", 0)),
+    )
+    history_html = ""
+    history_faq = None
+    history_properties = []
+    if history_rounds:
+        points = [float(row.get("points", 0)) for row in history_rounds]
+        season_average = sum(points) / len(points)
+        recent = history_rounds[-3:]
+        recent_average = sum(float(row.get("points", 0)) for row in recent) / len(recent)
+        dnf_count = sum(bool(row.get("is_dnf")) for row in history_rounds)
+        best = max(history_rounds, key=lambda row: float(row.get("points", 0)))
+        worst = min(history_rounds, key=lambda row: float(row.get("points", 0)))
+        round_names = rounds_by_num or {}
+
+        def history_race(row: dict) -> str:
+            round_info = round_names.get(int(row.get("round", 0)), {})
+            return short_race(round_info.get("name") or str(row.get("circuit_id", "Race")).replace("_", " ").title())
+
+        trend = "above" if recent_average > season_average + 1 else "below" if recent_average < season_average - 1 else "in line with"
+        recent_rows = "".join(
+            f'<tr><td>R{int(row.get("round", 0))}</td><td>{esc(history_race(row))}</td>'
+            f'<td class="num">{float(row.get("points", 0)):.0f}</td>'
+            f'<td>{"DNF" if row.get("is_dnf") else "Finished"}</td></tr>'
+            for row in reversed(history_rounds[-5:])
+        )
+        history_html = (
+            f'<p>BoxBox\'s completed-round history records <strong>{sum(points):.0f} fantasy points</strong> for {esc(name)} '
+            f'across {len(points)} rounds in {YEAR}: {season_average:.1f} per round on average and a {median(points):.1f}-point median. '
+            f'The latest three-round average is {recent_average:.1f}, which is {trend} the season average.</p>'
+            '<table><thead><tr><th>Round</th><th>Race</th><th class="num">Fantasy pts</th><th>Result</th></tr></thead><tbody>'
+            + recent_rows + '</tbody></table>'
+            f'<p><strong>Season range:</strong> best result {float(best.get("points", 0)):.0f} points at the {esc(history_race(best))}; '
+            f'lowest result {float(worst.get("points", 0)):.0f} at the {esc(history_race(worst))}; {dnf_count} recorded DNF{"s" if dnf_count != 1 else ""}.</p>'
+            '<p class="meta">Completed-round values come from the site\'s exported driver-history dataset and are separate from the current forecast.</p>'
+        )
+        history_faq = (
+            f"How has {name} scored in F1 Fantasy this season?",
+            f"BoxBox's completed-round history records {sum(points):.0f} points across {len(points)} rounds for {name}, an average of {season_average:.1f} per round. The latest three-round average is {recent_average:.1f}.",
+        )
+        history_properties = [
+            {"@type": "PropertyValue", "name": f"{YEAR} recorded fantasy points", "value": round(sum(points), 1)},
+            {"@type": "PropertyValue", "name": f"{YEAR} fantasy points per completed round", "value": round(season_average, 1)},
+            {"@type": "PropertyValue", "name": "Latest three-round fantasy average", "value": round(recent_average, 1)},
+        ]
     faqs = [
         (f"How many F1 Fantasy points is {name} projected to score?",
          f"{name} is currently projected for {driver.get('expected_points', 0):.1f} expected fantasy points at the {short}. The 90% simulation range is {floor:.1f} to {ceiling:.1f} points."),
@@ -1718,9 +1795,12 @@ def render_driver_page(driver: dict, current: dict, rank: int, constructors_by_i
         (f"What team does {name} drive for?",
          f"{name} is listed with {team} in the current BoxBoxF1Fantasy prediction file."),
     ]
+    if history_faq:
+        faqs.append(history_faq)
     ld = ld_block([
         {
             **webpage_ld(title, canonical, desc, "ProfilePage"),
+            "dateModified": source_date(current.get("exported_at"), current.get("generated_at")) or LINEUP_CONTENT_LASTMOD,
             "mainEntity": {
                 "@type": "Person",
                 "name": name,
@@ -1728,15 +1808,15 @@ def render_driver_page(driver: dict, current: dict, rank: int, constructors_by_i
                 "identifier": driver.get("driver_id", slug),
                 "jobTitle": "Formula 1 driver",
                 "sport": "Formula 1",
-                "affiliation": {"@type": "SportsTeam", "name": team},
-                "memberOf": {"@type": "SportsTeam", "name": team},
+                "affiliation": {"@type": "SportsTeam", "name": team, "url": f"{SITE}{team_url}"},
+                "memberOf": {"@type": "SportsTeam", "name": team, "url": f"{SITE}{team_url}"},
                 "additionalProperty": [
                     {"@type": "PropertyValue", "name": "F1 Fantasy price", "value": f"${driver.get('current_price', 0):.1f}M"},
                     {"@type": "PropertyValue", "name": "Expected F1 Fantasy points", "value": round(float(driver.get("expected_points", 0)), 1)},
                     {"@type": "PropertyValue", "name": "F1 Fantasy points per million", "value": round(float(driver.get("value_score", 0)), 2)},
                     {"@type": "PropertyValue", "name": "Predicted qualifying position", "value": driver.get("predicted_quali", "-")},
                     {"@type": "PropertyValue", "name": "Predicted race finish", "value": driver.get("predicted_finish", "-")},
-                ],
+                ] + history_properties,
             },
         },
         breadcrumb_ld([
@@ -1757,12 +1837,29 @@ def render_driver_page(driver: dict, current: dict, rank: int, constructors_by_i
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/drivers/">Drivers</a> &rsaquo; {esc(name)}</p>'
         f"<h1>{esc(name)} F1 Fantasy {YEAR}</h1>"
         f'<p class="lede">{esc(name)} is ranked #{rank} by expected F1 Fantasy points for the <strong>{esc(race)}</strong>, with a current projection of <strong>{driver.get("expected_points", 0):.1f} points</strong>.</p>'
-        f'<p class="meta">Price ${driver.get("current_price", 0):.1f}M &middot; {esc(team)} &middot; predicted P{driver.get("predicted_quali", "-")} qualifying to P{driver.get("predicted_finish", "-")} race finish.</p>'
+        f'<p class="meta">{esc(phase_label.title())} forecast &middot; Price ${driver.get("current_price", 0):.1f}M &middot; '
+        f'<a href="{team_url}">{esc(team)}</a> &middot; predicted P{driver.get("predicted_quali", "-")} qualifying to P{driver.get("predicted_finish", "-")} race finish.</p>'
         + cta
         + "<h2>Current projection</h2>"
         + stats
-        + "<h2>Fantasy read</h2>"
-        + f'<p>For this round, {esc(name)} profiles as <strong>{esc(value_label)}</strong>. The confidence range is wide because race outcomes can swing on reliability, safety cars, weather, strategy and incidents.</p>'
+        + f'<p>Against the full driver field, {esc(name)} ranks <strong>#{rank} for expected points</strong> and '
+        f'<strong>#{value_rank} for points per million</strong>. The deterministic projection is {float(driver.get("projected_points", 0)):.1f} points, '
+        f'while the risk-adjusted simulation mean is {float(driver.get("expected_points", 0)):.1f}.</p>'
+        + "<h2>Where the projection comes from</h2>"
+        + scoring
+        + f'<p>The model expects {esc(name)} to move from P{driver.get("predicted_quali", "-")} in qualifying to '
+        f'P{driver.get("predicted_finish", "-")} in the race, with {float(driver.get("expected_overtakes", 0)):.1f} expected overtakes. '
+        'These are forecast components, not guaranteed scoring events.</p>'
+        + "<h2>Risk and upside</h2>"
+        + f'<p>The 90% simulation interval runs from <strong>{float(floor):.1f}</strong> to <strong>{float(ceiling):.1f} points</strong>, '
+        f'around a {float(driver.get("expected_points", 0)):.1f}-point mean. The modeled DNF probability is {dnf_pct:.0f}% and the current risk band is '
+        f'<strong>{esc(driver.get("risk", "Unknown"))}</strong>. For this round, the price profile reads as {esc(value_label)}; '
+        'weather, reliability, safety cars, strategy and incidents can still move the outcome sharply.</p>'
+        + ("<h2>2026 fantasy form</h2>" + history_html if history_html else "")
+        + "<h2>Use this projection</h2>"
+        + f'<p>Open the <a href="{race_url}">{esc(short)} picks page</a> for the full race context, compare {esc(name)} with the rest of the '
+        f'<a href="/drivers/">driver field</a>, or test the pick alongside <a href="{team_url}">{esc(team)}</a> in the live Optimizer. '
+        f'This page currently reflects the {esc(phase_label)} model stage.</p>'
         + "<h2>FAQ</h2>"
         + _faq_html(faqs)
         + cta
@@ -4491,6 +4588,7 @@ def main() -> None:
     season = load_json(DATA / "season_summary.json")
     current = load_json(DATA / "predictions.json")
     current_weather = load_json(DATA / "weather.json") or {}
+    driver_history = load_json(DATA / "driver_history.json") or {"drivers": {}}
     horizon = load_json(DATA / "horizon_projections.json") or {"rounds": {}}
     track_data = load_json(DATA / "track_data.json") or {}
     changelog = load_json(DATA / "changelog.json") or {"entries": []}
@@ -4617,6 +4715,7 @@ def main() -> None:
     constructors_sorted = sorted(current.get("constructors", []), key=lambda c: c.get("expected_points", 0), reverse=True)
     constructors_by_id = {c["constructor_id"]: c for c in current.get("constructors", [])}
     drivers_by_id = {d["driver_id"]: d for d in current.get("drivers", [])}
+    rounds_by_num = {int(r["round"]): r for r in season.get("rounds", []) if r.get("round") is not None}
 
     drivers_dir = WEB / "drivers"
     drivers_dir.mkdir(parents=True, exist_ok=True)
@@ -4634,7 +4733,11 @@ def main() -> None:
         slug = plain_slug(driver.get("name", driver.get("driver_id", "driver")))
         out_dir = drivers_dir / slug
         out_dir.mkdir(parents=True, exist_ok=True)
-        (out_dir / "index.html").write_text(render_driver_page(driver, current, rank, constructors_by_id), encoding="utf-8")
+        history = (driver_history.get("drivers") or {}).get(driver.get("driver_id"), {})
+        (out_dir / "index.html").write_text(
+            render_driver_page(driver, current, rank, constructors_by_id, history, rounds_by_num),
+            encoding="utf-8",
+        )
         rel_paths.append(f"drivers/{slug}/")
         if current_lastmod:
             lastmods[f"drivers/{slug}/"] = current_lastmod

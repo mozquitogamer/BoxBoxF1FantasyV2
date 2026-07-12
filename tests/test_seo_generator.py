@@ -159,3 +159,52 @@ def test_directory_hubs_explain_resources_and_publish_faq_schema():
     assert "Where should a new F1 Fantasy player start?" in guides_html
     assert '"@type": "FAQPage"' in tools_html
     assert '"@type": "FAQPage"' in guides_html
+
+
+def test_driver_profile_uses_unique_projection_breakdown_and_history():
+    current = race_week_predictions()
+    driver = current["drivers"][1]
+    driver.update({
+        "expected_points_quali": 6.0,
+        "expected_points_race": 54.0,
+        "expected_positions_gained_lost": 2,
+        "expected_overtakes": 5,
+        "fastest_lap_probability": 0.12,
+        "dotd_probability": 0.08,
+        "confidence": 72,
+        "risk": "MEDIUM",
+    })
+    history = {
+        "rounds": [
+            {"round": 1, "points": 10, "is_dnf": False},
+            {"round": 2, "points": 20, "is_dnf": False},
+            {"round": 3, "points": -5, "is_dnf": True},
+            {"round": 6, "points": 30, "is_dnf": False},
+        ],
+    }
+    round_names = {
+        1: {"name": "Australian Grand Prix"},
+        2: {"name": "Chinese Grand Prix"},
+        3: {"name": "Japanese Grand Prix"},
+        6: {"name": "Miami Grand Prix"},
+    }
+    html = seo.render_driver_page(
+        driver,
+        current,
+        1,
+        {"X": current["constructors"][0]},
+        history,
+        round_names,
+    )
+
+    assert "Where the projection comes from" in html
+    assert "Expected qualifying contribution</th><td>6.0 pts" in html
+    assert "Risk and upside" in html
+    assert "2026 fantasy form" in html
+    assert "55 fantasy points" in html
+    assert "13.8 per round on average" in html
+    assert "latest three-round average is 15.0" in html
+    assert "Miami GP" in html
+    assert "/constructors/team-x/" in html
+    assert "How has Driver B scored in F1 Fantasy this season?" in html
+    assert '"name": "2026 recorded fantasy points"' in html
