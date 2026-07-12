@@ -1,0 +1,58 @@
+name: Notify Search Engines
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'web/public/**/*.html'
+      - 'web/public/sitemap.xml'
+      - 'web/public/robots.txt'
+      - 'web/public/feed.xml'
+      - 'web/public/feed.json'
+      - 'web/public/llms.txt'
+      - 'web/public/llms-full.txt'
+      - 'web/public/search-index.json'
+      - 'web/public/openapi.json'
+      - 'web/public/data/ai-summary.json'
+      - 'web/public/.well-known/**'
+      - 'web/public/779753a5fbbf054b3ea496085a0ce1e4.txt'
+      - 'pipeline/15_submit_indexnow.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: indexnow-production
+  cancel-in-progress: true
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Wait for Vercel deployment
+        run: sleep 75
+
+      - name: Validate submission payload
+        run: python pipeline/15_submit_indexnow.py --include-discovery --verify-production --dry-run
+
+      - name: Submit URLs to IndexNow
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            if python pipeline/15_submit_indexnow.py --include-discovery --verify-production; then
+              exit 0
+            fi
+            echo "IndexNow attempt $attempt failed; retrying shortly."
+            sleep $((attempt * 15))
+          done
+          exit 1

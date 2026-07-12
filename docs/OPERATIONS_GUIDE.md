@@ -982,9 +982,11 @@ python pipeline/14_build_seo_pages.py
 
 Run after the SEO pages have been deployed to production. It reads `web/public/sitemap.xml`, uses the generated IndexNow key file, and submits the changed URLs to `https://api.indexnow.org/indexnow`.
 
+Pushes to `master` that change crawlable HTML, the sitemap, feeds, or AI-discovery files automatically trigger `.github/workflows/indexnow-submit.yml`. The workflow waits for Vercel, verifies the public ownership key, validates the payload, and retries the submission up to three times. Scheduled weather and YouTube data-only commits are intentionally excluded to avoid repeatedly submitting the entire sitemap.
+
 ```bash
 python pipeline/15_submit_indexnow.py --include-discovery --dry-run
-python pipeline/15_submit_indexnow.py --include-discovery
+python pipeline/15_submit_indexnow.py --include-discovery --verify-production
 ```
 
 Use `--url https://boxboxf1fantasy.com/picks/example-gp-2026/` for a targeted one-page submission. A `200` or `202` response means the URL list was received; indexing is still at the search engine's discretion.
