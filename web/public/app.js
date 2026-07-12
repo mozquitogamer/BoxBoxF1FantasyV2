@@ -419,12 +419,13 @@ function renderChangelog() {
 // -- Init --
 document.addEventListener('DOMContentLoaded', async () => {
     // Phase 1: Fetch the compact home-page inputs in parallel. Official score
-    // history is needed before the first driver-card render to avoid repainting
-    // the entire grid when price brackets become available.
+    // history and weather are ready before the first live render, allowing the
+    // crawlable HTML snapshot to be replaced without an intermediate layout.
     await Promise.all([
         loadData(),
         loadSeasonData(),
         ensureLoaded('officialPoints', loadOfficialPoints),
+        ensureLoaded('weather', loadWeatherData),
     ]);
 
     // User-scenarios overlay: load LocalStorage state (per round, auto-cleared
@@ -453,7 +454,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Phase 2: Render Drivers tab immediately
     renderHero();
+    renderWeather();
     renderDrivers();
+    document.getElementById('tab-drivers')?.classList.remove('is-hydrating');
 
     // Deep links: ?team= pre-fills the Transfer Advisor; ?driver= / ?constructor=
     // jump to and highlight a single prediction card.
@@ -479,8 +482,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         showFallbackBanner();
         if (fallbackRoundCount > 0) renderDrivers();
     });
-    ensureWeatherData().then(() => renderWeather());
-
     // Phase 4: If deep-linked to another tab, render it
     const hash = location.hash.replace('#', '');
     if (hash && hash !== 'drivers') {

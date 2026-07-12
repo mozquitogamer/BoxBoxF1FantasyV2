@@ -360,6 +360,13 @@ select:focus, input:focus {
     gap: 16px;
 }
 
+/* The raw HTML carries compact prediction cards for crawlers and no-JS users.
+   Keep that changing region out of the visual flow while the live app hydrates,
+   then reveal the complete cards once so slow connections do not see a jump. */
+.js-enabled #tab-drivers.is-hydrating > :not(.seo-intro) {
+    visibility: hidden;
+}
+
 .driver-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
