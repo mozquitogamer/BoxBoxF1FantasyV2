@@ -2629,19 +2629,30 @@ def render_article_page(article: dict) -> str:
     article_title = clean_legacy_text(article.get("title", "F1 Fantasy Article"))
     published = clean_legacy_text(article.get("date", ""))
     tags = [clean_legacy_text(t) for t in article.get("tags", []) if t]
+    sources = [source for source in article.get("sources", []) if source]
     desc = _article_meta_description(article) or f"BoxBoxF1Fantasy article: {article_title}."
     title = f"{article_title} | BoxBoxF1Fantasy"
     content = clean_legacy_text(article.get("content_html", ""))
     tag_html = " ".join(f'<span class="tag">{esc(t)}</span>' for t in tags)
 
+    article_text = re.sub(r"<[^>]+>", " ", content)
+    article_word_count = len(re.findall(r"\b[\w'-]+\b", html.unescape(article_text)))
+    article_schema = webpage_ld(title, canonical, desc, "Article") | {
+        "headline": article_title,
+        "datePublished": published,
+        "dateModified": clean_legacy_text(article.get("modified", published)),
+        "author": publisher_ld(),
+        "about": ["F1 Fantasy", "Fantasy sports strategy", "Formula 1"] + tags[:5],
+        "articleSection": tags,
+        "wordCount": article_word_count,
+    }
+    if sources:
+        article_schema["citation"] = [
+            source if str(source).startswith(("http://", "https://")) else f"{SITE}{source}"
+            for source in sources
+        ]
     ld = ld_block([
-        webpage_ld(title, canonical, desc, "Article") | {
-            "headline": article_title,
-            "datePublished": published,
-            "dateModified": published,
-            "author": publisher_ld(),
-            "about": ["F1 Fantasy", "Fantasy sports strategy", "Formula 1"] + tags[:5],
-        },
+        article_schema,
         breadcrumb_ld([
             ("Home", f"{SITE}/"),
             ("Articles", f"{SITE}/articles/"),

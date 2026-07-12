@@ -159,12 +159,20 @@ def build():
     if not ARTICLES_DIR.exists():
         ARTICLES_DIR.mkdir(parents=True)
 
+    existing_articles = []
+    if OUT_PATH.exists():
+        try:
+            existing_articles = json.loads(OUT_PATH.read_text(encoding="utf-8")).get("articles", [])
+        except (json.JSONDecodeError, OSError):
+            existing_articles = []
+
     articles = []
     for md_file in sorted(ARTICLES_DIR.glob("*.md")):
         text = md_file.read_text(encoding="utf-8")
         meta, body = parse_frontmatter(text)
 
         tags = [t.strip() for t in meta.get("tags", "").split(",") if t.strip()]
+        sources = [source.strip() for source in meta.get("sources", "").split(",") if source.strip()]
         round_num = None
         if "round" in meta:
             try:
@@ -172,14 +180,24 @@ def build():
             except ValueError:
                 pass
 
-        articles.append({
+        article = {
             "slug": md_file.stem,
             "title": meta.get("title", md_file.stem.replace("-", " ").replace("_", " ").title()),
             "date": meta.get("date", ""),
             "round": round_num,
             "tags": tags,
             "content_html": md_to_html(body.strip()),
-        })
+        }
+        if sources:
+            article["sources"] = sources
+        articles.append(article)
+
+    generated_slugs = {article["slug"] for article in articles}
+    articles.extend(
+        article for article in existing_articles
+        if article.get("slug") not in generated_slugs
+    )
+    articles.sort(key=lambda article: article.get("date", ""), reverse=True)
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps({"articles": articles}, indent=2, ensure_ascii=False), encoding="utf-8")

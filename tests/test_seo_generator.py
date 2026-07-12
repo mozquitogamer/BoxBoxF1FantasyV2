@@ -309,3 +309,23 @@ def test_methodology_and_about_publish_trust_correction_and_schema_signals():
     assert "/methodology/" in about_html
     assert '"@type": "Organization"' in about_html
     assert '"@type": "FAQPage"' in about_html
+
+
+def test_belgian_model_briefing_is_dated_sourced_and_phase_honest():
+    articles_data = json.loads((seo.DATA / "articles.json").read_text(encoding="utf-8"))
+    briefing = next(
+        article for article in articles_data["articles"]
+        if article["slug"] == "2026-07-13-belgian-gp-model-briefing"
+    )
+
+    html = seo.render_article_page(briefing)
+
+    assert "Belgian GP F1 Fantasy: Why Max Leads" in html
+    assert "dated <strong>pre-practice briefing</strong>" in html
+    assert "The short answer is upside, not certainty" in html
+    assert "Weather is moving faster than the model" in html
+    assert "Red Bull is not the top constructor projection" in html
+    assert '"datePublished": "2026-07-13"' in html
+    assert '"wordCount":' in html
+    assert '"https://boxboxf1fantasy.com/data/predictions.json"' in html
+    assert '"https://boxboxf1fantasy.com/methodology/"' in html

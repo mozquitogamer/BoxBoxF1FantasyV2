@@ -105,6 +105,7 @@ tbody tr:hover { background: #11151d; }
 .update-card li a,
 .update-card p a { text-decoration: underline; text-underline-offset: 2px; }
 .callout a { text-decoration: underline; text-underline-offset: 2px; }
+.article-body a { text-decoration: underline; text-underline-offset: 2px; }
 .video-card {
   background: var(--card);
   border: 1px solid var(--border);
