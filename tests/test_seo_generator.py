@@ -86,8 +86,21 @@ def test_guide_modified_date_uses_controlled_content_date():
     assert seo.guide_article_ld(guide, "https://example.com/guide/")["dateModified"] == seo.SEO_CONTENT_LASTMOD
 
 
+def test_guides_publish_visible_brand_byline_and_author_profile():
+    guide = seo.GUIDES[0]
+    html = seo.render_content_page(guide, race_week_predictions())
+
+    assert 'By <a href="/about/" rel="author">BoxBoxF1Fantasy</a>' in html
+    assert 'href="/methodology/">How this analysis is made</a>' in html
+    assert seo.guide_article_ld(guide, "https://example.com/guide/")["author"]["url"] == "https://boxboxf1fantasy.com/about/"
+
+
 def test_current_race_page_is_phase_honest_and_explains_autopilot():
     _slug, html = seo.render_race_page(race_week_predictions(), True)
+    assert 'By <a href="/about/" rel="author">BoxBoxF1Fantasy</a>' in html
+    assert 'href="/methodology/">How this analysis is made</a>' in html
+    assert '"author": {' in html
+    assert '"url": "https://boxboxf1fantasy.com/about/"' in html
     assert "Pre-practice forecast" in html
     assert "No current-weekend free-practice telemetry is included yet" in html
     assert "July 18, 2026 14:00 UTC" in html
@@ -364,9 +377,15 @@ def test_methodology_and_about_publish_trust_correction_and_schema_signals():
     assert "Corrections and version accountability" in methodology_html
     assert "without publishing proprietary feature weights" in methodology_html
     assert '"@type": "TechArticle"' in methodology_html
+    assert 'By <a href="/about/" rel="author">BoxBoxF1Fantasy</a>' in methodology_html
+    assert "How this analysis is made" not in methodology_html
+    assert '"url": "https://boxboxf1fantasy.com/about/"' in methodology_html
     assert '"dateModified": "2026-07-13"' in methodology_html
     assert '"@type": "FAQPage"' in methodology_html
     assert "Corrections and accountability" in about_html
+    assert "Editorial authorship" in about_html
+    assert "rather than attributed to a fictional individual contributor" in about_html
+    assert "Why is BoxBoxF1Fantasy listed as the author?" in about_html
     assert "/methodology/" in about_html
     assert '"@type": "Organization"' in about_html
     assert '"@type": "FAQPage"' in about_html
@@ -423,6 +442,9 @@ def test_belgian_model_briefing_is_dated_sourced_and_phase_honest():
     html = seo.render_article_page(briefing)
 
     assert "Belgian GP F1 Fantasy: Why Max Leads" in html
+    assert 'By <a href="/about/" rel="author">BoxBoxF1Fantasy</a>' in html
+    assert 'href="/methodology/">How this analysis is made</a>' in html
+    assert '"url": "https://boxboxf1fantasy.com/about/"' in html
     assert "dated <strong>pre-practice briefing</strong>" in html
     assert "The short answer is upside, not certainty" in html
     assert "Weather is moving faster than the model" in html

@@ -157,6 +157,27 @@ def publisher_ld() -> dict:
     }
 
 
+def editorial_author_ld() -> dict:
+    """Public brand-author profile used wherever an editorial byline is expected."""
+    author = publisher_ld()
+    author["url"] = f"{SITE}/about/"
+    author["description"] = (
+        "Independent F1 Fantasy analysis, prediction research and tools published by BoxBoxF1Fantasy."
+    )
+    return author
+
+
+def byline_html(include_methodology: bool = True) -> str:
+    method = (
+        ' &middot; <a href="/methodology/">How this analysis is made</a>'
+        if include_methodology else ""
+    )
+    return (
+        '<p class="byline">By <a href="/about/" rel="author">BoxBoxF1Fantasy</a>'
+        f'{method}</p>'
+    )
+
+
 def webpage_ld(name: str, url: str, desc: str, page_type: str = "WebPage") -> dict:
     return {
         "@context": "https://schema.org",
@@ -1385,7 +1406,7 @@ def render_race_page(
             ),
             "datePublished": source_date(pred.get("date")) or gen_date or LINEUP_CONTENT_LASTMOD,
             "mainEntityOfPage": canonical,
-            "author": publisher_ld(),
+            "author": editorial_author_ld(),
             "about": [
                 "F1 Fantasy",
                 race,
@@ -1438,6 +1459,7 @@ def render_race_page(
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/picks/">Picks</a> &rsaquo; {esc(short)} {YEAR}</p>'
         + (f"<h1>F1 Fantasy Results: {esc(race)} {YEAR}</h1>" if has_actual else f"<h1>F1 Fantasy Picks: {esc(race)} {YEAR}</h1>")
+        + byline_html()
         + intro
         + (actual_results_html(actual, pred) + cta + '<h2>Archived pre-race prediction</h2><div class="callout"><strong>Historical forecast.</strong> Everything below this point is the model output saved before the race. It is preserved so readers can compare the recommendation with the recorded result above.</div>' if has_actual else "")
         + cap_line
@@ -1614,7 +1636,7 @@ def render_future_race_page(pred: dict, horizon_generated_at: str = "") -> tuple
             **webpage_ld(title, canonical, desc, "Article"),
             "headline": title,
             "dateModified": gen_date,
-            "author": publisher_ld(),
+            "author": editorial_author_ld(),
             "about": ["F1 Fantasy", race, f"{short} {YEAR}", "F1 Fantasy transfer planning"],
         },
         item_list_ld(
@@ -1655,7 +1677,8 @@ def render_future_race_page(pred: dict, horizon_generated_at: str = "") -> tuple
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/picks/">Picks</a> &rsaquo; {esc(short)} {YEAR}</p>'
         f"<h1>F1 Fantasy Early Outlook: {esc(race)} {YEAR}</h1>"
-        f'<p class="lede">Early, data-driven F1 Fantasy planning notes for the <strong>{esc(race)}</strong> '
+        + byline_html()
+        + f'<p class="lede">Early, data-driven F1 Fantasy planning notes for the <strong>{esc(race)}</strong> '
         f'(round {rn}, {YEAR}, scheduled for {esc(race_date)} at {esc(pred.get("circuit", ""))}). '
         f'These horizon projections are designed for transfer planning before race-week practice data is available.{sprint_note}</p>'
         f'<p class="meta">Horizon projection generated {esc(gen_date)} &middot; final race-week predictions will update when the pipeline runs for this round.</p>'
@@ -1759,6 +1782,7 @@ def render_calendar_race_page(round_info: dict, track_data: dict) -> tuple[str, 
             **webpage_ld(title, canonical, desc, "Article"),
             "headline": title,
             "dateModified": datetime.now(timezone.utc).date().isoformat(),
+            "author": editorial_author_ld(),
             "about": ["F1 Fantasy", race, f"{short} {YEAR}", "F1 Fantasy strategy"],
         },
         breadcrumb_ld([
@@ -1784,7 +1808,8 @@ def render_calendar_race_page(round_info: dict, track_data: dict) -> tuple[str, 
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/picks/">Picks</a> &rsaquo; {esc(short)} {YEAR}</p>'
         f"<h1>F1 Fantasy Strategy Watchlist: {esc(race)} {YEAR}</h1>"
-        f'<p class="lede">A crawlable early watchlist for the <strong>{esc(race)}</strong> '
+        + byline_html()
+        + f'<p class="lede">A crawlable early watchlist for the <strong>{esc(race)}</strong> '
         f'(round {rn}, scheduled for {esc(race_date)} at {esc(circuit)}). Full race-week projections are not published for this round yet.</p>'
         f'<p class="meta">Circuit profile: {esc(street)} &middot; {esc(overtaking)} &middot; {esc(downforce)} &middot; {esc(straight)} &middot; {esc(safety_car)}.</p>'
         f'<div class="callout"><strong>Watchlist only.</strong> {esc(sprint_note)} Recheck this URL once the prediction pipeline reaches the round for ranked picks, value picks and captain guidance.</div>'
@@ -2883,7 +2908,7 @@ def render_article_page(article: dict) -> str:
         "headline": article_title,
         "datePublished": published,
         "dateModified": clean_legacy_text(article.get("modified", published)),
-        "author": publisher_ld(),
+        "author": editorial_author_ld(),
         "about": ["F1 Fantasy", "Fantasy sports strategy", "Formula 1"] + tags[:5],
         "articleSection": tags,
         "wordCount": article_word_count,
@@ -2912,7 +2937,8 @@ def render_article_page(article: dict) -> str:
     body = (
         '<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/articles/">Articles</a> &rsaquo; Article</p>'
         f"<h1>{esc(article_title)}</h1>"
-        f'<p class="meta">{esc(published)}{(" &middot; " + tag_html) if tag_html else ""}</p>'
+        + byline_html()
+        + f'<p class="meta">{esc(published)}{(" &middot; " + tag_html) if tag_html else ""}</p>'
         '<div class="article-body">'
         + content
         + "</div>"
@@ -4005,6 +4031,8 @@ def write_trust_files() -> None:
     humans = "\n".join([
         "/* TEAM */",
         "Site: BoxBoxF1Fantasy",
+        "Editorial author: BoxBoxF1Fantasy",
+        "Author profile: https://boxboxf1fantasy.com/about/",
         f"Contact: {CONTACT_EMAIL}",
         "Location: South Africa",
         "",
@@ -4287,7 +4315,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The IndexNow key file enables real-time URL update notifications to participating search engines after new pages ship.",
         "- The .well-known discovery files mirror the OpenAPI and LLM guides for crawlers and agent tooling.",
         "- The Methodology page documents data layers, forecast phases, uncertainty, leakage safeguards, validation, limitations and corrections without exposing proprietary tuning values.",
-        "- The About page explains independence, contact details, and how to use the site.",
+        "- The About page is the BoxBoxF1Fantasy author profile and explains editorial ownership, programmatic data generation, independence, accountability, contact details, and how to use the site.",
         "- The Privacy page describes analytics, local storage, advertising readiness, and contact details.",
         "",
         "Disclosure:",
@@ -4445,6 +4473,8 @@ def write_llms_full(rel_paths: list[str], current: dict) -> None:
         "",
         "## Contact",
         f"- Email: {CONTACT_EMAIL}",
+        "- Editorial author profile: https://boxboxf1fantasy.com/about/",
+        "- Production methodology: https://boxboxf1fantasy.com/methodology/",
         "",
     ])
     (WEB / "llms-full.txt").write_text("\n".join(lines), encoding="utf-8")
@@ -4563,7 +4593,7 @@ def guide_article_ld(item: dict, canonical: str) -> dict:
         "url": canonical,
         "mainEntityOfPage": canonical,
         "inLanguage": "en",
-        "author": publisher_ld(),
+        "author": editorial_author_ld(),
         "publisher": publisher_ld(),
         "about": ["F1 Fantasy", "Formula 1", "Fantasy sports strategy"],
         "dateModified": item.get("lastmod", SEO_CONTENT_LASTMOD),
@@ -4662,6 +4692,7 @@ def render_content_page(item: dict, current: dict | None = None) -> str:
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/{base}/">{esc(crumb)}</a> &rsaquo; {esc(item["crumb_self"])}</p>'
         f'<h1>{esc(item["h1"])}</h1>'
+        + (byline_html() if base == "guides" else "")
         + item["intro"] + cta + dynamic + item["body"] + faq_section + cta
     )
     return page_head(item["title"], item["desc"], canonical, ld_block(ld_objs)) + body + FOOTER
@@ -4732,7 +4763,7 @@ def render_static_page(page: dict) -> str:
             "headline": page["h1"],
             "datePublished": page.get("published", page.get("lastmod", SEO_CONTENT_LASTMOD)),
             "dateModified": page.get("lastmod", SEO_CONTENT_LASTMOD),
-            "author": publisher_ld(),
+            "author": editorial_author_ld(),
             "about": page.get("about", ["F1 Fantasy", "Prediction methodology"]),
         })
     ld_objs = [
@@ -4765,6 +4796,7 @@ def render_static_page(page: dict) -> str:
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; {esc(page["crumb_self"])}</p>'
         f'<h1>{esc(page["h1"])}</h1>'
+        + (byline_html(include_methodology=page["slug"] != "methodology") if schema_type in {"Article", "TechArticle"} else "")
         + page["intro"]
         + page["body"]
         + (f'<h2>{esc(page.get("faq_heading", "FAQ"))}</h2>{_faq_html(faqs)}' if faqs else "")
@@ -5331,6 +5363,9 @@ STATIC_PAGES = [
         "body": (
             "<h2>What the site does</h2>"
             "<p>BoxBox publishes current-round F1 Fantasy projections for every driver and constructor, race-week pick summaries, a lineup optimizer, Team Compare, transfer tools, budget/value signals, and an accuracy record for completed rounds. The goal is to turn a large amount of race, practice, price and reliability data into decisions a fantasy player can inspect rather than a single unexplained pick.</p>"
+            "<h2>Editorial authorship</h2>"
+            '<p>Analysis, guides and generated race pages carry the <strong>BoxBoxF1Fantasy</strong> byline because they are published and maintained as part of this independent project rather than attributed to a fictional individual contributor. Recurring tables, rankings and scorecards are generated programmatically from the site\'s versioned prediction and result data. Longer explanations are assembled around those outputs, sources and documented model behavior. The site maintainer is responsible for the final published pages, corrections and disclosures.</p>'
+            '<p>Each editorial byline links here for ownership and contact context and to the <a href="/methodology/">Methodology</a> for the production process, data layers, uncertainty and limitations.</p>'
             "<h2>How to use it</h2>"
             '<p>Start with the <a href="/">live predictions</a>, then use the <a href="/tools/lineup-optimizer/">Optimizer</a> or <a href="/tools/team-compare/">Team Compare</a> when you need to turn those projections into an actual team. The <a href="/picks/">race-pick pages</a> give a quicker written summary for each Grand Prix, while the <a href="/guides/">guides</a> explain scoring, chips and strategy.</p>'
             "<h2>How the predictions are produced</h2>"
@@ -5352,6 +5387,8 @@ STATIC_PAGES = [
         "faqs": [
             ("Who runs BoxBoxF1Fantasy?",
              "BoxBoxF1Fantasy is an independently maintained fan project. It is not operated by Formula 1, the FIA, F1 Fantasy, any team or any driver. Contact and correction requests go to boxboxf1fantasy@gmail.com."),
+            ("Why is BoxBoxF1Fantasy listed as the author?",
+             "The brand byline identifies the independent project responsible for publishing and maintaining the analysis. Generated tables and rankings come from versioned site data, and the maintainer is accountable for final publication, disclosures and corrections."),
             ("Are BoxBox F1 Fantasy predictions guaranteed?",
              "No. They are model-based estimates for entertainment and decision support. Weather, reliability, safety cars, penalties, strategy and incidents can produce outcomes outside the expected range."),
             ("Does BoxBox publish prediction accuracy?",

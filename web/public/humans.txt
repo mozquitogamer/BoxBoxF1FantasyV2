@@ -1,5 +1,7 @@
 /* TEAM */
 Site: BoxBoxF1Fantasy
+Editorial author: BoxBoxF1Fantasy
+Author profile: https://boxboxf1fantasy.com/about/
 Contact: boxboxf1fantasy@gmail.com
 Location: South Africa
 

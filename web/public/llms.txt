@@ -102,7 +102,7 @@ Useful descriptions for agents:
 - The IndexNow key file enables real-time URL update notifications to participating search engines after new pages ship.
 - The .well-known discovery files mirror the OpenAPI and LLM guides for crawlers and agent tooling.
 - The Methodology page documents data layers, forecast phases, uncertainty, leakage safeguards, validation, limitations and corrections without exposing proprietary tuning values.
-- The About page explains independence, contact details, and how to use the site.
+- The About page is the BoxBoxF1Fantasy author profile and explains editorial ownership, programmatic data generation, independence, accountability, contact details, and how to use the site.
 - The Privacy page describes analytics, local storage, advertising readiness, and contact details.
 
 Disclosure:
