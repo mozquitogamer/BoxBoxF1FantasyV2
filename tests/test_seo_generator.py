@@ -95,6 +95,67 @@ def test_current_race_page_is_phase_honest_and_explains_autopilot():
     assert "updated through race week" not in html
 
 
+def test_completed_race_page_leads_with_results_and_labels_forecast_archive():
+    prediction = race_week_predictions()
+    prediction["date"] = "2026-07-19"
+    actual = {
+        "round": 12,
+        "race": "Test Grand Prix",
+        "drivers": [
+            {
+                "driver_id": "B", "name": "Driver B", "constructor": "X",
+                "quali_position": 2, "race_position": 1, "positions_gained": 1,
+                "overtakes": 4, "total_points": 52, "ppm": 2.6,
+            },
+            {
+                "driver_id": "A", "name": "Driver A", "constructor": "Y",
+                "quali_position": 1, "race_position": 4, "positions_gained": -3,
+                "overtakes": 1, "total_points": 8, "ppm": 0.8,
+            },
+        ],
+        "constructors": [
+            {
+                "constructor_id": "X", "name": "Team X", "quali_points": 15,
+                "race_points": 50, "sprint_points": 0, "pitstop_points": 5,
+                "total_points": 70, "ppm": 2.8,
+            },
+            {
+                "constructor_id": "Y", "name": "Team Y", "quali_points": 10,
+                "race_points": 40, "sprint_points": 0, "pitstop_points": 2,
+                "total_points": 52, "ppm": 2.1,
+            },
+        ],
+    }
+
+    _slug, html = seo.render_race_page(prediction, False, actual=actual)
+
+    assert "F1 Fantasy Test GP 2026 Results &amp; Review" in html
+    assert "F1 Fantasy Results: Test Grand Prix 2026" in html
+    assert "Driver B led the driver scoring with 52 points" in html
+    assert 'aria-label="Recorded driver fantasy results"' in html
+    assert 'aria-label="Recorded constructor fantasy results"' in html
+    assert "Forecast top-five overlap" in html
+    assert "Archived pre-race prediction" in html
+    assert "Archived optimized forecast lineup: Test Grand Prix" in html
+    assert "Current optimized team" not in html
+    assert html.index("Recorded F1 Fantasy results") < html.index("Archived pre-race prediction")
+    assert '"@type": "Dataset"' in html
+    assert '"contentUrl": "https://boxboxf1fantasy.com/data/actual_round12.json"' in html
+    assert "Recorded F1 Fantasy driver results for Test GP 2026" in html
+
+
+def test_picks_hub_marks_completed_rounds_as_results():
+    entries = [
+        ("test-gp-2026", "Test Grand Prix", "2026-07-19", 12, "result"),
+        ("future-gp-2026", "Future Grand Prix", "2026-07-26", 13, "future"),
+    ]
+
+    html = seo.render_index(entries, race_week_predictions(), None)
+
+    assert '<span class="tag tag-result">Results</span>' in html
+    assert "Where can I find completed F1 Fantasy race results?" in html
+
+
 def test_race_rankings_link_profiles_and_item_lists_target_entities():
     _slug, html = seo.render_race_page(race_week_predictions(), True)
 

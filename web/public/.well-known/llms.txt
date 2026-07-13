@@ -2,7 +2,7 @@
 
 > Free, data-driven F1 Fantasy 2026 predictions, lineup tools, transfer planning, race picks, and strategy guides.
 
-Last updated: 2026-07-12
+Last updated: 2026-07-13
 Canonical site: https://boxboxf1fantasy.com/
 
 BoxBoxF1Fantasy helps F1 Fantasy players choose drivers and constructors for the 2026 season. The site publishes current-round driver and constructor projections, budget/value signals, confidence ranges, lineup optimization, transfer planning, race-week picks, and beginner/strategy guides. It is free and does not require login.
@@ -90,6 +90,7 @@ Useful descriptions for agents:
 - The Changelog page publishes notable model, scoring, data and tool changes in plain English.
 - The Videos page lists recent YouTube race-week drafts, deadline streams, picks and strategy videos.
 - The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.
+- Completed race-pick pages become result-and-review pages: recorded driver and constructor fantasy scores appear first, followed by the archived forecast and its scorecard.
 - The Public Data page documents the JSON endpoints that agents can fetch directly.
 - The OpenAPI document provides a machine-readable contract for the public static JSON endpoints.
 - The ai-summary.json file is the best first endpoint for compact current-round answers.

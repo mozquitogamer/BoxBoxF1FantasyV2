@@ -1,6 +1,6 @@
 # BoxBoxF1Fantasy - Full Site Summary for LLMs and Agents
 
-Last updated: 2026-07-12
+Last updated: 2026-07-13
 Canonical site: https://boxboxf1fantasy.com/
 Primary language: English
 Season covered: 2026 F1 Fantasy
@@ -103,6 +103,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.
 - Videos: links recent YouTube drafts, deadline streams, top picks and race-week strategy explainers.
 - Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.
+- Completed race pages: recorded driver and constructor fantasy results, result value, a forecast scorecard, and the preserved pre-race prediction for transparent review.
 - Public Data: documents the static JSON endpoints for agents, answer engines and power users.
 - AI summary: compact current-round answer pack for top picks, value picks, captain/boost choice and sample lineup.
 - OpenAPI: provides a machine-readable endpoint contract for the public JSON data and discovery files.
@@ -127,15 +128,15 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - F1 Fantasy Dutch GP 2026: Early Picks | BoxBox: https://boxboxf1fantasy.com/picks/dutch-gp-2026/ - Early F1 Fantasy outlook for Dutch Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.
 - F1 Fantasy Hungarian GP 2026: Early Picks | BoxBox: https://boxboxf1fantasy.com/picks/hungarian-gp-2026/ - Early F1 Fantasy outlook for Hungarian Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.
 - F1 Fantasy Belgian GP 2026: Picks, Captain & Tips | BoxBox: https://boxboxf1fantasy.com/picks/belgian-gp-2026/ - F1 Fantasy Belgian GP 2026 picks: driver and constructor projections, best values, boost choice, optimized lineup, weather forecast and risk outlook.
-- F1 Fantasy British GP 2026: Picks, Captain & Tips | BoxBox: https://boxboxf1fantasy.com/picks/british-gp-2026/ - Our F1 Fantasy predictions for the British GP 2026 (round 11): top driver and constructor picks, best value (PPM) picks and the captain pick.
-- F1 Fantasy Austrian GP 2026: Picks, Captain & Tips | BoxBox: https://boxboxf1fantasy.com/picks/austrian-gp-2026/ - Our F1 Fantasy predictions for the Austrian GP 2026 (round 10): top driver and constructor picks, best value (PPM) picks and the captain pick.
-- F1 Fantasy Spanish GP 2026: Picks, Captain & Tips | BoxBox: https://boxboxf1fantasy.com/picks/spanish-gp-2026/ - Our F1 Fantasy predictions for the Spanish GP 2026 (round 9): top driver and constructor picks, best value (PPM) picks and the captain pick.
-- F1 Fantasy Monaco GP 2026: Picks, Captain & Tips | BoxBox: https://boxboxf1fantasy.com/picks/monaco-gp-2026/ - Our F1 Fantasy predictions for the Monaco GP 2026 (round 8): top driver and constructor picks, best value (PPM) picks and the captain pick.
-- F1 Fantasy Canadian GP 2026: Picks, Captain & Tips | BoxBox: https://boxboxf1fantasy.com/picks/canadian-gp-2026/ - Our F1 Fantasy predictions for the Canadian GP 2026 (round 7): top driver and constructor picks, best value (PPM) picks and the captain pick.
-- F1 Fantasy Miami GP 2026: Picks, Captain & Tips | BoxBox: https://boxboxf1fantasy.com/picks/miami-gp-2026/ - Our F1 Fantasy predictions for the Miami GP 2026 (round 6): top driver and constructor picks, best value (PPM) picks and the captain pick.
-- F1 Fantasy Japanese GP 2026: Picks, Captain & Tips | BoxBox: https://boxboxf1fantasy.com/picks/japanese-gp-2026/ - Our F1 Fantasy predictions for the Japanese GP 2026 (round 3): top driver and constructor picks, best value (PPM) picks and the captain pick.
-- F1 Fantasy Chinese GP 2026: Picks, Captain & Tips | BoxBox: https://boxboxf1fantasy.com/picks/chinese-gp-2026/ - Our F1 Fantasy predictions for the Chinese GP 2026 (round 2): top driver and constructor picks, best value (PPM) picks and the captain pick.
-- F1 Fantasy Australian GP 2026: Picks, Captain & Tips | BoxBox: https://boxboxf1fantasy.com/picks/australian-gp-2026/ - Our F1 Fantasy predictions for the Australian GP 2026 (round 1): top driver and constructor picks, best value (PPM) picks and the captain pick.
+- F1 Fantasy British GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/british-gp-2026/ - F1 Fantasy British GP 2026 results: Charles Leclerc led drivers with 54 points. See every driver and constructor score plus the archived forecast review.
+- F1 Fantasy Austrian GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/austrian-gp-2026/ - F1 Fantasy Austrian GP 2026 results: Max Verstappen led drivers with 43 points. See every driver and constructor score plus the archived forecast review.
+- F1 Fantasy Spanish GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/spanish-gp-2026/ - F1 Fantasy Spanish GP 2026 results: Lewis Hamilton led drivers with 56 points. See every driver and constructor score plus the archived forecast review.
+- F1 Fantasy Monaco GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/monaco-gp-2026/ - F1 Fantasy Monaco GP 2026 results: Kimi Antonelli led drivers with 55 points. See every driver and constructor score plus the archived forecast review.
+- F1 Fantasy Canadian GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/canadian-gp-2026/ - F1 Fantasy Canadian GP 2026 results: Kimi Antonelli led drivers with 62 points. See every driver and constructor score plus the archived forecast review.
+- F1 Fantasy Miami GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/miami-gp-2026/ - F1 Fantasy Miami GP 2026 results: Lando Norris led drivers with 54 points. See every driver and constructor score plus the archived forecast review.
+- F1 Fantasy Japanese GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/japanese-gp-2026/ - F1 Fantasy Japanese GP 2026 results: Kimi Antonelli led drivers with 50 points. See every driver and constructor score plus the archived forecast review.
+- F1 Fantasy Chinese GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/chinese-gp-2026/ - F1 Fantasy Chinese GP 2026 results: Kimi Antonelli led drivers with 68 points. See every driver and constructor score plus the archived forecast review.
+- F1 Fantasy Australian GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/australian-gp-2026/ - F1 Fantasy Australian GP 2026 results: Max Verstappen led drivers with 50 points. See every driver and constructor score plus the archived forecast review.
 - F1 Fantasy Drivers 2026: Points, Prices & Value | BoxBox: https://boxboxf1fantasy.com/drivers/ - Current F1 Fantasy 2026 driver projections: expected points, prices, value ratings, predicted qualifying and race finish for every driver.
 - Max Verstappen F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/max-verstappen/ - Max Verstappen F1 Fantasy 2026 projection: 22.6 expected points for the Belgian GP, $27.9M price, value rating and confidence range.
 - Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/kimi-antonelli/ - Kimi Antonelli F1 Fantasy 2026 projection: 20.1 expected points for the Belgian GP, $25.4M price, value rating and confidence range.

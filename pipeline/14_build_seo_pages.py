@@ -404,7 +404,7 @@ def suggested_lineup(pred: dict, budget: float = 100.0) -> dict | None:
     return best
 
 
-def suggested_lineup_html(pred: dict) -> str:
+def suggested_lineup_html(pred: dict, archived: bool = False) -> str:
     lineup = suggested_lineup(pred)
     if not lineup:
         return ""
@@ -423,11 +423,17 @@ def suggested_lineup_html(pred: dict) -> str:
         f'<td class="num">{_balanced_pts(c):.1f}</td></tr>'
         for c in lineup["constructors"]
     )
+    heading = "Archived optimized forecast lineup" if archived else "Current optimized team"
+    timing = (
+        "This was the model's $100M Balanced lineup before the race"
+        if archived else
+        "This crawlable $100M snapshot uses the live optimizer's default Balanced basis"
+    )
     return (
-        f'<h2>Current optimized team: {esc(pred.get("race", "this round"))}</h2>'
-        f'<p>This crawlable $100M snapshot uses the live optimizer\'s default <strong>Balanced</strong> basis &mdash; the mean of deterministic projected points and the risk-adjusted simulation mean &mdash; with a normal 2x boost on <strong>{esc(lineup["captain"].get("name", "the top driver"))}</strong>. '
-        'For locks, exclusions, chips and custom budgets, use the live Optimizer.</p>'
-        '<table><thead><tr><th>Pick</th><th>Slot</th><th class="num">Price</th><th class="num">Balanced pts</th></tr></thead><tbody>'
+        f'<h2>{heading}: {esc(pred.get("race", "this round"))}</h2>'
+        f'<p>{esc(timing)} &mdash; the mean of deterministic projected points and the risk-adjusted simulation mean &mdash; with a normal 2x boost on <strong>{esc(lineup["captain"].get("name", "the top driver"))}</strong>. '
+        + ('It is preserved for review and is not a current recommendation.</p>' if archived else 'For locks, exclusions, chips and custom budgets, use the live Optimizer.</p>')
+        + '<table><thead><tr><th>Pick</th><th>Slot</th><th class="num">Price</th><th class="num">Balanced pts</th></tr></thead><tbody>'
         + driver_rows + constructor_rows +
         "</tbody></table>"
         f'<div class="callout"><strong>Optimized team total:</strong> {lineup["points"]:.1f} balanced pts with normal 2x boost &middot; '
@@ -1015,7 +1021,176 @@ def current_race_brief_html(pred: dict) -> str:
     )
 
 
-def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) -> tuple[str, str]:
+def _actual_result_context(actual: dict, pred: dict) -> dict:
+    drivers = sorted(actual.get("drivers", []), key=lambda item: float(item.get("total_points") or 0), reverse=True)
+    constructors = sorted(actual.get("constructors", []), key=lambda item: float(item.get("total_points") or 0), reverse=True)
+    predictions = sorted(pred.get("drivers", []), key=lambda item: float(item.get("expected_points") or 0), reverse=True)
+    actual_by_id = {item.get("driver_id"): item for item in drivers}
+    actual_ranks = {item.get("driver_id"): rank for rank, item in enumerate(drivers, 1)}
+    matched = [item for item in predictions if item.get("driver_id") in actual_by_id]
+    mae = (
+        sum(abs(float(item.get("expected_points") or 0) - float(actual_by_id[item["driver_id"]].get("total_points") or 0)) for item in matched) / len(matched)
+        if matched else None
+    )
+    predicted_top_ids = {item.get("driver_id") for item in predictions[:5]}
+    actual_top_ids = {item.get("driver_id") for item in drivers[:5]}
+    top_constructor_points = float(constructors[0].get("total_points") or 0) if constructors else 0
+    constructor_leaders = [
+        item for item in constructors
+        if float(item.get("total_points") or 0) == top_constructor_points
+    ]
+    return {
+        "drivers": drivers,
+        "constructors": constructors,
+        "top_driver": drivers[0] if drivers else {},
+        "constructor_leaders": constructor_leaders,
+        "best_value": max(drivers, key=lambda item: float(item.get("ppm") or 0), default={}),
+        "predicted_leader": predictions[0] if predictions else {},
+        "actual_by_id": actual_by_id,
+        "actual_ranks": actual_ranks,
+        "top_five_overlap": len(predicted_top_ids & actual_top_ids),
+        "mae": mae,
+    }
+
+
+def actual_results_html(actual: dict, pred: dict) -> str:
+    context = _actual_result_context(actual, pred)
+    drivers = context["drivers"]
+    constructors = context["constructors"]
+    top_driver = context["top_driver"]
+    constructor_leaders = context["constructor_leaders"]
+    best_value = context["best_value"]
+    predicted_leader = context["predicted_leader"]
+    leader_actual = context["actual_by_id"].get(predicted_leader.get("driver_id"), {})
+    leader_rank = context["actual_ranks"].get(predicted_leader.get("driver_id"))
+    constructor_names = " / ".join(item.get("name", item.get("constructor_id", "")) for item in constructor_leaders) or "-"
+    constructor_points = float(constructor_leaders[0].get("total_points") or 0) if constructor_leaders else 0
+
+    summary = "".join([
+        '<div class="season-stat"><span>Top fantasy driver</span>'
+        f'<strong><a href="/drivers/{plain_slug(top_driver.get("name", ""))}/">{esc(top_driver.get("name", "-"))}</a></strong>'
+        f'<em>{_score(float(top_driver.get("total_points") or 0))} pts</em></div>',
+        '<div class="season-stat"><span>Top constructor</span>'
+        f'<strong>{esc(constructor_names)}</strong><em>{_score(constructor_points)} pts</em></div>',
+        '<div class="season-stat"><span>Best driver value</span>'
+        f'<strong><a href="/drivers/{plain_slug(best_value.get("name", ""))}/">{esc(best_value.get("name", "-"))}</a></strong>'
+        f'<em>{float(best_value.get("ppm") or 0):.2f} PPM</em></div>',
+        '<div class="season-stat"><span>Forecast top-five overlap</span>'
+        f'<strong>{context["top_five_overlap"]} of 5</strong>'
+        f'<em>{context["mae"]:.1f} pts MAE</em></div>' if context["mae"] is not None else "",
+    ])
+
+    driver_rows = []
+    for rank, item in enumerate(drivers, 1):
+        name = item.get("name", item.get("driver_id", ""))
+        team = str(item.get("constructor") or "").replace("_", " ").title()
+        if item.get("is_dsq"):
+            finish = "DSQ"
+        elif item.get("is_dns"):
+            finish = "DNS"
+        elif item.get("is_dnf"):
+            finish = "DNF"
+        else:
+            finish = f'P{item.get("race_position", "-")}'
+        quali = f'P{item.get("quali_position")}' if item.get("quali_position") is not None else "-"
+        driver_rows.append(
+            f'<tr><td class="num">{rank}</td><th scope="row"><a href="/drivers/{plain_slug(name)}/">{esc(name)}</a></th>'
+            f'<td><a href="/constructors/{plain_slug(team)}/">{esc(team)}</a></td>'
+            f'<td class="num">{esc(quali)}&rarr;{esc(finish)}</td>'
+            f'<td class="num">{_score(float(item.get("positions_gained") or 0))}</td>'
+            f'<td class="num">{_score(float(item.get("overtakes") or 0))}</td>'
+            f'<td class="num"><strong>{_score(float(item.get("total_points") or 0))}</strong></td>'
+            f'<td class="num">{float(item.get("ppm") or 0):.2f}</td></tr>'
+        )
+
+    constructor_rows = []
+    for rank, item in enumerate(constructors, 1):
+        name = item.get("name", item.get("constructor_id", ""))
+        constructor_rows.append(
+            f'<tr><td class="num">{rank}</td><th scope="row"><a href="/constructors/{plain_slug(name)}/">{esc(name)}</a></th>'
+            f'<td class="num">{_score(float(item.get("quali_points") or 0))}</td>'
+            f'<td class="num">{_score(float(item.get("race_points") or 0))}</td>'
+            f'<td class="num">{_score(float(item.get("sprint_points") or 0))}</td>'
+            f'<td class="num">{_score(float(item.get("pitstop_points") or 0))}</td>'
+            f'<td class="num"><strong>{_score(float(item.get("total_points") or 0))}</strong></td>'
+            f'<td class="num">{float(item.get("ppm") or 0):.2f}</td></tr>'
+        )
+
+    forecast_review = ""
+    if predicted_leader and leader_actual:
+        forecast_review = (
+            '<h2>Forecast review</h2><div class="callout">'
+            f'<strong>Archived top pick:</strong> {esc(predicted_leader.get("name", "-"))} was projected for {float(predicted_leader.get("expected_points") or 0):.1f} points '
+            f'and recorded {_score(float(leader_actual.get("total_points") or 0))}, ranking {leader_rank}{_ordinal_suffix(leader_rank)} among drivers. '
+            f'The forecast placed {context["top_five_overlap"]} of the actual top five inside its projected top five; '
+            f'the all-driver mean absolute points error was {context["mae"]:.1f}. '
+            '<a href="/accuracy/">See the full public accuracy record</a>.</div>'
+        )
+
+    return (
+        '<h2>Recorded F1 Fantasy results</h2>'
+        '<p>The race is complete. These are recorded base fantasy scores, without a manager-specific 2x or 3x multiplier.</p>'
+        f'<div class="season-stats">{summary}</div>'
+        '<h3>Driver fantasy points</h3>'
+        '<table aria-label="Recorded driver fantasy results"><thead><tr><th class="num">Rank</th><th>Driver</th><th>Team</th>'
+        '<th class="num">Quali&rarr;Race</th><th class="num">Gained</th><th class="num">Overtakes</th><th class="num">Fantasy pts</th><th class="num">PPM</th></tr></thead><tbody>'
+        + "".join(driver_rows) + '</tbody></table>'
+        '<h3>Constructor fantasy points</h3>'
+        '<table aria-label="Recorded constructor fantasy results"><thead><tr><th class="num">Rank</th><th>Constructor</th>'
+        '<th class="num">Quali</th><th class="num">Race</th><th class="num">Sprint</th><th class="num">Pit stops</th><th class="num">Fantasy pts</th><th class="num">PPM</th></tr></thead><tbody>'
+        + "".join(constructor_rows) + '</tbody></table>'
+        + forecast_review
+        + f'<p class="meta">Source: <a href="/data/actual_round{esc(actual.get("round", ""))}.json">recorded round result JSON</a>. '
+        'Scores can be corrected when the official game revises provisional results; material changes are published in the <a href="/changelog/">Changelog</a>.</p>'
+    )
+
+
+def _ordinal_suffix(rank: int | None) -> str:
+    if rank is None:
+        return ""
+    if 10 <= rank % 100 <= 20:
+        return "th"
+    return {1: "st", 2: "nd", 3: "rd"}.get(rank % 10, "th")
+
+
+def actual_result_ld(actual: dict, pred: dict, canonical: str, short: str) -> list[dict]:
+    context = _actual_result_context(actual, pred)
+    round_no = actual.get("round")
+    return [
+        item_list_ld(
+            f"Recorded F1 Fantasy driver results for {short} {YEAR}",
+            canonical,
+            [(item.get("name", item.get("driver_id", "")), f'{SITE}/drivers/{plain_slug(item.get("name", "driver"))}/') for item in context["drivers"]],
+        ),
+        item_list_ld(
+            f"Recorded F1 Fantasy constructor results for {short} {YEAR}",
+            canonical,
+            [(item.get("name", item.get("constructor_id", "")), f'{SITE}/constructors/{plain_slug(item.get("name", "constructor"))}/') for item in context["constructors"]],
+        ),
+        {
+            "@context": "https://schema.org",
+            "@type": "Dataset",
+            "name": f"{short} {YEAR} recorded F1 Fantasy results",
+            "description": "Recorded driver and constructor F1 Fantasy points, finishing positions, overtakes, positions gained and pit-stop scoring.",
+            "url": canonical,
+            "creator": publisher_ld(),
+            "isAccessibleForFree": True,
+            "variableMeasured": ["Fantasy points", "Qualifying position", "Race position", "Overtakes", "Positions gained", "Points per million"],
+            "distribution": {
+                "@type": "DataDownload",
+                "encodingFormat": "application/json",
+                "contentUrl": f"{SITE}/data/actual_round{round_no}.json",
+            },
+        },
+    ]
+
+
+def render_race_page(
+    pred: dict,
+    is_current: bool,
+    weather: dict | None = None,
+    actual: dict | None = None,
+) -> tuple[str, str]:
     race = pred["race"]
     rn = pred["round"]
     short = short_race(race)
@@ -1033,12 +1208,23 @@ def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) 
     captain = by_pts[0] if by_pts else None
     best_value = by_val[0] if by_val else None
     top3 = ", ".join(d["name"] for d in by_pts[:3])
+    has_actual = bool(actual and actual.get("drivers") and actual.get("constructors"))
+    result_context = _actual_result_context(actual, pred) if has_actual else {}
 
-    title = f"F1 Fantasy {short} {YEAR}: Picks, Captain & Tips | BoxBox"
+    if has_actual:
+        title = f"F1 Fantasy {short} {YEAR} Results & Review | BoxBox"
+        winner = result_context["top_driver"].get("name", "the top driver")
+        winner_points = float(result_context["top_driver"].get("total_points") or 0)
+        desc = (
+            f"F1 Fantasy {short} {YEAR} results: {winner} led drivers with {_score(winner_points)} points. "
+            "See every driver and constructor score plus the archived forecast review."
+        )
+    else:
+        title = f"F1 Fantasy {short} {YEAR}: Picks, Captain & Tips | BoxBox"
     if is_current:
         desc = (f"F1 Fantasy {short} {YEAR} picks: driver and constructor projections, best values, "
                 f"boost choice, optimized lineup, weather forecast and risk outlook.")
-    else:
+    elif not has_actual:
         desc = (f"Our F1 Fantasy predictions for the {short} {YEAR} (round {rn}): top driver "
                 f"and constructor picks, best value (PPM) picks and the captain pick.")
 
@@ -1113,41 +1299,71 @@ def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) 
 
     phase = str(pred.get("phase") or "pre_fp").lower()
     phase_label = {"pre_fp": "pre-practice", "post_fp": "post-practice", "post_quali": "post-qualifying"}.get(phase, phase.replace("_", "-"))
-    when = (f"This is the current {esc(phase_label)} forecast for the upcoming round."
-            if is_current else
-            f"Our archived predictions for round {rn}. The race has run &mdash; "
-            f'see how the model did in the <a href="/#accuracy">Accuracy</a> tab.')
-
-    intro = (
-        f'<p class="lede">Free, data-driven F1 Fantasy picks for the <strong>{esc(race)}</strong> '
-        f'(round {rn}, {YEAR}). Below are the model\'s top driver and constructor picks, the best '
-        f'value (points-per-million) options, and the pick to captain. {when}</p>'
-        f'<p class="meta">Predictions generated {esc(gen_date)} &middot; '
-        f'machine-learning models + 10,000-run Monte Carlo simulation.</p>'
-    )
+    if has_actual:
+        top_actual = result_context["top_driver"]
+        intro = (
+            f'<p class="lede">Recorded F1 Fantasy results and forecast review for the <strong>{esc(race)}</strong> '
+            f'(round {rn}, {YEAR}). {esc(top_actual.get("name", "The top driver"))} led the driver scoring with '
+            f'{_score(float(top_actual.get("total_points") or 0))} points. The actual tables come first; the original prediction remains below for transparency.</p>'
+            f'<p class="meta">Race complete &middot; archived forecast generated {esc(gen_date)} &middot; base fantasy scores exclude manager-specific boosts.</p>'
+        )
+    else:
+        when = (f"This is the current {esc(phase_label)} forecast for the upcoming round."
+                if is_current else
+                f"Our archived predictions for round {rn}. The race has run &mdash; "
+                f'see how the model did on the <a href="/accuracy/">Accuracy page</a>.')
+        intro = (
+            f'<p class="lede">Free, data-driven F1 Fantasy picks for the <strong>{esc(race)}</strong> '
+            f'(round {rn}, {YEAR}). Below are the model\'s top driver and constructor picks, the best '
+            f'value (points-per-million) options, and the pick to captain. {when}</p>'
+            f'<p class="meta">Predictions generated {esc(gen_date)} &middot; '
+            f'machine-learning models + 10,000-run Monte Carlo simulation.</p>'
+        )
 
     cta = (
-        '<div class="btnrow">'
-        '<a class="cta" href="/#optimizer">Build your optimal team in the Optimizer &rarr;</a>'
-        '<a class="cta" href="/" style="background:#1b212c;">See live driver cards &rarr;</a>'
-        '</div>'
+        '<div class="btnrow"><a class="cta" href="/stats/">View season points &amp; prices &rarr;</a>'
+        '<a class="cta" href="/accuracy/" style="background:#1b212c;">Prediction accuracy &rarr;</a></div>'
+        if has_actual else
+        '<div class="btnrow"><a class="cta" href="/#optimizer">Build your optimal team in the Optimizer &rarr;</a>'
+        '<a class="cta" href="/" style="background:#1b212c;">See live driver cards &rarr;</a></div>'
     )
 
     # --- FAQ (visible + structured) ---
-    faqs = [
-        (f"Who are the best F1 Fantasy picks for the {short}?",
-         f"Our model's top projected scorers for the {race} are {top3}. "
-         f"For value, {best_value['name'] if best_value else 'the leaders'} offers the best "
-         f"points per million. The full ranked list is in the table above."),
-        (f"What's the best F1 Fantasy team for the {short}?",
-         "Build it in seconds with our free Optimizer, which checks all 1.4 million legal "
-         "5-driver, 2-constructor lineups within your budget. The picks on this page are the "
-         "building blocks for it."),
-        (f"How are these {short} predictions made?",
-         "Machine-learning models trained on 2020-2026 data predict qualifying and race "
-         "positions, then a 10,000-run Monte Carlo simulation turns them into expected fantasy "
-         "points. Predictions sharpen as practice and qualifying data arrive across the weekend."),
-    ]
+    if has_actual:
+        actual_driver = result_context["top_driver"]
+        actual_constructors = " and ".join(
+            item.get("name", item.get("constructor_id", ""))
+            for item in result_context["constructor_leaders"]
+        )
+        actual_constructor_points = (
+            float(result_context["constructor_leaders"][0].get("total_points") or 0)
+            if result_context["constructor_leaders"] else 0
+        )
+        faqs = [
+            (f"Who scored the most F1 Fantasy points at the {short} {YEAR}?",
+             f"{actual_driver.get('name', 'The leading driver')} recorded {_score(float(actual_driver.get('total_points') or 0))} base fantasy points, the highest driver total for the round."),
+            (f"Which constructor scored the most fantasy points at the {short}?",
+             f"{actual_constructors or 'The leading constructor'} led the constructor scoring with {_score(actual_constructor_points)} points."),
+            (f"Do these {short} results include 2x or 3x boosts?",
+             "No. The result tables show each asset's recorded base fantasy score. Manager-specific 2x and 3x multipliers depend on the lineup and are not included."),
+            (f"How accurate was the {short} forecast?",
+             f"The archived forecast placed {result_context['top_five_overlap']} of the actual top five drivers inside its projected top five. Its all-driver mean absolute fantasy-points error was {result_context['mae']:.1f}. The original forecast remains on the page below the results."),
+        ]
+    else:
+        faqs = [
+            (f"Who are the best F1 Fantasy picks for the {short}?",
+             f"Our model's top projected scorers for the {race} are {top3}. "
+             f"For value, {best_value['name'] if best_value else 'the leaders'} offers the best "
+             f"points per million. The full ranked list is in the table above."),
+            (f"What's the best F1 Fantasy team for the {short}?",
+             "Build it in seconds with our free Optimizer, which checks all 1.4 million legal "
+             "5-driver, 2-constructor lineups within your budget. The picks on this page are the "
+             "building blocks for it."),
+            (f"How are these {short} predictions made?",
+             "Machine-learning models trained on 2020-2026 data predict qualifying and race "
+             "positions, then a 10,000-run Monte Carlo simulation turns them into expected fantasy "
+             "points. Predictions sharpen as practice and qualifying data arrive across the weekend."),
+        ]
     faq_html = "".join(
         f'<p class="faq-q">{esc(q)}</p><p class="faq-a">{esc(a)}</p>' for q, a in faqs
     )
@@ -1165,7 +1381,10 @@ def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) 
                 gen_date or LINEUP_CONTENT_LASTMOD,
                 LINEUP_CONTENT_LASTMOD,
                 weather_date or LINEUP_CONTENT_LASTMOD,
+                source_date(pred.get("date")) or LINEUP_CONTENT_LASTMOD,
             ),
+            "datePublished": source_date(pred.get("date")) or gen_date or LINEUP_CONTENT_LASTMOD,
+            "mainEntityOfPage": canonical,
             "author": publisher_ld(),
             "about": [
                 "F1 Fantasy",
@@ -1175,12 +1394,12 @@ def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) 
             ],
         },
         item_list_ld(
-            f"Top F1 Fantasy driver picks for {short} {YEAR}",
+            f"{'Archived predicted' if has_actual else 'Top'} F1 Fantasy driver picks for {short} {YEAR}",
             canonical,
             [(d["name"], f'{SITE}/drivers/{plain_slug(d["name"])}/') for d in by_pts[:TOP_DRIVERS]],
         ),
         item_list_ld(
-            f"Top F1 Fantasy constructor picks for {short} {YEAR}",
+            f"{'Archived predicted' if has_actual else 'Top'} F1 Fantasy constructor picks for {short} {YEAR}",
             canonical,
             [
                 (
@@ -1209,6 +1428,8 @@ def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) 
             ],
         },
     ]
+    if has_actual:
+        ld_objs.extend(actual_result_ld(actual, pred, canonical, short))
     event = race_event_ld(race, pred.get("date", ""), pred.get("circuit", ""), canonical, desc)
     if event:
         ld_objs.append(event)
@@ -1216,20 +1437,21 @@ def render_race_page(pred: dict, is_current: bool, weather: dict | None = None) 
 
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/picks/">Picks</a> &rsaquo; {esc(short)} {YEAR}</p>'
-        f"<h1>F1 Fantasy Picks: {esc(race)} {YEAR}</h1>"
+        + (f"<h1>F1 Fantasy Results: {esc(race)} {YEAR}</h1>" if has_actual else f"<h1>F1 Fantasy Picks: {esc(race)} {YEAR}</h1>")
         + intro
+        + (actual_results_html(actual, pred) + cta + '<h2>Archived pre-race prediction</h2><div class="callout"><strong>Historical forecast.</strong> Everything below this point is the model output saved before the race. It is preserved so readers can compare the recommendation with the recorded result above.</div>' if has_actual else "")
         + cap_line
-        + cta
+        + ("" if has_actual else cta)
         + (current_race_brief_html(pred) if is_current else "")
         + (current_weather_html(pred, weather) if is_current else "")
-        + suggested_lineup_html(pred)
-        + "<h2>Top driver picks</h2>"
-        + f"<p>Ranked by predicted fantasy points for the {esc(short)}. PPM = points per $million (value).</p>"
+        + suggested_lineup_html(pred, archived=not is_current)
+        + ("<h2>Archived driver projections</h2>" if has_actual else "<h2>Top driver picks</h2>")
+        + f"<p>Ranked by {'the archived forecast of' if has_actual else 'predicted'} fantasy points for the {esc(short)}. PPM = points per $million (value).</p>"
         + drivers_table
-        + "<h2>Best value picks (PPM)</h2>"
+        + ("<h2>Archived value projections (PPM)</h2>" if has_actual else "<h2>Best value picks (PPM)</h2>")
         + "<p>The most points per $million spent &mdash; the budget-stretchers that let you afford a premium elsewhere.</p>"
         + value_table
-        + "<h2>Top constructor picks</h2>"
+        + ("<h2>Archived constructor projections</h2>" if has_actual else "<h2>Top constructor picks</h2>")
         + "<p>Constructors score both their drivers' points plus pit-stop points and a qualifying bonus &mdash; don't overlook them.</p>"
         + cons_table
         + "<h2>FAQ</h2>"
@@ -1618,6 +1840,8 @@ def render_index(entries: list, current: dict | None = None, weather: dict | Non
         tag = ""
         if status == "current":
             tag = '<span class="tag">This week</span>'
+        elif status == "result":
+            tag = '<span class="tag tag-result">Results</span>'
         elif status == "future":
             tag = '<span class="tag">Early outlook</span>'
         elif status == "calendar":
@@ -1632,6 +1856,8 @@ def render_index(entries: list, current: dict | None = None, weather: dict | Non
          "Open the race marked This week for current driver, constructor, value, risk and optimized-team guidance. The page states whether the forecast is pre-practice, post-practice or post-qualifying."),
         ("When do BoxBox F1 Fantasy race picks update?",
          "Race pages can update before practice, after free practice and after qualifying. The post-practice version is the main actionable forecast before the normal team lock."),
+        ("Where can I find completed F1 Fantasy race results?",
+         "Completed rounds are marked Results. Those pages show recorded driver and constructor fantasy points first, followed by a transparent review and the archived pre-race forecast."),
         ("Are future-race picks final recommendations?",
          "No. Early outlook and watchlist pages are for transfer planning. Recheck the race page when current-weekend telemetry, weather and session results are available."),
     ]
@@ -4049,6 +4275,7 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- The Changelog page publishes notable model, scoring, data and tool changes in plain English.",
         "- The Videos page lists recent YouTube race-week drafts, deadline streams, picks and strategy videos.",
         "- The Articles page publishes race previews, recaps and longer-form fantasy strategy notes.",
+        "- Completed race-pick pages become result-and-review pages: recorded driver and constructor fantasy scores appear first, followed by the archived forecast and its scorecard.",
         "- The Public Data page documents the JSON endpoints that agents can fetch directly.",
         "- The OpenAPI document provides a machine-readable contract for the public static JSON endpoints.",
         "- The ai-summary.json file is the best first endpoint for compact current-round answers.",
@@ -4187,6 +4414,7 @@ def write_llms_full(rel_paths: list[str], current: dict) -> None:
         "- Changelog: explains notable prediction, scoring, data and tool changes without exposing private implementation details.",
         "- Videos: links recent YouTube drafts, deadline streams, top picks and race-week strategy explainers.",
         "- Articles: longer-form race previews, recaps, model context and F1 Fantasy strategy notes.",
+        "- Completed race pages: recorded driver and constructor fantasy results, result value, a forecast scorecard, and the preserved pre-race prediction for transparent review.",
         "- Public Data: documents the static JSON endpoints for agents, answer engines and power users.",
         "- AI summary: compact current-round answer pack for top picks, value picks, captain/boost choice and sample lineup.",
         "- OpenAPI: provides a machine-readable endpoint contract for the public JSON data and discovery files.",
@@ -5283,12 +5511,18 @@ def main() -> None:
         status = "archive"
         if r.get("has_predictions"):
             is_current = (rn == current_round)
-            status = "current" if is_current else "archive"
             pred = current if is_current else load_json(DATA / f"predictions_round{rn}.json")
             if not pred or not pred.get("drivers"):
                 print(f"  - round {rn}: no usable predictions, skipped")
                 continue
-            slug, page = render_race_page(pred, is_current, current_weather if is_current else None)
+            actual = load_json(DATA / f"actual_round{rn}.json") if r.get("has_actual") else None
+            status = "current" if is_current else "result" if actual else "archive"
+            slug, page = render_race_page(
+                pred,
+                is_current,
+                current_weather if is_current else None,
+                actual,
+            )
             race_name = pred.get("race", r["name"])
             race_date = pred.get("date", r.get("date", ""))
             page_lastmod = max(
@@ -5299,6 +5533,7 @@ def main() -> None:
                     if is_current and current_weather.get("round") == rn
                     else LINEUP_CONTENT_LASTMOD
                 ),
+                source_date(r.get("date")) or LINEUP_CONTENT_LASTMOD if actual else LINEUP_CONTENT_LASTMOD,
             )
             written += 1
         elif str(rn) in horizon_rounds:
@@ -5327,7 +5562,7 @@ def main() -> None:
         entries.append((slug, race_name, race_date, rn, status))
         if page_lastmod:
             lastmods[f"picks/{slug}/"] = page_lastmod
-        suffix = ", current" if status == "current" else ", early outlook" if status == "future" else ""
+        suffix = ", current" if status == "current" else ", results" if status == "result" else ", early outlook" if status == "future" else ""
         print(f"  [OK] /picks/{slug}/  (round {rn}{suffix})")
 
     # newest race first in the hub
@@ -5341,13 +5576,19 @@ def main() -> None:
     # all sitemap URLs (relative): home + picks + drivers + constructors + guides + tools
     rel_paths = ["", "picks/"] + [f"picks/{e[0]}/" for e in entries]
     now = datetime.now(timezone.utc)
-    feed_entries = [e for e in entries if e[4] in {"current", "future"}]
+    feed_entries = [e for e in entries if e[4] in {"current", "future", "result"}]
     feed_entries.sort(key=lambda e: (e[4] != "current", e[3]))
     feed_items = [
         {
-            "title": f"F1 Fantasy Picks: {short_race(name)} {YEAR}",
+            "title": (
+                f"F1 Fantasy Results: {short_race(name)} {YEAR}"
+                if status == "result" else
+                f"F1 Fantasy Picks: {short_race(name)} {YEAR}"
+            ),
             "url": f"{SITE}/picks/{slug}/",
             "summary": (
+                f"Recorded F1 Fantasy driver and constructor results plus the archived prediction review for {name}."
+                if status == "result" else
                 f"Early horizon F1 Fantasy outlook, transfer-planning notes and projected picks for {name}."
                 if status == "future" else
                 f"Early F1 Fantasy calendar watchlist, circuit traits and strategy notes for {name}."
