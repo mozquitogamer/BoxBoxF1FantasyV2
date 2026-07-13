@@ -42,3 +42,42 @@ def test_forecast_chart_is_fixed_size_and_visually_nonblank(tmp_path):
 
 def test_chart_slug_is_race_specific():
     assert charts.chart_slug("Belgian Grand Prix", 2026) == "belgian-gp-2026-fantasy-forecast.png"
+
+
+def test_midseason_chart_is_fixed_size_and_uses_recorded_history(tmp_path):
+    season = {
+        "season": 2026,
+        "rounds": [{"round": 1, "name": "Test Grand Prix", "has_actual": True}],
+        "driver_prices": {
+            f"D{i}": {"name": f"Driver {i}", "current_price": 10 + i, "price_change": i / 10}
+            for i in range(8)
+        },
+        "constructor_prices": {
+            f"C{i}": {"name": f"Team {i}", "current_price": 12 + i, "price_change": i / 10}
+            for i in range(6)
+        },
+    }
+    history = {
+        "season": 2026,
+        "drivers": {
+            f"D{i}": {"rounds": [{"round": 1, "points": 40 - i * 3}]}
+            for i in range(8)
+        },
+        "constructors": {
+            f"C{i}": {"rounds": [{"round": 1, "points": 70 - i * 5}]}
+            for i in range(6)
+        },
+    }
+    output = tmp_path / "midseason.png"
+
+    charts.build_midseason_report_chart(season, history, output)
+
+    with Image.open(output) as image:
+        assert image.size == (1200, 630)
+        colors = image.convert("RGB").resize((120, 63)).getcolors(maxcolors=120 * 63)
+        assert colors is not None
+        assert len(colors) > 40
+
+
+def test_season_report_slug_is_descriptive():
+    assert charts.season_report_slug(2026) == "f1-fantasy-2026-mid-season-points-value.png"

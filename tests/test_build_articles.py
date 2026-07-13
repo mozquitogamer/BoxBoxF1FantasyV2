@@ -21,7 +21,7 @@ def test_build_preserves_json_only_articles_and_replaces_markdown_slugs(tmp_path
         ],
     }), encoding="utf-8")
     (source_dir / "from-markdown.md").write_text(
-        "---\ntitle: New article\ndate: 2026-07-13\ntags: preview, data\nsources: /data/predictions.json, /methodology/\n"
+        "---\ntitle: New article\nseo_title: Concise search title\ndate: 2026-07-13\ntags: preview, data\nsources: /data/predictions.json, /methodology/\n"
         "image: /images/chart.png\nimage_alt: Accessible chart description\n---\n\n## Fresh\n\n"
         "![Accessible chart description](/images/chart.png)\n\nCurrent copy.",
         encoding="utf-8",
@@ -34,8 +34,21 @@ def test_build_preserves_json_only_articles_and_replaces_markdown_slugs(tmp_path
     built = json.loads(output.read_text(encoding="utf-8"))["articles"]
     assert [article["slug"] for article in built] == ["from-markdown", "json-only"]
     assert built[0]["title"] == "New article"
+    assert built[0]["seo_title"] == "Concise search title"
     assert built[0]["sources"] == ["/data/predictions.json", "/methodology/"]
     assert built[0]["image"] == "/images/chart.png"
     assert built[0]["image_alt"] == "Accessible chart description"
     assert '<img src="/images/chart.png" alt="Accessible chart description" width="1200" height="630"' in built[0]["content_html"]
     assert built[1]["title"] == "Keep me"
+
+
+def test_markdown_inline_preserves_underscores_in_links_code_and_plain_text():
+    html = articles.md_to_html(
+        "Read [driver history](/data/driver_history.json), "
+        "inspect `season_summary.json`, and keep snake_case plain."
+    )
+
+    assert 'href="/data/driver_history.json"' in html
+    assert '<code>season_summary.json</code>' in html
+    assert "snake_case" in html
+    assert "driver</em>history" not in html

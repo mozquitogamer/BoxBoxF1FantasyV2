@@ -970,6 +970,8 @@ No CLI args. Reads the already-exported `web/public/data/*.json` and generates s
 - **Editorial authorship** — every generated Article/TechArticle page shows a BoxBoxF1Fantasy byline linking to `/about/` and, where appropriate, `/methodology/`; structured author URLs use the same About profile. Keep visible and schema authorship aligned when adding editorial templates.
 - **Crawler/agent discovery files** at `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt`, `search-index.json`, `openapi.json`, `.well-known/*`, `humans.txt`, `security.txt`, `site.webmanifest`, and the IndexNow key file.
 
+The sitemap includes Google News metadata only for article URLs published within the last two days. Older articles remain normal sitemap URLs, but their `<news:news>` block is removed automatically on the next generation run.
+
 Targets recurring "[GP] f1 fantasy picks / tips" and evergreen "how to / scoring / optimizer" search traffic without changing the app. Appended **non-fatally** to the `pre_fp_predict`, `post_fp`, `post_quali` and `post_race` phases, so the pages refresh whenever predictions change. Pure stdlib; run standalone any time after an export:
 
 ```bash

@@ -458,3 +458,54 @@ def test_belgian_model_briefing_is_dated_sourced_and_phase_honest():
     assert '"@type": "ImageObject"' in html
     assert 'src="/images/belgian-gp-2026-fantasy-forecast.png"' in html
     assert 'loading="lazy"' in html
+
+
+def test_midseason_report_is_original_dated_sourced_and_shareable():
+    articles_data = json.loads((seo.DATA / "articles.json").read_text(encoding="utf-8"))
+    report = next(
+        article for article in articles_data["articles"]
+        if article["slug"] == "2026-07-13-f1-fantasy-mid-season-report"
+    )
+
+    html = seo.render_article_page(report)
+
+    assert "<title>F1 Fantasy 2026 Mid-Season Report | BoxBoxF1Fantasy</title>" in html
+    assert "F1 Fantasy 2026 Mid-Season Report: Points, Prices &amp; Form" in html
+    assert "After nine completed races" in html
+    assert "Kimi Antonelli" in html
+    assert "Lewis Hamilton" in html
+    assert "Franco Colapinto" in html
+    assert "Racing Bulls" in html
+    assert "backward-looking" in html
+    assert 'property="og:image" content="https://boxboxf1fantasy.com/images/f1-fantasy-2026-mid-season-points-value.png"' in html
+    assert 'src="/images/f1-fantasy-2026-mid-season-points-value.png"' in html
+    assert '"mainEntityOfPage": "https://boxboxf1fantasy.com/articles/2026-07-13-f1-fantasy-mid-season-report/"' in html
+    assert '"isAccessibleForFree": true' in html
+    assert '"wordCount":' in html
+    assert '"https://boxboxf1fantasy.com/stats/"' in html
+    assert '"https://boxboxf1fantasy.com/data/driver_history.json"' in html
+
+
+def test_news_sitemap_metadata_only_includes_articles_from_last_two_days(tmp_path, monkeypatch):
+    articles = [
+        {"slug": "today", "title": "Today's Report", "date": "2026-07-13"},
+        {"slug": "two-days", "title": "Two Day Report", "date": "2026-07-11"},
+        {"slug": "old", "title": "Old Report", "date": "2026-07-10"},
+        {"slug": "future", "title": "Future Report", "date": "2026-07-14"},
+    ]
+    news = seo.news_sitemap_items(articles, seo.date(2026, 7, 13))
+    monkeypatch.setattr(seo, "WEB", tmp_path)
+
+    seo.write_sitemap(
+        ["articles/today/", "articles/two-days/", "articles/old/", "articles/future/"],
+        {},
+        news,
+    )
+    sitemap = (tmp_path / "sitemap.xml").read_text(encoding="utf-8")
+
+    assert set(news) == {"articles/today/", "articles/two-days/"}
+    assert 'xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"' in sitemap
+    assert sitemap.count("<news:news>") == 2
+    assert "<news:title>Today&#x27;s Report</news:title>" in sitemap
+    assert "<news:title>Old Report</news:title>" not in sitemap
+    assert "<news:title>Future Report</news:title>" not in sitemap

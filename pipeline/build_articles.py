@@ -49,25 +49,42 @@ def md_to_html(md: str) -> str:
     in_p = False
 
     def inline(text):
-        # Images (fixed social-card ratio prevents layout shift in article pages)
+        protected = []
+
+        def protect(value: str) -> str:
+            token = f"\x00BB{len(protected)}\x00"
+            protected.append((token, value))
+            return token
+
+        # Protect constructs whose labels/URLs may legitimately contain emphasis characters.
+        text = re.sub(
+            r"`(.+?)`",
+            lambda m: protect(f"<code>{escape(m.group(1))}</code>"),
+            text,
+        )
         text = re.sub(
             r"!\[([^\]]*)\]\(([^)]+)\)",
-            lambda m: (
+            lambda m: protect(
                 f'<img src="{escape(m.group(2), quote=True)}" alt="{escape(m.group(1), quote=True)}" '
                 'width="1200" height="630" loading="lazy" decoding="async">'
             ),
             text,
         )
+        text = re.sub(
+            r"\[([^\]]+)\]\(([^)]+)\)",
+            lambda m: protect(
+                f'<a href="{escape(m.group(2), quote=True)}">{escape(m.group(1))}</a>'
+            ),
+            text,
+        )
         # Bold
         text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
-        text = re.sub(r"__(.+?)__", r"<strong>\1</strong>", text)
+        text = re.sub(r"(?<!\w)__(.+?)__(?!\w)", r"<strong>\1</strong>", text)
         # Italic
         text = re.sub(r"\*(.+?)\*", r"<em>\1</em>", text)
-        text = re.sub(r"_(.+?)_", r"<em>\1</em>", text)
-        # Links
-        text = re.sub(r"(?<!!)\[(.+?)\]\((.+?)\)", r'<a href="\2">\1</a>', text)
-        # Inline code
-        text = re.sub(r"`(.+?)`", r"<code>\1</code>", text)
+        text = re.sub(r"(?<!\w)_(.+?)_(?!\w)", r"<em>\1</em>", text)
+        for token, value in protected:
+            text = text.replace(token, value)
         return text
 
     def close_lists():
@@ -200,6 +217,8 @@ def build():
             "tags": tags,
             "content_html": md_to_html(body.strip()),
         }
+        if meta.get("seo_title", "").strip():
+            article["seo_title"] = meta["seo_title"].strip()
         if sources:
             article["sources"] = sources
         if image:

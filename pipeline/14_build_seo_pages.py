@@ -26,7 +26,7 @@ import json
 import re
 import runpy
 import unicodedata
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from email.utils import format_datetime
 from itertools import combinations
 from pathlib import Path
@@ -2891,6 +2891,7 @@ def render_article_page(article: dict) -> str:
     slug = plain_slug(article.get("slug") or article.get("title") or "article")
     canonical = f"{SITE}/articles/{slug}/"
     article_title = clean_legacy_text(article.get("title", "F1 Fantasy Article"))
+    seo_title = clean_legacy_text(article.get("seo_title", article_title))
     published = clean_legacy_text(article.get("date", ""))
     tags = [clean_legacy_text(t) for t in article.get("tags", []) if t]
     sources = [source for source in article.get("sources", []) if source]
@@ -2898,7 +2899,7 @@ def render_article_page(article: dict) -> str:
     image_alt = clean_legacy_text(article.get("image_alt", article_title))
     absolute_image = f"{SITE}{article_image}" if article_image.startswith("/") else article_image
     desc = _article_meta_description(article) or f"BoxBoxF1Fantasy article: {article_title}."
-    title = f"{article_title} | BoxBoxF1Fantasy"
+    title = f"{seo_title} | BoxBoxF1Fantasy"
     content = clean_legacy_text(article.get("content_html", ""))
     tag_html = " ".join(f'<span class="tag">{esc(t)}</span>' for t in tags)
 
@@ -2908,9 +2909,13 @@ def render_article_page(article: dict) -> str:
         "headline": article_title,
         "datePublished": published,
         "dateModified": clean_legacy_text(article.get("modified", published)),
+        "mainEntityOfPage": canonical,
         "author": editorial_author_ld(),
+        "publisher": publisher_ld(),
+        "isAccessibleForFree": True,
         "about": ["F1 Fantasy", "Fantasy sports strategy", "Formula 1"] + tags[:5],
         "articleSection": tags,
+        "keywords": tags,
         "wordCount": article_word_count,
     }
     if sources:
@@ -3663,15 +3668,54 @@ def write_prediction_schema() -> None:
     )
 
 
-def write_sitemap(rel_paths: list[str], lastmods: dict[str, str]) -> None:
+def news_sitemap_items(articles: list[dict], today: date | None = None) -> dict[str, dict]:
+    """Return Google News metadata only for articles published in the last two days."""
+    today = today or datetime.now(timezone.utc).date()
+    items = {}
+    for article in articles:
+        published_text = source_date(article.get("date"))
+        if not published_text:
+            continue
+        try:
+            published = date.fromisoformat(published_text)
+        except ValueError:
+            continue
+        age_days = (today - published).days
+        if not 0 <= age_days <= 2:
+            continue
+        slug = plain_slug(article.get("slug") or article.get("title") or "article")
+        items[f"articles/{slug}/"] = {
+            "title": clean_legacy_text(article.get("title", "F1 Fantasy article")),
+            "publication_date": published_text,
+        }
+    return items
+
+
+def write_sitemap(
+    rel_paths: list[str],
+    lastmods: dict[str, str],
+    news_items: dict[str, dict] | None = None,
+) -> None:
     """rel_paths: relative URLs like '', 'picks/', 'picks/monaco-gp-2026/', 'guides/'."""
+    news_items = news_items or {}
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
-             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">']
     for p in rel_paths:
         u = f"{SITE}/{p}"
         lastmod = lastmods.get(p)
         modified = f"<lastmod>{lastmod}</lastmod>" if lastmod else ""
-        lines.append(f"  <url><loc>{u}</loc>{modified}</url>")
+        news = news_items.get(p)
+        news_xml = ""
+        if news:
+            news_xml = (
+                "<news:news><news:publication>"
+                "<news:name>BoxBoxF1Fantasy</news:name><news:language>en</news:language>"
+                "</news:publication>"
+                f'<news:publication_date>{esc(news["publication_date"])}</news:publication_date>'
+                f'<news:title>{esc(news["title"])}</news:title>'
+                "</news:news>"
+            )
+        lines.append(f"  <url><loc>{u}</loc>{modified}{news_xml}</url>")
     lines.append("</urlset>\n")
     (WEB / "sitemap.xml").write_text("\n".join(lines), encoding="utf-8")
 
@@ -5875,7 +5919,7 @@ def main() -> None:
         rel_path = item["url"].removeprefix(f"{SITE}/")
         item_lastmod = lastmods.get(rel_path, SEO_CONTENT_LASTMOD)
         item["updated"] = datetime.fromisoformat(item_lastmod).replace(tzinfo=timezone.utc)
-    write_sitemap(rel_paths, lastmods)
+    write_sitemap(rel_paths, lastmods, news_sitemap_items(articles_sorted))
     write_robots()
     write_webmanifest()
     write_trust_files()
