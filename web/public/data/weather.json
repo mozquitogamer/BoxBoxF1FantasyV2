@@ -18,37 +18,37 @@
   "daily": [
     {
       "date": "2026-07-17",
-      "temp_max": 25.2,
-      "temp_min": 17.4,
+      "temp_max": 25.0,
+      "temp_min": 15.7,
       "precip_probability_max": 72,
-      "precip_sum_mm": 0.1,
-      "wind_max_kmh": 14.1,
-      "weather_description": "Light drizzle",
-      "weather_category": "drizzle",
-      "weather_icon": "\ud83c\udf26\ufe0f",
-      "weather_code": 51,
-      "rain_risk": "HIGH"
-    },
-    {
-      "date": "2026-07-18",
-      "temp_max": 22.2,
-      "temp_min": 13.2,
-      "precip_probability_max": 45,
       "precip_sum_mm": 0.0,
-      "wind_max_kmh": 18.1,
+      "wind_max_kmh": 16.1,
       "weather_description": "Overcast",
       "weather_category": "overcast",
       "weather_icon": "\u2601\ufe0f",
       "weather_code": 3,
+      "rain_risk": "HIGH"
+    },
+    {
+      "date": "2026-07-18",
+      "temp_max": 22.0,
+      "temp_min": 13.2,
+      "precip_probability_max": 45,
+      "precip_sum_mm": 0.3,
+      "wind_max_kmh": 20.0,
+      "weather_description": "Light drizzle",
+      "weather_category": "drizzle",
+      "weather_icon": "\ud83c\udf26\ufe0f",
+      "weather_code": 51,
       "rain_risk": "MEDIUM"
     },
     {
       "date": "2026-07-19",
-      "temp_max": 19.9,
-      "temp_min": 12.0,
+      "temp_max": 17.9,
+      "temp_min": 11.8,
       "precip_probability_max": 25,
       "precip_sum_mm": 0.3,
-      "wind_max_kmh": 17.1,
+      "wind_max_kmh": 16.8,
       "weather_description": "Light drizzle",
       "weather_category": "drizzle",
       "weather_icon": "\ud83c\udf26\ufe0f",
@@ -63,51 +63,51 @@
       "date": "2026-07-17",
       "rain_probability": 63,
       "rain_risk": "MEDIUM",
-      "avg_temp": 22.8,
-      "avg_wind": 9.7,
+      "avg_temp": 22.6,
+      "avg_wind": 8.6,
       "total_precip_mm": 0.0,
-      "weather_description": "Overcast",
-      "weather_category": "overcast",
-      "weather_icon": "\u2601\ufe0f",
+      "weather_description": "Partly cloudy",
+      "weather_category": "cloudy",
+      "weather_icon": "\u26c5",
       "hourly": [
         {
           "hour": 10,
-          "temp": 21.3,
-          "humidity": 61,
+          "temp": 22.0,
+          "humidity": 64,
           "precip_prob": 42,
           "precip_mm": 0.0,
-          "windspeed": 8.3,
-          "windgusts": 19.1,
-          "weather_code": 3
+          "windspeed": 8.1,
+          "windgusts": 19.4,
+          "weather_code": 2
         },
         {
           "hour": 11,
-          "temp": 22.5,
-          "humidity": 58,
+          "temp": 21.9,
+          "humidity": 62,
           "precip_prob": 47,
           "precip_mm": 0.0,
-          "windspeed": 9.5,
-          "windgusts": 24.1,
+          "windspeed": 6.9,
+          "windgusts": 23.0,
           "weather_code": 3
         },
         {
           "hour": 12,
-          "temp": 23.3,
-          "humidity": 52,
+          "temp": 23.1,
+          "humidity": 55,
           "precip_prob": 54,
           "precip_mm": 0.0,
-          "windspeed": 10.3,
-          "windgusts": 25.6,
+          "windspeed": 9.3,
+          "windgusts": 23.4,
           "weather_code": 2
         },
         {
           "hour": 13,
-          "temp": 23.9,
-          "humidity": 46,
+          "temp": 23.6,
+          "humidity": 51,
           "precip_prob": 63,
           "precip_mm": 0.0,
-          "windspeed": 10.8,
-          "windgusts": 25.2,
+          "windspeed": 10.0,
+          "windgusts": 22.0,
           "weather_code": 1
         }
       ]
@@ -119,51 +119,51 @@
       "rain_probability": 72,
       "rain_risk": "HIGH",
       "avg_temp": 24.9,
-      "avg_wind": 12.8,
+      "avg_wind": 13.3,
       "total_precip_mm": 0.0,
-      "weather_description": "Clear sky",
-      "weather_category": "clear",
-      "weather_icon": "\u2600\ufe0f",
+      "weather_description": "Overcast",
+      "weather_category": "overcast",
+      "weather_icon": "\u2601\ufe0f",
       "hourly": [
         {
           "hour": 14,
-          "temp": 24.3,
-          "humidity": 41,
+          "temp": 24.7,
+          "humidity": 45,
           "precip_prob": 69,
           "precip_mm": 0.0,
-          "windspeed": 11.4,
-          "windgusts": 25.2,
-          "weather_code": 1
+          "windspeed": 10.8,
+          "windgusts": 21.6,
+          "weather_code": 3
         },
         {
           "hour": 15,
-          "temp": 24.8,
-          "humidity": 38,
+          "temp": 25.0,
+          "humidity": 41,
           "precip_prob": 72,
           "precip_mm": 0.0,
-          "windspeed": 12.3,
-          "windgusts": 26.6,
-          "weather_code": 0
+          "windspeed": 12.7,
+          "windgusts": 23.0,
+          "weather_code": 3
         },
         {
           "hour": 16,
-          "temp": 25.2,
-          "humidity": 36,
+          "temp": 25.0,
+          "humidity": 38,
           "precip_prob": 72,
           "precip_mm": 0.0,
-          "windspeed": 13.4,
-          "windgusts": 28.4,
-          "weather_code": 0
+          "windspeed": 14.3,
+          "windgusts": 25.6,
+          "weather_code": 3
         },
         {
           "hour": 17,
-          "temp": 25.1,
-          "humidity": 36,
+          "temp": 24.7,
+          "humidity": 37,
           "precip_prob": 71,
           "precip_mm": 0.0,
-          "windspeed": 14.1,
-          "windgusts": 29.2,
-          "weather_code": 0
+          "windspeed": 15.4,
+          "windgusts": 26.6,
+          "weather_code": 3
         }
       ]
     },
@@ -173,52 +173,52 @@
       "date": "2026-07-18",
       "rain_probability": 45,
       "rain_risk": "MEDIUM",
-      "avg_temp": 17.8,
-      "avg_wind": 15.0,
-      "total_precip_mm": 0.0,
-      "weather_description": "Overcast",
-      "weather_category": "overcast",
-      "weather_icon": "\u2601\ufe0f",
+      "avg_temp": 17.3,
+      "avg_wind": 16.4,
+      "total_precip_mm": 0.2,
+      "weather_description": "Light drizzle",
+      "weather_category": "drizzle",
+      "weather_icon": "\ud83c\udf26\ufe0f",
       "hourly": [
         {
           "hour": 10,
-          "temp": 16.1,
-          "humidity": 69,
+          "temp": 15.3,
+          "humidity": 74,
           "precip_prob": 35,
-          "precip_mm": 0.0,
-          "windspeed": 14.3,
-          "windgusts": 33.1,
-          "weather_code": 3
+          "precip_mm": 0.1,
+          "windspeed": 16.8,
+          "windgusts": 34.2,
+          "weather_code": 51
         },
         {
           "hour": 11,
-          "temp": 17.2,
-          "humidity": 63,
+          "temp": 16.4,
+          "humidity": 67,
           "precip_prob": 41,
-          "precip_mm": 0.0,
-          "windspeed": 14.8,
-          "windgusts": 35.6,
-          "weather_code": 3
+          "precip_mm": 0.1,
+          "windspeed": 16.6,
+          "windgusts": 37.1,
+          "weather_code": 51
         },
         {
           "hour": 12,
-          "temp": 18.3,
-          "humidity": 58,
+          "temp": 17.9,
+          "humidity": 60,
           "precip_prob": 44,
           "precip_mm": 0.0,
-          "windspeed": 15.3,
-          "windgusts": 37.8,
-          "weather_code": 2
+          "windspeed": 16.2,
+          "windgusts": 41.4,
+          "weather_code": 3
         },
         {
           "hour": 13,
-          "temp": 19.4,
-          "humidity": 54,
+          "temp": 19.6,
+          "humidity": 52,
           "precip_prob": 45,
           "precip_mm": 0.0,
-          "windspeed": 15.7,
-          "windgusts": 40.0,
-          "weather_code": 1
+          "windspeed": 16.1,
+          "windgusts": 46.4,
+          "weather_code": 2
         }
       ]
     },
@@ -228,8 +228,8 @@
       "date": "2026-07-18",
       "rain_probability": 45,
       "rain_risk": "MEDIUM",
-      "avg_temp": 21.3,
-      "avg_wind": 16.5,
+      "avg_temp": 21.6,
+      "avg_wind": 17.9,
       "total_precip_mm": 0.0,
       "weather_description": "Clear sky",
       "weather_category": "clear",
@@ -237,42 +237,42 @@
       "hourly": [
         {
           "hour": 14,
-          "temp": 20.3,
-          "humidity": 51,
+          "temp": 20.9,
+          "humidity": 47,
           "precip_prob": 45,
           "precip_mm": 0.0,
-          "windspeed": 16.0,
-          "windgusts": 41.0,
-          "weather_code": 0
+          "windspeed": 16.2,
+          "windgusts": 50.4,
+          "weather_code": 1
         },
         {
           "hour": 15,
-          "temp": 21.1,
-          "humidity": 48,
+          "temp": 21.6,
+          "humidity": 45,
           "precip_prob": 44,
           "precip_mm": 0.0,
-          "windspeed": 16.4,
-          "windgusts": 40.7,
-          "weather_code": 0
+          "windspeed": 17.2,
+          "windgusts": 51.8,
+          "weather_code": 1
         },
         {
           "hour": 16,
-          "temp": 21.7,
-          "humidity": 46,
+          "temp": 22.0,
+          "humidity": 44,
           "precip_prob": 42,
           "precip_mm": 0.0,
-          "windspeed": 16.6,
-          "windgusts": 40.3,
+          "windspeed": 18.7,
+          "windgusts": 52.2,
           "weather_code": 0
         },
         {
           "hour": 17,
-          "temp": 22.1,
+          "temp": 21.9,
           "humidity": 45,
           "precip_prob": 39,
           "precip_mm": 0.0,
-          "windspeed": 17.0,
-          "windgusts": 39.6,
+          "windspeed": 19.7,
+          "windgusts": 51.5,
           "weather_code": 0
         }
       ]
@@ -283,8 +283,8 @@
       "date": "2026-07-19",
       "rain_probability": 24,
       "rain_risk": "LOW",
-      "avg_temp": 19.4,
-      "avg_wind": 16.8,
+      "avg_temp": 17.2,
+      "avg_wind": 15.6,
       "total_precip_mm": 0.0,
       "weather_description": "Overcast",
       "weather_category": "overcast",
@@ -292,48 +292,48 @@
       "hourly": [
         {
           "hour": 13,
-          "temp": 18.5,
-          "humidity": 45,
+          "temp": 16.6,
+          "humidity": 55,
           "precip_prob": 23,
           "precip_mm": 0.0,
-          "windspeed": 17.1,
+          "windspeed": 16.0,
           "windgusts": 33.1,
           "weather_code": 3
         },
         {
           "hour": 14,
-          "temp": 19.3,
-          "humidity": 41,
+          "temp": 17.0,
+          "humidity": 53,
           "precip_prob": 24,
           "precip_mm": 0.0,
-          "windspeed": 16.9,
+          "windspeed": 15.5,
           "windgusts": 34.2,
           "weather_code": 3
         },
         {
           "hour": 15,
-          "temp": 19.7,
-          "humidity": 39,
+          "temp": 17.4,
+          "humidity": 52,
           "precip_prob": 24,
           "precip_mm": 0.0,
-          "windspeed": 16.8,
+          "windspeed": 15.4,
           "windgusts": 34.9,
-          "weather_code": 3
+          "weather_code": 2
         },
         {
           "hour": 16,
-          "temp": 19.9,
-          "humidity": 39,
+          "temp": 17.7,
+          "humidity": 52,
           "precip_prob": 22,
           "precip_mm": 0.0,
-          "windspeed": 16.4,
+          "windspeed": 15.4,
           "windgusts": 35.3,
-          "weather_code": 2
+          "weather_code": 1
         }
       ]
     }
   ],
-  "last_updated": "2026-07-13T19:13:03Z",
-  "next_update": "2026-07-14T01:13:03Z",
+  "last_updated": "2026-07-14T01:41:30Z",
+  "next_update": "2026-07-14T07:41:30Z",
   "data_source": "Open-Meteo (open-meteo.com)"
 }
