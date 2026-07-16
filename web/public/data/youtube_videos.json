@@ -1,7 +1,14 @@
 {
-  "updated": "2026-07-15T11:51:20Z",
+  "updated": "2026-07-16T11:54:54Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "i8sMEiFZJog",
+      "title": "Drivers to TRANSFER in and out + Why! - Belgian GP - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-07-15",
+      "thumbnail": "https://i.ytimg.com/vi/i8sMEiFZJog/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=i8sMEiFZJog"
+    },
     {
       "id": "d0RuH8RFpk0",
       "title": "The Best F1 Fantasy Team for the Belgian Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
@@ -22,13 +29,6 @@
       "published": "2026-07-03",
       "thumbnail": "https://i.ytimg.com/vi/9WM_WJsmtog/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=9WM_WJsmtog"
-    },
-    {
-      "id": "0IBbi-pmmZY",
-      "title": "The Best F1 Fantasy Team for the British Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
-      "published": "2026-06-30",
-      "thumbnail": "https://i.ytimg.com/vi/0IBbi-pmmZY/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=0IBbi-pmmZY"
     }
   ]
 }
