@@ -24,6 +24,7 @@ Output:
 """
 
 import argparse
+import importlib
 import json
 import sys
 from pathlib import Path
@@ -51,6 +52,7 @@ from config.settings import (
 from pipeline.feature_engineering import engineer_features
 from config.track_classifications import (
     get_circuit_id_from_race_name,
+    get_track_features,
     grid_anchor_weight,
     fp_quali_blend_weight,
 )
@@ -299,6 +301,26 @@ def load_driver_id_maps() -> tuple[dict, dict]:
 
 # -- Build live priors ---------------------------------------------------------
 
+LIVE_PRIOR_IMPUTE_COLS = [
+    "driver_quali_last", "driver_roll_quali_3", "driver_roll_quali_5",
+    "driver_season_avg_quali", "driver_season_med_quali",
+    "constructor_quali_last", "constructor_roll_quali_3", "constructor_roll_quali_5",
+    "constructor_season_avg_quali", "field_season_avg_quali",
+    "driver_vs_field_season", "constructor_vs_field_season",
+    "team_delta_last", "team_delta_roll_3", "team_delta_roll_5",
+    "driver_circuit_exp", "driver_circuit_roll_3", "constructor_circuit_exp",
+    "position_delta_prev", "recent_wins", "recent_podiums", "recent_points_rate",
+    "recent_form_weighted", "form_trend", "team_recent_form",
+    "roll_points_3", "roll_points_5", "roll_finishpos_3", "roll_finishpos_5",
+    "roll_quali_3", "roll_quali_5", "roll_dnf_rate_5",
+    "roll_mech_dnf_rate_5_driver", "roll_mech_dnf_rate_5_constructor",
+    "roll_collision_dnf_rate_5_driver", "roll_drivererror_dnf_rate_5_driver",
+    "sim_weighted_points_3", "sim_weighted_points_5",
+    "sim_weighted_finishpos_3", "sim_weighted_finishpos_5",
+    "sim_weighted_quali_3", "sim_weighted_quali_5",
+]
+
+
 def build_live_priors(
     round_num: int,
     year: int,
@@ -321,9 +343,10 @@ def build_live_priors(
     all_rows = pd.read_parquet(model_rows_path)
     print(f"  Loaded {len(all_rows):,} historical model rows")
 
-    # Filter to completed rounds only (exclude current round if present)
+    # Only rows strictly before the target may feed a live prediction.
     completed = all_rows[
-        ~((all_rows["season"] == year) & (all_rows["round"] == round_num))
+        (all_rows["season"] < year)
+        | ((all_rows["season"] == year) & (all_rows["round"] < round_num))
     ].copy()
 
     # Get current round rows if they exist in the data (e.g., already normalized)
@@ -334,34 +357,83 @@ def build_live_priors(
     if not current_round.empty:
         # Rows exist — use them (features already computed by 03b)
         print(f"  Found {len(current_round)} pre-computed rows for round {round_num}")
-        return current_round
+        return current_round.copy()
 
-    # If no rows exist for this round, we need the last known priors per driver.
-    # Take the most recent row per driver as their "prior state".
-    print(f"  No pre-computed rows for {year} R{round_num} — using latest priors per driver")
+    # A stored row's rolling features are shifted and therefore describe the
+    # state before that stored race. Append a real target stub so R12 features,
+    # for example, include the completed R11 result without leaking R12.
+    print(f"  No pre-computed rows for {year} R{round_num} — building live stub rows")
 
-    # Get the most recent row for each active driver
-    completed_sorted = completed.sort_values(["season", "round"])
-    latest_per_driver = completed_sorted.groupby("driver_id").last().reset_index()
-
-    # Filter to current season drivers only
     with open(SEED_DIR / "drivers.json") as f:
         current_drivers = json.load(f)["drivers"]
     abbrev_to_jolpica, _ = load_driver_id_maps()
-    current_jolpica_ids = {
-        abbrev_to_jolpica.get(d["driver_id"], d["driver_id"])
-        for d in current_drivers
-    }
-    latest_per_driver = latest_per_driver[
-        latest_per_driver["driver_id"].isin(current_jolpica_ids)
-    ].copy()
+    target_circuit = _resolve_circuit(round_num, year)
 
-    # These rows carry the rolling features from the driver's last race
-    # which is exactly what we want as priors
-    latest_per_driver["season"] = year
-    latest_per_driver["round"] = round_num
+    stubs: list[dict] = []
+    for driver in current_drivers:
+        driver_id = abbrev_to_jolpica.get(driver["driver_id"], driver["driver_id"])
+        stub = {col: np.nan for col in completed.columns}
+        stub.update({
+            "season": year,
+            "round": round_num,
+            "driver_id": driver_id,
+            "constructor_id": driver["constructor_id"],
+            "circuit_id": target_circuit,
+            "points": 0.0,
+            "quali_position": np.nan,
+            "finish_position": np.nan,
+            "grid": np.nan,
+            "sprint_grid": np.nan,
+            "is_dnf": 0,
+            "is_dns": 0,
+            "is_dsq": 0,
+            "is_classified": 0,
+            "dnf_mechanical": 0,
+            "dnf_collision": 0,
+            "dnf_driver_error": 0,
+        })
+        stubs.append(stub)
 
-    return latest_per_driver
+    work = pd.concat([completed, pd.DataFrame(stubs)], ignore_index=True)
+    work = work.sort_values(["driver_id", "season", "round"]).reset_index(drop=True)
+
+    # Reuse the exact training feature functions. importlib is needed because
+    # the pipeline intentionally retains its numbered 03b filename.
+    feature_builder = importlib.import_module("pipeline.03b_build_jolpica_features")
+    work = feature_builder.compute_rolling_features(work)
+    work = feature_builder.add_rolling_rates(
+        work, "driver_id", "dnf_mechanical", 5, "roll_mech_dnf_rate_5_driver"
+    )
+    work = feature_builder.add_rolling_rates(
+        work, "constructor_id", "dnf_mechanical", 5, "roll_mech_dnf_rate_5_constructor"
+    )
+    work = feature_builder.add_rolling_rates(
+        work, "driver_id", "dnf_collision", 5, "roll_collision_dnf_rate_5_driver"
+    )
+    work = feature_builder.add_rolling_rates(
+        work, "driver_id", "dnf_driver_error", 5, "roll_drivererror_dnf_rate_5_driver"
+    )
+    work = feature_builder.compute_similarity_weighted_rolling(work, window=5)
+    work = feature_builder.add_quali_priors(work)
+    work = feature_builder.add_race_model_features(work)
+
+    live = work[(work["season"] == year) & (work["round"] == round_num)].copy()
+
+    # Stamp the upcoming circuit's real 9D vector. The old copied-row fallback
+    # also carried the previous circuit's characteristics into the new weekend.
+    for feature, value in get_track_features(target_circuit).items():
+        live[feature] = value
+    live = feature_builder.add_team_driver_ratings(live)
+    live = feature_builder.add_interaction_features(live)
+
+    # Match 03b's training-time imputation for sparse/new-driver priors.
+    for col in LIVE_PRIOR_IMPUTE_COLS:
+        if col in live.columns:
+            median = work[col].median()
+            live[col] = live[col].fillna(median if pd.notna(median) else 0.0)
+
+    print(f"  Built leak-free live priors through the end of round {round_num - 1}")
+    return live.sort_values("driver_id").reset_index(drop=True)
 
 
 # -- Confidence scoring --------------------------------------------------------
@@ -783,6 +855,14 @@ def run_predictions(
     print(f"\n[Step 1] Building Jolpica priors...")
     priors_df = build_live_priors(round_num, year)
     print(f"  Prior rows: {len(priors_df)} drivers")
+
+    # sprint_grid is a same-weekend signal and must never carry forward from a
+    # driver's most recent sprint race into a normal weekend.
+    if not is_sprint and "sprint_grid" in priors_df.columns:
+        stale_sprint_grids = int(priors_df["sprint_grid"].notna().sum())
+        priors_df["sprint_grid"] = np.nan
+        if stale_sprint_grids:
+            print(f"  Cleared {stale_sprint_grids} stale sprint-grid values (non-sprint round)")
 
     # ---- Step 1b: Recompute track-similarity AND circuit-specific features ----
     target_circuit = _resolve_circuit(round_num, year)

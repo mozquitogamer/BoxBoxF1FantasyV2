@@ -306,6 +306,54 @@ DRIVER_QUALIFYING_SPECIALIST = {
     'ollie_bearman': 7,
 }
 
+# The feature pipeline uses Jolpica/Ergast IDs (for example ``russell`` and
+# ``hamilton``), while the hand-maintained tables above use readable full-name
+# keys (``george_russell`` and ``lewis_hamilton``). Verstappen was a dangerous
+# accidental exception because his Jolpica ID is already ``max_verstappen``:
+# he received his elite ratings while most of the field silently fell back to
+# the default value of 6.
+#
+# Keep the readable table keys, but normalize every API ID at the lookup
+# boundary. Callers that already pass a full-name key continue to work.
+DRIVER_RATING_ID_ALIASES = {
+    # 2026 grid
+    'russell': 'george_russell',
+    'norris': 'lando_norris',
+    'piastri': 'oscar_piastri',
+    'antonelli': 'kimi_antonelli',
+    'leclerc': 'charles_leclerc',
+    'hamilton': 'lewis_hamilton',
+    'hadjar': 'isack_hadjar',
+    'gasly': 'pierre_gasly',
+    'sainz': 'carlos_sainz',
+    'albon': 'alexander_albon',
+    'alonso': 'fernando_alonso',
+    'bearman': 'oliver_bearman',
+    'ocon': 'esteban_ocon',
+    'colapinto': 'franco_colapinto',
+    'lawson': 'liam_lawson',
+    'stroll': 'lance_stroll',
+    'bortoleto': 'gabriel_bortoleto',
+    'perez': 'sergio_perez',
+    'hulkenberg': 'nico_hulkenberg',
+    'bottas': 'valtteri_bottas',
+    # Legacy Jolpica IDs used by the 2020-2025 training rows
+    'ricciardo': 'daniel_ricciardo',
+    'tsunoda': 'yuki_tsunoda',
+    'magnussen': 'kevin_magnussen',
+    'zhou': 'zhou_guanyu',
+    'latifi': 'nicholas_latifi',
+    'mazepin': 'nikita_mazepin',
+    'sargeant': 'logan_sargeant',
+    'doohan': 'jack_doohan',
+}
+
+
+def canonical_driver_rating_id(driver_id):
+    """Return the full-name key used by the manual driver-rating tables."""
+    key = str(driver_id).strip().lower()
+    return DRIVER_RATING_ID_ALIASES.get(key, key)
+
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
@@ -324,11 +372,11 @@ def get_team_adaptability(constructor_id):
 
 def get_driver_tire_mgmt(driver_id):
     """Get driver tire management skill"""
-    return DRIVER_TIRE_MANAGEMENT.get(driver_id, 6)  # Default average
+    return DRIVER_TIRE_MANAGEMENT.get(canonical_driver_rating_id(driver_id), 6)  # Default average
 
 def get_driver_wet_skill(driver_id):
     """Get driver wet weather skill"""
-    return DRIVER_WET_WEATHER_SKILL.get(driver_id, 6)
+    return DRIVER_WET_WEATHER_SKILL.get(canonical_driver_rating_id(driver_id), 6)
 
 def get_constructor_cold_skill(constructor_id):
     """Get constructor cold-weather rating (1-10, 5=neutral). Default 5."""
@@ -336,8 +384,8 @@ def get_constructor_cold_skill(constructor_id):
 
 def get_driver_overtaking(driver_id):
     """Get driver overtaking ability"""
-    return DRIVER_OVERTAKING_SKILL.get(driver_id, 6)
+    return DRIVER_OVERTAKING_SKILL.get(canonical_driver_rating_id(driver_id), 6)
 
 def get_driver_quali_skill(driver_id):
     """Get driver qualifying specialist rating"""
-    return DRIVER_QUALIFYING_SPECIALIST.get(driver_id, 6)
+    return DRIVER_QUALIFYING_SPECIALIST.get(canonical_driver_rating_id(driver_id), 6)

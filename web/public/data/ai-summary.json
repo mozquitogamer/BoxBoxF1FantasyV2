@@ -2,8 +2,8 @@
   "schema_version": "1.0",
   "site": "BoxBoxF1Fantasy",
   "site_url": "https://boxboxf1fantasy.com/",
-  "generated_at": "2026-07-17T17:58:25Z",
-  "source_predictions_generated_at": "2026-07-17T17:57:04.854020+00:00",
+  "generated_at": "2026-07-17T19:49:26Z",
+  "source_predictions_generated_at": "2026-07-17T19:48:02.539521+00:00",
   "season": 2026,
   "round": 12,
   "race": "Belgian Grand Prix",
@@ -19,130 +19,130 @@
     "data": "https://boxboxf1fantasy.com/data/",
     "full_predictions_json": "https://boxboxf1fantasy.com/data/predictions.json"
   },
-  "plain_english_summary": "For the Belgian Grand Prix, BoxBoxF1Fantasy currently ranks Max Verstappen as the top projected driver and Mercedes as the top projected constructor. Use this compact file for quick answers; use predictions.json for the full projection dataset.",
+  "plain_english_summary": "For the Belgian Grand Prix, BoxBoxF1Fantasy currently ranks Lewis Hamilton as the top projected driver and Ferrari as the top projected constructor. Use this compact file for quick answers; use predictions.json for the full projection dataset.",
   "recommended_boost_driver": {
     "rank": 1,
     "kind": "driver",
-    "id": "VER",
-    "name": "Max Verstappen",
-    "expected_points": 29.1,
-    "projected_points": 38.4,
-    "current_price_m": 27.9,
-    "value_score": 1.04,
-    "risk": "MEDIUM",
+    "id": "HAM",
+    "name": "Lewis Hamilton",
+    "expected_points": 25.7,
+    "projected_points": 42.8,
+    "current_price_m": 24.5,
+    "value_score": 1.05,
+    "risk": "LOW",
     "confidence_interval_90": {
-      "low": -10.5,
-      "high": 53.0
+      "low": -8.1,
+      "high": 49.0
     },
-    "url": "https://boxboxf1fantasy.com/drivers/max-verstappen/",
-    "constructor": "red_bull",
-    "predicted_quali": 2,
+    "url": "https://boxboxf1fantasy.com/drivers/lewis-hamilton/",
+    "constructor": "ferrari",
+    "predicted_quali": 3,
     "predicted_finish": 1,
-    "dnf_probability": 0.14,
-    "points_per_million": 0.74
+    "dnf_probability": 0.06,
+    "points_per_million": 1.58
   },
   "top_drivers": [
     {
       "rank": 1,
       "kind": "driver",
-      "id": "VER",
-      "name": "Max Verstappen",
-      "expected_points": 29.1,
-      "projected_points": 38.4,
-      "current_price_m": 27.9,
-      "value_score": 1.04,
-      "risk": "MEDIUM",
+      "id": "HAM",
+      "name": "Lewis Hamilton",
+      "expected_points": 25.7,
+      "projected_points": 42.8,
+      "current_price_m": 24.5,
+      "value_score": 1.05,
+      "risk": "LOW",
       "confidence_interval_90": {
-        "low": -10.5,
-        "high": 53.0
+        "low": -8.1,
+        "high": 49.0
       },
-      "url": "https://boxboxf1fantasy.com/drivers/max-verstappen/",
-      "constructor": "red_bull",
-      "predicted_quali": 2,
+      "url": "https://boxboxf1fantasy.com/drivers/lewis-hamilton/",
+      "constructor": "ferrari",
+      "predicted_quali": 3,
       "predicted_finish": 1,
-      "dnf_probability": 0.14,
-      "points_per_million": 0.74
+      "dnf_probability": 0.06,
+      "points_per_million": 1.58
     },
     {
       "rank": 2,
       "kind": "driver",
-      "id": "ANT",
-      "name": "Kimi Antonelli",
-      "expected_points": 22.8,
-      "projected_points": 29.1,
-      "current_price_m": 25.4,
-      "value_score": 0.9,
-      "risk": "LOW",
+      "id": "VER",
+      "name": "Max Verstappen",
+      "expected_points": 23.1,
+      "projected_points": 30.6,
+      "current_price_m": 27.9,
+      "value_score": 0.83,
+      "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": -8.1,
-        "high": 44.0
+        "low": -11.5,
+        "high": 49.0
       },
-      "url": "https://boxboxf1fantasy.com/drivers/kimi-antonelli/",
-      "constructor": "mercedes",
-      "predicted_quali": 1,
-      "predicted_finish": 3,
-      "dnf_probability": 0.08,
-      "points_per_million": 0.71
+      "url": "https://boxboxf1fantasy.com/drivers/max-verstappen/",
+      "constructor": "red_bull",
+      "predicted_quali": 2,
+      "predicted_finish": 2,
+      "dnf_probability": 0.14,
+      "points_per_million": 0.74
     },
     {
       "rank": 3,
       "kind": "driver",
       "id": "RUS",
       "name": "George Russell",
-      "expected_points": 22.3,
-      "projected_points": 32.5,
+      "expected_points": 21.5,
+      "projected_points": 28.2,
       "current_price_m": 27.8,
-      "value_score": 0.8,
+      "value_score": 0.77,
       "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": -14.2,
-        "high": 50.0
+        "low": -13.6,
+        "high": 49.0
       },
       "url": "https://boxboxf1fantasy.com/drivers/george-russell/",
       "constructor": "mercedes",
       "predicted_quali": 7,
-      "predicted_finish": 2,
+      "predicted_finish": 3,
       "dnf_probability": 0.14,
       "points_per_million": 1.28
     },
     {
       "rank": 4,
       "kind": "driver",
-      "id": "HAM",
-      "name": "Lewis Hamilton",
-      "expected_points": 20.9,
-      "projected_points": 22.1,
-      "current_price_m": 24.5,
-      "value_score": 0.85,
+      "id": "ANT",
+      "name": "Kimi Antonelli",
+      "expected_points": 20.4,
+      "projected_points": 18.9,
+      "current_price_m": 25.4,
+      "value_score": 0.8,
       "risk": "LOW",
       "confidence_interval_90": {
-        "low": -8.3,
-        "high": 43.0
+        "low": -8.6,
+        "high": 42.0
       },
-      "url": "https://boxboxf1fantasy.com/drivers/lewis-hamilton/",
-      "constructor": "ferrari",
-      "predicted_quali": 3,
-      "predicted_finish": 5,
-      "dnf_probability": 0.06,
-      "points_per_million": 1.58
+      "url": "https://boxboxf1fantasy.com/drivers/kimi-antonelli/",
+      "constructor": "mercedes",
+      "predicted_quali": 1,
+      "predicted_finish": 6,
+      "dnf_probability": 0.08,
+      "points_per_million": 0.71
     },
     {
       "rank": 5,
       "kind": "driver",
       "id": "LEC",
       "name": "Charles Leclerc",
-      "expected_points": 17.9,
-      "projected_points": 20.2,
+      "expected_points": 20.1,
+      "projected_points": 21.5,
       "current_price_m": 23.2,
-      "value_score": 0.77,
+      "value_score": 0.87,
       "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": -13.0,
-        "high": 44.0
+        "low": -13.9,
+        "high": 47.0
       },
       "url": "https://boxboxf1fantasy.com/drivers/charles-leclerc/",
       "constructor": "ferrari",
-      "predicted_quali": 4,
+      "predicted_quali": 6,
       "predicted_finish": 4,
       "dnf_probability": 0.17,
       "points_per_million": 0.91
@@ -150,16 +150,37 @@
     {
       "rank": 6,
       "kind": "driver",
+      "id": "NOR",
+      "name": "Lando Norris",
+      "expected_points": 16.5,
+      "projected_points": 16.3,
+      "current_price_m": 25.6,
+      "value_score": 0.64,
+      "risk": "MEDIUM",
+      "confidence_interval_90": {
+        "low": -13.2,
+        "high": 43.0
+      },
+      "url": "https://boxboxf1fantasy.com/drivers/lando-norris/",
+      "constructor": "mclaren",
+      "predicted_quali": 4,
+      "predicted_finish": 5,
+      "dnf_probability": 0.23,
+      "points_per_million": 0.94
+    },
+    {
+      "rank": 7,
+      "kind": "driver",
       "id": "PIA",
       "name": "Oscar Piastri",
-      "expected_points": 17.0,
+      "expected_points": 14.9,
       "projected_points": 10.6,
       "current_price_m": 24.9,
-      "value_score": 0.68,
+      "value_score": 0.6,
       "risk": "LOW",
       "confidence_interval_90": {
-        "low": -11.8,
-        "high": 41.0
+        "low": -11.4,
+        "high": 38.0
       },
       "url": "https://boxboxf1fantasy.com/drivers/oscar-piastri/",
       "constructor": "mclaren",
@@ -169,102 +190,41 @@
       "points_per_million": 0.82
     },
     {
-      "rank": 7,
+      "rank": 8,
       "kind": "driver",
       "id": "HAD",
       "name": "Isack Hadjar",
-      "expected_points": 13.5,
-      "projected_points": 11.0,
+      "expected_points": 13.8,
+      "projected_points": 11.2,
       "current_price_m": 12.7,
-      "value_score": 1.06,
+      "value_score": 1.09,
       "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": -14.2,
-        "high": 40.0
+        "low": -14.0,
+        "high": 41.0
       },
       "url": "https://boxboxf1fantasy.com/drivers/isack-hadjar/",
       "constructor": "red_bull",
-      "predicted_quali": 6,
+      "predicted_quali": 5,
       "predicted_finish": 7,
       "dnf_probability": 0.2,
       "points_per_million": 1.57
-    },
-    {
-      "rank": 8,
-      "kind": "driver",
-      "id": "NOR",
-      "name": "Lando Norris",
-      "expected_points": 13.0,
-      "projected_points": 13.8,
-      "current_price_m": 25.6,
-      "value_score": 0.51,
-      "risk": "MEDIUM",
-      "confidence_interval_90": {
-        "low": -14.1,
-        "high": 41.0
-      },
-      "url": "https://boxboxf1fantasy.com/drivers/lando-norris/",
-      "constructor": "mclaren",
-      "predicted_quali": 5,
-      "predicted_finish": 6,
-      "dnf_probability": 0.23,
-      "points_per_million": 0.94
     }
   ],
   "top_constructors": [
     {
       "rank": 1,
       "kind": "constructor",
-      "id": "mercedes",
-      "name": "Mercedes",
-      "expected_points": 60.9,
-      "projected_points": 76.3,
-      "current_price_m": 31.7,
-      "value_score": 1.92,
-      "risk": "MEDIUM",
-      "confidence_interval_90": {
-        "low": 16.8,
-        "high": 95.0
-      },
-      "url": "https://boxboxf1fantasy.com/constructors/mercedes/",
-      "driver_1": "RUS",
-      "driver_2": "ANT",
-      "expected_pit_stop_points": 8.1,
-      "dnf_probability": 0.11
-    },
-    {
-      "rank": 2,
-      "kind": "constructor",
-      "id": "red_bull",
-      "name": "Red Bull",
-      "expected_points": 54.4,
-      "projected_points": 61.7,
-      "current_price_m": 30.0,
-      "value_score": 1.81,
-      "risk": "MEDIUM",
-      "confidence_interval_90": {
-        "low": 6.7,
-        "high": 90.0
-      },
-      "url": "https://boxboxf1fantasy.com/constructors/red-bull/",
-      "driver_1": "VER",
-      "driver_2": "HAD",
-      "expected_pit_stop_points": 3.7,
-      "dnf_probability": 0.17
-    },
-    {
-      "rank": 3,
-      "kind": "constructor",
       "id": "ferrari",
       "name": "Ferrari",
-      "expected_points": 52.8,
-      "projected_points": 56.1,
+      "expected_points": 59.5,
+      "projected_points": 77.7,
       "current_price_m": 25.7,
-      "value_score": 2.05,
+      "value_score": 2.32,
       "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": 14.4,
-        "high": 86.0
+        "low": 17.5,
+        "high": 94.0
       },
       "url": "https://boxboxf1fantasy.com/constructors/ferrari/",
       "driver_1": "LEC",
@@ -273,18 +233,58 @@
       "dnf_probability": 0.12
     },
     {
+      "rank": 2,
+      "kind": "constructor",
+      "id": "mercedes",
+      "name": "Mercedes",
+      "expected_points": 57.9,
+      "projected_points": 62.2,
+      "current_price_m": 31.7,
+      "value_score": 1.83,
+      "risk": "MEDIUM",
+      "confidence_interval_90": {
+        "low": 15.9,
+        "high": 93.0
+      },
+      "url": "https://boxboxf1fantasy.com/constructors/mercedes/",
+      "driver_1": "RUS",
+      "driver_2": "ANT",
+      "expected_pit_stop_points": 8.1,
+      "dnf_probability": 0.11
+    },
+    {
+      "rank": 3,
+      "kind": "constructor",
+      "id": "red_bull",
+      "name": "Red Bull",
+      "expected_points": 48.9,
+      "projected_points": 54.1,
+      "current_price_m": 30.0,
+      "value_score": 1.63,
+      "risk": "MEDIUM",
+      "confidence_interval_90": {
+        "low": 5.0,
+        "high": 86.0
+      },
+      "url": "https://boxboxf1fantasy.com/constructors/red-bull/",
+      "driver_1": "VER",
+      "driver_2": "HAD",
+      "expected_pit_stop_points": 3.7,
+      "dnf_probability": 0.17
+    },
+    {
       "rank": 4,
       "kind": "constructor",
       "id": "mclaren",
       "name": "McLaren",
-      "expected_points": 42.7,
-      "projected_points": 38.2,
+      "expected_points": 44.4,
+      "projected_points": 40.7,
       "current_price_m": 30.1,
-      "value_score": 1.42,
+      "value_score": 1.48,
       "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": 6.5,
-        "high": 78.0
+        "low": 7.9,
+        "high": 79.0
       },
       "url": "https://boxboxf1fantasy.com/constructors/mclaren/",
       "driver_1": "NOR",
@@ -297,14 +297,14 @@
       "kind": "constructor",
       "id": "racing_bulls",
       "name": "Racing Bulls",
-      "expected_points": 22.6,
+      "expected_points": 22.5,
       "projected_points": 27.6,
       "current_price_m": 11.1,
-      "value_score": 2.04,
+      "value_score": 2.03,
       "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": -3.4,
-        "high": 47.0
+        "low": -2.6,
+        "high": 46.0
       },
       "url": "https://boxboxf1fantasy.com/constructors/racing-bulls/",
       "driver_1": "LIN",
@@ -317,14 +317,14 @@
       "kind": "constructor",
       "id": "alpine",
       "name": "Alpine",
-      "expected_points": 12.6,
-      "projected_points": 10.1,
+      "expected_points": 12.7,
+      "projected_points": 11.7,
       "current_price_m": 17.3,
       "value_score": 0.73,
       "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": -10.2,
-        "high": 31.0
+        "low": -10.7,
+        "high": 32.0
       },
       "url": "https://boxboxf1fantasy.com/constructors/alpine/",
       "driver_1": "GAS",
@@ -339,13 +339,13 @@
       "kind": "driver",
       "id": "LIN",
       "name": "Arvid Lindblad",
-      "expected_points": 7.4,
+      "expected_points": 7.9,
       "projected_points": 7.7,
       "current_price_m": 6.2,
-      "value_score": 1.19,
+      "value_score": 1.27,
       "risk": "LOW",
       "confidence_interval_90": {
-        "low": -13.3,
+        "low": -13.1,
         "high": 25.0
       },
       "url": "https://boxboxf1fantasy.com/drivers/arvid-lindblad/",
@@ -360,19 +360,19 @@
       "kind": "driver",
       "id": "HAM",
       "name": "Lewis Hamilton",
-      "expected_points": 20.9,
-      "projected_points": 22.1,
+      "expected_points": 25.7,
+      "projected_points": 42.8,
       "current_price_m": 24.5,
-      "value_score": 0.85,
+      "value_score": 1.05,
       "risk": "LOW",
       "confidence_interval_90": {
-        "low": -8.3,
-        "high": 43.0
+        "low": -8.1,
+        "high": 49.0
       },
       "url": "https://boxboxf1fantasy.com/drivers/lewis-hamilton/",
       "constructor": "ferrari",
       "predicted_quali": 3,
-      "predicted_finish": 5,
+      "predicted_finish": 1,
       "dnf_probability": 0.06,
       "points_per_million": 1.58
     },
@@ -381,18 +381,18 @@
       "kind": "driver",
       "id": "HAD",
       "name": "Isack Hadjar",
-      "expected_points": 13.5,
-      "projected_points": 11.0,
+      "expected_points": 13.8,
+      "projected_points": 11.2,
       "current_price_m": 12.7,
-      "value_score": 1.06,
+      "value_score": 1.09,
       "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": -14.2,
-        "high": 40.0
+        "low": -14.0,
+        "high": 41.0
       },
       "url": "https://boxboxf1fantasy.com/drivers/isack-hadjar/",
       "constructor": "red_bull",
-      "predicted_quali": 6,
+      "predicted_quali": 5,
       "predicted_finish": 7,
       "dnf_probability": 0.2,
       "points_per_million": 1.57
@@ -402,19 +402,19 @@
       "kind": "driver",
       "id": "BOR",
       "name": "Gabriel Bortoleto",
-      "expected_points": 5.2,
-      "projected_points": 3.7,
+      "expected_points": 3.8,
+      "projected_points": 1.8,
       "current_price_m": 6.0,
-      "value_score": 0.87,
+      "value_score": 0.63,
       "risk": "LOW",
       "confidence_interval_90": {
-        "low": -15.0,
-        "high": 21.0
+        "low": -15.1,
+        "high": 19.0
       },
       "url": "https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/",
       "constructor": "audi",
       "predicted_quali": 13,
-      "predicted_finish": 12,
+      "predicted_finish": 13,
       "dnf_probability": 0.06,
       "points_per_million": 1.56
     },
@@ -423,19 +423,19 @@
       "kind": "driver",
       "id": "COL",
       "name": "Franco Colapinto",
-      "expected_points": 4.5,
-      "projected_points": 3.7,
+      "expected_points": 3.5,
+      "projected_points": 2.7,
       "current_price_m": 9.8,
-      "value_score": 0.46,
+      "value_score": 0.36,
       "risk": "LOW",
       "confidence_interval_90": {
-        "low": -13.9,
-        "high": 19.0
+        "low": -14.2,
+        "high": 17.0
       },
       "url": "https://boxboxf1fantasy.com/drivers/franco-colapinto/",
       "constructor": "alpine",
       "predicted_quali": 11,
-      "predicted_finish": 11,
+      "predicted_finish": 12,
       "dnf_probability": 0.06,
       "points_per_million": 1.56
     },
@@ -444,14 +444,14 @@
       "kind": "driver",
       "id": "LAW",
       "name": "Liam Lawson",
-      "expected_points": 3.0,
+      "expected_points": 2.6,
       "projected_points": 4.7,
       "current_price_m": 8.9,
-      "value_score": 0.34,
+      "value_score": 0.29,
       "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": -16.3,
-        "high": 21.0
+        "low": -16.8,
+        "high": 19.0
       },
       "url": "https://boxboxf1fantasy.com/drivers/liam-lawson/",
       "constructor": "racing_bulls",
@@ -465,36 +465,16 @@
     {
       "rank": 1,
       "kind": "constructor",
-      "id": "audi",
-      "name": "Audi",
-      "expected_points": 10.8,
-      "projected_points": 11.3,
-      "current_price_m": 5.0,
-      "value_score": 2.16,
-      "risk": "MEDIUM",
-      "confidence_interval_90": {
-        "low": -14.5,
-        "high": 34.0
-      },
-      "url": "https://boxboxf1fantasy.com/constructors/audi/",
-      "driver_1": "BOR",
-      "driver_2": "HUL",
-      "expected_pit_stop_points": 3.4,
-      "dnf_probability": 0.17
-    },
-    {
-      "rank": 2,
-      "kind": "constructor",
       "id": "ferrari",
       "name": "Ferrari",
-      "expected_points": 52.8,
-      "projected_points": 56.1,
+      "expected_points": 59.5,
+      "projected_points": 77.7,
       "current_price_m": 25.7,
-      "value_score": 2.05,
+      "value_score": 2.32,
       "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": 14.4,
-        "high": 86.0
+        "low": 17.5,
+        "high": 94.0
       },
       "url": "https://boxboxf1fantasy.com/constructors/ferrari/",
       "driver_1": "LEC",
@@ -503,18 +483,18 @@
       "dnf_probability": 0.12
     },
     {
-      "rank": 3,
+      "rank": 2,
       "kind": "constructor",
       "id": "racing_bulls",
       "name": "Racing Bulls",
-      "expected_points": 22.6,
+      "expected_points": 22.5,
       "projected_points": 27.6,
       "current_price_m": 11.1,
-      "value_score": 2.04,
+      "value_score": 2.03,
       "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": -3.4,
-        "high": 47.0
+        "low": -2.6,
+        "high": 46.0
       },
       "url": "https://boxboxf1fantasy.com/constructors/racing-bulls/",
       "driver_1": "LIN",
@@ -523,109 +503,108 @@
       "dnf_probability": 0.1
     },
     {
-      "rank": 4,
+      "rank": 3,
       "kind": "constructor",
       "id": "mercedes",
       "name": "Mercedes",
-      "expected_points": 60.9,
-      "projected_points": 76.3,
+      "expected_points": 57.9,
+      "projected_points": 62.2,
       "current_price_m": 31.7,
-      "value_score": 1.92,
+      "value_score": 1.83,
       "risk": "MEDIUM",
       "confidence_interval_90": {
-        "low": 16.8,
-        "high": 95.0
+        "low": 15.9,
+        "high": 93.0
       },
       "url": "https://boxboxf1fantasy.com/constructors/mercedes/",
       "driver_1": "RUS",
       "driver_2": "ANT",
       "expected_pit_stop_points": 8.1,
       "dnf_probability": 0.11
+    },
+    {
+      "rank": 4,
+      "kind": "constructor",
+      "id": "red_bull",
+      "name": "Red Bull",
+      "expected_points": 48.9,
+      "projected_points": 54.1,
+      "current_price_m": 30.0,
+      "value_score": 1.63,
+      "risk": "MEDIUM",
+      "confidence_interval_90": {
+        "low": 5.0,
+        "high": 86.0
+      },
+      "url": "https://boxboxf1fantasy.com/constructors/red-bull/",
+      "driver_1": "VER",
+      "driver_2": "HAD",
+      "expected_pit_stop_points": 3.7,
+      "dnf_probability": 0.17
     }
   ],
   "sample_lineup_100m": {
     "budget_m": 100.0,
-    "cost_m": 98.6,
-    "bank_m": 1.4,
+    "cost_m": 99.7,
+    "bank_m": 0.3,
     "points_basis": "balanced",
-    "balanced_points_with_2x": 187.5,
-    "unboosted_balanced_points": 153.8,
+    "balanced_points_with_2x": 201.0,
+    "unboosted_balanced_points": 166.7,
     "captain_2x": {
       "rank": 1,
       "kind": "driver",
-      "id": "VER",
-      "name": "Max Verstappen",
-      "expected_points": 29.1,
-      "projected_points": 38.4,
-      "current_price_m": 27.9,
-      "value_score": 1.04,
-      "risk": "MEDIUM",
+      "id": "HAM",
+      "name": "Lewis Hamilton",
+      "expected_points": 25.7,
+      "projected_points": 42.8,
+      "current_price_m": 24.5,
+      "value_score": 1.05,
+      "risk": "LOW",
       "confidence_interval_90": {
-        "low": -10.5,
-        "high": 53.0
+        "low": -8.1,
+        "high": 49.0
       },
-      "url": "https://boxboxf1fantasy.com/drivers/max-verstappen/",
-      "constructor": "red_bull",
-      "predicted_quali": 2,
+      "url": "https://boxboxf1fantasy.com/drivers/lewis-hamilton/",
+      "constructor": "ferrari",
+      "predicted_quali": 3,
       "predicted_finish": 1,
-      "dnf_probability": 0.14,
-      "points_per_million": 0.74
+      "dnf_probability": 0.06,
+      "points_per_million": 1.58
     },
     "drivers": [
       {
         "rank": 1,
         "kind": "driver",
-        "id": "VER",
-        "name": "Max Verstappen",
-        "expected_points": 29.1,
-        "projected_points": 38.4,
-        "current_price_m": 27.9,
-        "value_score": 1.04,
-        "risk": "MEDIUM",
+        "id": "HAM",
+        "name": "Lewis Hamilton",
+        "expected_points": 25.7,
+        "projected_points": 42.8,
+        "current_price_m": 24.5,
+        "value_score": 1.05,
+        "risk": "LOW",
         "confidence_interval_90": {
-          "low": -10.5,
-          "high": 53.0
+          "low": -8.1,
+          "high": 49.0
         },
-        "url": "https://boxboxf1fantasy.com/drivers/max-verstappen/",
-        "constructor": "red_bull",
-        "predicted_quali": 2,
+        "url": "https://boxboxf1fantasy.com/drivers/lewis-hamilton/",
+        "constructor": "ferrari",
+        "predicted_quali": 3,
         "predicted_finish": 1,
-        "dnf_probability": 0.14,
-        "points_per_million": 0.74
+        "dnf_probability": 0.06,
+        "points_per_million": 1.58
       },
       {
         "rank": 2,
         "kind": "driver",
-        "id": "HAD",
-        "name": "Isack Hadjar",
-        "expected_points": 13.5,
-        "projected_points": 11.0,
-        "current_price_m": 12.7,
-        "value_score": 1.06,
-        "risk": "MEDIUM",
-        "confidence_interval_90": {
-          "low": -14.2,
-          "high": 40.0
-        },
-        "url": "https://boxboxf1fantasy.com/drivers/isack-hadjar/",
-        "constructor": "red_bull",
-        "predicted_quali": 6,
-        "predicted_finish": 7,
-        "dnf_probability": 0.2,
-        "points_per_million": 1.57
-      },
-      {
-        "rank": 3,
-        "kind": "driver",
         "id": "LIN",
         "name": "Arvid Lindblad",
-        "expected_points": 7.4,
+        "expected_points": 7.9,
         "projected_points": 7.7,
         "current_price_m": 6.2,
-        "value_score": 1.19,
+        "value_score": 1.27,
         "risk": "LOW",
         "confidence_interval_90": {
-          "low": -13.3,
+          "low": -13.1,
           "high": 25.0
         },
         "url": "https://boxboxf1fantasy.com/drivers/arvid-lindblad/",
@@ -636,88 +615,109 @@
         "points_per_million": 1.83
       },
       {
-        "rank": 4,
+        "rank": 3,
         "kind": "driver",
-        "id": "BOR",
-        "name": "Gabriel Bortoleto",
-        "expected_points": 5.2,
-        "projected_points": 3.7,
-        "current_price_m": 6.0,
-        "value_score": 0.87,
-        "risk": "LOW",
+        "id": "PER",
+        "name": "Sergio Perez",
+        "expected_points": -0.3,
+        "projected_points": 1.5,
+        "current_price_m": 5.6,
+        "value_score": -0.05,
+        "risk": "MEDIUM",
         "confidence_interval_90": {
-          "low": -15.0,
-          "high": 21.0
+          "low": -19.3,
+          "high": 15.0
         },
-        "url": "https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/",
-        "constructor": "audi",
-        "predicted_quali": 13,
-        "predicted_finish": 12,
-        "dnf_probability": 0.06,
-        "points_per_million": 1.56
+        "url": "https://boxboxf1fantasy.com/drivers/sergio-perez/",
+        "constructor": "cadillac",
+        "predicted_quali": 20,
+        "predicted_finish": 19,
+        "dnf_probability": 0.23,
+        "points_per_million": -0.12
       },
       {
-        "rank": 5,
+        "rank": 4,
         "kind": "driver",
         "id": "HUL",
         "name": "Nico Hulkenberg",
-        "expected_points": 0.4,
-        "projected_points": 3.7,
+        "expected_points": -0.9,
+        "projected_points": 0.8,
         "current_price_m": 3.0,
-        "value_score": 0.13,
+        "value_score": -0.3,
         "risk": "HIGH",
         "confidence_interval_90": {
-          "low": -19.2,
-          "high": 20.0
+          "low": -19.4,
+          "high": 17.0
         },
         "url": "https://boxboxf1fantasy.com/drivers/nico-hulkenberg/",
         "constructor": "audi",
         "predicted_quali": 17,
-        "predicted_finish": 14,
+        "predicted_finish": 16,
         "dnf_probability": 0.28,
         "points_per_million": -1.89
+      },
+      {
+        "rank": 5,
+        "kind": "driver",
+        "id": "BOT",
+        "name": "Valtteri Bottas",
+        "expected_points": -5.8,
+        "projected_points": -3.2,
+        "current_price_m": 3.0,
+        "value_score": -1.93,
+        "risk": "HIGH",
+        "confidence_interval_90": {
+          "low": -19.7,
+          "high": 8.0
+        },
+        "url": "https://boxboxf1fantasy.com/drivers/valtteri-bottas/",
+        "constructor": "cadillac",
+        "predicted_quali": 19,
+        "predicted_finish": 22,
+        "dnf_probability": 0.34,
+        "points_per_million": -3.33
       }
     ],
     "constructors": [
       {
         "rank": 1,
         "kind": "constructor",
-        "id": "mercedes",
-        "name": "Mercedes",
-        "expected_points": 60.9,
-        "projected_points": 76.3,
-        "current_price_m": 31.7,
-        "value_score": 1.92,
+        "id": "ferrari",
+        "name": "Ferrari",
+        "expected_points": 59.5,
+        "projected_points": 77.7,
+        "current_price_m": 25.7,
+        "value_score": 2.32,
         "risk": "MEDIUM",
         "confidence_interval_90": {
-          "low": 16.8,
-          "high": 95.0
+          "low": 17.5,
+          "high": 94.0
+        },
+        "url": "https://boxboxf1fantasy.com/constructors/ferrari/",
+        "driver_1": "LEC",
+        "driver_2": "HAM",
+        "expected_pit_stop_points": 5.8,
+        "dnf_probability": 0.12
+      },
+      {
+        "rank": 2,
+        "kind": "constructor",
+        "id": "mercedes",
+        "name": "Mercedes",
+        "expected_points": 57.9,
+        "projected_points": 62.2,
+        "current_price_m": 31.7,
+        "value_score": 1.83,
+        "risk": "MEDIUM",
+        "confidence_interval_90": {
+          "low": 15.9,
+          "high": 93.0
         },
         "url": "https://boxboxf1fantasy.com/constructors/mercedes/",
         "driver_1": "RUS",
         "driver_2": "ANT",
         "expected_pit_stop_points": 8.1,
         "dnf_probability": 0.11
-      },
-      {
-        "rank": 2,
-        "kind": "constructor",
-        "id": "racing_bulls",
-        "name": "Racing Bulls",
-        "expected_points": 22.6,
-        "projected_points": 27.6,
-        "current_price_m": 11.1,
-        "value_score": 2.04,
-        "risk": "MEDIUM",
-        "confidence_interval_90": {
-          "low": -3.4,
-          "high": 47.0
-        },
-        "url": "https://boxboxf1fantasy.com/constructors/racing-bulls/",
-        "driver_1": "LIN",
-        "driver_2": "LAW",
-        "expected_pit_stop_points": 6.6,
-        "dnf_probability": 0.1
       }
     ]
   },
