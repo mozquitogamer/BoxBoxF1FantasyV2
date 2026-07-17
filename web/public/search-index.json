@@ -2,7 +2,7 @@
   "site": "https://boxboxf1fantasy.com",
   "name": "BoxBoxF1Fantasy",
   "description": "Free F1 Fantasy 2026 predictions, race picks, lineup optimizer, transfer tools, strategy guides, public data and accuracy tracking.",
-  "generated_at": "2026-07-13T00:33:30.238158+00:00",
+  "generated_at": "2026-07-17T17:58:36.856949+00:00",
   "language": "en",
   "current_round": 12,
   "current_race": "Belgian Grand Prix",
@@ -237,7 +237,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/max-verstappen/",
       "path": "/drivers/max-verstappen/",
       "title": "Max Verstappen F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Max Verstappen F1 Fantasy 2026 projection: 22.6 expected points for the Belgian GP, $27.9M price, value rating and confidence range.",
+      "description": "Max Verstappen F1 Fantasy 2026 projection: 29.1 expected points for the Belgian GP, $27.9M price, value rating and confidence range.",
       "h1": "Max Verstappen F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -245,7 +245,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/kimi-antonelli/",
       "path": "/drivers/kimi-antonelli/",
       "title": "Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Kimi Antonelli F1 Fantasy 2026 projection: 20.1 expected points for the Belgian GP, $25.4M price, value rating and confidence range.",
+      "description": "Kimi Antonelli F1 Fantasy 2026 projection: 22.8 expected points for the Belgian GP, $25.4M price, value rating and confidence range.",
       "h1": "Kimi Antonelli F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -253,7 +253,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/george-russell/",
       "path": "/drivers/george-russell/",
       "title": "George Russell F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "George Russell F1 Fantasy 2026 projection: 18.3 expected points for the Belgian GP, $27.8M price, value rating and confidence range.",
+      "description": "George Russell F1 Fantasy 2026 projection: 22.3 expected points for the Belgian GP, $27.8M price, value rating and confidence range.",
       "h1": "George Russell F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -261,87 +261,87 @@
       "url": "https://boxboxf1fantasy.com/drivers/lewis-hamilton/",
       "path": "/drivers/lewis-hamilton/",
       "title": "Lewis Hamilton F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Lewis Hamilton F1 Fantasy 2026 projection: 16.5 expected points for the Belgian GP, $24.5M price, value rating and confidence range.",
+      "description": "Lewis Hamilton F1 Fantasy 2026 projection: 20.9 expected points for the Belgian GP, $24.5M price, value rating and confidence range.",
       "h1": "Lewis Hamilton F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/oscar-piastri/",
-      "path": "/drivers/oscar-piastri/",
-      "title": "Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Oscar Piastri F1 Fantasy 2026 projection: 13.0 expected points for the Belgian GP, $24.9M price, value rating and confidence range.",
-      "h1": "Oscar Piastri F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/charles-leclerc/",
       "path": "/drivers/charles-leclerc/",
       "title": "Charles Leclerc F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Charles Leclerc F1 Fantasy 2026 projection: 10.3 expected points for the Belgian GP, $23.2M price, value rating and confidence range.",
+      "description": "Charles Leclerc F1 Fantasy 2026 projection: 17.9 expected points for the Belgian GP, $23.2M price, value rating and confidence range.",
       "h1": "Charles Leclerc F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/arvid-lindblad/",
-      "path": "/drivers/arvid-lindblad/",
-      "title": "Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Arvid Lindblad F1 Fantasy 2026 projection: 8.1 expected points for the Belgian GP, $6.2M price, value rating and confidence range.",
-      "h1": "Arvid Lindblad F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/oscar-piastri/",
+      "path": "/drivers/oscar-piastri/",
+      "title": "Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Oscar Piastri F1 Fantasy 2026 projection: 17.0 expected points for the Belgian GP, $24.9M price, value rating and confidence range.",
+      "h1": "Oscar Piastri F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/isack-hadjar/",
       "path": "/drivers/isack-hadjar/",
       "title": "Isack Hadjar F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Isack Hadjar F1 Fantasy 2026 projection: 6.3 expected points for the Belgian GP, $12.7M price, value rating and confidence range.",
+      "description": "Isack Hadjar F1 Fantasy 2026 projection: 13.5 expected points for the Belgian GP, $12.7M price, value rating and confidence range.",
       "h1": "Isack Hadjar F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/franco-colapinto/",
-      "path": "/drivers/franco-colapinto/",
-      "title": "Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Franco Colapinto F1 Fantasy 2026 projection: 6.1 expected points for the Belgian GP, $9.8M price, value rating and confidence range.",
-      "h1": "Franco Colapinto F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/",
-      "path": "/drivers/gabriel-bortoleto/",
-      "title": "Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Gabriel Bortoleto F1 Fantasy 2026 projection: 5.4 expected points for the Belgian GP, $6.0M price, value rating and confidence range.",
-      "h1": "Gabriel Bortoleto F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/lando-norris/",
       "path": "/drivers/lando-norris/",
       "title": "Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Lando Norris F1 Fantasy 2026 projection: 3.6 expected points for the Belgian GP, $25.6M price, value rating and confidence range.",
+      "description": "Lando Norris F1 Fantasy 2026 projection: 13.0 expected points for the Belgian GP, $25.6M price, value rating and confidence range.",
       "h1": "Lando Norris F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/esteban-ocon/",
-      "path": "/drivers/esteban-ocon/",
-      "title": "Esteban Ocon F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Esteban Ocon F1 Fantasy 2026 projection: 3.4 expected points for the Belgian GP, $10.1M price, value rating and confidence range.",
-      "h1": "Esteban Ocon F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/arvid-lindblad/",
+      "path": "/drivers/arvid-lindblad/",
+      "title": "Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Arvid Lindblad F1 Fantasy 2026 projection: 7.4 expected points for the Belgian GP, $6.2M price, value rating and confidence range.",
+      "h1": "Arvid Lindblad F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/",
+      "path": "/drivers/gabriel-bortoleto/",
+      "title": "Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Gabriel Bortoleto F1 Fantasy 2026 projection: 5.2 expected points for the Belgian GP, $6.0M price, value rating and confidence range.",
+      "h1": "Gabriel Bortoleto F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/franco-colapinto/",
+      "path": "/drivers/franco-colapinto/",
+      "title": "Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Franco Colapinto F1 Fantasy 2026 projection: 4.5 expected points for the Belgian GP, $9.8M price, value rating and confidence range.",
+      "h1": "Franco Colapinto F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/liam-lawson/",
       "path": "/drivers/liam-lawson/",
       "title": "Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Liam Lawson F1 Fantasy 2026 projection: 2.2 expected points for the Belgian GP, $8.9M price, value rating and confidence range.",
+      "description": "Liam Lawson F1 Fantasy 2026 projection: 3.0 expected points for the Belgian GP, $8.9M price, value rating and confidence range.",
       "h1": "Liam Lawson F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/esteban-ocon/",
+      "path": "/drivers/esteban-ocon/",
+      "title": "Esteban Ocon F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Esteban Ocon F1 Fantasy 2026 projection: 2.6 expected points for the Belgian GP, $10.1M price, value rating and confidence range.",
+      "h1": "Esteban Ocon F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/pierre-gasly/",
       "path": "/drivers/pierre-gasly/",
       "title": "Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Pierre Gasly F1 Fantasy 2026 projection: 1.6 expected points for the Belgian GP, $12.8M price, value rating and confidence range.",
+      "description": "Pierre Gasly F1 Fantasy 2026 projection: 2.1 expected points for the Belgian GP, $12.8M price, value rating and confidence range.",
       "h1": "Pierre Gasly F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -349,64 +349,64 @@
       "url": "https://boxboxf1fantasy.com/drivers/carlos-sainz/",
       "path": "/drivers/carlos-sainz/",
       "title": "Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Carlos Sainz F1 Fantasy 2026 projection: -1.0 expected points for the Belgian GP, $11.4M price, value rating and confidence range.",
+      "description": "Carlos Sainz F1 Fantasy 2026 projection: 1.2 expected points for the Belgian GP, $11.4M price, value rating and confidence range.",
       "h1": "Carlos Sainz F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/oliver-bearman/",
-      "path": "/drivers/oliver-bearman/",
-      "title": "Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Oliver Bearman F1 Fantasy 2026 projection: -3.3 expected points for the Belgian GP, $7.0M price, value rating and confidence range.",
-      "h1": "Oliver Bearman F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/sergio-perez/",
-      "path": "/drivers/sergio-perez/",
-      "title": "Sergio Perez F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Sergio Perez F1 Fantasy 2026 projection: -3.6 expected points for the Belgian GP, $5.6M price, value rating and confidence range.",
-      "h1": "Sergio Perez F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/nico-hulkenberg/",
       "path": "/drivers/nico-hulkenberg/",
       "title": "Nico Hulkenberg F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Nico Hulkenberg F1 Fantasy 2026 projection: -4.1 expected points for the Belgian GP, $3.0M price, value rating and confidence range.",
+      "description": "Nico Hulkenberg F1 Fantasy 2026 projection: 0.4 expected points for the Belgian GP, $3.0M price, value rating and confidence range.",
       "h1": "Nico Hulkenberg F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/alex-albon/",
-      "path": "/drivers/alex-albon/",
-      "title": "Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Alex Albon F1 Fantasy 2026 projection: -6.3 expected points for the Belgian GP, $7.6M price, value rating and confidence range.",
-      "h1": "Alex Albon F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/sergio-perez/",
+      "path": "/drivers/sergio-perez/",
+      "title": "Sergio Perez F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Sergio Perez F1 Fantasy 2026 projection: -0.4 expected points for the Belgian GP, $5.6M price, value rating and confidence range.",
+      "h1": "Sergio Perez F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/oliver-bearman/",
+      "path": "/drivers/oliver-bearman/",
+      "title": "Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Oliver Bearman F1 Fantasy 2026 projection: -1.4 expected points for the Belgian GP, $7.0M price, value rating and confidence range.",
+      "h1": "Oliver Bearman F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/fernando-alonso/",
       "path": "/drivers/fernando-alonso/",
       "title": "Fernando Alonso F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Fernando Alonso F1 Fantasy 2026 projection: -7.3 expected points for the Belgian GP, $5.6M price, value rating and confidence range.",
+      "description": "Fernando Alonso F1 Fantasy 2026 projection: -2.8 expected points for the Belgian GP, $5.6M price, value rating and confidence range.",
       "h1": "Fernando Alonso F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/valtteri-bottas/",
-      "path": "/drivers/valtteri-bottas/",
-      "title": "Valtteri Bottas F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Valtteri Bottas F1 Fantasy 2026 projection: -8.0 expected points for the Belgian GP, $3.0M price, value rating and confidence range.",
-      "h1": "Valtteri Bottas F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/lance-stroll/",
       "path": "/drivers/lance-stroll/",
       "title": "Lance Stroll F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Lance Stroll F1 Fantasy 2026 projection: -8.1 expected points for the Belgian GP, $3.6M price, value rating and confidence range.",
+      "description": "Lance Stroll F1 Fantasy 2026 projection: -3.4 expected points for the Belgian GP, $3.6M price, value rating and confidence range.",
       "h1": "Lance Stroll F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/alex-albon/",
+      "path": "/drivers/alex-albon/",
+      "title": "Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Alex Albon F1 Fantasy 2026 projection: -3.7 expected points for the Belgian GP, $7.6M price, value rating and confidence range.",
+      "h1": "Alex Albon F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/valtteri-bottas/",
+      "path": "/drivers/valtteri-bottas/",
+      "title": "Valtteri Bottas F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Valtteri Bottas F1 Fantasy 2026 projection: -4.8 expected points for the Belgian GP, $3.0M price, value rating and confidence range.",
+      "h1": "Valtteri Bottas F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
@@ -421,31 +421,31 @@
       "url": "https://boxboxf1fantasy.com/constructors/mercedes/",
       "path": "/constructors/mercedes/",
       "title": "Mercedes F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Mercedes F1 Fantasy 2026 constructor projection: 54.8 expected points for the Belgian GP, $31.7M price, pit-stop points and value rating.",
+      "description": "Mercedes F1 Fantasy 2026 constructor projection: 60.9 expected points for the Belgian GP, $31.7M price, pit-stop points and value rating.",
       "h1": "Mercedes F1 Fantasy Constructor 2026",
-      "type": "constructor_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/constructors/ferrari/",
-      "path": "/constructors/ferrari/",
-      "title": "Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Ferrari F1 Fantasy 2026 constructor projection: 41.0 expected points for the Belgian GP, $25.7M price, pit-stop points and value rating.",
-      "h1": "Ferrari F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/constructors/red-bull/",
       "path": "/constructors/red-bull/",
       "title": "Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Red Bull F1 Fantasy 2026 constructor projection: 40.2 expected points for the Belgian GP, $30.0M price, pit-stop points and value rating.",
+      "description": "Red Bull F1 Fantasy 2026 constructor projection: 54.4 expected points for the Belgian GP, $30.0M price, pit-stop points and value rating.",
       "h1": "Red Bull F1 Fantasy Constructor 2026",
+      "type": "constructor_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/constructors/ferrari/",
+      "path": "/constructors/ferrari/",
+      "title": "Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Ferrari F1 Fantasy 2026 constructor projection: 52.8 expected points for the Belgian GP, $25.7M price, pit-stop points and value rating.",
+      "h1": "Ferrari F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/constructors/mclaren/",
       "path": "/constructors/mclaren/",
       "title": "McLaren F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "McLaren F1 Fantasy 2026 constructor projection: 29.0 expected points for the Belgian GP, $30.1M price, pit-stop points and value rating.",
+      "description": "McLaren F1 Fantasy 2026 constructor projection: 42.7 expected points for the Belgian GP, $30.1M price, pit-stop points and value rating.",
       "h1": "McLaren F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -453,7 +453,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/racing-bulls/",
       "path": "/constructors/racing-bulls/",
       "title": "Racing Bulls F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Racing Bulls F1 Fantasy 2026 constructor projection: 21.0 expected points for the Belgian GP, $11.1M price, pit-stop points and value rating.",
+      "description": "Racing Bulls F1 Fantasy 2026 constructor projection: 22.6 expected points for the Belgian GP, $11.1M price, pit-stop points and value rating.",
       "h1": "Racing Bulls F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -461,7 +461,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/alpine/",
       "path": "/constructors/alpine/",
       "title": "Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Alpine F1 Fantasy 2026 constructor projection: 12.9 expected points for the Belgian GP, $17.3M price, pit-stop points and value rating.",
+      "description": "Alpine F1 Fantasy 2026 constructor projection: 12.6 expected points for the Belgian GP, $17.3M price, pit-stop points and value rating.",
       "h1": "Alpine F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -469,7 +469,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/audi/",
       "path": "/constructors/audi/",
       "title": "Audi F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Audi F1 Fantasy 2026 constructor projection: 7.3 expected points for the Belgian GP, $5.0M price, pit-stop points and value rating.",
+      "description": "Audi F1 Fantasy 2026 constructor projection: 10.8 expected points for the Belgian GP, $5.0M price, pit-stop points and value rating.",
       "h1": "Audi F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -477,7 +477,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/haas/",
       "path": "/constructors/haas/",
       "title": "Haas F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Haas F1 Fantasy 2026 constructor projection: 2.8 expected points for the Belgian GP, $10.2M price, pit-stop points and value rating.",
+      "description": "Haas F1 Fantasy 2026 constructor projection: 4.2 expected points for the Belgian GP, $10.2M price, pit-stop points and value rating.",
       "h1": "Haas F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -485,7 +485,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/williams/",
       "path": "/constructors/williams/",
       "title": "Williams F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Williams F1 Fantasy 2026 constructor projection: -3.3 expected points for the Belgian GP, $14.4M price, pit-stop points and value rating.",
+      "description": "Williams F1 Fantasy 2026 constructor projection: 0.9 expected points for the Belgian GP, $14.4M price, pit-stop points and value rating.",
       "h1": "Williams F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -493,7 +493,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/cadillac/",
       "path": "/constructors/cadillac/",
       "title": "Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Cadillac F1 Fantasy 2026 constructor projection: -11.6 expected points for the Belgian GP, $4.8M price, pit-stop points and value rating.",
+      "description": "Cadillac F1 Fantasy 2026 constructor projection: -5.6 expected points for the Belgian GP, $4.8M price, pit-stop points and value rating.",
       "h1": "Cadillac F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -501,7 +501,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/aston-martin/",
       "path": "/constructors/aston-martin/",
       "title": "Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Aston Martin F1 Fantasy 2026 constructor projection: -14.6 expected points for the Belgian GP, $6.3M price, pit-stop points and value rating.",
+      "description": "Aston Martin F1 Fantasy 2026 constructor projection: -6.1 expected points for the Belgian GP, $6.3M price, pit-stop points and value rating.",
       "h1": "Aston Martin F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
