@@ -643,9 +643,9 @@ The pipeline has 5 named phases. Operators run them via `pipeline/run_weekend.py
     │  │ Layer 1 — Jolpica priors (always present):               │  │
     │  │   driver_roll_quali_3 = 9.5  (last 3 races: bad form)    │  │
     │  │   roll_finishpos_3 = 10.0    (mid-pack recent races)     │  │
-    │  │   driver_circuit_exp = 1.5    (RECOMPUTED for target —   │  │
-    │  │                                his career Canada quali   │  │
-    │  │                                avg across 4 starts)      │  │
+    │  │   driver_circuit_exp = 4.7    (current form plus a      │  │
+    │  │                                shrunk Canada effect      │  │
+    │  │                                from 4 prior starts)      │  │
     │  │   sim_weighted_quali_3 = 7.0  (RECOMPUTED for target —   │  │
     │  │                                track-sim weighted)       │  │
     │  │   roll_dnf_rate_5 = 0.22     (22% rolling DNF)           │  │

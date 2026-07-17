@@ -108,6 +108,10 @@ WET_TRAINING_WEIGHT_MULTIPLIER = 6.0
 QUALI_EXCLUDE = {
     # Identifiers / metadata
     "season", "round", "driver_id", "constructor_id",
+    # Diagnostics for how much circuit history supports the shrunk posterior.
+    # Retained in model rows/exports, but excluded from the rankers: adding the
+    # two sparse reliability columns regressed actionable race-FP validation.
+    "driver_circuit_reliability", "driver_circuit_roll_3_reliability",
     # Targets
     "finish_position", "points", "laps_completed", "status",
     # DNF / classification flags

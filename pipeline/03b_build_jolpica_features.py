@@ -36,6 +36,10 @@ from config.settings import (
 )
 from config.track_classifications import get_track_features, TRACK_FEATURE_NAMES
 from config.track_similarity import get_similarity
+from config.circuit_priors import (
+    apply_driver_circuit_effect,
+    driver_circuit_reliability,
+)
 from config.team_driver_ratings import (
     get_team_strategy_rating,
     get_team_adaptability,
@@ -442,25 +446,89 @@ def add_quali_priors(df: pd.DataFrame) -> pd.DataFrame:
 
     # --- Circuit priors (time-safe, shifted) ---
     d = d.sort_values(["driver_id", "circuit_id", "season", "round"])
-    d["driver_circuit_prev"] = d.groupby(["driver_id", "circuit_id"])["quali_position"].shift(1)
-    d["driver_circuit_exp"] = d.groupby(["driver_id", "circuit_id"])["driver_circuit_prev"].transform(
+    # Store the historical *effect* relative to driver form at the time. This
+    # avoids treating, for example, a rookie-year P18 as the driver's permanent
+    # raw level at that circuit after they have developed into a front-runner.
+    d["driver_circuit_effect_this"] = d["quali_position"] - d["driver_roll_quali_5"]
+    d["driver_circuit_effect_prev"] = d.groupby(
+        ["driver_id", "circuit_id"]
+    )["driver_circuit_effect_this"].shift(1)
+    circuit_history = d.groupby(
+        ["driver_id", "circuit_id"]
+    )["driver_circuit_effect_prev"]
+    d["_driver_circuit_exp_effect"] = circuit_history.transform(
         lambda x: x.expanding(min_periods=1).mean()
     )
-    d["driver_circuit_roll_3"] = d.groupby(["driver_id", "circuit_id"])["driver_circuit_prev"].transform(
+    d["_driver_circuit_roll_effect"] = circuit_history.transform(
         lambda x: x.rolling(3, min_periods=1).mean()
     )
+    d["_driver_circuit_exp_count"] = circuit_history.transform(
+        lambda x: x.expanding(min_periods=1).count()
+    )
+    d["_driver_circuit_roll_count"] = circuit_history.transform(
+        lambda x: x.rolling(3, min_periods=1).count()
+    )
 
-    d = d.sort_values(["constructor_id", "circuit_id", "season", "round", "driver_id"])
-    d["constructor_circuit_prev"] = d.groupby(["constructor_id", "circuit_id"])["quali_position"].shift(1)
-    d["constructor_circuit_exp"] = d.groupby(["constructor_id", "circuit_id"])["constructor_circuit_prev"].transform(
-        lambda x: x.expanding(min_periods=1).mean()
+    # A single historical visit is a very noisy track-specific signal. Its
+    # residual earns only 1/(1+12) weight; repeated visits progressively earn
+    # more authority. Keep this formula in lockstep with live recomputation.
+    d["driver_circuit_exp"] = [
+        apply_driver_circuit_effect(baseline, effect, count)
+        for baseline, effect, count in zip(
+            d["driver_roll_quali_5"],
+            d["_driver_circuit_exp_effect"],
+            d["_driver_circuit_exp_count"],
+        )
+    ]
+    d["driver_circuit_roll_3"] = [
+        apply_driver_circuit_effect(baseline, effect, count)
+        for baseline, effect, count in zip(
+            d["driver_roll_quali_5"],
+            d["_driver_circuit_roll_effect"],
+            d["_driver_circuit_roll_count"],
+        )
+    ]
+    d["driver_circuit_reliability"] = d["_driver_circuit_exp_count"].map(
+        driver_circuit_reliability
+    )
+    d["driver_circuit_roll_3_reliability"] = d["_driver_circuit_roll_count"].map(
+        driver_circuit_reliability
+    )
+
+    # Constructor features must shift at the RACE level. A row-wise shift lets
+    # the alphabetically second teammate see the first teammate's current quali.
+    constructor_round_keys = ["constructor_id", "circuit_id", "season", "round"]
+    constructor_rounds = d.groupby(
+        constructor_round_keys, as_index=False, dropna=False
+    )["quali_position"].agg(_quali_sum="sum", _quali_count="count")
+    constructor_rounds = constructor_rounds.sort_values(constructor_round_keys)
+    constructor_group = constructor_rounds.groupby(["constructor_id", "circuit_id"])
+    constructor_rounds["_prior_sum"] = (
+        constructor_group["_quali_sum"].cumsum() - constructor_rounds["_quali_sum"]
+    )
+    constructor_rounds["_prior_count"] = (
+        constructor_group["_quali_count"].cumsum() - constructor_rounds["_quali_count"]
+    )
+    constructor_rounds["constructor_circuit_exp"] = (
+        constructor_rounds["_prior_sum"] / constructor_rounds["_prior_count"].replace(0, np.nan)
+    )
+    d.drop(columns=["constructor_circuit_exp"], inplace=True, errors="ignore")
+    d = d.merge(
+        constructor_rounds[constructor_round_keys + ["constructor_circuit_exp"]],
+        on=constructor_round_keys,
+        how="left",
+    )
+    d["constructor_circuit_exp"] = d["constructor_circuit_exp"].fillna(
+        d["constructor_roll_quali_5"]
     )
 
     # Clean up intermediate columns
     d.drop(columns=[
         "driver_quali_prev", "constructor_quali_prev", "field_prev",
         "teammate_quali_this", "team_delta_this",
-        "driver_circuit_prev", "constructor_circuit_prev",
+        "driver_circuit_effect_this", "driver_circuit_effect_prev",
+        "_driver_circuit_exp_effect", "_driver_circuit_roll_effect",
+        "_driver_circuit_exp_count", "_driver_circuit_roll_count",
     ], inplace=True)
 
     return d
@@ -664,7 +732,7 @@ def load_all_normalized_data() -> pd.DataFrame:
             quali["quali_position"] = ensure_int(quali["quali_position"])
 
         # Select columns for merge
-        result_cols = ["season", "round", "driver_id", "constructor_id",
+        result_cols = ["season", "round", "circuit_id", "driver_id", "constructor_id",
                        "grid", "finish_position", "position_text", "points",
                        "status", "laps_completed"]
         if "quali_position" in results.columns:
@@ -691,7 +759,17 @@ def load_all_normalized_data() -> pd.DataFrame:
         if not races.empty:
             race_cols = ["season", "round", "circuit_id", "has_sprint"]
             races_small = races[[c for c in race_cols if c in races.columns]].copy()
+            # Current per-round normalized data already carries circuit_id in
+            # race_results.csv, while older bulk seasons also have races.csv.
+            # Coalesce the two sources instead of creating _x/_y columns.
+            if "circuit_id" in races_small.columns and "circuit_id" in df_year.columns:
+                races_small = races_small.rename(columns={"circuit_id": "_races_circuit_id"})
             df_year = df_year.merge(races_small, on=["season", "round"], how="left")
+            if "_races_circuit_id" in df_year.columns:
+                df_year["circuit_id"] = df_year["circuit_id"].combine_first(
+                    df_year["_races_circuit_id"]
+                )
+                df_year.drop(columns=["_races_circuit_id"], inplace=True)
 
         # Merge sprint results
         if not sprint.empty:
@@ -714,6 +792,17 @@ def load_all_normalized_data() -> pd.DataFrame:
 
             sprint_small = sprint[[c for c in sprint_merge_cols if c in sprint.columns]].copy()
             df_year = df_year.merge(sprint_small, on=["season", "round", "driver_id"], how="left")
+
+        # Per-round normalized seasons do not need a separate races.csv. Derive
+        # the weekend flag from the sprint rows that are already present.
+        if "has_sprint" not in df_year.columns:
+            df_year["has_sprint"] = False
+        if not sprint.empty:
+            sprint_rounds = set(sprint["round"].dropna().astype(int).tolist())
+            df_year["has_sprint"] = (
+                df_year["has_sprint"].fillna(False).astype(bool)
+                | df_year["round"].isin(sprint_rounds)
+            )
 
         all_parts.append(df_year)
 

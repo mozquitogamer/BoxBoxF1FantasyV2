@@ -562,23 +562,25 @@ A subtle but important detail: when generating predictions for an upcoming round
 
 The Layer-1 features `sim_weighted_quali_3`, `sim_weighted_quali_5`, `sim_weighted_finishpos_3`, etc. are computed during feature-build (`03b`) by weighting each driver's recent races by similarity to *that race's circuit*. For a stub row whose latest race was Miami, those values are weighted toward Miami-similar tracks.
 
-But for predicting Canada, we want them weighted toward *Canada-similar tracks*. So `_recompute_sim_features(priors_df, target_circuit)`:
+But for predicting Canada, we want them weighted toward *Canada-similar tracks*. So `_recompute_sim_features(priors_df, target_circuit, year, round_num)`:
 1. Loads `all_model_rows.parquet`.
-2. For each driver, takes their last 3 (and 5) races.
-3. Computes `weight = similarity(target_circuit, race_circuit)²` for each.
-4. Recomputes `sim_weighted_*` as the weighted average.
+2. Removes the target round and every later row (important for archive reconstruction).
+3. For each driver, takes their last 3 (and 5) races.
+4. Computes `weight = similarity(target_circuit, race_circuit)²` for each.
+5. Recomputes `sim_weighted_*` as the weighted average.
 
 ### `_recompute_circuit_features` (circuit-specific history)
 
 Added recently to fix a bug where `driver_circuit_exp`, `driver_circuit_roll_3`, and `constructor_circuit_exp` were inheriting their values from the most recent race. For a Canada prediction, VER's `driver_circuit_exp` was showing 9.5 (his Miami quali avg) instead of 1.5 (his actual Canada quali avg across 4 starts).
 
 The fix:
-1. Filters `all_model_rows.parquet` to rows where `circuit_id == target_circuit`.
-2. For each driver in the prediction set, computes:
-   - `driver_circuit_exp` = expanding mean of their prior quali_positions at this circuit
-   - `driver_circuit_roll_3` = rolling-3 mean of same
-3. For each constructor, similarly computes `constructor_circuit_exp`.
-4. Drivers/constructors with no history at the target circuit get NaN (rather than inheriting an unrelated track's value, which was actively misleading).
+1. Filters `all_model_rows.parquet` to rows strictly before the target round, then to `circuit_id == target_circuit`.
+2. Expresses every past visit as an effect relative to the driver's time-safe five-race form at that visit: `past_quali - past_roll5`.
+3. Shrinks the historical effect with empirical-Bayes weight `n / (n + 12)`, then adds it to current five-race form. One prior visit therefore gets only 7.7% circuit-specific authority.
+4. Writes both expanding-history and rolling-three variants (`driver_circuit_exp`, `driver_circuit_roll_3`), plus reliability diagnostics. With no history, the posterior equals current form.
+5. Computes `constructor_circuit_exp` from whole prior race events, so one teammate's current result cannot leak into the other teammate's row.
+
+The strength of 12 came from a strictly ordered check over 1,709 experienced driver/circuit rows (2020-2025). The unshrunk raw circuit mean had 4.11-position MAE versus 3.14 for recent form; the shrunken posterior was approximately 3.12. Reliability remains diagnostic-only because admitting it as two extra ranker features regressed post-FP validation.
 
 ### Why this matters
 
@@ -587,8 +589,12 @@ Both recomputations live in `06_run_predictions.py` and are called immediately a
 ```python
 priors_df = build_live_priors(round_num, year)
 if target_circuit and target_circuit != "unknown":
-    priors_df = _recompute_sim_features(priors_df, target_circuit)
-    priors_df = _recompute_circuit_features(priors_df, target_circuit)
+    priors_df = _recompute_sim_features(
+        priors_df, target_circuit, year, round_num
+    )
+    priors_df = _recompute_circuit_features(
+        priors_df, target_circuit, year, round_num
+    )
 ```
 
 Without these, the model is fed misleading "history at this circuit" features. With them, the model gets accurate per-circuit signals — every driver at every circuit. The biggest impact is mid-pack drivers where a circuit is genuinely informative; for top runners, rolling-3 form often dominates the model's learned weights regardless.

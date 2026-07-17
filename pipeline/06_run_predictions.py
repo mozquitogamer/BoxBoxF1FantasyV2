@@ -57,6 +57,10 @@ from config.track_classifications import (
     fp_quali_blend_weight,
 )
 from config.track_similarity import get_similarity
+from config.circuit_priors import (
+    apply_driver_circuit_effect,
+    driver_circuit_reliability,
+)
 
 
 # ============================================================
@@ -541,7 +545,24 @@ def _load_actual_quali(
     return {}
 
 
-def _recompute_circuit_features(df: pd.DataFrame, target_circuit: str) -> pd.DataFrame:
+def _history_before_round(
+    all_rows: pd.DataFrame,
+    target_year: int,
+    target_round: int,
+) -> pd.DataFrame:
+    """Return only results available before the prediction deadline."""
+    return all_rows[
+        (all_rows["season"] < target_year)
+        | ((all_rows["season"] == target_year) & (all_rows["round"] < target_round))
+    ].copy()
+
+
+def _recompute_circuit_features(
+    df: pd.DataFrame,
+    target_circuit: str,
+    target_year: int,
+    target_round: int,
+) -> pd.DataFrame:
     """
     Recompute circuit-specific historical features against the target circuit.
 
@@ -555,29 +576,46 @@ def _recompute_circuit_features(df: pd.DataFrame, target_circuit: str) -> pd.Dat
     history exists in all_model_rows but isn't flowing to the model unless we
     explicitly recompute these features for the target circuit.
 
-    Definitions match 03b_build_jolpica_features.py::add_jolpica_features:
-      - driver_circuit_exp:    expanding mean of driver's prior quali_position at this circuit
-      - driver_circuit_roll_3: rolling-3 mean of driver's prior quali_position at this circuit
+    Definitions match 03b_build_jolpica_features.py::add_quali_priors:
+      - driver_circuit_exp:    current form + shrunk expanding circuit effect
+      - driver_circuit_roll_3: current form + shrunk rolling-3 circuit effect
       - constructor_circuit_exp: expanding mean of constructor's prior quali_position at this circuit
 
-    Drivers/constructors with no history at the target circuit are left unchanged
-    (XGBoost handles NaN, but inheriting Miami's value is misleading; we set to NaN).
+    With no circuit history, values fall back to time-safe recent form. History
+    is strictly before the target round, including forced archive reconstruction.
     """
     model_rows_path = JOLPICA_MODEL_ROWS_DIR / "all_model_rows.parquet"
     if not model_rows_path.exists():
         return df
 
-    all_rows = pd.read_parquet(model_rows_path)
+    all_rows = _history_before_round(
+        pd.read_parquet(model_rows_path), target_year, target_round
+    )
     if "circuit_id" not in all_rows.columns:
         return df
+
+    # Reconstruct form at each historical event from actual earlier results.
+    # Saved model rows contain imputed priors, which would otherwise create an
+    # artificial circuit effect for a driver's first career race.
+    all_rows = all_rows.sort_values(["driver_id", "season", "round"])
+    previous_quali = all_rows.groupby("driver_id")["quali_position"].shift(1)
+    all_rows["_driver_form_at_event"] = previous_quali.groupby(
+        all_rows["driver_id"]
+    ).transform(lambda x: x.rolling(5, min_periods=1).mean())
+    all_rows["_driver_circuit_effect"] = (
+        pd.to_numeric(all_rows["quali_position"], errors="coerce")
+        - all_rows["_driver_form_at_event"]
+    )
 
     # Filter to target circuit only, sorted chronologically
     at_circuit = all_rows[all_rows["circuit_id"] == target_circuit].copy()
     if at_circuit.empty:
-        # No history at this circuit (e.g. brand-new track) — set to NaN
-        for col in ("driver_circuit_exp", "driver_circuit_roll_3", "constructor_circuit_exp"):
-            if col in df.columns:
-                df[col] = np.nan
+        # No history at this circuit: use the n=0 posterior (recent form).
+        df["driver_circuit_exp"] = df.get("driver_roll_quali_5", np.nan)
+        df["driver_circuit_roll_3"] = df.get("driver_roll_quali_5", np.nan)
+        df["driver_circuit_reliability"] = 0.0
+        df["driver_circuit_roll_3_reliability"] = 0.0
+        df["constructor_circuit_exp"] = df.get("constructor_roll_quali_5", np.nan)
         # Also stamp the circuit_id so downstream code knows
         df["circuit_id"] = target_circuit
         return df
@@ -590,13 +628,23 @@ def _recompute_circuit_features(df: pd.DataFrame, target_circuit: str) -> pd.Dat
 
         # Driver history at this circuit
         d_hist = at_circuit[at_circuit["driver_id"] == driver]
-        d_qualis = pd.to_numeric(d_hist["quali_position"], errors="coerce").dropna().tolist()
-        if d_qualis:
-            df.at[i, "driver_circuit_exp"] = float(np.mean(d_qualis))
-            df.at[i, "driver_circuit_roll_3"] = float(np.mean(d_qualis[-3:]))
-        else:
-            df.at[i, "driver_circuit_exp"] = np.nan
-            df.at[i, "driver_circuit_roll_3"] = np.nan
+        effects = pd.to_numeric(
+            d_hist["_driver_circuit_effect"], errors="coerce"
+        ).dropna().tolist()
+        recent_form = row.get("driver_roll_quali_5", np.nan)
+        expanding_effect = float(np.mean(effects)) if effects else np.nan
+        rolling_effects = effects[-3:]
+        rolling_effect = float(np.mean(rolling_effects)) if rolling_effects else np.nan
+        df.at[i, "driver_circuit_exp"] = apply_driver_circuit_effect(
+            recent_form, expanding_effect, len(effects)
+        )
+        df.at[i, "driver_circuit_roll_3"] = apply_driver_circuit_effect(
+            recent_form, rolling_effect, len(rolling_effects)
+        )
+        df.at[i, "driver_circuit_reliability"] = driver_circuit_reliability(len(effects))
+        df.at[i, "driver_circuit_roll_3_reliability"] = driver_circuit_reliability(
+            len(rolling_effects)
+        )
 
         # Constructor history at this circuit
         if constructor is not None and pd.notna(constructor):
@@ -605,14 +653,21 @@ def _recompute_circuit_features(df: pd.DataFrame, target_circuit: str) -> pd.Dat
             if c_qualis:
                 df.at[i, "constructor_circuit_exp"] = float(np.mean(c_qualis))
             else:
-                df.at[i, "constructor_circuit_exp"] = np.nan
+                df.at[i, "constructor_circuit_exp"] = row.get(
+                    "constructor_roll_quali_5", np.nan
+                )
 
     # Stamp the target circuit so any downstream check is accurate
     df["circuit_id"] = target_circuit
     return df
 
 
-def _recompute_sim_features(df: pd.DataFrame, target_circuit: str) -> pd.DataFrame:
+def _recompute_sim_features(
+    df: pd.DataFrame,
+    target_circuit: str,
+    target_year: int,
+    target_round: int,
+) -> pd.DataFrame:
     """
     Recompute similarity-weighted rolling features against the target circuit.
 
@@ -625,7 +680,9 @@ def _recompute_sim_features(df: pd.DataFrame, target_circuit: str) -> pd.DataFra
     if not model_rows_path.exists():
         return df
 
-    all_rows = pd.read_parquet(model_rows_path)
+    all_rows = _history_before_round(
+        pd.read_parquet(model_rows_path), target_year, target_round
+    )
     all_rows = all_rows.sort_values(["driver_id", "season", "round"])
 
     for i, row in df.iterrows():
@@ -868,9 +925,13 @@ def run_predictions(
     target_circuit = _resolve_circuit(round_num, year)
     if target_circuit and target_circuit != "unknown":
         print(f"  Recomputing similarity features for target circuit: {target_circuit}")
-        priors_df = _recompute_sim_features(priors_df, target_circuit)
+        priors_df = _recompute_sim_features(
+            priors_df, target_circuit, year, round_num
+        )
         print(f"  Recomputing circuit-specific features for target circuit: {target_circuit}")
-        priors_df = _recompute_circuit_features(priors_df, target_circuit)
+        priors_df = _recompute_circuit_features(
+            priors_df, target_circuit, year, round_num
+        )
     else:
         print(f"  Could not resolve target circuit — using prior circuit/similarity features as-is")
 
