@@ -186,7 +186,8 @@ const TA_TUNABLES = {
 // inflates cheap high-variance midfielders (Jensen effect on a floored points
 // curve), which distorts SELECTION — e.g. it will suggest selling a predicted
 // winner for a lower-projected driver. Each tool sets this from its "Points basis"
-// dropdown at the start of a run; display is unaffected (cards still show both).
+// dropdown at the start of a run; result renderers must use that same basis so
+// their pick values and swap deltas reconcile with the calculated totals.
 //   'projected'     -> deterministic finishing-order total (projected_points; no MC compression)
 //   'balanced'      -> mean of projected + risk-adjusted (DEFAULT; best expected-value proxy)
 //   'risk_adjusted' -> raw MC mean (expected_points; legacy behavior)
@@ -4237,7 +4238,8 @@ function runTransferAdvisor() {
     const freeTransfers = parseInt(document.getElementById('freeTransfers').value) || 0;
     const strategy = document.getElementById('transferStrategy').value;
     const chip = document.getElementById('transferChip').value;
-    optimizeBasis = document.getElementById('pointsBasisTransfer')?.value || 'balanced';
+    const transferPointsBasis = document.getElementById('pointsBasisTransfer')?.value || 'balanced';
+    optimizeBasis = transferPointsBasis;
 
     // Validate team
     const currentDriverIds = myTeamDrivers.filter(Boolean);
@@ -4332,6 +4334,7 @@ function runTransferAdvisor() {
             penalty: 0,
             boostedDriverId: curBoosted.driver_id,
             secondBoostedDriverId: curSecondBoosted ? curSecondBoosted.driver_id : null,
+            pointsBasis: transferPointsBasis,
             totalScore: curFinalScore,
         });
     }
@@ -4447,6 +4450,7 @@ function runTransferAdvisor() {
             penalty,
             boostedDriverId: boostedDriver.driver_id,
             secondBoostedDriverId: secondBoostedDriver ? secondBoostedDriver.driver_id : null,
+            pointsBasis: transferPointsBasis,
             totalScore: finalScore,
         });
     }
@@ -4597,6 +4601,10 @@ function renderTransferCard(lineup, index, chip) {
     const currentConstructorIds = myTeamConstructors.filter(Boolean);
     const newDriverIds = lineup.drivers.map(d => d.driver_id);
     const newConIds = lineup.constructors.map(c => c.constructor_id);
+    // Keep rendering tied to the basis used for this advisor run. Otherwise,
+    // Load More can drift if another optimizer tool changes optimizeBasis.
+    const pointsBasis = lineup.pointsBasis || optimizeBasis;
+    const displayPoints = item => basisPointsFor(item, pointsBasis);
 
     // Build swaps
     const driversOut = currentDriverIds.filter(id => !newDriverIds.includes(id));
@@ -4638,35 +4646,35 @@ function renderTransferCard(lineup, index, chip) {
     if (driversOut.length === 0 && consOut.length === 0) {
         html += '<p style="color:var(--green);font-weight:600;margin-bottom:12px;">No transfers needed — keep your current team!</p>';
     } else {
-        // Pair out↔in deterministically by expected_points (descending) so the
+        // Pair out↔in deterministically by the selected basis (descending) so the
         // top-impact swap is shown first. The raw filter order is arbitrary,
         // which made multi-swap rows show nonsensical pairings.
-        const sortByEp = (a, b) => (b?.expected_points || 0) - (a?.expected_points || 0);
-        const outDrivers = driversOut.map(id => data.drivers.find(d => d.driver_id === id)).filter(Boolean).sort(sortByEp);
-        const inDrivers  = driversIn.map(id => data.drivers.find(d => d.driver_id === id)).filter(Boolean).sort(sortByEp);
-        const outCons = consOut.map(id => data.constructors.find(c => c.constructor_id === id)).filter(Boolean).sort(sortByEp);
-        const inCons  = consIn.map(id => data.constructors.find(c => c.constructor_id === id)).filter(Boolean).sort(sortByEp);
+        const sortByBasis = (a, b) => displayPoints(b) - displayPoints(a);
+        const outDrivers = driversOut.map(id => data.drivers.find(d => d.driver_id === id)).filter(Boolean).sort(sortByBasis);
+        const inDrivers  = driversIn.map(id => data.drivers.find(d => d.driver_id === id)).filter(Boolean).sort(sortByBasis);
+        const outCons = consOut.map(id => data.constructors.find(c => c.constructor_id === id)).filter(Boolean).sort(sortByBasis);
+        const inCons  = consIn.map(id => data.constructors.find(c => c.constructor_id === id)).filter(Boolean).sort(sortByBasis);
 
         html += '<div style="margin-bottom:12px;">';
         for (let i = 0; i < Math.max(outDrivers.length, inDrivers.length); i++) {
-            html += renderSwapRow(outDrivers[i] || null, inDrivers[i] || null, 'driver');
+            html += renderSwapRow(outDrivers[i] || null, inDrivers[i] || null, 'driver', pointsBasis);
         }
         for (let i = 0; i < Math.max(outCons.length, inCons.length); i++) {
-            html += renderSwapRow(outCons[i] || null, inCons[i] || null, 'constructor');
+            html += renderSwapRow(outCons[i] || null, inCons[i] || null, 'constructor', pointsBasis);
         }
         html += '</div>';
     }
 
     // Show resulting lineup
     html += '<div class="lineup-picks-row">';
-    const sorted = [...lineup.drivers].sort((a, b) => b.expected_points - a.expected_points);
+    const sorted = [...lineup.drivers].sort((a, b) => displayPoints(b) - displayPoints(a));
     sorted.forEach(d => {
         const team = TEAMS[d.constructor] || { color: '#666', name: d.constructor };
         const isPrimaryBoosted = d.driver_id === lineup.boostedDriverId;
         const isSecondBoosted = d.driver_id === (lineup.secondBoostedDriverId || null);
         const multiplier = (isPrimaryBoosted && chip === '3x_boost') ? 3 : (isPrimaryBoosted || isSecondBoosted) ? 2 : 1;
         const isBoosted = isPrimaryBoosted || isSecondBoosted;
-        const displayPts = (d.expected_points * multiplier).toFixed(1);
+        const displayPts = (displayPoints(d) * multiplier).toFixed(1);
         const boostBadge = isBoosted ? `<span class="boost-badge">${multiplier}x</span>` : '';
         const isNew = !currentDriverIds.includes(d.driver_id);
         html += `<div class="lineup-pick-h${isBoosted ? ' boosted' : ''}" style="--team-color:${team.color}">
@@ -4690,7 +4698,7 @@ function renderTransferCard(lineup, index, chip) {
                 <span class="pick-h-name">${(c.name || c.constructor_id).toUpperCase()}${isNew ? ' <span style="color:var(--green);font-size:0.7rem;">NEW</span>' : ''}</span>
             </div>
             <div class="pick-h-team">${c.driver_1} & ${c.driver_2}</div>
-            <div class="pick-h-pts">${c.expected_points.toFixed(1)}<span class="pick-h-pts-label"> pts</span></div>
+            <div class="pick-h-pts">${displayPoints(c).toFixed(1)}<span class="pick-h-pts-label"> pts</span></div>
             <div class="pick-h-meta">
                 <span>$${c.current_price.toFixed(1)}M ${formatPriceChangeBadge(predictPriceChange(c, c.expected_points).expectedChange)}</span>
             </div>
@@ -4700,15 +4708,17 @@ function renderTransferCard(lineup, index, chip) {
     return html;
 }
 
-function renderSwapRow(outItem, inItem, type) {
+function renderSwapRow(outItem, inItem, type, pointsBasis = optimizeBasis) {
     const outName = outItem
         ? (type === 'driver' ? outItem.name.split(' ').pop() : (outItem.name || outItem.constructor_id).toUpperCase())
         : '—';
     const inName = inItem
         ? (type === 'driver' ? inItem.name.split(' ').pop() : (inItem.name || inItem.constructor_id).toUpperCase())
         : '—';
-    const outPts = outItem ? outItem.expected_points.toFixed(1) : '—';
-    const inPts = inItem ? inItem.expected_points.toFixed(1) : '—';
+    const outPoints = outItem ? basisPointsFor(outItem, pointsBasis) : null;
+    const inPoints = inItem ? basisPointsFor(inItem, pointsBasis) : null;
+    const outPts = outItem ? outPoints.toFixed(1) : '—';
+    const inPts = inItem ? inPoints.toFixed(1) : '—';
     const outPrice = outItem ? `$${outItem.current_price.toFixed(1)}M` : '';
     const inPrice = inItem ? `$${inItem.current_price.toFixed(1)}M` : '';
 
@@ -4725,7 +4735,7 @@ function renderSwapRow(outItem, inItem, type) {
     let swapDeltaHtml = '';
     if (outItem && inItem) {
         const netCost = inItem.current_price - outItem.current_price;
-        const ptsDelta = inItem.expected_points - outItem.expected_points;
+        const ptsDelta = inPoints - outPoints;
         const costSign = netCost > 0 ? '+' : (netCost < 0 ? '−' : '');
         const costColor = netCost > 0 ? 'var(--red, #ef4444)' : (netCost < 0 ? 'var(--green)' : 'var(--text-secondary)');
         const ptsSign = ptsDelta >= 0 ? '+' : '';

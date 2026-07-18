@@ -57,8 +57,15 @@ src += `
     hasScoreTeamPicks: typeof scoreTeamPicks === 'function',
     hasOfficialRoundCoverageCheck: typeof officialRoundHasCompleteScores === 'function',
     renderSwapRow: typeof renderSwapRow === 'function' ? renderSwapRow : null,
+    renderTransferCard: typeof renderTransferCard === 'function' ? renderTransferCard : null,
     scoreTeamPicks: typeof scoreTeamPicks === 'function' ? scoreTeamPicks : null,
     officialRoundHasCompleteScores: typeof officialRoundHasCompleteScores === 'function' ? officialRoundHasCompleteScores : null,
+    setTransferRenderState(basis, nextData, driverIds, constructorIds) {
+      optimizeBasis = basis;
+      data = nextData;
+      myTeamDrivers = driverIds;
+      myTeamConstructors = constructorIds;
+    },
     setPriceLoaderState(nextData, nextOfficialPoints) {
       data = nextData;
       officialPointsData = nextOfficialPoints;
@@ -113,7 +120,72 @@ try {
   fail('renderSwapRow threw: ' + e.message);
 }
 
-// 4) Team Compare scoring helper includes normal 2x / 3x boost and CI totals.
+// 4) Transfer Advisor display values must follow its selected points basis.
+// Deliberately give each asset very different deterministic and MC values so
+// accidentally rendering expected_points (the historical bug) is unambiguous.
+try {
+  const out = {
+    name: 'Outgoing Driver', driver_id: 'OUT', constructor: 'AAA',
+    expected_points: 20, projected_points: 30, current_price: 10,
+  };
+  const incoming = {
+    name: 'Incoming Driver', driver_id: 'IN', constructor: 'BBB',
+    expected_points: 24, projected_points: 40, current_price: 11,
+  };
+
+  // Explicit render basis must win over a later global change (the same drift
+  // that can happen when Load More runs after another optimizer tool).
+  S.setTransferRenderState('risk_adjusted', { drivers: [out, incoming], constructors: [] }, ['OUT'], []);
+  const projectedSwap = S.renderSwapRow(out, incoming, 'driver', 'projected');
+  if (!projectedSwap.includes('30.0 pts') || !projectedSwap.includes('40.0 pts') || !projectedSwap.includes('+10.0pts')) {
+    fail('Transfer Advisor projected-mode swap row did not display projected points/delta');
+  }
+
+  S.setTransferRenderState('projected', { drivers: [out, incoming], constructors: [] }, ['OUT'], []);
+  const riskSwap = S.renderSwapRow(out, incoming, 'driver', 'risk_adjusted');
+  if (!riskSwap.includes('20.0 pts') || !riskSwap.includes('24.0 pts') || !riskSwap.includes('+4.0pts')) {
+    fail('Transfer Advisor risk-adjusted swap row changed basis unexpectedly');
+  }
+
+  S.setTransferRenderState('risk_adjusted', { drivers: [out, incoming], constructors: [] }, ['OUT'], []);
+  const balancedSwap = S.renderSwapRow(out, incoming, 'driver', 'balanced');
+  if (!balancedSwap.includes('25.0 pts') || !balancedSwap.includes('32.0 pts') || !balancedSwap.includes('+7.0pts')) {
+    fail('Transfer Advisor balanced swap row changed basis unexpectedly');
+  }
+
+  const constructor = {
+    name: 'Constructor One', constructor_id: 'CON', driver_1: 'One', driver_2: 'Two',
+    expected_points: 25, projected_points: 40, current_price: 15,
+  };
+  const lineup = {
+    drivers: [out], constructors: [constructor], netPoints: 100, totalPoints: 100,
+    totalCost: 25, transfersNeeded: 0, penalty: 0, boostedDriverId: 'OUT',
+    secondBoostedDriverId: null, _isKeepCurrent: true, pointsBasis: 'projected',
+  };
+
+  // The lineup snapshot must also win over the now-risk-adjusted global basis.
+  S.setTransferRenderState('risk_adjusted', { drivers: [out], constructors: [constructor] }, ['OUT'], ['CON']);
+  const projectedCard = S.renderTransferCard(lineup, 0, 'none');
+  if (!projectedCard.includes('<div class="pick-h-pts">60.0') || !projectedCard.includes('<div class="pick-h-pts">40.0')) {
+    fail('Transfer Advisor projected-mode lineup card did not display projected pick points');
+  }
+
+  S.setTransferRenderState('projected', { drivers: [out], constructors: [constructor] }, ['OUT'], ['CON']);
+  const riskCard = S.renderTransferCard({ ...lineup, pointsBasis: 'risk_adjusted' }, 0, 'none');
+  if (!riskCard.includes('<div class="pick-h-pts">40.0') || !riskCard.includes('<div class="pick-h-pts">25.0')) {
+    fail('Transfer Advisor risk-adjusted lineup card changed basis unexpectedly');
+  }
+
+  S.setTransferRenderState('risk_adjusted', { drivers: [out], constructors: [constructor] }, ['OUT'], ['CON']);
+  const balancedCard = S.renderTransferCard({ ...lineup, pointsBasis: 'balanced' }, 0, 'none');
+  if (!balancedCard.includes('<div class="pick-h-pts">50.0') || !balancedCard.includes('<div class="pick-h-pts">32.5')) {
+    fail('Transfer Advisor balanced lineup card changed basis unexpectedly');
+  }
+} catch (e) {
+  fail('Transfer Advisor points-basis display regression test threw: ' + e.message);
+}
+
+// 5) Team Compare scoring helper includes normal 2x / 3x boost and CI totals.
 try {
   const drivers = [
     { driver_id: 'A', expected_points: 20, projected_points: 20, mc_total_p5: 5, mc_total_p95: 40 },
@@ -130,7 +202,7 @@ try {
   fail('scoreTeamPicks threw: ' + e.message);
 }
 
-// 5) Landing-page price history skips full actual files only when official
+// 6) Landing-page price history skips full actual files only when official
 // scores cover every current driver and constructor.
 try {
   const current = {
