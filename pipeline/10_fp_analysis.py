@@ -42,17 +42,16 @@ from config.settings import (
     CANCELLED_ROUNDS_2026,
 )
 from config.tyre_deg import (
+    FUEL_EFFECT_PER_LAP,
     stint_degradation,
     compound_average,
-    representative_stint_laps,
 )
-
-# Compounds that count as a race-pace long run (soft is treated as a quali sim).
-RACE_COMPOUNDS = {"MEDIUM", "HARD", "INTERMEDIATE", "WET"}
-# A stint needs this many raw laps to even be a long-run candidate; at least
-# LONG_RUN_MIN_CLEAN of them must survive the in/out gate + spike trim.
-LONG_RUN_MIN_RAW = 5
-LONG_RUN_MIN_CLEAN = 4
+from pipeline.fp_long_runs import (
+    LONG_RUN_MIN_CLEAN,
+    LONG_RUN_MIN_RAW,
+    extract_representative_long_runs,
+    select_headline_long_run,
+)
 
 
 # -- Load helpers --------------------------------------------------------------
@@ -181,84 +180,34 @@ def analyze_long_run_pace(df: pd.DataFrame, min_clean_laps: int = LONG_RUN_MIN_C
     if not all(c in df.columns for c in required):
         return {}
 
-    has_session = "session" in df.columns
-    has_age = "tyre_life" in df.columns
-    has_lap = "lap_number" in df.columns
-    has_compound = "compound" in df.columns
-    group_keys = (
-        (["session"] if has_session else [])
-        + ["stint"]
-        + (["compound"] if has_compound else [])
-    )
-
     clean = df[df["lap_time"].notna() & (df["lap_time"] > 0)].copy()
 
     result = {}
     for driver_id, driver_group in clean.groupby("driver_id"):
-        runs = []
-        for keys, stint_group in driver_group.groupby(group_keys):
-            keys = keys if isinstance(keys, tuple) else (keys,)
-            session = str(keys[0]) if has_session else "?"
-            compound = str(keys[-1]).upper() if has_compound else "UNKNOWN"
-            stint = keys[-2] if has_compound else keys[-1]
-
-            # Only race compounds count as race-pace long runs.
-            if has_compound and compound not in RACE_COMPOUNDS:
-                continue
-            if len(stint_group) < LONG_RUN_MIN_RAW:
-                continue
-
-            stint_sorted = stint_group.sort_values("lap_number") if has_lap else stint_group
-            times = stint_sorted["lap_time"].to_numpy(dtype=float)
-            if has_age:
-                age = stint_sorted["tyre_life"].to_numpy(dtype=float)
-            elif has_lap:
-                lap = stint_sorted["lap_number"].to_numpy(dtype=float)
-                age = lap - np.nanmin(lap)
-            else:
-                age = None
-
-            mask = representative_stint_laps(times, age, min_clean=min_clean_laps)
-            if int(mask.sum()) < min_clean_laps:
-                continue
-
-            kept = times[mask]
-            excluded = times[~mask]
-            runs.append({
-                "session": session,
-                "stint": int(stint),
-                "compound": compound,
-                "laps": int(mask.sum()),
-                "avg_pace": round(float(np.mean(kept)), 3),
-                "best_pace": round(float(np.min(kept)), 3),
-                "consistency": round(float(np.std(kept)), 3),
-                "kept_laps": [round(float(x), 3) for x in kept],
-                "excluded_laps": [round(float(x), 3) for x in excluded],
-            })
-
-        if runs:
-            # Headline pace = the most representative race-sim session, lap-
-            # weighted within it. FP2 is THE high-fuel race-run session on a
-            # normal weekend, so it wins; FP1 is the next best (sprint weekends
-            # have only FP1); FP3 is last because it's overwhelmingly low-fuel
-            # quali prep — trusting an FP3 run can put a driver on top of the
-            # race-pace board on a tank of low fuel (e.g. a hard-tyre run faster
-            # than his own medium run, which only happens light). This keeps
-            # every driver ranked on a comparable session instead of blending a
-            # green-track FP1 run in. All runs stay in `runs` for the breakdown.
-            session_order = {"FP2": 3, "FP1": 2, "FP3": 1}
-            headline_session = max(
-                runs, key=lambda r: session_order.get(r["session"], 0)
-            )["session"]
-            head_runs = [r for r in runs if r["session"] == headline_session]
-            head_laps = sum(r["laps"] for r in head_runs)
-            overall_avg = sum(r["avg_pace"] * r["laps"] for r in head_runs) / head_laps
+        runs = extract_representative_long_runs(
+            driver_group.rename(columns={"stint": "stint_number"}),
+            min_raw=LONG_RUN_MIN_RAW,
+            min_clean=min_clean_laps,
+        )
+        headline = select_headline_long_run(runs)
+        if headline is not None:
+            public_runs = [{
+                key: (
+                    [round(float(x), 3) for x in value]
+                    if key in {"kept_laps", "excluded_laps"}
+                    else round(float(value), 3)
+                    if key in {"avg_pace", "best_pace", "consistency"}
+                    else value
+                )
+                for key, value in run.items()
+                if key != "kept_tyre_age"
+            } for run in runs]
             result[driver_id] = {
-                "runs": runs,
-                "avg_long_run_pace": round(float(overall_avg), 3),
-                "headline_session": headline_session,
-                "headline_laps": head_laps,
-                "total_long_run_laps": sum(r["laps"] for r in runs),
+                "runs": public_runs,
+                "avg_long_run_pace": round(headline["avg_pace"], 3),
+                "headline_session": headline["session"],
+                "headline_laps": headline["laps"],
+                "total_long_run_laps": headline["total_long_run_laps"],
             }
 
     # Rank
@@ -721,14 +670,16 @@ def analyze_sector_rankings(df: pd.DataFrame) -> dict | None:
     return result if result else None
 
 
-def analyze_fuel_corrected_pace(df: pd.DataFrame, fuel_effect: float = 0.05) -> dict:
+def analyze_fuel_corrected_pace(
+    df: pd.DataFrame,
+    fuel_effect: float = FUEL_EFFECT_PER_LAP,
+) -> dict:
     """
-    Estimate fuel-corrected pace.
-    In FP, cars run different fuel loads. Early laps tend to be heavier.
-    Apply a simple fuel correction of ~0.05s/lap of fuel burn to estimate true race pace.
+    Fuel-normalize the same clean headline race runs used by long-run pace.
 
-    For each stint, we assume the first lap is the heaviest and apply
-    a progressive correction.
+    Only session-isolated race-compound runs qualify. Earlier laps are treated
+    as heavier and normalized to the end-of-stint fuel state; no already-clean
+    flying lap is discarded as an assumed out-lap.
     """
     if df is None or df.empty:
         return {}
@@ -737,33 +688,24 @@ def analyze_fuel_corrected_pace(df: pd.DataFrame, fuel_effect: float = 0.05) -> 
     if not all(c in df.columns for c in required):
         return {}
 
-    clean = df[df["lap_time"].notna() & (df["lap_time"] > 0)].copy()
-
     result = {}
-    for driver_id, driver_group in clean.groupby("driver_id"):
+    for driver_id, driver_group in df.groupby("driver_id"):
+        runs = extract_representative_long_runs(
+            driver_group.rename(columns={"stint": "stint_number"}),
+        )
+        headline = select_headline_long_run(runs)
+        if headline is None:
+            continue
+
         corrected_times = []
-        for stint, stint_group in driver_group.groupby("stint"):
-            if len(stint_group) < 3:
-                continue
-
-            if "lap_number" in stint_group.columns:
-                stint_sorted = stint_group.sort_values("lap_number")
-            else:
-                stint_sorted = stint_group
-
-            times = stint_sorted["lap_time"].values[1:]  # Skip first lap (out/cold)
-            if len(times) < 2:
-                continue
-
-            # Apply fuel correction: earlier laps in stint are heavier
-            # We subtract fuel_effect * (laps remaining in stint) from each lap time
-            n = len(times)
-            corrections = np.array([fuel_effect * (n - 1 - i) for i in range(n)])
+        for run in headline["runs"]:
+            times = np.asarray(run["kept_laps"], dtype=float)
+            ages = np.asarray(run.get("kept_tyre_age", []), dtype=float)
+            if len(ages) != len(times) or not np.isfinite(ages).all():
+                ages = np.arange(len(times), dtype=float)
+            # Preserve physical lap gaps left by traffic/outlier trimming.
+            corrections = fuel_effect * (np.max(ages) - ages)
             corrected = times - corrections
-
-            # Remove outliers
-            median = np.median(corrected)
-            corrected = corrected[corrected < median * 1.05]
             corrected_times.extend(corrected.tolist())
 
         if corrected_times:

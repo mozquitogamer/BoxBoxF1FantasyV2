@@ -1,4 +1,4 @@
-"""97-fold walk-forward validator for alternative algorithms (CatBoost, RandomForest).
+"""Multi-year walk-forward validator for alternative algorithms.
 
 Mirrors validate_model_config.py fold semantics exactly (same train/test splits
 via completed_folds, same metrics, same per-season stratification, same output
@@ -16,7 +16,7 @@ Algorithms:
 
 Usage:
     python pipeline/validate_alt_algo_v2.py --algorithm catboost \
-        --config-name catboost_multiyear --test-from-year 2022
+        --config-name catboost_multiyear --test-from-year 2022 --models race
 """
 from __future__ import annotations
 
@@ -99,8 +99,17 @@ def train_predict_catboost(tr, te, feats, target_col):
     tr_qids = make_race_qids(tr)
     te_qids = make_race_qids(te)
     y = position_to_relevance(tr[target_col]).to_numpy()
-    train_pool = Pool(data=tr[feats].to_numpy(), label=y, group_id=tr_qids)
-    test_pool = Pool(data=te[feats].to_numpy(), group_id=te_qids)
+    # Nullable pandas dtypes can emit scalar pd.NA objects from to_numpy(),
+    # which CatBoost cannot coerce. Force a numeric float matrix so missing
+    # values arrive as the native np.nan that CatBoost handles.
+    X_tr = tr[feats].apply(pd.to_numeric, errors="coerce").to_numpy(
+        dtype=float, na_value=np.nan
+    )
+    X_te = te[feats].apply(pd.to_numeric, errors="coerce").to_numpy(
+        dtype=float, na_value=np.nan
+    )
+    train_pool = Pool(data=X_tr, label=y, group_id=tr_qids)
+    test_pool = Pool(data=X_te, group_id=te_qids)
     model = CatBoost(CATBOOST_PARAMS)
     model.fit(train_pool)
     scores = model.predict(test_pool)
@@ -128,7 +137,16 @@ def train_predict_rf(tr, te, feats, target_col):
     return positions, te
 
 
-def run(df, algorithm, config_name, test_from_year, weight_2026=2.5, wet_boost=6.0, verbose=True):
+def run(
+    df,
+    algorithm,
+    config_name,
+    test_from_year,
+    weight_2026=2.5,
+    wet_boost=6.0,
+    verbose=True,
+    models=("quali", "race", "sprint"),
+):
     folds = completed_folds(df, test_from_year)
     df = reweight_2026(df, weight_2026, wet_boost)
     quali_features = build_quali_feature_list(list(df.columns))
@@ -157,6 +175,8 @@ def run(df, algorithm, config_name, test_from_year, weight_2026=2.5, wet_boost=6
             ("race", "finish_position", race_features, 100),
             ("sprint", "sprint_position", sprint_features, 60),
         ]:
+            if model_name not in models:
+                continue
             if target not in df.columns:
                 continue
             tr = df[train_mask & df[target].notna()].copy()
@@ -185,14 +205,30 @@ def main():
     ap.add_argument("--algorithm", choices=["catboost", "randomforest"], required=True)
     ap.add_argument("--config-name", required=True)
     ap.add_argument("--test-from-year", type=int, default=CURRENT_SEASON)
+    ap.add_argument(
+        "--models",
+        default="quali,race,sprint",
+        help="Comma-separated subset: quali,race,sprint (default: all)",
+    )
     args = ap.parse_args()
+
+    models = tuple(m.strip() for m in args.models.split(",") if m.strip())
+    unknown = sorted(set(models) - {"quali", "race", "sprint"})
+    if not models or unknown:
+        raise SystemExit(f"Invalid --models selection: {args.models!r}")
 
     np.random.seed(RNG_SEED)
     df = load_training_data()
     folds = completed_folds(df, args.test_from_year)
     print(f"Training data: {len(df):,} rows | {len(folds)} folds from {args.test_from_year}")
     print(f"Algorithm: {args.algorithm}\n")
-    result = run(df, args.algorithm, args.config_name, args.test_from_year)
+    result = run(
+        df,
+        args.algorithm,
+        args.config_name,
+        args.test_from_year,
+        models=models,
+    )
     out_path = EXPERIMENTS_DIR / f"{args.config_name}.json"
     out_path.write_text(json.dumps(result, indent=2, default=float))
     print(f"\nWrote {out_path}")

@@ -332,13 +332,13 @@ Built in `pipeline/03b_build_jolpica_features.py`.
 
 - **Pace:** avg_lap_time, best_lap_time, median_lap_time, best_3_lap_avg, best_5_lap_avg, best_10_lap_avg, p50_to_p95_avg
 - **Consistency:** lap_time_std, lap_time_variance, coefficient of variation
-- **Degradation:** degradation_rate (linear regression slope across longest stint)
-- **Long run / short run:** long_run_avg, long_run_rank, short_run_best
+- **Degradation:** degradation_rate (fuel-corrected, robust slope from a real session-isolated race-compound stint)
+- **Long run / short run:** long_run_avg, long_run_rank, short_run_best. Long-run candidates are grouped by `(session, stint_number, compound)`, require at least 5 raw / 4 clean laps, and use tyre-life-aware junk-lap and traffic-spike filtering. The headline is lap-weighted within one session only, prioritizing FP2 → FP1 → FP3; a driver without comparable evidence remains NaN.
 - **Sectors:** avg_sector_{1,2,3}, best_sector_{1,2,3}
 - **Compound-specific:** soft_best_lap, soft_avg_lap, medium_long_run_avg, hard_long_run_avg, medium_degradation, hard_degradation — separates qualifying-sim pace (soft) from race-sim pace (medium/hard)
 - **Pace deltas:** pace_delta_to_fastest, pace_delta_to_median, race_pace_delta_to_median, sector_N_delta_to_fastest, long_run_delta_to_median — **circuit-portable** features (a 0.5s gap means the same at Monaco and Monza)
 
-Built in `pipeline/03_extract_features.py`. Features extracted **only** from `all_laps_fp*.parquet`. Sprint qualifying laps are saved separately (`all_laps_sprint_qualifying.parquet`) and feed only the Race Deep Dive page (`10_fp_analysis.py`), not model training.
+Built in `pipeline/03_extract_features.py`, with `pipeline/fp_long_runs.py` as the shared source of truth for representative long runs used by both ML features and `10_fp_analysis.py`. Keeping session, stint and compound in the grouping prevents FastF1's per-session stint-number reset from fabricating a weekend-long run; restricting the headline to one session avoids mixing different track evolution and fuel programmes. The same clean evidence also feeds compound pace, degradation and the displayed fuel-corrected table. Features are extracted **only** from `all_laps_fp*.parquet`. Sprint qualifying laps are saved separately (`all_laps_sprint_qualifying.parquet`) and feed only the Race Deep Dive page (`10_fp_analysis.py`), not model training.
 
 #### Engineered cross-layer features
 
@@ -1073,7 +1073,7 @@ The constructor qualifying bonus depends on which Q sessions both drivers reach 
 
 **Updated 2026-05-25 (Weather Level 3 shipped):** the quali/race/sprint models now ingest per-session weather features (`weather_was_wet_*`, `weather_track_temp_*`, `weather_air_temp_*`, `weather_humidity_*`, plus `weather_precip_minutes_race`) and a `CONSTRUCTOR_COLD_WEATHER_SKILL` rating. Inference reads `weather.json` and injects the forecast. The Monte Carlo widens noise + DNF rate and applies per-driver wet/cold perturbations based on rain risk and air temperature (`MC_WEATHER_TUNABLES` in `08_monte_carlo_fantasy.py`).
 
-**Remaining limitation:** the validation gate was relaxed from the original +0.30 wet MAE target — achieved +0.185 due to small wet-race sample size (11 wet rounds in test window). The MC widener multipliers (1.7× noise, 2.6× DNF on HIGH rain) are reasonable first-pass values, not yet recalibrated from observed prediction error on wet 2026 weekends. See `docs/WEATHER_LEVEL3_IMPLEMENTATION_PLAN.md` for full Phase A-E report.
+**Calibration history and remaining limitation:** the validation gate was relaxed from the original +0.30 wet MAE target — achieved +0.185 due to the small wet-race sample (11 wet rounds in the test window). At the 2026-05-25 launch, the MC widener used first-pass HIGH multipliers of 1.7× noise and 2.6× DNF. On 2026-07-18 these were recalibrated to the more conservative `LOW 1.02/1.05`, `MEDIUM 1.08/1.13`, `HIGH 1.15/1.25` noise/DNF curve, anchored to the observed ~1.23× full-wet DNF uplift and removing the former cliff at MEDIUM risk. No completed 2026 MEDIUM/HIGH forecast bucket is yet available for direct outcome calibration, so this remains deliberately conservative. See `docs/WEATHER_LEVEL3_IMPLEMENTATION_PLAN.md` for the original Phase A-E report.
 
 **Still open (Level 3.5):** dedicated DNF-by-weather classifier — would predict per-driver DNF probability conditional on `(driver_id, constructor_id, was_wet, track, temp, recent_DNF)` and feed MC's DNF sampling directly. More robust than the current rolling 5-race blended DNF rate when applied to wet conditions.
 
@@ -1124,8 +1124,8 @@ Because the points curve is convex and floored at 0 past P10, the Monte Carlo **
 
 3. **What-If Scenarios Phases 2-3** — optimizer + transfer advisor + multi-week planner consulting scenario state; compare-two-scenarios side-by-side; MC band overlay on scenarios; suggest-a-bump hints based on FP signal.
 
-4. **MC weather widener calibration from observed data**
-   The current widener tunables (1.7× noise on HIGH rain, 2.6× DNF, etc.) are reasonable first-pass values. After 2-3 real wet weekends in 2026, recalibrate from observed prediction-vs-actual deltas.
+4. **Continue MC weather widener calibration from observed data**
+   The 2026-07-18 conservative curve caps HIGH rain at 1.15× position noise and 1.25× DNF risk (MEDIUM 1.08×/1.13×). Revisit it after 2-3 completed MEDIUM/HIGH forecast weekends provide direct prediction-vs-actual evidence.
 
 5. **Grid Penalty Integration**
    Auto-detect and apply engine/gearbox penalties. Dramatic fantasy impact.

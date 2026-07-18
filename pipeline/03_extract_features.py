@@ -33,6 +33,17 @@ from config.settings import (
     FEATURES_DIR,
     MIN_LONG_RUN_LAPS,
 )
+from config.tyre_deg import (
+    MIN_CLEAN_LAPS as DEG_MIN_CLEAN_LAPS,
+    compound_average,
+    stint_degradation,
+)
+from pipeline.fp_long_runs import (
+    FP_STINT_SEMANTICS_VERSION,
+    extract_representative_long_runs,
+    select_headline_long_run,
+    stint_group_columns,
+)
 
 
 # -- Feature extraction functions ----------------------------------------------
@@ -82,72 +93,46 @@ def consistency_features(group: pd.DataFrame) -> pd.Series:
 
 def degradation_features(group: pd.DataFrame) -> pd.Series:
     """
-    Estimate tyre degradation rate using linear regression on stint lap times.
+    Estimate fuel-corrected tyre degradation from one real race-compound stint.
 
-    Uses the longest stint to estimate the slope of lap time increase.
+    Session/stint/compound isolation prevents FastF1's session-reset stint
+    numbers from concatenating unrelated runs. The longest clean fit is used.
     """
-    features = {"degradation_rate": 0.0}
+    features = {"degradation_rate": np.nan}
+    runs = extract_representative_long_runs(
+        group,
+        min_raw=DEG_MIN_CLEAN_LAPS,
+        min_clean=DEG_MIN_CLEAN_LAPS,
+    )
+    estimates = []
+    for run in runs:
+        deg, n_clean = stint_degradation(
+            run["kept_laps"],
+            run["kept_tyre_age"],
+            min_laps=DEG_MIN_CLEAN_LAPS,
+        )
+        if deg is not None:
+            estimates.append((deg, n_clean))
 
-    if "stint_number" not in group.columns:
-        return pd.Series(features)
-
-    # Find the longest stint
-    stints = group.groupby("stint_number")
-    longest_stint = None
-    max_len = 0
-
-    for stint_num, stint_df in stints:
-        valid = stint_df[stint_df["lap_time"].notna()]
-        if len(valid) > max_len:
-            max_len = len(valid)
-            longest_stint = valid
-
-    if longest_stint is None or len(longest_stint) < 3:
-        return pd.Series(features)
-
-    # Simple linear regression: lap_time vs lap_index
-    x = np.arange(len(longest_stint), dtype=float)
-    y = longest_stint["lap_time"].values.astype(float)
-
-    # Remove NaN
-    mask = ~np.isnan(y)
-    x, y = x[mask], y[mask]
-
-    if len(x) < 3:
-        return pd.Series(features)
-
-    # Slope via least squares
-    x_mean = x.mean()
-    y_mean = y.mean()
-    numerator = ((x - x_mean) * (y - y_mean)).sum()
-    denominator = ((x - x_mean) ** 2).sum()
-
-    if denominator > 0:
-        features["degradation_rate"] = numerator / denominator
-
+    if estimates:
+        # Preserve the old feature's "most representative single stint"
+        # intent, but select a real physical stint instead of a cross-session
+        # concatenation.
+        features["degradation_rate"] = max(estimates, key=lambda x: x[1])[0]
     return pd.Series(features)
 
 
 def long_run_features(group: pd.DataFrame, min_laps: int) -> pd.Series:
     """
-    Compute long run pace features.
-
-    Detects stints with at least min_laps laps and computes average pace.
+    Compute representative race-compound pace from a comparable FP session.
     """
     features = {"long_run_avg": np.nan, "long_run_laps": 0}
 
-    if "stint_number" not in group.columns:
-        return pd.Series(features)
-
-    long_run_times = []
-    for stint_num, stint_df in group.groupby("stint_number"):
-        valid = stint_df["lap_time"].dropna()
-        if len(valid) >= min_laps:
-            long_run_times.extend(valid.tolist())
-
-    if long_run_times:
-        features["long_run_avg"] = np.mean(long_run_times)
-        features["long_run_laps"] = len(long_run_times)
+    runs = extract_representative_long_runs(group, min_raw=min_laps)
+    headline = select_headline_long_run(runs)
+    if headline is not None:
+        features["long_run_avg"] = headline["avg_pace"]
+        features["long_run_laps"] = headline["laps"]
 
     return pd.Series(features)
 
@@ -167,7 +152,8 @@ def short_run_features(group: pd.DataFrame) -> pd.Series:
         return pd.Series(features)
 
     fresh_tyre_times = []
-    for stint_num, stint_df in group.groupby("stint_number"):
+    group_keys = stint_group_columns(group)
+    for _, stint_df in group.groupby(group_keys, dropna=False, sort=False):
         valid = stint_df.sort_values("lap_number")["lap_time"].dropna()
         # First 3 laps of each stint
         fresh_tyre_times.extend(valid.head(3).tolist())
@@ -194,7 +180,10 @@ def sector_features(group: pd.DataFrame) -> pd.Series:
     return pd.Series(features)
 
 
-def compound_features(group: pd.DataFrame) -> pd.Series:
+def compound_features(
+    group: pd.DataFrame,
+    min_long_run_laps: int = MIN_LONG_RUN_LAPS,
+) -> pd.Series:
     """
     Extract tyre-compound-aware features.
 
@@ -228,30 +217,27 @@ def compound_features(group: pd.DataFrame) -> pd.Series:
         features["soft_best_lap"] = soft_laps.min()
         features["soft_avg_lap"] = soft_laps.mean()
 
-    # Medium tyre: race sims
-    med_mask = compounds.isin(["MEDIUM", "M"])
-    med_laps = group.loc[med_mask, "lap_time"].dropna()
-    if len(med_laps) >= 3:
-        features["medium_long_run_avg"] = med_laps.mean()
-        # Degradation: slope over sequential laps
-        x = np.arange(len(med_laps), dtype=float)
-        y = med_laps.values.astype(float)
-        x_mean, y_mean = x.mean(), y.mean()
-        denom = ((x - x_mean) ** 2).sum()
-        if denom > 0:
-            features["medium_degradation"] = ((x - x_mean) * (y - y_mean)).sum() / denom
+    runs = extract_representative_long_runs(group, min_raw=min_long_run_laps)
+    for compound, avg_key, deg_key in [
+        ("MEDIUM", "medium_long_run_avg", "medium_degradation"),
+        ("HARD", "hard_long_run_avg", "hard_degradation"),
+    ]:
+        headline = select_headline_long_run(runs, compound=compound)
+        if headline is not None:
+            features[avg_key] = headline["avg_pace"]
 
-    # Hard tyre: race sims
-    hard_mask = compounds.isin(["HARD", "H"])
-    hard_laps = group.loc[hard_mask, "lap_time"].dropna()
-    if len(hard_laps) >= 3:
-        features["hard_long_run_avg"] = hard_laps.mean()
-        x = np.arange(len(hard_laps), dtype=float)
-        y = hard_laps.values.astype(float)
-        x_mean, y_mean = x.mean(), y.mean()
-        denom = ((x - x_mean) ** 2).sum()
-        if denom > 0:
-            features["hard_degradation"] = ((x - x_mean) * (y - y_mean)).sum() / denom
+        estimates = []
+        for run in runs:
+            if run["compound"] != compound:
+                continue
+            estimates.append(stint_degradation(
+                run["kept_laps"],
+                run["kept_tyre_age"],
+                min_laps=DEG_MIN_CLEAN_LAPS,
+            ))
+        avg_deg, _, _ = compound_average(estimates)
+        if avg_deg is not None:
+            features[deg_key] = avg_deg
 
     return pd.Series(features)
 
@@ -306,7 +292,7 @@ def extract_driver_features(
         row.update(sec.to_dict())
 
         # Compound-specific features (Tier 2.2)
-        comp = compound_features(group)
+        comp = compound_features(group, min_long_run_laps)
         row.update(comp.to_dict())
 
         results.append(row)
@@ -320,12 +306,10 @@ def extract_driver_features(
         fill_val = (max_rank + 1) if pd.notna(max_rank) else 1
         df["pace_rank"] = df["pace_rank"].fillna(fill_val).astype(int)
 
-    # Add long run rank (NaN for drivers with no long runs)
+    # Missing means "no comparable race run", not "slowest". Leave it NaN so
+    # XGBoost/CatBoost can follow their learned missing branch.
     if "long_run_avg" in df.columns:
         df["long_run_rank"] = df["long_run_avg"].rank(method="min")
-        max_rank = df["long_run_rank"].max()
-        fill_val = (max_rank + 1) if pd.notna(max_rank) else 1
-        df["long_run_rank"] = df["long_run_rank"].fillna(fill_val).astype(int)
 
     # -- Relative pace normalization (Tier 2.3) --
     # These features transfer across circuits: a 0.5s delta means the same everywhere
@@ -410,6 +394,9 @@ def main() -> None:
     features_df["year"] = CURRENT_SEASON
     features_df["round"] = round_num
     features_df["fp_sessions_used"] = len(fp_files)
+    # This is metadata, not a model feature. It lets training and inference
+    # reject stale parquets produced with the old cross-session stint rules.
+    features_df["fp_stint_semantics_version"] = FP_STINT_SEMANTICS_VERSION
 
     # Save
     output_dir = FEATURES_DIR / f"round{round_num}"

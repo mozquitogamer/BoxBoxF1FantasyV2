@@ -1,4 +1,5 @@
 {
+  "fp_stint_semantics_version": 2,
   "quali_features": [
     "adaptability",
     "avg_corner_speed",

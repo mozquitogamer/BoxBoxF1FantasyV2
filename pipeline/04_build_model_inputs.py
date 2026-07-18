@@ -53,6 +53,10 @@ from config.settings import (
     PROCESSED_DIR,
 )
 from pipeline.feature_engineering import engineer_features
+from pipeline.fp_long_runs import (
+    FP_STINT_SEMANTICS_VERSION,
+    require_fp_stint_semantics,
+)
 
 
 # -- Weather features (Level 3) -----------------------------------------------
@@ -167,6 +171,8 @@ def load_fp_features_for_round(
     if "driver_id" not in df.columns:
         print(f"    Warning: no driver_id column in {fp_path}")
         return None
+
+    require_fp_stint_semantics(df, source=fp_path)
 
     # Keep only driver_id and recognized FP columns
     all_fp_cols = FP_ALL_POSSIBLE_COLUMNS + ENGINEERED_FP_COLUMNS
@@ -535,6 +541,13 @@ def main() -> None:
     TRAINING_DATA_DIR.mkdir(parents=True, exist_ok=True)
     output_path = TRAINING_DATA_DIR / "all_training_data.parquet"
     training_data.to_parquet(output_path, index=False, engine="pyarrow")
+    training_metadata_path = TRAINING_DATA_DIR / "training_metadata.json"
+    training_metadata_path.write_text(json.dumps({
+        "fp_stint_semantics_version": FP_STINT_SEMANTICS_VERSION,
+        "fp_stint_semantics": (
+            "session+stint+compound; clean race compounds; FP2>FP1>FP3 headline"
+        ),
+    }, indent=2))
 
     # ---- Summary -------------------------------------------------------------
     fp_indicator_col = "best_lap_time"

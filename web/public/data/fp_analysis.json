@@ -4340,189 +4340,93 @@
     ]
   },
   "fuel_corrected_pace": {
-    "ALB": {
-      "fuel_corrected_avg": 112.124,
-      "fuel_corrected_best": 107.969,
-      "fuel_corrected_median": 112.098,
-      "laps_used": 12,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 2.939
-    },
-    "ALO": {
-      "fuel_corrected_avg": 111.45,
-      "fuel_corrected_best": 111.368,
-      "fuel_corrected_median": 111.45,
-      "laps_used": 2,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 2.265
-    },
     "ANT": {
-      "fuel_corrected_avg": 110.952,
-      "fuel_corrected_best": 106.761,
-      "fuel_corrected_median": 111.857,
-      "laps_used": 14,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 1.767
-    },
-    "BEA": {
-      "fuel_corrected_avg": 109.79,
-      "fuel_corrected_best": 107.692,
-      "fuel_corrected_median": 109.0,
-      "laps_used": 7,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 0.605
-    },
-    "BOR": {
-      "fuel_corrected_avg": 109.895,
-      "fuel_corrected_best": 108.135,
-      "fuel_corrected_median": 110.066,
-      "laps_used": 7,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 0.71
+      "fuel_corrected_avg": 112.19,
+      "fuel_corrected_best": 111.838,
+      "fuel_corrected_median": 112.136,
+      "laps_used": 8,
+      "fuel_correction_per_lap": 0.035,
+      "gap_to_fastest": 1.6
     },
     "BOT": {
-      "fuel_corrected_avg": 113.093,
-      "fuel_corrected_best": 109.099,
-      "fuel_corrected_median": 111.381,
-      "laps_used": 11,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 3.908
-    },
-    "COL": {
-      "fuel_corrected_avg": 109.192,
-      "fuel_corrected_best": 107.047,
-      "fuel_corrected_median": 109.383,
-      "laps_used": 9,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 0.007
-    },
-    "CRA": {
-      "fuel_corrected_avg": 115.219,
-      "fuel_corrected_best": 112.999,
-      "fuel_corrected_median": 115.591,
-      "laps_used": 6,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 6.034
+      "fuel_corrected_avg": 117.996,
+      "fuel_corrected_best": 115.825,
+      "fuel_corrected_median": 116.739,
+      "laps_used": 4,
+      "fuel_correction_per_lap": 0.035,
+      "gap_to_fastest": 7.406
     },
     "GAS": {
-      "fuel_corrected_avg": 112.691,
-      "fuel_corrected_best": 109.009,
-      "fuel_corrected_median": 113.509,
-      "laps_used": 11,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 3.506
+      "fuel_corrected_avg": 113.856,
+      "fuel_corrected_best": 113.318,
+      "fuel_corrected_median": 113.868,
+      "laps_used": 6,
+      "fuel_correction_per_lap": 0.035,
+      "gap_to_fastest": 3.266
     },
     "HAD": {
-      "fuel_corrected_avg": 110.759,
-      "fuel_corrected_best": 106.772,
-      "fuel_corrected_median": 112.023,
-      "laps_used": 19,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 1.574
-    },
-    "HAM": {
-      "fuel_corrected_avg": 109.185,
-      "fuel_corrected_best": 106.961,
-      "fuel_corrected_median": 108.379,
-      "laps_used": 12,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 0.0
+      "fuel_corrected_avg": 112.361,
+      "fuel_corrected_best": 111.685,
+      "fuel_corrected_median": 112.432,
+      "laps_used": 6,
+      "fuel_correction_per_lap": 0.035,
+      "gap_to_fastest": 1.771
     },
     "HUL": {
-      "fuel_corrected_avg": 112.881,
-      "fuel_corrected_best": 110.435,
-      "fuel_corrected_median": 113.367,
-      "laps_used": 10,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 3.696
+      "fuel_corrected_avg": 113.553,
+      "fuel_corrected_best": 112.802,
+      "fuel_corrected_median": 113.609,
+      "laps_used": 8,
+      "fuel_correction_per_lap": 0.035,
+      "gap_to_fastest": 2.963
     },
     "LAW": {
-      "fuel_corrected_avg": 111.044,
-      "fuel_corrected_best": 107.732,
-      "fuel_corrected_median": 111.201,
-      "laps_used": 12,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 1.859
+      "fuel_corrected_avg": 113.558,
+      "fuel_corrected_best": 113.062,
+      "fuel_corrected_median": 113.646,
+      "laps_used": 6,
+      "fuel_correction_per_lap": 0.035,
+      "gap_to_fastest": 2.968
     },
     "LEC": {
-      "fuel_corrected_avg": 110.016,
-      "fuel_corrected_best": 107.277,
-      "fuel_corrected_median": 108.698,
-      "laps_used": 12,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 0.831
+      "fuel_corrected_avg": 112.251,
+      "fuel_corrected_best": 111.713,
+      "fuel_corrected_median": 112.319,
+      "laps_used": 4,
+      "fuel_correction_per_lap": 0.035,
+      "gap_to_fastest": 1.661
     },
     "LIN": {
-      "fuel_corrected_avg": 110.486,
-      "fuel_corrected_best": 107.044,
-      "fuel_corrected_median": 109.479,
-      "laps_used": 14,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 1.301
-    },
-    "NOR": {
-      "fuel_corrected_avg": 110.297,
-      "fuel_corrected_best": 106.134,
-      "fuel_corrected_median": 111.084,
-      "laps_used": 9,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 1.112
-    },
-    "OCO": {
-      "fuel_corrected_avg": 111.038,
-      "fuel_corrected_best": 108.619,
-      "fuel_corrected_median": 110.987,
-      "laps_used": 10,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 1.853
-    },
-    "PER": {
-      "fuel_corrected_avg": 112.812,
-      "fuel_corrected_best": 109.496,
-      "fuel_corrected_median": 112.453,
-      "laps_used": 14,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 3.627
+      "fuel_corrected_avg": 113.539,
+      "fuel_corrected_best": 113.268,
+      "fuel_corrected_median": 113.356,
+      "laps_used": 5,
+      "fuel_correction_per_lap": 0.035,
+      "gap_to_fastest": 2.949
     },
     "PIA": {
-      "fuel_corrected_avg": 110.037,
-      "fuel_corrected_best": 107.644,
-      "fuel_corrected_median": 110.504,
-      "laps_used": 6,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 0.852
-    },
-    "RUS": {
-      "fuel_corrected_avg": 110.627,
-      "fuel_corrected_best": 107.891,
-      "fuel_corrected_median": 111.549,
-      "laps_used": 11,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 1.442
+      "fuel_corrected_avg": 110.59,
+      "fuel_corrected_best": 110.11,
+      "fuel_corrected_median": 110.581,
+      "laps_used": 4,
+      "fuel_correction_per_lap": 0.035,
+      "gap_to_fastest": 0.0
     },
     "SAI": {
-      "fuel_corrected_avg": 113.944,
-      "fuel_corrected_best": 110.713,
-      "fuel_corrected_median": 114.719,
-      "laps_used": 11,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 4.759
-    },
-    "STR": {
-      "fuel_corrected_avg": 112.821,
-      "fuel_corrected_best": 111.081,
-      "fuel_corrected_median": 112.931,
-      "laps_used": 7,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 3.636
+      "fuel_corrected_avg": 115.288,
+      "fuel_corrected_best": 114.779,
+      "fuel_corrected_median": 115.248,
+      "laps_used": 6,
+      "fuel_correction_per_lap": 0.035,
+      "gap_to_fastest": 4.698
     },
     "VER": {
-      "fuel_corrected_avg": 110.92,
-      "fuel_corrected_best": 106.792,
-      "fuel_corrected_median": 111.326,
-      "laps_used": 19,
-      "fuel_correction_per_lap": 0.05,
-      "gap_to_fastest": 1.735
+      "fuel_corrected_avg": 111.771,
+      "fuel_corrected_best": 111.195,
+      "fuel_corrected_median": 111.594,
+      "laps_used": 7,
+      "fuel_correction_per_lap": 0.035,
+      "gap_to_fastest": 1.181
     }
   },
   "improvement_trajectory": {

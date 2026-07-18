@@ -1,6 +1,19 @@
 {
   "entries": [
     {
+      "date": "2026-07-18",
+      "title": "Practice long runs corrected and rain simulations retuned",
+      "tags": [
+        "fix",
+        "model"
+      ],
+      "body": [
+        "We found that the model's practice-data extractor could accidentally join unrelated runs when the same stint number appeared in different sessions or on different tyre compounds. That made some short qualifying-style runs look like race simulations and could overstate a driver's long-run pace. Runs are now kept separate by session, stint and compound, with the same robust lap cleaning used by the Analysis tab; drivers without a comparable race run are left as unknown rather than treated as slow.",
+        "We rebuilt the historical practice features and retrained the prediction models on the corrected data. Qualifying pace still matters, but the race forecast now gets a cleaner long-run signal built only from genuine, comparable practice stints.",
+        "Rain simulations were also toned down using the historical wet-versus-dry record. A medium rain forecast no longer nearly doubles every driver's retirement risk or adds a 40% uncertainty jump; confidence ranges and wet-weather skill still respond to the forecast, but without producing unrealistic retirement probabilities from a borderline forecast."
+      ]
+    },
+    {
       "date": "2026-07-12",
       "title": "Faster first load and better search discovery",
       "tags": [

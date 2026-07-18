@@ -62,6 +62,7 @@ from config.settings import (
     CURRENT_SEASON,
 )
 from pipeline.feature_engineering import engineer_features
+from pipeline.fp_long_runs import FP_STINT_SEMANTICS_VERSION
 
 try:
     import xgboost as xgb
@@ -702,6 +703,21 @@ def main() -> None:
         print(f"Training data not found at {training_path}")
         print("Run 04_build_model_inputs.py first.")
         return
+
+    training_metadata_path = TRAINING_DATA_DIR / "training_metadata.json"
+    if not training_metadata_path.exists():
+        raise RuntimeError(
+            f"Training metadata not found at {training_metadata_path}. "
+            "Re-run 04_build_model_inputs.py before training."
+        )
+    training_metadata = json.loads(training_metadata_path.read_text())
+    training_semantics = training_metadata.get("fp_stint_semantics_version")
+    if training_semantics != FP_STINT_SEMANTICS_VERSION:
+        raise RuntimeError(
+            "Training data uses stale or unknown FP stint semantics "
+            f"({training_semantics!r}); expected v{FP_STINT_SEMANTICS_VERSION}. "
+            "Re-extract FP features and run 04_build_model_inputs.py."
+        )
 
     df = pd.read_parquet(training_path)
     print(f"\nLoaded training data: {len(df):,} rows, {df.shape[1]} columns")
@@ -1415,6 +1431,7 @@ def main() -> None:
     # Save Feature Columns
     # ==================================================================
     feature_columns_data = {
+        "fp_stint_semantics_version": FP_STINT_SEMANTICS_VERSION,
         "quali_features": quali_available,
         "race_features": race_available,
         # race_fp shares the same feature list as race -- the only difference
@@ -1448,6 +1465,10 @@ def main() -> None:
         "total_rows": len(df),
         "seasons": sorted([int(s) for s in df["season"].unique()]),
         "fp_coverage": f"{fp_rows}/{len(df)} ({fp_rows/len(df):.1%})",
+        "fp_stint_semantics_version": FP_STINT_SEMANTICS_VERSION,
+        "fp_stint_semantics": (
+            "session+stint+compound; clean race compounds; FP2>FP1>FP3 headline"
+        ),
         "qualifying_model": {
             "algorithm": "XGBRanker (rank:pairwise)",
             "save_format": "json",

@@ -285,9 +285,14 @@ MC_WEATHER_TUNABLES = {
         # rain, often days out and likely to firm up dry). Kept a light touch so
         # a small chance of rain doesn't materially inflate the CI; real widening
         # is reserved for MEDIUM/HIGH where rain is genuinely likely.
-        "LOW":    {"noise_mult": 1.05, "dnf_mult": 1.10, "wet_weight": 0.02},
-        "MEDIUM": {"noise_mult": 1.40, "dnf_mult": 1.90, "wet_weight": 0.04},
-        "HIGH":   {"noise_mult": 1.70, "dnf_mult": 2.60, "wet_weight": 0.06},
+        # Historical wet races show ~1.23x dry DNF incidence and only a modest
+        # increase in grid-to-finish movement. Forecast buckets are mixtures of
+        # wet/dry outcomes, so their multipliers stay below (or at HIGH, close
+        # to) that observed full-wet uplift. This also removes the former cliff
+        # where a 50% / 0.0mm forecast jumped straight to 1.90x DNF risk.
+        "LOW":    {"noise_mult": 1.02, "dnf_mult": 1.05, "wet_weight": 0.01},
+        "MEDIUM": {"noise_mult": 1.08, "dnf_mult": 1.13, "wet_weight": 0.03},
+        "HIGH":   {"noise_mult": 1.15, "dnf_mult": 1.25, "wet_weight": 0.05},
     },
     # Per air-temp bucket (Celsius): cold_skill weight only. Cold doesn't widen
     # noise (cold races aren't more chaotic on average, just different in pace).

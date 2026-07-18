@@ -43,6 +43,7 @@ from config.settings import (  # noqa: E402
     MIN_LONG_RUN_LAPS,
     FP_SESSIONS,
 )
+from pipeline.fp_long_runs import FP_STINT_SEMANTICS_VERSION  # noqa: E402
 import fastf1  # noqa: E402
 
 DEFAULT_YEARS = [2022, 2023, 2024, 2025]
@@ -131,6 +132,7 @@ def main() -> None:
             if feats is None or feats.empty:
                 print(f"  R{rnd}: no FP laps loaded")
                 continue
+            feats["fp_stint_semantics_version"] = FP_STINT_SEMANTICS_VERSION
             out_dir.mkdir(parents=True, exist_ok=True)
             feats.to_parquet(out_path, index=False, engine="pyarrow")
             n_fp = int(feats["best_lap_time"].notna().sum()) if "best_lap_time" in feats else 0

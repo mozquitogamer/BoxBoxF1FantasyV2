@@ -51,6 +51,10 @@ from config.settings import (
     load_grid_penalties,
 )
 from pipeline.feature_engineering import engineer_features
+from pipeline.fp_long_runs import (
+    FP_STINT_SEMANTICS_VERSION,
+    require_fp_stint_semantics,
+)
 from config.track_classifications import (
     get_circuit_id_from_race_name,
     get_track_features,
@@ -945,6 +949,8 @@ def run_predictions(
         print(f"  --no-fp set: ignoring FP features (priors-only prediction)")
     elif fp_path.exists():
         fp_df = pd.read_parquet(fp_path)
+        require_fp_stint_semantics(fp_df, source=fp_path)
+        fp_df = fp_df.drop(columns=["fp_stint_semantics_version"])
         print(f"  Loaded FP features for {len(fp_df)} drivers from {fp_path}")
     else:
         print(f"  No FP features found at {fp_path} — using priors only")
@@ -1052,6 +1058,14 @@ def run_predictions(
     # Load feature column lists
     with open(feature_cols_path) as f:
         feature_cols_data = json.load(f)
+    if fp_df is not None and not fp_df.empty:
+        model_semantics = feature_cols_data.get("fp_stint_semantics_version")
+        if model_semantics != FP_STINT_SEMANTICS_VERSION:
+            raise RuntimeError(
+                "Trained models use stale or unknown FP stint semantics "
+                f"({model_semantics!r}); expected v{FP_STINT_SEMANTICS_VERSION}. "
+                "Rebuild model inputs and run 05_train_models.py before post-FP inference."
+            )
     quali_feature_list = feature_cols_data["quali_features"]
     race_feature_list = feature_cols_data.get("race_fp_features") if use_fp_race_model else None
     if not race_feature_list:
@@ -1495,6 +1509,9 @@ def run_predictions(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "is_post_quali": is_post_quali,
         "used_fp_features": has_fp,
+        "fp_stint_semantics_version": (
+            FP_STINT_SEMANTICS_VERSION if has_fp else None
+        ),
         "skip_fp_flag": skip_fp,
         "force_flag": force,
         "race_model_used": race_model_used.name,

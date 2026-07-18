@@ -46,6 +46,7 @@ Your starting point. Predicted fantasy points for every driver this round.
 The F1 Fantasy deadline is **before qualifying**, so the only live data we have when you're picking a team is **free practice**. The predictions are built to make the most of it:
 
 - **Practice pace drives the qualifying call.** We blend the model toward each driver's actual practice pace — and we use a *consistency* measure (their best lap **plus** their best-3-lap and best-5-lap averages), not just one hot lap, so a single tow-assisted banker doesn't fool it. On testing this predicts qualifying better than the model alone.
+- **Long-run pace uses real, comparable race runs.** FP1, FP2 and FP3 stint numbers reset, so the pipeline keeps every session, stint and tyre compound separate instead of accidentally joining unrelated laps. Only medium, hard or wet-weather runs of at least five laps qualify; in/out laps, cool-downs, traffic and lock-up spikes are removed. On a normal weekend the headline prefers FP2, then FP1, then FP3, and never averages different sessions together.
 - **Hard-to-overtake tracks behave like the real thing.** At circuits like Monaco where passing is nearly impossible, the predicted finish stays close to the grid (you can't gain places you can't physically take). At easy-overtaking tracks (Monza, Spa) pace fully decides the order.
 - **Why "projected" and "risk-adjusted" can disagree (working as intended):** the two numbers pull apart in a consistent way because fantasy points are worth a lot at the front (P1=25, P5=10) but almost nothing past P10 (P11 and back score ~0).
   - **A predicted winner usually shows a *lower* risk-adjusted number.** They're already at the top — any surprise can only move them *down* — and they carry the race's DNF risk. So it's normal for the predicted P2 to show more risk-adjusted points than the predicted winner (the runner-up may also be a Driver-of-the-Day favourite).
@@ -76,10 +77,10 @@ Click the small **±** button on the top-left of any driver or constructor card 
 
 When the race forecast triggers any weather-aware adjustment, you'll see one or two badges at the top of each driver/constructor card:
 
-- **🌧 Wet race forecast / Wet race likely / Light rain risk** — the Monte Carlo's confidence intervals widen, DNF risk multiplier kicks in (up to 2.6× on HIGH rain risk), and historically wet-strong drivers (Verstappen, Hamilton, Alonso, Antonelli) get a small score bias upward
+- **🌧 Wet race forecast / Wet race likely / Light rain risk** — the Monte Carlo's confidence intervals widen, DNF risk multiplier kicks in (up to 1.25× on HIGH rain risk; 1.13× on MEDIUM), and historically wet-strong drivers (Verstappen, Hamilton, Alonso, Antonelli) get a small score bias upward
 - **🥶 Cool race {temp}°C** — appears when the race forecast is under ~18°C air temp. Cold-strong constructors (Mercedes, Williams) get a small score bias upward in the simulation
 
-The weather widget on the Drivers tab also expands with a plain-English explainer of what's being adjusted ("Rain risk HIGH → confidence intervals widened by 70%, DNF risk ×2.6, wet-skilled drivers favoured.").
+The weather widget on the Drivers tab also expands with a plain-English explainer of what's being adjusted (for example, "Rain risk HIGH → confidence intervals widened by 15%, DNF risk ×1.25, wet-skilled drivers favoured.").
 
 ---
 
