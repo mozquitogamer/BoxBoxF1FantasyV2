@@ -50,6 +50,10 @@ from pipeline.audit import (
     load_actuals,
 )
 from pipeline.prediction_sanity import print_report as _sanity_report
+from config.fantasy_prices import (
+    current_price_mismatches,
+    load_fantasy_price_data,
+)
 
 
 VALID_PHASES = ("pre_fp", "post_fp", "post_quali")
@@ -142,8 +146,7 @@ def load_constructor_info() -> dict:
 
 
 def _warn_if_prices_stale() -> None:
-    """Print a loud warning if completed-race actuals exist for rounds beyond
-    the latest entry in fantasy_prices.json::price_history.
+    """Warn when price history is behind or top-level prices are inconsistent.
 
     Without this check, you can run a whole prediction phase with stale prices
     and silently produce wrong price-change brackets, wrong value scores, and a
@@ -166,6 +169,18 @@ def _warn_if_prices_stale() -> None:
     if not price_history:
         return
     latest_priced_round = max(int(k) for k in price_history.keys())
+    mismatches = current_price_mismatches(prices)
+
+    if mismatches:
+        mismatch_count = sum(len(group) for group in mismatches.values())
+        print()
+        print("  " + "!" * 78)
+        print("  ! WARNING: top-level current prices disagree with the latest")
+        print(f"  ! price_history snapshot for {mismatch_count} asset(s).")
+        print("  ! Runtime consumers will use the history snapshot, but the seed")
+        print("  ! file should be synchronized before committing.")
+        print("  " + "!" * 78)
+        print()
 
     # Find the highest completed round (has actual_fantasy_points.json on disk)
     highest_actual = 0
@@ -196,11 +211,7 @@ def _warn_if_prices_stale() -> None:
 
 def load_fantasy_prices() -> dict:
     """Load current fantasy prices."""
-    path = SEED_DIR / "fantasy_prices.json"
-    if not path.exists():
-        return {}
-    with open(path) as f:
-        return json.load(f)
+    return load_fantasy_price_data()
 
 
 def build_predictions_json(round_num: int) -> dict | None:

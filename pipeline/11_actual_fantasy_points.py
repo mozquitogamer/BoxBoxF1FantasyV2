@@ -61,6 +61,7 @@ from config.fantasy_scoring import (
     CONSTRUCTOR_SPRINT_DSQ_PENALTY,
     CONSTRUCTOR_RACE_DSQ_PENALTY,
 )
+from config.fantasy_prices import load_fantasy_price_maps
 
 # Telemetry-detected overtakes over-count (pit-cycle swaps, SC reshuffles, blue-flag
 # passes), so they're capped to a realistic ceiling. Official counts from
@@ -162,14 +163,7 @@ def load_constructors_info() -> dict:
 
 def load_fantasy_prices() -> tuple[dict, dict]:
     """Load current fantasy prices."""
-    prices_path = SEED_DIR / "fantasy_prices.json"
-    if not prices_path.exists():
-        return {}, {}
-    with open(prices_path) as f:
-        data = json.load(f)
-    driver_prices = {k: v["current_price"] for k, v in data.get("drivers", {}).items()}
-    constructor_prices = {k: v["current_price"] for k, v in data.get("constructors", {}).items()}
-    return driver_prices, constructor_prices
+    return load_fantasy_price_maps()
 
 
 def load_jolpica_json(year: int, round_num: int, filename: str) -> Optional[dict]:

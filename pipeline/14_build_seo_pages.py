@@ -25,6 +25,7 @@ import html
 import json
 import re
 import runpy
+import sys
 import unicodedata
 from datetime import date, datetime, timezone
 from email.utils import format_datetime
@@ -33,6 +34,9 @@ from pathlib import Path
 from statistics import median
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from config.fantasy_prices import load_fantasy_price_data
+
 WEB = ROOT / "web" / "public"
 DATA = WEB / "data"
 PICKS = WEB / "picks"
@@ -5572,7 +5576,7 @@ def main() -> None:
         for c in (load_seed_json("constructors.json") or {}).get("constructors", [])
         if c.get("constructor_id")
     }
-    prices = load_seed_json("fantasy_prices.json") or {}
+    prices = load_fantasy_price_data()
     PICKS.mkdir(parents=True, exist_ok=True)
     current_lastmod = source_date(current.get("exported_at"), current.get("generated_at"), season.get("generated_at"))
     horizon_lastmod = source_date(horizon.get("generated_at"))

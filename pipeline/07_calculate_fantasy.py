@@ -64,6 +64,7 @@ from config.fantasy_scoring import (
     calc_qualifying_points_driver,
     calc_constructor_quali_bonus,
 )
+from config.fantasy_prices import load_fantasy_price_maps
 
 
 # -- ID mapping ----------------------------------------------------------------
@@ -334,14 +335,7 @@ def estimate_sprint_overtakes(predicted_quali: int, predicted_race: int,
 
 def load_fantasy_prices() -> tuple[dict[str, float], dict[str, float]]:
     """Load current fantasy prices (keyed by abbreviation)."""
-    prices_path = SEED_DIR / "fantasy_prices.json"
-    if not prices_path.exists():
-        return {}, {}
-    with open(prices_path) as f:
-        data = json.load(f)
-    driver_prices = {k: v["current_price"] for k, v in data.get("drivers", {}).items()}
-    constructor_prices = {k: v["current_price"] for k, v in data.get("constructors", {}).items()}
-    return driver_prices, constructor_prices
+    return load_fantasy_price_maps()
 
 
 # -- Recent fantasy points for PPM --------------------------------------------

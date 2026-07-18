@@ -86,6 +86,7 @@ from config.team_driver_ratings import (
     get_constructor_cold_skill,
 )
 from config.grid_penalties import apply_grid_penalties
+from config.fantasy_prices import load_fantasy_price_maps
 
 
 # ==============================================================================
@@ -517,22 +518,14 @@ def load_fantasy_points(round_num: int) -> pd.DataFrame:
 
 def load_driver_prices() -> dict[str, float]:
     """Load current fantasy prices by driver abbreviation."""
-    path = SEED_DIR / "fantasy_prices.json"
-    if not path.exists():
-        return {}
-    with open(path) as f:
-        data = json.load(f)
-    return {k: v["current_price"] for k, v in data.get("drivers", {}).items()}
+    driver_prices, _ = load_fantasy_price_maps()
+    return driver_prices
 
 
 def load_constructor_prices() -> dict[str, float]:
     """Load current fantasy prices by constructor ID."""
-    path = SEED_DIR / "fantasy_prices.json"
-    if not path.exists():
-        return {}
-    with open(path) as f:
-        data = json.load(f)
-    return {k: v["current_price"] for k, v in data.get("constructors", {}).items()}
+    _, constructor_prices = load_fantasy_price_maps()
+    return constructor_prices
 
 
 def load_drivers_info() -> dict:
