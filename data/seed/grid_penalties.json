@@ -1,0 +1,15 @@
+{
+  "_comment": "Known race starting-grid penalties. 'places' drops a driver from each predicted/simulated qualifying result; 'back_of_grid' fixes them behind the field. Qualifying fantasy points remain based on the unpenalized qualifying result.",
+  "12": {
+    "_note": "Belgian GP confirmed penalties before FP3: HAD starts at the back; NOR and STR receive 10-place drops.",
+    "HAD": {
+      "back_of_grid": true
+    },
+    "NOR": {
+      "places": 10
+    },
+    "STR": {
+      "places": 10
+    }
+  }
+}

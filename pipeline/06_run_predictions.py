@@ -48,6 +48,7 @@ from config.settings import (
     fastf1_round,
     is_race_completed,
     load_pace_overrides,
+    load_grid_penalties,
 )
 from pipeline.feature_engineering import engineer_features
 from config.track_classifications import (
@@ -57,6 +58,7 @@ from config.track_classifications import (
     fp_quali_blend_weight,
 )
 from config.track_similarity import get_similarity
+from config.grid_penalties import apply_grid_penalties
 from config.circuit_priors import (
     apply_driver_circuit_effect,
     driver_circuit_reliability,
@@ -1149,7 +1151,43 @@ def run_predictions(
     else:
         pred_df["quali_position"] = pred_df["predicted_quali_position"]
         print(f"  Using predicted quali for all {len(pred_df)} drivers")
-    pred_df["grid"] = pred_df["quali_position"]
+
+    # Apply known race-grid penalties separately from the qualifying result.
+    # Qualifying points/display and the race model retain their trained
+    # qualifying semantics; downstream scoring and the hard-track anchor use
+    # the real starting grid.
+    grid_penalties = load_grid_penalties(round_num)
+    grid_abbrevs = pred_df["driver_id"].map(jolpica_to_abbrev).fillna(pred_df["driver_id"])
+    unpenalized_grid = pred_df["quali_position"].astype(int).to_numpy()
+    penalized_grid = apply_grid_penalties(
+        unpenalized_grid,
+        grid_abbrevs.tolist(),
+        grid_penalties,
+    )
+    pred_df["predicted_grid_position"] = penalized_grid
+    pred_df["grid_penalty_places"] = [
+        int(grid_penalties.get(str(abbrev).upper(), {}).get("places", 0))
+        for abbrev in grid_abbrevs
+    ]
+    pred_df["grid_back_of_grid"] = [
+        bool(grid_penalties.get(str(abbrev).upper(), {}).get("back_of_grid", False))
+        for abbrev in grid_abbrevs
+    ]
+    pred_df["grid_penalty"] = penalized_grid - unpenalized_grid
+    pred_df["grid"] = penalized_grid
+    # Keep the race model's quali-derived features on their trained semantics.
+    # Historical training uses qualifying result (not post-penalty grid), so
+    # rewriting quali_position here would create an inference-only distribution
+    # shift. The explicit hard-track anchor below uses the real grid instead.
+    if grid_penalties:
+        applied = []
+        for idx, abbrev in enumerate(grid_abbrevs):
+            rule = grid_penalties.get(str(abbrev).upper())
+            if rule:
+                applied.append(
+                    f"{abbrev}: Q{unpenalized_grid[idx]}->Grid{penalized_grid[idx]}"
+                )
+        print(f"  Grid penalties applied: {', '.join(applied)}")
 
     # Recompute grid-dependent features
     # NOTE: grid_advantage formula MUST match 03b_build_jolpica_features.py::add_race_model_features
@@ -1158,7 +1196,6 @@ def run_predictions(
     pred_df["is_front_row"] = (pred_df["quali_position"] <= 2).astype(int)
     pred_df["is_top10_quali"] = (pred_df["quali_position"] <= 10).astype(int)
     pred_df["grid_advantage"] = 11.0 - pred_df["quali_position"].astype(float)
-    pred_df["grid_penalty"] = 0  # No grid penalties at prediction time
 
     # Recompute interaction features if track data available
     if "overtaking_difficulty" in pred_df.columns:
@@ -1208,7 +1245,7 @@ def run_predictions(
             s = a.std()
             return (a - a.mean()) / s if s > 1e-9 else a - a.mean()
 
-        grid_pos = pred_df["quali_position"].astype(float).values
+        grid_pos = pred_df["predicted_grid_position"].astype(float).values
         z_race = _zscore(race_raw)
         z_grid = _zscore(-grid_pos)  # pole (grid 1) -> highest score
         race_raw = (1.0 - anchor_w) * z_race + anchor_w * z_grid
@@ -1396,7 +1433,9 @@ def run_predictions(
 
     output_cols = [
         "driver_id", "driver_abbrev", "constructor_id",
-        "predicted_quali_position", "predicted_race_position", "confidence",
+        "predicted_quali_position", "predicted_grid_position",
+        "grid_penalty_places", "grid_back_of_grid",
+        "predicted_race_position", "confidence",
         "predicted_quali_raw", "predicted_race_raw",
     ]
     if is_sprint:
@@ -1462,6 +1501,7 @@ def run_predictions(
         "race_model_algorithm": "catboost" if use_catboost_race else "xgboost",
         "quali_model_sha256_16": _file_sha256(quali_path),
         "race_model_sha256_16": _file_sha256(race_model_used),
+        "grid_penalties": grid_penalties,
         # Level 3: record exactly which weather values the model conditioned on,
         # so the Accuracy / Changelog tabs can diagnose "why does this round
         # predict X" without re-running the pipeline.
@@ -1479,6 +1519,7 @@ def run_predictions(
     print(f"PREDICTIONS — {year} Round {round_num}")
     print(f"{'=' * 70}")
     display_cols = ["driver_abbrev", "predicted_quali_position",
+                    "predicted_grid_position",
                     "predicted_race_position", "confidence"]
     if is_sprint:
         display_cols.append("predicted_sprint_position")

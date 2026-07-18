@@ -248,6 +248,43 @@ def load_pace_overrides(round_num: int) -> dict:
     return out
 
 
+def load_grid_penalties(round_num: int) -> dict:
+    """Return known race-grid penalties for a prediction round.
+
+    Reads ``data/seed/grid_penalties.json`` keyed by round and driver
+    abbreviation. Each rule supports ``places`` (a positive grid drop) or
+    ``back_of_grid``. The qualifying forecast remains unchanged; consumers use
+    these rules to construct a separate race starting grid.
+    """
+    import json
+    path = SEED_DIR / "grid_penalties.json"
+    if not path.exists():
+        return {}
+    try:
+        with open(path) as f:
+            data = json.load(f)
+    except Exception:
+        return {}
+
+    raw = data.get(str(round_num), {}) or {}
+    out = {}
+    for abbrev, rule in raw.items():
+        if str(abbrev).startswith("_") or not isinstance(rule, dict):
+            continue
+        clean = {}
+        if bool(rule.get("back_of_grid", False)):
+            clean["back_of_grid"] = True
+        try:
+            places = max(0, int(rule.get("places", 0)))
+        except (TypeError, ValueError):
+            places = 0
+        if places:
+            clean["places"] = places
+        if clean:
+            out[str(abbrev).upper()] = clean
+    return out
+
+
 def load_official_pitstop_points() -> dict:
     """Return manually-recorded official F1 Fantasy pit-stop points per round.
 

@@ -455,7 +455,8 @@ def calculate_driver_fantasy(
     for _, prow in predictions.iterrows():
         did = prow["driver_id"]
         pr = int(prow["predicted_race_position"])
-        pc = int(prow["predicted_quali_position"]) - pr
+        grid = int(prow.get("predicted_grid_position", prow["predicted_quali_position"]))
+        pc = grid - pr
         raw_fl[did] = _raw_fl_prob(pr)
         raw_dotd[did] = _raw_dotd_prob(pr, pc)
 
@@ -477,6 +478,7 @@ def calculate_driver_fantasy(
         driver_abbrev = row.get("driver_abbrev") or jolpica_to_abbrev.get(driver_id, driver_id)
         constructor_id = row.get("constructor_id", "")
         pred_quali = int(row["predicted_quali_position"])
+        pred_grid = int(row.get("predicted_grid_position", pred_quali))
         pred_race = int(row["predicted_race_position"])
         confidence = int(row.get("confidence", 50))
 
@@ -486,12 +488,13 @@ def calculate_driver_fantasy(
         # -- Race points --
         race_position_pts = RACE_POSITION_POINTS.get(pred_race, 0)
 
-        # Positions gained/lost (quali grid -> race finish)
-        pos_change = pred_quali - pred_race
+        # Positions gained/lost use the penalized race starting grid. Qualifying
+        # fantasy points above remain based on the unpenalized qualifying result.
+        pos_change = pred_grid - pred_race
         pos_pts = pos_change * RACE_POSITIONS_GAINED_PER_POS
 
         # Estimated overtakes
-        est_overtakes = estimate_overtakes(pred_quali, pred_race, multiplier=ot_mult)
+        est_overtakes = estimate_overtakes(pred_grid, pred_race, multiplier=ot_mult)
         overtake_pts = est_overtakes
 
         # Fastest lap & DOTD probabilities — field-normalized (sum to 1.0) in the
@@ -571,6 +574,9 @@ def calculate_driver_fantasy(
             "driver_abbrev": driver_abbrev,
             "constructor_id": constructor_id,
             "predicted_quali_position": pred_quali,
+            "predicted_grid_position": pred_grid,
+            "grid_penalty_places": int(row.get("grid_penalty_places", 0)),
+            "grid_back_of_grid": bool(row.get("grid_back_of_grid", False)),
             "predicted_race_position": pred_race,
             "confidence": confidence,
             "expected_quali_pts": round(quali_pts, 1),
@@ -764,7 +770,8 @@ def main() -> None:
     print("DRIVER FANTASY POINTS")
     print(f"{'=' * 70}")
     display_cols = [
-        "driver_abbrev", "predicted_quali_position", "predicted_race_position",
+        "driver_abbrev", "predicted_quali_position", "predicted_grid_position",
+        "predicted_race_position",
         "total_expected_fantasy_points", "expected_quali_pts", "expected_race_pts",
         "risk_label", "value_score", "current_price",
     ]

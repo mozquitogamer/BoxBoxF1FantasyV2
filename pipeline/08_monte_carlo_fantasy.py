@@ -85,6 +85,7 @@ from config.team_driver_ratings import (
     get_driver_wet_skill,
     get_constructor_cold_skill,
 )
+from config.grid_penalties import apply_grid_penalties
 
 
 # ==============================================================================
@@ -1025,6 +1026,25 @@ def run_simulations(
 
     constructors = pred_df["constructor_id"].values
 
+    # Reapply known penalties to every sampled qualifying order. This preserves
+    # qualifying uncertainty/points while ensuring race positions-gained,
+    # overtakes and DOTD are measured from the penalized starting grid.
+    grid_penalty_rules: dict[str, dict] = {}
+    for idx, abbrev in enumerate(abbrevs):
+        rule = {}
+        if "grid_penalty_places" in pred_df.columns:
+            value = pred_df.iloc[idx]["grid_penalty_places"]
+            if pd.notna(value) and int(value) > 0:
+                rule["places"] = int(value)
+        if "grid_back_of_grid" in pred_df.columns:
+            value = pred_df.iloc[idx]["grid_back_of_grid"]
+            if pd.notna(value) and bool(value):
+                rule["back_of_grid"] = True
+        if rule:
+            grid_penalty_rules[str(abbrev).upper()] = rule
+    if grid_penalty_rules:
+        print(f"  Grid penalties active in every simulation: {grid_penalty_rules}")
+
     # Manual DOTD overrides: map jolpica driver_id -> sim index -> forced prob.
     # In each sim, with this probability we assign DOTD to that driver directly
     # (if they didn't DNF), otherwise the normal fan-weighted sample_dotd runs.
@@ -1182,6 +1202,7 @@ def run_simulations(
     all_race_pts = np.zeros((n_sims, n_drivers))
     all_sprint_pts = np.zeros((n_sims, n_drivers))
     all_quali_pos = np.zeros((n_sims, n_drivers), dtype=int)
+    all_grid_pos = np.zeros((n_sims, n_drivers), dtype=int)
     all_race_pos = np.zeros((n_sims, n_drivers), dtype=int)
     all_overtakes = np.zeros((n_sims, n_drivers), dtype=int)
     all_dnf = np.zeros((n_sims, n_drivers), dtype=bool)
@@ -1219,6 +1240,9 @@ def run_simulations(
 
         quali_positions = sample_positions(quali_raw, cal_quali_noise, confidences, rng,
                                            constructor_ids=constructors, team_shocks=quali_team_shocks)
+        grid_positions = apply_grid_penalties(
+            quali_positions, abbrevs, grid_penalty_rules
+        )
 
         # 2. Correlated DNF sampling
         adjusted_probs = dnf_probs.copy()
@@ -1258,7 +1282,7 @@ def run_simulations(
         race_positions[dnf_mask] = GRID_SIZE
 
         # 4. Sample overtakes (use driver-specific history when available)
-        overtakes = sample_overtakes(quali_positions, race_positions, dnf_mask, rng,
+        overtakes = sample_overtakes(grid_positions, race_positions, dnf_mask, rng,
                                      driver_ids=driver_id_list, overtake_history=overtake_hist,
                                      overtake_mult=overtake_mult)
         # Retirees keep the overtakes they made before retiring (sample_overtakes
@@ -1273,7 +1297,7 @@ def run_simulations(
 
         # 5. Sample fastest lap & DOTD
         fl_idx = sample_fastest_lap(race_positions, dnf_mask, rng)
-        dotd_idx = sample_dotd(race_positions, quali_positions, dnf_mask, rng)
+        dotd_idx = sample_dotd(race_positions, grid_positions, dnf_mask, rng)
         # Manual DOTD override: force the favoured driver at the set probability
         # (only when they finished — a DNF can't win DOTD).
         for ov_idx, ov_prob in dotd_force.items():
@@ -1322,7 +1346,7 @@ def run_simulations(
             result = calc_driver_fantasy_points_sim(
                 quali_pos=quali_positions[i],
                 race_pos=race_positions[i],
-                grid_pos=quali_positions[i],  # Grid = quali position (no penalties modeled)
+                grid_pos=grid_positions[i],
                 overtakes=overtakes[i],
                 is_fastest_lap=(i == fl_idx),
                 is_dotd=(i == dotd_idx),
@@ -1342,6 +1366,7 @@ def run_simulations(
             all_race_pts[sim, i] = result["race_pts"]
             all_sprint_pts[sim, i] = result["sprint_pts"]
             all_quali_pos[sim, i] = quali_positions[i]
+            all_grid_pos[sim, i] = grid_positions[i]
             all_race_pos[sim, i] = race_positions[i]
             all_overtakes[sim, i] = overtakes[i]
             all_dnf[sim, i] = dnf_mask[i]
@@ -1374,6 +1399,7 @@ def run_simulations(
         r_pts = all_race_pts[:, i]
         s_pts = all_sprint_pts[:, i]
         q_pos = all_quali_pos[:, i]
+        grid_pos = all_grid_pos[:, i]
         r_pos = all_race_pos[:, i]
         ot = all_overtakes[:, i]
         dnf = all_dnf[:, i]
@@ -1383,6 +1409,9 @@ def run_simulations(
             "constructor_id": constructors[i],
             # Point predictions (deterministic, for reference)
             "det_quali_position": int(pred_df.iloc[i]["predicted_quali_position"]),
+            "det_grid_position": int(pred_df.iloc[i].get(
+                "predicted_grid_position", pred_df.iloc[i]["predicted_quali_position"]
+            )),
             "det_race_position": int(pred_df.iloc[i]["predicted_race_position"]),
             # Monte Carlo results — total points
             "mc_total_mean": round(float(pts.mean()), 1),
@@ -1400,8 +1429,10 @@ def run_simulations(
             "mc_sprint_pts_mean": round(float(s_pts.mean()), 1),
             # Position distributions
             "mc_quali_pos_mean": round(float(q_pos.mean()), 1),
+            "mc_grid_pos_mean": round(float(grid_pos.mean()), 1),
             "mc_race_pos_mean": round(float(r_pos.mean()), 1),
             "mc_quali_pos_std": round(float(q_pos.std()), 1),
+            "mc_grid_pos_std": round(float(grid_pos.std()), 1),
             "mc_race_pos_std": round(float(r_pos.std()), 1),
             # Overtakes & DNF
             "mc_overtakes_mean": round(float(ot.mean()), 1),

@@ -274,6 +274,11 @@ def build_predictions_json(round_num: int) -> dict | None:
             "constructor": info.get("constructor_id", row.get("constructor_id", "")),
             "number": info.get("number", 0),
             "predicted_quali": int(row["predicted_quali_position"]),
+            "predicted_grid": int(row.get(
+                "predicted_grid_position", row["predicted_quali_position"]
+            )),
+            "grid_penalty_places": int(row.get("grid_penalty_places", 0)),
+            "grid_back_of_grid": bool(row.get("grid_back_of_grid", False)),
             "predicted_finish": int(row["predicted_race_position"]),
             # projected_points = deterministic total (score if the predicted finishing
             # order holds). expected_points is overwritten below with the risk-adjusted
