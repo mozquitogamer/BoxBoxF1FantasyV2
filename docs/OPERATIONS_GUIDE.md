@@ -308,7 +308,7 @@ What runs:
 
 **Two FP-driven adjustments run inside step 4 (`06_run_predictions.py`)** — see Technical Deep Dive §7 for the full detail:
 - **FP-pace quali blend** — the predicted qualifying is blended toward this weekend's FP pace (a composite of best lap + best-3 + best-5 lap averages), because raw FP pace backtests as a *better* quali predictor than the model alone. Weight is track-scaled (0.6 normal → 0.80 at Monaco-level one-lap circuits). Tunables: `FP_QUALI_BLEND_TUNABLES` at the top of `06_run_predictions.py`.
-- **Grid-anchoring** — on hard-to-overtake circuits the predicted race finish is blended toward the grid (0 below difficulty 6 → 0.85 at Monaco). Tunables: `GRID_ANCHOR_*` in `config/track_classifications.py`.
+- **Phase-aware grid-anchoring** — pre-FP forecasts remain unanchored because their grid is priors-only. Once at least 10 drivers have usable current-weekend FP quali pace, hard-to-overtake circuits blend the predicted race finish toward that evidence-backed grid (0 below difficulty 6 → 0.85 at Monaco). Tunables: `GRID_ANCHOR_*` in `config/track_classifications.py`; the FP evidence threshold is `FP_QUALI_BLEND_TUNABLES["min_drivers_with_pace"]` in `06_run_predictions.py`.
 
 Both self-skip when no FP data is present, so `pre_fp_predict` and horizon projections are unaffected.
 

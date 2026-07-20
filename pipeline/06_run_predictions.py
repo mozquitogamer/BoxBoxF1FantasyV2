@@ -112,7 +112,9 @@ from config.circuit_priors import (
 # finish predictor (MAE 6.4 vs model 4.3 — finishes are dominated by DNFs /
 # strategy / start chaos). The improved quali still flows to the race because
 # (a) quali_position/grid_advantage are race-model features and (b) on hard-to-
-# overtake tracks grid-anchoring carries the grid into the finish.
+# overtake tracks grid-anchoring carries the grid into the finish. The anchor is
+# phase-aware: it stays off before practice, when the grid is only a priors-based
+# model estimate, and activates once enough current-weekend FP pace exists.
 # The base weight (0.6) is the backtest optimum on normal-overtake tracks. On
 # quali-dominant circuits (Monaco, Singapore, Hungary) one-lap pace decides the
 # weekend far more than season race form, so the weight is scaled UP toward
@@ -139,6 +141,32 @@ FP_QUALI_BLEND_TUNABLES = {
     "min_drivers_with_pace": 10,   # need at least this many FP times to blend
     "pace_cols": ["best_lap_time", "best_3_lap_avg", "best_5_lap_avg"],  # composite; lower = faster
 }
+
+
+def phase_aware_grid_anchor_weight(
+    circuit_id: str,
+    fp_pace_driver_count: int,
+    *,
+    is_post_quali: bool = False,
+) -> tuple[float, str]:
+    """Resolve the grid anchor from track difficulty and weekend evidence.
+
+    Before practice, predicted qualifying is a priors-only estimate already fed
+    into the race model. Anchoring the race score toward that same estimate would
+    count it twice and create false precision. Activate the normal track-scaled
+    anchor only after the FP quali composite has enough usable drivers. Actual
+    qualifying also qualifies as evidence for retrospective post-quali archives.
+    """
+    candidate = grid_anchor_weight(circuit_id)
+    if candidate <= 0:
+        return 0.0, "track_anchor_disabled"
+    if is_post_quali:
+        return candidate, "actual_qualifying_available"
+
+    minimum = int(FP_QUALI_BLEND_TUNABLES["min_drivers_with_pace"])
+    if int(fp_pace_driver_count) >= minimum:
+        return candidate, "fp_pace_available"
+    return 0.0, "awaiting_fp_pace"
 
 
 WEATHER_INFERENCE_TUNABLES = {
@@ -1050,7 +1078,8 @@ def run_predictions(
         race_model.load_model(str(chosen_json))
         algo_desc = f"XGBoost ({chosen_json.name})"
     if use_fp_race_model:
-        print(f"  Phase: post-FP (no actual quali) -> {algo_desc}")
+        phase_desc = "post-FP" if fp_df is not None and not fp_df.empty else "pre-FP"
+        print(f"  Phase: {phase_desc} (predicted quali) -> {algo_desc}")
     else:
         phase_desc = "post-quali (actual quali known)" if is_post_quali else "post-FP (fallback; no race_model_fp)"
         print(f"  Phase: {phase_desc} -> {algo_desc}")
@@ -1100,6 +1129,8 @@ def run_predictions(
     # inherit the blend. Only blends drivers that actually set an FP lap.
     fp_blend = FP_QUALI_BLEND_TUNABLES
     pace_cols = [c for c in fp_blend["pace_cols"] if c in pred_df.columns]
+    fp_pace_driver_count = 0
+    fp_quali_blend_applied = False
     # Scale the FP weight up on quali-dominant (hard-to-overtake) tracks.
     w_fp = fp_quali_blend_weight(
         target_circuit, fp_blend["weight"], fp_blend["weight_hard_track"],
@@ -1128,17 +1159,19 @@ def run_predictions(
             zmat.append(-(col - col.mean()) / sd if sd and sd > 1e-9 else col * 0.0)
         fp_pace_z = pd.concat(zmat, axis=1).mean(axis=1, skipna=True)  # NaN if all metrics NaN
         has_pace = fp_pace_z.notna().values
-        if int(has_pace.sum()) >= fp_blend["min_drivers_with_pace"]:
+        fp_pace_driver_count = int(has_pace.sum())
+        if fp_pace_driver_count >= fp_blend["min_drivers_with_pace"]:
             z_model = _zscore_q(quali_raw)
             comp_z = np.zeros(len(pred_df))
             comp_z[has_pace] = _zscore_q(fp_pace_z.values[has_pace])
             blended = z_model.copy()
             blended[has_pace] = (1.0 - w_fp) * z_model[has_pace] + w_fp * comp_z[has_pace]
             quali_raw = blended
+            fp_quali_blend_applied = True
             print(f"  FP-pace quali blend applied (weight={w_fp:.2f}, "
-                  f"cols={pace_cols}, {int(has_pace.sum())}/{len(pred_df)} drivers)")
+                  f"cols={pace_cols}, {fp_pace_driver_count}/{len(pred_df)} drivers)")
         else:
-            print(f"  FP-pace quali blend skipped (only {int(has_pace.sum())} drivers "
+            print(f"  FP-pace quali blend skipped (only {fp_pace_driver_count} drivers "
                   f"with FP pace < {fp_blend['min_drivers_with_pace']} min)")
 
     # Ranking model: higher score = better position (P1). Rank descending.
@@ -1242,7 +1275,7 @@ def run_predictions(
     X_r = pred_df[race_feature_list].copy()
     race_raw = race_model.predict(X_r)
 
-    # ---- Grid-anchoring on hard-to-overtake circuits ----
+    # ---- Phase-aware grid-anchoring on hard-to-overtake circuits ----
     # At tracks like Monaco the race result tracks the starting grid far more
     # than pure race-pace ranking implies — a P4 starter shouldn't be predicted
     # to win when overtaking is near-impossible. Blend the race model's ordering
@@ -1252,7 +1285,16 @@ def run_predictions(
     # so the anchoring flows to BOTH the deterministic finish AND the Monte Carlo
     # sim (08 re-ranks from predicted_race_raw). The MC re-normalizes anyway, so
     # only the ordering + relative gaps change — the noise treatment is untouched.
-    anchor_w = grid_anchor_weight(target_circuit)
+    # A priors-only qualifying prediction is already a race-model feature. Do not
+    # count it a second time before practice. Once the FP quali composite has
+    # sufficient coverage, the predicted grid is grounded in current-weekend
+    # evidence and the normal track-scaled anchor becomes actionable.
+    anchor_candidate_w = grid_anchor_weight(target_circuit)
+    anchor_w, anchor_reason = phase_aware_grid_anchor_weight(
+        target_circuit,
+        fp_pace_driver_count,
+        is_post_quali=is_post_quali,
+    )
     if anchor_w > 0:
         def _zscore(a: np.ndarray) -> np.ndarray:
             a = np.asarray(a, dtype=float)
@@ -1264,7 +1306,11 @@ def run_predictions(
         z_grid = _zscore(-grid_pos)  # pole (grid 1) -> highest score
         race_raw = (1.0 - anchor_w) * z_race + anchor_w * z_grid
         print(f"  Grid-anchoring applied (circuit={target_circuit}, "
-              f"difficulty-scaled weight={anchor_w:.2f})")
+              f"difficulty-scaled weight={anchor_w:.2f}, reason={anchor_reason})")
+    elif anchor_candidate_w > 0:
+        print(f"  Grid-anchoring deferred (circuit={target_circuit}, "
+              f"candidate weight={anchor_candidate_w:.2f}, reason={anchor_reason}, "
+              f"FP pace={fp_pace_driver_count}/{fp_blend['min_drivers_with_pace']})")
 
     # Ranking model: higher score = better position (P1). Rank descending.
     race_ranks = pd.Series(-race_raw).rank(method="first").astype(int)
@@ -1519,6 +1565,15 @@ def run_predictions(
         "quali_model_sha256_16": _file_sha256(quali_path),
         "race_model_sha256_16": _file_sha256(race_model_used),
         "grid_penalties": grid_penalties,
+        "grid_anchor": {
+            "candidate_weight": round(float(anchor_candidate_w), 4),
+            "applied_weight": round(float(anchor_w), 4),
+            "applied": bool(anchor_w > 0),
+            "reason": anchor_reason,
+            "fp_pace_driver_count": int(fp_pace_driver_count),
+            "min_fp_pace_drivers": int(fp_blend["min_drivers_with_pace"]),
+            "fp_quali_blend_applied": bool(fp_quali_blend_applied),
+        },
         # Level 3: record exactly which weather values the model conditioned on,
         # so the Accuracy / Changelog tabs can diagnose "why does this round
         # predict X" without re-running the pipeline.
