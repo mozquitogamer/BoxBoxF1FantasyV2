@@ -328,9 +328,11 @@ def parse_race_results(data: dict) -> tuple[list[dict], str]:
         # retirees like LEC R9 (P15, retired lap 62) being mis-scored as -20, and
         # for the old "status==Lapped" override wrongly un-DNF'ing genuine
         # retirements (ALB R9: posText=R, status=Lapped). Verified against all
+        # A driver can start and retire before completing lap 1, so laps==0 is
+        # not sufficient to label a DNS (for example RUS at Belgium 2026).
         # 2026 races: NUM=classified finisher, R=DNF, W=DNS, D=DSQ.
         is_dsq = position_text == "D" or status == "Disqualified"
-        is_dns = position_text == "W" or status == "Did not start" or laps == 0
+        is_dns = position_text == "W" or status == "Did not start"
         is_dnf = (position_text == "R") and not is_dns and not is_dsq
 
         # Fastest lap: rank "1" in FastestLap
@@ -453,8 +455,10 @@ def parse_sprint_results(data: dict) -> list[dict]:
 
         # Same classification-aware rule as the race parser: numeric positionText
         # = classified finisher (even if it retired late), "R" = true DNF.
+        # Do not infer DNS from laps==0; a first-lap retirement also has zero
+        # completed laps.
         is_dsq = position_text == "D" or status == "Disqualified"
-        is_dns = position_text == "W" or status == "Did not start" or laps == 0
+        is_dns = position_text == "W" or status == "Did not start"
         is_dnf = (position_text == "R") and not is_dns and not is_dsq
 
         fastest_lap = r.get("FastestLap", {})

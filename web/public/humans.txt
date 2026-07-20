@@ -7,7 +7,7 @@ Location: South Africa
 
 /* SITE */
 URL: https://boxboxf1fantasy.com/
-Last updated: 2026-07-18
+Last updated: 2026-07-20
 Language: English
 Purpose: Free F1 Fantasy predictions, race picks, lineup optimization, transfer planning, strategy guides, public data and accuracy tracking.
 Tech: Static HTML, vanilla JavaScript, Python data pipeline, machine-learning prediction models, Vercel hosting.

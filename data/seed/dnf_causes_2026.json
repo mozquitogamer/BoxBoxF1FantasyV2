@@ -9,7 +9,9 @@
     "7": "Canadian Grand Prix",
     "8": "Monaco Grand Prix",
     "9": "Barcelona Grand Prix",
-    "10": "Austrian Grand Prix"
+    "10": "Austrian Grand Prix",
+    "11": "British Grand Prix",
+    "12": "Belgian Grand Prix"
   },
   "_driver_names": {
     "ALB": "Alex Albon",
@@ -80,7 +82,17 @@
       "BOT": "mechanical",
       "PER": "mechanical",
       "SAI": "mechanical"
+    },
+    "11": {
+      "VER": "driver_error",
+      "ALB": "collision",
+      "HUL": "mechanical"
+    },
+    "12": {
+      "RUS": "collision",
+      "PER": "mechanical",
+      "STR": "mechanical"
     }
   },
-  "_source": "Causes researched from race reports (formula1.com, planetf1, the-race, crash.net, speedcafe, formuladaily) 2026-06-15. mechanical=car/PU failure; collision=contact; driver_error=solo crash; other=external/freak."
+  "_source": "Causes researched from race reports and official team/FIA/F1 reports through 2026-07-20. mechanical=car/PU failure; collision=contact; driver_error=solo crash; other=external/freak."
 }

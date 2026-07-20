@@ -1,0 +1,326 @@
+{
+  "year": 2026,
+  "round": 12,
+  "method": "openf1",
+  "sessions": {
+    "race": {
+      "session": "Race",
+      "event": "Spa-Francorchamps",
+      "year": 2026,
+      "round": 12,
+      "method": "openf1",
+      "session_key": 11334,
+      "total_overtakes": 126,
+      "include_pitstops": false,
+      "drivers": [
+        {
+          "driver": "HAD",
+          "driver_number": 6,
+          "overtakes": 15
+        },
+        {
+          "driver": "NOR",
+          "driver_number": 1,
+          "overtakes": 10
+        },
+        {
+          "driver": "GAS",
+          "driver_number": 10,
+          "overtakes": 10
+        },
+        {
+          "driver": "BEA",
+          "driver_number": 87,
+          "overtakes": 9
+        },
+        {
+          "driver": "SAI",
+          "driver_number": 55,
+          "overtakes": 8
+        },
+        {
+          "driver": "OCO",
+          "driver_number": 31,
+          "overtakes": 7
+        },
+        {
+          "driver": "LAW",
+          "driver_number": 30,
+          "overtakes": 6
+        },
+        {
+          "driver": "COL",
+          "driver_number": 43,
+          "overtakes": 6
+        },
+        {
+          "driver": "PER",
+          "driver_number": 11,
+          "overtakes": 5
+        },
+        {
+          "driver": "ALO",
+          "driver_number": 14,
+          "overtakes": 5
+        },
+        {
+          "driver": "HAM",
+          "driver_number": 44,
+          "overtakes": 5
+        },
+        {
+          "driver": "HUL",
+          "driver_number": 27,
+          "overtakes": 5
+        },
+        {
+          "driver": "BOT",
+          "driver_number": 77,
+          "overtakes": 5
+        },
+        {
+          "driver": "ALB",
+          "driver_number": 23,
+          "overtakes": 4
+        },
+        {
+          "driver": "PIA",
+          "driver_number": 81,
+          "overtakes": 4
+        },
+        {
+          "driver": "BOR",
+          "driver_number": 5,
+          "overtakes": 4
+        },
+        {
+          "driver": "STR",
+          "driver_number": 18,
+          "overtakes": 4
+        },
+        {
+          "driver": "VER",
+          "driver_number": 3,
+          "overtakes": 3
+        },
+        {
+          "driver": "LEC",
+          "driver_number": 16,
+          "overtakes": 3
+        },
+        {
+          "driver": "ANT",
+          "driver_number": 12,
+          "overtakes": 3
+        },
+        {
+          "driver": "LIN",
+          "driver_number": 41,
+          "overtakes": 3
+        },
+        {
+          "driver": "RUS",
+          "driver_number": 63,
+          "overtakes": 2
+        }
+      ]
+    }
+  },
+  "pitstops": {
+    "source": "openf1",
+    "session_key": 11334,
+    "total_stops": 28,
+    "stops_with_stationary": 28,
+    "stops_missing_stationary": 0,
+    "fastest_stop": {
+      "driver": "LEC",
+      "lap": 20,
+      "stop_duration": 2.3,
+      "lane_duration": 23.164
+    },
+    "by_driver": {
+      "HAD": [
+        {
+          "lap": 1,
+          "stop_duration": 3.6,
+          "lane_duration": 24.156
+        },
+        {
+          "lap": 2,
+          "stop_duration": 3.0,
+          "lane_duration": 22.997
+        },
+        {
+          "lap": 20,
+          "stop_duration": 4.4,
+          "lane_duration": 24.727
+        }
+      ],
+      "BEA": [
+        {
+          "lap": 1,
+          "stop_duration": 5.6,
+          "lane_duration": 26.554
+        },
+        {
+          "lap": 20,
+          "stop_duration": 8.5,
+          "lane_duration": 28.982
+        }
+      ],
+      "PER": [
+        {
+          "lap": 1,
+          "stop_duration": 3.5,
+          "lane_duration": 25.372
+        },
+        {
+          "lap": 12,
+          "stop_duration": 5.9,
+          "lane_duration": 27.617
+        }
+      ],
+      "BOT": [
+        {
+          "lap": 1,
+          "stop_duration": 5.1,
+          "lane_duration": 30.594
+        },
+        {
+          "lap": 32,
+          "stop_duration": 5.1,
+          "lane_duration": 25.91
+        }
+      ],
+      "OCO": [
+        {
+          "lap": 1,
+          "stop_duration": 10.8,
+          "lane_duration": 33.74
+        },
+        {
+          "lap": 16,
+          "stop_duration": 3.4,
+          "lane_duration": 24.124
+        }
+      ],
+      "GAS": [
+        {
+          "lap": 14,
+          "stop_duration": 3.4,
+          "lane_duration": 24.177
+        }
+      ],
+      "SAI": [
+        {
+          "lap": 14,
+          "stop_duration": 14.4,
+          "lane_duration": 34.841
+        }
+      ],
+      "LAW": [
+        {
+          "lap": 15,
+          "stop_duration": 3.1,
+          "lane_duration": 23.722
+        }
+      ],
+      "COL": [
+        {
+          "lap": 15,
+          "stop_duration": 3.7,
+          "lane_duration": 24.146
+        }
+      ],
+      "LIN": [
+        {
+          "lap": 16,
+          "stop_duration": 4.1,
+          "lane_duration": 24.81
+        }
+      ],
+      "VER": [
+        {
+          "lap": 17,
+          "stop_duration": 2.5,
+          "lane_duration": 23.128
+        }
+      ],
+      "STR": [
+        {
+          "lap": 17,
+          "stop_duration": 11.0,
+          "lane_duration": 31.649
+        }
+      ],
+      "ANT": [
+        {
+          "lap": 18,
+          "stop_duration": 2.6,
+          "lane_duration": 23.093
+        }
+      ],
+      "ALB": [
+        {
+          "lap": 18,
+          "stop_duration": 2.5,
+          "lane_duration": 22.638
+        }
+      ],
+      "ALO": [
+        {
+          "lap": 19,
+          "stop_duration": 2.7,
+          "lane_duration": 23.19
+        },
+        {
+          "lap": 31,
+          "stop_duration": 3.2,
+          "lane_duration": 24.746
+        }
+      ],
+      "LEC": [
+        {
+          "lap": 20,
+          "stop_duration": 2.3,
+          "lane_duration": 23.164
+        }
+      ],
+      "PIA": [
+        {
+          "lap": 20,
+          "stop_duration": 2.8,
+          "lane_duration": 23.292
+        }
+      ],
+      "HAM": [
+        {
+          "lap": 20,
+          "stop_duration": 10.6,
+          "lane_duration": 32.201
+        }
+      ],
+      "BOR": [
+        {
+          "lap": 20,
+          "stop_duration": 2.5,
+          "lane_duration": 23.127
+        }
+      ],
+      "HUL": [
+        {
+          "lap": 20,
+          "stop_duration": 3.5,
+          "lane_duration": 26.098
+        }
+      ],
+      "NOR": [
+        {
+          "lap": 30,
+          "stop_duration": 7.8,
+          "lane_duration": 28.314
+        }
+      ]
+    }
+  }
+}

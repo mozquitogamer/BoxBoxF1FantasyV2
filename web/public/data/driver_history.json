@@ -56,6 +56,12 @@
           "circuit_id": "silverstone",
           "points": -3,
           "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 26,
+          "is_dnf": false
         }
       ]
     },
@@ -114,6 +120,12 @@
           "circuit_id": "silverstone",
           "points": 44,
           "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": -11,
+          "is_dnf": true
         }
       ]
     },
@@ -171,6 +183,12 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 23,
+          "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 38,
           "is_dnf": false
         }
       ]
@@ -230,6 +248,12 @@
           "circuit_id": "silverstone",
           "points": 54,
           "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 39,
+          "is_dnf": false
         }
       ]
     },
@@ -287,6 +311,12 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 33,
+          "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 22,
           "is_dnf": false
         }
       ]
@@ -346,6 +376,12 @@
           "circuit_id": "silverstone",
           "points": 38,
           "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 40,
+          "is_dnf": false
         }
       ]
     },
@@ -403,6 +439,12 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 13,
+          "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 8,
           "is_dnf": false
         }
       ]
@@ -462,6 +504,12 @@
           "circuit_id": "silverstone",
           "points": 18,
           "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 5,
+          "is_dnf": false
         }
       ]
     },
@@ -519,6 +567,12 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 16,
+          "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 8,
           "is_dnf": false
         }
       ]
@@ -578,6 +632,12 @@
           "circuit_id": "silverstone",
           "points": 23,
           "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 8,
+          "is_dnf": false
         }
       ]
     },
@@ -635,6 +695,12 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 19,
+          "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 6,
           "is_dnf": false
         }
       ]
@@ -694,6 +760,12 @@
           "circuit_id": "silverstone",
           "points": 8,
           "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 10,
+          "is_dnf": false
         }
       ]
     },
@@ -752,6 +824,12 @@
           "circuit_id": "silverstone",
           "points": -13,
           "is_dnf": true
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 3,
+          "is_dnf": false
         }
       ]
     },
@@ -809,6 +887,12 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 27,
+          "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 8,
           "is_dnf": false
         }
       ]
@@ -868,6 +952,12 @@
           "circuit_id": "silverstone",
           "points": 22,
           "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 3,
+          "is_dnf": false
         }
       ]
     },
@@ -926,6 +1016,12 @@
           "circuit_id": "silverstone",
           "points": 7,
           "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": -17,
+          "is_dnf": true
         }
       ]
     },
@@ -983,6 +1079,12 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 23,
+          "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 38,
           "is_dnf": false
         }
       ]
@@ -1042,6 +1144,12 @@
           "circuit_id": "silverstone",
           "points": 8,
           "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 5,
+          "is_dnf": false
         }
       ]
     },
@@ -1098,6 +1206,12 @@
         {
           "round": 11,
           "circuit_id": "silverstone",
+          "points": 19,
+          "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
           "points": 19,
           "is_dnf": false
         }
@@ -1158,6 +1272,12 @@
           "circuit_id": "silverstone",
           "points": 5,
           "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 1,
+          "is_dnf": false
         }
       ]
     },
@@ -1216,6 +1336,12 @@
           "circuit_id": "silverstone",
           "points": -7,
           "is_dnf": true
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 4,
+          "is_dnf": false
         }
       ]
     },
@@ -1274,6 +1400,12 @@
           "circuit_id": "silverstone",
           "points": 7,
           "is_dnf": false
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": -19,
+          "is_dnf": true
         }
       ]
     }
@@ -1325,6 +1457,11 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 92
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 42
         }
       ]
     },
@@ -1374,6 +1511,11 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 92
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 71
         }
       ]
     },
@@ -1423,6 +1565,11 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 32
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 79
         }
       ]
     },
@@ -1472,6 +1619,11 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 55
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 15
         }
       ]
     },
@@ -1521,6 +1673,11 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 33
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 15
         }
       ]
     },
@@ -1570,6 +1727,11 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 53
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 19
         }
       ]
     },
@@ -1619,6 +1781,11 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 0
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 19
         }
       ]
     },
@@ -1668,6 +1835,11 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 72
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 71
         }
       ]
     },
@@ -1717,6 +1889,11 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 17
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": 19
         }
       ]
     },
@@ -1766,6 +1943,11 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 13
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": -17
         }
       ]
     },
@@ -1815,6 +1997,11 @@
           "round": 11,
           "circuit_id": "silverstone",
           "points": 16
+        },
+        {
+          "round": 12,
+          "circuit_id": "spa",
+          "points": -13
         }
       ]
     }
