@@ -1201,7 +1201,8 @@ const TABLE_COLUMNS = [
     { key: null, label: '#' },
     { key: 'name', label: 'Driver' },
     { key: 'constructor', label: 'Team' },
-    { key: 'expected_points', label: 'Pts' },
+    { key: 'projected_points', label: 'Projected' },
+    { key: 'expected_points', label: 'Risk-adj' },
     { key: 'predicted_quali', label: 'Quali' },
     { key: 'predicted_finish', label: 'Race' },
     { key: 'confidence', label: 'Conf' },
@@ -1705,6 +1706,9 @@ function driverCard(d, i) {
 
 function driverRow(d, i) {
     const team = TEAMS[d.constructor] || { name: d.constructor, color: '#666' };
+    const projectedPoints = typeof d.projected_points === 'number'
+        ? d.projected_points
+        : d.expected_points;
     const riskClass = d.risk === 'LOW' ? 'risk-low' :
                       d.risk === 'MEDIUM' ? 'risk-medium' : 'risk-high';
 
@@ -1729,6 +1733,7 @@ function driverRow(d, i) {
         <td>${i + 1}</td>
         <td><strong>${d.name}</strong></td>
         <td><span class="team-dot" style="background:${team.color}"></span>${team.name}</td>
+        <td class="num"><strong>${projectedPoints.toFixed(1)}</strong></td>
         <td class="num"><strong>${d.expected_points.toFixed(1)}</strong></td>
         <td class="num">P${d.predicted_quali}</td>
         <td class="num">P${d.predicted_finish}</td>
@@ -7830,8 +7835,10 @@ function renderAccuracyWithFilters(container) {
     // Compute all metrics
     const scatterPoints = [];
     const roundStats = [];
+    const positionRows = [];
     const entityAccum = {};
     let totalPtsMAE = 0, totalPosMAE = 0, totalCIHits = 0, totalCITotal = 0, totalComparisons = 0, totalPosComparisons = 0;
+    let totalQualiMAE = 0, totalQualiComparisons = 0;
     let roundsWithMissingOfficial = [];
 
     // Track latest round for per-entity latest race columns
@@ -7845,7 +7852,7 @@ function renderAccuracyWithFilters(container) {
         const actList = act[listKey] || [];
         actList.forEach(d => { actMap[d[idField]] = d; });
 
-        let rPtsMAE = 0, rPosMAE = 0, rCIHits = 0, rCITotal = 0, rCount = 0, rPosCount = 0;
+        let rPtsMAE = 0, rPosMAE = 0, rQualiMAE = 0, rCIHits = 0, rCITotal = 0, rCount = 0, rPosCount = 0, rQualiCount = 0;
         let bestErr = Infinity, worstErr = 0, bestName = '', worstName = '';
 
         // For constructors: track if official exists this round (for accuracy-confidence note)
@@ -7871,15 +7878,34 @@ function renderAccuracyWithFilters(container) {
 
             // Position MAE applies to drivers only
             if (isDrivers) {
+                const predQuali = p.predicted_quali;
+                const actQuali = a.quali_position;
                 const predFinish = p.predicted_finish;
                 const actFinish = a.race_position;
-                if (predFinish != null && actFinish != null) {
-                    const posErr = Math.abs(predFinish - actFinish);
-                    rPosMAE += posErr;
+                const qualiErr = predQuali != null && actQuali != null
+                    ? Math.abs(predQuali - actQuali)
+                    : null;
+                const raceErr = predFinish != null && actFinish != null
+                    ? Math.abs(predFinish - actFinish)
+                    : null;
+                if (qualiErr != null) {
+                    rQualiMAE += qualiErr;
+                    rQualiCount++;
+                    totalQualiMAE += qualiErr;
+                    totalQualiComparisons++;
+                }
+                if (raceErr != null) {
+                    rPosMAE += raceErr;
                     rPosCount++;
-                    totalPosMAE += posErr;
+                    totalPosMAE += raceErr;
                     totalPosComparisons++;
                 }
+                positionRows.push({
+                    round, race: name, driver: labelName,
+                    constructor: p.constructor || a.constructor || '',
+                    predQuali, actQuali, qualiErr,
+                    predRace: predFinish, actRace: actFinish, raceErr
+                });
             }
 
             if (p.mc_total_p5 != null && p.mc_total_p95 != null) {
@@ -7920,7 +7946,8 @@ function renderAccuracyWithFilters(container) {
         roundStats.push({
             round, name,
             ptsMAE: rCount > 0 ? (rPtsMAE / rCount).toFixed(1) : '-',
-            posMAE: isDrivers ? (rPosCount > 0 ? (rPosMAE / rPosCount).toFixed(1) : '-') : '-',
+            qualiMAE: isDrivers ? (rQualiCount > 0 ? (rQualiMAE / rQualiCount).toFixed(1) : '-') : '-',
+            raceMAE: isDrivers ? (rPosCount > 0 ? (rPosMAE / rPosCount).toFixed(1) : '-') : '-',
             ciCoverage: rCITotal > 0 ? ((rCIHits / rCITotal) * 100).toFixed(0) + '%' : '-',
             best: bestName + ' (' + bestErr.toFixed(1) + ')',
             worst: worstName + ' (' + worstErr.toFixed(1) + ')'
@@ -7929,6 +7956,7 @@ function renderAccuracyWithFilters(container) {
 
     const overallPtsMAE = totalComparisons > 0 ? (totalPtsMAE / totalComparisons).toFixed(1) : '-';
     const overallPosMAE = totalPosComparisons > 0 ? (totalPosMAE / totalPosComparisons).toFixed(1) : '-';
+    const overallQualiMAE = totalQualiComparisons > 0 ? (totalQualiMAE / totalQualiComparisons).toFixed(1) : '-';
     const overallCICov = totalCITotal > 0 ? ((totalCIHits / totalCITotal) * 100).toFixed(0) : '-';
 
     // Build scatter plot SVG
@@ -8009,10 +8037,10 @@ function renderAccuracyWithFilters(container) {
     }
 
     // Per-round table
-    const posMAEHeader = isDrivers ? '<th class="num">Pos MAE</th>' : '';
+    const positionMAEHeaders = isDrivers ? '<th class="num">Quali MAE</th><th class="num">Race MAE</th>' : '';
     const roundTableRows = roundStats.map(r => `<tr>
         <td>R${r.round}</td><td>${r.name}</td><td class="num">${r.ptsMAE}</td>
-        ${isDrivers ? `<td class="num">${r.posMAE}</td>` : ''}<td class="num">${r.ciCoverage}</td>
+        ${isDrivers ? `<td class="num">${r.qualiMAE}</td><td class="num">${r.raceMAE}</td>` : ''}<td class="num">${r.ciCoverage}</td>
         <td>${r.best}</td><td>${r.worst}</td>
     </tr>`).join('');
 
@@ -8055,6 +8083,48 @@ function renderAccuracyWithFilters(container) {
         </tr>`;
     }).join('');
 
+    const positionErrorClass = (error) => {
+        if (error == null) return '';
+        if (error <= 2) return 'cmp-green';
+        if (error <= 4) return 'cmp-yellow';
+        return 'cmp-red';
+    };
+    const formatPosition = (position) => position != null ? `P${position}` : '-';
+    const positionTableRows = [...positionRows]
+        .sort((a, b) => b.round - a.round || (a.actRace ?? 99) - (b.actRace ?? 99))
+        .map(row => {
+            const team = TEAMS[row.constructor] || { name: row.constructor, color: '#666' };
+            return `<tr>
+                <td>R${row.round}</td>
+                <td>${row.race}</td>
+                <td><strong>${row.driver}</strong></td>
+                <td style="color:${team.color}">${team.name}</td>
+                <td class="num">${formatPosition(row.predQuali)}</td>
+                <td class="num">${formatPosition(row.actQuali)}</td>
+                <td class="num ${positionErrorClass(row.qualiErr)}">${row.qualiErr ?? '-'}</td>
+                <td class="num">${formatPosition(row.predRace)}</td>
+                <td class="num">${formatPosition(row.actRace)}</td>
+                <td class="num ${positionErrorClass(row.raceErr)}">${row.raceErr ?? '-'}</td>
+            </tr>`;
+        }).join('');
+    const positionComparisonHTML = isDrivers ? `
+    <div class="accuracy-section">
+        <h3>Qualifying &amp; Race Position Comparison</h3>
+        <p style="margin:-6px 0 12px;color:var(--text-secondary);font-size:0.82rem;">
+            Predicted and actual positions for the selected phase and races. Error is the absolute number of positions missed.
+        </p>
+        <div class="table-wrapper">
+            <table class="data-table accuracy-position-table sortable">
+                <thead><tr>
+                    <th>Rd</th><th>Race</th><th>Driver</th><th>Team</th>
+                    <th class="num">Pred Quali</th><th class="num">Actual Quali</th><th class="num">Q Error</th>
+                    <th class="num">Pred Race</th><th class="num">Actual Race</th><th class="num">R Error</th>
+                </tr></thead>
+                <tbody>${positionTableRows}</tbody>
+            </table>
+        </div>
+    </div>` : '';
+
     container.innerHTML = accuracyMissingNote + `
     ${entityToggleHTML}
     ${phaseToggleHTML}
@@ -8067,8 +8137,12 @@ function renderAccuracyWithFilters(container) {
             <div class="accuracy-stat-label">Points MAE</div>
         </div>
         ${isDrivers ? `<div class="accuracy-stat-card">
+            <div class="accuracy-stat-value">${overallQualiMAE}</div>
+            <div class="accuracy-stat-label">Qualifying MAE</div>
+        </div>
+        <div class="accuracy-stat-card">
             <div class="accuracy-stat-value">${overallPosMAE}</div>
-            <div class="accuracy-stat-label">Position MAE</div>
+            <div class="accuracy-stat-label">Race MAE</div>
         </div>` : ''}
         <div class="accuracy-stat-card">
             <div class="accuracy-stat-value">${overallCICov}%</div>
@@ -8093,13 +8167,15 @@ function renderAccuracyWithFilters(container) {
             <table class="data-table accuracy-round-table sortable">
                 <thead><tr>
                     <th>Rd</th><th>Race</th><th class="num">Pts MAE</th>
-                    ${posMAEHeader}<th class="num">CI Coverage</th>
+                    ${positionMAEHeaders}<th class="num">CI Coverage</th>
                     <th>Best Prediction</th><th>Worst Prediction</th>
                 </tr></thead>
                 <tbody>${roundTableRows}</tbody>
             </table>
         </div>
     </div>
+
+    ${positionComparisonHTML}
 
     <div class="accuracy-section">
         <h3>Per-${entityLabel} Accuracy</h3>

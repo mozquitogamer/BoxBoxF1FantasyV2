@@ -706,7 +706,7 @@ select:focus, input:focus {
     vertical-align: middle;
 }
 
-/* Drivers table carries 16 columns (incl. the price-change forecast). Compact
+/* Drivers table carries 17 columns (incl. both point scores and the price-change forecast). Compact
    its padding/typography so the whole board fits inside the 1280px container
    without a horizontal scrollbar. Scoped to #driverTable so the roomier
    styling on every other table is left untouched. */
