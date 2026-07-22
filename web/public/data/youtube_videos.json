@@ -1,7 +1,14 @@
 {
-  "updated": "2026-07-21T12:01:40Z",
+  "updated": "2026-07-22T12:06:08Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "u7AMcBRr4tQ",
+      "title": "The Best F1 Fantasy Team for the Hungarian Grand Prix- 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
+      "published": "2026-07-21",
+      "thumbnail": "https://i.ytimg.com/vi/u7AMcBRr4tQ/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=u7AMcBRr4tQ"
+    },
     {
       "id": "i8sMEiFZJog",
       "title": "Drivers to TRANSFER in and out + Why! - Belgian GP - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
@@ -22,13 +29,6 @@
       "published": "2026-07-04",
       "thumbnail": "https://i.ytimg.com/vi/4dDsgiAV71s/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=4dDsgiAV71s"
-    },
-    {
-      "id": "9WM_WJsmtog",
-      "title": "Final Thoughts Post FP1 and SQ - British Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
-      "published": "2026-07-03",
-      "thumbnail": "https://i.ytimg.com/vi/9WM_WJsmtog/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=9WM_WJsmtog"
     }
   ]
 }
