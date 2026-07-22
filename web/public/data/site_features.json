@@ -1,0 +1,21 @@
+{
+  "email_updates": {
+    "enabled": false,
+    "endpoint": "/api/email/subscribe"
+  },
+  "adsense": {
+    "account_code_enabled": true,
+    "display_ads_enabled": false,
+    "publisher_id": "ca-pub-4471174873493912",
+    "bottom_display_slot_id": ""
+  },
+  "bottom_banner": {
+    "enabled": false,
+    "label": "Sponsored",
+    "headline": "",
+    "body": "",
+    "cta": "Learn more",
+    "href": "",
+    "image_url": ""
+  }
+}

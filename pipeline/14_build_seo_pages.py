@@ -35,6 +35,7 @@ from statistics import median
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+from config.adsense import ADSENSE_HEAD_END, ADSENSE_HEAD_START, render_adsense_account_head
 from config.fantasy_prices import load_fantasy_price_data
 
 WEB = ROOT / "web" / "public"
@@ -46,7 +47,7 @@ CONTACT_EMAIL = "boxboxf1fantasy@gmail.com"
 INDEXNOW_KEY = "779753a5fbbf054b3ea496085a0ce1e4"
 # Bump only when generated page templates, metadata, structured data or links
 # receive a significant site-wide content change.
-SEO_CONTENT_LASTMOD = "2026-07-13"
+SEO_CONTENT_LASTMOD = "2026-07-22"
 LINEUP_CONTENT_LASTMOD = "2026-07-13"
 
 TOP_DRIVERS = 10      # rows in the "top picks" table
@@ -81,6 +82,15 @@ def load_json(path: Path):
         return None
     with path.open(encoding="utf-8") as f:
         return json.load(f)
+
+
+def load_adsense_settings() -> dict:
+    features = load_json(DATA / "site_features.json") or {}
+    return features.get("adsense") or {}
+
+
+def adsense_head_html() -> str:
+    return render_adsense_account_head(load_adsense_settings())
 
 
 def load_seed_json(name: str):
@@ -836,6 +846,18 @@ def write_homepage_prediction_snapshot(current: dict) -> None:
     home.write_text(updated, encoding="utf-8")
 
 
+def write_homepage_adsense_head() -> None:
+    home = WEB / "index.html"
+    source = home.read_text(encoding="utf-8")
+    rendered = adsense_head_html()
+    pattern = re.compile(re.escape(ADSENSE_HEAD_START) + r".*?" + re.escape(ADSENSE_HEAD_END), re.S)
+    updated, count = pattern.subn(rendered, source, count=1)
+    if count != 1:
+        raise RuntimeError("Could not update homepage AdSense account-code markers")
+    if updated != source:
+        home.write_text(updated, encoding="utf-8")
+
+
 # GA4 snippet. Plain (non-f) string so the JS braces survive. Unlike the SPA,
 # each static page is a real distinct URL, so we let gtag fire its automatic
 # page_view per page (no send_page_view:false) - they show up directly in GA's
@@ -867,6 +889,7 @@ def page_head(
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{adsense_head_html()}
 {GA_SNIPPET}
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
@@ -900,6 +923,7 @@ def page_head(
 <link rel="author" type="text/plain" href="/humans.txt">
 <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/picks/picks.css">
+<link rel="stylesheet" href="/engagement.css?v=2">
 {extra_ld}
 </head>
 <body>
@@ -911,12 +935,50 @@ def page_head(
 """
 
 
+ENGAGEMENT_BLOCK = """<div class="engagement-shell">
+<section class="email-updates-panel" id="emailUpdatesPanel" aria-labelledby="emailUpdatesTitle" hidden>
+  <div class="email-updates-copy">
+    <span class="email-updates-eyebrow">Race-week alerts</span>
+    <h2 id="emailUpdatesTitle">Know when the simulations change</h2>
+    <p>Get one concise email when fresh BoxBox simulations go live. No daily spam, and unsubscribe whenever you like.</p>
+  </div>
+  <form class="email-updates-form" id="emailUpdatesForm" novalidate>
+    <div class="email-updates-fields">
+      <label class="sr-only" for="emailUpdatesAddress">Email address</label>
+      <input id="emailUpdatesAddress" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
+      <button type="submit">Notify me</button>
+    </div>
+    <div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+    <label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Email me when simulations are updated. I understand I must confirm my address first.</span></label>
+    <p class="email-updates-privacy">Handled according to the <a href="/privacy/">privacy policy</a>.</p>
+    <p class="email-updates-status" id="emailUpdatesStatus" role="status" aria-live="polite"></p>
+  </form>
+</section>
+<aside class="adsense-banner" id="adsenseBanner" aria-label="Advertisement" hidden>
+  <span class="adsense-label">Advertisement</span>
+  <ins class="adsbygoogle adsense-bottom-unit" id="adsenseBottomUnit" style="display:block"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+</aside>
+<aside class="bottom-banner" id="bottomBanner" aria-label="Sponsored message" hidden>
+  <span class="bottom-banner-label" id="bottomBannerLabel">Sponsored</span>
+  <a class="bottom-banner-link" id="bottomBannerLink" href="#">
+    <img class="bottom-banner-image" id="bottomBannerImage" src="" alt="" hidden>
+    <span class="bottom-banner-copy"><strong id="bottomBannerHeadline"></strong><span id="bottomBannerBody"></span></span>
+    <span class="bottom-banner-cta" id="bottomBannerCta">Learn more</span>
+  </a>
+</aside>
+</div>"""
+
+
 FOOTER = f"""</main>
+{ENGAGEMENT_BLOCK}
 <footer class="footer"><div class="wrap">
 <p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/stats/">Points &amp; Prices</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a> &middot; <a href="/articles/">Articles</a> &middot; <a href="/data/">Data</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/methodology/">Methodology</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
+<script src="/engagement.js?v=2"></script>
 </body>
 </html>
 """
@@ -5513,19 +5575,24 @@ STATIC_PAGES = [
         "schema_type": "WebPage",
         "intro": '<p class="lede">This privacy policy explains what BoxBoxF1Fantasy collects and how the site uses it.</p>',
         "body": (
-            f"<p><strong>Last updated:</strong> {SEO_CONTENT_LASTMOD}</p>"
+            "<p><strong>Last updated:</strong> 2026-07-22</p>"
             "<h2>Information we collect</h2>"
-            "<p>BoxBoxF1Fantasy does not require an account and does not ask visitors to create a profile. If you email us, we receive the email address and any information you choose to include in the message.</p>"
+            "<p>Most BoxBoxF1Fantasy features do not require an account. If you email us, we receive the email address and any information you choose to include in the message. If you subscribe to race-week alerts, we process your email address and confirmation status for that purpose.</p>"
+            "<h2>Email alerts</h2>"
+            "<p>Email alerts use a double-opt-in process: submitting an address sends a time-limited confirmation link, and the address is added to the mailing list only after that link is opened. Resend processes confirmation messages, subscriber records, delivery events and unsubscribes on our behalf. Every simulation-update broadcast includes an unsubscribe link. You can also ask us to remove your address.</p>"
             "<h2>Analytics</h2>"
             "<p>The site uses Google Analytics to understand aggregate traffic, page usage and engagement. Analytics data may include device/browser information, approximate location, referrer, pages viewed and interaction events. This helps improve the site and understand which pages are useful.</p>"
             "<h2>Cookies and local storage</h2>"
-            "<p>Google Analytics may use cookies or similar technologies. The site may also use browser local storage for convenience features such as saved scenario settings or team inputs. These are stored in your browser and are used to make the tools work better for you.</p>"
-            "<h2>Advertising</h2>"
-            "<p>The site may add advertising in the future. If ads are added, ad partners may use cookies or similar technologies to measure performance, prevent fraud and personalize or limit ads according to their own policies and your browser settings.</p>"
+            "<p>Google Analytics and, when enabled, Google AdSense may use cookies, web beacons or similar technologies. The site also uses browser local storage for convenience features such as saved scenario settings or team inputs. Local-storage data stays in your browser unless a feature clearly says it will be submitted.</p>"
+            "<h2>Advertising and Google AdSense</h2>"
+            "<p>BoxBoxF1Fantasy is prepared to display advertising supplied by Google AdSense. When ads are enabled, Google and its advertising partners may process IP address, device/browser information, cookie identifiers and ad interactions to deliver and measure ads, prevent fraud and abuse, and show personalized, non-personalized or limited ads depending on your region, consent choices and browser settings.</p>"
+            '<p>Google explains how it uses information from sites that use its services in <a href="https://policies.google.com/technologies/partner-sites" rel="noopener">How Google uses information from sites or apps that use its services</a>. Where consent is legally required, the site will use a Google-certified consent interface so visitors can accept, reject or manage non-essential advertising purposes before they are used.</p>'
             "<h2>External links</h2>"
-            "<p>BoxBoxF1Fantasy links to third-party sites such as social platforms, YouTube, Ko-fi, PayPal and data sources. Those sites have their own privacy policies and practices.</p>"
+            "<p>BoxBoxF1Fantasy links to third-party sites such as Google, social platforms, YouTube, Ko-fi, PayPal and data sources. Those sites have their own privacy policies and practices.</p>"
             "<h2>Data sharing</h2>"
-            "<p>We do not sell personal information. Aggregated analytics and operational information may be processed by service providers used to host, measure and maintain the site.</p>"
+            "<p>We do not sell personal information. Information may be processed by service providers used to host, email, analyze, advertise on and maintain the site, only for those services and subject to their terms.</p>"
+            "<h2>Retention and your choices</h2>"
+            "<p>Subscription data is kept until you unsubscribe or ask for deletion, except for limited suppression or delivery records needed to honour an unsubscribe and protect email deliverability. Advertising consent choices can be revisited through the consent interface when it is active. You may request access, correction or deletion by contacting us.</p>"
             "<h2>Contact</h2>"
             f'<p>For privacy questions, email <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>'
         ),
@@ -5561,6 +5628,7 @@ def main() -> None:
     )
 
     write_homepage_prediction_snapshot(current)
+    write_homepage_adsense_head()
     write_prediction_schema()
     write_ai_summary(current, season)
 

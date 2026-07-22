@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ADSENSE_ACCOUNT_CODE_START -->
+<meta name="google-adsense-account" content="ca-pub-4471174873493912">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4471174873493912" crossorigin="anonymous"></script>
+<!-- ADSENSE_ACCOUNT_CODE_END -->
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-T3HS76FJ7W"></script>
 <script>
@@ -43,6 +47,7 @@ gtag('config', 'G-T3HS76FJ7W');
 <link rel="author" type="text/plain" href="/humans.txt">
 <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/picks/picks.css">
+<link rel="stylesheet" href="/engagement.css?v=2">
 <script type="application/ld+json">
 [
  {
@@ -203,10 +208,45 @@ With Round 1 actual results now feeding into the pipeline, confidence scores imp
 <p>
 Round 3 data will give us enough signal for meaningful rolling averages. The Monte Carlo simulations become increasingly reliable as the sample size grows.
 </p></div><div class="btnrow"><a class="cta" href="/#articles">Open interactive Articles tab &rarr;</a></div></main>
+<div class="engagement-shell">
+<section class="email-updates-panel" id="emailUpdatesPanel" aria-labelledby="emailUpdatesTitle" hidden>
+  <div class="email-updates-copy">
+    <span class="email-updates-eyebrow">Race-week alerts</span>
+    <h2 id="emailUpdatesTitle">Know when the simulations change</h2>
+    <p>Get one concise email when fresh BoxBox simulations go live. No daily spam, and unsubscribe whenever you like.</p>
+  </div>
+  <form class="email-updates-form" id="emailUpdatesForm" novalidate>
+    <div class="email-updates-fields">
+      <label class="sr-only" for="emailUpdatesAddress">Email address</label>
+      <input id="emailUpdatesAddress" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
+      <button type="submit">Notify me</button>
+    </div>
+    <div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+    <label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Email me when simulations are updated. I understand I must confirm my address first.</span></label>
+    <p class="email-updates-privacy">Handled according to the <a href="/privacy/">privacy policy</a>.</p>
+    <p class="email-updates-status" id="emailUpdatesStatus" role="status" aria-live="polite"></p>
+  </form>
+</section>
+<aside class="adsense-banner" id="adsenseBanner" aria-label="Advertisement" hidden>
+  <span class="adsense-label">Advertisement</span>
+  <ins class="adsbygoogle adsense-bottom-unit" id="adsenseBottomUnit" style="display:block"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+</aside>
+<aside class="bottom-banner" id="bottomBanner" aria-label="Sponsored message" hidden>
+  <span class="bottom-banner-label" id="bottomBannerLabel">Sponsored</span>
+  <a class="bottom-banner-link" id="bottomBannerLink" href="#">
+    <img class="bottom-banner-image" id="bottomBannerImage" src="" alt="" hidden>
+    <span class="bottom-banner-copy"><strong id="bottomBannerHeadline"></strong><span id="bottomBannerBody"></span></span>
+    <span class="bottom-banner-cta" id="bottomBannerCta">Learn more</span>
+  </a>
+</aside>
+</div>
 <footer class="footer"><div class="wrap">
 <p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/stats/">Points &amp; Prices</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a> &middot; <a href="/articles/">Articles</a> &middot; <a href="/data/">Data</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/methodology/">Methodology</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the 2026 season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
+<script src="/engagement.js?v=2"></script>
 </body>
 </html>

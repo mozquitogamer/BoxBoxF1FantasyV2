@@ -44,9 +44,15 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="manifest" href="/site.webmanifest">
     <link rel="stylesheet" href="styles.css?v=19">
+    <link rel="stylesheet" href="engagement.css?v=2">
     <link rel="stylesheet" href="scenarios.css?v=3">
     <link rel="stylesheet" href="weather.css?v=2">
     <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+
+    <!-- ADSENSE_ACCOUNT_CODE_START -->
+<meta name="google-adsense-account" content="ca-pub-4471174873493912">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4471174873493912" crossorigin="anonymous"></script>
+<!-- ADSENSE_ACCOUNT_CODE_END -->
 
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-T3HS76FJ7W"></script>
@@ -1109,6 +1115,53 @@
                     </a>
                 </div>
             </aside>
+
+            <!-- Feature-flagged until the Resend domain and Vercel secrets are configured. -->
+            <section class="email-updates-panel" id="emailUpdatesPanel" aria-labelledby="emailUpdatesTitle" hidden>
+                <div class="email-updates-copy">
+                    <span class="email-updates-eyebrow">Race-week alerts</span>
+                    <h2 id="emailUpdatesTitle">Know when the simulations change</h2>
+                    <p>Get one concise email when fresh BoxBox simulations go live. No daily spam, and unsubscribe whenever you like.</p>
+                </div>
+                <form class="email-updates-form" id="emailUpdatesForm" novalidate>
+                    <div class="email-updates-fields">
+                        <label class="sr-only" for="emailUpdatesAddress">Email address</label>
+                        <input id="emailUpdatesAddress" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
+                        <button type="submit">Notify me</button>
+                    </div>
+                    <div class="email-updates-honeypot" aria-hidden="true">
+                        <label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+                    </div>
+                    <label class="email-updates-consent">
+                        <input name="consent" type="checkbox" required>
+                        <span>Email me when simulations are updated. I understand I must confirm my address first.</span>
+                    </label>
+                    <p class="email-updates-privacy">Handled according to the <a href="/privacy/">privacy policy</a>.</p>
+                    <p class="email-updates-status" id="emailUpdatesStatus" role="status" aria-live="polite"></p>
+                </form>
+            </section>
+
+            <!-- Responsive AdSense inventory; hidden until account and slot IDs are configured. -->
+            <aside class="adsense-banner" id="adsenseBanner" aria-label="Advertisement" hidden>
+                <span class="adsense-label">Advertisement</span>
+                <ins class="adsbygoogle adsense-bottom-unit" id="adsenseBottomUnit"
+                     style="display:block"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+            </aside>
+
+            <!-- Provider-neutral direct-sponsor inventory; used only when AdSense is off. -->
+            <aside class="bottom-banner" id="bottomBanner" aria-label="Sponsored message" hidden>
+                <span class="bottom-banner-label" id="bottomBannerLabel">Sponsored</span>
+                <a class="bottom-banner-link" id="bottomBannerLink" href="#">
+                    <img class="bottom-banner-image" id="bottomBannerImage" src="" alt="" hidden>
+                    <span class="bottom-banner-copy">
+                        <strong id="bottomBannerHeadline"></strong>
+                        <span id="bottomBannerBody"></span>
+                    </span>
+                    <span class="bottom-banner-cta" id="bottomBannerCta">Learn more</span>
+                </a>
+            </aside>
         </div>
     </main>
 
@@ -1140,5 +1193,6 @@
 
     <script src="scenarios.js?v=3"></script>
     <script src="app.js?v=112"></script>
+    <script src="engagement.js?v=2"></script>
 </body>
 </html>

@@ -1,0 +1,3 @@
+# Do not rename this file manually. Run pipeline/configure_adsense.py with the
+# real ca-pub account ID; it validates the ID and writes /ads.txt in this form:
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

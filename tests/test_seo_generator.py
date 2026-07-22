@@ -380,7 +380,7 @@ def test_methodology_and_about_publish_trust_correction_and_schema_signals():
     assert 'By <a href="/about/" rel="author">BoxBoxF1Fantasy</a>' in methodology_html
     assert "How this analysis is made" not in methodology_html
     assert '"url": "https://boxboxf1fantasy.com/about/"' in methodology_html
-    assert '"dateModified": "2026-07-13"' in methodology_html
+    assert f'"dateModified": "{seo.SEO_CONTENT_LASTMOD}"' in methodology_html
     assert '"@type": "FAQPage"' in methodology_html
     assert "Corrections and accountability" in about_html
     assert "Editorial authorship" in about_html
