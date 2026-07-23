@@ -1,6 +1,19 @@
 {
   "entries": [
     {
+      "date": "2026-07-23",
+      "title": "Reliable cars no longer get double-penalised after a retirement",
+      "tags": [
+        "fix",
+        "model"
+      ],
+      "body": [
+        "A recent retirement could hurt a driver twice: first by making their recent race form look like a slow last-place finish, and again through the explicit DNF-risk calculation. That was especially harsh on otherwise reliable front-running cars. Race-form features now measure pace only from classified finishes, while retirements remain in the separate reliability model where they belong.",
+        "DNF risk now shares part of the evidence across both cars from the same constructor. Individual crashes and errors still matter, but one driver's recent bad luck no longer makes two mechanically identical cars look wildly different. A no-peeking season back-test improved the retirement probability score slightly, and the post-practice race model used before the Fantasy deadline also reduced finishing-position error.",
+        "The Monte Carlo still models shared mechanical failures and multi-car incidents, but those correlations now preserve each driver's calibrated retirement probability instead of adding extra risk on top. In the current forecast the simulated field retirement rate is within a tenth of a percentage point of its intended weather-adjusted target."
+      ]
+    },
+    {
       "date": "2026-07-18",
       "title": "Practice long runs corrected and rain simulations retuned",
       "tags": [
