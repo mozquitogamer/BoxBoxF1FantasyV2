@@ -3180,6 +3180,22 @@ function ffQualifyingPoints(position) {
     return FF_QUALI_POSITION_POINTS[Number(position)] || 0;
 }
 
+function ffProjectedRacePoints(driver) {
+    const explicitRace = Number(driver?.projected_points_race);
+    if (Number.isFinite(explicitRace)) return explicitRace;
+
+    // Backward-compatible fallback for a briefly cached pre-field payload.
+    // Deliberately derive from projected_points; never fall back to the
+    // risk-adjusted expected_points or the global optimizer basis.
+    const projectedTotal = Number(driver?.projected_points);
+    if (!Number.isFinite(projectedTotal)) return 0;
+    const projectedQuali = Number.isFinite(Number(driver?.projected_points_quali))
+        ? Number(driver.projected_points_quali)
+        : ffQualifyingPoints(driver?.predicted_quali);
+    const projectedSprintRace = Number(driver?.projected_points_sprint_race) || 0;
+    return projectedTotal - projectedQuali - projectedSprintRace;
+}
+
 function ffSelectedAward(name) {
     return document.querySelector(`input[name="${name}"]:checked`)?.value || 'none';
 }
@@ -3206,12 +3222,7 @@ function ffSetScenarioDriver(side, resetInputs = true) {
     const grid = Number(driver.predicted_grid ?? quali);
     const penalty = Number(driver.grid_penalty_places || 0);
     const qPoints = ffQualifyingPoints(quali);
-    const raceMean = Number(driver.mc_race_pts_mean ?? driver.expected_points_race ?? 0);
-    const raceP5 = driver.mc_race_pts_p5;
-    const raceP95 = driver.mc_race_pts_p95;
-    const range = Number.isFinite(raceP5) && Number.isFinite(raceP95)
-        ? `${Number(raceP5).toFixed(1)} to ${Number(raceP95).toFixed(1)}`
-        : 'pending';
+    const projectedRace = ffProjectedRacePoints(driver);
 
     document.getElementById(`${prefix}Name`).textContent = driver.name;
     document.getElementById(`${prefix}Price`).textContent = `$${Number(driver.current_price || 0).toFixed(1)}M`;
@@ -3223,7 +3234,7 @@ function ffSetScenarioDriver(side, resetInputs = true) {
         <div><span>Qualifying</span><strong>P${quali} · ${qLabel}</strong></div>
         <div><span>Race start</span><strong>${gridText}</strong></div>
         <div><span>Model finish</span><strong>P${driver.predicted_finish}</strong></div>
-        <div><span>Model race points</span><strong>${raceMean.toFixed(1)} <small>(${range})</small></strong></div>
+        <div><span>Projected race points</span><strong>${projectedRace.toFixed(1)}</strong></div>
     `;
 
     if (resetInputs) {
@@ -3311,8 +3322,8 @@ function calculateFinalFixComparison() {
     const switchTotal = bankedQuali + incoming.points.total * multiplier;
     const scenarioDelta = switchTotal - holdTotal;
 
-    const modelOutRace = Number(outDriver.mc_race_pts_mean ?? outDriver.expected_points_race ?? 0);
-    const modelInRace = Number(inDriver.mc_race_pts_mean ?? inDriver.expected_points_race ?? 0);
+    const modelOutRace = ffProjectedRacePoints(outDriver);
+    const modelInRace = ffProjectedRacePoints(inDriver);
     const modelDelta = (modelInRace - modelOutRace) * multiplier;
     const modelHold = bankedQuali + modelOutRace * multiplier;
     const modelSwitch = bankedQuali + modelInRace * multiplier;
@@ -3337,10 +3348,10 @@ function calculateFinalFixComparison() {
         </div>
         <div class="ff-model-result">
             <div>
-                <span>Post-quali model</span>
+                <span>Projected points basis</span>
                 <strong>${modelDelta >= 0 ? 'Switch' : 'Hold'} by ${Math.abs(modelDelta).toFixed(1)} pts</strong>
             </div>
-            <p>Hold ${modelHold.toFixed(1)} · Switch ${modelSwitch.toFixed(1)} · race-only simulation means</p>
+            <p>Hold ${modelHold.toFixed(1)} · Switch ${modelSwitch.toFixed(1)} · deterministic race projections, not Balanced or Risk-adjusted</p>
         </div>
         <div class="ff-locked-note">
             <strong>${bankedQuali} Qualifying points stay banked from ${outDriver.name}.</strong>
@@ -3386,8 +3397,8 @@ function setupFinalFixTool() {
     const statusEl = document.getElementById('finalFixStatus');
     statusEl.className = `ff-status ${locked ? 'ready' : 'waiting'}`;
     statusEl.innerHTML = locked
-        ? '<strong>Post-qualifying simulations ready.</strong> Actual Qualifying and the confirmed starting grid are locked.'
-        : '<strong>Awaiting post-qualifying simulation.</strong> Manual scenarios work, but model numbers still reflect the pre-Qualifying forecast.';
+        ? '<strong>Post-qualifying projections ready.</strong> Actual Qualifying and the confirmed starting grid are locked. Comparisons use Projected points.'
+        : '<strong>Awaiting post-qualifying projections.</strong> Manual scenarios work, but model numbers still reflect the pre-Qualifying forecast.';
 
     ffSetScenarioDriver('out');
     ffSetScenarioDriver('in');

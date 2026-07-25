@@ -57,6 +57,7 @@ src += `
     hasScoreTeamPicks: typeof scoreTeamPicks === 'function',
     hasFinalFixRacePoints: typeof calculateFinalFixRacePoints === 'function',
     finalFixQualifyingPoints: typeof ffQualifyingPoints === 'function' ? ffQualifyingPoints : null,
+    finalFixProjectedRacePoints: typeof ffProjectedRacePoints === 'function' ? ffProjectedRacePoints : null,
     hasOfficialRoundCoverageCheck: typeof officialRoundHasCompleteScores === 'function',
     renderSwapRow: typeof renderSwapRow === 'function' ? renderSwapRow : null,
     renderTransferCard: typeof renderTransferCard === 'function' ? renderTransferCard : null,
@@ -221,6 +222,18 @@ try {
   const antonelliBankedQuali = S.finalFixQualifyingPoints(4);
   if (antonelliBankedQuali !== 7 || antonelliBankedQuali + hamilton.total !== 46) {
     fail('Final Fix did not retain Antonelli Q4 points while using Hamilton race points');
+  }
+  const projectedOnly = S.finalFixProjectedRacePoints({
+    predicted_quali: 4,
+    projected_points: 17.9,
+    projected_points_quali: 7,
+    projected_points_race: 10.9,
+    expected_points: 999,
+    expected_points_race: 888,
+    mc_race_pts_mean: 777,
+  });
+  if (projectedOnly !== 10.9) {
+    fail(`Final Fix used a non-projected points basis: ${projectedOnly}`);
   }
   const dnf = S.finalFixRacePoints({
     gridPosition: 7,

@@ -295,6 +295,12 @@ def build_predictions_json(round_num: int) -> dict | None:
             # order holds). expected_points is overwritten below with the risk-adjusted
             # MC mean; we keep BOTH so the UI can show projected vs risk-adjusted.
             "projected_points": round(float(row["total_expected_fantasy_points"]), 1),
+            "projected_points_quali": round(float(row.get(
+                "expected_quali_pts", row.get("expected_fantasy_points_from_quali", 0)
+            )), 1),
+            "projected_points_race": round(float(row.get(
+                "expected_race_pts", row.get("expected_fantasy_points_from_race", 0)
+            )), 1),
             "expected_points": round(float(row["total_expected_fantasy_points"]), 1),
             "expected_points_quali": round(float(row.get("expected_quali_pts", row.get("expected_fantasy_points_from_quali", 0))), 1),
             "expected_points_race": round(float(row.get("expected_race_pts", row.get("expected_fantasy_points_from_race", 0))), 1),
@@ -316,6 +322,9 @@ def build_predictions_json(round_num: int) -> dict | None:
             entry["current_price"] = driver_prices[abbrev]
 
         if is_sprint:
+            entry["projected_points_sprint_race"] = round(
+                float(row.get("expected_sprint_race_pts", 0)), 1
+            )
             entry["expected_points_sprint_quali"] = round(
                 float(row.get("expected_sprint_quali_pts", 0)), 1
             )
@@ -348,6 +357,7 @@ def build_predictions_json(round_num: int) -> dict | None:
             final_fix_meta = {
                 "qualifying_locked": bool(sim_params.get("qualifying_locked", False)),
                 "race_only_ranges": True,
+                "points_basis": "projected",
             }
             # Surface calibration metadata so the frontend can show users which
             # adjustments are being applied to predictions. None of these fields
