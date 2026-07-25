@@ -326,7 +326,12 @@ git add web/public/data/ && git commit -m "Post-FP predictions for R7 (Canada)" 
 
 **When:** After qualifying ends (Saturday afternoon for regular weekends; Saturday for sprint weekends — note that on sprint weekends regular qualifying is Saturday).
 
-**Purpose:** Re-predict the race using actual qualifying grid as input. The race model trained on real quali (`race_model.json`) is more accurate than the FP-fallback model (`race_model_fp.json`) when actual quali is available.
+**Purpose:** Re-predict the race using the official qualifying classification as model input, then apply any confirmed grid penalties to build the race starting grid. The race model trained on real quali (`race_model.json`) is more accurate than the FP-fallback model (`race_model_fp.json`) when actual quali is available.
+
+**Before running:** update `data/seed/grid_penalties.json` for every confirmed penalty. Qualifying position and starting grid are deliberately separate:
+
+- `actual_quali_position` / exported `predicted_quali` = official qualifying classification and banked qualifying points.
+- `predicted_grid_position` / exported `predicted_grid` = final race start after penalties and the reference for positions gained/lost.
 
 ```bash
 python pipeline/run_weekend.py --phase post_quali --round 7
@@ -335,9 +340,28 @@ python pipeline/run_weekend.py --phase post_quali --round 7
 Same step list as `post_fp`. The intelligence is in `06_run_predictions.py`:
 - It calls `_load_actual_quali()` which checks normalized Jolpica CSV first, then falls back to the FastF1 qualifying session.
 - If actual quali is found, it switches to `race_model.json` and feeds in real `quali_position` values.
+- It preserves that classification as `actual_quali_position`, applies `grid_penalties.json` separately, and writes the final start as `predicted_grid_position`.
+- `07_calculate_fantasy.py` banks qualifying points from the official classification, not the penalised grid.
+- `08_monte_carlo_fantasy.py` freezes both known values across all 10,000 simulations and samples only the race. Confirm `simulation_params.qualifying_locked` is `true`.
 - If not, behaves identically to `post_fp`.
 
 You can run `post_quali` even if Jolpica hasn't published quali yet — FastF1 usually has it within ~30 minutes of session end.
+
+The website export exposes both points families:
+
+- `projected_points`, `projected_points_quali`, `projected_points_race` — deterministic "predicted order holds" values.
+- `expected_points`, `expected_points_quali`, `expected_points_race` — Monte Carlo means (Risk-adjusted).
+- `mc_race_pts_p5/p25/median/p75/p95` — race-only simulation range.
+- `final_fix.points_basis="projected"` and `final_fix.qualifying_locked=true` — frontend contract for the dedicated Final Fix calculator.
+
+Final Fix must always compare:
+
+```text
+hold   = outgoing banked qualifying points + outgoing projected_points_race
+switch = outgoing banked qualifying points + incoming projected_points_race
+```
+
+Do not wire it to `expected_points_race`, `mc_race_pts_mean`, `basisPoints()`, or `optimizeBasis`; those are the Risk-adjusted/shared optimizer paths.
 
 ```bash
 git add web/public/data/ && git commit -m "Post-quali predictions for R7 (Canada)" && git push
@@ -729,6 +753,8 @@ Reads `predictions.parquet`, applies F1 Fantasy 2026 scoring rules. Outputs `fan
 
 10K-iteration simulation with calibrated noise. Auto-loads `data/seed/mc_calibration.json` if present. Outputs `monte_carlo_fantasy.json` + `.parquet`. Race-completed-guarded like 06.
 
+When every driver has `actual_quali_position`, the script logs `Post-quali mode: actual qualifying and starting grid fixed across sims`, sets `simulation_params.qualifying_locked=true`, and outputs race-only percentiles (`mc_race_pts_p5/p25/median/p75/p95`) alongside the total-score percentiles. Treat a missing/false lock after completed qualifying as a failed post-quali run; check the downloaded qualifying data before exporting.
+
 ### `pipeline/08_export_website_json.py` — Website exporter (orchestrated)
 
 ```
@@ -750,6 +776,7 @@ Bundles all parquets/JSONs into `web/public/data/*.json`. Auto-syncs official fa
 **Per-round outputs:**
 - `predictions_round{N}_{phase}.json` — **phase-tagged archive**, always written. Records what we predicted at this specific phase (pre-FP, post-FP, post-quali). The accuracy tab uses these to show how the forecast improved as more data arrived.
 - `predictions_round{N}.json` — **canonical archive**. Race-completed-guarded: refuses to overwrite if the race has already happened and the archive exists, unless `--force` is passed. This is the "first honest forecast" snapshot.
+- Driver entries retain deterministic components as `projected_points_quali`, `projected_points_race`, and (on sprint weekends) `projected_points_sprint_race`, even after the `expected_points_*` display fields are replaced with MC means. Final Fix depends on this separation.
 - `data/audit/predictions_log.jsonl` — one-line audit entry appended.
 - `data/audit/snapshots/round{N}/{ISO}_{phase}.json` — full immutable snapshot.
 
@@ -1207,9 +1234,14 @@ git add web/public/data/ && git commit -m "Post-FP R{N}" && git push
 
 ### Post-quali (after qualifying ends)
 ```bash
+# First record every confirmed grid drop in data/seed/grid_penalties.json.
 python pipeline/run_weekend.py --phase post_quali --round N
+# Confirm the MC log reports that qualifying + grid were fixed, then verify:
+node tests/smoke_app_js.js
 git add web/public/data/ && git commit -m "Post-quali R{N}" && git push
 ```
+
+Before publishing, inspect `web/public/data/predictions.json`: `phase` must be `post_quali`, `final_fix.qualifying_locked` must be `true`, `final_fix.points_basis` must be `projected`, and penalised drivers must show the correct pair of `predicted_quali` and `predicted_grid`.
 
 ### Post-race (Sunday evening + the morning after)
 ```bash

@@ -154,7 +154,7 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
 - ~~Given predicted fantasy points + confidence intervals, solve for the optimal 5-driver + 2-constructor team under the $100M budget constraint~~
 - Brute-force optimizer checking C(22,5) x C(11,2) = ~1.4M combinations
 - Transfer advisor: given current team + budget + free transfers, find optimal swaps with -10pt penalty per extra transfer
-- All 6 chip types supported: Limitless, 3x Boost (3x + 2x dual boost), Wild Card, No Negative, Autopilot, Final Fix
+- Five general chip types supported in lineup/planning searches: Limitless, 3x Boost (3x + 2x dual boost), Wild Card, No Negative, Autopilot. Final Fix is implemented as a dedicated post-qualifying calculator with banked qualifying points and a fixed Projected race-points basis.
 - Lock/exclude picks: left-click to force into lineup, right-click to exclude
 - 4 strategies: Max Points, Max Value, Budget Builder, Balanced
 
@@ -258,7 +258,7 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
   - `sprint_multiplier` = 1.15x for sprint weekends
 - **Beam search:** Width 60, explores 0-2 swaps per round, transfer banking (max 5 banked), -10pts per extra transfer
 - **Three strategies:** Max Points (pure projected points), Balanced (0.7 pts + 0.3 value), Budget Gain (0.4 pts + 0.6 price appreciation)
-- **Chip support:** Wild Card, Limitless, 3x Boost, No Negative, Autopilot, Final Fix can be deployed on specific rounds
+- **Chip support:** Wild Card, Limitless, 3x Boost, No Negative, and Autopilot can be deployed on specific rounds. Final Fix is intentionally excluded from the multi-week beam search because it requires a completed qualifying classification and confirmed starting grid.
 - **New data exports:** `track_data.json` (22 circuits with 9D features, race-circuit mappings, sprint rounds) and `driver_history.json` (per-driver/constructor actual points per round with circuit_id)
 - **UI:** Mode toggle (Single Round / Transfer Advisor / Multi-Week Planner), projection heatmap (top 12 drivers + top 6 constructors), ranked plan cards with round-by-round timeline showing hold/swap/chip actions
 

@@ -148,14 +148,14 @@ Walk through each field on the card, in order:
 
 ---
 
-## 5. The Optimizer — the tab that wins leagues (6:45–12:00)
+## 5. The Optimizer — the tab that wins leagues (6:45–14:00)
 
 This is the longest, most valuable section. It has **three modes**. Slow down here.
 
 `[SHOW]` Optimizer tab. Point at the three mode buttons: **Build Fresh Lineup**, **Transfer Advisor**, **Multi-Week Planner**.
 
 `[SAY]`
-> "This is the tab that actually wins leagues, and it has three tools. Which one you want depends on where you are in the season. Let me show you all three."
+> "This is the tab that actually wins leagues, and it has five modes. Build from scratch, improve the team you own, plan several races ahead, make a post-qualifying Final Fix, or compare complete teams side by side."
 
 ### 5a. Build Fresh Lineup — start of season, or a Wild Card (6:50–8:00)
 
@@ -225,12 +225,30 @@ This is the longest, most valuable section. It has **three modes**. Slow down he
 
 💡 **PRO TIP:** "Use the Multi-Week Planner most when you have **three or more free transfers banked.** Flexibility is exactly when planning ahead pays — and it'll often tell you to *bank* a transfer this week so you can make a double move when a sprint round or a favourable track cluster arrives."
 
-### 5d. The six chips — what they do and when to fire them (11:30–12:00)
+### 5d. Final Fix — make the post-qualifying decision (11:30–12:30)
 
-`[SHOW]` The chip dropdown, listing all six.
+`[SHOW]` Switch to Final Fix. Select Antonelli as the owned driver and Norris or Hamilton as the replacement. Point out Qualifying, Race start, and Projected race points.
 
 `[SAY]`
-> "Quick run through your six chips, because timing them is half the game:"
+> "Final Fix gets its own calculator because the scoring boundary is different after qualifying. The driver you already owned keeps the qualifying points they banked. If you switch, only the Grand Prix contribution changes.
+>
+> This distinction matters when there's a grid penalty. Qualifying points come from the official qualifying result; positions gained or lost start from the penalised race grid. So a driver can bank Q4 points but start P7."
+
+`[SHOW]` Change the incoming finish to two places above their grid, confirm the editable overtake suggestion, then toggle Fastest Lap or Driver of the Day.
+
+`[SAY]`
+> "Set the finish you expect, edit the overtake count, and assign Fastest Lap or Driver of the Day if that's part of your view. The table shows every point: finish, gained or lost, overtakes, and bonuses.
+>
+> The model line always uses the big **Projected** score—the deterministic 'if the predicted order holds' number. It does not use Balanced or Risk-adjusted, and it doesn't inherit a setting from another optimizer mode."
+
+💡 **PRO TIP:** "Check the bank first. Final Fix still has to be affordable: the sold driver's value plus your remaining cash must cover the replacement."
+
+### 5e. The five general chips — what they do and when to fire them (12:30–13:15)
+
+`[SHOW]` The normal chip dropdown.
+
+`[SAY]`
+> "The other optimizer modes handle five general chips. Final Fix is separate, so it won't appear here as a fake sixth dropdown option."
 
 | Chip | What it does | When to fire it |
 |---|---|---|
@@ -239,14 +257,20 @@ This is the longest, most valuable section. It has **three modes**. Slow down he
 | **Wild Card** | Unlimited free transfers, no penalties | When your team needs a *total* rebuild — pair it with the Lineup Optimizer's fresh build. |
 | **No Negative** | Negative driver scores become zero | A chaos/wet weekend with high DNF risk across your team — caps your downside. |
 | **Autopilot** | Auto-2× on your best driver | A safe insurance chip when you're not sure who'll pop — let it pick the boost for you. |
-| **Final Fix** | One roster change *after* qualifying | Save it for a weekend where qualifying surprises are likely — react to the actual grid. |
 
 `[SAY]`
-> "The optimizer and the planner both understand all six — pick the chip in the dropdown and they'll build the team that makes the most of it, and even tell you the best round to deploy it across your horizon."
+> "Pick one of these in the relevant optimizer or planner and it will build the team that makes the most of it. Use the dedicated Final Fix mode only after qualifying."
+
+### 5f. Team Compare — settle the full-lineup debate (13:15–14:00)
+
+`[SHOW]` Switch to Team Compare, enter two candidate teams, and change its Points basis selector.
+
+`[SAY]`
+> "When the real question is Team A versus Team B, compare the complete lineups here. It includes cost, bank, total score and the confidence range. Unlike Final Fix, Team Compare follows the Projected, Balanced or Risk-adjusted basis you choose right here."
 
 ---
 
-## 6. H2H — settle a single decision (12:00–12:45)
+## 6. H2H — settle a single decision (14:00–14:45)
 
 `[SHOW]` H2H tab. Pick two drivers (e.g. your captain candidates). Show the win probability + comparison.
 
@@ -257,7 +281,7 @@ This is the longest, most valuable section. It has **three modes**. Slow down he
 
 ---
 
-## 7. Accuracy — why you can trust any of this (12:45–14:00)
+## 7. Accuracy — why you can trust any of this (14:45–16:00)
 
 This section builds credibility. Don't skip it — it's what separates your tool from "some guy's predictions."
 
@@ -279,7 +303,7 @@ This section builds credibility. Don't skip it — it's what separates your tool
 
 ---
 
-## 8. Season — manage your budget like an asset (14:00–14:45)
+## 8. Season — manage your budget like an asset (16:00–16:45)
 
 `[SHOW]` Season tab. Scroll through championship standings, fantasy standings, the driver and constructor price trackers.
 
@@ -292,7 +316,7 @@ This section builds credibility. Don't skip it — it's what separates your tool
 
 ---
 
-## 9. Analysis & Race Deep Dive — for the data nerds (14:45–15:45)
+## 9. Analysis & Race Deep Dive — for the data nerds (16:45–17:45)
 
 `[SHOW]` Analysis tab → Free Practice panel, then Post-Race panel. Then the Race Deep Dive tab with a round selected.
 
@@ -305,7 +329,7 @@ This section builds credibility. Don't skip it — it's what separates your tool
 
 ---
 
-## 10. The quick tabs — Changelog, Videos, Articles, About (15:45–16:30)
+## 10. The quick tabs — Changelog, Videos, Articles, About (17:45–18:30)
 
 `[SHOW]` Click quickly through Changelog, Videos, Articles, About.
 
@@ -318,7 +342,7 @@ This section builds credibility. Don't skip it — it's what separates your tool
 
 ---
 
-## 11. Quirks & gotchas — "that's working as intended" (16:30–18:00)
+## 11. Quirks & gotchas — "that's working as intended" (18:30–20:00)
 
 This section is gold for retention — it pre-empts the exact things that make new users think the site is broken. Frame every one as "this looks weird, here's why it's right."
 
@@ -345,7 +369,7 @@ This section is gold for retention — it pre-empts the exact things that make n
 
 ---
 
-## 12. My weekly routine — put it all together (18:00–20:00)
+## 12. My weekly routine — put it all together (20:00–22:00)
 
 **This is the most valuable section in the whole video.** Everything above was "what the buttons do." This is "here's exactly how I use it to win." Make it concrete and repeatable.
 
@@ -370,7 +394,7 @@ This section is gold for retention — it pre-empts the exact things that make n
 
 ---
 
-## 13. Outro / CTA (20:00–20:45)
+## 13. Outro / CTA (22:00–22:45)
 
 `[SHOW]` Back to the homepage. Logo. Social/support links.
 
@@ -392,7 +416,7 @@ This section is gold for retention — it pre-empts the exact things that make n
 **Where the numbers come from:** real F1 data → ML predicts quali & race → **10,000 race simulations** → official 2026 scoring. Every card is the *average* of 10,000 simulated races, plus the range.
 
 **Reading a driver card:**
-- Two numbers, "X proj · Y risk-adj": **projected** = the score if the predicted order holds (the "if it goes to plan" number, and the default sort); **risk-adjusted** = the average across the 10,000 sims (what the optimizer uses). A safe front-runner's risk-adj sits *below* projected; a low-floor/high-ceiling midfielder's can sit *above* it — that's the sims pricing in retirements and chaos, not a bug.
+- Two numbers, "X proj · Y risk-adj": **projected** = the score if the predicted order holds (the "if it goes to plan" number, and the default sort); **risk-adjusted** = the average across the 10,000 sims. General optimizer modes can use Projected, Balanced, or Risk-adjusted; Final Fix always uses Projected. A safe front-runner's risk-adj sits *below* projected; a low-floor/high-ceiling midfielder's can sit *above* it — that's the sims pricing in retirements and chaos, not a bug.
 - The range (90% CI) = where they land in 90% of simulations. **Wide = gamble, narrow = safe. Wide is honest, not broken.**
 - Confidence: ~65% = history only (early), ~90% = practice data in, ~95% = post-qualifying.
 
@@ -419,7 +443,7 @@ This section is gold for retention — it pre-empts the exact things that make n
 
 **The deadline:** F1 Fantasy locks at the **start of qualifying** (or sprint qualifying on sprint weekends). The countdown is in the site header.
 
-**Chips quick guide:** Limitless = load up over budget · 3x Boost = one nailed-on big scorer · Wild Card = full rebuild · No Negative = chaos/wet insurance · Autopilot = auto-boost insurance · Final Fix = react to the grid post-quali.
+**Chips quick guide:** Limitless = load up over budget · 3x Boost = one nailed-on big scorer · Wild Card = full rebuild · No Negative = chaos/wet insurance · Autopilot = auto-boost insurance. **Final Fix:** use the dedicated post-quali calculator to compare one race-only driver change while retaining the outgoing driver's qualifying points.
 
 ---
 

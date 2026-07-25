@@ -12,7 +12,7 @@ The site has 12 tabs. Tabs lazy-load — only the active tab fetches its data, s
 
 - **Drivers** — all 22 drivers ranked by predicted points (the page you land on)
 - **Constructors** — all 11 teams with constructor-specific scoring
-- **Optimizer** — three lineup tools: Lineup Optimizer, Transfer Advisor, Multi-Week Planner
+- **Optimizer** — five tools: Lineup Optimizer, Transfer Advisor, Multi-Week Planner, Final Fix, and Team Compare
 - **Analysis** — Free Practice + Post-Race telemetry breakdowns
 - **Season** — championship standings + price trackers
 - **H2H** — head-to-head matchup predictions between any two drivers or constructors
@@ -33,7 +33,7 @@ Your starting point. Predicted fantasy points for every driver this round.
 
 - **Predicted points** — shown as two numbers, "X proj · Y risk-adj":
   - **Projected** — the score if the predicted finishing order holds (the single most-likely outcome). The driver list sorts on this by default.
-  - **Risk-adjusted** — the *average* score across 10,000 simulated races, so it accounts for DNFs, chaos, and upside/downside. This is the number the optimizer and value scores use.
+  - **Risk-adjusted** — the *average* score across 10,000 simulated races, so it accounts for DNFs, chaos, and upside/downside. Optimizer tools can use it directly, blend it with Projected, or ignore it according to their Points basis selector.
 - **MC 90% CI** — the range covering 90% of simulated outcomes (e.g., "8 — 53 pts" means 5% chance below 8, 5% above 53)
 - **Predicted positions** — qualifying and race finish predictions; sprint positions on sprint weekends
 - **Scoring breakdown** — qualifying, race, overtakes, fastest lap, DOTD, DNF risk, and sprint (if sprint weekend)
@@ -105,17 +105,19 @@ Same layout as Drivers, for the 11 constructors.
 
 ## Optimizer Tab
 
-Three tools, switchable from the mode buttons at the top.
+Five tools, switchable from the mode buttons at the top.
 
-### Points basis (all three tools)
+### Points basis
 
-Each tool has a **Points basis** selector that controls *which* points number it ranks picks on. This matters because of the projected-vs-risk-adjusted split explained on the [Drivers tab](#driver-cards):
+Lineup Optimizer, Transfer Advisor, Multi-Week Planner, and Team Compare have a **Points basis** selector that controls *which* points number they rank or compare picks on. This matters because of the projected-vs-risk-adjusted split explained on the [Drivers tab](#driver-cards):
 
 - **Balanced** *(default, recommended)* — the average of projected and risk-adjusted. Keeps predicted winners at the top while still pricing in DNF/variance. Best all-round choice.
 - **Projected** — ranks purely on the predicted finishing order (the "big number" on the cards). Simplest and most intuitive.
 - **Risk-adjusted** — ranks on the raw 10,000-sim average.
 
 Why it's there: the risk-adjusted average *compresses* predicted winners (a predicted P1 can only finish lower) and *inflates* cheap high-variance midfielders. Ranking purely on it can produce odd advice like "sell your predicted race winner for a lower-projected driver." **Balanced** and **Projected** avoid that. Only the *ranking* changes — the cards always show both numbers. If a recommendation ever looks like it's downgrading your points, check this selector.
+
+**Final Fix is the deliberate exception.** It has no points-basis selector and always compares the deterministic **Projected race points**. It never inherits Balanced or Risk-adjusted from another optimizer mode.
 
 ### 1. Lineup Optimizer
 
@@ -127,7 +129,7 @@ Why it's there: the risk-adjusted average *compresses* predicted winners (a pred
    - **Max Value** — best points per dollar
    - **Budget Builder** — prioritizes drivers likely to gain price
    - **Balanced** — mix of points and value
-3. Optionally select a chip (see [Chips](#the-6-chips) below)
+3. Optionally select a chip (see [Chips](#chips-and-final-fix) below)
 4. Click "Find Best Lineups"
 
 The brute-force evaluates ~1.4M combinations with budget pruning, returns top 200 lineups in ~1-2 seconds.
@@ -201,7 +203,7 @@ The brute-force evaluates ~1.4M combinations with budget pruning, returns top 20
 **Chip handling:**
 - **Wild Card** — a true brute-force optimal-team search runs at every beam state, target-aware when target mode is on
 - **Limitless** — one-round dream team only; the planner correctly reverts your real team afterwards (no transfers consumed, no penalty, no carry-forward)
-- All 6 chips are also offered on top of any 0/1/2-swap pattern (so "swap A→B and fire 3x Boost on the new driver" combinations are explored)
+- The five general chips are offered on top of 0/1/2-swap patterns (so "swap A→B and fire 3x Boost on the new driver" combinations are explored). Final Fix is handled separately after qualifying.
 
 **Tips:**
 - Check "Wild Card" if available — the planner finds the optimal round to deploy it
@@ -209,6 +211,57 @@ The brute-force evaluates ~1.4M combinations with budget pruning, returns top 20
 - Bank transfers when the upcoming round doesn't benefit from a swap (max 5 banked)
 - "Hold" entries mean your current team is already well-suited for that circuit
 - Use "Target Team" mode when you have a roster you want to end up with but need help planning the path; start with Balanced intensity and switch to Strict if you really want to force the convergence regardless of point cost
+
+### 4. Final Fix
+
+**What it does:** Compares holding one owned driver with replacing them for the Grand Prix after qualifying.
+
+1. Select the driver currently in your team and the possible replacement.
+2. Enter your remaining bank. The replacement is affordable when `outgoing price + bank ≥ incoming price`.
+3. Optionally tick that the outgoing driver has the 2x Boost; the Boost transfers to the replacement and doubles the Grand Prix portion only.
+4. Set a race finish and overtake count for each driver.
+5. Assign Fastest Lap and Driver of the Day if those are part of your scenario.
+
+**The scoring contract:**
+
+```text
+Hold =
+  outgoing driver's banked official qualifying points
+  + outgoing driver's race points
+
+Final Fix =
+  outgoing driver's banked official qualifying points
+  + incoming driver's race points
+```
+
+Grid penalties do **not** change the qualifying points already earned. They change the starting position used for race positions gained/lost. Race points are:
+
+```text
+finish-position points
++ (starting grid position - finishing position)
++ overtakes
++ 10 for Fastest Lap, when selected
++ 10 for Driver of the Day, when selected
+```
+
+For a DNF/DSQ, the calculator applies `-20 + overtakes`; it does not award finish, positions-gained, FL, or DOTD points.
+
+The model comparison is always **Projected**:
+
+```text
+Projected hold   = banked outgoing qualifying points + outgoing projected race points
+Projected switch = banked outgoing qualifying points + incoming projected race points
+```
+
+It uses the dedicated `projected_points_race` export and is isolated from the Balanced/Risk-adjusted controls used by the other optimizer modes. The manual comparison beside it uses only the finish, overtake, FL, and DOTD choices you enter.
+
+### 5. Team Compare
+
+**What it does:** Compares up to three complete 5-driver + 2-constructor teams using the selected points basis, budget, and chip.
+
+- Shows total score, cost, bank, and confidence floor/ceiling.
+- Uses Projected, Balanced, or Risk-adjusted according to its own selector.
+- Does not affect the fixed Projected basis used by Final Fix.
 
 ---
 
@@ -227,7 +280,7 @@ When someone opens the link, it drops them into the **Transfer Advisor with that
 
 ---
 
-## The 6 Chips
+## Chips and Final Fix
 
 | Chip | Effect |
 |------|--------|
@@ -236,9 +289,8 @@ When someone opens the link, it drops them into the **Transfer Advisor with that
 | **Wild Card** | Unlimited free transfers (no -10 pts penalties) |
 | **No Negative** | Negative driver scores become 0 |
 | **Autopilot** | Auto 2x on best driver |
-| **Final Fix** | Allows a roster change after qualifying |
 
-The optimizer fully understands all 6 — its scoring function applies the correct boosts when ranking lineups.
+These five general chips are available to the relevant lineup and planning tools. **Final Fix** is a separate post-qualifying calculator because it has a different scoring boundary: the outgoing driver's qualifying points are already banked, and only the Grand Prix driver contribution is replaced.
 
 ---
 

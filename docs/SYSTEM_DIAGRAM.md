@@ -199,7 +199,9 @@ Visual representations of the pipeline, feature architecture, scoring, and the r
 ║  │   6. Pit stops (per-team N(mu, sigma) → bracket)                         │    ║
 ║  │   7. Calculate full fantasy points                                       │    ║
 ║  │                                                                          │    ║
+║  │  Post-quali: official quali + penalised grid are FIXED; race-only noise  │    ║
 ║  │  Output: P5/P25/P50/P75/P95 + prob_top_3/5/10                            │    ║
+║  │          + race-only P5/P25/P50/P75/P95                                  │    ║
 ║  │  Calibration auto-loaded from data/seed/mc_calibration.json              │    ║
 ║  └────────────────────────┬─────────────────────────────────────────────────┘    ║
 ║                           │                                                      ║
@@ -212,6 +214,9 @@ Visual representations of the pipeline, feature architecture, scoring, and the r
 ║  │  │  web/public/data/                                       │             │    ║
 ║  │  │  ├── predictions.json          (current round)          │             │    ║
 ║  │  │  ├── predictions_round{N}.json (archive)                │             │    ║
+║  │  │  │    projected_points_*       (deterministic parts)    │             │    ║
+║  │  │  │    expected_points_*        (MC / risk-adjusted)     │             │    ║
+║  │  │  │    final_fix.points_basis   ("projected")            │             │    ║
 ║  │  │  ├── season_summary.json       (standings, prices)      │             │    ║
 ║  │  │  ├── actual_round{N}.json      (real results)           │             │    ║
 ║  │  │  ├── post_race_round{N}.json   (analysis)               │             │    ║
@@ -239,7 +244,9 @@ Visual representations of the pipeline, feature architecture, scoring, and the r
 ║  │  │  ├── Optimizer                                      │                 │    ║
 ║  │  │  │   ├── Lineup Optimizer (1.4M brute-force)        │                 │    ║
 ║  │  │  │   ├── Transfer Advisor (with penalty calc)       │                 │    ║
-║  │  │  │   └── Multi-Week Planner (beam search, 2-5 rds)  │                 │    ║
+║  │  │  │   ├── Multi-Week Planner (beam search, 2-5 rds)  │                 │    ║
+║  │  │  │   ├── Final Fix (projected race-only comparison) │                 │    ║
+║  │  │  │   └── Team Compare (up to 3 complete teams)      │                 │    ║
 ║  │  │  ├── Analysis (FP + post-race breakdowns)           │                 │    ║
 ║  │  │  ├── Season (standings + price tracker)             │                 │    ║
 ║  │  │  ├── H2H (matchup predictions)                      │                 │    ║

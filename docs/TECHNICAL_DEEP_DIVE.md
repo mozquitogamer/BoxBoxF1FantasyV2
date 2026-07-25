@@ -716,14 +716,16 @@ Auto-loaded from `data/seed/mc_calibration.json` (output of `calibrate_confidenc
 
 ### Output
 
-Per driver: P5/P25/P50/P75/P95, prob_top_3, prob_top_5, prob_top_10, mean, std, mc_overtakes_mean, mc_quali_pts_mean, mc_race_pts_mean, mc_dnf_rate.
+Per driver: P5/P25/P50/P75/P95, prob_top_3, prob_top_5, prob_top_10, mean, std, `mc_overtakes_mean`, `mc_quali_pts_mean`, `mc_race_pts_mean`, `mc_race_pts_p5/p25/median/p75/p95`, and `mc_dnf_rate`.
 Per constructor: P5/P25/P50/P75/P95 with per-iteration DOTD subtraction and pit-stop sampling.
+
+In post-quali mode, a complete `actual_quali_position` column switches the simulator into a **race-only uncertainty** path: the official qualifying classification and confirmed penalised `predicted_grid_position` remain fixed in all 10,000 iterations. `simulation_params.qualifying_locked=true` records the invariant. Before qualifying, both sessions continue to be sampled.
 
 On the website: "MC 90% CI: -10 — 53 pts" means "in 90% of our 10K simulations, this driver scored between -10 and 53 fantasy points." Wide CI = high variance, narrow CI = predictable.
 
 ### Projected vs Risk-adjusted (why the two headline numbers differ)
 
-`08_export_website_json.py` **overwrites** each entry's `expected_points` with the Monte Carlo mean, but first preserves the deterministic single-outcome total as `projected_points`. Every driver/constructor card shows **both** ("X proj · Y risk-adj"); the driver list defaults to sorting on `projected_points`, and the optimizer / PPM / value scores use the MC-mean `expected_points`.
+`08_export_website_json.py` **overwrites** each entry's `expected_points` with the Monte Carlo mean, but first preserves the deterministic single-outcome total as `projected_points`. It also preserves deterministic components as `projected_points_quali`, `projected_points_race`, and, on sprint weekends, `projected_points_sprint_race`. Every driver/constructor card shows **both** ("X proj · Y risk-adj"); the driver list defaults to sorting on `projected_points`, while optimizer tools use their selected points basis.
 
 They diverge because of the same convexity the "Why Monte Carlo?" example opened with — and it has a **consistent direction** set by the shape of the position→points curve (steep at the front: `P1=25, P5=10, P10=1`; then **floored at 0 from P11 down**):
 
@@ -868,7 +870,7 @@ The current implementation uses iterative branch-and-bound with budget pruning (
 
 `lineupScore` is chip-aware — when a chip like 3x Boost is selected, the boosted points are passed in (best driver × 3 + second-best × 2) so the strategy ranks lineups according to the realistic post-chip score.
 
-### Points basis (shared across all three team tools)
+### Points basis
 
 The "expected_points" that every strategy above sums is not read raw — it flows through `basisPoints(item)`, which returns one of three values based on the tool's **Points basis** dropdown:
 
@@ -880,7 +882,9 @@ The "expected_points" that every strategy above sums is not read raw — it flow
 
 **Why:** the MC mean (`expected_points`) compresses predicted winners (a predicted P1 can only shuffle down — see §10 *Projected vs Risk-adjusted*) and inflates cheap high-variance midfielders, which distorts *selection* — e.g. it will rank Verstappen above a predicted-winner Antonelli and suggest selling the winner. Ranking on `basisPoints` (Balanced/Projected) fixes this while leaving card **display** untouched (cards always show both numbers).
 
-`basisPoints` + `basisValue` (the per-$M analogue) live near `TA_TUNABLES` at the top of `app.js`. Each entry point — `runOptimizerSync`, `runTransferAdvisor`, `runMultiWeekPlanner` — sets the module-level `optimizeBasis` from its own dropdown (`pointsBasisOpt` / `pointsBasisTransfer` / `pointsBasisMW`, default `balanced`) at the start of a run, so the whole scoring pass (per-pick `score()`, lineup totals, boost-target pick, and the planner's current-round form seed) uses the chosen basis. `predictPriceChange` deliberately keeps reading the raw `expected_points` (price moves track the market's real-EV expectation, not the selection basis).
+`basisPoints` + `basisValue` (the per-$M analogue) live near `TA_TUNABLES` at the top of `app.js`. Each general-team entry point — `runOptimizerSync`, `runTransferAdvisor`, `runMultiWeekPlanner`, and `runTeamCompare` — sets or reads its own basis selector, so the whole scoring pass uses the chosen basis. `predictPriceChange` deliberately keeps reading the raw `expected_points` (price moves track the market's real-EV expectation, not the selection basis).
+
+The Final Fix calculator is intentionally outside this mechanism. `ffProjectedRacePoints()` reads `projected_points_race` directly and never calls `basisPoints()`, reads `optimizeBasis`, or falls back to `expected_points`/`mc_race_pts_mean`. This prevents another optimizer mode's Balanced or Risk-adjusted selection from leaking into a post-qualifying decision.
 
 ### Lock & Exclude
 
@@ -889,14 +893,31 @@ The "expected_points" that every strategy above sums is not read raw — it flow
 
 Enforced across all three optimizer modes (Lineup, Transfer Advisor, Multi-Week Planner).
 
-### The 6 Chips
+### General chips
 
 1. **Limitless:** No budget cap.
 2. **3x Boost:** Best driver scores 3x, second-best scores 2x.
 3. **Wild Card:** Unlimited free transfers (no penalties).
 4. **No Negative:** Negative scores become 0.
 5. **Autopilot:** Auto 2x on best driver.
-6. **Final Fix:** Post-quali roster changes.
+
+### Final Fix calculator
+
+Final Fix is a dedicated optimizer mode rather than a sixth generic chip option. It models the rule boundary after qualifying:
+
+```text
+hold_total   = outgoing_banked_quali + outgoing_race
+switch_total = outgoing_banked_quali + incoming_race
+```
+
+- `outgoing_banked_quali` comes from the official qualifying classification (`predicted_quali` after the post-quali scoring/export path), not the penalised grid.
+- Race positions gained/lost use `predicted_grid`, which includes confirmed grid penalties.
+- Manual race points use finish-position points + `(grid - finish)` + editable overtakes + selected FL/DOTD. DNF/DSQ is `-20 + overtakes`, with no finish, gain/loss, FL, or DOTD credit.
+- If the outgoing driver owns the 2x Boost, the multiplier transfers to the incoming driver and applies to the race portion only; the banked qualifying points are not multiplied again.
+- Affordability is `outgoing current_price + bank >= incoming current_price`.
+- The displayed model comparison uses only deterministic `projected_points_race`. The JSON advertises this contract through `final_fix.points_basis="projected"` and `final_fix.qualifying_locked`.
+
+The frontend defaults to Antonelli → Norris when both drivers are present, but every field remains user-selectable. Changing the chosen finish seeds overtakes to `max(0, grid - finish)` as a convenience; users may edit the overtake count because net positions can also change through pit cycles and retirements.
 
 ---
 
@@ -947,7 +968,7 @@ The Strategy dropdown re-ranks plans via a weighted internal score that is **not
 
 - **Wild Card:** at every beam state, `findOptimalWildcardTeam` runs a true brute-force search (constructor-pair × driver-combo with branch-and-bound pruning). Memoized per `(round_index, budget_bucket)` so the ~60-state × 3-round horizon performs the search ~3–10 times instead of 180.
 - **Limitless (P5b):** one-round dream team. The planner correctly carries the persisted (pre-Limitless) team forward — no transfers consumed, no penalty, no held-asset appreciation on the dream team, target distance measured against the persistent team. Greedy top-N selection is provably optimal here because Limitless ignores the budget constraint entirely.
-- **3x Boost / No Negative / Autopilot / Final Fix:** layered on top of any 0/1/2-swap candidate during beam expansion so combinations like "swap A→B AND fire 3x Boost on the new driver" are explored.
+- **3x Boost / No Negative / Autopilot:** layered on top of any 0/1/2-swap candidate during beam expansion so combinations like "swap A→B AND fire 3x Boost on the new driver" are explored. Final Fix is excluded because it is a post-qualifying, single-driver race-only comparison rather than a multi-round planning chip.
 
 ### Target Team Mode
 
@@ -1100,7 +1121,7 @@ Because the points curve is convex and floored at 0 past P10, the Monte Carlo **
 ✅ **Changelog tab** — JSON-driven release notes describing model + feature updates over time. (2026-05-25)
 ✅ Automated phase-aware pipeline runner (`run_weekend.py`)
 ✅ Weather integration (`weather_forecast.py` + GH Action)
-✅ Chip strategy advisor (all 6 chips in optimizer)
+✅ Chip strategy advisor (5 general chips) + dedicated post-quali Final Fix calculator
 ✅ Transfer Advisor with penalty calculation
 ✅ Head-to-Head matchup predictions
 ✅ Historical accuracy dashboard (per-round + per-driver MAE, scatter, CI coverage)
