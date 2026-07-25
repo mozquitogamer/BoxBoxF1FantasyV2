@@ -1,7 +1,21 @@
 {
-  "updated": "2026-07-24T11:56:47Z",
+  "updated": "2026-07-25T11:37:30Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "ylokDpKFVGI",
+      "title": "Don't go for 4A! Yet. Final Thoughts for Hungarian Grand Prix - 2026 F1 Fantasy",
+      "published": "2026-07-25",
+      "thumbnail": "https://i.ytimg.com/vi/ylokDpKFVGI/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=ylokDpKFVGI"
+    },
+    {
+      "id": "al6hZXiyd8g",
+      "title": "F1 Fantasy Q & A Stream - Hungarian Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
+      "published": "2026-07-25",
+      "thumbnail": "https://i.ytimg.com/vi/al6hZXiyd8g/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=al6hZXiyd8g"
+    },
     {
       "id": "u7AMcBRr4tQ",
       "title": "Time for 4A Teams? Early Thoughts for Hungarian Grand Prix - 2026 F1 Fantasy",
@@ -15,20 +29,6 @@
       "published": "2026-07-15",
       "thumbnail": "https://i.ytimg.com/vi/i8sMEiFZJog/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=i8sMEiFZJog"
-    },
-    {
-      "id": "d0RuH8RFpk0",
-      "title": "The Best F1 Fantasy Team for the Belgian Grand Prix - 2026 F1 Fantasy Drafts, Data, Tips & Strategy",
-      "published": "2026-07-08",
-      "thumbnail": "https://i.ytimg.com/vi/d0RuH8RFpk0/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=d0RuH8RFpk0"
-    },
-    {
-      "id": "4dDsgiAV71s",
-      "title": "F1 Fantasy Deadline Stream - British Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
-      "published": "2026-07-04",
-      "thumbnail": "https://i.ytimg.com/vi/4dDsgiAV71s/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=4dDsgiAV71s"
     }
   ]
 }
