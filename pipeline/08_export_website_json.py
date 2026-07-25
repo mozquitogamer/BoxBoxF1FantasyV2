@@ -337,6 +337,7 @@ def build_predictions_json(round_num: int) -> dict | None:
     mc_path = PREDICTIONS_DIR / f"round{round_num}" / "monte_carlo_fantasy.json"
     weather_adjustments_active = None
     calibration_meta = None
+    final_fix_meta = None
     if mc_path.exists():
         try:
             with open(mc_path) as f:
@@ -344,6 +345,10 @@ def build_predictions_json(round_num: int) -> dict | None:
             # Capture weather adjustments metadata for the frontend badges
             sim_params = mc_data.get("simulation_params", {})
             weather_adjustments_active = sim_params.get("weather_adjustments_active")
+            final_fix_meta = {
+                "qualifying_locked": bool(sim_params.get("qualifying_locked", False)),
+                "race_only_ranges": True,
+            }
             # Surface calibration metadata so the frontend can show users which
             # adjustments are being applied to predictions. None of these fields
             # change the numbers (those are already baked into the per-driver
@@ -370,6 +375,11 @@ def build_predictions_json(round_num: int) -> dict | None:
                     entry["mc_overtakes_mean"] = round(mc.get("mc_overtakes_mean", 0), 1)
                     entry["mc_quali_pts_mean"] = round(mc.get("mc_quali_pts_mean", 0), 1)
                     entry["mc_race_pts_mean"] = round(mc.get("mc_race_pts_mean", 0), 1)
+                    entry["mc_race_pts_p5"] = round(mc.get("mc_race_pts_p5", 0), 1)
+                    entry["mc_race_pts_p25"] = round(mc.get("mc_race_pts_p25", 0), 1)
+                    entry["mc_race_pts_median"] = round(mc.get("mc_race_pts_median", 0), 1)
+                    entry["mc_race_pts_p75"] = round(mc.get("mc_race_pts_p75", 0), 1)
+                    entry["mc_race_pts_p95"] = round(mc.get("mc_race_pts_p95", 0), 1)
                     # Use MC mean as primary expected_points (more accurate than deterministic)
                     entry["expected_points"] = round(mc.get("mc_total_mean", 0), 1)
                     entry["expected_points_quali"] = round(mc.get("mc_quali_pts_mean", 0), 1)
@@ -536,6 +546,8 @@ def build_predictions_json(round_num: int) -> dict | None:
         payload["weather_adjustments"] = weather_adjustments_active
     if calibration_meta is not None:
         payload["calibration"] = calibration_meta
+    if final_fix_meta is not None:
+        payload["final_fix"] = final_fix_meta
     return payload
 
 

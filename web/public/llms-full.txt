@@ -1,6 +1,6 @@
 # BoxBoxF1Fantasy - Full Site Summary for LLMs and Agents
 
-Last updated: 2026-07-22
+Last updated: 2026-07-25
 Canonical site: https://boxboxf1fantasy.com/
 Primary language: English
 Season covered: 2026 F1 Fantasy
@@ -45,7 +45,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 ## Current round context
 - Current round: 13
 - Race: Hungarian Grand Prix
-- Prediction file generated: 2026-07-20
+- Prediction file generated: 2026-07-25
 - Compact AI answer summary: https://boxboxf1fantasy.com/data/ai-summary.json
 - Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json
 - Predictions JSON Schema: https://boxboxf1fantasy.com/data/predictions.schema.json
@@ -66,26 +66,26 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Weather JSON: https://boxboxf1fantasy.com/data/weather.json
 
 ## Current top projected drivers
-- Kimi Antonelli: 23.4 expected points, $25.6M, PPM 0.91
-- Lewis Hamilton: 20.5 expected points, $24.9M, PPM 0.82
-- Charles Leclerc: 19.6 expected points, $23.6M, PPM 0.83
-- Max Verstappen: 17.8 expected points, $27.7M, PPM 0.64
-- Lando Norris: 17.5 expected points, $25.8M, PPM 0.68
-- Oscar Piastri: 13.7 expected points, $24.7M, PPM 0.55
-- George Russell: 9.0 expected points, $28.0M, PPM 0.32
-- Isack Hadjar: 8.5 expected points, $13.9M, PPM 0.61
-- Franco Colapinto: 3.2 expected points, $11.0M, PPM 0.29
-- Pierre Gasly: 3.1 expected points, $12.8M, PPM 0.24
+- Lando Norris: 25.1 expected points, $25.8M, PPM 0.97
+- Lewis Hamilton: 24.5 expected points, $24.9M, PPM 0.98
+- Charles Leclerc: 21.4 expected points, $23.6M, PPM 0.91
+- Kimi Antonelli: 18.7 expected points, $25.6M, PPM 0.73
+- Oscar Piastri: 18.0 expected points, $24.7M, PPM 0.73
+- Max Verstappen: 14.5 expected points, $27.7M, PPM 0.52
+- George Russell: 8.2 expected points, $28.0M, PPM 0.29
+- Isack Hadjar: 6.6 expected points, $13.9M, PPM 0.47
+- Arvid Lindblad: 3.8 expected points, $7.4M, PPM 0.51
+- Esteban Ocon: 1.5 expected points, $10.5M, PPM 0.14
 
 ## Current top projected constructors
-- Ferrari: 54.7 expected points, $26.3M, PPM 2.08
-- Mercedes: 48.8 expected points, $32.3M, PPM 1.51
-- McLaren: 44.4 expected points, $30.7M, PPM 1.45
-- Red Bull: 38.0 expected points, $30.6M, PPM 1.24
-- Racing Bulls: 14.7 expected points, $12.3M, PPM 1.20
-- Alpine: 11.2 expected points, $18.5M, PPM 0.61
-- Audi: 7.8 expected points, $6.2M, PPM 1.26
-- Haas: 1.2 expected points, $11.4M, PPM 0.11
+- Ferrari: 60.4 expected points, $26.3M, PPM 2.30
+- McLaren: 56.4 expected points, $30.7M, PPM 1.84
+- Mercedes: 43.2 expected points, $32.3M, PPM 1.34
+- Red Bull: 33.7 expected points, $30.6M, PPM 1.10
+- Racing Bulls: 14.3 expected points, $12.3M, PPM 1.16
+- Audi: 7.0 expected points, $6.2M, PPM 1.13
+- Alpine: 5.6 expected points, $18.5M, PPM 0.30
+- Haas: 0.7 expected points, $11.4M, PPM 0.06
 
 ## Tools and what they do
 - F1 Fantasy predictions: current driver and constructor projections with confidence ranges and price/value signals.
@@ -121,7 +121,7 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - F1 Fantasy Brazilian GP 2026: Strategy Watchlist | BoxBox: https://boxboxf1fantasy.com/picks/brazilian-gp-2026/ - Early F1 Fantasy strategy watchlist for the Brazilian GP 2026: race date, sprint status, circuit traits and what to monitor before projections are published.
 - F1 Fantasy Mexican GP 2026: Strategy Watchlist | BoxBox: https://boxboxf1fantasy.com/picks/mexican-gp-2026/ - Early F1 Fantasy strategy watchlist for the Mexican GP 2026: race date, sprint status, circuit traits and what to monitor before projections are published.
 - F1 Fantasy United States GP 2026: Strategy Watchlist | BoxBox: https://boxboxf1fantasy.com/picks/united-states-gp-2026/ - Early F1 Fantasy strategy watchlist for the United States GP 2026: race date, sprint status, circuit traits and what to monitor before projections are published.
-- F1 Fantasy Singapore GP 2026: Strategy Watchlist | BoxBox: https://boxboxf1fantasy.com/picks/singapore-gp-2026/ - Early F1 Fantasy strategy watchlist for the Singapore GP 2026: race date, sprint status, circuit traits and what to monitor before projections are published.
+- F1 Fantasy Singapore GP 2026: Early Picks | BoxBox: https://boxboxf1fantasy.com/picks/singapore-gp-2026/ - Early F1 Fantasy outlook for Singapore Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.
 - F1 Fantasy Azerbaijan GP 2026: Early Picks | BoxBox: https://boxboxf1fantasy.com/picks/azerbaijan-gp-2026/ - Early F1 Fantasy outlook for Azerbaijan Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.
 - F1 Fantasy Spanish GP (Madrid) 2026: Early Picks | BoxBox: https://boxboxf1fantasy.com/picks/spanish-gp-madrid-2026/ - Early F1 Fantasy outlook for Spanish Grand Prix (Madrid) 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.
 - F1 Fantasy Italian GP 2026: Early Picks | BoxBox: https://boxboxf1fantasy.com/picks/italian-gp-2026/ - Early F1 Fantasy outlook for Italian Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.
@@ -138,40 +138,40 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - F1 Fantasy Chinese GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/chinese-gp-2026/ - F1 Fantasy Chinese GP 2026 results: Kimi Antonelli led drivers with 68 points. See every driver and constructor score plus the archived forecast review.
 - F1 Fantasy Australian GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/australian-gp-2026/ - F1 Fantasy Australian GP 2026 results: Max Verstappen led drivers with 50 points. See every driver and constructor score plus the archived forecast review.
 - F1 Fantasy Drivers 2026: Points, Prices & Value | BoxBox: https://boxboxf1fantasy.com/drivers/ - Current F1 Fantasy 2026 driver projections: expected points, prices, value ratings, predicted qualifying and race finish for every driver.
-- Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/kimi-antonelli/ - Kimi Antonelli F1 Fantasy 2026 projection: 23.4 expected points for the Hungarian GP, $25.6M price, value rating and confidence range.
-- Lewis Hamilton F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lewis-hamilton/ - Lewis Hamilton F1 Fantasy 2026 projection: 20.5 expected points for the Hungarian GP, $24.9M price, value rating and confidence range.
-- Charles Leclerc F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/charles-leclerc/ - Charles Leclerc F1 Fantasy 2026 projection: 19.6 expected points for the Hungarian GP, $23.6M price, value rating and confidence range.
-- Max Verstappen F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/max-verstappen/ - Max Verstappen F1 Fantasy 2026 projection: 17.8 expected points for the Hungarian GP, $27.7M price, value rating and confidence range.
-- Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lando-norris/ - Lando Norris F1 Fantasy 2026 projection: 17.5 expected points for the Hungarian GP, $25.8M price, value rating and confidence range.
-- Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oscar-piastri/ - Oscar Piastri F1 Fantasy 2026 projection: 13.7 expected points for the Hungarian GP, $24.7M price, value rating and confidence range.
-- George Russell F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/george-russell/ - George Russell F1 Fantasy 2026 projection: 9.0 expected points for the Hungarian GP, $28.0M price, value rating and confidence range.
-- Isack Hadjar F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/isack-hadjar/ - Isack Hadjar F1 Fantasy 2026 projection: 8.5 expected points for the Hungarian GP, $13.9M price, value rating and confidence range.
-- Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/franco-colapinto/ - Franco Colapinto F1 Fantasy 2026 projection: 3.2 expected points for the Hungarian GP, $11.0M price, value rating and confidence range.
-- Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/pierre-gasly/ - Pierre Gasly F1 Fantasy 2026 projection: 3.1 expected points for the Hungarian GP, $12.8M price, value rating and confidence range.
-- Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/ - Gabriel Bortoleto F1 Fantasy 2026 projection: 3.0 expected points for the Hungarian GP, $7.2M price, value rating and confidence range.
-- Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/liam-lawson/ - Liam Lawson F1 Fantasy 2026 projection: 2.4 expected points for the Hungarian GP, $9.7M price, value rating and confidence range.
-- Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/arvid-lindblad/ - Arvid Lindblad F1 Fantasy 2026 projection: 2.2 expected points for the Hungarian GP, $7.4M price, value rating and confidence range.
-- Esteban Ocon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/esteban-ocon/ - Esteban Ocon F1 Fantasy 2026 projection: 1.7 expected points for the Hungarian GP, $10.5M price, value rating and confidence range.
-- Nico Hulkenberg F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/nico-hulkenberg/ - Nico Hulkenberg F1 Fantasy 2026 projection: -1.0 expected points for the Hungarian GP, $3.0M price, value rating and confidence range.
-- Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/carlos-sainz/ - Carlos Sainz F1 Fantasy 2026 projection: -2.2 expected points for the Hungarian GP, $10.2M price, value rating and confidence range.
-- Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oliver-bearman/ - Oliver Bearman F1 Fantasy 2026 projection: -2.8 expected points for the Hungarian GP, $7.4M price, value rating and confidence range.
-- Sergio Perez F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/sergio-perez/ - Sergio Perez F1 Fantasy 2026 projection: -3.4 expected points for the Hungarian GP, $4.4M price, value rating and confidence range.
-- Fernando Alonso F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/fernando-alonso/ - Fernando Alonso F1 Fantasy 2026 projection: -3.5 expected points for the Hungarian GP, $5.6M price, value rating and confidence range.
-- Lance Stroll F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lance-stroll/ - Lance Stroll F1 Fantasy 2026 projection: -4.2 expected points for the Hungarian GP, $3.0M price, value rating and confidence range.
-- Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/alex-albon/ - Alex Albon F1 Fantasy 2026 projection: -4.7 expected points for the Hungarian GP, $6.4M price, value rating and confidence range.
-- Valtteri Bottas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/valtteri-bottas/ - Valtteri Bottas F1 Fantasy 2026 projection: -4.7 expected points for the Hungarian GP, $3.0M price, value rating and confidence range.
+- Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lando-norris/ - Lando Norris F1 Fantasy 2026 projection: 25.1 expected points for the Hungarian GP, $25.8M price, value rating and confidence range.
+- Lewis Hamilton F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lewis-hamilton/ - Lewis Hamilton F1 Fantasy 2026 projection: 24.5 expected points for the Hungarian GP, $24.9M price, value rating and confidence range.
+- Charles Leclerc F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/charles-leclerc/ - Charles Leclerc F1 Fantasy 2026 projection: 21.4 expected points for the Hungarian GP, $23.6M price, value rating and confidence range.
+- Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/kimi-antonelli/ - Kimi Antonelli F1 Fantasy 2026 projection: 18.7 expected points for the Hungarian GP, $25.6M price, value rating and confidence range.
+- Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oscar-piastri/ - Oscar Piastri F1 Fantasy 2026 projection: 18.0 expected points for the Hungarian GP, $24.7M price, value rating and confidence range.
+- Max Verstappen F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/max-verstappen/ - Max Verstappen F1 Fantasy 2026 projection: 14.5 expected points for the Hungarian GP, $27.7M price, value rating and confidence range.
+- George Russell F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/george-russell/ - George Russell F1 Fantasy 2026 projection: 8.2 expected points for the Hungarian GP, $28.0M price, value rating and confidence range.
+- Isack Hadjar F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/isack-hadjar/ - Isack Hadjar F1 Fantasy 2026 projection: 6.6 expected points for the Hungarian GP, $13.9M price, value rating and confidence range.
+- Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/arvid-lindblad/ - Arvid Lindblad F1 Fantasy 2026 projection: 3.8 expected points for the Hungarian GP, $7.4M price, value rating and confidence range.
+- Esteban Ocon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/esteban-ocon/ - Esteban Ocon F1 Fantasy 2026 projection: 1.5 expected points for the Hungarian GP, $10.5M price, value rating and confidence range.
+- Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/franco-colapinto/ - Franco Colapinto F1 Fantasy 2026 projection: 0.8 expected points for the Hungarian GP, $11.0M price, value rating and confidence range.
+- Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/pierre-gasly/ - Pierre Gasly F1 Fantasy 2026 projection: 0.7 expected points for the Hungarian GP, $12.8M price, value rating and confidence range.
+- Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/ - Gabriel Bortoleto F1 Fantasy 2026 projection: 0.6 expected points for the Hungarian GP, $7.2M price, value rating and confidence range.
+- Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/liam-lawson/ - Liam Lawson F1 Fantasy 2026 projection: 0.0 expected points for the Hungarian GP, $9.7M price, value rating and confidence range.
+- Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/carlos-sainz/ - Carlos Sainz F1 Fantasy 2026 projection: -1.1 expected points for the Hungarian GP, $10.2M price, value rating and confidence range.
+- Nico Hulkenberg F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/nico-hulkenberg/ - Nico Hulkenberg F1 Fantasy 2026 projection: -1.2 expected points for the Hungarian GP, $3.0M price, value rating and confidence range.
+- Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oliver-bearman/ - Oliver Bearman F1 Fantasy 2026 projection: -1.7 expected points for the Hungarian GP, $7.4M price, value rating and confidence range.
+- Sergio Perez F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/sergio-perez/ - Sergio Perez F1 Fantasy 2026 projection: -2.8 expected points for the Hungarian GP, $4.4M price, value rating and confidence range.
+- Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/alex-albon/ - Alex Albon F1 Fantasy 2026 projection: -3.3 expected points for the Hungarian GP, $6.4M price, value rating and confidence range.
+- Valtteri Bottas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/valtteri-bottas/ - Valtteri Bottas F1 Fantasy 2026 projection: -4.5 expected points for the Hungarian GP, $3.0M price, value rating and confidence range.
+- Lance Stroll F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lance-stroll/ - Lance Stroll F1 Fantasy 2026 projection: -4.6 expected points for the Hungarian GP, $3.0M price, value rating and confidence range.
+- Fernando Alonso F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/fernando-alonso/ - Fernando Alonso F1 Fantasy 2026 projection: -5.0 expected points for the Hungarian GP, $5.6M price, value rating and confidence range.
 - F1 Fantasy Constructors 2026: Points & Value | BoxBox: https://boxboxf1fantasy.com/constructors/ - Current F1 Fantasy 2026 constructor projections: expected points, prices, pit-stop points, value ratings and risk for every constructor.
-- Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/ferrari/ - Ferrari F1 Fantasy 2026 constructor projection: 54.7 expected points for the Hungarian GP, $26.3M price, pit-stop points and value rating.
-- Mercedes F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mercedes/ - Mercedes F1 Fantasy 2026 constructor projection: 48.8 expected points for the Hungarian GP, $32.3M price, pit-stop points and value rating.
-- McLaren F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mclaren/ - McLaren F1 Fantasy 2026 constructor projection: 44.4 expected points for the Hungarian GP, $30.7M price, pit-stop points and value rating.
-- Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/red-bull/ - Red Bull F1 Fantasy 2026 constructor projection: 38.0 expected points for the Hungarian GP, $30.6M price, pit-stop points and value rating.
-- Racing Bulls F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/racing-bulls/ - Racing Bulls F1 Fantasy 2026 constructor projection: 14.7 expected points for the Hungarian GP, $12.3M price, pit-stop points and value rating.
-- Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/alpine/ - Alpine F1 Fantasy 2026 constructor projection: 11.2 expected points for the Hungarian GP, $18.5M price, pit-stop points and value rating.
-- Audi F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/audi/ - Audi F1 Fantasy 2026 constructor projection: 7.8 expected points for the Hungarian GP, $6.2M price, pit-stop points and value rating.
-- Haas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/haas/ - Haas F1 Fantasy 2026 constructor projection: 1.2 expected points for the Hungarian GP, $11.4M price, pit-stop points and value rating.
-- Williams F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/williams/ - Williams F1 Fantasy 2026 constructor projection: -2.6 expected points for the Hungarian GP, $13.2M price, pit-stop points and value rating.
-- Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/aston-martin/ - Aston Martin F1 Fantasy 2026 constructor projection: -7.4 expected points for the Hungarian GP, $5.1M price, pit-stop points and value rating.
-- Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/cadillac/ - Cadillac F1 Fantasy 2026 constructor projection: -8.6 expected points for the Hungarian GP, $3.6M price, pit-stop points and value rating.
+- Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/ferrari/ - Ferrari F1 Fantasy 2026 constructor projection: 60.4 expected points for the Hungarian GP, $26.3M price, pit-stop points and value rating.
+- McLaren F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mclaren/ - McLaren F1 Fantasy 2026 constructor projection: 56.4 expected points for the Hungarian GP, $30.7M price, pit-stop points and value rating.
+- Mercedes F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mercedes/ - Mercedes F1 Fantasy 2026 constructor projection: 43.2 expected points for the Hungarian GP, $32.3M price, pit-stop points and value rating.
+- Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/red-bull/ - Red Bull F1 Fantasy 2026 constructor projection: 33.7 expected points for the Hungarian GP, $30.6M price, pit-stop points and value rating.
+- Racing Bulls F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/racing-bulls/ - Racing Bulls F1 Fantasy 2026 constructor projection: 14.3 expected points for the Hungarian GP, $12.3M price, pit-stop points and value rating.
+- Audi F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/audi/ - Audi F1 Fantasy 2026 constructor projection: 7.0 expected points for the Hungarian GP, $6.2M price, pit-stop points and value rating.
+- Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/alpine/ - Alpine F1 Fantasy 2026 constructor projection: 5.6 expected points for the Hungarian GP, $18.5M price, pit-stop points and value rating.
+- Haas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/haas/ - Haas F1 Fantasy 2026 constructor projection: 0.7 expected points for the Hungarian GP, $11.4M price, pit-stop points and value rating.
+- Williams F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/williams/ - Williams F1 Fantasy 2026 constructor projection: -3.1 expected points for the Hungarian GP, $13.2M price, pit-stop points and value rating.
+- Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/aston-martin/ - Aston Martin F1 Fantasy 2026 constructor projection: -7.5 expected points for the Hungarian GP, $5.1M price, pit-stop points and value rating.
+- Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/cadillac/ - Cadillac F1 Fantasy 2026 constructor projection: -8.0 expected points for the Hungarian GP, $3.6M price, pit-stop points and value rating.
 - F1 Fantasy Points & Price Tracker 2026 | BoxBox: https://boxboxf1fantasy.com/stats/ - F1 Fantasy 2026 driver and constructor points, current prices, season changes, points per race and last-three form, updated after each Grand Prix.
 - F1 Fantasy Guides 2026: Scoring, Strategy & Chips | BoxBox: https://boxboxf1fantasy.com/guides/ - Free F1 Fantasy 2026 guides: how scoring works, how to win, chips explained, drivers vs constructors, and a beginner's how-to-play walkthrough.
 - How F1 Fantasy Scoring Works (2026) | BoxBox: https://boxboxf1fantasy.com/guides/how-f1-fantasy-scoring-works/ - F1 Fantasy 2026 scoring explained: qualifying, race and sprint points, overtakes, bonuses, DNF penalties, constructors and pit stops.

@@ -1051,6 +1051,12 @@ def run_predictions(
     # Otherwise we're in post-FP and should use race_model_fp.json if available.
     actual_quali_map = _load_actual_quali(year, round_num, abbrev_to_jolpica)
     is_post_quali = len(actual_quali_map) > 0
+    # Preserve the actual qualifying classification as an explicit downstream
+    # signal. The model's qualifying prediction remains available for phase
+    # accuracy, while scoring and post-quali MC can lock the completed session.
+    pred_df["actual_quali_position"] = (
+        pred_df["driver_id"].map(actual_quali_map) if is_post_quali else np.nan
+    )
 
     # Select race model: post-FP uses race_model_fp (trained on predicted quali)
     # to match the distribution it sees at inference; post-quali uses race_model
@@ -1493,7 +1499,8 @@ def run_predictions(
 
     output_cols = [
         "driver_id", "driver_abbrev", "constructor_id",
-        "predicted_quali_position", "predicted_grid_position",
+        "predicted_quali_position", "actual_quali_position",
+        "predicted_grid_position",
         "grid_penalty_places", "grid_back_of_grid",
         "predicted_race_position", "confidence",
         "predicted_quali_raw", "predicted_race_raw",

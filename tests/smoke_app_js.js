@@ -55,10 +55,13 @@ src += `
     hasRenderTransferCard: typeof renderTransferCard === 'function',
     hasRunTeamCompare: typeof runTeamCompare === 'function',
     hasScoreTeamPicks: typeof scoreTeamPicks === 'function',
+    hasFinalFixRacePoints: typeof calculateFinalFixRacePoints === 'function',
+    finalFixQualifyingPoints: typeof ffQualifyingPoints === 'function' ? ffQualifyingPoints : null,
     hasOfficialRoundCoverageCheck: typeof officialRoundHasCompleteScores === 'function',
     renderSwapRow: typeof renderSwapRow === 'function' ? renderSwapRow : null,
     renderTransferCard: typeof renderTransferCard === 'function' ? renderTransferCard : null,
     scoreTeamPicks: typeof scoreTeamPicks === 'function' ? scoreTeamPicks : null,
+    finalFixRacePoints: typeof calculateFinalFixRacePoints === 'function' ? calculateFinalFixRacePoints : null,
     officialRoundHasCompleteScores: typeof officialRoundHasCompleteScores === 'function' ? officialRoundHasCompleteScores : null,
     setTransferRenderState(basis, nextData, driverIds, constructorIds) {
       optimizeBasis = basis;
@@ -103,6 +106,7 @@ for (const [k, label] of [
   ['hasRenderTransferCard', 'renderTransferCard'],
   ['hasRunTeamCompare', 'runTeamCompare'],
   ['hasScoreTeamPicks', 'scoreTeamPicks'],
+  ['hasFinalFixRacePoints', 'calculateFinalFixRacePoints'],
   ['hasOfficialRoundCoverageCheck', 'officialRoundHasCompleteScores'],
 ]) {
   if (!S[k]) fail(`${label} is not defined as a function`);
@@ -202,7 +206,38 @@ try {
   fail('scoreTeamPicks threw: ' + e.message);
 }
 
-// 6) Landing-page price history skips full actual files only when official
+// 6) Final Fix race math counts finish, net positions, overtakes and bonuses.
+try {
+  const hamilton = S.finalFixRacePoints({
+    gridPosition: 5,
+    finishPosition: 3,
+    overtakes: 2,
+    fastestLap: true,
+    dotd: true,
+  });
+  if (hamilton.finishPoints !== 15 || hamilton.positionsGainedLost !== 2 || hamilton.total !== 39) {
+    fail(`Final Fix Hamilton scenario mismatch: ${JSON.stringify(hamilton)}`);
+  }
+  const antonelliBankedQuali = S.finalFixQualifyingPoints(4);
+  if (antonelliBankedQuali !== 7 || antonelliBankedQuali + hamilton.total !== 46) {
+    fail('Final Fix did not retain Antonelli Q4 points while using Hamilton race points');
+  }
+  const dnf = S.finalFixRacePoints({
+    gridPosition: 7,
+    finishPosition: 22,
+    overtakes: 3,
+    fastestLap: true,
+    dotd: true,
+    isDnf: true,
+  });
+  if (dnf.total !== -17 || dnf.fastestLapPoints !== 0 || dnf.dotdPoints !== 0) {
+    fail(`Final Fix DNF scenario mismatch: ${JSON.stringify(dnf)}`);
+  }
+} catch (e) {
+  fail('Final Fix scoring helper threw: ' + e.message);
+}
+
+// 7) Landing-page price history skips full actual files only when official
 // scores cover every current driver and constructor.
 try {
   const current = {

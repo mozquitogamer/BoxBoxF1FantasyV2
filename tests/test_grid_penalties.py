@@ -33,6 +33,24 @@ def test_round12_grid_is_unique_and_matches_confirmed_penalties():
     assert by_driver["ALO"] == 20
 
 
+def test_round13_equal_three_place_penalties_match_confirmed_top_seven():
+    drivers = ["NOR", "HAM", "LEC", "ANT", "PIA", "VER", "RUS"]
+    positions = np.arange(1, len(drivers) + 1)
+    rules = load_grid_penalties(13)
+
+    grid = apply_grid_penalties(positions, drivers, rules)
+
+    assert dict(zip(drivers, grid.tolist())) == {
+        "NOR": 1,
+        "HAM": 5,
+        "LEC": 2,
+        "ANT": 7,
+        "PIA": 3,
+        "RUS": 6,
+        "VER": 4,
+    }
+
+
 def test_no_penalties_is_identity_and_place_drop_caps_at_field_tail():
     positions = np.array([3, 1, 2])
     drivers = ["A", "B", "C"]
@@ -94,3 +112,34 @@ def test_driver_fantasy_keeps_quali_points_but_uses_penalized_grid(monkeypatch):
     assert result["expected_quali_pts"] == fantasy.calc_qualifying_points_driver(4)
     assert result["expected_positions_gained_lost"] == 9
     assert result["expected_overtakes"] == fantasy.estimate_overtakes(14, 5)
+
+
+def test_post_quali_scoring_uses_actual_classification_and_penalized_grid(monkeypatch):
+    predictions = pd.DataFrame([{
+        "driver_id": "antonelli",
+        "driver_abbrev": "ANT",
+        "constructor_id": "mercedes",
+        "predicted_quali_position": 2,
+        "actual_quali_position": 4,
+        "predicted_grid_position": 7,
+        "grid_penalty_places": 3,
+        "grid_back_of_grid": False,
+        "predicted_race_position": 5,
+        "confidence": 90,
+    }])
+    monkeypatch.setattr(fantasy, "load_id_maps", lambda: ({"antonelli": "ANT"}, {"ANT": "antonelli"}))
+    monkeypatch.setattr(fantasy, "load_fantasy_prices", lambda: ({"ANT": 25.6}, {}))
+    monkeypatch.setattr(fantasy, "calculate_risk_ratings", lambda _: {"antonelli": 0.0})
+    monkeypatch.setattr(fantasy, "load_recent_fantasy_points", lambda *_: 0.0)
+    monkeypatch.setattr(fantasy, "load_dotd_overrides", lambda *_: {})
+    monkeypatch.setattr(fantasy, "race_name_for_round", lambda *_: "Hungarian Grand Prix")
+    monkeypatch.setattr(fantasy, "get_circuit_id_from_race_name", lambda *_: "hungaroring")
+    monkeypatch.setattr(fantasy, "overtake_multiplier", lambda *_: 1.0)
+
+    result = fantasy.calculate_driver_fantasy(predictions, 13).iloc[0]
+
+    assert result["predicted_quali_position"] == 4
+    assert result["model_predicted_quali_position"] == 2
+    assert result["predicted_grid_position"] == 7
+    assert result["expected_quali_pts"] == fantasy.calc_qualifying_points_driver(4)
+    assert result["expected_positions_gained_lost"] == 2

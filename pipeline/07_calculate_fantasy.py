@@ -471,13 +471,19 @@ def calculate_driver_fantasy(
         driver_id = row["driver_id"]  # Jolpica format
         driver_abbrev = row.get("driver_abbrev") or jolpica_to_abbrev.get(driver_id, driver_id)
         constructor_id = row.get("constructor_id", "")
-        pred_quali = int(row["predicted_quali_position"])
-        pred_grid = int(row.get("predicted_grid_position", pred_quali))
+        model_pred_quali = int(row["predicted_quali_position"])
+        actual_quali = row.get("actual_quali_position")
+        # Qualifying points are banked from the official classification. A grid
+        # penalty changes only the race start used for positions gained/lost.
+        scoring_quali = (
+            int(actual_quali) if pd.notna(actual_quali) else model_pred_quali
+        )
+        pred_grid = int(row.get("predicted_grid_position", scoring_quali))
         pred_race = int(row["predicted_race_position"])
         confidence = int(row.get("confidence", 50))
 
         # -- Qualifying points --
-        quali_pts = calc_qualifying_points_driver(pred_quali)
+        quali_pts = calc_qualifying_points_driver(scoring_quali)
 
         # -- Race points --
         race_position_pts = RACE_POSITION_POINTS.get(pred_race, 0)
@@ -527,7 +533,7 @@ def calculate_driver_fantasy(
             # qualifying) — needed for positions-gained, but NOT itself scored:
             # official F1 Fantasy awards no points for sprint-qualifying position
             # (verified against official actuals). sprint_quali_pts stays 0.
-            pred_sprint_quali = int(row.get("predicted_sprint_quali_position", pred_quali))
+            pred_sprint_quali = int(row.get("predicted_sprint_quali_position", scoring_quali))
             pred_sprint = int(row.get("predicted_sprint_position", pred_race))
 
             sprint_pos_pts = SPRINT_POSITION_POINTS.get(pred_sprint, 0)
@@ -567,7 +573,8 @@ def calculate_driver_fantasy(
             "driver_id": driver_id,
             "driver_abbrev": driver_abbrev,
             "constructor_id": constructor_id,
-            "predicted_quali_position": pred_quali,
+            "predicted_quali_position": scoring_quali,
+            "model_predicted_quali_position": model_pred_quali,
             "predicted_grid_position": pred_grid,
             "grid_penalty_places": int(row.get("grid_penalty_places", 0)),
             "grid_back_of_grid": bool(row.get("grid_back_of_grid", False)),

@@ -1,6 +1,19 @@
 {
   "entries": [
     {
+      "date": "2026-07-25",
+      "title": "Final Fix calculator added after Hungarian GP Qualifying",
+      "tags": [
+        "feature",
+        "fix"
+      ],
+      "body": [
+        "The Lineup Optimizer now has a dedicated Final Fix mode. Choose the driver you own and a possible replacement, enter your remaining budget, then compare the post-Qualifying model with your own race scenario.",
+        "You can set each driver's finishing position and overtake count, then assign Fastest Lap or Driver of the Day. The result shows finish points, positions gained or lost, overtakes, bonuses, the banked Qualifying points and the exact gain or loss from making the switch.",
+        "Post-Qualifying simulations now lock the completed Qualifying classification and confirmed penalised starting grid instead of resampling them. Hamilton's and Antonelli's Hungarian GP grid drops are included, so their race position-change points are measured from P5 and P7 while their banked Qualifying points remain based on Q2 and Q4."
+      ]
+    },
+    {
       "date": "2026-07-23",
       "title": "Reliable cars no longer get double-penalised after a retirement",
       "tags": [

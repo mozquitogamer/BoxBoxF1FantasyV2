@@ -1043,6 +1043,21 @@ def run_simulations(
     if grid_penalty_rules:
         print(f"  Grid penalties active in every simulation: {grid_penalty_rules}")
 
+    # Post-qualifying mode: qualifying classification and the penalized starting
+    # grid are known facts. Freeze both so the remaining uncertainty is race-only.
+    fixed_quali_positions = None
+    fixed_grid_positions = None
+    if "actual_quali_position" in pred_df.columns:
+        actual_quali = pd.to_numeric(
+            pred_df["actual_quali_position"], errors="coerce"
+        )
+        if actual_quali.notna().all():
+            fixed_quali_positions = actual_quali.astype(int).to_numpy()
+            fixed_grid_positions = pd.to_numeric(
+                pred_df["predicted_grid_position"], errors="raise"
+            ).astype(int).to_numpy()
+            print("  Post-quali mode: actual qualifying and starting grid fixed across sims")
+
     # Manual DOTD overrides: map jolpica driver_id -> sim index -> forced prob.
     # In each sim, with this probability we assign DOTD to that driver directly
     # (if they didn't DNF), otherwise the normal fan-weighted sample_dotd runs.
@@ -1228,19 +1243,26 @@ def run_simulations(
             print(f"  Sprint grid is a pre-SQ proxy — resampled from Sunday quali per sim")
 
     for sim in range(n_sims):
-        # 1. Sample qualifying positions (with teammate correlation)
-        # Generate per-team shock for qualifying
-        quali_team_shocks = np.zeros(n_drivers)
-        quali_shock_by_cid = {cid: rng.normal(0, TEAMMATE_CORRELATION_ALPHA * cal_quali_noise)
-                              for cid in unique_constructors}
-        for i in range(n_drivers):
-            quali_team_shocks[i] = quali_shock_by_cid[constructors[i]]
+        # 1. Qualifying/grid: fixed after qualifying, sampled before qualifying.
+        if fixed_quali_positions is not None:
+            quali_positions = fixed_quali_positions
+            grid_positions = fixed_grid_positions
+        else:
+            quali_team_shocks = np.zeros(n_drivers)
+            quali_shock_by_cid = {
+                cid: rng.normal(0, TEAMMATE_CORRELATION_ALPHA * cal_quali_noise)
+                for cid in unique_constructors
+            }
+            for i in range(n_drivers):
+                quali_team_shocks[i] = quali_shock_by_cid[constructors[i]]
 
-        quali_positions = sample_positions(quali_raw, cal_quali_noise, confidences, rng,
-                                           constructor_ids=constructors, team_shocks=quali_team_shocks)
-        grid_positions = apply_grid_penalties(
-            quali_positions, abbrevs, grid_penalty_rules
-        )
+            quali_positions = sample_positions(
+                quali_raw, cal_quali_noise, confidences, rng,
+                constructor_ids=constructors, team_shocks=quali_team_shocks
+            )
+            grid_positions = apply_grid_penalties(
+                quali_positions, abbrevs, grid_penalty_rules
+            )
 
         # 2. Correlated DNF sampling
         adjusted_probs = dnf_probs.copy()
@@ -1406,7 +1428,14 @@ def run_simulations(
             "driver_abbrev": abbrevs[i],
             "constructor_id": constructors[i],
             # Point predictions (deterministic, for reference)
-            "det_quali_position": int(pred_df.iloc[i]["predicted_quali_position"]),
+            "det_quali_position": int(
+                pred_df.iloc[i]["actual_quali_position"]
+                if (
+                    "actual_quali_position" in pred_df.columns
+                    and pd.notna(pred_df.iloc[i]["actual_quali_position"])
+                )
+                else pred_df.iloc[i]["predicted_quali_position"]
+            ),
             "det_grid_position": int(pred_df.iloc[i].get(
                 "predicted_grid_position", pred_df.iloc[i]["predicted_quali_position"]
             )),
@@ -1424,6 +1453,11 @@ def run_simulations(
             # Component breakdowns
             "mc_quali_pts_mean": round(float(q_pts.mean()), 1),
             "mc_race_pts_mean": round(float(r_pts.mean()), 1),
+            "mc_race_pts_p5": round(float(np.percentile(r_pts, 5)), 1),
+            "mc_race_pts_p25": round(float(np.percentile(r_pts, 25)), 1),
+            "mc_race_pts_median": round(float(np.median(r_pts)), 1),
+            "mc_race_pts_p75": round(float(np.percentile(r_pts, 75)), 1),
+            "mc_race_pts_p95": round(float(np.percentile(r_pts, 95)), 1),
             "mc_sprint_pts_mean": round(float(s_pts.mean()), 1),
             # Position distributions
             "mc_quali_pos_mean": round(float(q_pos.mean()), 1),
@@ -1467,6 +1501,7 @@ def run_simulations(
             "calibration_source": "OpenF1 R1+R2 actual data (2026)",
             "calibration_rounds": cal.get("n_rounds", 0),
             "is_sprint_weekend": is_sprint,
+            "qualifying_locked": fixed_quali_positions is not None,
             "weather_adjustments_active": {
                 "is_active": bool(wx["is_active"]),
                 "rain_risk": wx.get("rain_risk", "NONE"),

@@ -11,5 +11,14 @@
     "STR": {
       "places": 10
     }
+  },
+  "13": {
+    "_note": "Hungarian GP confirmed post-qualifying penalties: HAM and ANT receive three-place grid drops.",
+    "HAM": {
+      "places": 3
+    },
+    "ANT": {
+      "places": 3
+    }
   }
 }
