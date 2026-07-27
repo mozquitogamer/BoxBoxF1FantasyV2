@@ -46,7 +46,7 @@
       "date": "2026-07-26",
       "temp_max": 31.5,
       "temp_min": 17.0,
-      "precip_probability_max": 4,
+      "precip_probability_max": 6,
       "precip_sum_mm": 0.0,
       "wind_max_kmh": 21.6,
       "weather_description": "Overcast",
@@ -333,7 +333,7 @@
       ]
     }
   ],
-  "last_updated": "2026-07-26T18:57:31Z",
-  "next_update": "2026-07-27T00:57:31Z",
+  "last_updated": "2026-07-27T02:02:33Z",
+  "next_update": "2026-07-27T08:02:33Z",
   "data_source": "Open-Meteo (open-meteo.com)"
 }
