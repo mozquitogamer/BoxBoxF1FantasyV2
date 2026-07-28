@@ -2,7 +2,7 @@
   "site": "https://boxboxf1fantasy.com",
   "name": "BoxBoxF1Fantasy",
   "description": "Free F1 Fantasy 2026 predictions, race picks, lineup optimizer, transfer tools, strategy guides, public data and accuracy tracking.",
-  "generated_at": "2026-07-28T07:44:50.931675+00:00",
+  "generated_at": "2026-07-28T07:53:22.702985+00:00",
   "language": "en",
   "current_round": 14,
   "current_race": "Dutch Grand Prix",
@@ -700,9 +700,9 @@
     {
       "url": "https://boxboxf1fantasy.com/articles/2026-07-28-f1-fantasy-season-strategy-experiment/",
       "path": "/articles/2026-07-28-f1-fantasy-season-strategy-experiment/",
-      "title": "F1 Fantasy Strategy Experiment: Points vs Budget | BoxBoxF1Fantasy",
-      "description": "What happens if one F1 Fantasy manager always chases the highest projected score, while another remains points-first but also builds team value? We ran...",
-      "h1": "We Simulated Two F1 Fantasy Strategies Across the 2026 Season",
+      "title": "F1 Fantasy Strategy Experiment: Three Season Simulations | BoxBoxF1Fantasy",
+      "description": "Would an F1 Fantasy manager score more by chasing the maximum projected points every weekend, or by accepting a small short-term compromise to build a...",
+      "h1": "We Simulated Three F1 Fantasy Strategies Across the 2026 Season",
       "type": "article_page"
     },
     {
