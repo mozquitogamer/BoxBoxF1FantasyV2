@@ -3734,6 +3734,15 @@ table.sortable th.sort-desc::after {
 .article-body li { margin-bottom: 4px; }
 .article-body strong { color: var(--text); }
 .article-body em { color: var(--text-secondary); }
+.article-body img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 16px 0 22px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
 .article-body blockquote { border-left: 3px solid var(--accent); margin: 12px 0; padding: 8px 16px; background: var(--bg-card); border-radius: 0 8px 8px 0; }
 
 /* ---- Videos Tab ---- */

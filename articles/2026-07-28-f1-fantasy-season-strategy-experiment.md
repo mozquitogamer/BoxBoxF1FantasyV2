@@ -66,6 +66,16 @@ Limitless and 3x Boost were assigned to the strongest projected opportunities am
 
 Wild Card was saved. We had no archived multi-round horizon forecast that could justify making a permanent rebuild based only on a one-round uplift.
 
+### Experiment 1 round-by-round teams
+
+**Max Points manager**
+
+<img src="/images/season-strategy-exp1-max-points-table.png" alt="Spreadsheet showing the Max Points manager's round-by-round drivers, constructors, transfers, chips, points and budget in Experiment 1" width="2320" height="593" decoding="async">
+
+**Balanced manager**
+
+<img src="/images/season-strategy-exp1-balanced-table.png" alt="Spreadsheet showing the Balanced manager's round-by-round drivers, constructors, transfers, chips, points and budget in Experiment 1" width="2320" height="593" decoding="async">
+
 ### Experiment 1 chip schedule
 
 For Max Points:
@@ -136,6 +146,16 @@ Austria was selected. Its archive carried an 18.5% mean projected DNF probabilit
 
 Autopilot went to the strongest remaining captain-uncertainty round after the other chips had been allocated.
 
+### Experiment 2 round-by-round teams
+
+**Max Points manager**
+
+<img src="/images/season-strategy-exp2-max-points-table.png" alt="Spreadsheet showing the Max Points manager's round-by-round drivers, constructors, transfers, chips, points and budget in Experiment 2" width="2320" height="593" decoding="async">
+
+**Balanced manager**
+
+<img src="/images/season-strategy-exp2-balanced-table.png" alt="Spreadsheet showing the Balanced manager's round-by-round drivers, constructors, transfers, chips, points and budget in Experiment 2" width="2320" height="593" decoding="async">
+
 ### Experiment 2 chip schedule
 
 For Max Points:
@@ -175,6 +195,16 @@ The third experiment repeated Experiment 2 with one change: the 3x Boost was not
 It was explicitly saved for a future race, and no replacement chip was allowed to take its Miami slot. This matters because allowing another chip to move into R6 would have changed more than one variable and made the comparison less useful.
 
 Every persistent team, transfer and budget decision remained the same as Experiment 2 because 3x Boost is a temporary scoring overlay. Only the points changed.
+
+### Experiment 3 round-by-round teams
+
+**Max Points manager**
+
+<img src="/images/season-strategy-exp3-max-points-table.png" alt="Spreadsheet showing the Max Points manager's round-by-round drivers, constructors, transfers, chips, points and budget in Experiment 3" width="2320" height="593" decoding="async">
+
+**Balanced manager**
+
+<img src="/images/season-strategy-exp3-balanced-table.png" alt="Spreadsheet showing the Balanced manager's round-by-round drivers, constructors, transfers, chips, points and budget in Experiment 3" width="2320" height="593" decoding="async">
 
 ### Experiment 3 chip schedule
 
