@@ -1,16 +1,16 @@
 ---
-title: We Simulated Three F1 Fantasy Strategies Across the 2026 Season
-seo_title: F1 Fantasy Strategy Experiment: Three Season Simulations
+title: How Big an Effect Does Max Points vs Balanced Have?
+seo_title: Max Points vs Balanced F1 Fantasy Strategy
 date: 2026-07-28
 tags: analysis, strategy, budget, chips, optimizer, simulation
 sources: /data/official_fantasy_points.json, /data/season_summary.json, /methodology/, /tools/lineup-optimizer/, /tools/transfer-planner/
 ---
 
-Would an F1 Fantasy manager score more by chasing the maximum projected points every weekend, or by accepting a small short-term compromise to build a more valuable team?
+How big an effect does going for a Max Points team versus a Balanced approach have? I wondered, and ran three sets of simulations to find out.
 
-We built a sequential season simulator to find out. It replayed every completed 2026 race with two virtual managers, then repeated the season under three different chip policies.
+This season simulator replayed every completed 2026 race with two virtual managers. Each of the three experiments used a different chip policy.
 
-The first manager always pursued **Max Points**. The second used a **Balanced** strategy: points remained the priority, but expected price growth also had value because a larger budget can unlock stronger teams later.
+The first manager always pursued Max Points. The second used a Balanced strategy: points remained the priority, but expected price growth also had value because a larger budget can unlock stronger teams later.
 
 Across all three experiments, the Balanced manager finished with more points and substantially more team value. But the chip results were less straightforward. A chip choice that helped one strategy could hurt the other because the managers entered the same race with different teams, budgets and transfer needs.
 
@@ -18,9 +18,9 @@ This article explains all three experiments, their constraints, the results and 
 
 ## The common rules used in all three experiments
 
-Both managers started Round 1 with **$100.0M** and selected the standard five drivers and two constructors.
+Both managers started Round 1 with $100.0M and selected the standard five drivers and two constructors.
 
-The simulation then moved through the 11 completed races: internal Rounds 1, 2, 3 and 6-13. Bahrain and Saudi Arabia retained their original internal numbers but were cancelled, so they were not treated as completed fantasy rounds.
+The simulation then moved through the 11 completed races.
 
 Each round followed the same sequence:
 
@@ -32,19 +32,17 @@ Each round followed the same sequence:
 6. Revalue the persistent team using the official closing prices.
 7. Carry the team, bank balance, team value and transfers into the next race.
 
-The simulator did not reset either manager to $100M between races.
-
 ## Team-selection and transfer constraints
 
 The normal 2x boost went to the highest projected driver in the selected team.
 
-After Round 1, the managers received two free transfers. Unused transfers could roll forward, with the available total capped at five. The normal transfer strategy was allowed at most one paid transfer in a round, charged at **-10 points**.
+After Round 1, the managers received two free transfers. Unused transfers could roll forward as in the game. The normal transfer strategy was allowed at most one paid transfer in a round, charged at -10 points.
 
 The Max Points manager maximised archived projected fantasy points after transfer penalties.
 
-The Balanced manager maximised projected points after penalties, then added eight units of decision value for every projected **$1M of price appreciation**. That did not mean budget replaced points. It meant the manager could accept a small forecast sacrifice when a likely price rise offered useful future buying power.
+The Balanced manager maximised projected points after penalties, then added eight units of decision value for every projected $1M of price appreciation. That did not mean budget replaced points. It meant the manager could accept a small forecast sacrifice when a likely price rise offered useful future buying power.
 
-Price-growth forecasts mirrored the website's rolling-three points-per-million brackets. They used only earlier official scores plus the current forecast. Actual closing prices, rather than predicted prices, determined the next round's real budget.
+Price-growth forecasts mirrored the website's rolling-three-races points-per-million brackets. They used only earlier official scores plus the current forecast. Actual closing prices, rather than predicted prices, determined the next round's real budget.
 
 Temporary scoring chips did not change the normal persistent-team decision. A 3x Boost, No Negative or Autopilot sat on top of the lineup the manager would otherwise choose. Limitless and Wild Card were different because their rules directly affect team selection.
 
@@ -59,8 +57,6 @@ The chip mechanics were:
 - **Wild Card:** transfers were unlimited and free, and the rebuilt team remained for future rounds.
 - **No Negative:** negative driver and constructor asset scores were floored at zero for that round.
 - **Autopilot:** the highest actual-scoring driver in the selected team received the 2x boost.
-
-Constructor and driver ownership were both scored in the normal way. Owning a driver and that driver's constructor is legitimate in F1 Fantasy and therefore was not treated as duplicate scoring.
 
 ## Experiment 1: generic forecast-opportunity chip timing
 
@@ -90,11 +86,11 @@ For Balanced:
 
 ### Experiment 1 results
 
-Max Points finished with **2,286 points** and a **$105.7M** team value.
+Max Points finished with 2,286 points and a $105.7M team value.
 
-Balanced finished with **2,541 points** and a **$116.8M** team value.
+Balanced finished with 2,541 points and a $116.8M team value.
 
-Balanced won by **255 points** and ended with **$11.1M more team value**.
+Balanced won by 255 points and ended with $11.1M more team value.
 
 There was also an important warning. The Max Points no-chip baseline scored 2,380, meaning this chip schedule finished 94 points behind simply playing no chips. Balanced's no-chip baseline scored 2,495, so its chip schedule added 46 points.
 
@@ -108,7 +104,7 @@ The second experiment replaced the generic chip timing with more familiar F1 Fan
 
 Limitless targeted the completed circuit with the highest overtaking difficulty. The reasoning was that a low-overtaking track makes qualifying and grid position more valuable, while the unlimited budget allows the manager to load up on the strongest premium qualifiers.
 
-Monaco, rated **10/10 for overtaking difficulty**, was therefore selected.
+Monaco, rated 10/10 for overtaking difficulty, was therefore selected.
 
 ### 3x Boost constraint
 
@@ -160,11 +156,11 @@ For Balanced:
 
 ### Experiment 2 results
 
-Max Points scored **2,323 points** and finished with **$107.8M**.
+Max Points scored 2,323 points and finished with $107.8M.
 
-Balanced scored **2,494 points** and finished with **$117.7M**.
+Balanced scored 2,494 points and finished with $117.7M.
 
-Balanced won by **171 points** and built **$9.9M more team value**.
+Balanced won by 171 points and built $9.9M more team value.
 
 Compared with Experiment 1, the domain-informed policy improved Max Points by 37 points and $2.1M. Balanced scored 47 fewer points than in Experiment 1 but gained another $0.9M in team value.
 
@@ -174,7 +170,7 @@ The domain rules made the strategies more explainable, but they did not guarante
 
 ## Experiment 3: save the 3x Boost
 
-The third experiment repeated Experiment 2 with one change: **the 3x Boost was not played**.
+The third experiment repeated Experiment 2 with one change: the 3x Boost was not played.
 
 It was explicitly saved for a future race, and no replacement chip was allowed to take its Miami slot. This matters because allowing another chip to move into R6 would have changed more than one variable and made the comparison less useful.
 
@@ -200,9 +196,9 @@ For Balanced:
 
 ### Experiment 3 results
 
-Max Points scored **2,267 points** and retained its **$107.8M** final team value.
+Max Points scored 2,267 points and retained its $107.8M final team value.
 
-Balanced scored **2,438 points** and retained its **$117.7M** final team value.
+Balanced scored 2,438 points and retained its $117.7M final team value.
 
 Both managers scored exactly 56 fewer points than in Experiment 2. In other words, playing the 3x Boost at Miami would have added 56 points to either team's completed-season total.
 
@@ -212,7 +208,7 @@ Saving it may still be rational if a later weekend offers a higher expected retu
 
 Monaco looked like the textbook Limitless round. Overtaking difficulty was 10/10, so an unrestricted premium team should, in theory, gain more from strong qualifying than a normal budget-constrained lineup.
 
-But chip value depends on the team being replaced.
+But chip value depends on the team being replaced. And since Monaco was such a paw-paw parade, Limitless at Monaco this year was an epic fail, as I found out myself this year.
 
 When we removed Monaco Limitless from the Experiment 2 schedule while keeping the other chip timings fixed, the downstream effect differed sharply:
 
@@ -221,17 +217,11 @@ When we removed Monaco Limitless from the Experiment 2 schedule while keeping th
 
 Those figures include later transfers and budget effects, not only Monaco's immediate score.
 
-The lesson is not that Monaco is a bad Limitless track. It is that circuit suitability is only the first condition. The unlimited team must also project materially better than the manager's existing lineup, and the cost of reverting afterward must be considered.
+The lesson is that sometimes Monaco brings bad luck.
 
 ## Constraints and limitations
 
 These simulations are designed to be transparent, but they are not a perfect live-manager backtest.
-
-### Reconstructed early archives
-
-Rounds 1-3 use reconstructed post-practice forecasts created later. Rounds 6-13 use genuine archives captured during the season.
-
-The official points and price changes are real throughout, but reconstructed forecasts can benefit from later model development or training data. Full-season totals must therefore be described as indicative rather than prospective performance.
 
 ### Retrospective comparison of forecast opportunities
 
@@ -256,8 +246,6 @@ They do not isolate the pure accuracy of the qualifying or race-position models.
 ### No claim of globally optimal chip use
 
 The simulator evaluates defined policies. It does not search every possible season-long chip schedule with hindsight.
-
-Doing that would find the mathematically highest realised total, but it would answer a less useful question: what would have worked if the results were already known?
 
 ## What the three experiments taught us
 
