@@ -7,6 +7,20 @@
   "language": "en",
   "items": [
     {
+      "id": "https://boxboxf1fantasy.com/articles/",
+      "url": "https://boxboxf1fantasy.com/articles/",
+      "title": "F1 Fantasy Articles 2026",
+      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
+      "date_modified": "2026-07-28T00:00:00+00:00"
+    },
+    {
+      "id": "https://boxboxf1fantasy.com/articles/2026-07-28-f1-fantasy-season-strategy-experiment/",
+      "url": "https://boxboxf1fantasy.com/articles/2026-07-28-f1-fantasy-season-strategy-experiment/",
+      "title": "We Simulated Two F1 Fantasy Strategies Across the 2026 Season",
+      "summary": "What happens if one F1 Fantasy manager always chases the highest projected score, while another remains points-first but also builds team value? We ran both strategies sequentially through every completed 2026 race,...",
+      "date_modified": "2026-07-28T00:00:00+00:00"
+    },
+    {
       "id": "https://boxboxf1fantasy.com/picks/dutch-gp-2026/",
       "url": "https://boxboxf1fantasy.com/picks/dutch-gp-2026/",
       "title": "F1 Fantasy Picks: Dutch GP 2026",
@@ -308,13 +322,6 @@
       "date_modified": "2026-07-22T00:00:00+00:00"
     },
     {
-      "id": "https://boxboxf1fantasy.com/articles/",
-      "url": "https://boxboxf1fantasy.com/articles/",
-      "title": "F1 Fantasy Articles 2026",
-      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
-      "date_modified": "2026-07-22T00:00:00+00:00"
-    },
-    {
       "id": "https://boxboxf1fantasy.com/articles/2026-07-13-belgian-gp-model-briefing/",
       "url": "https://boxboxf1fantasy.com/articles/2026-07-13-belgian-gp-model-briefing/",
       "title": "Belgian GP F1 Fantasy: Why Max Leads",
@@ -347,13 +354,6 @@
       "url": "https://boxboxf1fantasy.com/articles/2026-03-23-round2-chinese-gp/",
       "title": "Round 2 — Chinese Grand Prix Recap",
       "summary": "Shanghai Sprint Weekend Round 2 took the paddock to the Shanghai International Circuit for the first sprint weekend of the season. The sprint format added an extra layer of complexity for both teams and fantasy...",
-      "date_modified": "2026-07-22T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/articles/2026-03-16-round1-australian-gp/",
-      "url": "https://boxboxf1fantasy.com/articles/2026-03-16-round1-australian-gp/",
-      "title": "Round 1 — Australian Grand Prix Recap",
-      "summary": "Season Opener in Melbourne The 2026 Formula 1 season kicked off under the lights of Albert Park with a dramatically reshuffled grid under the new technical regulations. With wider cars, new aero rules, and 11 teams on...",
       "date_modified": "2026-07-22T00:00:00+00:00"
     }
   ]

@@ -1,0 +1,1273 @@
+{
+  "schema_version": 1,
+  "season": 2026,
+  "starting_budget": 100.0,
+  "completed_rounds": [
+    1,
+    2,
+    3,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "forecast_phase": "post_fp",
+  "reconstructed_rounds": [
+    1,
+    2,
+    3
+  ],
+  "genuine_rounds": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "policy": {
+    "max_points": "Projected points after transfer penalties.",
+    "balanced": "Projected points after penalties plus 8 points per projected $1M gain.",
+    "paid_transfer_limit": 1,
+    "transfer_penalty": 10,
+    "max_banked_transfers": 5
+  },
+  "managers": [
+    {
+      "strategy": "max_points",
+      "chip_schedule": {
+        "6": "3x_boost",
+        "7": "limitless",
+        "12": "no_negative",
+        "13": "autopilot"
+      },
+      "rounds": [
+        {
+          "round": 1,
+          "race": "Australian Grand Prix",
+          "archive": "web/public/data/predictions_round1_post_fp.json",
+          "archive_reconstructed": true,
+          "chip": null,
+          "drivers": [
+            "RUS",
+            "HAD",
+            "OCO",
+            "LIN",
+            "BOR"
+          ],
+          "constructors": [
+            "mercedes",
+            "audi"
+          ],
+          "persistent_drivers": [
+            "RUS",
+            "HAD",
+            "OCO",
+            "LIN",
+            "BOR"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "audi"
+          ],
+          "captain": "RUS",
+          "second_boost": null,
+          "captain_bonus": 39.0,
+          "transfers": 0,
+          "free_transfers_before": 0,
+          "free_transfers_next": 2,
+          "transfer_penalty": 0,
+          "projected_points": 230.2,
+          "projected_price_gain": 2.4,
+          "actual_points_gross": 203.0,
+          "actual_points_net": 203.0,
+          "season_points": 203.0,
+          "budget_before": 100.0,
+          "played_team_cost": 98.8,
+          "bank_after_transfers": 1.2,
+          "budget_after": 100.7,
+          "actual_budget_change": 0.7,
+          "downside_risk": 40.5,
+          "captain_gap": 26.9,
+          "captain_uncertainty": 0.477
+        },
+        {
+          "round": 2,
+          "race": "Chinese Grand Prix",
+          "archive": "web/public/data/predictions_round2_post_fp.json",
+          "archive_reconstructed": true,
+          "chip": null,
+          "drivers": [
+            "ANT",
+            "HAD",
+            "ALB",
+            "OCO",
+            "BOR"
+          ],
+          "constructors": [
+            "mercedes",
+            "audi"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "HAD",
+            "ALB",
+            "OCO",
+            "BOR"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "audi"
+          ],
+          "captain": "ANT",
+          "second_boost": null,
+          "captain_bonus": 68.0,
+          "transfers": 2,
+          "free_transfers_before": 2,
+          "free_transfers_next": 1,
+          "transfer_penalty": 0,
+          "projected_points": 314.1,
+          "projected_price_gain": 2.0,
+          "actual_points_gross": 269.0,
+          "actual_points_net": 269.0,
+          "season_points": 472.0,
+          "budget_before": 100.7,
+          "played_team_cost": 98.7,
+          "bank_after_transfers": 2.0,
+          "budget_after": 100.7,
+          "actual_budget_change": 0.0,
+          "downside_risk": 37.5,
+          "captain_gap": 24.4,
+          "captain_uncertainty": 0.646
+        },
+        {
+          "round": 3,
+          "race": "Japanese Grand Prix",
+          "archive": "web/public/data/predictions_round3_post_fp.json",
+          "archive_reconstructed": true,
+          "chip": null,
+          "drivers": [
+            "ANT",
+            "HAD",
+            "OCO",
+            "LIN",
+            "BOR"
+          ],
+          "constructors": [
+            "mercedes",
+            "audi"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "HAD",
+            "OCO",
+            "LIN",
+            "BOR"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "audi"
+          ],
+          "captain": "ANT",
+          "second_boost": null,
+          "captain_bonus": 50.0,
+          "transfers": 1,
+          "free_transfers_before": 1,
+          "free_transfers_next": 1,
+          "transfer_penalty": 0,
+          "projected_points": 231.5,
+          "projected_price_gain": 0.8,
+          "actual_points_gross": 233.0,
+          "actual_points_net": 233.0,
+          "season_points": 705.0,
+          "budget_before": 100.7,
+          "played_team_cost": 95.3,
+          "bank_after_transfers": 5.4,
+          "budget_after": 101.1,
+          "actual_budget_change": 0.4,
+          "downside_risk": 35.5,
+          "captain_gap": 20.1,
+          "captain_uncertainty": 0.607
+        },
+        {
+          "round": 6,
+          "race": "Miami Grand Prix",
+          "archive": "web/public/data/predictions_round6_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": "3x_boost",
+          "drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "LAW",
+            "BOR"
+          ],
+          "constructors": [
+            "mercedes",
+            "racing_bulls"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "LAW",
+            "BOR"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "racing_bulls"
+          ],
+          "captain": "ANT",
+          "second_boost": "OCO",
+          "captain_bonus": 98.0,
+          "transfers": 2,
+          "free_transfers_before": 1,
+          "free_transfers_next": 1,
+          "transfer_penalty": 10,
+          "projected_points": 432.0,
+          "projected_price_gain": 2.4,
+          "actual_points_gross": 251.0,
+          "actual_points_net": 241.0,
+          "season_points": 946.0,
+          "budget_before": 101.1,
+          "played_team_cost": 92.4,
+          "bank_after_transfers": 8.7,
+          "budget_after": 102.3,
+          "actual_budget_change": 1.2,
+          "downside_risk": 10.0,
+          "captain_gap": 22.2,
+          "captain_uncertainty": 0.621
+        },
+        {
+          "round": 7,
+          "race": "Canadian Grand Prix",
+          "archive": "web/public/data/predictions_round7_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": "limitless",
+          "drivers": [
+            "RUS",
+            "NOR",
+            "PIA",
+            "ANT",
+            "HAM"
+          ],
+          "constructors": [
+            "mercedes",
+            "mclaren"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "LAW",
+            "BOR"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "racing_bulls"
+          ],
+          "captain": "ANT",
+          "second_boost": null,
+          "captain_bonus": 62.0,
+          "transfers": 0,
+          "free_transfers_before": 1,
+          "free_transfers_next": 2,
+          "transfer_penalty": 0,
+          "projected_points": 460.7,
+          "projected_price_gain": 1.9,
+          "actual_points_gross": 297.0,
+          "actual_points_net": 297.0,
+          "season_points": 1243.0,
+          "budget_before": 102.3,
+          "played_team_cost": 187.0,
+          "bank_after_transfers": 8.7,
+          "budget_after": 103.1,
+          "actual_budget_change": 0.8,
+          "downside_risk": 0.0,
+          "captain_gap": 7.9,
+          "captain_uncertainty": 1.584
+        },
+        {
+          "round": 8,
+          "race": "Monaco Grand Prix",
+          "archive": "web/public/data/predictions_round8_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": null,
+          "drivers": [
+            "ANT",
+            "LIN",
+            "STR",
+            "BOR",
+            "HUL"
+          ],
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "LIN",
+            "STR",
+            "BOR",
+            "HUL"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "captain": "ANT",
+          "second_boost": null,
+          "captain_bonus": 55.0,
+          "transfers": 3,
+          "free_transfers_before": 2,
+          "free_transfers_next": 1,
+          "transfer_penalty": 10,
+          "projected_points": 221.0,
+          "projected_price_gain": 0.5,
+          "actual_points_gross": 215.0,
+          "actual_points_net": 205.0,
+          "season_points": 1448.0,
+          "budget_before": 103.1,
+          "played_team_cost": 101.3,
+          "bank_after_transfers": 1.8,
+          "budget_after": 102.4,
+          "actual_budget_change": -0.7,
+          "downside_risk": 29.0,
+          "captain_gap": 28.7,
+          "captain_uncertainty": 0.323
+        },
+        {
+          "round": 9,
+          "race": "Spanish Grand Prix",
+          "archive": "web/public/data/predictions_round9_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": null,
+          "drivers": [
+            "ANT",
+            "LIN",
+            "STR",
+            "BOR",
+            "HUL"
+          ],
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "LIN",
+            "STR",
+            "BOR",
+            "HUL"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "captain": "ANT",
+          "second_boost": null,
+          "captain_bonus": -4.0,
+          "transfers": 0,
+          "free_transfers_before": 1,
+          "free_transfers_next": 2,
+          "transfer_penalty": 0,
+          "projected_points": 219.0,
+          "projected_price_gain": -0.7,
+          "actual_points_gross": 71.0,
+          "actual_points_net": 71.0,
+          "season_points": 1519.0,
+          "budget_before": 102.4,
+          "played_team_cost": 100.6,
+          "bank_after_transfers": 1.8,
+          "budget_after": 102.5,
+          "actual_budget_change": 0.1,
+          "downside_risk": 29.0,
+          "captain_gap": 22.3,
+          "captain_uncertainty": 0.579
+        },
+        {
+          "round": 10,
+          "race": "Austrian Grand Prix",
+          "archive": "web/public/data/predictions_round10_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": null,
+          "drivers": [
+            "ANT",
+            "LIN",
+            "STR",
+            "BOR",
+            "HUL"
+          ],
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "LIN",
+            "STR",
+            "BOR",
+            "HUL"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "captain": "ANT",
+          "second_boost": null,
+          "captain_bonus": 35.0,
+          "transfers": 0,
+          "free_transfers_before": 2,
+          "free_transfers_next": 3,
+          "transfer_penalty": 0,
+          "projected_points": 190.1,
+          "projected_price_gain": 0.5,
+          "actual_points_gross": 210.0,
+          "actual_points_net": 210.0,
+          "season_points": 1729.0,
+          "budget_before": 102.5,
+          "played_team_cost": 100.7,
+          "bank_after_transfers": 1.8,
+          "budget_after": 103.4,
+          "actual_budget_change": 0.9,
+          "downside_risk": 73.4,
+          "captain_gap": 21.3,
+          "captain_uncertainty": 0.865
+        },
+        {
+          "round": 11,
+          "race": "British Grand Prix",
+          "archive": "web/public/data/predictions_round11_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": null,
+          "drivers": [
+            "VER",
+            "LIN",
+            "PER",
+            "HUL",
+            "BOT"
+          ],
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "VER",
+            "LIN",
+            "PER",
+            "HUL",
+            "BOT"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "captain": "VER",
+          "second_boost": null,
+          "captain_bonus": -3.0,
+          "transfers": 3,
+          "free_transfers_before": 3,
+          "free_transfers_next": 1,
+          "transfer_penalty": 0,
+          "projected_points": 236.2,
+          "projected_price_gain": 0.7,
+          "actual_points_gross": 201.0,
+          "actual_points_net": 201.0,
+          "season_points": 1930.0,
+          "budget_before": 103.4,
+          "played_team_cost": 103.1,
+          "bank_after_transfers": 0.3,
+          "budget_after": 103.9,
+          "actual_budget_change": 0.5,
+          "downside_risk": 70.4,
+          "captain_gap": 20.6,
+          "captain_uncertainty": 0.94
+        },
+        {
+          "round": 12,
+          "race": "Belgian Grand Prix",
+          "archive": "web/public/data/predictions_round12_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": "no_negative",
+          "drivers": [
+            "HAD",
+            "LIN",
+            "PER",
+            "HUL",
+            "BOT"
+          ],
+          "constructors": [
+            "mercedes",
+            "red_bull"
+          ],
+          "persistent_drivers": [
+            "HAD",
+            "LIN",
+            "PER",
+            "HUL",
+            "BOT"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "red_bull"
+          ],
+          "captain": "HAD",
+          "second_boost": null,
+          "captain_bonus": 38.0,
+          "transfers": 2,
+          "free_transfers_before": 1,
+          "free_transfers_next": 1,
+          "transfer_penalty": 10,
+          "projected_points": 198.0,
+          "projected_price_gain": 1.2,
+          "actual_points_gross": 207.0,
+          "actual_points_net": 197.0,
+          "season_points": 2127.0,
+          "budget_before": 103.9,
+          "played_team_cost": 93.4,
+          "bank_after_transfers": 10.5,
+          "budget_after": 105.1,
+          "actual_budget_change": 1.2,
+          "downside_risk": 86.4,
+          "captain_gap": 29.4,
+          "captain_uncertainty": 0.885
+        },
+        {
+          "round": 13,
+          "race": "Hungarian Grand Prix",
+          "archive": "web/public/data/predictions_round13_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": "autopilot",
+          "drivers": [
+            "HAM",
+            "LIN",
+            "PER",
+            "HUL",
+            "BOT"
+          ],
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "HAM",
+            "LIN",
+            "PER",
+            "HUL",
+            "BOT"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "captain": "HAM",
+          "second_boost": null,
+          "captain_bonus": 25.0,
+          "transfers": 2,
+          "free_transfers_before": 1,
+          "free_transfers_next": 1,
+          "transfer_penalty": 10,
+          "projected_points": 159.9,
+          "projected_price_gain": 0.3,
+          "actual_points_gross": 169.0,
+          "actual_points_net": 159.0,
+          "season_points": 2286.0,
+          "budget_before": 105.1,
+          "played_team_cost": 101.3,
+          "bank_after_transfers": 3.8,
+          "budget_after": 105.7,
+          "actual_budget_change": 0.6,
+          "downside_risk": 78.0,
+          "captain_gap": 27.5,
+          "captain_uncertainty": 0.488
+        }
+      ],
+      "summary": {
+        "season_points": 2286.0,
+        "final_budget": 105.7,
+        "budget_gain": 5.7,
+        "final_bank": 3.8,
+        "final_drivers": [
+          "HAM",
+          "LIN",
+          "PER",
+          "HUL",
+          "BOT"
+        ],
+        "final_constructors": [
+          "mercedes",
+          "ferrari"
+        ],
+        "transfer_penalties": 40,
+        "transfers": 15
+      },
+      "chip_rationale": {
+        "limitless": {
+          "round": 7,
+          "forecast_opportunity_score": 153.6,
+          "reason": "Largest projected unlimited-budget uplift on a genuine sprint archive."
+        },
+        "3x_boost": {
+          "round": 6,
+          "forecast_opportunity_score": 79.2,
+          "reason": "Best remaining genuine sprint-round projected 3x/2x uplift."
+        },
+        "wild_card": {
+          "round": null,
+          "forecast_opportunity_score": 54.2,
+          "reason": "Saved. A permanent rebuild needs archived multi-round horizon forecasts; a one-round uplift alone is not enough evidence."
+        },
+        "no_negative": {
+          "round": 12,
+          "forecast_opportunity_score": 78.3,
+          "reason": "Highest forecast P5 downside exposure among remaining genuine rounds."
+        },
+        "autopilot": {
+          "round": 13,
+          "forecast_opportunity_score": 1.871,
+          "reason": "Greatest captain uncertainty among remaining genuine rounds."
+        }
+      },
+      "no_chip_baseline": {
+        "season_points": 2380.0,
+        "final_budget": 113.7,
+        "budget_gain": 13.7,
+        "final_bank": 5.9,
+        "final_drivers": [
+          "HAD",
+          "BEA",
+          "OCO",
+          "LIN",
+          "BOR"
+        ],
+        "final_constructors": [
+          "mercedes",
+          "ferrari"
+        ],
+        "transfer_penalties": 30,
+        "transfers": 14
+      }
+    },
+    {
+      "strategy": "balanced",
+      "chip_schedule": {
+        "6": "3x_boost",
+        "7": "limitless",
+        "8": "autopilot",
+        "12": "no_negative"
+      },
+      "rounds": [
+        {
+          "round": 1,
+          "race": "Australian Grand Prix",
+          "archive": "web/public/data/predictions_round1_post_fp.json",
+          "archive_reconstructed": true,
+          "chip": null,
+          "drivers": [
+            "RUS",
+            "HAD",
+            "OCO",
+            "LIN",
+            "BOR"
+          ],
+          "constructors": [
+            "mercedes",
+            "audi"
+          ],
+          "persistent_drivers": [
+            "RUS",
+            "HAD",
+            "OCO",
+            "LIN",
+            "BOR"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "audi"
+          ],
+          "captain": "RUS",
+          "second_boost": null,
+          "captain_bonus": 39.0,
+          "transfers": 0,
+          "free_transfers_before": 0,
+          "free_transfers_next": 2,
+          "transfer_penalty": 0,
+          "projected_points": 230.2,
+          "projected_price_gain": 2.4,
+          "actual_points_gross": 203.0,
+          "actual_points_net": 203.0,
+          "season_points": 203.0,
+          "budget_before": 100.0,
+          "played_team_cost": 98.8,
+          "bank_after_transfers": 1.2,
+          "budget_after": 100.7,
+          "actual_budget_change": 0.7,
+          "downside_risk": 40.5,
+          "captain_gap": 26.9,
+          "captain_uncertainty": 0.477
+        },
+        {
+          "round": 2,
+          "race": "Chinese Grand Prix",
+          "archive": "web/public/data/predictions_round2_post_fp.json",
+          "archive_reconstructed": true,
+          "chip": null,
+          "drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "constructors": [
+            "mercedes",
+            "audi"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "audi"
+          ],
+          "captain": "ANT",
+          "second_boost": null,
+          "captain_bonus": 68.0,
+          "transfers": 2,
+          "free_transfers_before": 2,
+          "free_transfers_next": 1,
+          "transfer_penalty": 0,
+          "projected_points": 308.3,
+          "projected_price_gain": 3.6,
+          "actual_points_gross": 282.0,
+          "actual_points_net": 282.0,
+          "season_points": 485.0,
+          "budget_before": 100.7,
+          "played_team_cost": 88.4,
+          "bank_after_transfers": 12.3,
+          "budget_after": 100.7,
+          "actual_budget_change": 0.0,
+          "downside_risk": 31.5,
+          "captain_gap": 24.4,
+          "captain_uncertainty": 0.646
+        },
+        {
+          "round": 3,
+          "race": "Japanese Grand Prix",
+          "archive": "web/public/data/predictions_round3_post_fp.json",
+          "archive_reconstructed": true,
+          "chip": null,
+          "drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "constructors": [
+            "mercedes",
+            "alpine"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "alpine"
+          ],
+          "captain": "ANT",
+          "second_boost": null,
+          "captain_bonus": 50.0,
+          "transfers": 1,
+          "free_transfers_before": 1,
+          "free_transfers_next": 1,
+          "transfer_penalty": 0,
+          "projected_points": 234.4,
+          "projected_price_gain": 2.4,
+          "actual_points_gross": 234.0,
+          "actual_points_net": 234.0,
+          "season_points": 719.0,
+          "budget_before": 100.7,
+          "played_team_cost": 96.7,
+          "bank_after_transfers": 4.0,
+          "budget_after": 102.7,
+          "actual_budget_change": 2.0,
+          "downside_risk": 20.5,
+          "captain_gap": 20.1,
+          "captain_uncertainty": 0.607
+        },
+        {
+          "round": 6,
+          "race": "Miami Grand Prix",
+          "archive": "web/public/data/predictions_round6_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": "3x_boost",
+          "drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "COL",
+            "LAW"
+          ],
+          "constructors": [
+            "mercedes",
+            "racing_bulls"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "COL",
+            "LAW"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "racing_bulls"
+          ],
+          "captain": "ANT",
+          "second_boost": "OCO",
+          "captain_bonus": 98.0,
+          "transfers": 2,
+          "free_transfers_before": 1,
+          "free_transfers_next": 1,
+          "transfer_penalty": 10,
+          "projected_points": 430.7,
+          "projected_price_gain": 3.6,
+          "actual_points_gross": 257.0,
+          "actual_points_net": 247.0,
+          "season_points": 966.0,
+          "budget_before": 102.7,
+          "played_team_cost": 94.2,
+          "bank_after_transfers": 8.5,
+          "budget_after": 105.1,
+          "actual_budget_change": 2.4,
+          "downside_risk": 5.0,
+          "captain_gap": 22.2,
+          "captain_uncertainty": 0.621
+        },
+        {
+          "round": 7,
+          "race": "Canadian Grand Prix",
+          "archive": "web/public/data/predictions_round7_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": "limitless",
+          "drivers": [
+            "RUS",
+            "NOR",
+            "PIA",
+            "ANT",
+            "HAM"
+          ],
+          "constructors": [
+            "mercedes",
+            "mclaren"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "COL",
+            "LAW"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "racing_bulls"
+          ],
+          "captain": "ANT",
+          "second_boost": null,
+          "captain_bonus": 62.0,
+          "transfers": 0,
+          "free_transfers_before": 1,
+          "free_transfers_next": 2,
+          "transfer_penalty": 0,
+          "projected_points": 460.7,
+          "projected_price_gain": 1.9,
+          "actual_points_gross": 297.0,
+          "actual_points_net": 297.0,
+          "season_points": 1263.0,
+          "budget_before": 105.1,
+          "played_team_cost": 187.0,
+          "bank_after_transfers": 8.5,
+          "budget_after": 106.3,
+          "actual_budget_change": 1.2,
+          "downside_risk": 0.0,
+          "captain_gap": 7.9,
+          "captain_uncertainty": 1.584
+        },
+        {
+          "round": 8,
+          "race": "Monaco Grand Prix",
+          "archive": "web/public/data/predictions_round8_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": "autopilot",
+          "drivers": [
+            "ANT",
+            "LIN",
+            "COL",
+            "STR",
+            "BOR"
+          ],
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "LIN",
+            "COL",
+            "STR",
+            "BOR"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "captain": "ANT",
+          "second_boost": null,
+          "captain_bonus": 55.0,
+          "transfers": 3,
+          "free_transfers_before": 2,
+          "free_transfers_next": 1,
+          "transfer_penalty": 10,
+          "projected_points": 220.6,
+          "projected_price_gain": 1.7,
+          "actual_points_gross": 212.0,
+          "actual_points_net": 202.0,
+          "season_points": 1465.0,
+          "budget_before": 106.3,
+          "played_team_cost": 106.3,
+          "bank_after_transfers": 0.0,
+          "budget_after": 106.8,
+          "actual_budget_change": 0.5,
+          "downside_risk": 22.0,
+          "captain_gap": 28.7,
+          "captain_uncertainty": 0.323
+        },
+        {
+          "round": 9,
+          "race": "Spanish Grand Prix",
+          "archive": "web/public/data/predictions_round9_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": null,
+          "drivers": [
+            "ANT",
+            "LIN",
+            "COL",
+            "BOR",
+            "HUL"
+          ],
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "LIN",
+            "COL",
+            "BOR",
+            "HUL"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "captain": "ANT",
+          "second_boost": null,
+          "captain_bonus": -4.0,
+          "transfers": 1,
+          "free_transfers_before": 1,
+          "free_transfers_next": 1,
+          "transfer_penalty": 0,
+          "projected_points": 222.0,
+          "projected_price_gain": 0.1,
+          "actual_points_gross": 100.0,
+          "actual_points_net": 100.0,
+          "season_points": 1565.0,
+          "budget_before": 106.8,
+          "played_team_cost": 105.2,
+          "bank_after_transfers": 1.6,
+          "budget_after": 108.1,
+          "actual_budget_change": 1.3,
+          "downside_risk": 20.0,
+          "captain_gap": 22.3,
+          "captain_uncertainty": 0.579
+        },
+        {
+          "round": 10,
+          "race": "Austrian Grand Prix",
+          "archive": "web/public/data/predictions_round10_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": null,
+          "drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "BOR",
+            "HUL"
+          ],
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "BOR",
+            "HUL"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "captain": "ANT",
+          "second_boost": null,
+          "captain_bonus": 35.0,
+          "transfers": 1,
+          "free_transfers_before": 1,
+          "free_transfers_next": 1,
+          "transfer_penalty": 0,
+          "projected_points": 206.3,
+          "projected_price_gain": 1.3,
+          "actual_points_gross": 234.0,
+          "actual_points_net": 234.0,
+          "season_points": 1799.0,
+          "budget_before": 108.1,
+          "played_team_cost": 106.8,
+          "bank_after_transfers": 1.3,
+          "budget_after": 109.4,
+          "actual_budget_change": 1.3,
+          "downside_risk": 46.3,
+          "captain_gap": 17.3,
+          "captain_uncertainty": 1.055
+        },
+        {
+          "round": 11,
+          "race": "British Grand Prix",
+          "archive": "web/public/data/predictions_round11_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": null,
+          "drivers": [
+            "ANT",
+            "LIN",
+            "COL",
+            "BOR",
+            "HUL"
+          ],
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "LIN",
+            "COL",
+            "BOR",
+            "HUL"
+          ],
+          "persistent_constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "captain": "ANT",
+          "second_boost": null,
+          "captain_bonus": 23.0,
+          "transfers": 1,
+          "free_transfers_before": 1,
+          "free_transfers_next": 1,
+          "transfer_penalty": 0,
+          "projected_points": 243.9,
+          "projected_price_gain": 1.5,
+          "actual_points_gross": 284.0,
+          "actual_points_net": 284.0,
+          "season_points": 2083.0,
+          "budget_before": 109.4,
+          "played_team_cost": 107.8,
+          "bank_after_transfers": 1.6,
+          "budget_after": 111.7,
+          "actual_budget_change": 2.3,
+          "downside_risk": 51.3,
+          "captain_gap": 17.1,
+          "captain_uncertainty": 0.961
+        },
+        {
+          "round": 12,
+          "race": "Belgian Grand Prix",
+          "archive": "web/public/data/predictions_round12_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": "no_negative",
+          "drivers": [
+            "ANT",
+            "HAD",
+            "LIN",
+            "BOR",
+            "HUL"
+          ],
+          "constructors": [
+            "red_bull",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "HAD",
+            "LIN",
+            "BOR",
+            "HUL"
+          ],
+          "persistent_constructors": [
+            "red_bull",
+            "ferrari"
+          ],
+          "captain": "HAD",
+          "second_boost": null,
+          "captain_bonus": 38.0,
+          "transfers": 2,
+          "free_transfers_before": 1,
+          "free_transfers_next": 1,
+          "transfer_penalty": 10,
+          "projected_points": 220.4,
+          "projected_price_gain": 2.1,
+          "actual_points_gross": 281.0,
+          "actual_points_net": 271.0,
+          "season_points": 2354.0,
+          "budget_before": 111.7,
+          "played_team_cost": 111.3,
+          "bank_after_transfers": 0.4,
+          "budget_after": 114.4,
+          "actual_budget_change": 2.7,
+          "downside_risk": 70.1,
+          "captain_gap": 10.6,
+          "captain_uncertainty": 2.319
+        },
+        {
+          "round": 13,
+          "race": "Hungarian Grand Prix",
+          "archive": "web/public/data/predictions_round13_post_fp.json",
+          "archive_reconstructed": false,
+          "chip": null,
+          "drivers": [
+            "HAM",
+            "HAD",
+            "LIN",
+            "BOR",
+            "HUL"
+          ],
+          "constructors": [
+            "mclaren",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "HAM",
+            "HAD",
+            "LIN",
+            "BOR",
+            "HUL"
+          ],
+          "persistent_constructors": [
+            "mclaren",
+            "ferrari"
+          ],
+          "captain": "HAM",
+          "second_boost": null,
+          "captain_bonus": 25.0,
+          "transfers": 2,
+          "free_transfers_before": 1,
+          "free_transfers_next": 1,
+          "transfer_penalty": 10,
+          "projected_points": 182.4,
+          "projected_price_gain": 1.7,
+          "actual_points_gross": 197.0,
+          "actual_points_net": 187.0,
+          "season_points": 2541.0,
+          "budget_before": 114.4,
+          "played_team_cost": 113.4,
+          "bank_after_transfers": 1.0,
+          "budget_after": 116.8,
+          "actual_budget_change": 2.4,
+          "downside_risk": 68.3,
+          "captain_gap": 21.1,
+          "captain_uncertainty": 0.629
+        }
+      ],
+      "summary": {
+        "season_points": 2541.0,
+        "final_budget": 116.8,
+        "budget_gain": 16.8,
+        "final_bank": 1.0,
+        "final_drivers": [
+          "HAM",
+          "HAD",
+          "LIN",
+          "BOR",
+          "HUL"
+        ],
+        "final_constructors": [
+          "mclaren",
+          "ferrari"
+        ],
+        "transfer_penalties": 40,
+        "transfers": 15
+      },
+      "chip_rationale": {
+        "limitless": {
+          "round": 7,
+          "forecast_opportunity_score": 155.7,
+          "reason": "Largest projected unlimited-budget uplift on a genuine sprint archive."
+        },
+        "3x_boost": {
+          "round": 6,
+          "forecast_opportunity_score": 79.2,
+          "reason": "Best remaining genuine sprint-round projected 3x/2x uplift."
+        },
+        "wild_card": {
+          "round": null,
+          "forecast_opportunity_score": 56.7,
+          "reason": "Saved. A permanent rebuild needs archived multi-round horizon forecasts; a one-round uplift alone is not enough evidence."
+        },
+        "no_negative": {
+          "round": 12,
+          "forecast_opportunity_score": 70.1,
+          "reason": "Highest forecast P5 downside exposure among remaining genuine rounds."
+        },
+        "autopilot": {
+          "round": 8,
+          "forecast_opportunity_score": 1.129,
+          "reason": "Greatest captain uncertainty among remaining genuine rounds."
+        }
+      },
+      "no_chip_baseline": {
+        "season_points": 2495.0,
+        "final_budget": 118.4,
+        "budget_gain": 18.4,
+        "final_bank": 1.0,
+        "final_drivers": [
+          "HAM",
+          "HAD",
+          "LIN",
+          "BOR",
+          "HUL"
+        ],
+        "final_constructors": [
+          "mercedes",
+          "ferrari"
+        ],
+        "transfer_penalties": 40,
+        "transfers": 15
+      }
+    }
+  ]
+}
