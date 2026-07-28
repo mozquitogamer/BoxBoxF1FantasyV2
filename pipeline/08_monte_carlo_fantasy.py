@@ -436,7 +436,28 @@ def compute_weather_perturbations(
 # Calibration loading
 # ==============================================================================
 
-def load_calibration(round_num: int | None = None) -> dict:
+def load_prediction_phase(round_num: int) -> str:
+    """Resolve the predictor phase from the sidecar written by script 06."""
+    path = (
+        PREDICTIONS_DIR
+        / f"round{round_num}"
+        / "prediction_metadata.json"
+    )
+    if path.exists():
+        try:
+            with open(path) as f:
+                phase = json.load(f).get("phase")
+            if phase in {"pre_fp", "post_fp", "post_quali"}:
+                return phase
+        except (OSError, json.JSONDecodeError):
+            pass
+    return "post_fp"
+
+
+def load_calibration(
+    round_num: int | None = None,
+    phase: str | None = None,
+) -> dict:
     """Load calibration parameters from data/seed/mc_calibration.json.
 
     Returns dict with noise_multiplier (default 1.0) and optional bias correction.
@@ -453,7 +474,23 @@ def load_calibration(round_num: int | None = None) -> dict:
     if not path.exists():
         return {"noise_multiplier": 1.0, "bias_correction": 0.0, "source": "default"}
     with open(path) as f:
-        cal = json.load(f)
+        raw = json.load(f)
+
+    if raw.get("schema_version") == 2:
+        selected_phase = phase or raw.get("default_phase", "post_fp")
+        cal = raw.get("phases", {}).get(selected_phase)
+        if not isinstance(cal, dict):
+            return {
+                "noise_multiplier": 1.0,
+                "bias_correction": 0.0,
+                "source": f"default_missing_phase:{selected_phase}",
+                "calibration_phase": selected_phase,
+            }
+        calibration_phase = selected_phase
+    else:
+        # Backward-compatible read only. New calibrations are always phase-safe.
+        cal = raw
+        calibration_phase = "legacy_mixed"
 
     # Per-tier bias dict (front / midfield / back). calibrate_confidence.py
     # writes these alongside the global bias because front-runners are
@@ -474,25 +511,40 @@ def load_calibration(round_num: int | None = None) -> dict:
         "n_rounds": cal.get("n_rounds", 0),
         "coverage_90": cal.get("coverage_90", None),
         "source": "global",
+        "calibration_phase": calibration_phase,
     }
 
-    # If per-round calibration exists, average multipliers from rounds STRICTLY
-    # earlier than round_num. We never look up the target round's own entry
-    # because that would leak future-data calibration into its own prediction.
-    # Require at least MIN_EARLIER_ROUNDS entries before trusting the per-round
-    # estimate; otherwise stick with the global multiplier.
-    MIN_EARLIER_ROUNDS = 2
-    if round_num is not None and isinstance(cal.get("per_round"), list):
-        earlier = [
-            pr for pr in cal["per_round"]
-            if pr.get("noise_multiplier") is not None
-            and pr.get("round") is not None
-            and int(pr["round"]) < int(round_num)
+    # Version-2 calibration stores cumulative snapshots. Select the latest one
+    # ending STRICTLY before the target round. Averaging independently clamped
+    # per-round multipliers is statistically invalid and can let later rounds
+    # leak into a historical replay.
+    if round_num is not None and isinstance(cal.get("cumulative"), list):
+        eligible = [
+            entry
+            for entry in cal["cumulative"]
+            if entry.get("through_round") is not None
+            and int(entry["through_round"]) < int(round_num)
         ]
-        if len(earlier) >= MIN_EARLIER_ROUNDS:
-            mults = [float(pr["noise_multiplier"]) for pr in earlier]
-            result["noise_multiplier"] = round(sum(mults) / len(mults), 4)
-            result["source"] = f"per_round_mean(n={len(earlier)})"
+        if eligible:
+            selected = max(
+                eligible,
+                key=lambda entry: int(entry["through_round"]),
+            )
+            result["noise_multiplier"] = float(
+                selected.get("noise_multiplier", 1.0)
+            )
+            result["bias_correction"] = float(
+                selected.get("bias_correction", 0.0)
+            )
+            result["n_rounds"] = int(selected.get("n_rounds", 0))
+            result["coverage_90"] = selected.get("coverage_90")
+            result["per_tier_bias"] = {
+                tier: float(values.get("bias", 0.0))
+                for tier, values in (selected.get("per_tier") or {}).items()
+            }
+            result["source"] = (
+                f"cumulative_through_R{selected['through_round']}"
+            )
     return result
 
 
@@ -1498,7 +1550,8 @@ def run_simulations(
             "teammate_correlation_alpha": TEAMMATE_CORRELATION_ALPHA,
             "team_dnf_correlation": TEAM_DNF_CORRELATION,
             "incident_dnf_boost": INCIDENT_DNF_BOOST,
-            "calibration_source": "OpenF1 R1+R2 actual data (2026)",
+            "calibration_source": cal.get("source", "default"),
+            "calibration_phase": cal.get("calibration_phase"),
             "calibration_rounds": cal.get("n_rounds", 0),
             "is_sprint_weekend": is_sprint,
             "qualifying_locked": fixed_quali_positions is not None,
@@ -1848,6 +1901,7 @@ def update_web_predictions(round_num: int, results: dict,
         mc = mc_lookup.get(abbrev)
         if mc:
             driver["mc_total_mean"] = mc["mc_total_mean"]
+            driver["mc_total_median"] = mc["mc_total_median"]
             driver["mc_total_std"] = mc["mc_total_std"]
             driver["mc_total_p5"] = mc["mc_total_p5"]
             driver["mc_total_p25"] = mc["mc_total_p25"]
@@ -1945,13 +1999,18 @@ def main() -> None:
 
     # Load calibration (from calibrate_confidence.py) — use per-round averaging
     # of calibration from strictly-earlier rounds when available.
-    calibration = load_calibration(round_num=args.round)
+    prediction_phase = load_prediction_phase(args.round)
+    calibration = load_calibration(
+        round_num=args.round,
+        phase=prediction_phase,
+    )
     if calibration.get("noise_multiplier", 1.0) != 1.0:
         cov = calibration.get("coverage_90")
         cov_str = f", coverage_90={cov*100:.1f}%" if cov else ""
         src = calibration.get("source", "global")
         print(f"  Calibration loaded: noise_mult={calibration['noise_multiplier']:.3f}"
-              f" ({calibration.get('n_rounds', '?')} rounds{cov_str}, src={src})")
+              f" ({calibration.get('n_rounds', '?')} rounds{cov_str}, src={src}, "
+              f"phase={calibration.get('calibration_phase')})")
 
     # Load weather forecast for the race session and resolve MC adjustments
     # (Level 3 Option B: widen CI + DNF on wet, bias toward wet-strong drivers

@@ -43,6 +43,7 @@ _spec.loader.exec_module(_vmc)
 load_training_data = _vmc.load_training_data
 completed_folds = _vmc.completed_folds
 reweight_2026 = _vmc.reweight_2026
+apply_session_wet_boost = _vmc.apply_session_wet_boost
 sort_by_race_groups = _vmc.sort_by_race_groups
 make_race_qids = _vmc.make_race_qids
 position_to_relevance = _vmc.position_to_relevance
@@ -51,6 +52,9 @@ fold_metrics = _vmc.fold_metrics
 summarise = _vmc.summarise
 build_quali_feature_list = _vmc.build_quali_feature_list
 build_race_feature_list = _vmc.build_race_feature_list
+build_sprint_feature_list = _vmc.build_sprint_feature_list
+add_sprint_grid_features = _vmc.add_sprint_grid_features
+classified_finisher_mask = _vmc.classified_finisher_mask
 WEATHER_RACE_FEATURES = _vmc.WEATHER_RACE_FEATURES
 WEATHER_SPRINT_FEATURES = _vmc.WEATHER_SPRINT_FEATURES
 EXPERIMENTS_DIR = _vmc.EXPERIMENTS_DIR
@@ -108,7 +112,10 @@ def train_predict_catboost(tr, te, feats, target_col):
     X_te = te[feats].apply(pd.to_numeric, errors="coerce").to_numpy(
         dtype=float, na_value=np.nan
     )
-    train_pool = Pool(data=X_tr, label=y, group_id=tr_qids)
+    pool_kwargs = {"data": X_tr, "label": y, "group_id": tr_qids}
+    if "sample_weight" in tr.columns:
+        pool_kwargs["group_weight"] = tr["sample_weight"].to_numpy(dtype=float)
+    train_pool = Pool(**pool_kwargs)
     test_pool = Pool(data=X_te, group_id=te_qids)
     model = CatBoost(CATBOOST_PARAMS)
     model.fit(train_pool)
@@ -149,15 +156,12 @@ def run(
 ):
     folds = completed_folds(df, test_from_year)
     df = reweight_2026(df, weight_2026, wet_boost)
+    df = add_sprint_grid_features(df)
     quali_features = build_quali_feature_list(list(df.columns))
     race_features = build_race_feature_list(quali_features, list(df.columns))
-    sprint_features = [c for c in race_features if c not in WEATHER_RACE_FEATURES]
-    for sf in ["sprint_grid", "sprint_position", "sprint_points"]:
-        if sf in df.columns and sf not in sprint_features:
-            sprint_features.append(sf)
-    for wcol in WEATHER_SPRINT_FEATURES:
-        if wcol in df.columns and wcol not in sprint_features:
-            sprint_features.append(wcol)
+    sprint_features = build_sprint_feature_list(
+        race_features, list(df.columns)
+    )
 
     trainer = {"catboost": train_predict_catboost, "randomforest": train_predict_rf}[algorithm]
     all_results: dict[str, list[dict[str, Any]]] = {"quali": [], "race": [], "sprint": []}
@@ -179,10 +183,20 @@ def run(
                 continue
             if target not in df.columns:
                 continue
-            tr = df[train_mask & df[target].notna()].copy()
-            te = df[test_mask & df[target].notna()].copy()
+            if model_name == "race":
+                eligible = classified_finisher_mask(df)
+            else:
+                eligible = df[target].notna()
+            tr = df[train_mask & eligible].copy()
+            te = df[test_mask & eligible].copy()
             if len(tr) < min_tr or len(te) < 5:
                 continue
+            wet_col = {
+                "quali": "weather_was_wet_quali",
+                "race": "weather_was_wet_race",
+                "sprint": "weather_was_wet_sprint",
+            }[model_name]
+            tr = apply_session_wet_boost(tr, wet_col, wet_boost)
             feats = [c for c in feats_all if c in tr.columns]
             preds, te_sorted = trainer(tr, te, feats, target)
             m = fold_metrics(preds, te_sorted[target].to_numpy())
@@ -205,6 +219,8 @@ def main():
     ap.add_argument("--algorithm", choices=["catboost", "randomforest"], required=True)
     ap.add_argument("--config-name", required=True)
     ap.add_argument("--test-from-year", type=int, default=CURRENT_SEASON)
+    ap.add_argument("--weight-2026", type=float, default=2.5)
+    ap.add_argument("--wet-boost", type=float, default=6.0)
     ap.add_argument(
         "--models",
         default="quali,race,sprint",
@@ -227,6 +243,8 @@ def main():
         args.algorithm,
         args.config_name,
         args.test_from_year,
+        weight_2026=args.weight_2026,
+        wet_boost=args.wet_boost,
         models=models,
     )
     out_path = EXPERIMENTS_DIR / f"{args.config_name}.json"

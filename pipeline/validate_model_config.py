@@ -57,6 +57,7 @@ from config.settings import (
     CANCELLED_ROUNDS_2026,
     CURRENT_SEASON,
     REGULATION_CHANGE_YEAR,
+    REGULATION_WEIGHT_MULTIPLIER,
     TRAINING_DATA_DIR,
 )
 
@@ -74,6 +75,9 @@ _spec.loader.exec_module(_tm)  # type: ignore[union-attr]
 
 build_quali_feature_list = _tm.build_quali_feature_list
 build_race_feature_list = _tm.build_race_feature_list
+build_sprint_feature_list = _tm.build_sprint_feature_list
+add_sprint_grid_features = _tm.add_sprint_grid_features
+classified_finisher_mask = _tm.classified_finisher_mask
 sort_by_race_groups = _tm.sort_by_race_groups
 make_race_qids = _tm.make_race_qids
 position_to_relevance = _tm.position_to_relevance
@@ -147,7 +151,7 @@ class ModelConfig:
     quali_params: dict[str, Any] = field(default_factory=lambda: deepcopy(DEFAULT_QUALI_PARAMS))
     race_params: dict[str, Any] = field(default_factory=lambda: deepcopy(DEFAULT_RACE_PARAMS))
     sprint_params: dict[str, Any] = field(default_factory=lambda: deepcopy(DEFAULT_SPRINT_PARAMS))
-    weight_2026: float = 2.5
+    weight_2026: float = REGULATION_WEIGHT_MULTIPLIER
     wet_boost: float = float(WET_TRAINING_WEIGHT_MULTIPLIER_DEFAULT)
     # Feature-ablation support (#10). Names listed here, OR any feature whose
     # name starts with one of drop_prefixes, are removed from ALL model feature
@@ -220,18 +224,35 @@ def reweight_2026(df: pd.DataFrame, weight_2026: float, wet_boost: float) -> pd.
       - season < REGULATION_CHANGE_YEAR     → 1.0
       - REGULATION_CHANGE_YEAR <= season < CURRENT_SEASON → 2.5 (regulation-era base)
       - season == CURRENT_SEASON            → weight_2026
-    Then multiply wet-race rows (weather_was_wet_race) by wet_boost.
+    Session-specific wet weighting is applied after each train/test split by
+    `apply_session_wet_boost`; doing it here would incorrectly use race
+    conditions for qualifying and sprint models.
     """
     df = df.copy()
     base = np.where(
         df["season"] == CURRENT_SEASON, weight_2026,
-        np.where(df["season"] >= REGULATION_CHANGE_YEAR, 2.5, 1.0),
+        np.where(
+            df["season"] >= REGULATION_CHANGE_YEAR,
+            REGULATION_WEIGHT_MULTIPLIER,
+            1.0,
+        ),
     ).astype(float)
-    if "weather_was_wet_race" in df.columns:
-        is_wet = (df["weather_was_wet_race"].fillna(0.0) > 0.5).astype(float)
-        base = base * (1.0 + (wet_boost - 1.0) * is_wet)
     df["sample_weight"] = base
     return df
+
+
+def apply_session_wet_boost(
+    df: pd.DataFrame, wet_col: str, wet_boost: float
+) -> pd.DataFrame:
+    """Apply a session-matched wet weight to training rows only."""
+    if wet_col not in df.columns or "sample_weight" not in df.columns:
+        return df
+    out = df.copy()
+    is_wet = (out[wet_col].fillna(0.0) > 0.5).astype(float)
+    out["sample_weight"] = out["sample_weight"] * (
+        1.0 + (wet_boost - 1.0) * is_wet
+    )
+    return out
 
 
 # ============================================================
@@ -331,13 +352,10 @@ def run_walk_forward(
 
     quali_features = build_quali_feature_list(list(df.columns))
     race_features = build_race_feature_list(quali_features, list(df.columns))
-    sprint_features = [c for c in race_features if c not in WEATHER_RACE_FEATURES]
-    for sf in ["sprint_grid", "sprint_position", "sprint_points"]:
-        if sf in df.columns and sf not in sprint_features:
-            sprint_features.append(sf)
-    for wcol in WEATHER_SPRINT_FEATURES:
-        if wcol in df.columns and wcol not in sprint_features:
-            sprint_features.append(wcol)
+    df = add_sprint_grid_features(df)
+    sprint_features = build_sprint_feature_list(
+        race_features, list(df.columns)
+    )
 
     # Feature ablation (#10): drop named/prefixed features from every list.
     if config.drop_features or config.drop_prefixes:
@@ -371,6 +389,9 @@ def run_walk_forward(
             tr = df[train_mask & df["quali_position"].notna()].copy()
             te = df[test_mask & df["quali_position"].notna()].copy()
             if len(tr) >= 100 and len(te) >= 5:
+                tr = apply_session_wet_boost(
+                    tr, "weather_was_wet_quali", config.wet_boost
+                )
                 model, used = train_one_ranker(tr, quali_features, "quali_position", config.quali_params)
                 preds, te_sorted = predict_one_fold(model, te, used)
                 m = fold_metrics(preds, te_sorted["quali_position"].to_numpy())
@@ -381,9 +402,13 @@ def run_walk_forward(
 
         # ------ Race ------
         if "race" in models_to_run:
-            tr = df[train_mask & df["finish_position"].notna()].copy()
-            te = df[test_mask & df["finish_position"].notna()].copy()
+            finisher_mask = classified_finisher_mask(df)
+            tr = df[train_mask & finisher_mask].copy()
+            te = df[test_mask & finisher_mask].copy()
             if len(tr) >= 100 and len(te) >= 5:
+                tr = apply_session_wet_boost(
+                    tr, "weather_was_wet_race", config.wet_boost
+                )
                 model, used = train_one_ranker(tr, race_features, "finish_position", config.race_params)
                 preds, te_sorted = predict_one_fold(model, te, used)
                 m = fold_metrics(preds, te_sorted["finish_position"].to_numpy())
@@ -397,6 +422,9 @@ def run_walk_forward(
             tr = df[train_mask & df["sprint_position"].notna()].copy()
             te = df[test_mask & df["sprint_position"].notna()].copy()
             if len(tr) >= 60 and len(te) >= 5:
+                tr = apply_session_wet_boost(
+                    tr, "weather_was_wet_sprint", config.wet_boost
+                )
                 model, used = train_one_ranker(tr, sprint_features, "sprint_position", config.sprint_params)
                 preds, te_sorted = predict_one_fold(model, te, used)
                 m = fold_metrics(preds, te_sorted["sprint_position"].to_numpy())
@@ -593,7 +621,14 @@ def main() -> None:
     ap.add_argument("--test-from-year", type=int, default=CURRENT_SEASON,
                     help=f"First season to use as walk-forward test folds (default {CURRENT_SEASON}). "
                          "Set to 2022 for a multi-year fold set (~75 folds — much tighter CIs).")
-    ap.add_argument("--weight-2026", type=float, help="2026 sample weight multiplier (default 2.5)")
+    ap.add_argument(
+        "--weight-2026",
+        type=float,
+        help=(
+            "2026 sample weight multiplier "
+            f"(default {REGULATION_WEIGHT_MULTIPLIER:g})"
+        ),
+    )
     ap.add_argument("--wet-boost", type=float, help=f"Wet-row weight boost (default {WET_TRAINING_WEIGHT_MULTIPLIER_DEFAULT})")
     # Per-model hyperparam overrides
     for m in ("quali", "race", "sprint"):

@@ -1,0 +1,30 @@
+[
+  {
+    "cluster_id": "2026-R13",
+    "season": 2026,
+    "round": 13,
+    "model": "quali",
+    "phase": "post_fp_quali",
+    "algorithm": "xgboost",
+    "train_events": 141,
+    "train_rows": 2833,
+    "test_rows": 22,
+    "mae": 1.2727272727272727,
+    "kendall_tau": 0.8528138528138528,
+    "spearman_rho": 0.9672501411631848
+  },
+  {
+    "cluster_id": "2026-R13",
+    "season": 2026,
+    "round": 13,
+    "model": "race",
+    "phase": "post_quali_race",
+    "algorithm": "xgboost",
+    "train_events": 141,
+    "train_rows": 2416,
+    "test_rows": 19,
+    "mae": 2.1052631578947367,
+    "kendall_tau": 0.6959064327485379,
+    "spearman_rho": 0.8859649122807017
+  }
+]

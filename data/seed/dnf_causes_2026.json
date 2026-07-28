@@ -11,7 +11,8 @@
     "9": "Barcelona Grand Prix",
     "10": "Austrian Grand Prix",
     "11": "British Grand Prix",
-    "12": "Belgian Grand Prix"
+    "12": "Belgian Grand Prix",
+    "13": "Hungarian Grand Prix"
   },
   "_driver_names": {
     "ALB": "Alex Albon",
@@ -26,6 +27,7 @@
     "LEC": "Charles Leclerc",
     "NOR": "Lando Norris",
     "PER": "Sergio Perez",
+    "PIA": "Oscar Piastri",
     "RUS": "George Russell",
     "SAI": "Carlos Sainz",
     "STR": "Lance Stroll",
@@ -92,7 +94,12 @@
       "RUS": "collision",
       "PER": "mechanical",
       "STR": "mechanical"
+    },
+    "13": {
+      "PIA": "mechanical",
+      "PER": "mechanical",
+      "BOT": "mechanical"
     }
   },
-  "_source": "Causes researched from race reports and official team/FIA/F1 reports through 2026-07-20. mechanical=car/PU failure; collision=contact; driver_error=solo crash; other=external/freak."
+  "_source": "Causes researched from race reports and official team/FIA/F1 reports through 2026-07-27. mechanical=car/PU failure; collision=contact; driver_error=solo crash; other=external/freak."
 }

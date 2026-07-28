@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "season": 2026,
+  "round": 14,
+  "phase": "pre_fp",
+  "frozen_at": "2026-07-27T11:55:04.586717+00:00",
+  "archive_source": "web/public/data/predictions_round14_pre_fp.json",
+  "archive_sha256": "bc3d4205db6d3515eb10cbe9a81948b056db2c7500a4f574940027b8dbf87def",
+  "archive_exported_at": "2026-07-27T11:55:04.410602+00:00",
+  "archive_generated_at": "2026-07-27T11:55:04.409937+00:00",
+  "reconstructed": false,
+  "model_identity": {
+    "quali_model_sha256_16": "43e74a7132974709",
+    "race_model_sha256_16": "42c7f815bec669ea",
+    "race_model_used": "race_model_fp.json",
+    "race_model_algorithm": "xgboost"
+  },
+  "weather_snapshot": {
+    "snapshot_id": null,
+    "retrieved_at": null,
+    "archive_path": null
+  }
+}

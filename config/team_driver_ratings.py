@@ -4,6 +4,33 @@
 # Manual expert ratings for team strategy and driver-specific skills
 # Scale: 1-10 (higher = better)
 
+from datetime import date, datetime
+
+
+# The first versioned snapshot is the table below, authored after the 2026
+# Chinese GP. No earlier snapshots exist, so dates before this boundary must
+# receive neutral values rather than today's hindsight-informed judgments.
+CURRENT_RATING_SNAPSHOT_ID = "post_2026_r02"
+RATING_SNAPSHOT_EFFECTIVE_FROM = date(2026, 3, 16)
+RATING_SNAPSHOT_EFFECTIVE_EVENT = (2026, 3)
+
+
+def rating_as_of_for_event(season, round_num) -> date:
+    """Resolve an event key to the rating snapshot available before it.
+
+    Historical model rows do not currently retain ``race_date``.  The first
+    manually authored table was created after 2026 round 2, so round 3 is the
+    first event allowed to consume it.  Earlier events deliberately receive
+    ``date.min`` and therefore the neutral pre-snapshot ratings.
+    """
+    try:
+        event_key = (int(season), int(round_num))
+    except (TypeError, ValueError):
+        return date.min
+    if event_key >= RATING_SNAPSHOT_EFFECTIVE_EVENT:
+        return RATING_SNAPSHOT_EFFECTIVE_FROM
+    return date.min
+
 # ============================================================================
 # TEAM STRATEGY RATINGS (2026 — updated post China GP Round 2 race results)
 # ============================================================================
@@ -354,38 +381,85 @@ def canonical_driver_rating_id(driver_id):
     key = str(driver_id).strip().lower()
     return DRIVER_RATING_ID_ALIASES.get(key, key)
 
+
+def _coerce_as_of(as_of) -> date | None:
+    """Normalize a date-like value; invalid historical values stay unknown."""
+    if as_of is None:
+        return None
+    if isinstance(as_of, datetime):
+        return as_of.date()
+    if isinstance(as_of, date):
+        return as_of
+    try:
+        return date.fromisoformat(str(as_of)[:10])
+    except (TypeError, ValueError):
+        return None
+
+
+def get_rating_snapshot_id(as_of=None) -> str:
+    """Return the snapshot available on a date.
+
+    ``as_of=None`` is the operational/live lookup and uses the current table.
+    Historical calls with a real date before the first snapshot are explicitly
+    neutral.
+    """
+    resolved = _coerce_as_of(as_of)
+    if as_of is None or (
+        resolved is not None and resolved >= RATING_SNAPSHOT_EFFECTIVE_FROM
+    ):
+        return CURRENT_RATING_SNAPSHOT_ID
+    return "neutral_pre_snapshot"
+
+
+def _rating_snapshot_is_effective(as_of=None) -> bool:
+    return get_rating_snapshot_id(as_of) == CURRENT_RATING_SNAPSHOT_ID
+
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
 
-def get_team_strategy_rating(constructor_id):
+def get_team_strategy_rating(constructor_id, *, as_of=None):
     """Get strategy rating for a constructor"""
+    if not _rating_snapshot_is_effective(as_of):
+        return 5
     if constructor_id in TEAM_STRATEGY_RATINGS:
         return TEAM_STRATEGY_RATINGS[constructor_id]['strategy_rating']
     return 5  # Default average
 
-def get_team_adaptability(constructor_id):
+def get_team_adaptability(constructor_id, *, as_of=None):
     """Get adaptability rating (important for SC/rain)"""
+    if not _rating_snapshot_is_effective(as_of):
+        return 5
     if constructor_id in TEAM_STRATEGY_RATINGS:
         return TEAM_STRATEGY_RATINGS[constructor_id]['adaptability']
     return 5
 
-def get_driver_tire_mgmt(driver_id):
+def get_driver_tire_mgmt(driver_id, *, as_of=None):
     """Get driver tire management skill"""
+    if not _rating_snapshot_is_effective(as_of):
+        return 6
     return DRIVER_TIRE_MANAGEMENT.get(canonical_driver_rating_id(driver_id), 6)  # Default average
 
-def get_driver_wet_skill(driver_id):
+def get_driver_wet_skill(driver_id, *, as_of=None):
     """Get driver wet weather skill"""
+    if not _rating_snapshot_is_effective(as_of):
+        return 6
     return DRIVER_WET_WEATHER_SKILL.get(canonical_driver_rating_id(driver_id), 6)
 
-def get_constructor_cold_skill(constructor_id):
+def get_constructor_cold_skill(constructor_id, *, as_of=None):
     """Get constructor cold-weather rating (1-10, 5=neutral). Default 5."""
+    if not _rating_snapshot_is_effective(as_of):
+        return 5
     return CONSTRUCTOR_COLD_WEATHER_SKILL.get(constructor_id, 5)
 
-def get_driver_overtaking(driver_id):
+def get_driver_overtaking(driver_id, *, as_of=None):
     """Get driver overtaking ability"""
+    if not _rating_snapshot_is_effective(as_of):
+        return 6
     return DRIVER_OVERTAKING_SKILL.get(canonical_driver_rating_id(driver_id), 6)
 
-def get_driver_quali_skill(driver_id):
+def get_driver_quali_skill(driver_id, *, as_of=None):
     """Get driver qualifying specialist rating"""
+    if not _rating_snapshot_is_effective(as_of):
+        return 6
     return DRIVER_QUALIFYING_SPECIALIST.get(canonical_driver_rating_id(driver_id), 6)

@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import math
+import statistics
 from functools import lru_cache
 
 from config.track_classifications import TRACK_DATABASE, TRACK_FEATURE_NAMES, get_track_features
@@ -73,3 +74,50 @@ def build_similarity_matrix() -> dict[str, dict[str, float]]:
         for b in circuits:
             matrix[a][b] = get_similarity(a, b)
     return matrix
+
+
+def similarity_diagnostics(
+    saturation_threshold: float = 0.95,
+) -> dict[str, float | int | bool]:
+    """Summarize whether the current circuit vectors separate tracks.
+
+    This is an evidence aid, not an automatic transformation. A high median or
+    a large share above ``saturation_threshold`` means cosine-weighted rolling
+    form is unlikely to differ materially from ordinary rolling form.
+    """
+    circuits = sorted(TRACK_DATABASE)
+    values = [
+        get_similarity(a, b)
+        for i, a in enumerate(circuits)
+        for b in circuits[i + 1:]
+    ]
+    if not values:
+        return {
+            "circuits": len(circuits),
+            "pairs": 0,
+            "median": 0.0,
+            "p90": 0.0,
+            "minimum": 0.0,
+            "share_at_or_above_threshold": 0.0,
+            "saturation_threshold": saturation_threshold,
+            "is_saturated": False,
+        }
+
+    ordered = sorted(values)
+    p90_index = round(0.90 * (len(ordered) - 1))
+    share_saturated = sum(
+        value >= saturation_threshold for value in ordered
+    ) / len(ordered)
+    median = statistics.median(ordered)
+    return {
+        "circuits": len(circuits),
+        "pairs": len(ordered),
+        "median": round(float(median), 6),
+        "p90": round(float(ordered[p90_index]), 6),
+        "minimum": round(float(ordered[0]), 6),
+        "share_at_or_above_threshold": round(float(share_saturated), 6),
+        "saturation_threshold": saturation_threshold,
+        "is_saturated": bool(
+            median >= saturation_threshold or share_saturated >= 0.50
+        ),
+    }

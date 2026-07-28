@@ -344,6 +344,9 @@ def parse_race_results(data: dict) -> tuple[list[dict], str]:
             "code": r["Driver"].get("code", ""),
             "jolpica_constructor_id": r["Constructor"]["constructorId"],
             "position": position,
+            # Preserve Jolpica's official result-order position even when
+            # fantasy scoring must null race_position for a DNF/DNS/DSQ.
+            "classified_position": position,
             "grid": grid,
             "status": status,
             "position_text": position_text,
@@ -802,6 +805,7 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             "name": full_name,
             "constructor": constructor_id,
             "quali_position": quali_position,
+            "classified_position": r["classified_position"],
             "race_position": race_position,
             "grid": r["grid"],
             "status": r["status"],
@@ -998,14 +1002,14 @@ def calculate_from_post_race_analysis(
         grid = r.get("grid", 22)
         finish = r.get("finish_position")
         status = r.get("status", "")
-        is_finished = r.get("is_finished", False)
-
+        is_classified = r.get("is_classified", r.get("is_finished", False))
         is_dns = status == "Did not start"
-        is_dnf = status == "Retired" and not is_dns
         is_dsq = status == "Disqualified"
-        # Lapped drivers are finishers
-        if status == "Lapped":
-            is_dnf = False
+        # Any unclassified non-DNS/non-DSQ result is a retirement.  This also
+        # handles status strings such as "Engine" while preserving a late
+        # classified retirement whose numeric positionText made 09 mark it
+        # classified.
+        is_dnf = not is_classified and not is_dns and not is_dsq
 
         # Use grid as rough quali position (post_race_analysis doesn't have quali)
         quali_position = grid
@@ -1054,6 +1058,10 @@ def calculate_from_post_race_analysis(
             "name": full_name,
             "constructor": constructor_id,
             "quali_position": quali_position,
+            "classified_position": r.get(
+                "classified_position",
+                finish if finish is not None else results.index(r) + 1,
+            ),
             "race_position": race_position,
             "grid": grid,
             "status": status,

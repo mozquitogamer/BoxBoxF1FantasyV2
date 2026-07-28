@@ -82,7 +82,7 @@ from config.circuit_priors import (
 #   weather_track_temp_{quali,race,sprint}  deg C
 #   weather_air_temp_{quali,race,sprint}    deg C
 #   weather_humidity_{quali,race,sprint}    %
-#   weather_precip_minutes_race             approximate from forecast precip
+#   weather_precip_minutes_{quali,race,sprint} approximate from forecast precip
 #
 # Tunables here are conservative: we under-predict wet risk because the
 # product cost of "predicted wet, was dry" (user picks rain-strong drivers,
@@ -275,12 +275,27 @@ def inject_weather_features(pred_df: pd.DataFrame, round_num: int) -> tuple[pd.D
     weather_round = wjson.get("round")
     if weather_round is not None and weather_round != round_num:
         print(f"  [WARN] weather.json is for round {weather_round}, but predicting round {round_num}.")
-        print(f"         Using forecast anyway, but verify pipeline/weather_forecast.py ran for this round.")
+        print("         Rejecting the stale forecast and running WITHOUT weather conditioning.")
+        for sess in ("quali", "race", "sprint"):
+            for metric in ("was_wet", "track_temp", "air_temp", "humidity", "precip_minutes"):
+                pred_df[f"weather_{metric}_{sess}"] = np.nan
+        weather_meta.update(
+            {
+                "source": wjson.get("last_updated") or "unknown",
+                "missing": True,
+                "stale": True,
+                "weather_round": weather_round,
+            }
+        )
+        return pred_df, weather_meta
 
     weather_meta["source"] = wjson.get("last_updated") or "unknown"
     weather_meta["missing"] = False
     weather_meta["overall_rain_risk"] = wjson.get("overall_rain_risk")
     weather_meta["weather_round"] = weather_round
+    weather_meta["forecast_snapshot_id"] = wjson.get("forecast_snapshot_id")
+    weather_meta["forecast_retrieved_at"] = wjson.get("forecast_retrieved_at")
+    weather_meta["forecast_archive_path"] = wjson.get("forecast_archive_path")
 
     # Collect per-session aggregates. If multiple sessions share a label
     # (e.g. FP1+FP2+FP3 all map to None and quali maps to quali), we keep the
@@ -299,9 +314,9 @@ def inject_weather_features(pred_df: pd.DataFrame, round_num: int) -> tuple[pd.D
         pred_df[f"weather_track_temp_{label}"] = agg.get("track_temp") if "track_temp" in agg else np.nan
         pred_df[f"weather_air_temp_{label}"] = agg.get("air_temp") if "air_temp" in agg else np.nan
         pred_df[f"weather_humidity_{label}"] = agg.get("humidity") if "humidity" in agg else np.nan
-        if label == "race":
-            # Only race model expects precip_minutes
-            pred_df[f"weather_precip_minutes_{label}"] = agg.get("precip_minutes") if "precip_minutes" in agg else np.nan
+        pred_df[f"weather_precip_minutes_{label}"] = (
+            agg.get("precip_minutes") if "precip_minutes" in agg else np.nan
+        )
         weather_meta["per_session"][label] = agg
 
     # Log what we injected
@@ -338,25 +353,6 @@ def load_driver_id_maps() -> tuple[dict, dict]:
 
 
 # -- Build live priors ---------------------------------------------------------
-
-LIVE_PRIOR_IMPUTE_COLS = [
-    "driver_quali_last", "driver_roll_quali_3", "driver_roll_quali_5",
-    "driver_season_avg_quali", "driver_season_med_quali",
-    "constructor_quali_last", "constructor_roll_quali_3", "constructor_roll_quali_5",
-    "constructor_season_avg_quali", "field_season_avg_quali",
-    "driver_vs_field_season", "constructor_vs_field_season",
-    "team_delta_last", "team_delta_roll_3", "team_delta_roll_5",
-    "driver_circuit_exp", "driver_circuit_roll_3", "constructor_circuit_exp",
-    "position_delta_prev", "recent_wins", "recent_podiums", "recent_points_rate",
-    "recent_form_weighted", "form_trend", "team_recent_form",
-    "roll_points_3", "roll_points_5", "roll_finishpos_3", "roll_finishpos_5",
-    "roll_quali_3", "roll_quali_5", "roll_dnf_rate_5",
-    "roll_mech_dnf_rate_5_driver", "roll_mech_dnf_rate_5_constructor",
-    "roll_collision_dnf_rate_5_driver", "roll_drivererror_dnf_rate_5_driver",
-    "sim_weighted_points_3", "sim_weighted_points_5",
-    "sim_weighted_finishpos_3", "sim_weighted_finishpos_5",
-    "sim_weighted_quali_3", "sim_weighted_quali_5",
-]
 
 
 def build_live_priors(
@@ -442,7 +438,7 @@ def build_live_priors(
     work = feature_builder.add_rolling_rates(
         work, "driver_id", "dnf_mechanical", 5, "roll_mech_dnf_rate_5_driver"
     )
-    work = feature_builder.add_rolling_rates(
+    work = feature_builder.add_event_rolling_rate(
         work, "constructor_id", "dnf_mechanical", 5, "roll_mech_dnf_rate_5_constructor"
     )
     work = feature_builder.add_rolling_rates(
@@ -464,11 +460,8 @@ def build_live_priors(
     live = feature_builder.add_team_driver_ratings(live)
     live = feature_builder.add_interaction_features(live)
 
-    # Match 03b's training-time imputation for sparse/new-driver priors.
-    for col in LIVE_PRIOR_IMPUTE_COLS:
-        if col in live.columns:
-            median = work[col].median()
-            live[col] = live[col].fillna(median if pd.notna(median) else 0.0)
+    # Keep sparse/new-driver priors as NaN, matching 03b. The ranking models
+    # handle missing values natively and retain "no history yet" as a signal.
 
     print(f"  Built leak-free live priors through the end of round {round_num - 1}")
     return live.sort_values("driver_id").reset_index(drop=True)
@@ -629,8 +622,8 @@ def _recompute_circuit_features(
         return df
 
     # Reconstruct form at each historical event from actual earlier results.
-    # Saved model rows contain imputed priors, which would otherwise create an
-    # artificial circuit effect for a driver's first career race.
+    # Reconstruct from actual earlier results so sparse saved priors do not
+    # create an artificial circuit effect for a driver's first career race.
     all_rows = all_rows.sort_values(["driver_id", "season", "round"])
     previous_quali = all_rows.groupby("driver_id")["quali_position"].shift(1)
     all_rows["_driver_form_at_event"] = previous_quali.groupby(

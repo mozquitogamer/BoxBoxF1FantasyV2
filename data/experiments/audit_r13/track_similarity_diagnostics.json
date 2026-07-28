@@ -1,0 +1,10 @@
+{
+  "circuits": 31,
+  "pairs": 465,
+  "median": 0.974956,
+  "p90": 0.993894,
+  "minimum": 0.69169,
+  "share_at_or_above_threshold": 0.713978,
+  "saturation_threshold": 0.95,
+  "is_saturated": true
+}

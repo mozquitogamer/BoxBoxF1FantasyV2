@@ -50,6 +50,7 @@ from pipeline.audit import (
     load_actuals,
 )
 from pipeline.prediction_sanity import print_report as _sanity_report
+from pipeline.prospective_holdout import freeze_phase_archive
 from config.fantasy_prices import (
     current_price_mismatches,
     load_fantasy_price_data,
@@ -124,6 +125,50 @@ def write_archive_safely(
     with open(archive_path, "w") as f:
         json.dump(payload, f, indent=2)
     print(f"  Wrote -> {archive_path}")
+
+
+def write_phase_archive_safely(
+    archive_path: Path,
+    payload: dict,
+    round_num: int,
+    phase: str,
+    replace: bool = False,
+) -> bool:
+    """Write a phase archive once, unless an explicit correction is requested.
+
+    A phase archive is the public accuracy record for what was available at one
+    race-week deadline. Unlike ``predictions.json`` it must not drift when the
+    pipeline is rerun. The timestamped audit snapshot still records every run,
+    including a requested correction.
+
+    Returns ``True`` when the public phase archive was written.
+    """
+    if phase not in VALID_PHASES:
+        raise ValueError(f"Invalid prediction phase: {phase!r}")
+    payload_phase = payload.get("phase")
+    if payload_phase != phase:
+        raise ValueError(
+            f"Phase archive payload says {payload_phase!r}, expected {phase!r}"
+        )
+
+    if archive_path.exists() and not replace:
+        print(
+            f"  [FROZEN] phase archive R{round_num} {phase} already exists; "
+            "leaving the public accuracy record unchanged. Use "
+            "--replace-phase-archive only for an explicit correction."
+        )
+        return False
+
+    if archive_path.exists():
+        print(
+            f"  [CORRECTION] explicitly replacing frozen R{round_num} {phase} "
+            "phase archive; the prior run remains in data/audit/snapshots."
+        )
+
+    with open(archive_path, "w") as f:
+        json.dump(payload, f, indent=2)
+    print(f"  Wrote phase archive -> {archive_path}")
+    return True
 
 
 def load_race_info() -> dict:
@@ -369,12 +414,18 @@ def build_predictions_json(round_num: int) -> dict | None:
                 "bias_correction_per_tier": sim_params.get("bias_correction_per_tier"),
                 "bias_correction_applied": sim_params.get("bias_correction_applied", False),
                 "calibration_rounds": sim_params.get("calibration_rounds"),
+                "calibration_source": sim_params.get("calibration_source"),
+                "calibration_phase": sim_params.get("calibration_phase"),
             }
             mc_by_driver = {d["driver_abbrev"]: d for d in mc_data.get("drivers", [])}
             for entry in drivers_json:
                 mc = mc_by_driver.get(entry["driver_id"])
                 if mc:
                     entry["mc_total_mean"] = round(mc.get("mc_total_mean", 0), 1)
+                    entry["mc_total_median"] = round(
+                        mc.get("mc_total_median", mc.get("mc_total_mean", 0)),
+                        1,
+                    )
                     entry["mc_total_std"] = round(mc.get("mc_total_std", 0), 1)
                     entry["mc_total_p5"] = round(mc.get("mc_total_p5", 0), 1)
                     entry["mc_total_p25"] = round(mc.get("mc_total_p25", 0), 1)
@@ -783,6 +834,14 @@ def main():
                              "(pre_fp/post_fp/post_quali). Default 'auto' detects from data state.")
     parser.add_argument("--force", action="store_true",
                         help="Override race-completed guards (overwrite existing per-round archives)")
+    parser.add_argument(
+        "--replace-phase-archive",
+        action="store_true",
+        help=(
+            "Explicitly correct an existing frozen phase archive. --force does "
+            "not imply this; every run is still retained in data/audit."
+        ),
+    )
     parser.add_argument("--reconstructed", action="store_true",
                         help="Mark this export as a post-hoc reconstruction (sets reconstructed=true in JSON)")
     parser.add_argument("--audit-label", type=str, default=None,
@@ -858,12 +917,28 @@ def main():
             with open(live_path, "w") as f:
                 json.dump(predictions, f, indent=2)
 
-        # Phase-tagged archive: always written (this is the historical record
-        # of "what we predicted at phase X")
+        # Phase-tagged archive: frozen on first write. Later reruns still update
+        # live predictions and append to data/audit, but they cannot silently
+        # rewrite the public accuracy record.
         phase_archive = WEB_DATA_DIR / f"predictions_round{round_num}_{phase}.json"
-        with open(phase_archive, "w") as f:
-            json.dump(predictions, f, indent=2)
-        print(f"  Wrote phase archive -> {phase_archive}")
+        phase_archive_written = write_phase_archive_safely(
+            phase_archive,
+            predictions,
+            round_num,
+            phase,
+            replace=args.replace_phase_archive,
+        )
+        if phase_archive_written and not args.reconstructed:
+            try:
+                holdout_path = freeze_phase_archive(
+                    phase_archive,
+                    round_num,
+                    phase,
+                    prediction_metadata=load_prediction_metadata(round_num),
+                )
+                print(f"  Prospective holdout -> {holdout_path}")
+            except Exception as exc:
+                print(f"  WARNING: prospective holdout registration failed: {exc}")
 
         # Canonical archive: guarded against post-race overwrite
         canonical_archive = WEB_DATA_DIR / f"predictions_round{round_num}.json"

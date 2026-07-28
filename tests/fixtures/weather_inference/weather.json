@@ -1,0 +1,28 @@
+{
+  "round": 99,
+  "last_updated": "2026-07-27T00:00:00Z",
+  "overall_rain_risk": "MEDIUM",
+  "sessions": [
+    {
+      "name": "Qualifying",
+      "rain_probability": 70,
+      "avg_temp": 20,
+      "total_precip_mm": 2,
+      "hourly": [{"humidity": 80}]
+    },
+    {
+      "name": "Sprint",
+      "rain_probability": 10,
+      "avg_temp": 22,
+      "total_precip_mm": 1,
+      "hourly": [{"humidity": 60}]
+    },
+    {
+      "name": "Race",
+      "rain_probability": 30,
+      "avg_temp": 24,
+      "total_precip_mm": 3,
+      "hourly": [{"humidity": 70}]
+    }
+  ]
+}

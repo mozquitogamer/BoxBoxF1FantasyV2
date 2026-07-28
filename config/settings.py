@@ -16,7 +16,11 @@ HISTORICAL_SEASONS: list[int] = [2020, 2021, 2022, 2023, 2024, 2025]
 
 # 2026 has new regulations — weight recent data more heavily during training
 REGULATION_CHANGE_YEAR: int = 2026
-REGULATION_WEIGHT_MULTIPLIER: float = 2.5  # 2026 samples count 2.5× in training
+# R13 audit: strict event-prequential screening across all 11 contested 2026
+# rounds selected 4.0x over 1.0/1.5/2.5/6.0. Versus 2.5x it improved the
+# actionability-weighted event score in 8/11 rounds (mean -0.074 position;
+# race-cluster bootstrap 95% CI [-0.124, -0.019]).
+REGULATION_WEIGHT_MULTIPLIER: float = 4.0
 
 # -- Data paths ----------------------------------------------------------------
 DATA_DIR          = PROJECT_ROOT / "data"
@@ -29,6 +33,7 @@ FEATURES_DIR      = PROCESSED_DIR / "features"
 MODEL_INPUTS_DIR  = PROCESSED_DIR / "model_inputs"
 PREDICTIONS_DIR   = DATA_DIR / "predictions"
 SEED_DIR          = DATA_DIR / "seed"
+FORECAST_ARCHIVE_DIR = DATA_DIR / "forecasts"
 
 # -- Jolpica processed paths ---------------------------------------------------
 JOLPICA_NORMALIZED_DIR = PROCESSED_DIR / "jolpica" / "normalized"
@@ -51,13 +56,12 @@ MODEL_RANDOM_STATE: int = 42
 MIN_LONG_RUN_LAPS: int = 5
 
 # Algorithm for the RACE finish models (race_model + race_model_fp) ONLY.
-# Quali and sprint stay XGBoost (CatBoost showed no quali gain and was worse on
-# sprint in 97-fold walk-forward). "catboost" wins race -0.18 MAE (p=0.0001, all
-# 5 yrs) and race_fp -0.10 MAE (CI excludes zero); see data/experiments/
-# racefp_{xgb,cat}_my.json + catboost_recheck.json. 05_train_models.py trains and
-# saves BOTH formats every run (race_model.{json,cbm}); 06 loads per this flag, so
-# reverting is a one-line change back to "xgboost".
-RACE_MODEL_ALGORITHM: str = "catboost"  # "catboost" | "xgboost"
+# The R13 audit corrected CatBoost group weighting and compared both learners
+# under identical strict 2026 prequential inputs. They were statistically tied;
+# XGBoost was better on the actionable race_fp path for the selected 4x,
+# no-unversioned-ratings policy (mean -0.077 position; 5 wins, 3 ties, 3
+# losses), so production uses the simpler single-ranker stack.
+RACE_MODEL_ALGORITHM: str = "xgboost"  # "catboost" | "xgboost"
 
 # -- Sessions ------------------------------------------------------------------
 ALL_SESSIONS: list[str] = ["FP1", "FP2", "FP3", "Qualifying", "Race", "Sprint", "Sprint Shootout"]
@@ -92,6 +96,22 @@ FEATURE_COLUMNS: list[str] = [
     "best_sector_1",
     "best_sector_2",
     "best_sector_3",
+    # Compound-specific evidence
+    "soft_best_lap",
+    "soft_avg_lap",
+    "medium_long_run_avg",
+    "hard_long_run_avg",
+    "medium_degradation",
+    "hard_degradation",
+    # Session-relative pace (portable across circuits and conditions)
+    "pace_delta_to_fastest",
+    "pace_delta_to_median",
+    "avg_pace_delta_to_median",
+    "race_pace_delta_to_median",
+    "long_run_delta_to_median",
+    "sector_1_delta_to_fastest",
+    "sector_2_delta_to_fastest",
+    "sector_3_delta_to_fastest",
 ]
 
 # -- Target columns (used by 04 & 05) -----------------------------------------

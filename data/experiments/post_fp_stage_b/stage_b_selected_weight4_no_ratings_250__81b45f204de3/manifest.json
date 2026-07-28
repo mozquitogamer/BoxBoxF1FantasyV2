@@ -1,0 +1,674 @@
+{
+  "schema_version": 1,
+  "stage": "B_post_fp_overlay_policy",
+  "created_at_utc": "2026-07-27T10:45:26.120990+00:00",
+  "dataset": {
+    "path": "D:\\OneDrive\\BoxBoxF1FantasyV2\\models\\training_data\\all_training_data.parquet",
+    "sha256": "cf9f2db088bdc6c205da44d573c74d3e86348b1798e932faf3134e4ee9743ca3",
+    "rows": 2855,
+    "columns": 157
+  },
+  "git": {
+    "sha": "5c6acc4e720ab62f5fc0204ee0482bbc6d761240",
+    "dirty": true
+  },
+  "source_sha256": {
+    "pipeline\\evaluate_post_fp_overlays.py": "2ab82b039cff9539b453a24be2d6209dfded1695e5950480b7a4034b5b5007e2",
+    "pipeline\\evaluate_prequential_2026.py": "0cdc39674217495db45502e9345b4ed7aa6a666f0b44c72eba6b5942c09532f9",
+    "pipeline\\05_train_models.py": "ac7feda3b1f3b2f2673724626d91c6fdc218cd6c20486c334e26396361d7ba8a",
+    "pipeline\\06_run_predictions.py": "15f6d158963968a612058b0d494ccc73e01f19cfde24ccebbab1c59fcbf3629f",
+    "config\\track_classifications.py": "c342474a5072115c6aa3c3dc2592a2463c25416916e5093f9d0262ef31fb3ac1"
+  },
+  "config": {
+    "name": "stage_b_selected_weight4_no_ratings_250",
+    "algorithm": "xgboost",
+    "current_season_weight": 4.0,
+    "wet_weight": 6.0,
+    "min_train_events": 10,
+    "min_train_rows": 100,
+    "first_round": null,
+    "last_round": null,
+    "allow_oracle_weather": false,
+    "drop_features": [],
+    "drop_prefixes": [],
+    "quali_params": {
+      "n_estimators": 250,
+      "learning_rate": 0.025,
+      "max_depth": 3,
+      "subsample": 0.85,
+      "colsample_bytree": 0.85,
+      "min_child_weight": 3,
+      "reg_alpha": 0.1,
+      "reg_lambda": 1.0,
+      "tree_method": "hist",
+      "objective": "rank:pairwise",
+      "random_state": 42,
+      "n_jobs": -1
+    },
+    "race_params": {
+      "n_estimators": 250,
+      "learning_rate": 0.03,
+      "max_depth": 5,
+      "subsample": 0.85,
+      "colsample_bytree": 0.85,
+      "min_child_weight": 5,
+      "reg_alpha": 0.1,
+      "reg_lambda": 1.0,
+      "tree_method": "hist",
+      "objective": "rank:pairwise",
+      "random_state": 42,
+      "n_jobs": -1
+    },
+    "catboost_params": {
+      "loss_function": "YetiRank",
+      "iterations": 650,
+      "learning_rate": 0.03,
+      "depth": 6,
+      "random_seed": 42,
+      "verbose": false,
+      "allow_writing_files": false
+    }
+  },
+  "policies": [
+    {
+      "code": "B0",
+      "description": "no FP blend; no grid anchor",
+      "quali_mode": "none",
+      "grid_anchor": false
+    },
+    {
+      "code": "B1",
+      "description": "FP 0.60 regular / 0.15 sprint; no hard ramp; no grid anchor",
+      "quali_mode": "base",
+      "grid_anchor": false
+    },
+    {
+      "code": "B2",
+      "description": "current hard-track FP ramp; no grid anchor",
+      "quali_mode": "hard",
+      "grid_anchor": false
+    },
+    {
+      "code": "B3",
+      "description": "FP 0.60 regular / 0.15 sprint; current grid anchor",
+      "quali_mode": "base",
+      "grid_anchor": true
+    },
+    {
+      "code": "B4",
+      "description": "current hard-track FP ramp plus current grid anchor",
+      "quali_mode": "hard",
+      "grid_anchor": true
+    }
+  ],
+  "features": {
+    "quali": [
+      "avg_corner_speed",
+      "avg_lap_time",
+      "avg_pace_delta_to_median",
+      "avg_sector_1",
+      "avg_sector_2",
+      "avg_sector_3",
+      "best_10_lap_avg",
+      "best_3_lap_avg",
+      "best_5_lap_avg",
+      "best_lap_time",
+      "best_sector_1",
+      "best_sector_2",
+      "best_sector_3",
+      "constructor_circuit_exp",
+      "constructor_quali_last",
+      "constructor_roll_quali_3",
+      "constructor_roll_quali_5",
+      "constructor_season_avg_quali",
+      "constructor_vs_field_season",
+      "cv_lap_time",
+      "deg_x_laps",
+      "degradation_rate",
+      "downforce_level",
+      "driver_circuit_exp",
+      "driver_circuit_roll_3",
+      "driver_quali_last",
+      "driver_roll_quali_3",
+      "driver_roll_quali_5",
+      "driver_season_avg_quali",
+      "driver_season_med_quali",
+      "driver_vs_field_season",
+      "field_season_avg_quali",
+      "fp_sessions_used",
+      "grip_level",
+      "hard_degradation",
+      "hard_long_run_avg",
+      "is_street",
+      "lap_time_std",
+      "lap_time_variance",
+      "laps_per_session",
+      "long_run_avg",
+      "long_run_delta",
+      "long_run_delta_to_median",
+      "long_run_laps",
+      "long_run_rank",
+      "median_lap_time",
+      "medium_degradation",
+      "medium_hard_gap",
+      "medium_long_run_avg",
+      "overtaking_difficulty",
+      "p50_to_p95_avg",
+      "pace_consistency_ratio",
+      "pace_delta",
+      "pace_delta_to_fastest",
+      "pace_delta_to_median",
+      "pace_rank",
+      "prior_vs_fp_rank",
+      "race_pace_delta_to_median",
+      "roll_collision_dnf_rate_5_driver",
+      "roll_dnf_rate_5",
+      "roll_drivererror_dnf_rate_5_driver",
+      "roll_mech_dnf_rate_5_constructor",
+      "roll_mech_dnf_rate_5_driver",
+      "roll_quali_3",
+      "roll_quali_5",
+      "safety_car_probability",
+      "season_progress",
+      "sector_1_delta",
+      "sector_1_delta_to_fastest",
+      "sector_2_delta",
+      "sector_2_delta_to_fastest",
+      "sector_3_delta",
+      "sector_3_delta_to_fastest",
+      "short_run_best",
+      "sim_weighted_finishpos_3",
+      "sim_weighted_finishpos_5",
+      "sim_weighted_points_3",
+      "sim_weighted_points_5",
+      "sim_weighted_quali_3",
+      "sim_weighted_quali_5",
+      "soft_avg_lap",
+      "soft_best_lap",
+      "soft_medium_gap",
+      "soft_vs_overall_best",
+      "sprint_grid",
+      "straight_line_importance",
+      "team_delta_last",
+      "team_delta_roll_3",
+      "team_delta_roll_5",
+      "theoretical_best",
+      "top3_vs_top5",
+      "top5_vs_top10",
+      "total_laps",
+      "track_evolution",
+      "turn1_incident_risk"
+    ],
+    "race_fp": [
+      "avg_corner_speed",
+      "avg_lap_time",
+      "avg_pace_delta_to_median",
+      "avg_sector_1",
+      "avg_sector_2",
+      "avg_sector_3",
+      "best_10_lap_avg",
+      "best_3_lap_avg",
+      "best_5_lap_avg",
+      "best_lap_time",
+      "best_sector_1",
+      "best_sector_2",
+      "best_sector_3",
+      "constructor_circuit_exp",
+      "constructor_quali_last",
+      "constructor_roll_quali_3",
+      "constructor_roll_quali_5",
+      "constructor_season_avg_quali",
+      "constructor_vs_field_season",
+      "cv_lap_time",
+      "deg_x_laps",
+      "degradation_rate",
+      "downforce_level",
+      "driver_circuit_exp",
+      "driver_circuit_roll_3",
+      "driver_quali_last",
+      "driver_roll_quali_3",
+      "driver_roll_quali_5",
+      "driver_season_avg_quali",
+      "driver_season_med_quali",
+      "driver_vs_field_season",
+      "field_season_avg_quali",
+      "fp_sessions_used",
+      "grip_level",
+      "hard_degradation",
+      "hard_long_run_avg",
+      "is_street",
+      "lap_time_std",
+      "lap_time_variance",
+      "laps_per_session",
+      "long_run_avg",
+      "long_run_delta",
+      "long_run_delta_to_median",
+      "long_run_laps",
+      "long_run_rank",
+      "median_lap_time",
+      "medium_degradation",
+      "medium_hard_gap",
+      "medium_long_run_avg",
+      "overtaking_difficulty",
+      "p50_to_p95_avg",
+      "pace_consistency_ratio",
+      "pace_delta",
+      "pace_delta_to_fastest",
+      "pace_delta_to_median",
+      "pace_rank",
+      "prior_vs_fp_rank",
+      "race_pace_delta_to_median",
+      "roll_collision_dnf_rate_5_driver",
+      "roll_dnf_rate_5",
+      "roll_drivererror_dnf_rate_5_driver",
+      "roll_mech_dnf_rate_5_constructor",
+      "roll_mech_dnf_rate_5_driver",
+      "roll_quali_3",
+      "roll_quali_5",
+      "safety_car_probability",
+      "season_progress",
+      "sector_1_delta",
+      "sector_1_delta_to_fastest",
+      "sector_2_delta",
+      "sector_2_delta_to_fastest",
+      "sector_3_delta",
+      "sector_3_delta_to_fastest",
+      "short_run_best",
+      "sim_weighted_finishpos_3",
+      "sim_weighted_finishpos_5",
+      "sim_weighted_points_3",
+      "sim_weighted_points_5",
+      "sim_weighted_quali_3",
+      "sim_weighted_quali_5",
+      "soft_avg_lap",
+      "soft_best_lap",
+      "soft_medium_gap",
+      "soft_vs_overall_best",
+      "sprint_grid",
+      "straight_line_importance",
+      "team_delta_last",
+      "team_delta_roll_3",
+      "team_delta_roll_5",
+      "theoretical_best",
+      "top3_vs_top5",
+      "top5_vs_top10",
+      "total_laps",
+      "track_evolution",
+      "turn1_incident_risk",
+      "quali_position",
+      "roll_finishpos_3",
+      "roll_finishpos_5",
+      "roll_points_3",
+      "roll_points_5",
+      "position_delta_prev",
+      "recent_wins",
+      "recent_podiums",
+      "recent_points_rate",
+      "recent_form_weighted",
+      "form_trend",
+      "team_recent_form",
+      "is_pole_position",
+      "is_front_row",
+      "is_top10_quali",
+      "grid_advantage"
+    ]
+  },
+  "strict_temporal_filter": "season < target_season OR (season == target_season AND round < target_round)",
+  "race_fp_contract": "Historical and test quali_position are event-prequential policy-blended predictions; qualifying-derived features are rederived. Actual qualifying is target-only and never a race-FP predictor.",
+  "race_metric_population": "Full field ranked; MAE/correlation evaluated on 05_train_models.py::classified_finisher_mask",
+  "pairing": {
+    "unit": "race event",
+    "keys": [
+      "cluster_id"
+    ],
+    "driver_independent_bootstrap": false
+  },
+  "raw_quali_cache": {
+    "strategy": "raw_scores_history_plus_current",
+    "history": {
+      "identity_sha256": "56f41bab9062924cff265e44d39f3e2bed9740b3f4409cb9e69a60f16ddea539",
+      "path": "D:\\OneDrive\\BoxBoxF1FantasyV2\\data\\experiments\\post_fp_stage_b\\_cache\\stage_b_quali_history__56f41bab9062924c.parquet",
+      "hit": false
+    },
+    "current": {
+      "identity_sha256": "4f8045021165d260b6422598abece5e519c3c31bb976442eeb8708b2a1901331",
+      "path": "D:\\OneDrive\\BoxBoxF1FantasyV2\\data\\experiments\\post_fp_stage_b\\_cache\\stage_b_quali_current_2026__4f8045021165d260.parquet",
+      "hit": false,
+      "current_season_weight": 4.0
+    }
+  },
+  "evaluated_folds": [
+    {
+      "cluster_id": "2026-R01",
+      "policy": "B0",
+      "train_events": 121,
+      "test_classified_finishers": 14
+    },
+    {
+      "cluster_id": "2026-R01",
+      "policy": "B1",
+      "train_events": 121,
+      "test_classified_finishers": 14
+    },
+    {
+      "cluster_id": "2026-R01",
+      "policy": "B3",
+      "train_events": 121,
+      "test_classified_finishers": 14
+    },
+    {
+      "cluster_id": "2026-R01",
+      "policy": "B2",
+      "train_events": 121,
+      "test_classified_finishers": 14
+    },
+    {
+      "cluster_id": "2026-R01",
+      "policy": "B4",
+      "train_events": 121,
+      "test_classified_finishers": 14
+    },
+    {
+      "cluster_id": "2026-R02",
+      "policy": "B0",
+      "train_events": 122,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R02",
+      "policy": "B1",
+      "train_events": 122,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R02",
+      "policy": "B3",
+      "train_events": 122,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R02",
+      "policy": "B2",
+      "train_events": 122,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R02",
+      "policy": "B4",
+      "train_events": 122,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R03",
+      "policy": "B0",
+      "train_events": 123,
+      "test_classified_finishers": 20
+    },
+    {
+      "cluster_id": "2026-R03",
+      "policy": "B1",
+      "train_events": 123,
+      "test_classified_finishers": 20
+    },
+    {
+      "cluster_id": "2026-R03",
+      "policy": "B3",
+      "train_events": 123,
+      "test_classified_finishers": 20
+    },
+    {
+      "cluster_id": "2026-R03",
+      "policy": "B2",
+      "train_events": 123,
+      "test_classified_finishers": 20
+    },
+    {
+      "cluster_id": "2026-R03",
+      "policy": "B4",
+      "train_events": 123,
+      "test_classified_finishers": 20
+    },
+    {
+      "cluster_id": "2026-R06",
+      "policy": "B0",
+      "train_events": 124,
+      "test_classified_finishers": 18
+    },
+    {
+      "cluster_id": "2026-R06",
+      "policy": "B1",
+      "train_events": 124,
+      "test_classified_finishers": 18
+    },
+    {
+      "cluster_id": "2026-R06",
+      "policy": "B3",
+      "train_events": 124,
+      "test_classified_finishers": 18
+    },
+    {
+      "cluster_id": "2026-R06",
+      "policy": "B2",
+      "train_events": 124,
+      "test_classified_finishers": 18
+    },
+    {
+      "cluster_id": "2026-R06",
+      "policy": "B4",
+      "train_events": 124,
+      "test_classified_finishers": 18
+    },
+    {
+      "cluster_id": "2026-R07",
+      "policy": "B0",
+      "train_events": 125,
+      "test_classified_finishers": 16
+    },
+    {
+      "cluster_id": "2026-R07",
+      "policy": "B1",
+      "train_events": 125,
+      "test_classified_finishers": 16
+    },
+    {
+      "cluster_id": "2026-R07",
+      "policy": "B3",
+      "train_events": 125,
+      "test_classified_finishers": 16
+    },
+    {
+      "cluster_id": "2026-R07",
+      "policy": "B2",
+      "train_events": 125,
+      "test_classified_finishers": 16
+    },
+    {
+      "cluster_id": "2026-R07",
+      "policy": "B4",
+      "train_events": 125,
+      "test_classified_finishers": 16
+    },
+    {
+      "cluster_id": "2026-R08",
+      "policy": "B0",
+      "train_events": 126,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R08",
+      "policy": "B1",
+      "train_events": 126,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R08",
+      "policy": "B3",
+      "train_events": 126,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R08",
+      "policy": "B2",
+      "train_events": 126,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R08",
+      "policy": "B4",
+      "train_events": 126,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R09",
+      "policy": "B0",
+      "train_events": 127,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R09",
+      "policy": "B1",
+      "train_events": 127,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R09",
+      "policy": "B3",
+      "train_events": 127,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R09",
+      "policy": "B2",
+      "train_events": 127,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R09",
+      "policy": "B4",
+      "train_events": 127,
+      "test_classified_finishers": 15
+    },
+    {
+      "cluster_id": "2026-R10",
+      "policy": "B0",
+      "train_events": 128,
+      "test_classified_finishers": 18
+    },
+    {
+      "cluster_id": "2026-R10",
+      "policy": "B1",
+      "train_events": 128,
+      "test_classified_finishers": 18
+    },
+    {
+      "cluster_id": "2026-R10",
+      "policy": "B3",
+      "train_events": 128,
+      "test_classified_finishers": 18
+    },
+    {
+      "cluster_id": "2026-R10",
+      "policy": "B2",
+      "train_events": 128,
+      "test_classified_finishers": 18
+    },
+    {
+      "cluster_id": "2026-R10",
+      "policy": "B4",
+      "train_events": 128,
+      "test_classified_finishers": 18
+    },
+    {
+      "cluster_id": "2026-R11",
+      "policy": "B0",
+      "train_events": 129,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R11",
+      "policy": "B1",
+      "train_events": 129,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R11",
+      "policy": "B3",
+      "train_events": 129,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R11",
+      "policy": "B2",
+      "train_events": 129,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R11",
+      "policy": "B4",
+      "train_events": 129,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R12",
+      "policy": "B0",
+      "train_events": 130,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R12",
+      "policy": "B1",
+      "train_events": 130,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R12",
+      "policy": "B3",
+      "train_events": 130,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R12",
+      "policy": "B2",
+      "train_events": 130,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R12",
+      "policy": "B4",
+      "train_events": 130,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R13",
+      "policy": "B0",
+      "train_events": 131,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R13",
+      "policy": "B1",
+      "train_events": 131,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R13",
+      "policy": "B3",
+      "train_events": 131,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R13",
+      "policy": "B2",
+      "train_events": 131,
+      "test_classified_finishers": 19
+    },
+    {
+      "cluster_id": "2026-R13",
+      "policy": "B4",
+      "train_events": 131,
+      "test_classified_finishers": 19
+    }
+  ],
+  "config_sha256": "717539ef311322e80f565d0777dcda964b7170ac206fb387d24057a39abfe3a9",
+  "run_identity_sha256": "81b45f204de39915183a79ac92cf634a034c57ca9c83c79843ad84c8c3daa3f9"
+}

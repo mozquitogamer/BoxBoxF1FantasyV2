@@ -8,7 +8,8 @@ import pytest
 predictions = importlib.import_module("pipeline.06_run_predictions")
 
 
-def test_hard_track_anchor_is_off_before_practice():
+def test_hard_track_anchor_is_off_before_practice(monkeypatch):
+    monkeypatch.setattr(predictions, "grid_anchor_weight", lambda _circuit: 0.6375)
     weight, reason = predictions.phase_aware_grid_anchor_weight(
         "hungaroring",
         fp_pace_driver_count=0,
@@ -18,7 +19,8 @@ def test_hard_track_anchor_is_off_before_practice():
     assert reason == "awaiting_fp_pace"
 
 
-def test_partial_practice_file_does_not_activate_anchor():
+def test_partial_practice_file_does_not_activate_anchor(monkeypatch):
+    monkeypatch.setattr(predictions, "grid_anchor_weight", lambda _circuit: 0.6375)
     minimum = predictions.FP_QUALI_BLEND_TUNABLES["min_drivers_with_pace"]
     weight, reason = predictions.phase_aware_grid_anchor_weight(
         "hungaroring",
@@ -29,7 +31,8 @@ def test_partial_practice_file_does_not_activate_anchor():
     assert reason == "awaiting_fp_pace"
 
 
-def test_sufficient_fp_pace_activates_normal_track_scaled_anchor():
+def test_sufficient_fp_pace_activates_normal_track_scaled_anchor(monkeypatch):
+    monkeypatch.setattr(predictions, "grid_anchor_weight", lambda _circuit: 0.6375)
     minimum = predictions.FP_QUALI_BLEND_TUNABLES["min_drivers_with_pace"]
     weight, reason = predictions.phase_aware_grid_anchor_weight(
         "hungaroring",
@@ -40,7 +43,8 @@ def test_sufficient_fp_pace_activates_normal_track_scaled_anchor():
     assert reason == "fp_pace_available"
 
 
-def test_actual_qualifying_can_anchor_retrospective_archive_without_fp():
+def test_actual_qualifying_can_anchor_retrospective_archive_without_fp(monkeypatch):
+    monkeypatch.setattr(predictions, "grid_anchor_weight", lambda _circuit: 0.6375)
     weight, reason = predictions.phase_aware_grid_anchor_weight(
         "hungaroring",
         fp_pace_driver_count=0,
@@ -54,6 +58,16 @@ def test_actual_qualifying_can_anchor_retrospective_archive_without_fp():
 def test_normal_track_remains_unanchored_even_with_fp():
     weight, reason = predictions.phase_aware_grid_anchor_weight(
         "spa",
+        fp_pace_driver_count=22,
+    )
+
+    assert weight == 0.0
+    assert reason == "track_anchor_disabled"
+
+
+def test_production_hard_track_anchor_is_disabled_pending_more_evidence():
+    weight, reason = predictions.phase_aware_grid_anchor_weight(
+        "hungaroring",
         fp_pace_driver_count=22,
     )
 

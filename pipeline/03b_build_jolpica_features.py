@@ -48,6 +48,7 @@ from config.team_driver_ratings import (
     get_driver_overtaking,
     get_driver_quali_skill,
     get_constructor_cold_skill,
+    rating_as_of_for_event,
 )
 
 # All seasons to load for cross-season rolling features
@@ -183,6 +184,46 @@ def add_rolling_rates(df: pd.DataFrame, group_col: str, flag_col: str,
         .reset_index(level=0, drop=True)
     )
     return df
+
+
+def add_event_rolling_rate(
+    df: pd.DataFrame,
+    group_col: str,
+    flag_col: str,
+    window: int,
+    out_col: str,
+) -> pd.DataFrame:
+    """
+    Compute a rolling rate at completed-event grain, then merge it to all rows.
+
+    A row-wise constructor shift is not time-safe when a constructor has two
+    drivers in the same race: the second row can see the first driver's current
+    result. Aggregate the flag within each event first, shift whole events, and
+    only then calculate the rolling history shared by both teammates.
+    """
+    event_keys = [group_col, "season", "round"]
+    events = df[event_keys + [flag_col]].copy()
+    events[flag_col] = pd.to_numeric(events[flag_col], errors="coerce")
+    events = (
+        events.groupby(event_keys, as_index=False, dropna=False)[flag_col]
+        .mean()
+        .sort_values(event_keys)
+    )
+    events["_event_rate_prev"] = (
+        events.groupby(group_col, dropna=False)[flag_col].shift(1)
+    )
+    events[out_col] = events.groupby(group_col, dropna=False)[
+        "_event_rate_prev"
+    ].transform(lambda x: x.rolling(window, min_periods=1).mean())
+
+    d = df.drop(columns=[out_col], errors="ignore")
+    return d.merge(
+        events[event_keys + [out_col]],
+        on=event_keys,
+        how="left",
+        sort=False,
+        validate="many_to_one",
+    )
 
 
 def compute_rolling_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -402,26 +443,74 @@ def add_quali_priors(df: pd.DataFrame) -> pd.DataFrame:
         lambda x: x.expanding(min_periods=1).median()
     )
 
-    # --- Constructor priors (shifted) ---
-    d = d.sort_values(["constructor_id", "season", "round", "driver_id"])
-    d["constructor_quali_prev"] = d.groupby("constructor_id")["quali_position"].shift(1)
+    # --- Constructor priors (shifted at completed-race grain) ---
+    # Aggregate the two cars first. A row-wise shift made one teammate's prior
+    # depend on the other teammate's current qualifying result and counted
+    # driver rows rather than races in the 3/5-event windows.
+    constructor_keys = ["constructor_id", "season", "round"]
+    constructor_rounds = (
+        d[constructor_keys + ["quali_position"]]
+        .groupby(constructor_keys, as_index=False, dropna=False)["quali_position"]
+        .mean()
+        .sort_values(constructor_keys)
+    )
+    constructor_rounds["_constructor_quali_prev"] = constructor_rounds.groupby(
+        "constructor_id", dropna=False
+    )["quali_position"].shift(1)
+    constructor_rounds["constructor_quali_last"] = constructor_rounds[
+        "_constructor_quali_prev"
+    ]
+    for window in (3, 5):
+        constructor_rounds[f"constructor_roll_quali_{window}"] = (
+            constructor_rounds.groupby("constructor_id", dropna=False)[
+                "_constructor_quali_prev"
+            ].transform(lambda x: x.rolling(window, min_periods=1).mean())
+        )
+    constructor_rounds["constructor_season_avg_quali"] = (
+        constructor_rounds.groupby(
+            ["constructor_id", "season"], dropna=False
+        )["_constructor_quali_prev"].transform(
+            lambda x: x.expanding(min_periods=1).mean()
+        )
+    )
+    constructor_feature_cols = [
+        "constructor_quali_last",
+        "constructor_roll_quali_3",
+        "constructor_roll_quali_5",
+        "constructor_season_avg_quali",
+    ]
+    d.drop(columns=constructor_feature_cols, inplace=True, errors="ignore")
+    d = d.merge(
+        constructor_rounds[constructor_keys + constructor_feature_cols],
+        on=constructor_keys,
+        how="left",
+        sort=False,
+        validate="many_to_one",
+    )
 
-    d["constructor_quali_last"] = d["constructor_quali_prev"]
-    d["constructor_roll_quali_3"] = d.groupby("constructor_id")["constructor_quali_prev"].transform(
-        lambda x: x.rolling(3, min_periods=1).mean()
+    # --- Field baseline (shifted at completed-race grain) ---
+    # Every driver in a round must see the same field history, based only on
+    # earlier rounds in that season.
+    field_keys = ["season", "round"]
+    field_rounds = (
+        d[field_keys + ["quali_position"]]
+        .groupby(field_keys, as_index=False, dropna=False)["quali_position"]
+        .mean()
+        .sort_values(field_keys)
     )
-    d["constructor_roll_quali_5"] = d.groupby("constructor_id")["constructor_quali_prev"].transform(
-        lambda x: x.rolling(5, min_periods=1).mean()
-    )
-    d["constructor_season_avg_quali"] = d.groupby(["constructor_id", "season"])["constructor_quali_prev"].transform(
-        lambda x: x.expanding(min_periods=1).mean()
-    )
-
-    # --- Field baseline (shifted) ---
-    d = d.sort_values(["season", "round", "driver_id"])
-    d["field_prev"] = d.groupby("season")["quali_position"].shift(1)
-    d["field_season_avg_quali"] = d.groupby("season")["field_prev"].transform(
-        lambda x: x.expanding(min_periods=1).mean()
+    field_rounds["_field_prev"] = field_rounds.groupby(
+        "season", dropna=False
+    )["quali_position"].shift(1)
+    field_rounds["field_season_avg_quali"] = field_rounds.groupby(
+        "season", dropna=False
+    )["_field_prev"].transform(lambda x: x.expanding(min_periods=1).mean())
+    d.drop(columns=["field_season_avg_quali"], inplace=True, errors="ignore")
+    d = d.merge(
+        field_rounds[field_keys + ["field_season_avg_quali"]],
+        on=field_keys,
+        how="left",
+        sort=False,
+        validate="many_to_one",
     )
 
     d["driver_vs_field_season"] = d["driver_season_avg_quali"] - d["field_season_avg_quali"]
@@ -524,7 +613,7 @@ def add_quali_priors(df: pd.DataFrame) -> pd.DataFrame:
 
     # Clean up intermediate columns
     d.drop(columns=[
-        "driver_quali_prev", "constructor_quali_prev", "field_prev",
+        "driver_quali_prev",
         "teammate_quali_this", "team_delta_this",
         "driver_circuit_effect_this", "driver_circuit_effect_prev",
         "_driver_circuit_exp_effect", "_driver_circuit_roll_effect",
@@ -537,6 +626,66 @@ def add_quali_priors(df: pd.DataFrame) -> pd.DataFrame:
 # ============================================================================
 # Group 4: Race model features (derived from existing columns)
 # ============================================================================
+
+def compute_season_progress(df: pd.DataFrame) -> pd.Series:
+    """
+    Return a stable active-event ordinal divided by the known season length.
+
+    Historical completed seasons use their observed event count. For the
+    current season, races.json provides the full active schedule, so progress
+    does not incorrectly jump to 1.0 merely because only completed races have
+    been normalized. Cancelled calendar slots do not advance the ordinal.
+    """
+    progress = pd.Series(np.nan, index=df.index, dtype=float)
+
+    schedule_season: int | None = None
+    active_rounds: list[int] = []
+    schedule_path = SEED_DIR / "races.json"
+    if schedule_path.exists():
+        try:
+            schedule = json.loads(schedule_path.read_text(encoding="utf-8"))
+            schedule_season = int(schedule.get("season"))
+            active_rounds = sorted(
+                int(race["round"])
+                for race in schedule.get("races", [])
+                if not race.get("cancelled", False) and race.get("round") is not None
+            )
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            schedule_season = None
+            active_rounds = []
+
+    for season, season_rows in df.groupby("season", dropna=False):
+        numeric_rounds = pd.to_numeric(season_rows["round"], errors="coerce")
+        observed_rounds = sorted(
+            int(value) for value in numeric_rounds.dropna().unique()
+        )
+        if not observed_rounds:
+            continue
+
+        if (
+            schedule_season is not None
+            and pd.notna(season)
+            and int(season) == schedule_season
+            and active_rounds
+        ):
+            ordinal_by_round = {
+                round_number: ordinal
+                for ordinal, round_number in enumerate(active_rounds, start=1)
+            }
+            denominator = float(len(active_rounds))
+        else:
+            ordinal_by_round = {
+                round_number: ordinal
+                for ordinal, round_number in enumerate(observed_rounds, start=1)
+            }
+            denominator = float(len(observed_rounds))
+
+        progress.loc[season_rows.index] = (
+            numeric_rounds.map(ordinal_by_round).astype(float) / denominator
+        )
+
+    return progress
+
 
 def add_race_model_features(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -601,19 +750,41 @@ def add_race_model_features(df: pd.DataFrame) -> pd.DataFrame:
     # Form trend: roll_3 - roll_5 (positive = improving, uses already-computed rolling features)
     d["form_trend"] = d["roll_finishpos_3"] - d["roll_finishpos_5"]
 
-    # Team recent form: constructor rolling avg finish (shifted)
-    d = d.sort_values(["constructor_id", "season", "round", "driver_id"])
-    d["_constructor_finish_prev"] = d.groupby("constructor_id")["finish_position"].shift(1).astype(float)
-    d["team_recent_form"] = (
-        d.groupby("constructor_id")["_constructor_finish_prev"]
-        .rolling(5, min_periods=1)
+    # Team recent form: rolling average of completed constructor events.
+    # Aggregate both cars before shifting so every teammate gets the same prior.
+    constructor_keys = ["constructor_id", "season", "round"]
+    constructor_rounds = d[constructor_keys + ["finish_position"]].copy()
+    constructor_rounds["finish_position"] = pd.to_numeric(
+        constructor_rounds["finish_position"], errors="coerce"
+    )
+    constructor_rounds = (
+        constructor_rounds.groupby(
+            constructor_keys, as_index=False, dropna=False
+        )["finish_position"]
         .mean()
-        .reset_index(level=0, drop=True)
+        .sort_values(constructor_keys)
+    )
+    constructor_rounds["_constructor_finish_prev"] = (
+        constructor_rounds.groupby("constructor_id", dropna=False)[
+            "finish_position"
+        ].shift(1)
+    )
+    constructor_rounds["team_recent_form"] = constructor_rounds.groupby(
+        "constructor_id", dropna=False
+    )["_constructor_finish_prev"].transform(
+        lambda x: x.rolling(5, min_periods=1).mean()
+    )
+    d.drop(columns=["team_recent_form"], inplace=True, errors="ignore")
+    d = d.merge(
+        constructor_rounds[constructor_keys + ["team_recent_form"]],
+        on=constructor_keys,
+        how="left",
+        sort=False,
+        validate="many_to_one",
     )
 
-    # Season progress
-    max_rounds = d.groupby("season")["round"].transform("max").astype(float)
-    d["season_progress"] = d["round"].astype(float) / max_rounds
+    # Season progress uses the scheduled active-event denominator when known.
+    d["season_progress"] = compute_season_progress(d)
 
     # Clean up intermediate columns
     temp_cols = [c for c in d.columns if c.startswith("_")]
@@ -644,19 +815,54 @@ def add_team_driver_ratings(df: pd.DataFrame) -> pd.DataFrame:
     Constructor ratings use the canonical constructor_id.
     """
     d = df.copy()
+    if "race_date" in d.columns:
+        parsed_dates = pd.to_datetime(d["race_date"], errors="coerce")
+        rating_dates = [
+            value.date() if pd.notna(value) else None
+            for value in parsed_dates
+        ]
+    elif {"season", "round"}.issubset(d.columns):
+        rating_dates = [
+            rating_as_of_for_event(season, round_num)
+            for season, round_num in zip(d["season"], d["round"])
+        ]
+    else:
+        # Live stubs without a date use the current operational snapshot.
+        rating_dates = [None] * len(d)
 
     # Team ratings via canonical constructor_id
-    d["strategy_rating"] = d["constructor_id"].map(get_team_strategy_rating)
-    d["adaptability"] = d["constructor_id"].map(get_team_adaptability)
+    d["strategy_rating"] = [
+        get_team_strategy_rating(cid, as_of=as_of)
+        for cid, as_of in zip(d["constructor_id"], rating_dates)
+    ]
+    d["adaptability"] = [
+        get_team_adaptability(cid, as_of=as_of)
+        for cid, as_of in zip(d["constructor_id"], rating_dates)
+    ]
     # Per-constructor cold-weather rating (used in interaction with weather
     # features at training time, and as an MC perturbation when forecast is cold).
-    d["cold_skill"] = d["constructor_id"].map(get_constructor_cold_skill)
+    d["cold_skill"] = [
+        get_constructor_cold_skill(cid, as_of=as_of)
+        for cid, as_of in zip(d["constructor_id"], rating_dates)
+    ]
 
     # Driver ratings via jolpica driver_id
-    d["tire_mgmt"] = d["driver_id"].map(get_driver_tire_mgmt)
-    d["wet_skill"] = d["driver_id"].map(get_driver_wet_skill)
-    d["overtaking"] = d["driver_id"].map(get_driver_overtaking)
-    d["quali_skill"] = d["driver_id"].map(get_driver_quali_skill)
+    d["tire_mgmt"] = [
+        get_driver_tire_mgmt(driver, as_of=as_of)
+        for driver, as_of in zip(d["driver_id"], rating_dates)
+    ]
+    d["wet_skill"] = [
+        get_driver_wet_skill(driver, as_of=as_of)
+        for driver, as_of in zip(d["driver_id"], rating_dates)
+    ]
+    d["overtaking"] = [
+        get_driver_overtaking(driver, as_of=as_of)
+        for driver, as_of in zip(d["driver_id"], rating_dates)
+    ]
+    d["quali_skill"] = [
+        get_driver_quali_skill(driver, as_of=as_of)
+        for driver, as_of in zip(d["driver_id"], rating_dates)
+    ]
 
     return d
 
@@ -924,7 +1130,13 @@ def build_features(target_years: list[int]) -> None:
 
     # DNF cause rolling rates
     df = add_rolling_rates(df, "driver_id", "dnf_mechanical", 5, "roll_mech_dnf_rate_5_driver")
-    df = add_rolling_rates(df, "constructor_id", "dnf_mechanical", 5, "roll_mech_dnf_rate_5_constructor")
+    df = add_event_rolling_rate(
+        df,
+        "constructor_id",
+        "dnf_mechanical",
+        5,
+        "roll_mech_dnf_rate_5_constructor",
+    )
     df = add_rolling_rates(df, "driver_id", "dnf_collision", 5, "roll_collision_dnf_rate_5_driver")
     df = add_rolling_rates(df, "driver_id", "dnf_driver_error", 5, "roll_drivererror_dnf_rate_5_driver")
 
@@ -946,29 +1158,9 @@ def build_features(target_years: list[int]) -> None:
     df = add_team_driver_ratings(df)
     df = add_interaction_features(df)
 
-    # --- Impute NaN priors with global median ---
-    impute_cols = [
-        "driver_quali_last", "driver_roll_quali_3", "driver_roll_quali_5",
-        "driver_season_avg_quali", "driver_season_med_quali",
-        "constructor_quali_last", "constructor_roll_quali_3", "constructor_roll_quali_5",
-        "constructor_season_avg_quali",
-        "field_season_avg_quali", "driver_vs_field_season", "constructor_vs_field_season",
-        "team_delta_last", "team_delta_roll_3", "team_delta_roll_5",
-        "driver_circuit_exp", "driver_circuit_roll_3", "constructor_circuit_exp",
-        "position_delta_prev", "recent_wins", "recent_podiums", "recent_points_rate",
-        "recent_form_weighted", "form_trend", "team_recent_form",
-        "roll_points_3", "roll_points_5", "roll_finishpos_3", "roll_finishpos_5",
-        "roll_quali_3", "roll_quali_5", "roll_dnf_rate_5",
-        "roll_mech_dnf_rate_5_driver", "roll_mech_dnf_rate_5_constructor",
-        "roll_collision_dnf_rate_5_driver", "roll_drivererror_dnf_rate_5_driver",
-        "sim_weighted_points_3", "sim_weighted_points_5",
-        "sim_weighted_finishpos_3", "sim_weighted_finishpos_5",
-        "sim_weighted_quali_3", "sim_weighted_quali_5",
-    ]
-    for c in impute_cols:
-        if c in df.columns:
-            med = df[c].median()
-            df[c] = df[c].fillna(med if pd.notna(med) else 0.0)
+    # Preserve sparse priors as NaN. XGBoost and CatBoost route missing values
+    # natively; filling from the full multi-season frame leaked future results
+    # into early training rows and erased the useful "no history yet" signal.
 
     # Drop intermediate/unused columns from output
     drop_cols = ["position_text", "status", "dnf_cause",

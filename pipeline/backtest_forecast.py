@@ -91,7 +91,10 @@ def reforecast_round(round_num: int, n_sims: int, seed: int) -> tuple[dict, dict
     driver_fantasy = f07.calculate_driver_fantasy(pred_df, round_num)
 
     # 08 Monte Carlo, wired exactly like 08.main()
-    calibration = f08.load_calibration(round_num=round_num)
+    calibration = f08.load_calibration(
+        round_num=round_num,
+        phase="post_fp",
+    )
     weather = f08.load_weather_for_mc(round_num)  # inactive for past rounds
     circuit_id = get_circuit_id_from_race_name(race_name_for_round(round_num))
     results = f08.run_simulations(

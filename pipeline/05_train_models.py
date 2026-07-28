@@ -99,11 +99,40 @@ WEATHER_SPRINT_FEATURES = [
     "weather_air_temp_sprint",
     "weather_humidity_sprint",
 ]
+ALL_SESSION_WEATHER_FEATURES = {
+    *WEATHER_QUALI_FEATURES,
+    *WEATHER_RACE_FEATURES,
+    *WEATHER_SPRINT_FEATURES,
+}
+
+# Historical rows contain observed session weather, but there is no timestamped
+# archive of the forecast available at the Fantasy lock. Feeding those observed
+# values to a position ranker makes retrospective validation optimistic and
+# creates a train/live mismatch. Weather remains available for wet-event sample
+# weights, confidence work, and Monte Carlo conditioning.
+POSITION_RANKER_WEATHER_ENABLED = False
 # Wet-row sample weight multiplier — addresses the ~85/15 dry/wet imbalance.
 # Calibrated via pipeline/validate_weather_features.py: 6x gives statistically
 # significant wet improvement (+0.185 MAE, CI [+0.084, +0.290]) without dry
 # regression. See Phase C gate report in docs/WEATHER_LEVEL3_IMPLEMENTATION_PLAN.md.
 WET_TRAINING_WEIGHT_MULTIPLIER = 6.0
+
+# The current expert-rating table was authored after 2026 R2 and has no
+# historical effective-date snapshots. Applying today's values to 2020-early
+# 2026 makes retrospective validation outcome-informed. Retain the columns in
+# model rows for diagnostics and conditional MC adjustments, but exclude them
+# from every position ranker until versioned snapshots exist.
+UNVERSIONED_MANUAL_RATING_FEATURES = {
+    "tire_mgmt",
+    "wet_skill",
+    "overtaking",
+    "quali_skill",
+    "quali_skill_x_ot_diff",
+    "strategy_rating",
+    "adaptability",
+    "cold_skill",
+    "strategy_sc_advantage",
+}
 
 # Columns to EXCLUDE from qualifying features
 QUALI_EXCLUDE = {
@@ -126,6 +155,8 @@ QUALI_EXCLUDE = {
     "sprint_position", "sprint_points",
     # Weight
     "sample_weight",
+    # Unversioned manual priors (see block above).
+    *UNVERSIONED_MANUAL_RATING_FEATURES,
     # Race-specific form features (used only in race model)
     "position_delta_prev", "recent_wins", "recent_podiums",
     "recent_points_rate", "recent_form_weighted", "form_trend",
@@ -159,6 +190,66 @@ RACE_EXTRA_FEATURES = [
     *WEATHER_RACE_FEATURES,
 ]
 
+SPRINT_GRID_DERIVED_FEATURES = [
+    "sprint_is_front_row",
+    "sprint_is_top3",
+    "sprint_is_top10",
+    "sprint_grid_advantage",
+]
+
+SPRINT_FUTURE_QUALI_FEATURES = {
+    "quali_position",
+    "is_pole_position",
+    "is_front_row",
+    "is_top10_quali",
+    "grid_advantage",
+    "pole_advantage",
+    "front_row_advantage",
+    "grid_importance_factor",
+    "top10_sc_interaction",
+    "top10_turn1_interaction",
+    "top10_street_interaction",
+    "quali_vs_fp_rank",
+}
+
+
+def add_sprint_grid_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Derive the sprint-grid inputs used by production and validation."""
+    out = df.copy()
+    if "sprint_grid" not in out.columns:
+        return out
+    sg = pd.to_numeric(out["sprint_grid"], errors="coerce")
+    out["sprint_is_front_row"] = (sg <= 2).where(sg.notna())
+    out["sprint_is_top3"] = (sg <= 3).where(sg.notna())
+    out["sprint_is_top10"] = (sg <= 10).where(sg.notna())
+    out["sprint_grid_advantage"] = 1.0 / (sg + 0.5)
+    return out
+
+
+def build_sprint_feature_list(
+    race_features: list[str],
+    all_columns: list[str],
+    include_weather: bool = POSITION_RANKER_WEATHER_ENABLED,
+) -> list[str]:
+    """Build sprint features without admitting sprint outcome targets."""
+    features = [
+        c for c in race_features
+        if c not in WEATHER_RACE_FEATURES
+        and c not in {"sprint_position", "sprint_points"}
+        and c not in SPRINT_FUTURE_QUALI_FEATURES
+    ]
+    extras = [
+        "sprint_grid",
+        *SPRINT_GRID_DERIVED_FEATURES,
+    ]
+    if include_weather:
+        extras.extend(WEATHER_SPRINT_FEATURES)
+    for col in extras:
+        if col in all_columns and col not in features:
+            features.append(col)
+    return features
+
+
 # FP signal features (pace-focused subset for confidence scoring)
 FP_SIGNAL_FEATURES = [
     "avg_lap_time", "best_lap_time", "median_lap_time",
@@ -174,12 +265,15 @@ FP_SIGNAL_FEATURES = [
 ]
 
 
-def build_quali_feature_list(all_columns: list[str]) -> list[str]:
+def build_quali_feature_list(
+    all_columns: list[str],
+    include_weather: bool = POSITION_RANKER_WEATHER_ENABLED,
+) -> list[str]:
     """Build the qualifying feature list by excluding metadata, targets, and race-specific columns.
 
-    Quali-session weather features (WEATHER_QUALI_FEATURES) are appended explicitly
-    after the auto-exclusion step — they're excluded from auto-derivation only so
-    that race/sprint weather doesn't leak into the quali model.
+    Observed weather is disabled by default because no historical lock-time
+    forecast archive exists. ``include_weather=True`` is for labelled oracle
+    diagnostics only.
     """
     features = []
     for col in sorted(all_columns):
@@ -188,6 +282,8 @@ def build_quali_feature_list(all_columns: list[str]) -> list[str]:
         if col == "quali_position":
             continue  # target for quali model
         if any(col.startswith(prefix) for prefix in QUALI_EXCLUDE_PREFIXES):
+            continue
+        if col in ALL_SESSION_WEATHER_FEATURES:
             continue
         # Exclude other non-feature columns
         if col in {
@@ -198,18 +294,23 @@ def build_quali_feature_list(all_columns: list[str]) -> list[str]:
         }:
             continue
         features.append(col)
-    # Append quali-session weather (which is NOT in QUALI_EXCLUDE but we keep
-    # this explicit so the model unambiguously receives it).
-    for wcol in WEATHER_QUALI_FEATURES:
-        if wcol in all_columns and wcol not in features:
-            features.append(wcol)
+    if include_weather:
+        for wcol in WEATHER_QUALI_FEATURES:
+            if wcol in all_columns and wcol not in features:
+                features.append(wcol)
     return features
 
 
-def build_race_feature_list(quali_features: list[str], all_columns: list[str]) -> list[str]:
+def build_race_feature_list(
+    quali_features: list[str],
+    all_columns: list[str],
+    include_weather: bool = POSITION_RANKER_WEATHER_ENABLED,
+) -> list[str]:
     """Build the race feature list: all quali features + race-specific extras."""
     race_features = list(quali_features)
     for col in RACE_EXTRA_FEATURES:
+        if col in ALL_SESSION_WEATHER_FEATURES and not include_weather:
+            continue
         if col not in race_features and col in all_columns:
             race_features.append(col)
     # Quali-session weather is part of quali_features; strip it from race
@@ -221,7 +322,7 @@ def build_race_feature_list(quali_features: list[str], all_columns: list[str]) -
 def apply_wet_training_boost(
     df: pd.DataFrame, wet_col: str = "weather_was_wet_race"
 ) -> pd.DataFrame:
-    """Multiply sample_weight for wet-race training rows by WET_TRAINING_WEIGHT_MULTIPLIER.
+    """Multiply sample weights for wet sessions by the configured multiplier.
 
     Compensates for the ~85/15 dry/wet imbalance in historical data. Without this,
     XGBoost can ignore weather features because the dry signal dominates. Validated
@@ -230,10 +331,8 @@ def apply_wet_training_boost(
     Returns a COPY of df with the modified sample_weight column. The original
     df is not mutated. If wet_col is missing from df, returns df unchanged.
 
-    Use the same column (default weather_was_wet_race) for ALL model training
-    blocks (quali, race, sprint) — the "wetness of the weekend" is a single fact
-    per (season, round), and using the race-session label as the canonical signal
-    keeps the boost stable across models.
+    Callers must pass the wetness label for the session being predicted.
+    Qualifying, sprint, and race conditions can differ within one weekend.
     """
     if wet_col not in df.columns or "sample_weight" not in df.columns:
         return df
@@ -243,8 +342,9 @@ def apply_wet_training_boost(
     boosted["sample_weight"] = boosted["sample_weight"] * boost
     n_wet = int(is_wet.sum())
     if n_wet > 0:
+        session_label = wet_col.removeprefix("weather_was_wet_")
         print(f"    Applied {WET_TRAINING_WEIGHT_MULTIPLIER}x weight to "
-              f"{n_wet:,} wet-race training rows")
+              f"{n_wet:,} wet-{session_label} training rows")
     return boosted
 
 
@@ -255,6 +355,20 @@ def apply_wet_training_boost(
 def sort_by_race_groups(df: pd.DataFrame) -> pd.DataFrame:
     """Sort dataframe by (season, round) so race groups are contiguous. Required by XGBRanker."""
     return df.sort_values(["season", "round"]).reset_index(drop=True)
+
+
+def classified_finisher_mask(df: pd.DataFrame) -> pd.Series:
+    """Return the exact population modeled by the conditional race ranker."""
+    mask = df["finish_position"].notna()
+    if "is_finished" in df.columns:
+        mask = mask & (df["is_finished"] == 1)
+    elif "is_dnf" in df.columns:
+        mask = mask & (df["is_dnf"] == 0)
+    if "is_dsq" in df.columns:
+        mask = mask & (df["is_dsq"] == 0)
+    if "is_dns" in df.columns:
+        mask = mask & (df["is_dns"] == 0)
+    return mask
 
 
 def make_race_qids(df: pd.DataFrame) -> np.ndarray:
@@ -314,6 +428,7 @@ def walk_forward_validate(
     model_name: str,
     use_weights: bool = True,
     use_ranking: bool = False,
+    wet_col: str | None = None,
 ) -> list[dict]:
     """
     Walk-forward validation: train on [2020..N], test on N+1.
@@ -339,6 +454,9 @@ def walk_forward_validate(
 
         if len(train_df) < 50 or len(test_df) < 10:
             continue
+
+        if wet_col is not None:
+            train_df = apply_wet_training_boost(train_df, wet_col=wet_col)
 
         # Sort by race groups for ranking models
         if use_ranking:
@@ -445,6 +563,7 @@ def _evaluate_race_model_under_post_fp(
     feature_cols: list[str],
     target_col: str,
     model_factory,
+    wet_col: str,
 ) -> list[dict]:
     """
     Evaluate the CURRENT race model training recipe (actual-quali training)
@@ -473,6 +592,7 @@ def _evaluate_race_model_under_post_fp(
         if len(tr) < 50 or len(te) < 10:
             continue
 
+        tr = apply_wet_training_boost(tr, wet_col=wet_col)
         tr = sort_by_race_groups(tr)
         te = sort_by_race_groups(te)
 
@@ -590,6 +710,10 @@ def generate_walk_forward_quali_predictions(
             result.loc[test_mask_full] = df.loc[test_mask_full, "quali_position"].astype(float)
             continue
 
+        train_df = apply_wet_training_boost(
+            train_df, wet_col="weather_was_wet_quali"
+        )
+
         # Preserve original indices before sorting (sort_by_race_groups uses
         # reset_index(drop=True), which would otherwise discard them).
         # We stash the original indices as a column, then read them back after
@@ -666,19 +790,39 @@ def rederive_quali_dependent_features(
 # Main
 # ============================================================
 
-def train_and_save_catboost_race(X, y_relevance, group_qids, out_path, label):
+def train_and_save_catboost_race(
+    X,
+    y_relevance,
+    group_qids,
+    out_path,
+    label,
+    row_group_weights=None,
+):
     """Train a CatBoost YetiRank ranker for a race model and save it (.cbm).
 
-    Mirrors the EXACT config validated in validate_alt_algo_v2.py / the race_fp
-    back-test (YetiRank, 650 iters, lr 0.03, depth 6) AND that protocol's choice
-    of no per-group sample weights — so what ships equals what was back-tested.
+    Uses YetiRank with the validated 650-iteration/depth-6 configuration.
+    Race-constant group weights carry the configured current-season and
+    wet-session emphasis into the deployed CatBoost model.
     Saved alongside the XGBoost .json so 06 selects via settings.RACE_MODEL_ALGORITHM
     and reverting is one line. CatBoost handles NaN natively; passing a DataFrame
     preserves feature names so inference aligns by column, not position. Rows must
     already be sorted into contiguous race groups (callers sort before this).
     """
     from catboost import CatBoost, Pool
-    pool = Pool(data=X, label=np.asarray(y_relevance, dtype=float), group_id=group_qids)
+    pool_kwargs = {
+        "data": X,
+        "label": np.asarray(y_relevance, dtype=float),
+        "group_id": group_qids,
+    }
+    if row_group_weights is not None:
+        row_group_weights = np.asarray(row_group_weights, dtype=float)
+        if len(row_group_weights) != len(X):
+            raise ValueError(
+                f"CatBoost row_group_weights length {len(row_group_weights)} "
+                f"does not match training rows {len(X)}"
+            )
+        pool_kwargs["group_weight"] = row_group_weights
+    pool = Pool(**pool_kwargs)
     model = CatBoost(dict(
         loss_function="YetiRank", iterations=650, learning_rate=0.03, depth=6,
         random_seed=MODEL_RANDOM_STATE, verbose=False, allow_writing_files=False,
@@ -785,12 +929,14 @@ def main() -> None:
     print("\n  Walk-forward validation:")
     quali_wf_results = walk_forward_validate(
         quali_df, quali_feature_cols, "quali_position", make_quali_model, "Qualifying",
-        use_ranking=True,
+        use_ranking=True, wet_col="weather_was_wet_quali",
     )
 
     # Train final qualifying model on all data
     print("\n  Training final qualifying model on all data...")
-    quali_df = apply_wet_training_boost(quali_df)
+    quali_df = apply_wet_training_boost(
+        quali_df, wet_col="weather_was_wet_quali"
+    )
     quali_df = sort_by_race_groups(quali_df)
     X_q = quali_df[quali_available]
     y_q_rel = position_to_relevance(quali_df["quali_position"])
@@ -862,15 +1008,7 @@ def main() -> None:
     race_available = [c for c in race_feature_cols if c in df.columns]
 
     # Filter to classified finishers only (exclude DNFs)
-    race_filter = df["finish_position"].notna()
-    if "is_finished" in df.columns:
-        race_filter = race_filter & (df["is_finished"] == 1)
-    elif "is_dnf" in df.columns:
-        race_filter = race_filter & (df["is_dnf"] == 0)
-    if "is_dsq" in df.columns:
-        race_filter = race_filter & (df["is_dsq"] == 0)
-    if "is_dns" in df.columns:
-        race_filter = race_filter & (df["is_dns"] == 0)
+    race_filter = classified_finisher_mask(df)
 
     race_df = df[race_filter].copy()
 
@@ -912,7 +1050,7 @@ def main() -> None:
     print("\n  Walk-forward validation:")
     race_wf_results = walk_forward_validate(
         race_df, race_feature_cols, "finish_position", make_race_model, "Race",
-        use_ranking=True,
+        use_ranking=True, wet_col="weather_was_wet_race",
     )
 
     # Train final race model on all data
@@ -955,7 +1093,12 @@ def main() -> None:
     # settings.RACE_MODEL_ALGORITHM). Same data/relevance/groups; no per-group
     # weights to match the back-tested config.
     train_and_save_catboost_race(
-        X_r, y_r_rel, r_groups, TRAINED_DIR / "race_model.cbm", "race"
+        X_r,
+        y_r_rel,
+        r_groups,
+        TRAINED_DIR / "race_model.cbm",
+        "race",
+        row_group_weights=w_r,
     )
 
     # ==================================================================
@@ -993,7 +1136,7 @@ def main() -> None:
         print("\n  Walk-forward validation (post-FP scenario):")
         race_fp_wf_results = walk_forward_validate(
             race_fp_df, race_feature_cols, "finish_position", make_race_model, "Race-FP",
-            use_ranking=True,
+            use_ranking=True, wet_col="weather_was_wet_race",
         )
 
         # ALSO run the current race_model through the post-FP scenario for
@@ -1029,6 +1172,7 @@ def main() -> None:
             feature_cols=race_feature_cols,
             target_col="finish_position",
             model_factory=make_race_model,
+            wet_col="weather_was_wet_race",
         )
 
         # Summaries for comparison
@@ -1091,7 +1235,12 @@ def main() -> None:
 
         # ALSO train + save a CatBoost YetiRank race_fp model (see flag note above).
         train_and_save_catboost_race(
-            X_r_fp, y_r_fp, r_fp_groups, TRAINED_DIR / "race_model_fp.cbm", "race_fp"
+            X_r_fp,
+            y_r_fp,
+            r_fp_groups,
+            TRAINED_DIR / "race_model_fp.cbm",
+            "race_fp",
+            row_group_weights=w_r_fp,
         )
 
     # ==================================================================
@@ -1164,14 +1313,8 @@ def main() -> None:
     # just like quali_position is the #1 feature for race predictions.
     # At prediction time, we have ACTUAL sprint qualifying results (deadline = sprint race start).
     if "sprint_grid" in sprint_df.columns:
+        sprint_df = add_sprint_grid_features(sprint_df)
         sg = sprint_df["sprint_grid"]
-        sprint_df["sprint_is_front_row"] = (sg <= 2).astype(int)
-        sprint_df["sprint_is_top3"] = (sg <= 3).astype(int)
-        sprint_df["sprint_is_top10"] = (sg <= 10).astype(int)
-        sprint_df["sprint_grid_advantage"] = 1.0 / (sg + 0.5)
-        # Delta between regular qualifying position and sprint qualifying position
-        if "quali_position" in sprint_df.columns:
-            sprint_df["quali_to_sprint_grid_delta"] = sprint_df["quali_position"] - sg
         print(f"  Sprint grid feature coverage: {sg.notna().sum()}/{len(sprint_df)} rows")
     else:
         print(f"  WARNING: sprint_grid not available — sprint model will lack key feature")
@@ -1179,15 +1322,9 @@ def main() -> None:
     # Sprint model uses race features PLUS sprint-grid-derived features.
     # Sprint-session weather replaces race-session weather (the sprint runs
     # on Saturday — its conditions can differ from Sunday's race).
-    SPRINT_EXTRA_FEATURES = [
-        "sprint_grid", "sprint_is_front_row", "sprint_is_top3",
-        "sprint_is_top10", "sprint_grid_advantage", "quali_to_sprint_grid_delta",
-        *WEATHER_SPRINT_FEATURES,
-    ]
-    sprint_feature_cols = [c for c in race_feature_cols if c not in WEATHER_RACE_FEATURES]
-    for sf in SPRINT_EXTRA_FEATURES:
-        if sf in sprint_df.columns and sf not in sprint_feature_cols:
-            sprint_feature_cols.append(sf)
+    sprint_feature_cols = build_sprint_feature_list(
+        race_feature_cols, list(sprint_df.columns)
+    )
     sprint_available = [c for c in sprint_feature_cols if c in sprint_df.columns]
     sprint_wf_results = []
     sprint_model = None
@@ -1215,7 +1352,7 @@ def main() -> None:
         print("\n  Walk-forward validation:")
         sprint_wf_results = walk_forward_validate(
             sprint_df, sprint_feature_cols, "sprint_position", make_sprint_model, "Sprint",
-            use_ranking=True,
+            use_ranking=True, wet_col="weather_was_wet_sprint",
         )
 
         # Train final sprint model on all sprint data
@@ -1320,7 +1457,7 @@ def main() -> None:
             print("\n  Walk-forward validation (post-FP scenario):")
             sprint_fp_wf_results = walk_forward_validate(
                 sprint_fp_df, sprint_feature_cols, "sprint_position", make_sprint_model,
-                "Sprint-FP", use_ranking=True,
+                "Sprint-FP", use_ranking=True, wet_col="weather_was_wet_sprint",
             )
 
             # Benchmark: current sprint_model recipe under post-FP scenario.
@@ -1349,6 +1486,7 @@ def main() -> None:
                 feature_cols=sprint_feature_cols,
                 target_col="sprint_position",
                 model_factory=make_sprint_model,
+                wet_col="weather_was_wet_sprint",
             )
 
             if sprint_fp_wf_results and current_sprint_posfp_results:

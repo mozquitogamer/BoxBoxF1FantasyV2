@@ -34,7 +34,12 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     # Theoretical best lap from best sectors
     sector_cols = ["best_sector_1", "best_sector_2", "best_sector_3"]
     if all(c in df.columns for c in sector_cols):
-        df["theoretical_best"] = df[sector_cols].sum(axis=1)
+        # A partial sector sum is not a lap. Preserve NaN unless all three
+        # sectors are available rather than silently treating a missing sector
+        # as zero and producing an impossibly fast "theoretical best".
+        df["theoretical_best"] = df[sector_cols].sum(
+            axis=1, min_count=len(sector_cols)
+        )
 
     # Coefficient of variation (consistency relative to pace)
     if "lap_time_std" in df.columns and "avg_lap_time" in df.columns:

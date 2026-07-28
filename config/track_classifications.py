@@ -474,15 +474,22 @@ OVERTAKE_DAMP_FLOOR: float = 0.13   # overtake multiplier at difficulty 10 -> Mo
 POS_NOISE_DAMP_PIVOT: int = 6       # difficulty at/below which MC position noise is unchanged
 POS_NOISE_DAMP_FLOOR: float = 0.70  # MC position-noise multiplier at difficulty 10 (Monaco)
 
-# Grid-anchoring: on hard-to-overtake circuits the race result tracks the
-# starting grid far more than pure race-pace ranking implies. This blends the
-# race model's predicted finish toward the qualifying grid, scaled by
-# `overtaking_difficulty`. Unlike the damping multipliers above this ramps UP
-# with difficulty: 0 at/below the pivot (normal tracks untouched) -> CEIL at
-# difficulty 10 (Monaco ~grid-locked). Raise the ceiling to freeze the grid
-# harder, lower it to let race pace re-order more.
+# Optional grid-anchoring blends predicted finish toward qualifying on
+# hard-to-pass circuits. Stage-B validation currently disables the mechanism;
+# the pivot/function remain so it can be re-enabled after prospective evidence.
 GRID_ANCHOR_PIVOT: int = 6          # difficulty at/below which finish is NOT anchored to grid
-GRID_ANCHOR_CEIL: float = 0.85      # grid-anchor weight at difficulty 10 (Monaco)
+# R13 Stage-B replay: anchoring improved Hungary but worsened Monaco. With only
+# two completed hard-track events, disable it rather than selecting on the
+# aggregate. The evidence gate prevents a future edit from re-enabling the
+# candidate 0.85 weight before at least four eligible event-level validations.
+GRID_ANCHOR_CANDIDATE_CEIL: float = 0.85
+GRID_ANCHOR_VALIDATED_EVENTS: int = 2
+GRID_ANCHOR_MIN_VALIDATED_EVENTS: int = 4
+GRID_ANCHOR_CEIL: float = (
+    GRID_ANCHOR_CANDIDATE_CEIL
+    if GRID_ANCHOR_VALIDATED_EVENTS >= GRID_ANCHOR_MIN_VALIDATED_EVENTS
+    else 0.0
+)
 
 
 def _difficulty_for(circuit_id: str) -> int:

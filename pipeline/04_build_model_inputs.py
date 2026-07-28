@@ -19,7 +19,7 @@ Data flow:
        -- FP features use abbreviation IDs (VER, HAM); model_rows use Jolpica IDs
        -- Convert via driver_ids.json before merging
     4. Apply feature engineering (pace deltas, theoretical best, etc.)
-    5. Add sample_weight (2.5x for 2026, 1.0 for earlier)
+    5. Add regulation-aware sample_weight (configured in settings.py)
     6. Save combined training data
 
 Output:
@@ -174,8 +174,29 @@ def load_fp_features_for_round(
 
     require_fp_stint_semantics(df, source=fp_path)
 
-    # Keep only driver_id and recognized FP columns
+    # Enforce one schema contract. Silently dropping a newly extracted numeric
+    # feature makes the telemetry layer look complete while the model never
+    # receives it.
     all_fp_cols = FP_ALL_POSSIBLE_COLUMNS + ENGINEERED_FP_COLUMNS
+    fp_metadata_cols = {
+        "driver_id",
+        "constructor_id",
+        "year",
+        "round",
+        "fp_stint_semantics_version",
+    }
+    unexpected = sorted(
+        c for c in df.columns
+        if c not in fp_metadata_cols and c not in all_fp_cols
+    )
+    if unexpected:
+        raise RuntimeError(
+            f"Unrecognized FP feature columns in {fp_path}: {unexpected}. "
+            "Add them to config.settings.FEATURE_COLUMNS or explicitly mark "
+            "them as metadata before rebuilding model inputs."
+        )
+
+    # Keep only driver_id and recognized FP columns.
     keep_cols = ["driver_id"] + [c for c in all_fp_cols if c in df.columns]
     return df[keep_cols].copy()
 
@@ -425,16 +446,32 @@ def main() -> None:
 
     # ---- Step 5: Add sample weights ------------------------------------------
     # Round-aware ramp for regulation-change weight: with only a few rounds of
-    # current-season data, a flat 2.5x multiplier can over-weight noisy early
+    # current-season data, the full multiplier can over-weight noisy early
     # rounds. We ramp from REGULATION_WEIGHT_START -> REGULATION_WEIGHT_MULTIPLIER
-    # as more rounds accumulate. Past-regulation seasons stay at 2.5x (they are
+    # as more rounds accumulate. Past-regulation seasons stay at full weight.
     # the full-season reference used to calibrate the multiplier).
     print(f"\n[Step 5] Adding sample weights ...")
 
     REGULATION_WEIGHT_START = 2.0
     REGULATION_WEIGHT_FULL_THRESHOLD = 10  # rounds of current-reg data for full weight
 
-    current_reg_rows = model_rows[model_rows["season"] >= REGULATION_CHANGE_YEAR]
+    # Derive the live-season ramp from rows that will actually survive a
+    # temporal cutoff. Computing this from the full dataframe gives early
+    # historical folds knowledge of how many later races were eventually run.
+    weight_scope = model_rows
+    if args.exclude_after:
+        cutoff_year, cutoff_round = map(int, args.exclude_after.split(":"))
+        weight_scope = weight_scope[
+            (weight_scope["season"] < cutoff_year)
+            | (
+                (weight_scope["season"] == cutoff_year)
+                & (weight_scope["round"] < cutoff_round)
+            )
+        ]
+
+    current_reg_rows = weight_scope[
+        weight_scope["season"] >= REGULATION_CHANGE_YEAR
+    ]
     if len(current_reg_rows) > 0:
         # Only the current (still-running) season ramps; past reg-era seasons are full.
         active_season_rounds = (
@@ -498,12 +535,12 @@ def main() -> None:
         print(f"  Rows: {before:,} -> {len(model_rows):,} ({removed} removed)")
 
     # Leakage guard: current-season rows are only safe when the caller has
-    # explicitly declared a cutoff (--exclude-after / --exclude-season-round)
+    # explicitly declared a temporal cutoff (--exclude-after)
     # or has opted in with --force-include-current. Otherwise, accidentally
     # leaving current-season data in the training set risks leaking future-round
     # information when predicting upcoming rounds.
     current_season_rows = model_rows[model_rows["season"] == CURRENT_SEASON]
-    declared_cutoff = bool(args.exclude_after) or bool(args.exclude_season_round)
+    declared_cutoff = bool(args.exclude_after)
     if len(current_season_rows) > 0:
         rounds_present = sorted(current_season_rows["round"].unique())
         if declared_cutoff:

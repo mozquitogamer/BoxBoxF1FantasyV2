@@ -62,6 +62,12 @@
           "circuit_id": "spa",
           "points": 26,
           "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 39,
+          "is_dnf": false
         }
       ]
     },
@@ -126,6 +132,12 @@
           "circuit_id": "spa",
           "points": -11,
           "is_dnf": true
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 23,
+          "is_dnf": false
         }
       ]
     },
@@ -189,6 +201,12 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 38,
+          "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 28,
           "is_dnf": false
         }
       ]
@@ -254,6 +272,12 @@
           "circuit_id": "spa",
           "points": 39,
           "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 31,
+          "is_dnf": false
         }
       ]
     },
@@ -317,6 +341,12 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 22,
+          "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 25,
           "is_dnf": false
         }
       ]
@@ -382,6 +412,12 @@
           "circuit_id": "spa",
           "points": 40,
           "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 37,
+          "is_dnf": false
         }
       ]
     },
@@ -445,6 +481,12 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 8,
+          "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 3,
           "is_dnf": false
         }
       ]
@@ -510,6 +552,12 @@
           "circuit_id": "spa",
           "points": 5,
           "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 4,
+          "is_dnf": false
         }
       ]
     },
@@ -573,6 +621,12 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 8,
+          "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 10,
           "is_dnf": false
         }
       ]
@@ -638,6 +692,12 @@
           "circuit_id": "spa",
           "points": 8,
           "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 6,
+          "is_dnf": false
         }
       ]
     },
@@ -701,6 +761,12 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 6,
+          "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 4,
           "is_dnf": false
         }
       ]
@@ -766,6 +832,12 @@
           "circuit_id": "spa",
           "points": 10,
           "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 2,
+          "is_dnf": false
         }
       ]
     },
@@ -829,6 +901,12 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 3,
+          "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 4,
           "is_dnf": false
         }
       ]
@@ -894,6 +972,12 @@
           "circuit_id": "spa",
           "points": 8,
           "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 3,
+          "is_dnf": false
         }
       ]
     },
@@ -957,6 +1041,12 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 3,
+          "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 13,
           "is_dnf": false
         }
       ]
@@ -1022,6 +1112,12 @@
           "circuit_id": "spa",
           "points": -17,
           "is_dnf": true
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": -20,
+          "is_dnf": true
         }
       ]
     },
@@ -1085,6 +1181,12 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 38,
+          "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 15,
           "is_dnf": false
         }
       ]
@@ -1150,6 +1252,12 @@
           "circuit_id": "spa",
           "points": 5,
           "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 10,
+          "is_dnf": false
         }
       ]
     },
@@ -1214,6 +1322,12 @@
           "circuit_id": "spa",
           "points": 19,
           "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": -11,
+          "is_dnf": true
         }
       ]
     },
@@ -1278,6 +1392,12 @@
           "circuit_id": "spa",
           "points": 1,
           "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": -16,
+          "is_dnf": true
         }
       ]
     },
@@ -1341,6 +1461,12 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 4,
+          "is_dnf": false
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 9,
           "is_dnf": false
         }
       ]
@@ -1406,6 +1532,12 @@
           "circuit_id": "spa",
           "points": -19,
           "is_dnf": true
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 15,
+          "is_dnf": false
         }
       ]
     }
@@ -1462,6 +1594,11 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 42
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 71
         }
       ]
     },
@@ -1515,6 +1652,11 @@
         {
           "round": 12,
           "circuit_id": "spa",
+          "points": 71
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
           "points": 71
         }
       ]
@@ -1570,6 +1712,11 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 79
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 59
         }
       ]
     },
@@ -1624,6 +1771,11 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 15
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 47
         }
       ]
     },
@@ -1678,6 +1830,11 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 15
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 10
         }
       ]
     },
@@ -1732,6 +1889,11 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 19
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 17
         }
       ]
     },
@@ -1786,6 +1948,11 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 19
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 10
         }
       ]
     },
@@ -1840,6 +2007,11 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 71
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 38
         }
       ]
     },
@@ -1894,6 +2066,11 @@
           "round": 12,
           "circuit_id": "spa",
           "points": 19
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 29
         }
       ]
     },
@@ -1948,6 +2125,11 @@
           "round": 12,
           "circuit_id": "spa",
           "points": -17
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": -37
         }
       ]
     },
@@ -2002,6 +2184,11 @@
           "round": 12,
           "circuit_id": "spa",
           "points": -13
+        },
+        {
+          "round": 13,
+          "circuit_id": "hungaroring",
+          "points": 36
         }
       ]
     }

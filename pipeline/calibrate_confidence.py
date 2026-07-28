@@ -17,13 +17,14 @@ With N rounds of data, the calibration improves:
   - 6+ rounds: reliable calibration
 
 Usage:
-    python pipeline/calibrate_confidence.py
-    python pipeline/calibrate_confidence.py --verbose
+    python pipeline/calibrate_confidence.py --phase post_fp
+    python pipeline/calibrate_confidence.py --phase post_fp --verbose
 """
 
 import argparse
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -31,19 +32,67 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config.settings import (
-    PREDICTIONS_DIR,
+    CURRENT_SEASON,
     SEED_DIR,
     WEB_DATA_DIR,
     CANCELLED_ROUNDS_2026,
 )
 
+VALID_PHASES = ("pre_fp", "post_fp", "post_quali")
 
-def load_mc_predictions(round_num: int) -> pd.DataFrame | None:
-    """Load Monte Carlo predictions for a round."""
-    path = PREDICTIONS_DIR / f"round{round_num}" / "monte_carlo_fantasy.parquet"
+
+def load_mc_predictions(
+    round_num: int, phase: str = "post_fp"
+) -> pd.DataFrame | None:
+    """Load one frozen phase archive as a calibration frame.
+
+    Mutable ``data/predictions/roundN/monte_carlo_fantasy.parquet`` files are
+    deliberately not accepted: a later post-quali or post-race rerun can replace
+    the distribution that was actually available at the Fantasy lock.
+    """
+    if phase not in VALID_PHASES:
+        raise ValueError(f"Invalid calibration phase: {phase!r}")
+    path = WEB_DATA_DIR / f"predictions_round{round_num}_{phase}.json"
     if not path.exists():
         return None
-    return pd.read_parquet(path)
+    with open(path) as f:
+        payload = json.load(f)
+    if payload.get("phase") != phase:
+        raise ValueError(
+            f"{path.name} is tagged {payload.get('phase')!r}, expected {phase!r}"
+        )
+
+    rows = []
+    for driver in payload.get("drivers", []):
+        required = ("mc_total_p5", "mc_total_p25", "mc_total_p75", "mc_total_p95")
+        if not driver.get("driver_id") or any(driver.get(k) is None for k in required):
+            continue
+        mean = driver.get("mc_total_mean", driver.get("expected_points"))
+        median = driver.get(
+            "mc_total_median",
+            driver.get("expected_points", mean),
+        )
+        if mean is None or median is None:
+            continue
+        rows.append({
+            "driver_abbrev": driver["driver_id"],
+            "det_race_position": driver.get("predicted_finish"),
+            "mc_total_mean": mean,
+            "mc_total_std": driver.get("mc_total_std", 0.0),
+            "mc_total_median": median,
+            "mc_total_p5": driver["mc_total_p5"],
+            "mc_total_p25": driver["mc_total_p25"],
+            "mc_total_p75": driver["mc_total_p75"],
+            "mc_total_p95": driver["mc_total_p95"],
+        })
+
+    if not rows:
+        return None
+    frame = pd.DataFrame(rows)
+    frame.attrs["archive_path"] = str(path)
+    frame.attrs["reconstructed"] = bool(payload.get("reconstructed", False))
+    frame.attrs["phase"] = phase
+    return frame
 
 
 def load_actual_results(round_num: int) -> dict | None:
@@ -53,6 +102,16 @@ def load_actual_results(round_num: int) -> dict | None:
         return None
     with open(path) as f:
         return json.load(f)
+
+
+def load_official_fantasy_points() -> dict:
+    """Load authoritative point totals; absent rounds are still provisional."""
+    path = SEED_DIR / "official_fantasy_points.json"
+    if not path.exists():
+        return {}
+    with open(path) as f:
+        payload = json.load(f)
+    return payload.get("rounds", {})
 
 
 def compute_empirical_percentile(mc_row: dict, actual_pts: float) -> float:
@@ -105,7 +164,9 @@ def _compute_noise_multiplier(observed_coverage_90: float, n_samples: int) -> fl
     if n_samples <= 0:
         return 1.0
     from scipy.stats import norm
-    target_z = norm.ppf(0.975)  # 1.96 for 90% CI
+    # P5-P95 is a CENTRAL 90% interval: each tail contains 5%, so the
+    # corresponding one-sided normal quantile is 0.95 (z ~= 1.645).
+    target_z = norm.ppf(0.95)
     if observed_coverage_90 < 0.88:
         effective_z = norm.ppf(0.5 + observed_coverage_90 / 2)
         mult = target_z / effective_z if effective_z > 0 else 1.2
@@ -122,25 +183,40 @@ def _compute_noise_multiplier(observed_coverage_90: float, n_samples: int) -> fl
     return float(mult)
 
 
-def analyze_calibration(verbose: bool = False) -> dict:
-    """Analyze MC calibration across all completed rounds.
+def analyze_calibration(
+    verbose: bool = False,
+    phase: str = "post_fp",
+    include_reconstructed: bool = False,
+) -> dict:
+    """Analyze MC calibration across official, frozen forecasts for one phase.
 
     Returns calibration metrics and recommended noise adjustment.
     """
+    if phase not in VALID_PHASES:
+        raise ValueError(f"Invalid calibration phase: {phase!r}")
     all_data = []
+    official_rounds = load_official_fantasy_points()
 
-    # Scan for rounds with both MC predictions and actual results
-    for round_num in range(1, 25):
+    # Official fantasy totals are the completeness gate. A calculated actual
+    # file alone is not sufficient because DOTD, pit points, or overtakes may
+    # still be provisional.
+    for round_key in sorted(official_rounds, key=lambda value: int(value)):
+        round_num = int(round_key)
         if round_num in CANCELLED_ROUNDS_2026:
             continue
 
-        mc_df = load_mc_predictions(round_num)
+        mc_df = load_mc_predictions(round_num, phase=phase)
         actual = load_actual_results(round_num)
 
         if mc_df is None or actual is None:
             continue
+        if mc_df.attrs.get("reconstructed", False) and not include_reconstructed:
+            if verbose:
+                print(f"  Skipping reconstructed R{round_num} {phase} archive")
+            continue
 
-        actual_pts_map = {d["driver_id"]: d["total_points"] for d in actual["drivers"]}
+        official_round = official_rounds.get(str(round_num), {})
+        actual_pts_map = official_round.get("drivers", {})
         actual_race_pos = {d["driver_id"]: d.get("race_position") for d in actual["drivers"]}
         actual_quali_pos = {d["driver_id"]: d.get("quali_position") for d in actual["drivers"]}
         actual_dnf = {d["driver_id"]: d.get("is_dnf", False) for d in actual["drivers"]}
@@ -179,6 +255,10 @@ def analyze_calibration(verbose: bool = False) -> dict:
                 "tier": tier,
                 "is_dnf": actual_dnf.get(abbrev, False),
                 "det_position": det_pos,
+                "phase": phase,
+                "archive_reconstructed": bool(
+                    mc_df.attrs.get("reconstructed", False)
+                ),
             })
 
     if not all_data:
@@ -190,8 +270,11 @@ def analyze_calibration(verbose: bool = False) -> dict:
     n_samples = len(df)
 
     print(f"\n{'=' * 70}")
-    print(f"CONFIDENCE INTERVAL CALIBRATION")
-    print(f"  {n_rounds} rounds, {n_samples} driver-rounds")
+    print(f"CONFIDENCE INTERVAL CALIBRATION — {phase}")
+    print(
+        f"  {n_rounds} official rounds, {n_samples} driver-rounds"
+        f"{' (including reconstructions)' if include_reconstructed else ''}"
+    )
     print(f"{'=' * 70}")
 
     # 1. Coverage analysis at key percentile levels
@@ -223,7 +306,22 @@ def analyze_calibration(verbose: bool = False) -> dict:
     print(f"  {'Interval':<25} {'Actual':>8} {'Target':>8} {'Ratio':>8}")
     print(f"  {'-' * 50}")
     for label, v in coverage.items():
-        status = "OK" if 0.85 <= v["ratio"] <= 1.15 else ("NARROW" if v["ratio"] < 0.85 else "WIDE")
+        if label.startswith("90%"):
+            status = (
+                "NARROW"
+                if v["actual"] < 0.88
+                else "WIDE"
+                if v["actual"] > 0.95
+                else "OK"
+            )
+        else:
+            status = (
+                "OK"
+                if 0.85 <= v["ratio"] <= 1.15
+                else "NARROW"
+                if v["ratio"] < 0.85
+                else "WIDE"
+            )
         print(f"  {label:<25} {v['actual']*100:>7.1f}% {v['target']*100:>7.0f}% {v['ratio']:>7.2f}  {status}")
 
     # 2. PIT histogram (should be uniform if well-calibrated)
@@ -309,26 +407,9 @@ def analyze_calibration(verbose: bool = False) -> dict:
     overall_90_coverage = coverage["90% CI (P5-P95)"]["actual"]
     overall_50_coverage = coverage["50% CI (P25-P75)"]["actual"]
 
-    # Compute noise multiplier from coverage ratio
-    # Using quantile-based approach: if coverage is too low, widen intervals
-    if overall_90_coverage < 0.88:
-        # Intervals too narrow - need more noise
-        # Approximate: the "effective" z-value that gives our observed coverage
-        from scipy.stats import norm
-        target_z = norm.ppf(0.975)  # 1.96 for 95th percentile (one-sided)
-        # Our effective z gives coverage = overall_90_coverage
-        effective_z = norm.ppf(0.5 + overall_90_coverage / 2)
-        noise_multiplier = target_z / effective_z if effective_z > 0 else 1.2
-        noise_multiplier = min(noise_multiplier, 1.5)  # Cap at 1.5x
-    elif overall_90_coverage > 0.95:
-        # Intervals too wide - could reduce noise (conservative: don't go below 0.9x)
-        from scipy.stats import norm
-        target_z = norm.ppf(0.975)
-        effective_z = norm.ppf(0.5 + overall_90_coverage / 2)
-        noise_multiplier = target_z / effective_z if effective_z > 0 else 0.95
-        noise_multiplier = max(noise_multiplier, 0.8)  # Floor at 0.8x
-    else:
-        noise_multiplier = 1.0  # Well-calibrated
+    noise_multiplier = _compute_noise_multiplier(
+        overall_90_coverage, n_samples
+    )
 
     # Bias correction: shift the mean prediction
     overall_bias = float(df["error"].mean())
@@ -350,8 +431,63 @@ def analyze_calibration(verbose: bool = False) -> dict:
         print(f"  Using conservative adjustment (capped at +/- 10%).")
         noise_multiplier = max(0.9, min(1.1, noise_multiplier))
 
+    # Cumulative, time-safe calibration snapshots. A forecast for round N may
+    # load only an entry whose ``through_round`` is strictly less than N.
+    cumulative = []
+    for through_round in sorted(df["round"].unique()):
+        cdf = df[df["round"] <= through_round]
+        cumulative_rounds = int(cdf["round"].nunique())
+        cumulative_90 = float(
+            (
+                (cdf["actual_pts"] >= cdf["mc_p5"])
+                & (cdf["actual_pts"] <= cdf["mc_p95"])
+            ).mean()
+        )
+        cumulative_mult = _compute_noise_multiplier(
+            cumulative_90, len(cdf)
+        )
+        if cumulative_rounds < 3:
+            cumulative_mult = max(0.9, min(1.1, cumulative_mult))
+
+        cumulative_bias = float(cdf["error"].mean())
+        cumulative_std = float(cdf["error"].std())
+        cumulative_bias_significant = (
+            np.isfinite(cumulative_std)
+            and abs(cumulative_bias)
+            > 0.5 * cumulative_std / np.sqrt(len(cdf))
+        )
+        cumulative_tiers = {}
+        for tier in ("front", "midfield", "back"):
+            tier_df = cdf[cdf["tier"] == tier]
+            if len(tier_df) >= 5:
+                cumulative_tiers[tier] = {
+                    "bias": round(float(tier_df["error"].mean()), 2),
+                    "n": int(len(tier_df)),
+                }
+
+        cumulative.append({
+            "through_round": int(through_round),
+            "n_rounds": cumulative_rounds,
+            "n_samples": int(len(cdf)),
+            "coverage_90": round(cumulative_90, 4),
+            "noise_multiplier": round(float(cumulative_mult), 4),
+            "bias_correction": (
+                round(cumulative_bias, 2)
+                if cumulative_bias_significant
+                else 0.0
+            ),
+            "per_tier": cumulative_tiers,
+        })
+
     # Build calibration output
     calibration = {
+        "phase": phase,
+        "season": CURRENT_SEASON,
+        "archive_policy": (
+            "frozen phase archives; reconstructed excluded"
+            if not include_reconstructed
+            else "frozen phase archives; reconstructed included"
+        ),
         "noise_multiplier": round(noise_multiplier, 4),
         "bias_correction": round(overall_bias, 2) if bias_significant else 0.0,
         "n_rounds": n_rounds,
@@ -362,6 +498,7 @@ def analyze_calibration(verbose: bool = False) -> dict:
         "overall_bias": round(overall_bias, 2),
         "per_tier": {},
         "per_round": round_coverages,
+        "cumulative": cumulative,
         "pit_histogram": [int(h) for h in hist],
         "pit_chi2": round(chi2, 2),
     }
@@ -383,22 +520,55 @@ def analyze_calibration(verbose: bool = False) -> dict:
     return calibration
 
 
-def save_calibration(calibration: dict) -> None:
-    """Save calibration parameters to seed data."""
+def save_calibration(calibration: dict, phase: str) -> None:
+    """Merge one phase's result into the versioned calibration seed."""
     path = SEED_DIR / "mc_calibration.json"
+    existing = {}
+    if path.exists():
+        with open(path) as f:
+            existing = json.load(f)
+
+    if existing.get("schema_version") == 2:
+        output = existing
+    else:
+        output = {
+            "schema_version": 2,
+            "default_phase": "post_fp",
+            "phases": {},
+        }
+        if existing:
+            output["legacy_mixed_calibration"] = existing
+
+    output.setdefault("phases", {})[phase] = calibration
+    output["updated_at"] = datetime.now(timezone.utc).isoformat()
     with open(path, "w") as f:
-        json.dump(calibration, f, indent=2)
-    print(f"\n  Saved calibration -> {path}")
+        json.dump(output, f, indent=2)
+    print(f"\n  Saved {phase} calibration -> {path}")
 
 
 def main():
     parser = argparse.ArgumentParser(description="Calibrate MC confidence intervals")
     parser.add_argument("--verbose", "-v", action="store_true")
+    parser.add_argument(
+        "--phase",
+        choices=VALID_PHASES,
+        default="post_fp",
+        help="Frozen forecast phase to calibrate (default: actionable post_fp)",
+    )
+    parser.add_argument(
+        "--include-reconstructed",
+        action="store_true",
+        help="Include explicitly reconstructed archives (excluded by default)",
+    )
     args = parser.parse_args()
 
-    calibration = analyze_calibration(verbose=args.verbose)
+    calibration = analyze_calibration(
+        verbose=args.verbose,
+        phase=args.phase,
+        include_reconstructed=args.include_reconstructed,
+    )
     if calibration:
-        save_calibration(calibration)
+        save_calibration(calibration, args.phase)
         print(f"\n  To apply: re-run 08_monte_carlo_fantasy.py (auto-loads calibration)")
 
 

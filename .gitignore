@@ -6,6 +6,7 @@ __pycache__/
 dist/
 build/
 *.egg
+.pytest*/
 
 # Virtual environments
 venv/
@@ -60,3 +61,7 @@ desktop.ini
 .env
 *.env
 credentials.json
+
+# Disposable experiment caches/logs (final manifests and metrics remain tracked)
+data/experiments/**/_cache/
+data/experiments/**/*.log

@@ -402,6 +402,46 @@
         "audi": 19,
         "cadillac": -17
       }
+    },
+    "13": {
+      "race": "Hungarian Grand Prix",
+      "drivers": {
+        "VER": 39,
+        "RUS": 23,
+        "NOR": 37,
+        "PIA": -11,
+        "ANT": 28,
+        "LEC": 31,
+        "HAM": 25,
+        "HAD": 15,
+        "GAS": 6,
+        "SAI": 2,
+        "ALB": 4,
+        "ALO": 10,
+        "BEA": 3,
+        "OCO": 4,
+        "LIN": 4,
+        "COL": 3,
+        "LAW": 13,
+        "STR": 15,
+        "BOR": 10,
+        "PER": -20,
+        "HUL": 9,
+        "BOT": -16
+      },
+      "constructors": {
+        "mercedes": 71,
+        "mclaren": 38,
+        "red_bull": 59,
+        "ferrari": 71,
+        "alpine": 17,
+        "williams": 10,
+        "aston_martin": 36,
+        "haas": 10,
+        "racing_bulls": 47,
+        "audi": 29,
+        "cadillac": -37
+      }
     }
   }
 }

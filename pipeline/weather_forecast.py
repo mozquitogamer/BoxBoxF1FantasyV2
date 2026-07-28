@@ -18,6 +18,7 @@ Output:
 """
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -31,7 +32,13 @@ if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from config.settings import CURRENT_SEASON, SEED_DIR, WEB_DATA_DIR
+from config.settings import (
+    CURRENT_SEASON,
+    FORECAST_ARCHIVE_DIR,
+    PROJECT_ROOT,
+    SEED_DIR,
+    WEB_DATA_DIR,
+)
 from config.circuit_coordinates import get_circuit_location
 
 # WMO Weather interpretation codes → labels and icons
@@ -288,6 +295,75 @@ def process_hourly_for_sessions(api_data: dict, sessions: list[dict]) -> list[di
     return enriched_sessions
 
 
+def archive_weather_snapshot(
+    output: dict,
+    provider_response: dict,
+    retrieved_at: datetime | None = None,
+) -> Path:
+    """Persist an immutable provider + processed forecast snapshot.
+
+    ``weather.json`` remains the mutable latest forecast. These timestamped
+    files are the evidence used to evaluate weather at the actual information
+    deadline rather than substituting observed session conditions.
+    """
+    now = retrieved_at or datetime.now(timezone.utc)
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=timezone.utc)
+    now = now.astimezone(timezone.utc)
+
+    snapshot_id = now.strftime("%Y-%m-%dT%H-%M-%S.%fZ")
+    season = int(str(output["race_date"])[:4])
+    round_num = int(output["round"])
+    archive_dir = (
+        FORECAST_ARCHIVE_DIR
+        / "weather"
+        / f"year{season}"
+        / f"round{round_num}"
+    )
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    archive_path = archive_dir / f"{snapshot_id}_open_meteo.json"
+    if archive_path.exists():
+        raise FileExistsError(
+            f"Weather snapshot collision; refusing overwrite: {archive_path}"
+        )
+
+    raw_bytes = json.dumps(
+        provider_response,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    try:
+        relative_path = str(
+            archive_path.relative_to(PROJECT_ROOT)
+        ).replace("\\", "/")
+    except ValueError:
+        relative_path = str(archive_path)
+
+    output["forecast_snapshot_id"] = snapshot_id
+    output["forecast_retrieved_at"] = now.isoformat()
+    output["forecast_archive_path"] = relative_path
+
+    snapshot = {
+        "schema_version": 1,
+        "snapshot_id": snapshot_id,
+        "retrieved_at": now.isoformat(),
+        "provider": "Open-Meteo",
+        "provider_response_sha256": hashlib.sha256(raw_bytes).hexdigest(),
+        "target": {
+            "season": season,
+            "round": round_num,
+            "race": output.get("race"),
+            "race_date": output.get("race_date"),
+            "forecast_window": output.get("forecast_window"),
+        },
+        "processed_forecast": output,
+        "provider_response": provider_response,
+    }
+    with open(archive_path, "x") as f:
+        json.dump(snapshot, f, indent=2)
+    return archive_path
+
+
 def run_weather_forecast(round_num: int | None = None) -> dict:
     """Main entry point — fetch and process weather for a race weekend."""
     print("=" * 60)
@@ -374,6 +450,12 @@ def run_weather_forecast(round_num: int | None = None) -> dict:
         "data_source": "Open-Meteo (open-meteo.com)",
     }
 
+    snapshot_path = archive_weather_snapshot(
+        output,
+        api_data,
+        retrieved_at=now,
+    )
+
     # Save to website data
     WEB_DATA_DIR.mkdir(parents=True, exist_ok=True)
     output_path = WEB_DATA_DIR / "weather.json"
@@ -403,6 +485,8 @@ def run_weather_forecast(round_num: int | None = None) -> dict:
 
     print(f"\n  Last updated:  {output['last_updated']}")
     print(f"  Next update:   {output['next_update']}")
+    print(f"  Snapshot:      {output['forecast_snapshot_id']}")
+    print(f"  Archived ->    {snapshot_path}")
     print(f"  Saved -> {output_path}")
     print("=" * 60)
 

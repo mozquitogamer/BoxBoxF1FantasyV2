@@ -99,8 +99,8 @@ PHASES = {
         "description": "Prepare for race weekend - download historical data and train models",
         "steps": [
             ("01_download_data.py", ["--mode", "historical", "--start-year", "2020", "--end-year", "2025"]),
-            ("03a_normalize_jolpica.py", []),
-            ("03b_build_jolpica_features.py", []),
+            ("03a_normalize_jolpica.py", ["--all"]),
+            ("03b_build_jolpica_features.py", ["--all"]),
             ("04_build_model_inputs.py", ["--exclude-after", "{year}:{round}"]),
             ("05_train_models.py", []),
         ],
@@ -159,17 +159,23 @@ PHASES = {
         "description": "After the race - download results, compute actuals, analyze accuracy",
         "steps": [
             ("01_download_data.py", ["--mode", "current", "--round", "{round}"]),
+            # Persist the completed session's weather before the next retrain.
+            ("03c_extract_session_weather.py", ["--year", "{year}", "--round", "{round}"]),
             ("09_post_race_analysis.py", ["--round", "{round}"]),
-            # Fetch OpenF1 overtakes + pit stop stationary times BEFORE actual_fantasy_points
-            # so the constructor pit stop scoring uses real wheels-up times (stop_duration),
-            # not Jolpica's pit lane transit duration (~22s, all in the >3s zero-points bracket).
-            # Note: OpenF1 may not have stop_duration populated immediately after the race.
-            # If `pitstops` key is missing in overtakes.json, re-run this phase a day later.
-            ("13_fetch_openf1_overtakes.py", ["--year", str(CURRENT_SEASON), "--round", "{round}"]),
-            ("11_actual_fantasy_points.py", ["--round", "{round}"]),
             ("11_race_deep_dive.py", ["--round", "{round}"]),
+            # Keep the FastF1 detector as a diagnostic/fallback first. OpenF1 then
+            # backs it up and writes the canonical file consumed by actual scoring.
+            # Reversing these two steps silently overwrites OpenF1 overtakes and
+            # removes its pit-stop block.
             ("12_count_overtakes.py", ["--round", "{round}"]),
+            ("13_fetch_openf1_overtakes.py", ["--year", str(CURRENT_SEASON), "--round", "{round}"]),
+            # Format pit-stop stationary times before scoring/export when OpenF1
+            # has published them. This formatter is cache-only and remains safe
+            # to rerun when stop_duration arrives later.
             ("13_fetch_pitstop_stationary.py", ["--year", str(CURRENT_SEASON), "--round", "{round}"]),
+            # Score actuals only after the canonical overtake/pit file is final.
+            # This avoids a second run producing different totals from the first.
+            ("11_actual_fantasy_points.py", ["--round", "{round}"]),
             ("08_export_website_json.py", ["--round", "{round}"]),
             ("14_build_seo_pages.py", [], {"non_fatal": True}),
         ],

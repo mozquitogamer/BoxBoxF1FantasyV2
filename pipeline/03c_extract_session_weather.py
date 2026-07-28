@@ -258,8 +258,15 @@ def process_year(year: int, only_round: Optional[int], force: bool) -> int:
     if not rounds:
         return 0
 
-    existing = None if force else existing_year_df(year)
-    skip_keys = already_extracted_keys(existing)
+    # Always retain the existing year file as the merge base. In particular,
+    # ``--year Y --round R --force`` must replace only R's successfully
+    # re-extracted sessions, not truncate the year file to that one round.
+    #
+    # Keeping the old rows also makes a forced refresh failure-safe: if
+    # FastF1 cannot reload one cached session, its last known aggregate stays
+    # on disk instead of silently disappearing.
+    existing = existing_year_df(year)
+    skip_keys = set() if force else already_extracted_keys(existing)
 
     print(f"\n[{year}] {len(rounds)} round(s) to consider; "
           f"{len(skip_keys)} (round, session) pairs already extracted")

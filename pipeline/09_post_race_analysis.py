@@ -25,6 +25,7 @@ Usage:
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -156,6 +157,30 @@ def load_driver_constructors() -> dict:
 
 # -- Analysis functions --------------------------------------------------------
 
+_LAPS_BEHIND_STATUS = re.compile(r"^\+\s*\d+\s+laps?$", re.IGNORECASE)
+
+
+def is_classified_result(result: dict) -> bool:
+    """Return whether Jolpica classifies a race/sprint result.
+
+    ``positionText`` is authoritative when present: a numeric value is a
+    classified result, while ``R``/``D``/``W`` represent retirement,
+    disqualification, and DNS.  Older/current Jolpica payloads are inconsistent
+    about the companion status for lapped finishers (``Lapped`` versus
+    ``+1 Lap``/``+N Laps``), so status is only a compatibility fallback.
+    """
+    position_text = str(result.get("positionText", "")).strip()
+    if position_text:
+        return position_text.isdigit()
+
+    status = str(result.get("status", "")).strip()
+    status_lower = status.lower()
+    return (
+        status_lower in {"finished", "lapped"}
+        or bool(_LAPS_BEHIND_STATUS.fullmatch(status))
+    )
+
+
 def analyze_race_results(race_data: dict, jolpica_to_abbrev: dict) -> list[dict]:
     """Parse race results into a clean list."""
     results = []
@@ -165,9 +190,10 @@ def analyze_race_results(race_data: dict, jolpica_to_abbrev: dict) -> list[dict]
         constructor = r.get("Constructor", {}).get("constructorId", "")
 
         status = r.get("status", "Finished")
-        is_finished = status.lower() in ["finished"] or status.startswith("+")
+        is_finished = is_classified_result(r)
         grid = int(r.get("grid", 0))
-        position = int(r.get("position", 0)) if is_finished else None
+        classified_position = int(r.get("position", 0))
+        position = classified_position if is_finished else None
         points = float(r.get("points", 0))
 
         pos_change = (grid - position) if position and grid else 0
@@ -176,8 +202,10 @@ def analyze_race_results(race_data: dict, jolpica_to_abbrev: dict) -> list[dict]
             "driver_id": abbrev,
             "constructor_id": constructor,
             "grid": grid,
+            "classified_position": classified_position,
             "finish_position": position,
             "status": status,
+            "is_classified": is_finished,
             "is_finished": is_finished,
             "points": points,
             "positions_gained": pos_change,
@@ -194,9 +222,10 @@ def analyze_sprint_results(sprint_data: dict, jolpica_to_abbrev: dict) -> list[d
         constructor = r.get("Constructor", {}).get("constructorId", "")
 
         status = r.get("status", "Finished")
-        is_finished = status.lower() in ["finished"] or status.startswith("+")
+        is_finished = is_classified_result(r)
         grid = int(r.get("grid", 0))
-        position = int(r.get("position", 0)) if is_finished else None
+        classified_position = int(r.get("position", 0))
+        position = classified_position if is_finished else None
         points = float(r.get("points", 0))
 
         pos_change = (grid - position) if position and grid else 0
@@ -205,8 +234,10 @@ def analyze_sprint_results(sprint_data: dict, jolpica_to_abbrev: dict) -> list[d
             "driver_id": abbrev,
             "constructor_id": constructor,
             "grid": grid,
+            "classified_position": classified_position,
             "finish_position": position,
             "status": status,
+            "is_classified": is_finished,
             "is_finished": is_finished,
             "points": points,
             "positions_gained": pos_change,

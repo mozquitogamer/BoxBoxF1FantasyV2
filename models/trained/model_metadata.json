@@ -1,8 +1,8 @@
 {
-  "trained_at": "2026-07-18T10:02:54.163901",
+  "trained_at": "2026-07-27T13:52:05.050126",
   "current_season": 2026,
   "training_data": "D:\\OneDrive\\BoxBoxF1FantasyV2\\models\\training_data\\all_training_data.parquet",
-  "total_rows": 2811,
+  "total_rows": 2855,
   "seasons": [
     2020,
     2021,
@@ -12,14 +12,14 @@
     2025,
     2026
   ],
-  "fp_coverage": "1614/2811 (57.4%)",
+  "fp_coverage": "1658/2855 (58.1%)",
   "fp_stint_semantics_version": 2,
   "fp_stint_semantics": "session+stint+compound; clean race compounds; FP2>FP1>FP3 headline",
   "qualifying_model": {
     "algorithm": "XGBRanker (rank:pairwise)",
     "save_format": "json",
-    "n_features": 92,
-    "training_samples": 2811,
+    "n_features": 95,
+    "training_samples": 2855,
     "params": {
       "n_estimators": 1200,
       "learning_rate": 0.025,
@@ -36,74 +36,74 @@
         "test_year": 2022,
         "train_size": 779,
         "test_size": 440,
-        "mae": 2.9545,
-        "rmse": 3.9191,
-        "kendall_tau": 0.6,
-        "top3_accuracy": 0.5909
+        "mae": 2.9273,
+        "rmse": 3.9818,
+        "kendall_tau": 0.6005,
+        "top3_accuracy": 0.697
       },
       {
         "test_year": 2023,
         "train_size": 1219,
         "test_size": 440,
-        "mae": 3.5977,
-        "rmse": 4.7685,
-        "kendall_tau": 0.4984,
-        "top3_accuracy": 0.5909
+        "mae": 3.675,
+        "rmse": 4.8843,
+        "kendall_tau": 0.4926,
+        "top3_accuracy": 0.5455
       },
       {
         "test_year": 2024,
         "train_size": 1659,
         "test_size": 479,
-        "mae": 3.0689,
-        "rmse": 4.1612,
-        "kendall_tau": 0.5738,
-        "top3_accuracy": 0.5278
+        "mae": 3.048,
+        "rmse": 4.1592,
+        "kendall_tau": 0.577,
+        "top3_accuracy": 0.5556
       },
       {
         "test_year": 2025,
         "train_size": 2138,
         "test_size": 478,
-        "mae": 3.2552,
-        "rmse": 4.316,
-        "kendall_tau": 0.5517,
-        "top3_accuracy": 0.6528
+        "mae": 3.3096,
+        "rmse": 4.3397,
+        "kendall_tau": 0.5431,
+        "top3_accuracy": 0.6111
       },
       {
         "test_year": 2026,
         "train_size": 2616,
-        "test_size": 195,
-        "mae": 2.2462,
-        "rmse": 3.0634,
-        "kendall_tau": 0.7214,
-        "top3_accuracy": 0.6296
+        "test_size": 239,
+        "mae": 2.1255,
+        "rmse": 2.9685,
+        "kendall_tau": 0.74,
+        "top3_accuracy": 0.5455
       }
     ],
-    "walk_forward_mean_mae": 3.0245,
-    "walk_forward_mean_kendall_tau": 0.5891,
-    "walk_forward_mean_top3_accuracy": 0.5984,
+    "walk_forward_mean_mae": 3.0171,
+    "walk_forward_mean_kendall_tau": 0.5906,
+    "walk_forward_mean_top3_accuracy": 0.5909,
     "top_features": {
-      "sim_weighted_points_5": 0.0363,
-      "driver_season_med_quali": 0.0229,
-      "driver_roll_quali_5": 0.0217,
-      "driver_vs_field_season": 0.0214,
-      "driver_season_avg_quali": 0.0213,
-      "driver_circuit_roll_3": 0.0205,
-      "quali_skill": 0.0191,
-      "weather_was_wet_quali": 0.0189,
-      "constructor_vs_field_season": 0.0168,
-      "sim_weighted_quali_3": 0.0155,
-      "wet_skill": 0.0154,
-      "pace_rank": 0.0147,
-      "constructor_season_avg_quali": 0.0141,
-      "driver_circuit_exp": 0.0138,
-      "sim_weighted_quali_5": 0.0132
+      "driver_circuit_roll_3": 0.0316,
+      "constructor_season_avg_quali": 0.0274,
+      "sim_weighted_points_3": 0.0228,
+      "driver_circuit_exp": 0.0228,
+      "roll_quali_5": 0.0226,
+      "driver_vs_field_season": 0.0176,
+      "driver_season_med_quali": 0.016,
+      "pace_delta_to_median": 0.0157,
+      "pace_rank": 0.015,
+      "driver_season_avg_quali": 0.0145,
+      "sprint_grid": 0.0139,
+      "sim_weighted_quali_3": 0.0139,
+      "sim_weighted_points_5": 0.0137,
+      "sim_weighted_quali_5": 0.0135,
+      "sector_1_delta_to_fastest": 0.0133
     }
   },
   "race_model": {
     "algorithm": "XGBRanker (rank:pairwise)",
     "save_format": "json",
-    "n_features": 108,
-    "training_samples": 2397,
+    "n_features": 111,
+    "training_samples": 2435,
     "trained_on": "actual quali_position",
     "used_for": "post-quali inference (actual quali known)",
     "params": {
@@ -120,74 +120,74 @@
         "test_year": 2022,
         "train_size": 663,
         "test_size": 366,
-        "mae": 2.4317,
-        "rmse": 3.2843,
-        "kendall_tau": 0.6071,
-        "top3_accuracy": 0.6818
+        "mae": 2.3716,
+        "rmse": 3.2128,
+        "kendall_tau": 0.6035,
+        "top3_accuracy": 0.6667
       },
       {
         "test_year": 2023,
         "train_size": 1029,
         "test_size": 374,
-        "mae": 2.3262,
-        "rmse": 3.1231,
-        "kendall_tau": 0.6289,
-        "top3_accuracy": 0.5758
+        "mae": 2.4064,
+        "rmse": 3.2093,
+        "kendall_tau": 0.6159,
+        "top3_accuracy": 0.5606
       },
       {
         "test_year": 2024,
         "train_size": 1403,
         "test_size": 425,
-        "mae": 2.1929,
-        "rmse": 3.0633,
-        "kendall_tau": 0.6646,
-        "top3_accuracy": 0.625
+        "mae": 2.1788,
+        "rmse": 3.0732,
+        "kendall_tau": 0.6725,
+        "top3_accuracy": 0.6667
       },
       {
         "test_year": 2025,
         "train_size": 1828,
         "test_size": 419,
-        "mae": 2.2721,
-        "rmse": 3.2435,
-        "kendall_tau": 0.6277,
-        "top3_accuracy": 0.75
+        "mae": 2.2148,
+        "rmse": 3.1811,
+        "kendall_tau": 0.6479,
+        "top3_accuracy": 0.7639
       },
       {
         "test_year": 2026,
         "train_size": 2247,
-        "test_size": 150,
-        "mae": 1.86,
-        "rmse": 2.8083,
-        "kendall_tau": 0.7028,
-        "top3_accuracy": 0.6296
+        "test_size": 188,
+        "mae": 1.8989,
+        "rmse": 2.6866,
+        "kendall_tau": 0.7059,
+        "top3_accuracy": 0.6061
       }
     ],
-    "walk_forward_mean_mae": 2.2166,
-    "walk_forward_mean_kendall_tau": 0.6462,
-    "walk_forward_mean_top3_accuracy": 0.6524,
+    "walk_forward_mean_mae": 2.2141,
+    "walk_forward_mean_kendall_tau": 0.6491,
+    "walk_forward_mean_top3_accuracy": 0.6528,
     "top_features": {
-      "is_top10_quali": 0.059,
-      "grid_advantage": 0.0451,
-      "roll_points_5": 0.0324,
-      "quali_position": 0.0264,
-      "constructor_season_avg_quali": 0.0154,
-      "driver_circuit_roll_3": 0.0153,
-      "sim_weighted_points_5": 0.0128,
-      "weather_precip_minutes_race": 0.0117,
-      "constructor_vs_field_season": 0.0115,
-      "roll_points_3": 0.0115,
-      "cold_skill": 0.011,
-      "sim_weighted_quali_5": 0.0104,
-      "roll_finishpos_5": 0.0104,
-      "driver_vs_field_season": 0.0102,
-      "is_front_row": 0.0101
+      "grid_advantage": 0.0571,
+      "is_top10_quali": 0.0509,
+      "quali_position": 0.0268,
+      "is_front_row": 0.0239,
+      "roll_points_5": 0.0217,
+      "constructor_season_avg_quali": 0.0132,
+      "sim_weighted_points_5": 0.0129,
+      "roll_points_3": 0.0123,
+      "team_recent_form": 0.0113,
+      "constructor_vs_field_season": 0.0111,
+      "driver_season_med_quali": 0.0111,
+      "pace_delta_to_fastest": 0.0104,
+      "sim_weighted_points_3": 0.0104,
+      "roll_finishpos_5": 0.0103,
+      "sim_weighted_quali_5": 0.0101
     }
   },
   "race_model_fp": {
     "algorithm": "XGBRanker (rank:pairwise)",
     "save_format": "json",
-    "n_features": 108,
-    "training_samples": 2397,
+    "n_features": 111,
+    "training_samples": 2435,
     "trained": true,
     "trained_on": "walk-forward predicted quali_position",
     "used_for": "post-FP inference (predicted quali only)",
@@ -204,81 +204,81 @@
         "test_year": 2022,
         "train_size": 663,
         "test_size": 366,
-        "mae": 2.8415,
-        "rmse": 3.814,
-        "kendall_tau": 0.5262,
-        "top3_accuracy": 0.6212
+        "mae": 2.6339,
+        "rmse": 3.5652,
+        "kendall_tau": 0.5569,
+        "top3_accuracy": 0.6364
       },
       {
         "test_year": 2023,
         "train_size": 1029,
         "test_size": 374,
         "mae": 2.6364,
-        "rmse": 3.4664,
-        "kendall_tau": 0.5753,
-        "top3_accuracy": 0.4545
+        "rmse": 3.4587,
+        "kendall_tau": 0.5842,
+        "top3_accuracy": 0.4091
       },
       {
         "test_year": 2024,
         "train_size": 1403,
         "test_size": 425,
-        "mae": 2.6588,
-        "rmse": 3.6312,
-        "kendall_tau": 0.5771,
-        "top3_accuracy": 0.5556
+        "mae": 2.6824,
+        "rmse": 3.6299,
+        "kendall_tau": 0.5754,
+        "top3_accuracy": 0.5694
       },
       {
         "test_year": 2025,
         "train_size": 1828,
         "test_size": 419,
-        "mae": 2.8353,
-        "rmse": 3.8156,
-        "kendall_tau": 0.5512,
+        "mae": 2.7924,
+        "rmse": 3.7064,
+        "kendall_tau": 0.5671,
         "top3_accuracy": 0.6389
       },
       {
         "test_year": 2026,
         "train_size": 2247,
-        "test_size": 150,
-        "mae": 2.3267,
-        "rmse": 3.1549,
-        "kendall_tau": 0.6323,
-        "top3_accuracy": 0.6296
+        "test_size": 188,
+        "mae": 2.2394,
+        "rmse": 3.1479,
+        "kendall_tau": 0.6331,
+        "top3_accuracy": 0.6061
       }
     ],
-    "walk_forward_mean_mae": 2.6597,
-    "walk_forward_mean_kendall_tau": 0.5724,
-    "walk_forward_mean_top3_accuracy": 0.58,
-    "post_fp_mae_delta_vs_race_model": 0.9946,
+    "walk_forward_mean_mae": 2.5969,
+    "walk_forward_mean_kendall_tau": 0.5833,
+    "walk_forward_mean_top3_accuracy": 0.572,
+    "post_fp_mae_delta_vs_race_model": 1.0222,
     "top_features": {
-      "roll_points_5": 0.0405,
-      "driver_vs_field_season": 0.0278,
-      "driver_circuit_roll_3": 0.0187,
-      "sim_weighted_points_5": 0.0171,
-      "is_pole_position": 0.0171,
-      "quali_position": 0.0164,
-      "constructor_vs_field_season": 0.0161,
-      "grid_advantage": 0.015,
-      "constructor_season_avg_quali": 0.0142,
-      "driver_season_avg_quali": 0.0137,
-      "sim_weighted_quali_3": 0.0127,
-      "sim_weighted_quali_5": 0.0126,
-      "driver_season_med_quali": 0.0122,
-      "tire_mgmt": 0.0121,
-      "weather_precip_minutes_race": 0.0116
+      "grid_advantage": 0.0634,
+      "roll_points_5": 0.0384,
+      "quali_position": 0.0221,
+      "sim_weighted_points_5": 0.0179,
+      "roll_drivererror_dnf_rate_5_driver": 0.0146,
+      "constructor_season_avg_quali": 0.0135,
+      "driver_circuit_roll_3": 0.0133,
+      "sim_weighted_quali_5": 0.0132,
+      "driver_vs_field_season": 0.0125,
+      "driver_season_avg_quali": 0.0116,
+      "constructor_vs_field_season": 0.0116,
+      "team_recent_form": 0.0114,
+      "roll_quali_3": 0.011,
+      "driver_circuit_exp": 0.011,
+      "driver_season_med_quali": 0.0107
     }
   },
   "fp_signal_model": {
     "algorithm": "ExtraTreesRegressor",
     "save_format": "pkl",
-    "n_features": 11,
-    "training_samples": 1614,
+    "n_features": 19,
+    "training_samples": 1658,
     "trained": true
   },
   "sprint_model": {
     "algorithm": "XGBRanker (rank:pairwise)",
     "save_format": "json",
-    "n_features": 113,
+    "n_features": 110,
     "training_samples": 567,
     "trained": true,
     "trained_on": "actual quali_position + actual sprint_grid",
@@ -298,46 +298,46 @@
         "test_year": 2022,
         "train_size": 60,
         "test_size": 60,
-        "mae": 3.5333,
-        "rmse": 4.626,
-        "kendall_tau": 0.5088,
-        "top3_accuracy": 0.8889
+        "mae": 3.1,
+        "rmse": 4.1312,
+        "kendall_tau": 0.5719,
+        "top3_accuracy": 0.6667
       },
       {
         "test_year": 2023,
         "train_size": 120,
         "test_size": 120,
-        "mae": 3.3,
-        "rmse": 4.4083,
-        "kendall_tau": 0.5246,
+        "mae": 3.0167,
+        "rmse": 4.0845,
+        "kendall_tau": 0.5702,
         "top3_accuracy": 0.5556
       },
       {
         "test_year": 2024,
         "train_size": 240,
         "test_size": 120,
-        "mae": 2.75,
-        "rmse": 3.977,
-        "kendall_tau": 0.6035,
-        "top3_accuracy": 0.7778
+        "mae": 2.6167,
+        "rmse": 3.937,
+        "kendall_tau": 0.6211,
+        "top3_accuracy": 0.8333
       },
       {
         "test_year": 2025,
         "train_size": 360,
         "test_size": 119,
-        "mae": 3.4454,
-        "rmse": 5.0577,
-        "kendall_tau": 0.4977,
-        "top3_accuracy": 0.7222
+        "mae": 3.8824,
+        "rmse": 5.32,
+        "kendall_tau": 0.4509,
+        "top3_accuracy": 0.6667
       },
       {
         "test_year": 2026,
         "train_size": 479,
         "test_size": 88,
-        "mae": 2.5682,
-        "rmse": 3.615,
-        "kendall_tau": 0.6883,
-        "top3_accuracy": 0.6667
+        "mae": 3.2955,
+        "rmse": 4.4543,
+        "kendall_tau": 0.6039,
+        "top3_accuracy": 0.5833
       }
     ]
   },
@@ -355,52 +355,52 @@
         "test_year": 2022,
         "train_size": 60,
         "test_size": 60,
-        "mae": 4.6333,
-        "rmse": 5.7155,
-        "kendall_tau": 0.3439,
+        "mae": 3.9333,
+        "rmse": 4.7434,
+        "kendall_tau": 0.4877,
         "top3_accuracy": 0.5556
       },
       {
         "test_year": 2023,
         "train_size": 120,
         "test_size": 120,
-        "mae": 3.4167,
-        "rmse": 4.5589,
-        "kendall_tau": 0.4982,
-        "top3_accuracy": 0.3889
+        "mae": 3.5833,
+        "rmse": 4.6993,
+        "kendall_tau": 0.4877,
+        "top3_accuracy": 0.2778
       },
       {
         "test_year": 2024,
         "train_size": 240,
         "test_size": 120,
-        "mae": 3.1833,
-        "rmse": 4.2407,
-        "kendall_tau": 0.5544,
-        "top3_accuracy": 0.6667
+        "mae": 3.0333,
+        "rmse": 4.0988,
+        "kendall_tau": 0.5737,
+        "top3_accuracy": 0.6111
       },
       {
         "test_year": 2025,
         "train_size": 360,
         "test_size": 119,
-        "mae": 4.084,
-        "rmse": 5.6166,
-        "kendall_tau": 0.3959,
-        "top3_accuracy": 0.6667
+        "mae": 3.9328,
+        "rmse": 5.3844,
+        "kendall_tau": 0.4086,
+        "top3_accuracy": 0.6111
       },
       {
         "test_year": 2026,
         "train_size": 479,
         "test_size": 88,
-        "mae": 3.3182,
-        "rmse": 4.2212,
-        "kendall_tau": 0.5974,
-        "top3_accuracy": 0.3333
+        "mae": 3.5455,
+        "rmse": 4.6539,
+        "kendall_tau": 0.5541,
+        "top3_accuracy": 0.5
       }
     ],
-    "walk_forward_mean_mae": 3.7271,
-    "walk_forward_mean_kendall_tau": 0.478,
-    "walk_forward_mean_top3_accuracy": 0.5222,
-    "post_fp_mae_delta_vs_sprint_model": -0.4763,
+    "walk_forward_mean_mae": 3.6056,
+    "walk_forward_mean_kendall_tau": 0.5024,
+    "walk_forward_mean_top3_accuracy": 0.5111,
+    "post_fp_mae_delta_vs_sprint_model": -0.2161,
     "top_features": {}
   }
 }

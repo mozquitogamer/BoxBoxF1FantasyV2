@@ -58,6 +58,7 @@ _spec.loader.exec_module(_vmc)
 load_training_data = _vmc.load_training_data
 completed_folds = _vmc.completed_folds
 reweight_2026 = _vmc.reweight_2026
+apply_session_wet_boost = _vmc.apply_session_wet_boost
 sort_by_race_groups = _vmc.sort_by_race_groups
 make_race_qids = _vmc.make_race_qids
 position_to_relevance = _vmc.position_to_relevance
@@ -77,6 +78,7 @@ _tm = _ilu.module_from_spec(_spec2)
 sys.modules["tm"] = _tm
 _spec2.loader.exec_module(_tm)
 rederive_quali_dependent_features = _tm.rederive_quali_dependent_features
+classified_finisher_mask = _tm.classified_finisher_mask
 
 
 # ============================================================
@@ -84,7 +86,11 @@ rederive_quali_dependent_features = _tm.rederive_quali_dependent_features
 # ============================================================
 
 def precompute_walk_forward_quali(
-    df: pd.DataFrame, quali_params: dict, quali_features: list[str], verbose: bool = True
+    df: pd.DataFrame,
+    quali_params: dict,
+    quali_features: list[str],
+    wet_boost: float,
+    verbose: bool = True,
 ) -> pd.Series:
     """One predicted quali value per row, season-level walk-forward.
 
@@ -113,6 +119,9 @@ def precompute_walk_forward_quali(
             if verbose:
                 print(f"  Season {test_year}: insufficient train ({len(tr_df)}); fell back to actual")
             continue
+        tr_df = apply_session_wet_boost(
+            tr_df, "weather_was_wet_quali", wet_boost
+        )
         tr_df["_orig"] = tr_df.index
         te_df["_orig"] = te_df.index
         tr_sorted = sort_by_race_groups(tr_df)
@@ -154,7 +163,8 @@ def prepare_fp_dataset(df: pd.DataFrame, wf_quali: pd.Series, mask: pd.Series) -
     then re-derive quali-dependent features so the model sees a consistent
     distribution. Mirrors what 05_train_models.py does for race_fp_model.
     """
-    sub = df[mask & wf_quali.notna() & df["finish_position"].notna()].copy()
+    eligible = mask & wf_quali.notna() & classified_finisher_mask(df)
+    sub = df[eligible].copy()
     sub["quali_position"] = wf_quali.loc[sub.index].astype(float)
     sub = rederive_quali_dependent_features(sub, "quali_position")
     return sub
@@ -184,7 +194,9 @@ def run_walk_forward_fp(
     # before R's season, so it's invariant to which fold we're validating.
     if verbose:
         print(f"\nPrecomputing walk-forward quali (one quali model per season)...")
-    wf_quali = precompute_walk_forward_quali(df, quali_params, quali_features, verbose=verbose)
+    wf_quali = precompute_walk_forward_quali(
+        df, quali_params, quali_features, wet_boost, verbose=verbose
+    )
     if verbose:
         n_with_wf = int(wf_quali.notna().sum())
         print(f"  WF quali available for {n_with_wf:,} / {len(df):,} rows\n")
@@ -203,6 +215,9 @@ def run_walk_forward_fp(
         te = prepare_fp_dataset(df, wf_quali, test_mask)
         if len(tr) < 100 or len(te) < 5:
             continue
+        tr = apply_session_wet_boost(
+            tr, "weather_was_wet_race", wet_boost
+        )
 
         # Train race_fp model on WF-quali-overridden training set
         feats_avail = [c for c in race_features if c in tr.columns]
@@ -217,7 +232,17 @@ def run_walk_forward_fp(
             # conservative test (the XGBoost baseline keeps its 2026 weighting).
             from catboost import CatBoost, Pool
             y = position_to_relevance(tr_sorted["finish_position"]).to_numpy()
-            train_pool = Pool(tr_sorted[feats_avail].to_numpy(), label=y, group_id=qids)
+            group_weight = (
+                tr_sorted["sample_weight"].to_numpy(dtype=float)
+                if "sample_weight" in tr_sorted.columns
+                else None
+            )
+            train_pool = Pool(
+                tr_sorted[feats_avail].to_numpy(),
+                label=y,
+                group_id=qids,
+                group_weight=group_weight,
+            )
             test_pool = Pool(te_sorted[feats_avail].to_numpy(), group_id=make_race_qids(te_sorted))
             cb = CatBoost(dict(loss_function="YetiRank", iterations=650, learning_rate=0.03,
                                depth=6, random_seed=RNG_SEED, verbose=False,

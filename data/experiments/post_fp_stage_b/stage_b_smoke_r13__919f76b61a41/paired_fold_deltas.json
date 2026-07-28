@@ -1,0 +1,112 @@
+[
+  {
+    "cluster_id": "2026-R13",
+    "season": 2026,
+    "round": 13,
+    "race_name": "hungaroring",
+    "reference_policy": "B0",
+    "candidate_policy": "B1",
+    "reference_mae": 2.4210526315789473,
+    "candidate_mae": 2.6315789473684212,
+    "delta_mae_candidate_minus_reference": 0.2105263157894739
+  },
+  {
+    "cluster_id": "2026-R13",
+    "season": 2026,
+    "round": 13,
+    "race_name": "hungaroring",
+    "reference_policy": "B0",
+    "candidate_policy": "B2",
+    "reference_mae": 2.4210526315789473,
+    "candidate_mae": 2.5789473684210527,
+    "delta_mae_candidate_minus_reference": 0.1578947368421053
+  },
+  {
+    "cluster_id": "2026-R13",
+    "season": 2026,
+    "round": 13,
+    "race_name": "hungaroring",
+    "reference_policy": "B0",
+    "candidate_policy": "B3",
+    "reference_mae": 2.4210526315789473,
+    "candidate_mae": 2.1052631578947367,
+    "delta_mae_candidate_minus_reference": -0.3157894736842106
+  },
+  {
+    "cluster_id": "2026-R13",
+    "season": 2026,
+    "round": 13,
+    "race_name": "hungaroring",
+    "reference_policy": "B0",
+    "candidate_policy": "B4",
+    "reference_mae": 2.4210526315789473,
+    "candidate_mae": 2.1052631578947367,
+    "delta_mae_candidate_minus_reference": -0.3157894736842106
+  },
+  {
+    "cluster_id": "2026-R13",
+    "season": 2026,
+    "round": 13,
+    "race_name": "hungaroring",
+    "reference_policy": "B1",
+    "candidate_policy": "B2",
+    "reference_mae": 2.6315789473684212,
+    "candidate_mae": 2.5789473684210527,
+    "delta_mae_candidate_minus_reference": -0.052631578947368585
+  },
+  {
+    "cluster_id": "2026-R13",
+    "season": 2026,
+    "round": 13,
+    "race_name": "hungaroring",
+    "reference_policy": "B1",
+    "candidate_policy": "B3",
+    "reference_mae": 2.6315789473684212,
+    "candidate_mae": 2.1052631578947367,
+    "delta_mae_candidate_minus_reference": -0.5263157894736845
+  },
+  {
+    "cluster_id": "2026-R13",
+    "season": 2026,
+    "round": 13,
+    "race_name": "hungaroring",
+    "reference_policy": "B1",
+    "candidate_policy": "B4",
+    "reference_mae": 2.6315789473684212,
+    "candidate_mae": 2.1052631578947367,
+    "delta_mae_candidate_minus_reference": -0.5263157894736845
+  },
+  {
+    "cluster_id": "2026-R13",
+    "season": 2026,
+    "round": 13,
+    "race_name": "hungaroring",
+    "reference_policy": "B2",
+    "candidate_policy": "B3",
+    "reference_mae": 2.5789473684210527,
+    "candidate_mae": 2.1052631578947367,
+    "delta_mae_candidate_minus_reference": -0.47368421052631593
+  },
+  {
+    "cluster_id": "2026-R13",
+    "season": 2026,
+    "round": 13,
+    "race_name": "hungaroring",
+    "reference_policy": "B2",
+    "candidate_policy": "B4",
+    "reference_mae": 2.5789473684210527,
+    "candidate_mae": 2.1052631578947367,
+    "delta_mae_candidate_minus_reference": -0.47368421052631593
+  },
+  {
+    "cluster_id": "2026-R13",
+    "season": 2026,
+    "round": 13,
+    "race_name": "hungaroring",
+    "reference_policy": "B3",
+    "candidate_policy": "B4",
+    "reference_mae": 2.1052631578947367,
+    "candidate_mae": 2.1052631578947367,
+    "delta_mae_candidate_minus_reference": 0.0
+  }
+]

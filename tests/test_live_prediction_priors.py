@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from config.team_driver_ratings import (
+    get_rating_snapshot_id,
     get_driver_overtaking,
     get_driver_quali_skill,
     get_driver_tire_mgmt,
@@ -15,6 +16,9 @@ from config.team_driver_ratings import (
 
 
 predictions = importlib.import_module("pipeline.06_run_predictions")
+feature_builder = importlib.import_module(
+    "pipeline.03b_build_jolpica_features"
+)
 
 
 def test_jolpica_driver_ids_resolve_to_manual_ratings():
@@ -31,6 +35,34 @@ def test_jolpica_driver_ids_resolve_to_manual_ratings():
     # remain backward compatible.
     assert get_driver_quali_skill("george_russell") == 10
     assert get_driver_overtaking("max_verstappen") == 10
+
+
+def test_manual_ratings_are_effective_dated() -> None:
+    assert get_rating_snapshot_id("2026-03-15") == "neutral_pre_snapshot"
+    assert get_rating_snapshot_id("2026-03-16") == "post_2026_r02"
+    assert get_driver_wet_skill("max_verstappen", as_of="2026-03-15") == 6
+    assert get_driver_wet_skill("max_verstappen", as_of="2026-03-16") == 10
+
+    rows = pd.DataFrame({
+        "race_date": ["2026-03-15", "2026-03-29"],
+        "constructor_id": ["mercedes", "mercedes"],
+        "driver_id": ["russell", "russell"],
+    })
+    rated = feature_builder.add_team_driver_ratings(rows)
+    assert rated["strategy_rating"].tolist() == [5, 9]
+    assert rated["quali_skill"].tolist() == [6, 10]
+
+    model_schema_rows = pd.DataFrame({
+        "season": [2025, 2026, 2026],
+        "round": [24, 2, 3],
+        "constructor_id": ["mercedes", "mercedes", "mercedes"],
+        "driver_id": ["russell", "russell", "russell"],
+    })
+    model_schema_rated = feature_builder.add_team_driver_ratings(
+        model_schema_rows
+    )
+    assert model_schema_rated["strategy_rating"].tolist() == [5, 5, 9]
+    assert model_schema_rated["quali_skill"].tolist() == [6, 6, 10]
 
 
 def test_live_stub_includes_latest_result_and_excludes_future_rows(tmp_path, monkeypatch):
