@@ -59,6 +59,8 @@ src += `
     finalFixQualifyingPoints: typeof ffQualifyingPoints === 'function' ? ffQualifyingPoints : null,
     finalFixProjectedRacePoints: typeof ffProjectedRacePoints === 'function' ? ffProjectedRacePoints : null,
     hasOfficialRoundCoverageCheck: typeof officialRoundHasCompleteScores === 'function',
+    hasBudgetFuturePointValue: typeof budgetFuturePointValue === 'function',
+    budgetFuturePointValue: typeof budgetFuturePointValue === 'function' ? budgetFuturePointValue : null,
     renderSwapRow: typeof renderSwapRow === 'function' ? renderSwapRow : null,
     renderTransferCard: typeof renderTransferCard === 'function' ? renderTransferCard : null,
     scoreTeamPicks: typeof scoreTeamPicks === 'function' ? scoreTeamPicks : null,
@@ -73,6 +75,9 @@ src += `
     setPriceLoaderState(nextData, nextOfficialPoints) {
       data = nextData;
       officialPointsData = nextOfficialPoints;
+    },
+    setBudgetValueData(nextBudgetValueData) {
+      budgetValueData = nextBudgetValueData;
     },
   };
 })();
@@ -98,6 +103,12 @@ const ta = S.TA_TUNABLES;
 for (const k of ['poolByScore', 'poolByPpm', 'poolByCheapest', 'maxIterations', 'maxResults', 'transferPenalty']) {
   if (typeof ta[k] !== 'number') fail(`TA_TUNABLES.${k} missing or non-numeric`);
 }
+if (typeof S.MW_TUNABLES.budgetBuilderOptionMultiplier !== 'number') {
+  fail('MW_TUNABLES.budgetBuilderOptionMultiplier missing or non-numeric');
+}
+if ('budgetGainWeight' in S.MW_TUNABLES) {
+  fail('legacy cumulative MW_TUNABLES.budgetGainWeight is still present');
+}
 
 // 2) Key functions must exist.
 for (const [k, label] of [
@@ -109,11 +120,39 @@ for (const [k, label] of [
   ['hasScoreTeamPicks', 'scoreTeamPicks'],
   ['hasFinalFixRacePoints', 'calculateFinalFixRacePoints'],
   ['hasOfficialRoundCoverageCheck', 'officialRoundHasCompleteScores'],
+  ['hasBudgetFuturePointValue', 'budgetFuturePointValue'],
 ]) {
   if (!S[k]) fail(`${label} is not defined as a function`);
 }
 
-// 3) renderSwapRow actually runs and produces the swap-delta markup.
+// 3) Calibrated budget value observes timing and forecast reliability.
+try {
+  S.setBudgetValueData({
+    current_races_remaining: 11,
+    curve: {
+      ceiling_points_per_million: 8.567,
+      tau_races: 1.8,
+      points_per_million: { '0': 0, '10': 8.53, '11': 8.55 },
+      points_per_million_p25: { '0': 0, '10': 8.04, '11': 8.04 },
+      points_per_million_p75: { '0': 0, '10': 8.98, '11': 9.05 },
+    },
+    calibration: {
+      decision_grade_multiplier: 0.625,
+      forecast_realization_discount: 0.867,
+      forecast_signed_realization_discount: 0.771,
+    },
+  });
+  const forecastValue = S.budgetFuturePointValue(0.3, { racesLeft: 11, status: 'forecast' });
+  const securedValue = S.budgetFuturePointValue(0.3, { racesLeft: 11, status: 'secured' });
+  const lastRaceForecast = S.budgetFuturePointValue(0.3, { racesLeft: 1, status: 'forecast' });
+  if (Math.abs(forecastValue - 1.386) > 0.01) fail(`forecast budget value mismatch: ${forecastValue}`);
+  if (Math.abs(securedValue - 1.603) > 0.01) fail(`secured budget value mismatch: ${securedValue}`);
+  if (lastRaceForecast !== 0) fail(`last-race forecast should be worthless: ${lastRaceForecast}`);
+} catch (e) {
+  fail('budgetFuturePointValue threw: ' + e.message);
+}
+
+// 4) renderSwapRow actually runs and produces the swap-delta markup.
 try {
   const out = S.renderSwapRow(
     { name: 'Max Verstappen', driver_id: 'max_verstappen', expected_points: 20, current_price: 28 },

@@ -108,6 +108,7 @@ let compareTeams = [
 // Multi-week planner data
 let trackData = null;
 let driverHistory = null;
+let budgetValueData = null;       // calibrated budget-to-future-points model
 // P9: ML-based projections for future rounds, populated by pipeline/predict_horizon.py.
 // When present, projectScoresForRound prefers these over the affinity heuristic.
 let horizonProjections = null;
@@ -427,6 +428,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadSeasonData(),
         ensureLoaded('officialPoints', loadOfficialPoints),
         ensureLoaded('weather', loadWeatherData),
+        ensureLoaded('budgetValue', loadBudgetValueData),
     ]);
 
     // User-scenarios overlay: load LocalStorage state (per round, auto-cleared
@@ -1036,6 +1038,7 @@ function setupControls() {
     // Optimizer
     document.getElementById('runOptimizer').addEventListener('click', runOptimizer);
     setupFinalFixTool();
+    setupBudgetValueTool();
     document.getElementById('loadMoreLineups').addEventListener('click', () => {
         const activeMode = document.querySelector('.mode-btn.active');
         const mode = activeMode ? activeMode.dataset.mode : 'fresh';
@@ -2876,6 +2879,150 @@ function predictPriceChange(item, predictedPts) {
     };
 }
 
+function currentRacesRemaining() {
+    const calibrated = Number(budgetValueData?.current_races_remaining);
+    if (Number.isFinite(calibrated) && calibrated >= 0) return calibrated;
+    if (data?.round) {
+        return LOCK_DEADLINES.filter(r => !r.cancelled && r.round >= data.round).length;
+    }
+    return 0;
+}
+
+function calibratedPointsPerMillion(usableRaces, band = 'mean') {
+    const curve = budgetValueData?.curve;
+    if (!curve) return 0;
+    const races = Math.max(0, Number(usableRaces) || 0);
+    const map = band === 'p25'
+        ? curve.points_per_million_p25
+        : band === 'p75'
+            ? curve.points_per_million_p75
+            : curve.points_per_million;
+    const roundedKey = String(Math.round(races));
+    if (map && Number.isFinite(Number(map[roundedKey]))) {
+        return Number(map[roundedKey]);
+    }
+    const ceiling = Number(curve.ceiling_points_per_million) || 0;
+    const tau = Number(curve.tau_races) || 1;
+    return ceiling * (1 - Math.exp(-races / tau));
+}
+
+function budgetFuturePointValue(
+    budgetChange,
+    {
+        racesLeft = currentRacesRemaining(),
+        status = 'forecast',
+        band = 'mean',
+        aggression = 1,
+    } = {},
+) {
+    const isForecast = status === 'forecast';
+    const usableRaces = Math.max(0, Number(racesLeft) - (isForecast ? 1 : 0));
+    const calibration = budgetValueData?.calibration || {};
+    const decisionMultiplier = Number(calibration.decision_grade_multiplier) || 0;
+    const forecastDiscount = isForecast
+        ? (
+            Number(budgetChange) < 0
+                ? (
+                    Number(calibration.forecast_signed_realization_discount)
+                    || Number(calibration.forecast_realization_discount)
+                    || 0
+                )
+                : (Number(calibration.forecast_realization_discount) || 0)
+        )
+        : 1;
+    return Number(budgetChange || 0)
+        * calibratedPointsPerMillion(usableRaces, band)
+        * decisionMultiplier
+        * forecastDiscount
+        * aggression;
+}
+
+function projectedTeamPriceChange(drivers, constructorsList, scoreLookup = null) {
+    let total = 0;
+    for (const item of [...drivers, ...constructorsList]) {
+        const id = item.driver_id || item.constructor_id;
+        const predicted = scoreLookup && Number.isFinite(Number(scoreLookup[id]))
+            ? Number(scoreLookup[id])
+            : Number(item.expected_points) || 0;
+        total += predictPriceChange(item, predicted).expectedChange;
+    }
+    return Math.round(total * 100) / 100;
+}
+
+function setupBudgetValueTool() {
+    const button = document.getElementById('runBudgetCalculator');
+    if (!button) return;
+    const racesInput = document.getElementById('budgetCalcRaces');
+    if (racesInput && currentRacesRemaining() > 0) {
+        racesInput.value = currentRacesRemaining();
+    }
+    button.addEventListener('click', runBudgetValueCalculator);
+    runBudgetValueCalculator();
+}
+
+function runBudgetValueCalculator() {
+    const resultEl = document.getElementById('budgetCalcResult');
+    if (!resultEl) return;
+    if (!budgetValueData) {
+        resultEl.innerHTML = '<div class="optimizer-warning">The budget-value calibration is not available yet.</div>';
+        return;
+    }
+
+    const points = Math.max(0, Number(document.getElementById('budgetCalcPoints')?.value) || 0);
+    const budgetChange = Number(document.getElementById('budgetCalcChange')?.value) || 0;
+    const racesLeft = Math.max(1, Number(document.getElementById('budgetCalcRaces')?.value) || 1);
+    const status = document.getElementById('budgetCalcStatus')?.value || 'forecast';
+    const thresholdRaw = document.getElementById('budgetCalcThreshold')?.value;
+    const threshold = thresholdRaw === '' ? null : Math.max(0, Number(thresholdRaw) || 0);
+    const usableRaces = Math.max(0, racesLeft - (status === 'forecast' ? 1 : 0));
+    const optionPoints = budgetFuturePointValue(budgetChange, { racesLeft, status });
+    const lower = budgetFuturePointValue(budgetChange, { racesLeft, status, band: 'p25' });
+    const upper = budgetFuturePointValue(budgetChange, { racesLeft, status, band: 'p75' });
+    const rate = budgetFuturePointValue(1, { racesLeft, status });
+    const budgetNeeded = rate > 0 ? points / rate : null;
+    const netDecision = optionPoints - points;
+    const preferBudget = netDecision > 0;
+    const medianUnlock = Number(
+        budgetValueData.affordability_frontier?.median_minimum_unlock_millions,
+    ) || 0;
+
+    let thresholdText;
+    if (threshold !== null) {
+        thresholdText = Math.abs(budgetChange) + 1e-9 >= threshold
+            ? `This change crosses the $${threshold.toFixed(1)}M affordability gap you entered.`
+            : `This change is still $${(threshold - Math.abs(budgetChange)).toFixed(1)}M short of the affordability gap you entered.`;
+    } else if (Math.abs(budgetChange) + 1e-9 < medianUnlock) {
+        thresholdText = `It is below the observed median first lineup unlock of $${medianUnlock.toFixed(1)}M. Small rises often change no immediate lineup.`;
+    } else {
+        thresholdText = `It reaches the observed median first lineup unlock of $${medianUnlock.toFixed(1)}M, although your exact team frontier may differ.`;
+    }
+
+    const verdictClass = preferBudget ? 'budget-value-verdict budget' : 'budget-value-verdict points';
+    const verdict = preferBudget
+        ? `The budget side leads by about ${Math.abs(netDecision).toFixed(1)} season-adjusted points.`
+        : `Keep the points. They lead by about ${Math.abs(netDecision).toFixed(1)} season-adjusted points.`;
+    const statusLabel = status === 'forecast'
+        ? 'forecast rise after this race'
+        : 'secured, spendable budget';
+
+    resultEl.innerHTML = `
+        <div class="${verdictClass}">
+            <strong>${verdict}</strong>
+            <span>${budgetChange >= 0 ? '+' : ''}$${budgetChange.toFixed(1)}M of ${statusLabel} is worth about ${optionPoints.toFixed(1)} future points in this model.</span>
+        </div>
+        <div class="budget-value-metrics">
+            <div><span>Points given up</span><strong>${points.toFixed(1)}</strong></div>
+            <div><span>Budget option value</span><strong>${optionPoints.toFixed(1)} pts</strong></div>
+            <div><span>Middle 50% range</span><strong>${Math.min(lower, upper).toFixed(1)} to ${Math.max(lower, upper).toFixed(1)}</strong></div>
+            <div><span>Decision value per $1M</span><strong>${rate.toFixed(1)} pts</strong></div>
+            <div><span>Usable future races</span><strong>${usableRaces}</strong></div>
+            <div><span>Budget needed to offset ${points.toFixed(1)} pts</span><strong>${budgetNeeded === null ? 'Not enough races' : `$${budgetNeeded.toFixed(2)}M`}</strong></div>
+        </div>
+        <p class="budget-value-frontier">${thresholdText}</p>
+        <p class="hint">Experimental 2026 calibration through round ${budgetValueData.updated_after_round}. The smooth value is an option estimate, not guaranteed scoring.</p>
+    `;
+}
+
 // -- Lineup Optimizer --
 // F1 Fantasy rules: 5 drivers + 2 constructors within budget
 
@@ -2908,6 +3055,13 @@ function lineupScore(strategy, totalPoints, totalCost, allDrivers, constructorsL
         // Mix price appreciation (heavy) with points (light) so we don't pick
         // a team that gains cash but scores zero.
         return priceGain * 100 + totalPoints * 0.1;
+    }
+    if (strategy === 'season_value') {
+        const priceGain = projectedTeamPriceChange(allDrivers, constructorsList);
+        return totalPoints + budgetFuturePointValue(priceGain, {
+            racesLeft: currentRacesRemaining(),
+            status: 'forecast',
+        });
     }
     // balanced — see header comment for weighting rationale
     const value = totalCost > 0 ? totalPoints / totalCost : 0;
@@ -3178,6 +3332,17 @@ function ffDriverById(driverId) {
 
 function ffQualifyingPoints(position) {
     return FF_QUALI_POSITION_POINTS[Number(position)] || 0;
+}
+
+async function loadBudgetValueData() {
+    try {
+        const resp = await fetch(cacheBust('data/budget_value.json'));
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        budgetValueData = await resp.json();
+    } catch (e) {
+        budgetValueData = null;
+        console.warn('Budget value calibration is unavailable:', e);
+    }
 }
 
 function ffProjectedRacePoints(driver) {
@@ -3454,6 +3619,13 @@ function runOptimizerSync(budget, strategy, chip) {
             const pc = predictPriceChange(item, item.expected_points);
             return pc.expectedChange * 100 + basisValue(item) * 5;
         }
+        if (strategy === 'season_value') {
+            const pc = predictPriceChange(item, item.expected_points);
+            return basisPoints(item) + budgetFuturePointValue(pc.expectedChange, {
+                racesLeft: currentRacesRemaining(),
+                status: 'forecast',
+            });
+        }
         return basisPoints(item) * 0.6 + basisValue(item) * 10 * 0.4;
     }
 
@@ -3676,6 +3848,11 @@ function displayLineups(strategy) {
                 <div class="big-num" style="color:${totalExpChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)'}">${totalExpChange >= 0 ? '+' : ''}${totalExpChange.toFixed(1)}M</div>
                 <div class="label" title="Expected combined price change for all picks based on predicted PPM ratings">Exp Budget Change</div>
             </div>
+            ${strategy === 'season_value' ? `
+            <div class="lineup-stat">
+                <div class="big-num">${budgetFuturePointValue(totalExpChange, { racesLeft: currentRacesRemaining(), status: 'forecast' }).toFixed(1)}</div>
+                <div class="label" title="Decision-grade future point option value of the forecast budget change">Future Budget Value</div>
+            </div>` : ''}
         `;
 
         document.getElementById('lineupCards').innerHTML = '';
@@ -3722,6 +3899,10 @@ function renderSingleLineup(lineup, index, strategy, budget) {
     const secondBoostedId = lineup.secondBoostedDriverId || null;
     const chipSel = document.getElementById('chipSelect');
     const activeChip = chipSel ? chipSel.value : 'none';
+    const seasonOption = budgetFuturePointValue(totalExpChange, {
+        racesLeft: currentRacesRemaining(),
+        status: 'forecast',
+    });
     const expandedClass = index === 0 ? ' expanded' : '';
     const shareDriverIds = lineup.drivers.map(d => d.driver_id).join(',');
     const shareConsIds = lineup.constructors.map(c => c.constructor_id).join(',');
@@ -3733,6 +3914,7 @@ function renderSingleLineup(lineup, index, strategy, budget) {
                     ${lineup.totalPoints.toFixed(1)} pts (incl boost) \u00b7 $${lineup.totalCost.toFixed(1)}M \u00b7
                     $${(budget - lineup.totalCost).toFixed(1)}M left \u00b7
                     <span style="color:${totalExpChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)'}">${totalExpChange >= 0 ? '+' : ''}${totalExpChange.toFixed(1)}M exp change</span>
+                    ${strategy === 'season_value' ? ` \u00b7 ${seasonOption >= 0 ? '+' : ''}${seasonOption.toFixed(1)} future pts` : ''}
                 </span>
                 <button type="button" class="share-team-btn" onclick="event.stopPropagation(); shareTeamFromIds('${shareDriverIds}','${shareConsIds}', this)">\ud83d\udd17 Share</button>
             </div>
@@ -4579,6 +4761,13 @@ function runTransferAdvisor() {
             const pc = predictPriceChange(item, item.expected_points);
             return pc.expectedChange * 100 + basisValue(item) * 5;
         }
+        if (strategy === 'season_value') {
+            const pc = predictPriceChange(item, item.expected_points);
+            return basisPoints(item) + budgetFuturePointValue(pc.expectedChange, {
+                racesLeft: currentRacesRemaining(),
+                status: 'forecast',
+            });
+        }
         return basisPoints(item) * 0.6 + basisValue(item) * 10 * 0.4;
     }
 
@@ -4619,13 +4808,16 @@ function runTransferAdvisor() {
     // it can be skipped by the MAX_ITERATIONS cap, or excluded entirely if
     // any current pick is in the excluded set. Without this explicit entry,
     // the filter falls back to -Infinity and every bad transfer passes.
-    // Look up driver/constructor objects from full `data` (not `allDrivers`/
-    // `allConstructors`) so excluded current picks still count for baseline.
+    // Use the full scenario-aware view (before exclusions) so the hold baseline
+    // includes every current pick and stays comparable with scenario-adjusted
+    // transfer candidates.
     const currentDriverObjs = currentDriverIds
-        .map(id => data.drivers.find(d => d.driver_id === id))
+        .map(id => view.drivers.find(d => d.driver_id === id)
+            || data.drivers.find(d => d.driver_id === id))
         .filter(Boolean);
     const currentConstructorObjs = currentConstructorIds
-        .map(id => data.constructors.find(c => c.constructor_id === id))
+        .map(id => view.constructors.find(c => c.constructor_id === id)
+            || data.constructors.find(c => c.constructor_id === id))
         .filter(Boolean);
     if (currentDriverObjs.length === currentDriverIds.length &&
         currentConstructorObjs.length === currentConstructorIds.length) {
@@ -4804,23 +4996,46 @@ function runTransferAdvisor() {
         return true;
     });
 
-    // Filter out pointless transfers: find the "keep current team" score and remove results that are worse or equal
+    // Compare every option with the explicit hold baseline. Price appreciation
+    // is converted to future-point option value once, using the calibrated
+    // season curve. This powers both the explanations and Season Value filter.
     const keepCurrentResult = unique.find(l => l.transfersNeeded === 0);
     const keepCurrentPoints = keepCurrentResult ? keepCurrentResult.netPoints : -Infinity;
+    const keepCurrentPriceChange = keepCurrentResult
+        ? projectedTeamPriceChange(keepCurrentResult.drivers, keepCurrentResult.constructors)
+        : 0;
+    for (const lineup of unique) {
+        lineup.projectedPriceChange = projectedTeamPriceChange(lineup.drivers, lineup.constructors);
+        lineup.budgetChangeVsHold = lineup.projectedPriceChange - keepCurrentPriceChange;
+        lineup.pointsChangeVsHold = lineup.netPoints - keepCurrentPoints;
+        lineup.budgetOptionPoints = budgetFuturePointValue(lineup.budgetChangeVsHold, {
+            racesLeft: currentRacesRemaining(),
+            status: 'forecast',
+        });
+        lineup.seasonValueDelta = lineup.pointsChangeVsHold + lineup.budgetOptionPoints;
+    }
+
+    // Max Points, Max Value and Balanced remain strict this-round improvement
+    // modes. Season Value can knowingly trade current points for enough future
+    // budget value. The deliberately aggressive Budget Builder follows its own
+    // price-heavy score instead of being contradicted by the old raw-points gate.
     const filtered = unique.filter(l => {
-        // Always keep the "no transfers" option
         if (l.transfersNeeded === 0) return true;
-        // Filter out lineups that don't improve on keeping current team
+        if (strategy === 'season_value') return l.seasonValueDelta > 0;
+        if (strategy === 'budget_gain' && keepCurrentResult) {
+            return l.totalScore > keepCurrentResult.totalScore;
+        }
         return l.netPoints > keepCurrentPoints;
     });
 
     // Take top results
     allLineups = filtered.slice(0, MAX_RESULTS);
-
-    // If the best option is "keep current team", highlight it
-    if (allLineups.length > 0 && allLineups[0].transfersNeeded === 0) {
-        allLineups[0]._isKeepCurrent = true;
+    if (keepCurrentResult && !allLineups.includes(keepCurrentResult)) {
+        allLineups.push(keepCurrentResult);
     }
+
+    // Label the hold baseline wherever it ranks.
+    if (keepCurrentResult) keepCurrentResult._isKeepCurrent = true;
 
     if (allLineups.length === 0) {
         const resultEl = document.getElementById('optimizerResult');
@@ -4879,6 +5094,11 @@ function displayTransferResults(strategy, chip, showWildcardHint) {
                 <div class="big-num">${best.totalPoints.toFixed(1)}</div>
                 <div class="label">Gross Points (incl boost)</div>
             </div>
+            ${strategy === 'season_value' ? `
+            <div class="lineup-stat">
+                <div class="big-num">${best.seasonValueDelta >= 0 ? '+' : ''}${best.seasonValueDelta.toFixed(1)}</div>
+                <div class="label">Season Value vs Hold</div>
+            </div>` : ''}
         `;
         const hintHtml = showWildcardHint
             ? `<div class="optimizer-hint" style="grid-column:1/-1;background:rgba(245,158,11,0.08);border:1px solid var(--orange,#f59e0b);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text-secondary);">Tip: Wild Card chip gives unlimited free transfers — consider it instead of taking penalties for 3+ extra transfers.</div>`
@@ -4955,6 +5175,25 @@ function renderTransferCard(lineup, index, chip) {
             </span>
         </div>
         <div class="lineup-details">`;
+
+    if (lineup.transfersNeeded > 0 && Number.isFinite(lineup.seasonValueDelta)) {
+        const budgetSign = lineup.budgetChangeVsHold >= 0 ? '+' : '';
+        const optionSign = lineup.budgetOptionPoints >= 0 ? '+' : '';
+        const seasonSign = lineup.seasonValueDelta >= 0 ? '+' : '';
+        const medianUnlock = Number(
+            budgetValueData?.affordability_frontier?.median_minimum_unlock_millions,
+        ) || 0;
+        const frontierNote = lineup.budgetChangeVsHold > 0 && lineup.budgetChangeVsHold < medianUnlock
+            ? `Below the observed $${medianUnlock.toFixed(1)}M median first lineup unlock.`
+            : 'Exact value depends on whether the extra budget crosses your next affordable-lineup gap.';
+        html += `<div class="transfer-budget-tradeoff">
+            <div>This round vs hold<strong>${lineup.pointsChangeVsHold >= 0 ? '+' : ''}${lineup.pointsChangeVsHold.toFixed(1)} pts</strong></div>
+            <div>Expected budget vs hold<strong>${budgetSign}$${lineup.budgetChangeVsHold.toFixed(1)}M</strong></div>
+            <div>Future budget value<strong>${optionSign}${lineup.budgetOptionPoints.toFixed(1)} pts</strong></div>
+            <div>Season-adjusted trade-off<strong>${seasonSign}${lineup.seasonValueDelta.toFixed(1)} pts</strong></div>
+            <div class="transfer-budget-note">${frontierNote}</div>
+        </div>`;
+    }
 
     // Show transfer swaps
     if (driversOut.length === 0 && consOut.length === 0) {
@@ -5111,14 +5350,11 @@ const MW_TUNABLES = {
     wildcardFreePool: 15,           // Top-N drivers fed into the brute-force wildcard search.
 
     // --- Strategy weighting (beam-search ranking only, not displayed) ---
-    budgetGainWeight: 50,           // priceGain * this — added to net points for the budget_gain strategy.
+    // Appreciation already raises the next-round spending ceiling. Add its
+    // calibrated option value only once to the current state, not every round.
+    budgetBuilderOptionMultiplier: 2.0, // Aggressive, but anchored to the measured curve.
     balancedPointsWeight: 0.7,      // pts coefficient in balanced strategy
     balancedPpmWeight: 30,          // ppm coefficient in balanced strategy
-
-    // --- PPM bracket thresholds (price-change estimation in beam score) ---
-    ppmHighThreshold: 1.2,          // PPM ≥ this earns top tier price-gain credit.
-    ppmMidThreshold: 0.9,           // PPM ≥ this earns middle tier.
-    priceBracketSplit: 18.5,        // A-tier vs B-tier driver price cutoff (matches predictPriceChange brackets).
 
     // --- Affinity heuristic (computeAffinityWithConfidence) ---
     affinitySimilarityFloor: 0.5,   // Below this cosine sim, a historical race contributes 0 weight.
@@ -5647,6 +5883,28 @@ async function runMultiWeekPlanner() {
         };
     });
 
+    // Hold-path budget is the counterfactual for valuing planner appreciation.
+    // A plan receives option value only for budget above/below this path, so
+    // ordinary appreciation is not mistaken for an advantage created by its
+    // transfers.
+    const holdDriverObjects = teamDrivers
+        .map(id => data.drivers.find(d => d.driver_id === id))
+        .filter(Boolean);
+    const holdConstructorObjects = teamCons
+        .map(id => data.constructors.find(c => c.constructor_id === id))
+        .filter(Boolean);
+    let runningHoldBudget = budget;
+    const holdBudgetPath = roundProjections.map(proj => {
+        const scoreLookup = { ...proj.drivers, ...proj.constructors };
+        runningHoldBudget += projectedTeamPriceChange(
+            holdDriverObjects,
+            holdConstructorObjects,
+            scoreLookup,
+        );
+        runningHoldBudget = Math.round(runningHoldBudget * 100) / 100;
+        return runningHoldBudget;
+    });
+
     // === P2: Target-team feasibility pre-check ===
     // When the user has set a target team, decide BEFORE running beam search
     // whether it's even reachable. Three states:
@@ -5756,6 +6014,10 @@ async function runMultiWeekPlanner() {
         chipsUsed: [],
         chipsAvailable: [...availableChips],
         totalPoints: 0,
+        strategyCumulative: 0,
+        totalScore: 0,
+        budgetDeltaVsHold: 0,
+        terminalBudgetOptionValue: 0,
         roundActions: [],
     }];
 
@@ -5914,27 +6176,13 @@ async function runMultiWeekPlanner() {
 
                 const netPts = pts - penalty;
 
-                // Strategy weighting
-                // P5b: for Limitless rounds, strategy calcs use the PERSISTED team
-                // (not dream team). budget_gain measures appreciation of held
-                // assets — dream team isn't held. balanced measures team ppm —
-                // dream team isn't the user's actual team.
+                // Round-level strategy score. Budget strategies stay on raw net
+                // points here. Their budget option is added once after budget
+                // propagation, avoiding the former cumulative double-count.
                 const strategyDrivers = isLimitless ? state.drivers : cand.drivers;
                 const strategyCons = isLimitless ? state.constructors : cand.constructors;
-                let score = netPts;
-                if (strategy === 'budget_gain') {
-                    // Add projected price appreciation. P10: thresholds/weights from MW_TUNABLES.
-                    let priceGain = 0;
-                    for (const did of strategyDrivers) {
-                        const d = data.drivers.find(x => x.driver_id === did);
-                        if (d) {
-                            const ppm = (proj.drivers[did] || 0) / d.current_price;
-                            if (ppm >= MW_TUNABLES.ppmHighThreshold) priceGain += d.current_price <= MW_TUNABLES.priceBracketSplit ? 0.6 : 0.3;
-                            else if (ppm >= MW_TUNABLES.ppmMidThreshold) priceGain += d.current_price <= MW_TUNABLES.priceBracketSplit ? 0.2 : 0.1;
-                        }
-                    }
-                    score = netPts + priceGain * MW_TUNABLES.budgetGainWeight;
-                } else if (strategy === 'balanced') {
+                let roundStrategyScore = netPts;
+                if (strategy === 'balanced') {
                     // Mix points + value. P10: weights from MW_TUNABLES.
                     let totalPrice = 0;
                     for (const did of strategyDrivers) {
@@ -5946,7 +6194,8 @@ async function runMultiWeekPlanner() {
                         if (c) totalPrice += c.current_price;
                     }
                     const ppm = totalPrice > 0 ? netPts / totalPrice : 0;
-                    score = netPts * MW_TUNABLES.balancedPointsWeight + ppm * MW_TUNABLES.balancedPpmWeight;
+                    roundStrategyScore = netPts * MW_TUNABLES.balancedPointsWeight
+                        + ppm * MW_TUNABLES.balancedPpmWeight;
                 }
 
                 // P3: Continuous target-distance objective.
@@ -5982,7 +6231,7 @@ async function runMultiWeekPlanner() {
                     for (const cid of persistedCons) {
                         if (!targetConsSet.has(cid)) distance++;
                     }
-                    score -= distance * (roundTargetInfo ? roundTargetInfo.distanceWeight : 0);
+                    roundStrategyScore -= distance * (roundTargetInfo ? roundTargetInfo.distanceWeight : 0);
                 }
 
                 const newChipsAvail = usedChip
@@ -6024,6 +6273,32 @@ async function runMultiWeekPlanner() {
                 }
                 const budgetBefore = state.budget;
                 const budgetAfter = Math.round((state.budget + roundAppreciation) * 100) / 100;
+                const nextTotalPoints = state.totalPoints + netPts;
+                const nextStrategyCumulative = (state.strategyCumulative || 0)
+                    + roundStrategyScore;
+                const budgetDeltaVsHold = Math.round(
+                    (budgetAfter - holdBudgetPath[ri]) * 100,
+                ) / 100;
+                const remainingSeasonRaces = Math.max(
+                    0,
+                    currentRacesRemaining() - (ri + 1),
+                );
+                // This delta is forecast to exist after the current simulated
+                // round, then becomes spendable at the following deadline.
+                const terminalBudgetOptionValue = budgetFuturePointValue(
+                    budgetDeltaVsHold,
+                    {
+                        racesLeft: remainingSeasonRaces + 1,
+                        status: 'forecast',
+                    },
+                );
+                let priorityScore = nextStrategyCumulative;
+                if (strategy === 'season_value') {
+                    priorityScore += terminalBudgetOptionValue;
+                } else if (strategy === 'budget_gain') {
+                    priorityScore += terminalBudgetOptionValue
+                        * MW_TUNABLES.budgetBuilderOptionMultiplier;
+                }
 
                 nextBeam.push({
                     // P5b: carry PERSISTED team forward (= state's for limitless,
@@ -6035,8 +6310,12 @@ async function runMultiWeekPlanner() {
                     bankedTransfers: remainingTransfers,
                     chipsUsed: usedChip ? [...state.chipsUsed, { round: proj.round, chip: usedChip }] : [...state.chipsUsed],
                     chipsAvailable: newChipsAvail,
-                    totalPoints: state.totalPoints + netPts,
-                    totalScore: (state.totalScore || 0) + score,
+                    totalPoints: nextTotalPoints,
+                    strategyCumulative: nextStrategyCumulative,
+                    totalScore: priorityScore,
+                    budgetDeltaVsHold,
+                    terminalBudgetOptionValue,
+                    remainingSeasonRaces,
                     roundActions: [...state.roundActions, {
                         round: proj.round,
                         name: proj.name,
@@ -6052,6 +6331,9 @@ async function runMultiWeekPlanner() {
                         budgetBefore: Math.round(budgetBefore * 100) / 100,
                         appreciation: Math.round(roundAppreciation * 100) / 100,
                         budgetAfter,
+                        holdBudgetAfter: holdBudgetPath[ri],
+                        budgetDeltaVsHold,
+                        budgetOptionValue: terminalBudgetOptionValue,
                         // P5b: 'team' = dream team played THIS round (for display).
                         // 'persistedTeam' = team carried into NEXT round (= team
                         // for non-limitless; = pre-limitless team for limitless).
@@ -6067,7 +6349,7 @@ async function runMultiWeekPlanner() {
         // Prune beam: keep top BEAM_WIDTH by cumulative score
         nextBeam.sort((a, b) => (b.totalScore || b.totalPoints) - (a.totalScore || a.totalPoints));
 
-        // P6: Deduplicate by team + chips-available + banked-transfers.
+        // P6: Deduplicate by team + chips + transfers + budget bucket.
         // Previously the key was just team composition, which collapsed two
         // states with the same persistent team but different remaining chips
         // or different banked-FT counts. The worse one would win first-seen
@@ -6082,7 +6364,8 @@ async function runMultiWeekPlanner() {
             const key = [...state.drivers].sort().join(',') + '|'
                 + [...state.constructors].sort().join(',') + '|'
                 + [...state.chipsAvailable].sort().join(',') + '|'
-                + state.bankedTransfers;
+                + state.bankedTransfers + '|'
+                + Math.round(state.budget * 10);
             if (!seen.has(key)) {
                 seen.add(key);
                 beam.push(state);
@@ -6098,7 +6381,13 @@ async function runMultiWeekPlanner() {
     const topPlans = beam.slice(0, 5);
 
     // Render results
-    displayMultiWeekResults(topPlans, roundProjections, currentRound, feasibilityInfo);
+    displayMultiWeekResults(
+        topPlans,
+        roundProjections,
+        currentRound,
+        feasibilityInfo,
+        strategy,
+    );
 }
 
 // P2: Render the target-team feasibility report. Surfaces whether the target is
@@ -6152,7 +6441,7 @@ function renderFeasibilityCard(info) {
     </div>`;
 }
 
-function displayMultiWeekResults(plans, roundProjections, currentRound, feasibilityInfo) {
+function displayMultiWeekResults(plans, roundProjections, currentRound, feasibilityInfo, strategy) {
     const container = document.getElementById('mwResults');
     if (!plans.length) {
         // Still show feasibility card if target was set — explains why no plans
@@ -6181,7 +6470,12 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
     // users wonder why Budget Builder shows fewer points than Max Points even
     // though it's "their pick".
     html += '<h3 style="margin:20px 0 4px;">Recommended Plans</h3>';
-    html += '<p class="hint" style="margin:0 0 12px;font-size:0.82rem;color:var(--text-secondary);">Totals show raw projected net points (after transfer penalties + chip effects). The Strategy dropdown re-ranks plans but does not alter the displayed totals.</p>';
+    const strategyHint = strategy === 'season_value'
+        ? 'Season Value ranks raw points plus the calibrated terminal option value of budget gained versus holding.'
+        : strategy === 'budget_gain'
+            ? 'Budget Builder applies a 2x aggressive multiplier to the same terminal option value, without rewarding appreciation again every round.'
+            : 'The Strategy dropdown re-ranks plans but does not alter the displayed totals.';
+    html += `<p class="hint" style="margin:0 0 12px;font-size:0.82rem;color:var(--text-secondary);">Totals show raw projected net points after transfer penalties and chip effects. ${strategyHint}</p>`;
 
     for (let pi = 0; pi < plans.length; pi++) {
         const plan = plans[pi];
@@ -6198,9 +6492,17 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
             const totalAppr = lastAction.budgetAfter - firstAction.budgetBefore;
             const apprColor = totalAppr >= 0 ? 'var(--green)' : 'var(--red, #ef4444)';
             const apprSign = totalAppr >= 0 ? '+' : '';
+            const delta = Number(plan.budgetDeltaVsHold) || 0;
+            const deltaSign = delta >= 0 ? '+' : '';
+            const option = Number(plan.terminalBudgetOptionValue) || 0;
+            const optionSign = option >= 0 ? '+' : '';
             horizonBudgetHtml = `<span class="mw-plan-stats" style="margin-left:16px;">
                 Budget: $${firstAction.budgetBefore.toFixed(1)}M → $${lastAction.budgetAfter.toFixed(1)}M
                 <span style="color:${apprColor};font-weight:600;">(${apprSign}$${totalAppr.toFixed(1)}M)</span>
+                <span title="Budget difference versus making no transfers, converted with the calibrated remaining-season curve.">
+                    &middot; ${deltaSign}$${delta.toFixed(1)}M vs hold
+                    &middot; ${optionSign}${option.toFixed(1)} future pts
+                </span>
             </span>`;
         }
 
@@ -6309,9 +6611,13 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
             if (typeof action.budgetAfter === 'number' && typeof action.budgetBefore === 'number') {
                 const apprColor = action.appreciation >= 0 ? 'var(--green)' : 'var(--red, #ef4444)';
                 const apprSign = action.appreciation >= 0 ? '+' : '';
+                const delta = Number(action.budgetDeltaVsHold) || 0;
+                const deltaSign = delta >= 0 ? '+' : '';
+                const option = Number(action.budgetOptionValue) || 0;
                 html += `<div class="mw-round-budget" style="font-size:0.7rem;color:var(--text-secondary);margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);line-height:1.4;">
                     <div>$${action.budgetBefore.toFixed(1)}M → $${action.budgetAfter.toFixed(1)}M</div>
                     <div style="color:${apprColor};">${apprSign}$${action.appreciation.toFixed(1)}M apprec</div>
+                    <div>${deltaSign}$${delta.toFixed(1)}M vs hold (${option >= 0 ? '+' : ''}${option.toFixed(1)} future pts)</div>
                 </div>`;
             }
 

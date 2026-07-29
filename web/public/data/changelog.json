@@ -1,6 +1,19 @@
 {
   "entries": [
     {
+      "date": "2026-07-29",
+      "title": "Points versus budget calculator and season-aware transfer advice",
+      "tags": [
+        "feature",
+        "fix"
+      ],
+      "body": [
+        "The Lineup Optimizer now includes a Points vs Budget calculator. Enter the points you would give up, the expected budget change, and the number of races left to see a decision-grade estimate of that budget's future scoring value. It distinguishes a forecast rise from budget already secured, because money earned after a race can only be used at the following deadline.",
+        "Transfer Advisor options now show their points change versus holding, expected budget difference, future budget option value, and combined season-adjusted trade-off. A new experimental Season Value strategy can accept a small immediate points loss only when the calibrated future value is larger. The existing Budget Builder remains available as a clearly labelled aggressive strategy.",
+        "The Multi-Week Planner no longer rewards appreciation twice. Budget growth still increases the next-round spending ceiling, but its scoring value is added only once as a terminal option value relative to the no-transfer hold path. Plan cards now show that budget difference and its estimated future-point value separately."
+      ]
+    },
+    {
       "date": "2026-07-25",
       "title": "Final Fix calculator added after Hungarian GP Qualifying",
       "tags": [

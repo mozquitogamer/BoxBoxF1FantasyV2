@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "season": 2026,
+  "updated_after_round": 13,
+  "current_races_remaining": 11,
+  "curve": {
+    "formula": "ceiling * (1 - exp(-races_remaining / tau))",
+    "ceiling_points_per_million": 8.567,
+    "tau_races": 1.8,
+    "points_per_million": {
+      "0": 0.0,
+      "1": 3.65,
+      "2": 5.75,
+      "3": 6.95,
+      "4": 7.64,
+      "5": 8.03,
+      "6": 8.26,
+      "7": 8.39,
+      "8": 8.47,
+      "9": 8.51,
+      "10": 8.53,
+      "11": 8.55
+    },
+    "points_per_million_p25": {
+      "0": 0.0,
+      "1": 2.98,
+      "2": 4.98,
+      "3": 6.38,
+      "4": 7.27,
+      "5": 7.84,
+      "6": 8.02,
+      "7": 8.04,
+      "8": 8.04,
+      "9": 8.04,
+      "10": 8.04,
+      "11": 8.04
+    },
+    "points_per_million_p75": {
+      "0": 0.0,
+      "1": 6.93,
+      "2": 7.87,
+      "3": 8.0,
+      "4": 8.02,
+      "5": 8.08,
+      "6": 8.36,
+      "7": 8.58,
+      "8": 8.76,
+      "9": 8.9,
+      "10": 8.98,
+      "11": 9.05
+    }
+  },
+  "calibration": {
+    "decision_grade_multiplier": 0.625,
+    "forecast_realization_discount": 0.867,
+    "forecast_signed_realization_discount": 0.771,
+    "forecast_0_3m_mean_actual_change": 0.26,
+    "forecast_0_3m_rise_hit_rate": 0.96,
+    "predicted_rise_hit_rate": 0.856
+  },
+  "affordability_frontier": {
+    "genuine_deadline_states": 8,
+    "median_minimum_unlock_millions": 0.7,
+    "share_unlocked_by_0_3m": 0.0,
+    "share_unlocked_by_0_5m": 0.0,
+    "share_unlocked_by_1_0m": 0.875
+  },
+  "plateau": {
+    "minimum_average_points_for_any_rise": "0.9 * current_price",
+    "minimum_average_points_for_maximum_rise": "1.2 * current_price",
+    "next_score_for_any_rise": "max(0, 2.7 * current_price - previous_two_round_points)",
+    "next_score_for_maximum_rise": "max(0, 3.6 * current_price - previous_two_round_points)",
+    "extra_next_score_hurdle_per_0_1m_price_rise": {
+      "any_rise": 0.27,
+      "maximum_rise": 0.36
+    },
+    "low_tier_max_price": 18.5,
+    "low_tier_positive_changes": [
+      0.2,
+      0.6
+    ],
+    "high_tier_positive_changes": [
+      0.1,
+      0.3
+    ],
+    "examples": {
+      "10": {
+        "any_rise_average_points": 9.0,
+        "maximum_rise_average_points": 12.0
+      },
+      "15": {
+        "any_rise_average_points": 13.5,
+        "maximum_rise_average_points": 18.0
+      },
+      "20": {
+        "any_rise_average_points": 18.0,
+        "maximum_rise_average_points": 24.0
+      },
+      "25": {
+        "any_rise_average_points": 22.5,
+        "maximum_rise_average_points": 30.0
+      }
+    }
+  },
+  "examples": {
+    "price_forecast_reliability_discount": 0.867,
+    "marginal_points_realization_discount": 0.625,
+    "predicted_0_3m_mean_realized_change": 0.26,
+    "by_races_remaining": {
+      "1": {
+        "races_budget_can_be_used": 0,
+        "secured_0_3m_point_value": 1.09,
+        "predicted_0_3m_expected_point_value": 0.0,
+        "decision_grade_secured_0_3m_point_value": 0.68,
+        "decision_grade_predicted_0_3m_point_value": 0.0,
+        "decision_grade_predicted_0_3m_p25": 0.0,
+        "decision_grade_predicted_0_3m_p75": 0.0,
+        "secured_1_0m_point_value": 3.65,
+        "decision_grade_secured_1_0m_point_value": 2.28,
+        "secured_budget_needed_for_10_points": 4.38,
+        "predicted_budget_needed_for_10_points": null
+      },
+      "3": {
+        "races_budget_can_be_used": 2,
+        "secured_0_3m_point_value": 2.08,
+        "predicted_0_3m_expected_point_value": 1.5,
+        "decision_grade_secured_0_3m_point_value": 1.3,
+        "decision_grade_predicted_0_3m_point_value": 0.93,
+        "decision_grade_predicted_0_3m_p25": 0.81,
+        "decision_grade_predicted_0_3m_p75": 1.28,
+        "secured_1_0m_point_value": 6.95,
+        "decision_grade_secured_1_0m_point_value": 4.34,
+        "secured_budget_needed_for_10_points": 2.3,
+        "predicted_budget_needed_for_10_points": 3.21
+      },
+      "5": {
+        "races_budget_can_be_used": 4,
+        "secured_0_3m_point_value": 2.41,
+        "predicted_0_3m_expected_point_value": 1.99,
+        "decision_grade_secured_0_3m_point_value": 1.51,
+        "decision_grade_predicted_0_3m_point_value": 1.24,
+        "decision_grade_predicted_0_3m_p25": 1.18,
+        "decision_grade_predicted_0_3m_p75": 1.3,
+        "secured_1_0m_point_value": 8.03,
+        "decision_grade_secured_1_0m_point_value": 5.02,
+        "secured_budget_needed_for_10_points": 1.99,
+        "predicted_budget_needed_for_10_points": 2.42
+      },
+      "8": {
+        "races_budget_can_be_used": 7,
+        "secured_0_3m_point_value": 2.54,
+        "predicted_0_3m_expected_point_value": 2.18,
+        "decision_grade_secured_0_3m_point_value": 1.59,
+        "decision_grade_predicted_0_3m_point_value": 1.36,
+        "decision_grade_predicted_0_3m_p25": 1.31,
+        "decision_grade_predicted_0_3m_p75": 1.39,
+        "secured_1_0m_point_value": 8.47,
+        "decision_grade_secured_1_0m_point_value": 5.29,
+        "secured_budget_needed_for_10_points": 1.89,
+        "predicted_budget_needed_for_10_points": 2.2
+      },
+      "11": {
+        "races_budget_can_be_used": 10,
+        "secured_0_3m_point_value": 2.56,
+        "predicted_0_3m_expected_point_value": 2.22,
+        "decision_grade_secured_0_3m_point_value": 1.6,
+        "decision_grade_predicted_0_3m_point_value": 1.39,
+        "decision_grade_predicted_0_3m_p25": 1.31,
+        "decision_grade_predicted_0_3m_p75": 1.46,
+        "secured_1_0m_point_value": 8.55,
+        "decision_grade_secured_1_0m_point_value": 5.34,
+        "secured_budget_needed_for_10_points": 1.87,
+        "predicted_budget_needed_for_10_points": 2.16
+      }
+    }
+  },
+  "source": {
+    "completed_rounds": [
+      1,
+      2,
+      3,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "genuine_deadline_rounds": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "method": "Finite-difference continuation simulation from each historical deadline state; points-only policy is primary.",
+    "note": "Experimental 2026 option value. Budget earned after a race can first be used at the following deadline."
+  }
+}

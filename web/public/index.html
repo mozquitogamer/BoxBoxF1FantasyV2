@@ -546,6 +546,7 @@
                 <div class="optimizer-mode-toggle">
                     <button class="mode-btn active" data-mode="fresh">Build Fresh Lineup</button>
                     <button class="mode-btn" data-mode="transfers">Transfer Advisor</button>
+                    <button class="mode-btn" data-mode="budgetvalue">Points vs Budget</button>
                     <button class="mode-btn" data-mode="multiweek">Multi-Week Planner</button>
                     <button class="mode-btn" data-mode="finalfix">Final Fix</button>
                     <button class="mode-btn" data-mode="compare">Team Compare</button>
@@ -574,7 +575,8 @@
                             <select id="strategy">
                                 <option value="max_points">Max Expected Points</option>
                                 <option value="max_value">Max Value (Points/$M)</option>
-                                <option value="budget_gain" title="Prioritize picks likely to increase in price based on PPM ratings">Budget Builder</option>
+                                <option value="season_value" title="Combine this round's points with the calibrated future option value of expected budget changes">Season Value (Experimental)</option>
+                                <option value="budget_gain" title="Aggressively prioritize picks likely to increase in price based on PPM ratings">Budget Builder (Aggressive)</option>
                                 <option value="balanced">Balanced</option>
                             </select>
                         </div>
@@ -610,7 +612,7 @@
                             <ul>
                                 <li><strong>Lock picks:</strong> Left-click a driver/constructor to lock them in &mdash; they won't be swapped out</li>
                                 <li><strong>Exclude picks:</strong> Right-click to exclude a player from recommendations</li>
-                                <li><strong>Strategies:</strong> Max Points focuses on this round's score; Budget Builder prioritizes price appreciation</li>
+                                <li><strong>Strategies:</strong> Max Points focuses on this round. Season Value uses our calibrated points value for expected budget changes. Budget Builder is the aggressive price-growth option.</li>
                             </ul>
                         </details>
                     </div>
@@ -641,7 +643,8 @@
                                 <select id="transferStrategy">
                                     <option value="max_points">Max Expected Points</option>
                                     <option value="max_value">Max Value (Points/$M)</option>
-                                    <option value="budget_gain">Budget Builder</option>
+                                    <option value="season_value">Season Value (Experimental)</option>
+                                    <option value="budget_gain">Budget Builder (Aggressive)</option>
                                     <option value="balanced">Balanced</option>
                                 </select>
                             </div>
@@ -667,6 +670,46 @@
                             <button class="btn-primary" id="runTransferAdvisor">Find Best Transfers</button>
                             <button class="share-team-btn" id="shareMyTeam" type="button" title="Copy a shareable link to your current team">🔗 Share team</button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Points versus budget decision tool -->
+                <div class="optimizer-mode hidden" id="mode-budgetvalue">
+                    <div class="tool-explainer">
+                        <details open>
+                            <summary>What does extra F1 Fantasy budget actually buy?</summary>
+                            <p>This experimental calculator converts an expected or already secured budget change into future-point option value. It is calibrated from the completed 2026 rounds and accounts for the number of races left, price-forecast reliability, and the fact that a rise earned this weekend can only be spent from the next deadline.</p>
+                            <p>Budget value is lumpy. A small rise may change nothing until it crosses the price gap to a better lineup, so the result is a decision guide rather than guaranteed points.</p>
+                        </details>
+                    </div>
+                    <div class="budget-value-tool">
+                        <div class="budget-value-inputs">
+                            <div class="control-group">
+                                <label for="budgetCalcPoints">Points sacrificed now</label>
+                                <input type="number" id="budgetCalcPoints" value="10" min="0" step="0.1">
+                            </div>
+                            <div class="control-group">
+                                <label for="budgetCalcChange">Budget change ($M)</label>
+                                <input type="number" id="budgetCalcChange" value="0.3" step="0.1">
+                            </div>
+                            <div class="control-group">
+                                <label for="budgetCalcRaces">Races left, including this one</label>
+                                <input type="number" id="budgetCalcRaces" value="11" min="1" max="24" step="1">
+                            </div>
+                            <div class="control-group">
+                                <label for="budgetCalcStatus">Budget status</label>
+                                <select id="budgetCalcStatus">
+                                    <option value="forecast" selected>Forecast after this race</option>
+                                    <option value="secured">Already secured and spendable</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label for="budgetCalcThreshold">Known affordability gap ($M, optional)</label>
+                                <input type="number" id="budgetCalcThreshold" placeholder="e.g. 0.7" min="0" step="0.1">
+                            </div>
+                            <button class="btn-primary" id="runBudgetCalculator">Compare Points and Budget</button>
+                        </div>
+                        <div id="budgetCalcResult" class="budget-value-result"></div>
                     </div>
                 </div>
 
@@ -711,7 +754,8 @@
                                 <select id="mwStrategy">
                                     <option value="max_points">Max Expected Points</option>
                                     <option value="balanced">Balanced</option>
-                                    <option value="budget_gain">Budget Builder</option>
+                                    <option value="season_value">Season Value (Experimental)</option>
+                                    <option value="budget_gain">Budget Builder (Aggressive)</option>
                                 </select>
                             </div>
                             <div class="control-group">
@@ -1294,7 +1338,7 @@
     </footer>
 
     <script src="scenarios.js?v=3"></script>
-    <script src="app.js?v=114"></script>
+    <script src="app.js?v=115"></script>
     <script src="engagement.js?v=2"></script>
 </body>
 </html>

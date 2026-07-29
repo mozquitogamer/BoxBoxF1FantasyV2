@@ -3355,6 +3355,106 @@ table.sortable th.sort-desc::after {
     }
 }
 
+/* --- Points versus budget decision tool ------------------------------ */
+.budget-value-tool {
+    margin-top: 16px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg, 12px);
+    background: var(--card);
+}
+.budget-value-inputs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+    gap: 14px;
+    align-items: end;
+}
+.budget-value-inputs .btn-primary {
+    min-height: 42px;
+}
+.budget-value-result {
+    margin-top: 18px;
+}
+.budget-value-verdict {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 14px 16px;
+    border-radius: 9px;
+    border: 1px solid;
+}
+.budget-value-verdict.points {
+    color: var(--green);
+    border-color: color-mix(in srgb, var(--green) 45%, transparent);
+    background: color-mix(in srgb, var(--green) 8%, transparent);
+}
+.budget-value-verdict.budget {
+    color: var(--accent, #6366f1);
+    border-color: color-mix(in srgb, var(--accent, #6366f1) 45%, transparent);
+    background: color-mix(in srgb, var(--accent, #6366f1) 8%, transparent);
+}
+.budget-value-verdict span {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+.budget-value-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+.budget-value-metrics > div {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+}
+.budget-value-metrics span {
+    display: block;
+    min-height: 2.4em;
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    line-height: 1.25;
+}
+.budget-value-metrics strong {
+    display: block;
+    margin-top: 4px;
+    color: var(--text);
+    font-size: 1rem;
+}
+.budget-value-frontier {
+    margin: 12px 0 4px;
+    padding: 10px 12px;
+    border-left: 3px solid var(--orange, #f59e0b);
+    background: rgba(245, 158, 11, 0.08);
+    color: var(--text-secondary);
+    font-size: 0.84rem;
+}
+.transfer-budget-tradeoff {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+    margin: 0 0 14px;
+    padding: 12px;
+    border: 1px solid color-mix(in srgb, var(--accent, #6366f1) 30%, var(--border));
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--accent, #6366f1) 5%, transparent);
+}
+.transfer-budget-tradeoff div {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+.transfer-budget-tradeoff strong {
+    display: block;
+    margin-top: 2px;
+    color: var(--text);
+    font-size: 0.9rem;
+}
+.transfer-budget-note {
+    grid-column: 1 / -1;
+    line-height: 1.4;
+}
+
 /* ============================================================
    Hero Section
    ============================================================ */
