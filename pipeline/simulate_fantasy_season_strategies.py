@@ -1,12 +1,13 @@
 """Sequential 2026 F1 Fantasy strategy experiment.
 
-Simulates two managers from a $100M round-one budget:
+Simulates manager policies from a $100M round-one budget:
 
 * ``max_points`` maximises the archived post-FP projected score.
 * ``balanced`` remains points-first but values each projected $1M price rise
   as eight projected points.
+* ``budget_builder`` applies a stronger price-growth value for experiments.
 
-Both managers carry their real team, bank balance, asset price changes, and
+Managers carry their real team, bank balance, asset price changes, and
 banked transfers from round to round.  All realised scoring uses the official
 fantasy totals in ``data/seed/official_fantasy_points.json``.
 
@@ -44,9 +45,31 @@ INITIAL_FREE_TRANSFERS_AFTER_R1 = 2
 MAX_BANKED_TRANSFERS = 5
 MAX_PAID_TRANSFERS_PER_ROUND = 1
 BALANCED_PRICE_GAIN_VALUE = 8.0
+BUDGET_BUILDER_PRICE_GAIN_VALUE = 20.0
+RISK_PROFILE_WEIGHTS = {
+    "maximum_tolerance": 0.0,
+    "medium_tolerance": 0.75,
+    "minimal_risk_accepted": 2.0,
+}
+TOTAL_RISK_AVOIDANCE = "total_avoidance"
 SPRINT_ROUNDS = {2, 6, 7, 11, 14, 18}
 CHIPS = ("wild_card", "limitless", "3x_boost", "no_negative", "autopilot")
 RAIN_RISK_BONUS = {"NONE": 0.0, "LOW": 1.0, "MEDIUM": 5.0, "HIGH": 10.0}
+
+
+def strategy_price_gain_value(
+    strategy: str,
+    *,
+    chip: str | None = None,
+) -> float:
+    values = {
+        "max_points": 0.0,
+        "balanced": BALANCED_PRICE_GAIN_VALUE,
+        "budget_builder": BUDGET_BUILDER_PRICE_GAIN_VALUE,
+    }
+    if strategy not in values:
+        raise ValueError(f"Unknown manager strategy: {strategy}")
+    return 0.0 if chip == "limitless" else values[strategy]
 
 
 @dataclass
@@ -376,6 +399,7 @@ def choose_lineup(
     state: TeamState | None,
     strategy: str,
     chip: str | None,
+    risk_profile: str = "maximum_tolerance",
 ) -> Candidate:
     """Return the best legal lineup for one round and manager policy."""
     cost = combos.driver_cost[:, None] + combos.constructor_cost[None, :]
@@ -444,14 +468,24 @@ def choose_lineup(
         legal &= transfers <= free_transfers + MAX_PAID_TRANSFERS_PER_ROUND
 
     points_after_penalty = selection_projected - penalty
-    if strategy == "balanced" and chip != "limitless":
-        objective = (
-            points_after_penalty
-            + BALANCED_PRICE_GAIN_VALUE * projected_gain
-        )
+    price_gain_value = strategy_price_gain_value(strategy, chip=chip)
+    strategy_objective = (
+        points_after_penalty + price_gain_value * projected_gain
+    )
+
+    if risk_profile == TOTAL_RISK_AVOIDANCE:
+        legal_downside = np.where(legal, downside, np.inf)
+        minimum_downside = float(np.min(legal_downside))
+        safest_legal = legal & np.isclose(downside, minimum_downside)
+        objective = np.where(safest_legal, strategy_objective, -np.inf)
     else:
-        objective = points_after_penalty
-    objective = np.where(legal, objective, -np.inf)
+        if risk_profile not in RISK_PROFILE_WEIGHTS:
+            raise ValueError(f"Unknown risk profile: {risk_profile}")
+        objective = (
+            strategy_objective
+            - RISK_PROFILE_WEIGHTS[risk_profile] * downside
+        )
+        objective = np.where(legal, objective, -np.inf)
     flat_index = int(np.argmax(objective))
     if not np.isfinite(objective.flat[flat_index]):
         raise RuntimeError(
@@ -560,6 +594,7 @@ def simulate(
     *,
     strategy: str,
     chip_schedule: dict[int, str],
+    risk_profile: str = "maximum_tolerance",
 ) -> dict[str, Any]:
     state: TeamState | None = None
     total_points = 0.0
@@ -576,6 +611,7 @@ def simulate(
             state=state,
             strategy=strategy,
             chip=chip,
+            risk_profile=risk_profile,
         )
         persistent_drivers = candidate.drivers
         persistent_constructors = candidate.constructors
@@ -644,6 +680,7 @@ def simulate(
                 "transfer_penalty": penalty,
                 "projected_points": candidate.projected_points,
                 "projected_price_gain": candidate.projected_gain,
+                "selection_utility": round(candidate.utility, 3),
                 "actual_points_gross": round(gross_actual, 1),
                 "actual_points_net": round(net_actual, 1),
                 "season_points": round(total_points, 1),
@@ -661,6 +698,7 @@ def simulate(
 
     return {
         "strategy": strategy,
+        "risk_profile": risk_profile,
         "chip_schedule": {str(key): value for key, value in sorted(chip_schedule.items())},
         "rounds": records,
         "summary": {
@@ -686,6 +724,7 @@ def choose_chip_schedule(
     *,
     strategy: str,
     baseline: dict[str, Any],
+    risk_profile: str = "maximum_tolerance",
 ) -> tuple[dict[int, str], dict[str, Any]]:
     """Choose one forecast-only opportunity for each chip.
 
@@ -707,6 +746,7 @@ def choose_chip_schedule(
                     state=state,
                     strategy=strategy,
                     chip=chip,
+                    risk_profile=risk_profile,
                 )
                 chip_candidates[chip] = {
                     "uplift": round(
@@ -824,6 +864,7 @@ def choose_chip_schedule_v2(
     *,
     strategy: str,
     baseline: dict[str, Any],
+    risk_profile: str = "maximum_tolerance",
 ) -> tuple[dict[int, str], dict[str, Any]]:
     """Choose chips using domain rules and only pre-race forecast evidence.
 
@@ -845,6 +886,7 @@ def choose_chip_schedule_v2(
                 state=state,
                 strategy=strategy,
                 chip="wild_card",
+                risk_profile=risk_profile,
             )
             limitless = choose_lineup(
                 round_data=round_data,
@@ -852,6 +894,7 @@ def choose_chip_schedule_v2(
                 state=state,
                 strategy=strategy,
                 chip="limitless",
+                risk_profile=risk_profile,
             )
             selected_driver_points = sorted(
                 (
@@ -866,16 +909,7 @@ def choose_chip_schedule_v2(
             )
             top_projection, top_driver = selected_driver_points[-1]
             second_projection, second_driver = selected_driver_points[-2]
-            baseline_utility = (
-                float(row["projected_points"])
-                - float(row["transfer_penalty"])
-                + (
-                    BALANCED_PRICE_GAIN_VALUE
-                    * float(row["projected_price_gain"])
-                    if strategy == "balanced"
-                    else 0.0
-                )
-            )
+            baseline_utility = float(row["selection_utility"])
             wildcard_uplift = max(
                 0.0, float(wildcard.utility) - baseline_utility
             )
@@ -1003,7 +1037,12 @@ def choose_chip_schedule_v2(
     # Re-evaluate Wild Card after the already-selected chips have altered the
     # persistent team path.  This keeps the "several changes" rule true for
     # the team the manager would actually own at that deadline.
-    provisional = simulate(rounds, strategy=strategy, chip_schedule=schedule)
+    provisional = simulate(
+        rounds,
+        strategy=strategy,
+        chip_schedule=schedule,
+        risk_profile=risk_profile,
+    )
     provisional_by_round = {
         row["round"]: row for row in provisional["rounds"]
     }
@@ -1021,17 +1060,9 @@ def choose_chip_schedule_v2(
                 state=state,
                 strategy=strategy,
                 chip="wild_card",
+                risk_profile=risk_profile,
             )
-            baseline_utility = (
-                float(row["projected_points"])
-                - float(row["transfer_penalty"])
-                + (
-                    BALANCED_PRICE_GAIN_VALUE
-                    * float(row["projected_price_gain"])
-                    if strategy == "balanced"
-                    else 0.0
-                )
-            )
+            baseline_utility = float(row["selection_utility"])
             uplift = max(0.0, float(wildcard.utility) - baseline_utility)
             wildcard_signals[round_data.round_num] = {
                 "transfers": float(wildcard.transfers),
@@ -1081,7 +1112,10 @@ def choose_chip_schedule_v2(
     # Wild Card can also change captain choices later, so use that final
     # provisional path when selecting the remaining Autopilot opportunity.
     final_provisional = simulate(
-        rounds, strategy=strategy, chip_schedule=schedule
+        rounds,
+        strategy=strategy,
+        chip_schedule=schedule,
+        risk_profile=risk_profile,
     )
     final_by_round = {
         row["round"]: row for row in final_provisional["rounds"]

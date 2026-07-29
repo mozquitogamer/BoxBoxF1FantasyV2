@@ -138,3 +138,51 @@ def test_v2_chip_policy_uses_track_risk_and_real_lineup_churn() -> None:
             item for item in rounds if item.round_num == round_num
         )
         assert not round_data.reconstructed
+
+
+def test_risk_profiles_change_lineup_using_negative_p5_exposure() -> None:
+    round_data = sim.RoundInputs(
+        round_num=1,
+        race_name="Risk Test GP",
+        reconstructed=False,
+        archive_path="risk-test.json",
+        drivers=("A", "B", "C", "D", "E", "F"),
+        constructors=("X", "Y", "Z"),
+        driver_projection=np.array([50, 40, 30, 20, 10, 5], dtype=float),
+        constructor_projection=np.array([40, 20, 5], dtype=float),
+        driver_p5=np.array([-20, -10, 0, 0, 0, 0], dtype=float),
+        constructor_p5=np.array([-30, 0, 0], dtype=float),
+        driver_std=np.ones(6),
+        driver_prices=np.ones(6),
+        constructor_prices=np.ones(3),
+        driver_close_prices=np.ones(6),
+        constructor_close_prices=np.ones(3),
+        driver_actual=np.zeros(6),
+        constructor_actual=np.zeros(3),
+        driver_projected_gain=np.zeros(6),
+        constructor_projected_gain=np.zeros(3),
+    )
+    combos = sim.build_combo_matrices(round_data)
+
+    maximum = sim.choose_lineup(
+        round_data=round_data,
+        combos=combos,
+        state=None,
+        strategy="max_points",
+        chip=None,
+        risk_profile="maximum_tolerance",
+    )
+    total_avoidance = sim.choose_lineup(
+        round_data=round_data,
+        combos=combos,
+        state=None,
+        strategy="max_points",
+        chip=None,
+        risk_profile="total_avoidance",
+    )
+
+    assert maximum.downside_risk == 60.0
+    assert total_avoidance.downside_risk == 10.0
+    assert maximum.projected_points > total_avoidance.projected_points
+    assert "X" in maximum.constructors
+    assert "X" not in total_avoidance.constructors
