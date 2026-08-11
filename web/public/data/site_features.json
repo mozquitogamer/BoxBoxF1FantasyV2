@@ -1,7 +1,8 @@
 {
   "email_updates": {
-    "enabled": false,
-    "endpoint": "/api/email/subscribe"
+    "enabled": true,
+    "endpoint": "/api/email/subscribe",
+    "status_endpoint": "/api/email/status"
   },
   "adsense": {
     "account_code_enabled": true,

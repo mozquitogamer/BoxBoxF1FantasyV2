@@ -57,8 +57,8 @@ module.exports = async function confirm(req, res) {
         }
 
         return res.status(200).send(htmlPage(
-            'You’re on the grid',
-            'Your email is confirmed. You’ll get a concise alert when the race simulations are updated, with an unsubscribe link in every alert.',
+            "You're on the grid",
+            "Your email is confirmed. You'll get concise V13 and simulation updates, plus the free Beat V13 registration link after Round 22. Every alert includes an unsubscribe link.",
             true
         ));
     } catch (error) {

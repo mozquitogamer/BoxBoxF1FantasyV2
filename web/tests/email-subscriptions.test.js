@@ -11,6 +11,7 @@ const {
 } = require('../lib/email-subscriptions');
 const subscribeHandler = require('../api/email/subscribe');
 const confirmHandler = require('../api/email/confirm');
+const statusHandler = require('../api/email/status');
 
 function mockResponse() {
     return {
@@ -99,9 +100,45 @@ test('subscribe handler sends only a confirmation email', async () => {
         assert.equal(calls[0].url, 'https://api.resend.com/emails');
         const payload = JSON.parse(calls[0].options.body);
         assert.deepEqual(payload.to, ['fan@example.com']);
+        assert.equal(payload.subject, 'Confirm your free BoxBox V13 alerts');
         assert.match(payload.text, /\/api\/email\/confirm\?token=/);
     } finally {
         global.fetch = originalFetch;
+        restoreEnv();
+    }
+});
+
+test('status handler hides sign-up when delivery is not configured', () => {
+    const keys = [
+        'RESEND_API_KEY',
+        'RESEND_FROM',
+        'RESEND_SIM_UPDATES_SEGMENT_ID',
+        'SUBSCRIPTION_SIGNING_SECRET',
+    ];
+    const previous = Object.fromEntries(keys.map(key => [key, process.env[key]]));
+    for (const key of keys) delete process.env[key];
+
+    try {
+        const res = mockResponse();
+        statusHandler({ method: 'GET' }, res);
+        assert.equal(res.statusCode, 200);
+        assert.deepEqual(res.body, { available: false });
+    } finally {
+        for (const [key, value] of Object.entries(previous)) {
+            if (value === undefined) delete process.env[key];
+            else process.env[key] = value;
+        }
+    }
+});
+
+test('status handler exposes sign-up after delivery is configured', () => {
+    const restoreEnv = withEmailEnv();
+    try {
+        const res = mockResponse();
+        statusHandler({ method: 'GET' }, res);
+        assert.equal(res.statusCode, 200);
+        assert.deepEqual(res.body, { available: true });
+    } finally {
         restoreEnv();
     }
 });

@@ -18,13 +18,25 @@
         element.dataset.state = state || '';
     }
 
-    function initEmailUpdates(config) {
+    async function initEmailUpdates(config) {
         const panel = document.getElementById('emailUpdatesPanel');
         const form = document.getElementById('emailUpdatesForm');
         const status = document.getElementById('emailUpdatesStatus');
         const submit = form?.querySelector('button[type="submit"]');
 
         if (!config?.enabled || !panel || !form || !status || !submit) return;
+
+        // Ship the public flag independently of private delivery credentials.
+        // Do not expose a form that can only fail with a configuration error.
+        try {
+            const response = await fetch(config.status_endpoint || '/api/email/status', {
+                cache: 'no-store',
+            });
+            const availability = await response.json().catch(() => ({}));
+            if (!response.ok || availability.available !== true) return;
+        } catch (_) {
+            return;
+        }
 
         panel.hidden = false;
         form.addEventListener('submit', async (event) => {
@@ -147,7 +159,7 @@
             const response = await fetch(CONFIG_URL, { cache: 'no-store' });
             if (!response.ok) return;
             const config = await response.json();
-            initEmailUpdates(config.email_updates);
+            await initEmailUpdates(config.email_updates);
             const adSenseActive = initAdSense(config.adsense);
             if (!adSenseActive) initBottomBanner(config.bottom_banner);
         } catch (error) {

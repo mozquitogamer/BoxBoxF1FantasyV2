@@ -60,14 +60,14 @@ module.exports = async function subscribe(req, res) {
             body: {
                 from: config.from,
                 to: [email],
-                subject: 'Confirm your BoxBox simulation alerts',
+                subject: 'Confirm your free BoxBox V13 alerts',
                 html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#141821">
-                    <h1 style="font-size:24px">Confirm your BoxBox alerts</h1>
-                    <p>You asked to be notified when BoxBoxF1Fantasy publishes updated race simulations.</p>
-                    <p><a href="${confirmationUrl}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 18px;border-radius:7px;font-weight:700">Confirm email alerts</a></p>
+                    <h1 style="font-size:24px">Join the V13 grid</h1>
+                    <p>You asked for free V13 early-thoughts and post-FP simulation updates from BoxBoxF1Fantasy. We will also send the free Beat V13 registration link after Round 22.</p>
+                    <p><a href="${confirmationUrl}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 18px;border-radius:7px;font-weight:700">Confirm free alerts</a></p>
                     <p style="color:#667085;font-size:13px">This link expires in ${config.ttlHours} hours. If you did not request this, you can ignore this email and no subscription will be created.</p>
                 </div>`,
-                text: `Confirm your BoxBoxF1Fantasy simulation alerts:\n\n${confirmationUrl}\n\nThis link expires in ${config.ttlHours} hours. If you did not request this, ignore this email.`,
+                text: `Confirm your free BoxBoxF1Fantasy V13 alerts:\n\n${confirmationUrl}\n\nYou will get V13 early-thoughts and post-FP simulation updates, plus the free Beat V13 registration link after Round 22. This link expires in ${config.ttlHours} hours. If you did not request this, ignore this email.`,
             },
         });
         return res.status(202).json({

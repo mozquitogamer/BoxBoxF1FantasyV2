@@ -109,6 +109,7 @@ let compareTeams = [
 let trackData = null;
 let driverHistory = null;
 let budgetValueData = null;       // calibrated budget-to-future-points model
+let v13Data = null;                // V13 research replay + live manager state
 // P9: ML-based projections for future rounds, populated by pipeline/predict_horizon.py.
 // When present, projectScoresForRound prefers these over the affinity heuristic.
 let horizonProjections = null;
@@ -320,6 +321,13 @@ async function renderTabIfNeeded(tabName) {
             // Optimizer renders on button click, just mark ready
             _tabRendered.optimizer = true;
             break;
+        case 'beatbot':
+            showTabSpinner(tabId);
+            await ensureLoaded('v13', loadV13Data);
+            renderV13();
+            removeTabSpinner(tabId);
+            _tabRendered.beatbot = true;
+            break;
         case 'analysis':
             showTabSpinner(tabId);
             await ensureAnalysisData();
@@ -418,6 +426,317 @@ function renderChangelog() {
     }).join('');
 }
 
+// -- Beat V13 ---------------------------------------------------------------
+async function loadV13Data() {
+    try {
+        const response = await fetch(cacheBust('data/v13_manager.json'));
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        v13Data = await response.json();
+    } catch (error) {
+        v13Data = null;
+        console.warn('V13 manager record is unavailable:', error);
+    }
+}
+
+function v13Escape(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
+function v13ChipLabel(value) {
+    if (!value) return 'No chip';
+    const labels = {
+        wild_card: 'Wild Card',
+        limitless: 'Limitless',
+        '3x_boost': '3x Boost',
+        no_negative: 'No Negative',
+        autopilot: 'Autopilot',
+        final_fix: 'Final Fix',
+    };
+    return labels[value] || String(value).replaceAll('_', ' ');
+}
+
+function v13Name(id, type = 'driver') {
+    const labels = v13Data?.labels?.[type === 'constructor' ? 'constructors' : 'drivers'] || {};
+    return labels[id] || id;
+}
+
+function v13Pills(ids, type = 'driver', captain = null) {
+    return (ids || []).map(id => {
+        const boosted = id === captain;
+        return `<span class="v13-asset-pill ${type}${boosted ? ' boosted' : ''}">
+            ${v13Escape(v13Name(id, type))}${boosted ? '<b>2x</b>' : ''}
+        </span>`;
+    }).join('');
+}
+
+function v13SnapshotCard(title, snapshot, emptyText) {
+    if (!snapshot) {
+        return `<article class="v13-snapshot empty">
+            <div class="v13-snapshot-heading"><span>${v13Escape(title)}</span><em>Awaiting data</em></div>
+            <p>${v13Escape(emptyText)}</p>
+        </article>`;
+    }
+    const chip = snapshot.chip ? `<span class="v13-chip">${v13Escape(v13ChipLabel(snapshot.chip))}</span>` : '';
+    const phaseLabel = {
+        provisional: 'Provisional',
+        frozen_before_lock: 'Frozen before lock',
+        frozen_replay: 'Frozen replay',
+    }[snapshot.status] || (snapshot.phase === 'pre_fp' ? 'Provisional' : 'Frozen');
+    const changes = snapshot.changes || {};
+    const driverMove = (changes.drivers_out || []).length
+        ? `${changes.drivers_out.map(id => v13Name(id)).join(' + ')} → ${changes.drivers_in.map(id => v13Name(id)).join(' + ')}`
+        : '';
+    const constructorMove = (changes.constructors_out || []).length
+        ? `${changes.constructors_out.map(id => v13Name(id, 'constructor')).join(' + ')} → ${changes.constructors_in.map(id => v13Name(id, 'constructor')).join(' + ')}`
+        : '';
+    const moveText = [driverMove, constructorMove].filter(Boolean).join(' · ');
+    return `<article class="v13-snapshot">
+        <div class="v13-snapshot-heading"><span>${v13Escape(title)}</span><em>${phaseLabel}</em></div>
+        <div class="v13-asset-row">${v13Pills(snapshot.drivers, 'driver', snapshot.captain)}</div>
+        <div class="v13-asset-row constructors">${v13Pills(snapshot.constructors, 'constructor')}${chip}</div>
+        ${moveText ? `<p class="v13-move-line"><strong>Move:</strong> ${v13Escape(moveText)}${snapshot.transfer_penalty ? ` · −${Number(snapshot.transfer_penalty)} pts` : ''}</p>` : ''}
+        <div class="v13-snapshot-metrics">
+            <span><small>Projected</small><strong>${Number(snapshot.projected_points || 0).toFixed(1)}</strong></span>
+            <span><small>Transfers</small><strong>${Number(snapshot.transfers || 0)}</strong></span>
+            <span><small>Price signal</small><strong>$${Number(snapshot.projected_price_gain || 0).toFixed(1)}M</strong></span>
+            <span><small>Downside</small><strong>${Number(snapshot.downside_risk || 0).toFixed(1)}</strong></span>
+        </div>
+    </article>`;
+}
+
+function v13RoundHistory(round, isLatest) {
+    const final = round.post_fp_final;
+    const early = round.early_thoughts;
+    const provenance = round.provenance === 'reconstructed' ? 'Reconstructed' : 'Archived live forecast';
+    const provenanceClass = round.provenance === 'reconstructed' ? 'reconstructed' : 'genuine';
+    const chip = final.chip ? v13ChipLabel(final.chip) : 'No chip';
+    const fix = round.final_fix;
+    return `<details class="v13-round"${isLatest ? ' open' : ''}>
+        <summary>
+            <span class="v13-round-number">R${round.round}</span>
+            <span class="v13-round-title"><strong>${v13Escape(round.race)}</strong><small>${v13Escape(chip)}</small></span>
+            <span class="v13-provenance ${provenanceClass}">${provenance}</span>
+            <span class="v13-round-score"><strong>${Number(round.actual_points).toFixed(0)}</strong><small>round pts</small></span>
+            <span class="v13-round-total"><strong>${Number(round.cumulative_points).toFixed(0)}</strong><small>total</small></span>
+        </summary>
+        <div class="v13-round-body">
+            <div class="v13-round-snapshots">
+                ${v13SnapshotCard('Early thoughts', early, 'No preserved pre-FP archive exists for this round.')}
+                ${v13SnapshotCard('Post-FP final', final, 'The post-FP team is unavailable.')}
+            </div>
+            ${fix ? `<div class="v13-final-fix">
+                <span>Final Fix · post-qualifying</span>
+                <strong>${v13Escape(fix.outgoing_name)} → ${v13Escape(fix.incoming_name)}</strong>
+                <p>The qualifying-locked model projected a ${Number(fix.projected_gain).toFixed(1)}-point race gain. The move added ${Number(fix.actual_gain).toFixed(0)} realised points while keeping ${v13Escape(fix.outgoing_name)}'s qualifying score banked.</p>
+            </div>` : ''}
+            <div class="v13-reasons">
+                <h4>Why V13 chose it</h4>
+                <ul>${(final.reasons || []).map(reason => `<li>${v13Escape(reason)}</li>`).join('')}</ul>
+            </div>
+            <div class="v13-audit-line">
+                <span>Budget after: <strong>$${Number(round.budget_after).toFixed(1)}M</strong></span>
+                <span>Next-round transfers: <strong>${Number(round.free_transfers_next)}</strong></span>
+                <span title="${v13Escape(final.archive_sha256)}">Forecast proof: <strong>${v13Escape(String(final.archive_sha256 || '').slice(0, 10))}</strong></span>
+            </div>
+        </div>
+    </details>`;
+}
+
+function renderV13() {
+    const root = document.getElementById('v13Root');
+    if (!root) return;
+    if (!v13Data?.research_replay) {
+        root.innerHTML = '<p class="no-data">The V13 record is not available yet.</p>';
+        return;
+    }
+
+    const replay = v13Data.research_replay;
+    const current = v13Data.current_state;
+    const competition = v13Data.competition;
+    const rounds = replay.rounds || [];
+    const latest = rounds[rounds.length - 1];
+    const usedChips = Object.entries(current.chips_used || {})
+        .filter(([, round]) => round != null)
+        .map(([chip, round]) => `<span>${v13Escape(v13ChipLabel(chip))}<b>R${round}</b></span>`)
+        .join('');
+
+    root.innerHTML = `
+        <section class="v13-hero">
+            <div class="v13-identity">
+                <div class="v13-mark" aria-hidden="true"><span>V</span><strong>13</strong></div>
+                <div>
+                    <span class="v13-eyebrow">BoxBox virtual manager</span>
+                    <h1>Beat V13</h1>
+                    <p>${v13Escape(v13Data.manager.tagline)}</p>
+                </div>
+            </div>
+            <div class="v13-scoreboard">
+                <div><small>Full-season score</small><strong>${Number(replay.total_points).toLocaleString()}</strong><span>through R${replay.end_round}</span></div>
+                <div><small>Team value</small><strong>$${Number(replay.final_budget).toFixed(1)}M</strong><span>+$${(Number(replay.final_budget) - 100).toFixed(1)}M built</span></div>
+                <div><small>Prize pool</small><strong>$${competition.prizes_usd.reduce((a, b) => a + b, 0)}</strong><span>$100 · $50 · $30</span></div>
+            </div>
+            <div class="v13-hero-actions">
+                <button class="btn-primary" id="v13HistoryButton" type="button">See every decision</button>
+                <a class="v13-kofi-button" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Pit Wall &middot; $5/month</a>
+            </div>
+        </section>
+
+        <div class="v13-replay-warning">
+            <strong>Research replay, not a prospective claim.</strong>
+            <span>${v13Escape(replay.disclaimer)}</span>
+        </div>
+
+        <section class="v13-section">
+            <div class="v13-section-heading">
+                <div><span>Next decision</span><h2>Round ${current.next_round}: Early thoughts → Post-FP final</h2></div>
+                <em>Both snapshots will stay visible</em>
+            </div>
+            <div class="v13-round-snapshots current">
+                ${v13SnapshotCard('Early thoughts', current.early_thoughts, 'Publishes from the pre-FP simulation before the race weekend.')}
+                ${v13SnapshotCard('Post-FP final', current.post_fp_final, 'Free-practice evidence will freeze V13\'s official team before lock.')}
+            </div>
+        </section>
+
+        <section class="v13-section v13-state-section">
+            <div class="v13-section-heading"><div><span>Manager state</span><h2>What V13 owns after R${current.as_of_round}</h2></div><em>Policy v${v13Escape(v13Data.manager.policy_version)}</em></div>
+            <div class="v13-state-grid">
+                <div class="v13-owned-team">
+                    <h3>Drivers</h3><div class="v13-asset-row">${v13Pills(current.drivers, 'driver')}</div>
+                    <h3>Constructors</h3><div class="v13-asset-row constructors">${v13Pills(current.constructors, 'constructor')}</div>
+                </div>
+                <div class="v13-state-numbers">
+                    <span><small>Bank</small><strong>$${Number(current.bank).toFixed(1)}M</strong></span>
+                    <span><small>Free transfers</small><strong>${Number(current.free_transfers)}</strong></span>
+                    <span><small>Chip remaining</small><strong>${v13Escape(v13ChipLabel(current.chips_remaining?.[0]))}</strong></span>
+                </div>
+            </div>
+            <div class="v13-chip-ledger">${usedChips}</div>
+        </section>
+
+        <section class="v13-membership-card" aria-labelledby="v13MembershipTitle">
+            <div class="v13-membership-copy">
+                <span class="v13-membership-badge">Pit Wall membership &middot; $5/month</span>
+                <h2 id="v13MembershipTitle">The same free tools, with your team remembered</h2>
+                <p>BoxBox predictions, simulations, V13 decisions and the Beat V13 challenge stay free. Pit Wall is the convenience layer for people who want the relevant update brought to them.</p>
+                <a class="v13-membership-button" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join the Pit Wall on Ko-fi</a>
+            </div>
+            <div class="v13-membership-benefits">
+                <div><strong>At launch</strong><span>Concise member briefings and first access to new convenience features.</span></div>
+                <div><strong>Rolling out next</strong><span>Saved team, budget and chips; tailored pre-FP and post-FP alerts; My Team vs V13.</span></div>
+                <small>Paid members get faster delivery and personalization, never hidden contest data or a private prediction advantage.</small>
+            </div>
+        </section>
+
+        <section class="v13-section" id="v13History">
+            <div class="v13-section-heading"><div><span>Transparent record</span><h2>The complete R1–R13 replay</h2></div><em>FP for teams · Qualifying for Final Fix</em></div>
+            <div class="v13-history">${rounds.map((round, index) => v13RoundHistory(round, index === rounds.length - 1)).join('')}</div>
+        </section>
+
+        <section class="v13-rules-card" id="v13Registration">
+            <div>
+                <span class="v13-eyebrow">Beat the Bot challenge</span>
+                <h2>Registration closes after Round ${competition.registration_deadline_round}</h2>
+                <p>${v13Escape(competition.registration_window)} The planned score is the official full-2026 total, leaving R23 and R24 to decide the challenge. Entrants will designate one team at registration, then provide the official end-of-season score screenshot. A private league remains available as a verification backup.</p>
+                <p class="v13-rules-note">${v13Escape(competition.eligibility_note)}</p>
+            </div>
+            <div class="v13-prizes" aria-label="Prize positions">
+                <span><small>1st</small><strong>$${competition.prizes_usd[0]}</strong></span>
+                <span><small>2nd</small><strong>$${competition.prizes_usd[1]}</strong></span>
+                <span><small>3rd</small><strong>$${competition.prizes_usd[2]}</strong></span>
+            </div>
+        </section>
+    `;
+
+    root.querySelector('#v13HistoryButton')?.addEventListener('click', () => {
+        root.querySelector('#v13History')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (typeof gtag === 'function') gtag('event', 'beat_v13_history_open');
+    });
+    root.querySelector('.v13-kofi-button')?.addEventListener('click', () => {
+        if (typeof gtag === 'function') gtag('event', 'beat_v13_kofi_click', { location: 'tab' });
+    });
+    root.querySelector('.v13-membership-button')?.addEventListener('click', () => {
+        if (typeof gtag === 'function') gtag('event', 'pit_wall_join_click', { location: 'v13_tab', price_usd: 5 });
+    });
+}
+
+function setupV13Popup() {
+    const popup = document.getElementById('v13Popup');
+    const closeButton = document.getElementById('v13PopupClose');
+    const exploreButton = document.getElementById('v13PopupExplore');
+    const supportLink = popup?.querySelector('.v13-popup-support');
+    if (!popup || !closeButton || !exploreButton) return;
+
+    const storageKey = 'boxbox-v13-popup-until';
+    const engagedKey = 'boxbox-v13-popup-engaged';
+    let previousFocus = null;
+
+    const rememberDismissal = (days = 10) => {
+        try { localStorage.setItem(storageKey, String(Date.now() + days * 86400000)); } catch (e) {}
+    };
+    const hide = (remember = true) => {
+        popup.classList.add('hidden');
+        document.body.classList.remove('v13-popup-open');
+        if (remember) rememberDismissal();
+        previousFocus?.focus?.();
+    };
+    const show = () => {
+        if (location.hash.replace('#', '') === 'beatbot') return;
+        try {
+            if (localStorage.getItem(engagedKey) === '1') return;
+            if (Number(localStorage.getItem(storageKey) || 0) > Date.now()) return;
+        } catch (e) {}
+        previousFocus = document.activeElement;
+        popup.classList.remove('hidden');
+        document.body.classList.add('v13-popup-open');
+        closeButton.focus();
+        if (typeof gtag === 'function') gtag('event', 'beat_v13_popup_impression');
+    };
+
+    closeButton.addEventListener('click', () => {
+        hide(true);
+        if (typeof gtag === 'function') gtag('event', 'beat_v13_popup_dismiss');
+    });
+    popup.addEventListener('click', event => {
+        if (event.target === popup) hide(true);
+    });
+    exploreButton.addEventListener('click', () => {
+        try { localStorage.setItem(engagedKey, '1'); } catch (e) {}
+        hide(false);
+        switchTab('beatbot');
+        history.replaceState(null, '', '#beatbot');
+        document.querySelector('.tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (typeof gtag === 'function') gtag('event', 'beat_v13_popup_click');
+    });
+    supportLink?.addEventListener('click', () => {
+        rememberDismissal(30);
+        if (typeof gtag === 'function') gtag('event', 'beat_v13_kofi_click', { location: 'popup' });
+    });
+    popup.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            hide(true);
+            return;
+        }
+        if (event.key !== 'Tab') return;
+        const focusable = [...popup.querySelectorAll('button, a[href]')].filter(el => !el.disabled);
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault(); last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault(); first.focus();
+        }
+    });
+
+    window.setTimeout(show, 12000);
+}
+
 // -- Init --
 document.addEventListener('DOMContentLoaded', async () => {
     // Phase 1: Fetch the compact home-page inputs in parallel. Official score
@@ -454,6 +773,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     startCountdown();
     setupTabs();
     setupControls();
+    setupV13Popup();
 
     // Phase 2: Render Drivers tab immediately
     renderHero();
@@ -952,6 +1272,7 @@ function startCountdown() {
 // time. The real browser URL is never changed; these paths exist only in GA.
 const GA_TAB_TITLES = {
     drivers: 'Drivers', constructors: 'Constructors', optimizer: 'Lineup Optimizer',
+    beatbot: 'Beat V13',
     analysis: 'Analysis', season: 'Season', h2h: 'H2H', accuracy: 'Accuracy',
     deepdive: 'Race Deep Dive', videos: 'Videos', articles: 'Articles',
     changelog: 'Changelog', about: 'About',

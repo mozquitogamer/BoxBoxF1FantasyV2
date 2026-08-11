@@ -938,9 +938,9 @@ def page_head(
 ENGAGEMENT_BLOCK = """<div class="engagement-shell">
 <section class="email-updates-panel" id="emailUpdatesPanel" aria-labelledby="emailUpdatesTitle" hidden>
   <div class="email-updates-copy">
-    <span class="email-updates-eyebrow">Race-week alerts</span>
-    <h2 id="emailUpdatesTitle">Know when the simulations change</h2>
-    <p>Get one concise email when fresh BoxBox simulations go live. No daily spam, and unsubscribe whenever you like.</p>
+    <span class="email-updates-eyebrow">Free V13 alerts</span>
+    <h2 id="emailUpdatesTitle">Get the bot's next move in your inbox</h2>
+    <p>Know when early thoughts and the final post-FP simulations go live, and get the Beat V13 registration link after R22. Free, concise, and never daily spam.</p>
   </div>
   <form class="email-updates-form" id="emailUpdatesForm" novalidate>
     <div class="email-updates-fields">
@@ -949,7 +949,7 @@ ENGAGEMENT_BLOCK = """<div class="engagement-shell">
       <button type="submit">Notify me</button>
     </div>
     <div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
-    <label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Email me when simulations are updated. I understand I must confirm my address first.</span></label>
+    <label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Email me V13 and simulation updates. I understand I must confirm my address first and can unsubscribe at any time.</span></label>
     <p class="email-updates-privacy">Handled according to the <a href="/privacy/">privacy policy</a>.</p>
     <p class="email-updates-status" id="emailUpdatesStatus" role="status" aria-live="polite"></p>
   </form>
@@ -978,7 +978,7 @@ FOOTER = f"""</main>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
-<script src="/engagement.js?v=2"></script>
+<script src="/engagement.js?v=3"></script>
 </body>
 </html>
 """

@@ -58,7 +58,7 @@ create table if not exists public.member_chips (
 create table if not exists public.member_entitlements (
     id uuid primary key default gen_random_uuid(),
     user_id uuid not null references public.member_profiles(user_id) on delete cascade,
-    provider text not null check (provider in ('paystack', 'youtube', 'manual')),
+    provider text not null check (provider in ('kofi', 'paystack', 'youtube', 'manual')),
     external_customer_id text,
     external_subscription_id text,
     status text not null check (status in ('active', 'trialing', 'past_due', 'cancelled', 'expired')),
