@@ -624,11 +624,11 @@ function renderV13() {
                 <span class="v13-membership-badge">Pit Wall membership &middot; $5/month</span>
                 <h2 id="v13MembershipTitle">The same free tools, with your team remembered</h2>
                 <p>BoxBox predictions, simulations, V13 decisions and the Beat V13 challenge stay free. Pit Wall is the convenience layer for people who want the relevant update brought to them.</p>
-                <a class="v13-membership-button" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join the Pit Wall on Ko-fi</a>
+                <div class="v13-membership-actions"><a class="v13-membership-button" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join the Pit Wall on Ko-fi</a><button class="v13-membership-button secondary" id="v13MemberToolsButton" type="button">Sign in &amp; save my team</button></div>
             </div>
             <div class="v13-membership-benefits">
-                <div><strong>At launch</strong><span>Concise member briefings and first access to new convenience features.</span></div>
-                <div><strong>Rolling out next</strong><span>Saved team, budget and chips; tailored pre-FP and post-FP alerts; My Team vs V13.</span></div>
+                <div><strong>Live now</strong><span>Save your team and budget once; get a tailored early-thoughts or post-FP suggestion when simulations update.</span></div>
+                <div><strong>Private by design</strong><span>Passwordless sign-in and row-level privacy keep each member’s lineup visible only to that member.</span></div>
                 <small>Paid members get faster delivery and personalization, never hidden contest data or a private prediction advantage.</small>
             </div>
         </section>
@@ -669,6 +669,12 @@ function renderV13() {
     });
     root.querySelector('.v13-membership-button')?.addEventListener('click', () => {
         if (typeof gtag === 'function') gtag('event', 'pit_wall_join_click', { location: 'v13_tab', price_usd: 5 });
+    });
+    root.querySelector('#v13MemberToolsButton')?.addEventListener('click', () => {
+        switchTab('optimizer');
+        document.querySelector('.mode-btn[data-mode="transfers"]')?.click();
+        document.getElementById('pitWallMemberPanel')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (typeof gtag === 'function') gtag('event', 'pit_wall_signin_click', { location: 'v13_tab' });
     });
 }
 
@@ -4597,6 +4603,49 @@ function syncBudgetInputsFromTeamCost(totalCost) {
         mwBudgetEl.value = formatted;
     }
 }
+
+function getMemberTeamSnapshot() {
+    const drivers = myTeamDrivers.filter(Boolean);
+    const constructors = myTeamConstructors.filter(Boolean);
+    if (drivers.length !== 5 || constructors.length !== 2) {
+        throw new Error('Select all 5 drivers and both constructors before saving.');
+    }
+    const budget = Number(document.getElementById('transferBudget')?.value);
+    const freeTransfers = Number(document.getElementById('freeTransfers')?.value);
+    if (!Number.isFinite(budget) || budget < 0) throw new Error('Enter a valid available budget.');
+    if (!Number.isInteger(freeTransfers) || freeTransfers < 0) throw new Error('Enter a valid number of free transfers.');
+    return {
+        budget_millions: budget,
+        free_transfers: freeTransfers,
+        assets: [
+            ...drivers.map((assetId, index) => ({ asset_type: 'driver', asset_id: assetId, slot: index + 1, is_boosted: false })),
+            ...constructors.map((assetId, index) => ({ asset_type: 'constructor', asset_id: assetId, slot: index + 1, is_boosted: false })),
+        ],
+    };
+}
+
+function applySavedMemberTeam(team) {
+    if (!team || !Array.isArray(team.assets)) return;
+    const drivers = team.assets.filter(item => item.asset_type === 'driver').sort((a, b) => a.slot - b.slot);
+    const constructors = team.assets.filter(item => item.asset_type === 'constructor').sort((a, b) => a.slot - b.slot);
+    myTeamDrivers = [null, null, null, null, null];
+    myTeamConstructors = [null, null];
+    drivers.slice(0, 5).forEach((item, index) => { myTeamDrivers[index] = item.asset_id; });
+    constructors.slice(0, 2).forEach((item, index) => { myTeamConstructors[index] = item.asset_id; });
+    const budget = document.getElementById('transferBudget');
+    const freeTransfers = document.getElementById('freeTransfers');
+    if (budget) {
+        budget.value = Number(team.budget_millions || 100).toFixed(1);
+        transferBudgetTouched = true;
+    }
+    if (freeTransfers) freeTransfers.value = String(Number(team.free_transfers || 0));
+    renderMyTeamGrid();
+}
+
+window.BoxBoxTeamMemory = {
+    getSnapshot: getMemberTeamSnapshot,
+    apply: applySavedMemberTeam,
+};
 
 function getCompareBudget() {
     const value = parseFloat(document.getElementById('compareBudget')?.value || '100');

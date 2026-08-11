@@ -1164,6 +1164,68 @@ select:focus, input:focus {
 }
 
 /* My Team section */
+.pit-wall-panel {
+    margin: 16px 0;
+    padding: 18px;
+    border: 1px solid rgba(139, 92, 246, .3);
+    border-left: 4px solid #8b5cf6;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, .09), rgba(55, 230, 208, .035));
+}
+.pit-wall-panel p { margin: 8px 0 0; color: var(--text-secondary); font-size: .82rem; line-height: 1.55; }
+.pit-wall-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.pit-wall-heading span:first-child { color: #a78bfa; font-size: .66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.pit-wall-heading h4 { margin: 3px 0 0; font-size: .96rem; overflow-wrap: anywhere; }
+.pit-wall-badge { flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; color: #d8ccff; background: rgba(139, 92, 246, .16); font-size: .64rem; font-weight: 800; }
+.pit-wall-badge.active { color: #9bf0cf; background: rgba(34, 197, 94, .13); }
+.pit-wall-badge.inactive { color: #f9b9b9; background: rgba(239, 68, 68, .12); }
+.pit-wall-signin { margin-top: 13px; }
+.pit-wall-signin label { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: .7rem; font-weight: 700; }
+.pit-wall-signin > div { display: flex; gap: 8px; }
+.pit-wall-signin input { min-width: 0; flex: 1; padding: 10px 11px; border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); background: var(--bg-primary); font: inherit; }
+.pit-wall-signin button,
+.pit-wall-save {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 13px;
+    border: 0;
+    border-radius: 8px;
+    color: #090b12;
+    background: #37e6d0;
+    font: inherit;
+    font-size: .76rem;
+    font-weight: 850;
+    text-decoration: none;
+    cursor: pointer;
+}
+.pit-wall-signin button:disabled,
+.pit-wall-save:disabled { opacity: .55; cursor: wait; }
+.pit-wall-links { display: flex; align-items: center; gap: 10px; margin-top: 9px; color: var(--text-muted); font-size: .68rem; }
+.pit-wall-links a { color: #a78bfa; font-weight: 750; }
+.pit-wall-actions { display: flex; gap: 8px; margin-top: 13px; }
+.pit-wall-secondary { padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); background: transparent; font: inherit; font-size: .74rem; font-weight: 750; cursor: pointer; }
+.pit-wall-pref { display: flex; align-items: center; gap: 8px; margin-top: 13px; color: var(--text-secondary); font-size: .76rem; cursor: pointer; }
+.pit-wall-pref input { accent-color: #8b5cf6; }
+.pit-wall-panel .pit-wall-status { min-height: 1.2em; margin-top: 9px; color: var(--text-muted); font-size: .72rem; }
+.pit-wall-panel .pit-wall-status.success { color: #86e7c1; }
+.pit-wall-panel .pit-wall-status.error { color: #f7a4a4; }
+.pit-wall-panel .pit-wall-saved { color: var(--text-muted); font-size: .7rem; }
+.pit-wall-latest { display: grid; gap: 3px; margin-top: 11px; padding: 10px 11px; border-radius: 8px; background: rgba(0, 0, 0, .16); }
+.pit-wall-latest span { color: var(--text-muted); font-size: .64rem; text-transform: uppercase; letter-spacing: .06em; }
+.pit-wall-latest strong { font-size: .78rem; }
+.pit-wall-loading { margin: 0 !important; }
+
+@media (max-width: 620px) {
+    .pit-wall-heading { display: grid; }
+    .pit-wall-badge { width: fit-content; }
+    .pit-wall-signin > div,
+    .pit-wall-actions { align-items: stretch; flex-direction: column; }
+    .pit-wall-signin button,
+    .pit-wall-save,
+    .pit-wall-secondary { width: 100%; }
+    .pit-wall-links { align-items: flex-start; flex-direction: column; gap: 3px; }
+}
 .my-team-section { margin-bottom: 24px; }
 .my-team-section h3 { font-size: 16px; margin-bottom: 8px; }
 .my-team-grid {
@@ -3871,6 +3933,9 @@ table.sortable th.sort-desc::after {
     font-weight: 850;
     cursor: pointer;
 }
+.v13-membership-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.v13-membership-actions .v13-membership-button { margin-top: 0; }
+.v13-membership-button.secondary { border-color: rgba(55,230,208,.42); color: #b9fff5; background: rgba(55,230,208,.08); cursor: pointer; }
 .v13-registration-button:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .v13-registration-button:focus-visible { outline: 3px solid rgba(55,230,208,.35); outline-offset: 3px; }
 .v13-prizes { display: flex; gap: 8px; }

@@ -4,6 +4,9 @@
   "installCommand": "",
   "framework": null,
   "trailingSlash": true,
+  "functions": {
+    "api/members/notify.js": { "maxDuration": 60 }
+  },
   "headers": [
     {
       "source": "/data/(.*)",

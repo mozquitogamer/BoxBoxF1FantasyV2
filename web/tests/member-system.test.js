@@ -1,0 +1,86 @@
+'use strict';
+
+const assert = require('node:assert/strict');
+const test = require('node:test');
+
+const { buildRecommendation } = require('../lib/personalized-recommendations');
+const { safeEqual } = require('../lib/member-system');
+const { inFilter } = require('../api/members/notify');
+const { paidUntil, parseKofiPayload } = require('../api/webhooks/kofi');
+
+function predictions() {
+    const drivers = [
+        ['A', 'Driver A', 10, 10],
+        ['B', 'Driver B', 11, 11],
+        ['C', 'Driver C', 12, 12],
+        ['D', 'Driver D', 13, 13],
+        ['E', 'Driver E', 14, 14],
+        ['F', 'Driver F', 18, 14],
+        ['G', 'Driver G', 30, 40],
+    ].map(([driver_id, name, projected_points, current_price]) => ({
+        driver_id, name, projected_points, expected_points: projected_points, current_price,
+    }));
+    const constructors = [
+        ['one', 'One', 30, 20],
+        ['two', 'Two', 31, 21],
+        ['three', 'Three', 39, 25],
+    ].map(([constructor_id, name, projected_points, current_price]) => ({
+        constructor_id, name, projected_points, expected_points: projected_points, current_price,
+    }));
+    return {
+        race: 'Test Grand Prix',
+        round: 15,
+        season: 2026,
+        phase: 'post_fp',
+        generated_at: '2026-09-01T12:00:00Z',
+        drivers,
+        constructors,
+    };
+}
+
+function team(freeTransfers = 1) {
+    return {
+        budget_millions: 105,
+        free_transfers: freeTransfers,
+        assets: [
+            ...['A', 'B', 'C', 'D', 'E'].map((asset_id, index) => ({ asset_type: 'driver', asset_id, slot: index + 1 })),
+            ...['one', 'two'].map((asset_id, index) => ({ asset_type: 'constructor', asset_id, slot: index + 1 })),
+        ],
+    };
+}
+
+test('recommends the strongest affordable one-move upgrade', () => {
+    const result = buildRecommendation(predictions(), team());
+    assert.equal(result.move.asset_type, 'driver');
+    assert.equal(result.move.outgoing_id, 'A');
+    assert.equal(result.move.incoming_id, 'F');
+    assert.equal(result.move.projected_gain, 8);
+    assert.match(result.headline, /Driver A.*Driver F/);
+    assert.equal(result.captain.name, 'Driver E');
+});
+
+test('accounts for an extra-transfer penalty before recommending action', () => {
+    const result = buildRecommendation(predictions(), team(0));
+    assert.equal(result.move, null);
+    assert.equal(result.headline, 'Hold your current lineup');
+});
+
+test('parses Ko-fi form payloads and grants only a bounded paid period', () => {
+    const payload = {
+        message_id: 'message-1',
+        email: 'fan@example.com',
+        is_subscription_payment: true,
+    };
+    const req = { body: new URLSearchParams({ data: JSON.stringify(payload) }).toString() };
+    assert.deepEqual(parseKofiPayload(req), payload);
+    assert.equal(paidUntil('2026-08-01T00:00:00Z'), '2026-09-05T00:00:00.000Z');
+});
+
+test('uses timing-safe secret comparison and safe PostgREST filters', () => {
+    assert.equal(safeEqual('same-secret', 'same-secret'), true);
+    assert.equal(safeEqual('same-secret', 'different'), false);
+    assert.equal(
+        inFilter(['21b4f9ba-1bf3-4dd4-a0de-c2af164f8463', 'unsafe),drop table']),
+        'in.(21b4f9ba-1bf3-4dd4-a0de-c2af164f8463,unsafedroptable)',
+    );
+});

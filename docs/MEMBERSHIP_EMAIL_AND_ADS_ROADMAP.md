@@ -26,7 +26,7 @@ Official references checked on 2026-07-21:
 3. `web/api/email/subscribe.js` sends a signed, expiring double-opt-in confirmation email. It does not store the address.
 4. `web/api/email/confirm.js` verifies the signed link and only then adds the address to the Resend simulation-alert segment.
 5. `pipeline/notify_subscribers.py` turns the current `predictions.json` into a branded Resend broadcast. Preview is the default; `--draft` is reviewable; only `--send` delivers.
-6. `infrastructure/supabase/001_memberships.sql` defines the future private member/team/chip/entitlement/recommendation tables and RLS policies. It is not connected to the site yet.
+6. `infrastructure/supabase/001_memberships.sql` defines the private member/team/chip/entitlement/recommendation tables and RLS policies. The schema is connected to the Pit Wall member panel and server-side notification worker.
 
 ## Phase 1 — simulation alerts
 
@@ -66,6 +66,8 @@ Do not paste an AdSense script into the direct banner config. Keep display ads o
 
 ## Phase 3 — paid members and saved teams
 
+Implementation status: live foundation completed on 2026-08-11. The remaining recurring operational task is the monthly Ko-fi member reconciliation described in step 5.
+
 1. Create a Supabase project and run `infrastructure/supabase/001_memberships.sql` in the SQL editor.
 2. Add magic-link login. Keep the existing optimizer and all public predictions free; membership pays for persistence, convenience, and personalized delivery.
 3. Build a member settings page for:
@@ -78,6 +80,8 @@ Do not paste an AdSense script into the direct banner config. Keep display ads o
 5. Reconcile Ko-fi's member CSV monthly because the payment webhook does not report ended memberships. Never interpret one historical payment as permanent access.
 6. Port the Transfer Advisor calculation to a server-side recommendation worker and add parity fixtures against the browser results. On each notification event the worker should snapshot one recommendation per team in `member_recommendations` before sending it.
 7. Use an idempotent event key such as `2026:r13:post_fp:<predictions_generated_at>` so pipeline reruns cannot double-email.
+
+The live implementation uses same-origin, HttpOnly session cookies; verifies active entitlement before generating a passwordless link; stores complete teams transactionally; and triggers the recommendation worker only after a successful Production deployment. The worker skips non-actionable or stale predictions and snapshots each personalized recommendation before delivery.
 
 Suggested product boundary: public users keep the full tools; paid users get saved teams, zero re-entry, personalized transfer/chip advice after every actionable simulation update, and the member newsletter. That is a strong convenience product without weakening the site's SEO or goodwill with a paywall.
 

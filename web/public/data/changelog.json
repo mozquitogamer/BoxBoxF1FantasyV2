@@ -1,6 +1,19 @@
 {
   "entries": [
     {
+      "date": "2026-08-11",
+      "title": "Pit Wall saved teams and personalized simulation updates",
+      "tags": [
+        "feature",
+        "infra"
+      ],
+      "body": [
+        "Pit Wall members can now sign in with the email used for their Ko-fi membership and save their current five drivers, two constructors, available budget and free transfers. The public predictions, simulations and lineup tools remain free; membership adds the convenience of remembering the lineup between visits.",
+        "When a fresh early-thoughts or post-practice simulation reaches the live site, the member system compares it with each saved team and emails a concise, budget-aware one-move suggestion plus a 2x captain check. Recommendations are generated only after the live deployment succeeds, stored before delivery and protected against duplicate sends.",
+        "Ko-fi payments activate access server-side, passwordless links expire automatically, and private team data is protected per account. Members can turn personalized simulation emails off from the saved-team panel at any time."
+      ]
+    },
+    {
       "date": "2026-07-29",
       "title": "Points versus budget calculator and season-aware transfer advice",
       "tags": [

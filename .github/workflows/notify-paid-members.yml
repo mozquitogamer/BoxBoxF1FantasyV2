@@ -1,0 +1,25 @@
+name: Notify paid members after production deploy
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    if: >-
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'Production'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger idempotent personalized simulation emails
+        env:
+          MEMBER_NOTIFICATION_SECRET: ${{ secrets.MEMBER_NOTIFICATION_SECRET }}
+        run: |
+          curl --fail-with-body --retry 3 --retry-all-errors \
+            --request POST \
+            --header "Authorization: Bearer ${MEMBER_NOTIFICATION_SECRET}" \
+            --header "Content-Type: application/json" \
+            --data '{"source":"github_production_deployment"}' \
+            https://boxboxf1fantasy.com/api/members/notify

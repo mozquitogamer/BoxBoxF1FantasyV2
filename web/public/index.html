@@ -43,7 +43,7 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="manifest" href="/site.webmanifest">
-    <link rel="stylesheet" href="styles.css?v=24">
+    <link rel="stylesheet" href="styles.css?v=25">
     <link rel="stylesheet" href="engagement.css?v=2">
     <link rel="stylesheet" href="scenarios.css?v=3">
     <link rel="stylesheet" href="weather.css?v=2">
@@ -621,6 +621,9 @@
                         <h3>My Current Team</h3>
                         <p class="hint">Select your current 5 drivers and 2 constructors. Click a slot to change it.</p>
                         <div class="my-team-grid" id="myTeamGrid"></div>
+                        <aside class="pit-wall-panel" id="pitWallMemberPanel" aria-label="Pit Wall saved team">
+                            <p class="pit-wall-loading">Checking Pit Wall sign-in…</p>
+                        </aside>
                         <div class="my-team-controls">
                             <div class="control-group">
                                 <label>Available Budget ($M)</label>
@@ -1364,7 +1367,8 @@
     </footer>
 
     <script src="scenarios.js?v=3"></script>
-    <script src="app.js?v=118"></script>
+    <script src="app.js?v=119"></script>
+    <script src="members.js?v=1"></script>
     <script src="engagement.js?v=4"></script>
 </body>
 </html>

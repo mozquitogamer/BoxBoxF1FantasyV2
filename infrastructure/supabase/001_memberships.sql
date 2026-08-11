@@ -1,6 +1,6 @@
--- BoxBoxF1Fantasy member-data foundation for Supabase/Postgres.
--- Apply only after creating the Supabase project. Public prediction JSON stays
--- separate; these tables hold private user/team/payment state behind RLS.
+-- BoxBoxF1Fantasy paid-member foundation for Supabase/Postgres.
+-- Public predictions remain static and free. These tables hold private
+-- account, saved-team, entitlement and delivery state behind row-level security.
 
 create extension if not exists pgcrypto;
 
@@ -10,9 +10,13 @@ create table if not exists public.member_profiles (
     display_name text,
     email_simulation_updates boolean not null default true,
     email_member_newsletter boolean not null default true,
+    magic_link_sent_at timestamptz,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
 );
+
+create unique index if not exists member_profiles_email_lower
+    on public.member_profiles(lower(email));
 
 create table if not exists public.saved_teams (
     id uuid primary key default gen_random_uuid(),
@@ -65,7 +69,8 @@ create table if not exists public.member_entitlements (
     current_period_end timestamptz,
     metadata jsonb not null default '{}'::jsonb,
     created_at timestamptz not null default now(),
-    updated_at timestamptz not null default now()
+    updated_at timestamptz not null default now(),
+    unique (user_id, provider)
 );
 
 create unique index if not exists member_entitlements_external_subscription
@@ -74,6 +79,19 @@ create unique index if not exists member_entitlements_external_subscription
 
 create index if not exists member_entitlements_active_user
     on public.member_entitlements(user_id, status, current_period_end);
+
+create table if not exists public.kofi_webhook_events (
+    message_id text primary key,
+    event_type text,
+    payment_email text,
+    tier_name text,
+    payload jsonb not null,
+    user_id uuid references public.member_profiles(user_id) on delete set null,
+    processed boolean not null default false,
+    last_error text,
+    received_at timestamptz not null default now(),
+    processed_at timestamptz
+);
 
 create table if not exists public.notification_events (
     id uuid primary key default gen_random_uuid(),
@@ -129,7 +147,7 @@ drop trigger if exists member_entitlements_set_updated_at on public.member_entit
 create trigger member_entitlements_set_updated_at before update on public.member_entitlements
 for each row execute function public.set_updated_at();
 
-create or replace function public.handle_new_member_user()
+create or replace function public.handle_member_user_change()
 returns trigger
 language plpgsql
 security definer
@@ -137,52 +155,182 @@ set search_path = ''
 as $$
 begin
     insert into public.member_profiles (user_id, email, display_name)
-    values (new.id, coalesce(new.email, ''), new.raw_user_meta_data ->> 'display_name')
-    on conflict (user_id) do nothing;
+    values (
+        new.id,
+        lower(coalesce(new.email, '')),
+        new.raw_user_meta_data ->> 'display_name'
+    )
+    on conflict (user_id) do update
+    set email = excluded.email,
+        display_name = coalesce(public.member_profiles.display_name, excluded.display_name);
     return new;
 end;
 $$;
 
 drop trigger if exists on_auth_user_created_boxbox on auth.users;
 create trigger on_auth_user_created_boxbox
-after insert on auth.users
-for each row execute function public.handle_new_member_user();
+after insert or update of email on auth.users
+for each row execute function public.handle_member_user_change();
+
+create or replace function public.member_has_active_entitlement(subject uuid default auth.uid())
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+    select exists (
+        select 1
+        from public.member_entitlements entitlement
+        where entitlement.user_id = subject
+          and entitlement.status in ('active', 'trialing')
+          and (
+              entitlement.current_period_end is null
+              or entitlement.current_period_end > now()
+          )
+    );
+$$;
+
+create or replace function public.save_member_team(
+    p_name text,
+    p_budget_millions numeric,
+    p_free_transfers smallint,
+    p_assets jsonb
+)
+returns uuid
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+    v_user_id uuid := auth.uid();
+    v_team_id uuid;
+    v_asset jsonb;
+begin
+    if v_user_id is null then
+        raise exception 'Sign in is required.';
+    end if;
+    if not public.member_has_active_entitlement(v_user_id) then
+        raise exception 'An active Pit Wall membership is required.';
+    end if;
+    if p_name is null or char_length(trim(p_name)) not between 1 and 60 then
+        raise exception 'Team name is invalid.';
+    end if;
+    if p_budget_millions is null or p_budget_millions not between 0 and 999.9 then
+        raise exception 'Budget is invalid.';
+    end if;
+    if p_free_transfers is null or p_free_transfers not between 0 and 9 then
+        raise exception 'Free transfers are invalid.';
+    end if;
+    if jsonb_typeof(p_assets) <> 'array' or jsonb_array_length(p_assets) <> 7 then
+        raise exception 'A complete team must contain five drivers and two constructors.';
+    end if;
+    if (select count(*) from jsonb_array_elements(p_assets) item where item ->> 'asset_type' = 'driver') <> 5
+       or (select count(*) from jsonb_array_elements(p_assets) item where item ->> 'asset_type' = 'constructor') <> 2 then
+        raise exception 'A complete team must contain five drivers and two constructors.';
+    end if;
+
+    update public.saved_teams
+    set is_default = false
+    where user_id = v_user_id and name <> trim(p_name) and is_default;
+
+    insert into public.saved_teams (
+        user_id, name, budget_millions, free_transfers, is_default
+    )
+    values (
+        v_user_id, trim(p_name), p_budget_millions, p_free_transfers, true
+    )
+    on conflict (user_id, name) do update
+    set budget_millions = excluded.budget_millions,
+        free_transfers = excluded.free_transfers,
+        is_default = true
+    returning id into v_team_id;
+
+    delete from public.saved_team_assets where team_id = v_team_id;
+    for v_asset in select value from jsonb_array_elements(p_assets)
+    loop
+        insert into public.saved_team_assets (
+            team_id, asset_type, asset_id, slot, is_boosted
+        ) values (
+            v_team_id,
+            v_asset ->> 'asset_type',
+            v_asset ->> 'asset_id',
+            (v_asset ->> 'slot')::smallint,
+            coalesce((v_asset ->> 'is_boosted')::boolean, false)
+        );
+    end loop;
+
+    return v_team_id;
+end;
+$$;
 
 alter table public.member_profiles enable row level security;
 alter table public.saved_teams enable row level security;
 alter table public.saved_team_assets enable row level security;
 alter table public.member_chips enable row level security;
 alter table public.member_entitlements enable row level security;
+alter table public.kofi_webhook_events enable row level security;
 alter table public.notification_events enable row level security;
 alter table public.member_recommendations enable row level security;
 
+drop policy if exists "members read own profile" on public.member_profiles;
 create policy "members read own profile" on public.member_profiles
 for select to authenticated using ((select auth.uid()) = user_id);
+
+drop policy if exists "members update own profile" on public.member_profiles;
 create policy "members update own profile" on public.member_profiles
-for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
+for update to authenticated using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
 
-create policy "members manage own teams" on public.saved_teams
-for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-
-create policy "members manage assets for own teams" on public.saved_team_assets
+drop policy if exists "paid members manage own teams" on public.saved_teams;
+create policy "paid members manage own teams" on public.saved_teams
 for all to authenticated
-using (exists (select 1 from public.saved_teams t where t.id = team_id and t.user_id = (select auth.uid())))
-with check (exists (select 1 from public.saved_teams t where t.id = team_id and t.user_id = (select auth.uid())));
+using ((select auth.uid()) = user_id and public.member_has_active_entitlement(user_id))
+with check ((select auth.uid()) = user_id and public.member_has_active_entitlement(user_id));
 
-create policy "members manage chips for own teams" on public.member_chips
+drop policy if exists "paid members manage assets for own teams" on public.saved_team_assets;
+create policy "paid members manage assets for own teams" on public.saved_team_assets
 for all to authenticated
-using (exists (select 1 from public.saved_teams t where t.id = team_id and t.user_id = (select auth.uid())))
-with check (exists (select 1 from public.saved_teams t where t.id = team_id and t.user_id = (select auth.uid())));
+using (exists (
+    select 1 from public.saved_teams team
+    where team.id = team_id
+      and team.user_id = (select auth.uid())
+      and public.member_has_active_entitlement(team.user_id)
+))
+with check (exists (
+    select 1 from public.saved_teams team
+    where team.id = team_id
+      and team.user_id = (select auth.uid())
+      and public.member_has_active_entitlement(team.user_id)
+));
 
+drop policy if exists "paid members manage chips for own teams" on public.member_chips;
+create policy "paid members manage chips for own teams" on public.member_chips
+for all to authenticated
+using (exists (
+    select 1 from public.saved_teams team
+    where team.id = team_id
+      and team.user_id = (select auth.uid())
+      and public.member_has_active_entitlement(team.user_id)
+))
+with check (exists (
+    select 1 from public.saved_teams team
+    where team.id = team_id
+      and team.user_id = (select auth.uid())
+      and public.member_has_active_entitlement(team.user_id)
+));
+
+drop policy if exists "members read own entitlements" on public.member_entitlements;
 create policy "members read own entitlements" on public.member_entitlements
 for select to authenticated using ((select auth.uid()) = user_id);
 
+drop policy if exists "members read own recommendations" on public.member_recommendations;
 create policy "members read own recommendations" on public.member_recommendations
 for select to authenticated using ((select auth.uid()) = user_id);
 
--- Prevent clients from changing identity/payment/delivery fields. Service-role
--- requests bypass RLS and retain full access for webhooks and email workers.
-revoke all on public.member_profiles from authenticated;
+-- Service-role requests bypass RLS. Browser sessions can only see or change
+-- their own allowed fields and never payment, webhook or delivery state.
+revoke all on public.member_profiles from anon, authenticated;
 grant select on public.member_profiles to authenticated;
 grant update (display_name, email_simulation_updates, email_member_newsletter) on public.member_profiles to authenticated;
 
@@ -191,3 +339,5 @@ grant select, insert, update, delete on public.saved_team_assets to authenticate
 grant select, insert, update, delete on public.member_chips to authenticated;
 grant select on public.member_entitlements to authenticated;
 grant select on public.member_recommendations to authenticated;
+grant execute on function public.member_has_active_entitlement(uuid) to authenticated;
+grant execute on function public.save_member_team(text, numeric, smallint, jsonb) to authenticated;

@@ -1,0 +1,288 @@
+'use strict';
+
+const crypto = require('node:crypto');
+
+const DEFAULT_SITE_ORIGIN = 'https://boxboxf1fantasy.com';
+const ACCESS_COOKIE = 'boxbox_member_access';
+const REFRESH_COOKIE = 'boxbox_member_refresh';
+
+function required(value, name) {
+    const result = String(value || '').trim();
+    if (!result) throw new Error(`${name} is not configured`);
+    return result;
+}
+
+function getMemberConfig() {
+    return {
+        supabaseUrl: required(process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL'),
+        publicKey: required(
+            process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+            'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
+        ),
+        serviceKey: required(
+            process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY,
+            'SUPABASE_SERVICE_ROLE_KEY',
+        ),
+        siteOrigin: (process.env.SITE_ORIGIN || DEFAULT_SITE_ORIGIN).replace(/\/$/, ''),
+    };
+}
+
+function normalizeEmail(value) {
+    return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+function isValidEmail(email) {
+    return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function requestOrigin(req) {
+    const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
+    const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim();
+    return host ? `${proto}://${host}` : '';
+}
+
+function isAllowedOrigin(req, configuredOrigin) {
+    const origin = String(req.headers.origin || '').replace(/\/$/, '');
+    if (!origin) return process.env.VERCEL_ENV !== 'production';
+    return origin === configuredOrigin || origin === requestOrigin(req);
+}
+
+function parseBody(req) {
+    if (!req.body) return {};
+    if (typeof req.body === 'object') return req.body;
+    try {
+        return JSON.parse(req.body);
+    } catch (_) {
+        return {};
+    }
+}
+
+function parseCookies(req) {
+    const cookies = {};
+    for (const part of String(req.headers.cookie || '').split(';')) {
+        const separator = part.indexOf('=');
+        if (separator < 1) continue;
+        const name = part.slice(0, separator).trim();
+        const value = part.slice(separator + 1).trim();
+        try {
+            cookies[name] = decodeURIComponent(value);
+        } catch (_) {
+            cookies[name] = value;
+        }
+    }
+    return cookies;
+}
+
+function cookie(name, value, options = {}) {
+    const parts = [`${name}=${encodeURIComponent(value)}`, 'Path=/', 'HttpOnly', 'Secure', 'SameSite=Lax'];
+    if (Number.isFinite(options.maxAge)) parts.push(`Max-Age=${Math.max(0, Math.floor(options.maxAge))}`);
+    return parts.join('; ');
+}
+
+function appendCookies(res, values) {
+    const previous = res.getHeader?.('Set-Cookie');
+    const existing = previous ? (Array.isArray(previous) ? previous : [previous]) : [];
+    res.setHeader('Set-Cookie', [...existing, ...values]);
+}
+
+function setSessionCookies(res, session) {
+    appendCookies(res, [
+        cookie(ACCESS_COOKIE, session.access_token, { maxAge: Number(session.expires_in || 3600) }),
+        cookie(REFRESH_COOKIE, session.refresh_token, { maxAge: 60 * 24 * 60 * 60 }),
+    ]);
+}
+
+function clearSessionCookies(res) {
+    appendCookies(res, [
+        cookie(ACCESS_COOKIE, '', { maxAge: 0 }),
+        cookie(REFRESH_COOKIE, '', { maxAge: 0 }),
+    ]);
+}
+
+async function readJson(response) {
+    const text = await response.text();
+    if (!text) return null;
+    try {
+        return JSON.parse(text);
+    } catch (_) {
+        return text;
+    }
+}
+
+async function apiRequest(url, options = {}) {
+    const response = await fetch(url, options);
+    const data = await readJson(response);
+    if (!response.ok) {
+        const message = data?.msg || data?.message || data?.error_description || data?.error || `Request failed (${response.status})`;
+        const error = new Error(message);
+        error.status = response.status;
+        error.details = data;
+        throw error;
+    }
+    return data;
+}
+
+function authHeaders(key, bearer = key) {
+    return {
+        apikey: key,
+        Authorization: `Bearer ${bearer}`,
+        'Content-Type': 'application/json',
+    };
+}
+
+async function authAdminRequest(path, options = {}) {
+    const config = getMemberConfig();
+    return apiRequest(`${config.supabaseUrl}/auth/v1${path}`, {
+        method: options.method || 'GET',
+        headers: authHeaders(config.serviceKey),
+        body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+}
+
+async function authPublicRequest(path, options = {}) {
+    const config = getMemberConfig();
+    return apiRequest(`${config.supabaseUrl}/auth/v1${path}`, {
+        method: options.method || 'GET',
+        headers: authHeaders(config.publicKey, options.accessToken || config.publicKey),
+        body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+}
+
+async function restRequest(path, options = {}) {
+    const config = getMemberConfig();
+    const key = options.service ? config.serviceKey : config.publicKey;
+    const bearer = options.service ? config.serviceKey : options.accessToken;
+    if (!bearer) throw new Error('A member access token is required');
+    const headers = authHeaders(key, bearer);
+    if (options.prefer) headers.Prefer = options.prefer;
+    return apiRequest(`${config.supabaseUrl}/rest/v1/${path}`, {
+        method: options.method || 'GET',
+        headers,
+        body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    });
+}
+
+async function fetchUser(accessToken) {
+    try {
+        return await authPublicRequest('/user', { accessToken });
+    } catch (error) {
+        if (error.status === 401 || error.status === 403) return null;
+        throw error;
+    }
+}
+
+async function refreshSession(refreshToken) {
+    if (!refreshToken) return null;
+    try {
+        return await authPublicRequest('/token?grant_type=refresh_token', {
+            method: 'POST',
+            body: { refresh_token: refreshToken },
+        });
+    } catch (error) {
+        if (error.status === 400 || error.status === 401) return null;
+        throw error;
+    }
+}
+
+async function getMemberSession(req, res) {
+    const cookies = parseCookies(req);
+    let accessToken = cookies[ACCESS_COOKIE] || '';
+    let refreshToken = cookies[REFRESH_COOKIE] || '';
+    let user = accessToken ? await fetchUser(accessToken) : null;
+
+    if (!user && refreshToken) {
+        const refreshed = await refreshSession(refreshToken);
+        if (refreshed?.access_token && refreshed?.refresh_token) {
+            setSessionCookies(res, refreshed);
+            accessToken = refreshed.access_token;
+            refreshToken = refreshed.refresh_token;
+            user = refreshed.user || await fetchUser(accessToken);
+        }
+    }
+
+    if (!user) {
+        if (accessToken || refreshToken) clearSessionCookies(res);
+        return null;
+    }
+    return { user, accessToken, refreshToken };
+}
+
+function isEntitlementActive(entitlement, now = Date.now()) {
+    if (!entitlement || !['active', 'trialing'].includes(entitlement.status)) return false;
+    if (!entitlement.current_period_end) return true;
+    return Date.parse(entitlement.current_period_end) > now;
+}
+
+async function getMemberDashboard(session) {
+    const userId = session.user.id;
+    const encodedUserId = encodeURIComponent(userId);
+    const [profiles, entitlements] = await Promise.all([
+        restRequest(`member_profiles?user_id=eq.${encodedUserId}&select=user_id,email,display_name,email_simulation_updates,email_member_newsletter`, { accessToken: session.accessToken }),
+        restRequest(`member_entitlements?user_id=eq.${encodedUserId}&select=provider,status,current_period_end,updated_at&order=updated_at.desc`, { accessToken: session.accessToken }),
+    ]);
+    const entitlement = (entitlements || []).find(item => isEntitlementActive(item)) || entitlements?.[0] || null;
+    const active = isEntitlementActive(entitlement);
+    let team = null;
+    let recommendation = null;
+
+    if (active) {
+        const teams = await restRequest(
+            `saved_teams?user_id=eq.${encodedUserId}&is_default=eq.true&select=id,name,budget_millions,free_transfers,updated_at&limit=1`,
+            { accessToken: session.accessToken },
+        );
+        if (teams?.[0]) {
+            team = teams[0];
+            team.assets = await restRequest(
+                `saved_team_assets?team_id=eq.${encodeURIComponent(team.id)}&select=asset_type,asset_id,slot,is_boosted&order=asset_type.asc,slot.asc`,
+                { accessToken: session.accessToken },
+            );
+            const recommendations = await restRequest(
+                `member_recommendations?team_id=eq.${encodeURIComponent(team.id)}&select=recommendation,delivery_status,created_at&order=created_at.desc&limit=1`,
+                { accessToken: session.accessToken },
+            );
+            recommendation = recommendations?.[0] || null;
+        }
+    }
+
+    return {
+        authenticated: true,
+        email: session.user.email || profiles?.[0]?.email || '',
+        profile: profiles?.[0] || null,
+        entitlement: entitlement ? { ...entitlement, active } : { active: false },
+        team,
+        recommendation,
+    };
+}
+
+function safeEqual(left, right) {
+    const leftBuffer = Buffer.from(String(left || ''));
+    const rightBuffer = Buffer.from(String(right || ''));
+    return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function htmlEscape(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+module.exports = {
+    authAdminRequest,
+    authPublicRequest,
+    clearSessionCookies,
+    getMemberConfig,
+    getMemberDashboard,
+    getMemberSession,
+    htmlEscape,
+    isAllowedOrigin,
+    isEntitlementActive,
+    isValidEmail,
+    normalizeEmail,
+    parseBody,
+    restRequest,
+    safeEqual,
+    setSessionCookies,
+};
