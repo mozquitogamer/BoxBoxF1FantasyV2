@@ -80,20 +80,19 @@ prices exist. Do not update V13's score manually in the public JSON.
 Do not ask people to submit a lineup every week. Use one registration and one
 final proof:
 
-1. After R22 is complete and before the R23 lock, the entrant submits their
-   exact official F1 Fantasy team name/identifier, display name, contact email,
-   and the Ko-fi identity used for eligibility checks.
-2. The registration form records timestamp, rules version, consent, country,
-   age confirmation, and acceptance of the privacy notice.
-3. After R24, a potential winner submits an official full-season score
-   screenshot. The registered team identifier must match.
+1. Registration is open now. The entrant submits and confirms an email address
+   before the R22 Las Vegas F1 Fantasy team lock on 2026-11-21 at 04:00 UTC.
+2. The confirmation event and timestamp are the entry record. Entry is free
+   and Ko-fi membership is not required.
+3. After R24, the entrant submits one exact official F1 Fantasy team
+   name/identifier and its official full-season score screenshot.
 4. A private F1 Fantasy league can be used as the primary verification source
-   if it reliably exposes the registered team's full-season total; screenshots
+   if it reliably exposes the submitted team's full-season total; screenshots
    remain the fallback.
 
-Locking registration between R22 and R23 prevents entrants from choosing among
-multiple teams after seeing the final two rounds. A screenshot alone at season
-end would not prove which team they intended to enter.
+Closing registration at the R22 lock prevents people from waiting for the final
+two rounds before deciding whether to enter. The chosen team is submitted after
+the season, as approved for the simplified 2026 challenge flow.
 
 ## Standings and prizes
 
@@ -105,12 +104,11 @@ end would not prove which team they intended to enter.
   occupy. This avoids a subjective or retrofitted tiebreaker.
 - Publish V13's final audit record before verifying winners.
 
-## Eligibility and payments launch gate
+## Eligibility and payments
 
-Keep the challenge in `rules_pending` status until written official rules are
-published. The fact that Ko-fi payments support the channel and contest entry
-is described as a bonus does not, by itself, establish that the arrangement is
-outside payment-processor contest restrictions. Before opening registration:
+The challenge is `registration_open` with a free entry route. Ko-fi payments
+support the channel and do not determine challenge eligibility. Before winner
+verification and payout, publish and confirm the remaining official terms:
 
 - obtain a rules/compliance review for the countries being allowed;
 - confirm PayPal and Ko-fi permit the final promotion structure or provide a
@@ -122,20 +120,18 @@ outside payment-processor contest restrictions. Before opening registration:
   F1 Fantasy, Ko-fi, or PayPal;
 - publish a privacy notice and retention period for registration evidence.
 
-Until those items are closed, the site may introduce V13 and show the research
-record, but it should not claim that paid-member contest registration is open.
-
 ## Minimal data model for registration
 
-Use a private table with these fields:
+For the simple launch, the confirmed Resend contact and its confirmation event
+are the entry record. Before end-of-season score submission opens, use a private
+table with these fields:
 
 - generated entry ID;
 - submitted timestamp and rules version;
 - entrant display name and email;
 - country and age confirmation;
-- Ko-fi supporter email or immutable supporter reference;
 - exact F1 Fantasy team name/identifier;
-- eligibility snapshot after R22 and before the R23 lock;
+- confirmation evidence from before the R22 lock;
 - optional private-league identity;
 - final screenshot location, verified score, verification status, and notes.
 

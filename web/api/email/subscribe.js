@@ -3,6 +3,7 @@
 const {
     createSubscriptionToken,
     getConfig,
+    isBeatV13RegistrationOpen,
     isAllowedRequestOrigin,
     isValidEmail,
     normalizeEmail,
@@ -29,6 +30,13 @@ module.exports = async function subscribe(req, res) {
         return res.status(403).json({ ok: false, message: 'Request origin was not accepted.' });
     }
 
+    if (!isBeatV13RegistrationOpen()) {
+        return res.status(410).json({
+            ok: false,
+            message: 'Beat V13 registration closed at the Round 22 F1 Fantasy team lock.',
+        });
+    }
+
     let body = req.body || {};
     if (typeof body === 'string') {
         try {
@@ -40,7 +48,7 @@ module.exports = async function subscribe(req, res) {
 
     // Honeypot fields are intentionally answered as success to avoid teaching bots.
     if (body.website) {
-        return res.status(202).json({ ok: true, message: 'Check your inbox to confirm your subscription.' });
+        return res.status(202).json({ ok: true, message: 'Check your inbox to confirm your free Beat V13 entry.' });
     }
 
     const email = normalizeEmail(body.email);
@@ -48,7 +56,7 @@ module.exports = async function subscribe(req, res) {
         return res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
     }
     if (body.consent !== true) {
-        return res.status(400).json({ ok: false, message: 'Please confirm that you want email alerts.' });
+        return res.status(400).json({ ok: false, message: 'Please confirm your free Beat V13 registration.' });
     }
 
     const token = createSubscriptionToken(email, config.signingSecret, config.ttlHours);
@@ -60,19 +68,20 @@ module.exports = async function subscribe(req, res) {
             body: {
                 from: config.from,
                 to: [email],
-                subject: 'Confirm your free BoxBox V13 alerts',
+                subject: 'Confirm your free Beat V13 registration',
                 html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#141821">
-                    <h1 style="font-size:24px">Join the V13 grid</h1>
-                    <p>You asked for free V13 early-thoughts and post-FP simulation updates from BoxBoxF1Fantasy. We will also send the free Beat V13 registration link after Round 22.</p>
-                    <p><a href="${confirmationUrl}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 18px;border-radius:7px;font-weight:700">Confirm free alerts</a></p>
-                    <p style="color:#667085;font-size:13px">This link expires in ${config.ttlHours} hours. If you did not request this, you can ignore this email and no subscription will be created.</p>
+                    <h1 style="font-size:24px">Register to Beat V13</h1>
+                    <p>Beat V13 entry is free. Confirm this address before the Round 22 Las Vegas F1 Fantasy team lock on 21 November 2026 at 04:00 UTC. The final two rounds will decide the challenge using official full-season totals.</p>
+                    <p><a href="${confirmationUrl}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 18px;border-radius:7px;font-weight:700">Confirm free registration</a></p>
+                    <p>You will also receive concise V13 early-thoughts, post-FP simulation updates and competition instructions.</p>
+                    <p style="color:#667085;font-size:13px">This link expires in ${config.ttlHours} hours and cannot be used after registration closes. If you did not request this, ignore the email and no entry will be created.</p>
                 </div>`,
-                text: `Confirm your free BoxBoxF1Fantasy V13 alerts:\n\n${confirmationUrl}\n\nYou will get V13 early-thoughts and post-FP simulation updates, plus the free Beat V13 registration link after Round 22. This link expires in ${config.ttlHours} hours. If you did not request this, ignore this email.`,
+                text: `Confirm your free Beat V13 registration:\n\n${confirmationUrl}\n\nConfirm before the Round 22 Las Vegas F1 Fantasy team lock on 21 November 2026 at 04:00 UTC. The final two rounds will decide the challenge using official full-season totals. You will also receive concise V13 early-thoughts, post-FP simulation updates and competition instructions. This link expires in ${config.ttlHours} hours and cannot be used after registration closes. If you did not request this, ignore this email.`,
             },
         });
         return res.status(202).json({
             ok: true,
-            message: 'Check your inbox and click the confirmation link to finish signing up.',
+            message: 'Check your inbox and confirm your free Beat V13 registration before the Round 22 lock.',
         });
     } catch (error) {
         console.error('Could not send subscription confirmation:', error.message);

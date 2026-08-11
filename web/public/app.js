@@ -558,6 +558,7 @@ function renderV13() {
     const replay = v13Data.research_replay;
     const current = v13Data.current_state;
     const competition = v13Data.competition;
+    const registrationOpen = Date.now() < Date.parse(competition.registration_deadline_at || '2026-11-21T04:00:00Z');
     const rounds = replay.rounds || [];
     const latest = rounds[rounds.length - 1];
     const usedChips = Object.entries(current.chips_used || {})
@@ -639,10 +640,11 @@ function renderV13() {
 
         <section class="v13-rules-card" id="v13Registration">
             <div>
-                <span class="v13-eyebrow">Beat the Bot challenge</span>
-                <h2>Registration closes after Round ${competition.registration_deadline_round}</h2>
-                <p>${v13Escape(competition.registration_window)} The planned score is the official full-2026 total, leaving R23 and R24 to decide the challenge. Entrants will designate one team at registration, then provide the official end-of-season score screenshot. A private league remains available as a verification backup.</p>
+                <span class="v13-eyebrow">Beat the Bot challenge · Free entry</span>
+                <h2>${registrationOpen ? 'Registration is open now' : 'Registration is closed'}</h2>
+                <p>${registrationOpen ? v13Escape(competition.registration_window) : 'Registration closed at the Round 22 Las Vegas F1 Fantasy team lock.'} Scores use the official full-2026 total, leaving R23 and R24 to decide the challenge. ${registrationOpen ? 'Confirm your email now; after the season, submit one official team and its full-season score screenshot.' : 'Registered entrants will receive end-of-season score-submission instructions.'} A private league remains available as a verification backup.</p>
                 <p class="v13-rules-note">${v13Escape(competition.eligibility_note)}</p>
+                ${registrationOpen ? '<button class="v13-registration-button" id="v13RegisterButton" type="button">Register free with email</button>' : ''}
             </div>
             <div class="v13-prizes" aria-label="Prize positions">
                 <span><small>1st</small><strong>$${competition.prizes_usd[0]}</strong></span>
@@ -655,6 +657,12 @@ function renderV13() {
     root.querySelector('#v13HistoryButton')?.addEventListener('click', () => {
         root.querySelector('#v13History')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         if (typeof gtag === 'function') gtag('event', 'beat_v13_history_open');
+    });
+    root.querySelector('#v13RegisterButton')?.addEventListener('click', () => {
+        const panel = document.getElementById('emailUpdatesPanel');
+        panel?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        window.setTimeout(() => document.getElementById('emailUpdatesAddress')?.focus(), 450);
+        if (typeof gtag === 'function') gtag('event', 'beat_v13_registration_cta_click', { location: 'v13_tab' });
     });
     root.querySelector('.v13-kofi-button')?.addEventListener('click', () => {
         if (typeof gtag === 'function') gtag('event', 'beat_v13_kofi_click', { location: 'tab' });
@@ -670,6 +678,14 @@ function setupV13Popup() {
     const exploreButton = document.getElementById('v13PopupExplore');
     const supportLink = popup?.querySelector('.v13-popup-support');
     if (!popup || !closeButton || !exploreButton) return;
+
+    const registrationDeadline = Date.parse('2026-11-21T04:00:00Z');
+    const registrationOpen = Date.now() < registrationDeadline;
+    const fineprint = popup.querySelector('.v13-popup-fineprint');
+    if (!registrationOpen) {
+        exploreButton.textContent = 'Follow V13';
+        if (fineprint) fineprint.textContent = 'Registration closed at the Round 22 Las Vegas F1 Fantasy team lock. The final two rounds now decide the challenge.';
+    }
 
     const storageKey = 'boxbox-v13-popup-until';
     const engagedKey = 'boxbox-v13-popup-engaged';

@@ -6,6 +6,7 @@
     'use strict';
 
     const CONFIG_URL = '/data/site_features.json';
+    const BEAT_V13_REGISTRATION_DEADLINE = Date.parse('2026-11-21T04:00:00Z');
 
     function track(eventName, params = {}) {
         if (typeof window.gtag === 'function') {
@@ -25,6 +26,18 @@
         const submit = form?.querySelector('button[type="submit"]');
 
         if (!config?.enabled || !panel || !form || !status || !submit) return;
+
+        if (Date.now() >= BEAT_V13_REGISTRATION_DEADLINE) {
+            panel.hidden = false;
+            form.hidden = true;
+            const eyebrow = panel.querySelector('.email-updates-eyebrow');
+            const title = panel.querySelector('.email-updates-copy h2');
+            const body = panel.querySelector('.email-updates-copy p');
+            if (eyebrow) eyebrow.textContent = 'Beat V13 registration · Closed';
+            if (title) title.textContent = 'The grid is locked';
+            if (body) body.textContent = 'Registration closed at the Round 22 Las Vegas F1 Fantasy team lock. Registered entrants will receive the final submission instructions after the season.';
+            return;
+        }
 
         // Ship the public flag independently of private delivery credentials.
         // Do not expose a form that can only fail with a configuration error.
@@ -47,7 +60,7 @@
             const website = form.elements.website.value;
 
             if (!email || !consent) {
-                setStatus(status, 'Enter your email and confirm that you want update alerts.', 'error');
+                setStatus(status, 'Enter your email and confirm your free Beat V13 registration.', 'error');
                 return;
             }
 
@@ -67,10 +80,10 @@
                 form.reset();
                 setStatus(
                     status,
-                    result.message || 'Check your inbox and confirm your subscription.',
+                    result.message || 'Check your inbox and confirm your free Beat V13 registration.',
                     'success'
                 );
-                track('email_updates_signup_started', { location: 'site_footer' });
+                track('beat_v13_registration_started', { location: 'site_footer' });
             } catch (error) {
                 setStatus(
                     status,
@@ -79,7 +92,7 @@
                 );
             } finally {
                 submit.disabled = false;
-                submit.textContent = 'Notify me';
+                submit.textContent = 'Register free';
             }
         });
     }

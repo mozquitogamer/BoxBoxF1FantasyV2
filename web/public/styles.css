@@ -3859,6 +3859,20 @@ table.sortable th.sort-desc::after {
 .v13-rules-card h2 { margin: 0 0 8px; letter-spacing: -.03em; }
 .v13-rules-card p { max-width: 72ch; color: var(--text-secondary); font-size: .86rem; }
 .v13-rules-card .v13-rules-note { margin-top: 10px; color: #d8dced; font-size: .76rem; }
+.v13-registration-button {
+    margin-top: 16px;
+    padding: 11px 17px;
+    border: 1px solid rgba(55,230,208,.55);
+    border-radius: 9px;
+    background: var(--v13-cyan);
+    color: #07110f;
+    font: inherit;
+    font-size: .8rem;
+    font-weight: 850;
+    cursor: pointer;
+}
+.v13-registration-button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.v13-registration-button:focus-visible { outline: 3px solid rgba(55,230,208,.35); outline-offset: 3px; }
 .v13-prizes { display: flex; gap: 8px; }
 .v13-prizes span {
     min-width: 78px;

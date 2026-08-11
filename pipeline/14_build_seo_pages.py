@@ -938,18 +938,18 @@ def page_head(
 ENGAGEMENT_BLOCK = """<div class="engagement-shell">
 <section class="email-updates-panel" id="emailUpdatesPanel" aria-labelledby="emailUpdatesTitle" hidden>
   <div class="email-updates-copy">
-    <span class="email-updates-eyebrow">Free V13 alerts</span>
-    <h2 id="emailUpdatesTitle">Get the bot's next move in your inbox</h2>
-    <p>Know when early thoughts and the final post-FP simulations go live, and get the Beat V13 registration link after R22. Free, concise, and never daily spam.</p>
+    <span class="email-updates-eyebrow">Beat V13 registration &middot; Open</span>
+    <h2 id="emailUpdatesTitle">Register free to Beat the Bot</h2>
+    <p>Confirm your email before the Round 22 Las Vegas team lock on 21 November 2026 at 04:00 UTC. You will also receive concise V13 early-thoughts, post-FP simulation updates and competition instructions.</p>
   </div>
   <form class="email-updates-form" id="emailUpdatesForm" novalidate>
     <div class="email-updates-fields">
       <label class="sr-only" for="emailUpdatesAddress">Email address</label>
       <input id="emailUpdatesAddress" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
-      <button type="submit">Notify me</button>
+      <button type="submit">Register free</button>
     </div>
     <div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
-    <label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Email me V13 and simulation updates. I understand I must confirm my address first and can unsubscribe at any time.</span></label>
+    <label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Register me for Beat V13 and email me V13, simulation and competition updates. I understand I must confirm my address before the deadline and can unsubscribe at any time.</span></label>
     <p class="email-updates-privacy">Handled according to the <a href="/privacy/">privacy policy</a>.</p>
     <p class="email-updates-status" id="emailUpdatesStatus" role="status" aria-live="polite"></p>
   </form>
@@ -978,7 +978,7 @@ FOOTER = f"""</main>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
-<script src="/engagement.js?v=3"></script>
+<script src="/engagement.js?v=4"></script>
 </body>
 </html>
 """
@@ -5575,11 +5575,11 @@ STATIC_PAGES = [
         "schema_type": "WebPage",
         "intro": '<p class="lede">This privacy policy explains what BoxBoxF1Fantasy collects and how the site uses it.</p>',
         "body": (
-            "<p><strong>Last updated:</strong> 2026-07-22</p>"
+            "<p><strong>Last updated:</strong> 2026-08-11</p>"
             "<h2>Information we collect</h2>"
-            "<p>Most BoxBoxF1Fantasy features do not require an account. If you email us, we receive the email address and any information you choose to include in the message. If you subscribe to race-week alerts, we process your email address and confirmation status for that purpose.</p>"
-            "<h2>Email alerts</h2>"
-            "<p>Email alerts use a double-opt-in process: submitting an address sends a time-limited confirmation link, and the address is added to the mailing list only after that link is opened. Resend processes confirmation messages, subscriber records, delivery events and unsubscribes on our behalf. Every simulation-update broadcast includes an unsubscribe link. You can also ask us to remove your address.</p>"
+            "<p>Most BoxBoxF1Fantasy features do not require an account. If you email us, we receive the email address and any information you choose to include. If you register for Beat V13, we process your email address, confirmation status and later any team identifier, score screenshot or verification information you submit for the challenge.</p>"
+            "<h2>Beat V13 registration and email updates</h2>"
+            "<p>Registration uses a double-opt-in process: submitting an address sends a time-limited confirmation link, and the address is registered only after that link is opened before the stated deadline. Resend processes confirmation messages, subscriber records, delivery events and unsubscribes on our behalf. Registered entrants also receive V13, simulation and competition updates. Every broadcast includes an unsubscribe link, and you can ask us to remove your address.</p>"
             "<h2>Analytics</h2>"
             "<p>The site uses Google Analytics to understand aggregate traffic, page usage and engagement. Analytics data may include device/browser information, approximate location, referrer, pages viewed and interaction events. This helps improve the site and understand which pages are useful.</p>"
             "<h2>Cookies and local storage</h2>"
@@ -5592,7 +5592,7 @@ STATIC_PAGES = [
             "<h2>Data sharing</h2>"
             "<p>We do not sell personal information. Information may be processed by service providers used to host, email, analyze, advertise on and maintain the site, only for those services and subject to their terms.</p>"
             "<h2>Retention and your choices</h2>"
-            "<p>Subscription data is kept until you unsubscribe or ask for deletion, except for limited suppression or delivery records needed to honour an unsubscribe and protect email deliverability. Advertising consent choices can be revisited through the consent interface when it is active. You may request access, correction or deletion by contacting us.</p>"
+            "<p>Email subscription data is kept until you unsubscribe or ask for deletion, except for limited suppression or delivery records needed to honour an unsubscribe and protect email deliverability. Beat V13 entry and score-verification evidence is kept through challenge administration and prize verification, then removed when it is no longer reasonably needed, unless a longer period is required for legal, tax or dispute purposes. Advertising consent choices can be revisited through the consent interface when it is active. You may request access, correction or deletion by contacting us.</p>"
             "<h2>Contact</h2>"
             f'<p>For privacy questions, email <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>'
         ),

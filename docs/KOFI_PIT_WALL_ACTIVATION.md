@@ -50,9 +50,9 @@ When the member dashboard is connected:
 
 Until the private database and magic-link accounts are live, Ko-fi itself is the source of truth for the member briefing. Website-only personalized tools should remain marked as rolling out.
 
-## Free V13 alerts
+## Free Beat V13 registration and alerts
 
-The free email list is separate from Ko-fi membership. A visitor explicitly opts into V13 and simulation updates through the website, confirms by email, and can unsubscribe from every message. Contest registration after Round 22 should use a separate administrative consent and an optional marketing checkbox.
+The free email list and Beat V13 entry are separate from Ko-fi membership. Registration is open now: a visitor explicitly registers through the website, confirms by email before the Round 22 Las Vegas F1 Fantasy team lock on 2026-11-21 at 04:00 UTC, and receives V13, simulation and competition updates. Entry is free, and every broadcast includes an unsubscribe route.
 
 To expose the free sign-up form, configure these private values in Vercel:
 

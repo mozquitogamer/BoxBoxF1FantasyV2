@@ -5,6 +5,12 @@ const crypto = require('node:crypto');
 const RESEND_API = 'https://api.resend.com';
 const DEFAULT_SITE_ORIGIN = 'https://boxboxf1fantasy.com';
 const DEFAULT_TTL_HOURS = 48;
+const BEAT_V13_REGISTRATION_DEADLINE = '2026-11-21T04:00:00Z';
+const BEAT_V13_REGISTRATION_DEADLINE_MS = Date.parse(BEAT_V13_REGISTRATION_DEADLINE);
+
+function isBeatV13RegistrationOpen(now = Date.now()) {
+    return Number.isFinite(now) && now < BEAT_V13_REGISTRATION_DEADLINE_MS;
+}
 
 function normalizeEmail(value) {
     if (typeof value !== 'string') return '';
@@ -118,9 +124,11 @@ function htmlPage(title, message, success) {
 }
 
 module.exports = {
+    BEAT_V13_REGISTRATION_DEADLINE,
     createSubscriptionToken,
     getConfig,
     htmlPage,
+    isBeatV13RegistrationOpen,
     isAllowedRequestOrigin,
     isValidEmail,
     normalizeEmail,

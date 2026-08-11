@@ -3,6 +3,7 @@
 const {
     getConfig,
     htmlPage,
+    isBeatV13RegistrationOpen,
     resendRequest,
     verifySubscriptionToken,
 } = require('../../lib/email-subscriptions');
@@ -22,6 +23,14 @@ module.exports = async function confirm(req, res) {
     } catch (error) {
         console.error('Email confirmation is not configured:', error.message);
         return res.status(503).send(htmlPage('Alerts are not ready', 'Please try again later.', false));
+    }
+
+    if (!isBeatV13RegistrationOpen()) {
+        return res.status(410).send(htmlPage(
+            'Registration closed',
+            'Beat V13 registration closed at the Round 22 F1 Fantasy team lock.',
+            false
+        ));
     }
 
     const token = typeof req.query?.token === 'string' ? req.query.token : '';
@@ -57,8 +66,8 @@ module.exports = async function confirm(req, res) {
         }
 
         return res.status(200).send(htmlPage(
-            "You're on the grid",
-            "Your email is confirmed. You'll get concise V13 and simulation updates, plus the free Beat V13 registration link after Round 22. Every alert includes an unsubscribe link.",
+            "You're registered",
+            "Your free Beat V13 entry is confirmed. After the season, we'll send instructions to submit one official F1 Fantasy team and its full-season score screenshot. You'll also get concise V13 and simulation updates, and every alert includes an unsubscribe link.",
             true
         ));
     } catch (error) {

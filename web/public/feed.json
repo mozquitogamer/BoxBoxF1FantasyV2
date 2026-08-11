@@ -7,6 +7,20 @@
   "language": "en",
   "items": [
     {
+      "id": "https://boxboxf1fantasy.com/picks/dutch-gp-2026/",
+      "url": "https://boxboxf1fantasy.com/picks/dutch-gp-2026/",
+      "title": "F1 Fantasy Picks: Dutch GP 2026",
+      "summary": "Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Dutch Grand Prix.",
+      "date_modified": "2026-08-11T00:00:00+00:00"
+    },
+    {
+      "id": "https://boxboxf1fantasy.com/changelog/",
+      "url": "https://boxboxf1fantasy.com/changelog/",
+      "title": "BoxBoxF1Fantasy Changelog 2026",
+      "summary": "Public release notes for BoxBoxF1Fantasy model updates, scoring fixes, data-quality improvements and feature releases. Latest: Points versus budget calculator and season-aware transfer advice.",
+      "date_modified": "2026-07-29T00:00:00+00:00"
+    },
+    {
       "id": "https://boxboxf1fantasy.com/articles/",
       "url": "https://boxboxf1fantasy.com/articles/",
       "title": "F1 Fantasy Articles 2026",
@@ -26,13 +40,6 @@
       "title": "How Big an Effect Does Max Points vs Balanced Have?",
       "summary": "How big an effect does going for a Max Points team versus a Balanced approach have? I wondered, and ran three sets of simulations to find out. This season simulator replayed every completed 2026 race with two virtual...",
       "date_modified": "2026-07-28T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/picks/dutch-gp-2026/",
-      "url": "https://boxboxf1fantasy.com/picks/dutch-gp-2026/",
-      "title": "F1 Fantasy Picks: Dutch GP 2026",
-      "summary": "Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Dutch Grand Prix.",
-      "date_modified": "2026-07-27T00:00:00+00:00"
     },
     {
       "id": "https://boxboxf1fantasy.com/picks/italian-gp-2026/",
@@ -166,13 +173,6 @@
       "title": "F1 Fantasy Prediction Accuracy 2026",
       "summary": "Public BoxBoxF1Fantasy track record across 11 completed rounds: driver points MAE 11.6, constructor points MAE 18.4, and 90% CI coverage 80%.",
       "date_modified": "2026-07-26T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/changelog/",
-      "url": "https://boxboxf1fantasy.com/changelog/",
-      "title": "BoxBoxF1Fantasy Changelog 2026",
-      "summary": "Public release notes for BoxBoxF1Fantasy model updates, scoring fixes, data-quality improvements and feature releases. Latest: Final Fix calculator added after Hungarian GP Qualifying.",
-      "date_modified": "2026-07-25T00:00:00+00:00"
     },
     {
       "id": "https://boxboxf1fantasy.com/videos/",

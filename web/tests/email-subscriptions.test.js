@@ -4,7 +4,9 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 const {
+    BEAT_V13_REGISTRATION_DEADLINE,
     createSubscriptionToken,
+    isBeatV13RegistrationOpen,
     isValidEmail,
     normalizeEmail,
     verifySubscriptionToken,
@@ -51,6 +53,12 @@ test('normalizes and validates subscriber addresses', () => {
     assert.equal(normalizeEmail('  FAN@Example.COM '), 'fan@example.com');
     assert.equal(isValidEmail('fan@example.com'), true);
     assert.equal(isValidEmail('not-an-email'), false);
+});
+
+test('opens registration before the Round 22 lock and closes it at the deadline', () => {
+    const deadline = Date.parse(BEAT_V13_REGISTRATION_DEADLINE);
+    assert.equal(isBeatV13RegistrationOpen(deadline - 1), true);
+    assert.equal(isBeatV13RegistrationOpen(deadline), false);
 });
 
 test('creates and verifies a signed subscription token', () => {
@@ -100,7 +108,7 @@ test('subscribe handler sends only a confirmation email', async () => {
         assert.equal(calls[0].url, 'https://api.resend.com/emails');
         const payload = JSON.parse(calls[0].options.body);
         assert.deepEqual(payload.to, ['fan@example.com']);
-        assert.equal(payload.subject, 'Confirm your free BoxBox V13 alerts');
+        assert.equal(payload.subject, 'Confirm your free Beat V13 registration');
         assert.match(payload.text, /\/api\/email\/confirm\?token=/);
     } finally {
         global.fetch = originalFetch;
@@ -162,7 +170,7 @@ test('confirm handler adds a verified address to the alert segment', async () =>
         await confirmHandler(req, res);
 
         assert.equal(res.statusCode, 200);
-        assert.match(res.body, /on the grid/);
+        assert.match(res.body, /registered/);
         assert.equal(calls.length, 1);
         assert.equal(calls[0].url, 'https://api.resend.com/contacts');
         const payload = JSON.parse(calls[0].options.body);

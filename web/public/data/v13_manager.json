@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-11T11:53:31.182242+02:00",
+  "generated_at": "2026-08-11T20:33:44.747426+02:00",
   "manager": {
     "id": "v13",
     "name": "V13",
@@ -18,17 +18,20 @@
     }
   },
   "competition": {
-    "status": "rules_pending",
+    "status": "registration_open",
     "scoring_basis": "full_2026_official_season_total",
+    "registration_open": true,
     "registration_deadline_round": 22,
-    "registration_window": "After R22 is complete and before the R23 team lock.",
-    "evidence": "Designated team at registration plus end-of-season official-score screenshot; private league retained as a verification fallback.",
+    "registration_deadline_race": "Las Vegas Grand Prix",
+    "registration_deadline_at": "2026-11-21T04:00:00Z",
+    "registration_window": "Registration is open now and closes at the F1 Fantasy team-lock deadline for Round 22, the third-last race: 21 November 2026 at 04:00 UTC.",
+    "evidence": "Confirm an email address before the deadline. After the season, submit one official F1 Fantasy team and its full-season score screenshot; a private league remains available as a verification fallback.",
     "prizes_usd": [
       100,
       50,
       30
     ],
-    "eligibility_note": "Final eligibility and payout terms will be published before registration opens."
+    "eligibility_note": "Entry is free. The registration email must be confirmed before the Round 22 team lock. Final score verification and payout terms apply."
   },
   "research_replay": {
     "label": "R1-R13 research replay",
