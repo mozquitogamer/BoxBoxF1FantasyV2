@@ -4645,13 +4645,23 @@ function applySavedMemberTeam(team) {
 
 function normalizeOfficialAssetId(asset) {
     if (!data || !asset) return null;
-    const name = String(asset.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const canonicalName = value => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const name = canonicalName(asset.name);
     const pool = asset.asset_type === 'constructor' ? data.constructors : data.drivers;
     const idKey = asset.asset_type === 'constructor' ? 'constructor_id' : 'driver_id';
     const nameKey = asset.asset_type === 'constructor' ? 'name' : 'name';
     const exact = pool.find(item => String(item[idKey]) === String(asset.asset_id));
     if (exact) return exact[idKey];
-    const matched = pool.find(item => String(item[nameKey] || '').toLowerCase().replace(/[^a-z0-9]/g, '') === name);
+    const matched = pool.find(item => {
+        const localName = canonicalName(item[nameKey]);
+        if (localName === name) return true;
+        if (asset.asset_type === 'constructor') {
+            return name.includes(localName) || localName.includes(name);
+        }
+        const officialSurname = String(asset.name || '').trim().split(/\s+/).pop();
+        const localSurname = String(item[nameKey] || '').trim().split(/\s+/).pop();
+        return canonicalName(officialSurname) === canonicalName(localSurname);
+    });
     return matched?.[idKey] || null;
 }
 

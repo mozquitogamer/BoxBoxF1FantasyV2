@@ -70,6 +70,49 @@ test('extractSnapshot accepts PascalCase drivers and constructors in separate se
     assert.equal(snapshot.assets.filter(item => item.asset_type === 'constructor').length, 2);
 });
 
+test('extractSnapshot resolves the official seven-ID lineup through the public round roster', () => {
+    const playerIds = ['18', '11059', '12', '129', '11051', '25', '23'];
+    const payload = {
+        Data: {
+            Value: {
+                userTeam: [{
+                    teamname: 'Boxed%20In',
+                    playerid: playerIds,
+                    capplayerid: '18',
+                    gdpoints: '123',
+                    ovpoints: '987',
+                    gdrank: '45',
+                    ovrank: '6789',
+                    teambal: '3.4',
+                    usersubsleft: '2',
+                }],
+            },
+        },
+    };
+    const roster = {
+        Data: {
+            Value: [
+                ...playerIds.slice(0, 5).map((id, index) => ({
+                    PlayerId: id,
+                    PositionName: 'DRIVER',
+                    FUllName: `Driver ${index + 1}`,
+                })),
+                { PlayerId: '25', PositionName: 'CONSTRUCTOR', FUllName: 'Ferrari' },
+                { PlayerId: '23', PositionName: 'CONSTRUCTOR', FUllName: 'Alpine' },
+            ],
+        },
+    };
+    const link = { user_id: 'user', official_team_id: 'official', official_team_name: 'Boxed In', team_slot: 1 };
+    const snapshot = extractSnapshot(payload, link, 14, roster);
+    assert.equal(snapshot.assets.filter(item => item.asset_type === 'driver').length, 5);
+    assert.equal(snapshot.assets.filter(item => item.asset_type === 'constructor').length, 2);
+    assert.equal(snapshot.assets.find(item => item.asset_id === '18').is_boosted, true);
+    assert.equal(snapshot.fantasy_points, 123);
+    assert.equal(snapshot.overall_points, 987);
+    assert.equal(snapshot.budget_millions, 3.4);
+    assert.equal(snapshot.free_transfers, 2);
+});
+
 test('extractSnapshot refuses to turn an empty F1 response into a saved lineup', () => {
     const link = { user_id: 'user', official_team_id: 'official', official_team_name: 'My Team', team_slot: 1 };
     assert.throws(

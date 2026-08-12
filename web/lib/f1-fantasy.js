@@ -277,9 +277,53 @@ function extractAssets(payload) {
     ]);
 }
 
-function extractSnapshot(payload, link, round) {
+function rosterByPlayerId(payload) {
+    const byId = new Map();
+    for (const row of objects(payload)) {
+        const asset = mapAsset(row, 0);
+        if (!asset?.asset_type) continue;
+        const key = String(asset.asset_id);
+        const existing = byId.get(key) || [];
+        existing.push(asset);
+        byId.set(key, existing);
+    }
+    return byId;
+}
+
+function extractIdLineup(payload, rosterPayload) {
+    if (!rosterPayload) return [];
+    const team = objects(payload).find(row => {
+        const ids = first(row, ['playerid', 'player_id', 'playerIds', 'player_ids']);
+        return Array.isArray(ids) && ids.length === 7;
+    });
+    if (!team) return [];
+
+    const ids = first(team, ['playerid', 'player_id', 'playerIds', 'player_ids']);
+    const roster = rosterByPlayerId(rosterPayload);
+    const captainId = String(first(team, ['capplayerid', 'captainPlayerId', 'captain_id']) || '');
+    const typeSlots = { driver: 0, constructor: 0 };
+    const assets = ids.map((id, index) => {
+        const choices = roster.get(String(id)) || [];
+        const expectedType = index < 5 ? 'driver' : 'constructor';
+        const match = choices.find(item => item.asset_type === expectedType) || choices[0];
+        if (!match) return null;
+        typeSlots[match.asset_type] += 1;
+        return {
+            ...match,
+            slot: typeSlots[match.asset_type],
+            is_boosted: String(id) === captainId,
+        };
+    }).filter(Boolean);
+    return uniqueAssets(assets);
+}
+
+function extractSnapshot(payload, link, round, rosterPayload = null) {
     const allObjects = objects(payload);
-    const assets = extractAssets(payload);
+    let assets = extractAssets(payload);
+    if (assets.filter(item => item.asset_type === 'driver').length !== 5
+        || assets.filter(item => item.asset_type === 'constructor').length !== 2) {
+        assets = extractIdLineup(payload, rosterPayload);
+    }
     const drivers = assets.filter(item => item.asset_type === 'driver').length;
     const constructors = assets.filter(item => item.asset_type === 'constructor').length;
     if (drivers !== 5 || constructors !== 2) {
@@ -287,7 +331,10 @@ function extractSnapshot(payload, link, round) {
         error.code = 'F1_INCOMPLETE_LINEUP';
         throw error;
     }
-    const summary = allObjects.find(row => String(first(row, ['team_id', 'teamId', 'id']) || '') === String(link.official_team_id)) || allObjects[0] || {};
+    const summary = allObjects.find(row => Array.isArray(first(row, ['playerid', 'player_id', 'playerIds', 'player_ids'])))
+        || allObjects.find(row => String(first(row, ['team_id', 'teamId', 'id']) || '') === String(link.official_team_id))
+        || allObjects[0]
+        || {};
     return {
         user_id: link.user_id,
         official_team_id: link.official_team_id,
@@ -296,13 +343,13 @@ function extractSnapshot(payload, link, round) {
         team_slot: link.team_slot,
         official_team_name: link.official_team_name,
         manager_name: link.manager_name || null,
-        fantasy_points: numberOrNull(first(summary, ['gameweek_points', 'gameWeekPoints', 'round_points', 'roundPoints', 'points', 'score'])),
-        overall_points: numberOrNull(first(summary, ['overall_points', 'overallPoints', 'total_points', 'totalPoints'])),
-        league_rank: numberOrNull(first(summary, ['league_rank', 'leagueRank', 'rank', 'position'])),
-        overall_rank: numberOrNull(first(summary, ['overall_rank', 'overallRank', 'global_rank', 'globalRank'])),
-        budget_millions: numberOrNull(first(summary, ['budget', 'budget_millions', 'budgetMillions', 'team_value', 'teamValue'])),
-        free_transfers: numberOrNull(first(summary, ['free_transfers', 'freeTransfers', 'transfers_available', 'transfersAvailable'])),
-        chip_code: normalizeName(first(summary, ['chip', 'chip_code', 'chipCode', 'booster', 'booster_name'])) || null,
+        fantasy_points: numberOrNull(first(summary, ['gdpoints', 'gameweek_points', 'gameWeekPoints', 'round_points', 'roundPoints', 'points', 'score'])),
+        overall_points: numberOrNull(first(summary, ['ovpoints', 'overall_points', 'overallPoints', 'total_points', 'totalPoints'])),
+        league_rank: numberOrNull(first(summary, ['gdrank', 'league_rank', 'leagueRank', 'rank', 'position'])),
+        overall_rank: numberOrNull(first(summary, ['ovrank', 'overall_rank', 'overallRank', 'global_rank', 'globalRank'])),
+        budget_millions: numberOrNull(first(summary, ['teambal', 'budget', 'budget_millions', 'budgetMillions', 'team_value', 'teamValue'])),
+        free_transfers: numberOrNull(first(summary, ['usersubsleft', 'userSubsleft', 'free_transfers', 'freeTransfers', 'transfers_available', 'transfersAvailable'])),
+        chip_code: normalizeName(first(summary, ['boosterid', 'chip', 'chip_code', 'chipCode', 'booster', 'booster_name'])) || null,
         assets,
         captured_at: new Date().toISOString(),
     };
@@ -322,8 +369,14 @@ function officialGameDay(internalRound) {
 async function getOpponentSnapshot(link, round = 1) {
     const gameDay = officialGameDay(round);
     const payload = await request(`/services/user/opponentteam/opponentgamedayplayerteamget/1/${encodeURIComponent(link.official_team_id)}/${link.team_slot}/${gameDay}/1?buster=${Date.now()}`);
+    let rosterPayload = null;
     try {
-        return extractSnapshot(payload, link, round);
+        rosterPayload = await request(`/feeds/drivers/${gameDay}_en.json?buster=${Date.now()}`);
+    } catch (error) {
+        console.warn('[f1-sync] roster feed unavailable', JSON.stringify({ round, gameDay, message: error.message }));
+    }
+    try {
+        return extractSnapshot(payload, link, round, rosterPayload);
     } catch (error) {
         if (error.code === 'F1_INCOMPLETE_LINEUP') {
             console.warn('[f1-sync] incomplete response shape', JSON.stringify({ round, gameDay, shape: payloadShape(payload) }));
