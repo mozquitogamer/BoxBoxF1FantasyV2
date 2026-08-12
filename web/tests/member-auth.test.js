@@ -4,8 +4,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 const signIn = require('../api/members/sign-in');
-const passwordReset = require('../api/members/password-reset');
-const updatePassword = require('../api/members/password');
+const password = require('../api/members/password');
 
 function response(body, status = 200) {
     return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -115,7 +114,7 @@ test('creates a recovery email only for an active member', async () => {
     };
     try {
         const res = mockRes();
-        await passwordReset(memberReq({ email: 'member@example.com' }), res);
+        await password(memberReq({ action: 'reset', email: 'member@example.com' }), res);
         assert.equal(res.statusCode, 202);
         assert.equal(res.body.ok, true);
         const generate = calls.find(call => call.url.endsWith('/auth/v1/admin/generate_link'));
@@ -145,8 +144,8 @@ test('sets a new password from an authenticated recovery session', async () => {
     };
     try {
         const res = mockRes();
-        await updatePassword(memberReq(
-            { password: 'a new secure password' },
+        await password(memberReq(
+            { action: 'update', password: 'a new secure password' },
             'boxbox_member_access=recovery-access; boxbox_member_refresh=recovery-refresh',
         ), res);
         assert.equal(res.statusCode, 200);

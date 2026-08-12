@@ -74,7 +74,7 @@
             event.currentTarget.disabled = true;
             status('Preparing password setup…');
             try {
-                const result = await request('/api/members/password-reset/', { method: 'POST', body: { email } });
+                const result = await request('/api/members/password/', { method: 'POST', body: { action: 'reset', email } });
                 status(result.message, 'success');
             } catch (error) { status(error.message, 'error'); }
             finally { event.currentTarget.disabled = false; }
@@ -90,7 +90,7 @@
             const button = form.querySelector('button');
             button.disabled = true;
             try {
-                const result = await request('/api/members/password/', { method: 'POST', body: { password: form.elements.password.value } });
+                const result = await request('/api/members/password/', { method: 'POST', body: { action: 'update', password: form.elements.password.value } });
                 history.replaceState(null, '', '/#optimizer');
                 await loadSession();
                 status(result.message, 'success');

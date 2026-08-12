@@ -337,7 +337,7 @@
                 if (!email) { status.textContent = 'Enter your Ko-fi membership email first.'; status.dataset.state = 'error'; return; }
                 event.currentTarget.disabled = true;
                 try {
-                    const result = await memberRequest('/api/members/password-reset/', { method: 'POST', body: { email } });
+                    const result = await memberRequest('/api/members/password/', { method: 'POST', body: { action: 'reset', email } });
                     status.textContent = result.message;
                     status.dataset.state = 'success';
                 } catch (error) { status.textContent = error.message; status.dataset.state = 'error'; }
