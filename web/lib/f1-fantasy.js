@@ -304,20 +304,24 @@ function extractIdLineup(payload, rosterPayload) {
     });
     if (!team) return [];
 
-    const ids = first(team, ['playerid', 'player_id', 'playerIds', 'player_ids']);
+    const entries = first(team, ['playerid', 'player_id', 'playerIds', 'player_ids']);
     const roster = rosterByPlayerId(rosterPayload);
     const captainId = String(first(team, ['capplayerid', 'captainPlayerId', 'captain_id']) || '');
     const typeSlots = { driver: 0, constructor: 0 };
-    const assets = ids.map((id, index) => {
+    const assets = entries.map((entry, index) => {
+        const record = entry && typeof entry === 'object' ? entry : null;
+        const id = record ? first(record, ['id', 'playerid', 'player_id', 'PlayerId']) : entry;
+        const position = Number(record ? first(record, ['playerpostion', 'playerposition', 'player_position', 'position']) : index + 1);
         const choices = roster.get(String(id)) || [];
-        const expectedType = index < 5 ? 'driver' : 'constructor';
+        const expectedType = position >= 6 ? 'constructor' : 'driver';
         const match = choices.find(item => item.asset_type === expectedType) || choices[0];
         if (!match) return null;
         typeSlots[match.asset_type] += 1;
         return {
             ...match,
-            slot: typeSlots[match.asset_type],
-            is_boosted: String(id) === captainId,
+            slot: expectedType === 'driver' ? position : position - 5,
+            is_boosted: booleanValue(record ? first(record, ['iscaptain', 'is_captain', 'captain']) : null) === true
+                || String(id) === captainId,
         };
     }).filter(Boolean);
     return uniqueAssets(assets);

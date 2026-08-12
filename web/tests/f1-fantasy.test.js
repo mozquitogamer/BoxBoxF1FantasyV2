@@ -136,6 +136,39 @@ test('extractSnapshot accepts alternate F1 player IDs used by team responses', (
     assert.equal(snapshot.assets.filter(item => item.asset_type === 'constructor').length, 2);
 });
 
+test('extractSnapshot parses the live F1 player record array and explicit positions', () => {
+    const entries = [
+        { id: '11032', playerpostion: 2, iscaptain: 0 },
+        { id: '11051', playerpostion: 4, iscaptain: 0 },
+        { id: '111', playerpostion: 5, iscaptain: 0 },
+        { id: '11149', playerpostion: 3, iscaptain: 0 },
+        { id: '115', playerpostion: 1, iscaptain: 1 },
+        { id: '25', playerpostion: 7, iscaptain: 0 },
+        { id: '28', playerpostion: 6, iscaptain: 0 },
+    ];
+    const roster = {
+        Data: {
+            Value: [
+                ...entries.slice(0, 5).map((entry, index) => ({
+                    PlayerId: entry.id,
+                    PositionName: 'DRIVER',
+                    FUllName: `Driver ${index + 1}`,
+                })),
+                { PlayerId: '25', PositionName: 'CONSTRUCTOR', FUllName: 'Ferrari' },
+                { PlayerId: '28', PositionName: 'CONSTRUCTOR', FUllName: 'McLaren' },
+            ],
+        },
+    };
+    const payload = { Data: { Value: { userTeam: [{ playerid: entries }] } } };
+    const link = { user_id: 'user', official_team_id: 'official', official_team_name: 'Boxed In', team_slot: 1 };
+    const snapshot = extractSnapshot(payload, link, 14, roster);
+    assert.equal(snapshot.assets.filter(item => item.asset_type === 'driver').length, 5);
+    assert.equal(snapshot.assets.filter(item => item.asset_type === 'constructor').length, 2);
+    assert.equal(snapshot.assets.find(item => item.asset_id === '115').slot, 1);
+    assert.equal(snapshot.assets.find(item => item.asset_id === '115').is_boosted, true);
+    assert.equal(snapshot.assets.find(item => item.asset_id === '28').slot, 1);
+});
+
 test('extractSnapshot refuses to turn an empty F1 response into a saved lineup', () => {
     const link = { user_id: 'user', official_team_id: 'official', official_team_name: 'My Team', team_slot: 1 };
     assert.throws(
