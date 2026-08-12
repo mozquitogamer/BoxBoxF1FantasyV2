@@ -76,7 +76,13 @@ function first(object, keys) {
 }
 
 function normalizeName(value) {
-    return String(value || '').trim().replace(/\s+/g, ' ');
+    let text = String(value || '').trim();
+    try {
+        text = decodeURIComponent(text);
+    } catch (_) {
+        // Keep malformed third-party text readable instead of rejecting the row.
+    }
+    return text.replace(/\s+/g, ' ');
 }
 
 function candidateTeam(row) {

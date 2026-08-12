@@ -21,6 +21,18 @@ test('extractTeams accepts current-style leaderboard fields and de-duplicates te
     });
 });
 
+test('decodes official F1 team names before display and exact-name search', () => {
+    const payload = {
+        leaderboard: [
+            { user_guid: 'owner-1', team_name: 'Boxed%20In', team_no: 1, manager_name: 'Quintin%20Engelbrecht' },
+        ],
+    };
+    const teams = extractTeams(payload);
+    assert.equal(teams[0].name, 'Boxed In');
+    assert.equal(teams[0].manager, 'Quintin Engelbrecht');
+    assert.deepEqual(findTeams(teams, 'Boxed In').map(team => team.name), ['Boxed In']);
+});
+
 test('extractSnapshot finds five drivers and two constructors', () => {
     const assets = [
         ...['A', 'B', 'C', 'D', 'E'].map((name, index) => ({ player_id: `d${index}`, player_name: name, player_type: 'driver', slot: index + 1 })),

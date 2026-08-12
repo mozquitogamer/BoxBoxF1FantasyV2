@@ -26,6 +26,7 @@
     }
 
     function friendlyDate(value) {
+        if (value === null || value === undefined || String(value).trim() === '') return '';
         const date = new Date(value);
         if (!Number.isFinite(date.getTime())) return '';
         return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
