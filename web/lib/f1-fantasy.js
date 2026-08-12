@@ -61,6 +61,19 @@ function arrayEntries(value, path = [], found = []) {
     return found;
 }
 
+function payloadShape(value, path = 'root', found = [], depth = 0) {
+    if (depth > 5 || found.length >= 80) return found;
+    if (Array.isArray(value)) {
+        found.push({ path, kind: 'array', length: value.length });
+        value.slice(0, 2).forEach((item, index) => payloadShape(item, `${path}[${index}]`, found, depth + 1));
+    } else if (value && typeof value === 'object') {
+        const keys = Object.keys(value).slice(0, 40);
+        found.push({ path, kind: 'object', keys });
+        keys.forEach(key => payloadShape(value[key], `${path}.${key}`, found, depth + 1));
+    }
+    return found;
+}
+
 function objects(value, found = []) {
     if (Array.isArray(value)) {
         value.forEach(item => objects(item, found));
@@ -309,7 +322,14 @@ function officialGameDay(internalRound) {
 async function getOpponentSnapshot(link, round = 1) {
     const gameDay = officialGameDay(round);
     const payload = await request(`/services/user/opponentteam/opponentgamedayplayerteamget/1/${encodeURIComponent(link.official_team_id)}/${link.team_slot}/${gameDay}/1?buster=${Date.now()}`);
-    return extractSnapshot(payload, link, round);
+    try {
+        return extractSnapshot(payload, link, round);
+    } catch (error) {
+        if (error.code === 'F1_INCOMPLETE_LINEUP') {
+            console.warn('[f1-sync] incomplete response shape', { round, gameDay, shape: payloadShape(payload) });
+        }
+        throw error;
+    }
 }
 
 module.exports = {
