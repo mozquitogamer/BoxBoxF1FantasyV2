@@ -324,7 +324,7 @@
                 submit.disabled = true;
                 status.textContent = 'Preparing your secure link…';
                 try {
-                    const result = await memberRequest('/api/members/sign-in', { method: 'POST', body: { email: form.elements.email.value.trim() } });
+                    const result = await memberRequest('/api/members/sign-in/', { method: 'POST', body: { email: form.elements.email.value.trim() } });
                     status.textContent = result.message;
                     status.dataset.state = 'success';
                     form.reset();
@@ -340,14 +340,14 @@
             const active = session.entitlement?.active === true;
             content.innerHTML = `<span class="pit-wall-login-eyebrow">Pit Wall account</span><h2 id="pitWallLoginTitle">${escapeHtml(session.email || 'Signed in')}</h2><p>${active ? 'Your membership is active. Open the Transfer Advisor to manage your saved and official F1 Fantasy teams.' : 'You are signed in, but this membership is not currently active.'}</p><div class="pit-wall-login-actions"><a href="/?pitwall=1#optimizer">Open my Pit Wall</a><button type="button" id="sitePitWallSignOut">Sign out</button></div>`;
             content.querySelector('#sitePitWallSignOut')?.addEventListener('click', async () => {
-                await memberRequest('/api/members/sign-out', { method: 'POST' }).catch(() => null);
+                await memberRequest('/api/members/sign-out/', { method: 'POST' }).catch(() => null);
                 renderLoggedOut('Signed out.');
             });
         }
 
         async function refresh() {
             try {
-                const session = await memberRequest('/api/members/session');
+                const session = await memberRequest('/api/members/session/');
                 if (session.authenticated) renderSignedIn(session);
                 else renderLoggedOut();
             } catch (_) { renderLoggedOut('Sign-in is temporarily unavailable.'); }
