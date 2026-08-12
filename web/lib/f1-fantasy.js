@@ -282,10 +282,16 @@ function rosterByPlayerId(payload) {
     for (const row of objects(payload)) {
         const asset = mapAsset(row, 0);
         if (!asset?.asset_type) continue;
-        const key = String(asset.asset_id);
-        const existing = byId.get(key) || [];
-        existing.push(asset);
-        byId.set(key, existing);
+        const ids = [
+            asset.asset_id,
+            first(row, ['F1PlayerId', 'f1_player_id', 'f1PlayerId']),
+            first(row, ['TeamId', 'team_id', 'teamId']),
+        ].filter(value => value !== null && value !== undefined && value !== '').map(String);
+        for (const key of new Set(ids)) {
+            const existing = byId.get(key) || [];
+            existing.push(asset);
+            byId.set(key, existing);
+        }
     }
     return byId;
 }
@@ -327,6 +333,13 @@ function extractSnapshot(payload, link, round, rosterPayload = null) {
     const drivers = assets.filter(item => item.asset_type === 'driver').length;
     const constructors = assets.filter(item => item.asset_type === 'constructor').length;
     if (drivers !== 5 || constructors !== 2) {
+        const teamIds = allObjects.find(row => Array.isArray(first(row, ['playerid', 'player_id', 'playerIds', 'player_ids'])));
+        const roster = rosterPayload ? rosterByPlayerId(rosterPayload) : new Map();
+        console.warn('[f1-sync] lineup ID resolution failed', JSON.stringify({
+            teamIds: first(teamIds, ['playerid', 'player_id', 'playerIds', 'player_ids']) || [],
+            rosterKeyCount: roster.size,
+            rosterKeySample: [...roster.keys()].slice(0, 20),
+        }));
         const error = new Error(`F1 Fantasy returned an incomplete lineup (${drivers} drivers and ${constructors} constructors). Your saved team was not changed.`);
         error.code = 'F1_INCOMPLETE_LINEUP';
         throw error;

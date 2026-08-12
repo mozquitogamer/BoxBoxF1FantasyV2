@@ -113,6 +113,29 @@ test('extractSnapshot resolves the official seven-ID lineup through the public r
     assert.equal(snapshot.free_transfers, 2);
 });
 
+test('extractSnapshot accepts alternate F1 player IDs used by team responses', () => {
+    const playerIds = ['8', '1059', '2', '29', '1051', '5', '3'];
+    const payload = { Data: { Value: { userTeam: [{ playerid: playerIds }] } } };
+    const roster = {
+        Data: {
+            Value: [
+                ...playerIds.slice(0, 5).map((id, index) => ({
+                    PlayerId: `primary-${index}`,
+                    F1PlayerId: id,
+                    PositionName: 'DRIVER',
+                    FUllName: `Driver ${index + 1}`,
+                })),
+                { PlayerId: '25', F1PlayerId: '5', TeamId: '25', PositionName: 'CONSTRUCTOR', FUllName: 'Ferrari' },
+                { PlayerId: '23', F1PlayerId: '3', TeamId: '23', PositionName: 'CONSTRUCTOR', FUllName: 'Alpine' },
+            ],
+        },
+    };
+    const link = { user_id: 'user', official_team_id: 'official', official_team_name: 'My Team', team_slot: 1 };
+    const snapshot = extractSnapshot(payload, link, 14, roster);
+    assert.equal(snapshot.assets.filter(item => item.asset_type === 'driver').length, 5);
+    assert.equal(snapshot.assets.filter(item => item.asset_type === 'constructor').length, 2);
+});
+
 test('extractSnapshot refuses to turn an empty F1 response into a saved lineup', () => {
     const link = { user_id: 'user', official_team_id: 'official', official_team_name: 'My Team', team_slot: 1 };
     assert.throws(
