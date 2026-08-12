@@ -105,6 +105,27 @@
     clip: rect(1px, 1px, 1px, 1px) !important;
     white-space: nowrap !important;
 }
+.pit-wall-account-button { flex:none; padding:9px 13px; border:1px solid var(--accent,#e10600); border-radius:7px; background:rgba(225,6,0,.1); color:var(--text,#e9edf3); font:inherit; font-size:.76rem; font-weight:800; cursor:pointer; white-space:nowrap; }
+.pit-wall-account-button:hover { background:var(--accent,#e10600); color:#fff; }
+.pit-wall-account-button.floating { position:fixed; z-index:900; top:14px; right:14px; box-shadow:0 8px 24px rgba(0,0,0,.28); }
+.pit-wall-login-modal[hidden] { display:none !important; }
+.pit-wall-login-modal { position:fixed; inset:0; z-index:1100; display:grid; place-items:center; padding:18px; }
+.pit-wall-login-backdrop { position:absolute; inset:0; background:rgba(3,6,12,.76); backdrop-filter:blur(4px); }
+.pit-wall-login-dialog { position:relative; width:min(480px,100%); padding:26px; border:1px solid var(--border,#2a3341); border-radius:12px; background:var(--bg-card,#12161f); color:var(--text,#e9edf3); box-shadow:0 24px 70px rgba(0,0,0,.48); }
+.pit-wall-login-close { position:absolute; top:9px; right:11px; border:0; background:none; color:var(--text-secondary,#9aa4b2); font-size:1.65rem; cursor:pointer; }
+.pit-wall-login-eyebrow { color:var(--accent,#e10600); font-size:.68rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+.pit-wall-login-dialog h2 { margin:7px 28px 9px 0; font-size:1.35rem; }
+.pit-wall-login-dialog p { color:var(--text-secondary,#9aa4b2); font-size:.86rem; line-height:1.55; }
+.pit-wall-login-dialog form label { display:block; margin-bottom:6px; font-size:.76rem; font-weight:700; }
+.pit-wall-login-dialog form>div { display:flex; gap:8px; }
+.pit-wall-login-dialog input { min-width:0; flex:1; padding:10px 12px; border:1px solid var(--border,#2a3341); border-radius:7px; background:var(--bg-secondary,#0d1118); color:inherit; font:inherit; }
+.pit-wall-login-dialog form button,.pit-wall-login-actions a { padding:10px 13px; border:0; border-radius:7px; background:var(--accent,#e10600); color:#fff; font:inherit; font-weight:800; text-decoration:none; cursor:pointer; }
+.pit-wall-login-status { min-height:1.3em; margin:9px 0; }
+.pit-wall-login-status[data-state="success"] { color:var(--green,#22c55e); }
+.pit-wall-login-status[data-state="error"] { color:var(--red,#ef4444); }
+.pit-wall-login-kofi { color:var(--text-secondary,#9aa4b2); font-size:.76rem; }
+.pit-wall-login-actions { display:flex; align-items:center; gap:9px; }
+.pit-wall-login-actions button { padding:9px 12px; border:1px solid var(--border,#2a3341); border-radius:7px; background:transparent; color:inherit; cursor:pointer; }
 .adsense-banner {
     position: relative;
     width: min(970px, calc(100% - 20px));
@@ -196,4 +217,6 @@
     .bottom-banner-cta { display: none; }
     .adsense-banner { min-height: 92px; }
     .adsense-bottom-unit { min-height: 60px; }
+    .pit-wall-account-button { padding:7px 10px; font-size:.7rem; }
+    .pit-wall-login-dialog form>div { flex-direction:column; }
 }

@@ -44,7 +44,7 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="manifest" href="/site.webmanifest">
     <link rel="stylesheet" href="styles.css?v=26">
-    <link rel="stylesheet" href="engagement.css?v=2">
+    <link rel="stylesheet" href="engagement.css?v=3">
     <link rel="stylesheet" href="scenarios.css?v=3">
     <link rel="stylesheet" href="weather.css?v=2">
     <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -543,6 +543,11 @@
                     <p>Find the best F1 Fantasy lineups within your budget, or get transfer recommendations for your current team.</p>
                 </div>
 
+                <section class="email-updates-panel" data-email-updates data-registration-location="optimizer" aria-labelledby="optimizerRegistrationTitle" hidden>
+                    <div class="email-updates-copy"><span class="email-updates-eyebrow">Beat V13 registration &middot; Open</span><h2 id="optimizerRegistrationTitle">Register free to Beat the Bot</h2><p>Confirm your email before the Round 22 Las Vegas team lock. You will also receive V13, simulation and competition updates.</p></div>
+                    <form class="email-updates-form" novalidate><div class="email-updates-fields"><label class="sr-only">Email address</label><input name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required><button type="submit">Register free</button></div><div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div><label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Register me for Beat V13 and email me V13, simulation and competition updates. I can unsubscribe at any time.</span></label><p class="email-updates-privacy">Handled according to the <a href="/privacy/">privacy policy</a>.</p><p class="email-updates-status" role="status" aria-live="polite"></p></form>
+                </section>
+
                 <!-- Mode toggle -->
                 <div class="optimizer-mode-toggle">
                     <button class="mode-btn active" data-mode="fresh">Build Fresh Lineup</button>
@@ -971,6 +976,10 @@
 
             <!-- Beat V13 Tab -->
             <section class="tab-content" id="tab-beatbot">
+                <section class="email-updates-panel" data-email-updates data-registration-location="beat_v13" aria-labelledby="v13RegistrationTitleTop" hidden>
+                    <div class="email-updates-copy"><span class="email-updates-eyebrow">Beat V13 registration &middot; Open</span><h2 id="v13RegistrationTitleTop">Enter Beat V13 for free</h2><p>Confirm your email before the Round 22 Las Vegas team lock. You will also receive V13, simulation and competition updates.</p></div>
+                    <form class="email-updates-form" novalidate><div class="email-updates-fields"><label class="sr-only">Email address</label><input name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required><button type="submit">Register free</button></div><div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div><label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Register me for Beat V13 and email me V13, simulation and competition updates. I can unsubscribe at any time.</span></label><p class="email-updates-privacy">Handled according to the <a href="/privacy/">privacy policy</a>.</p><p class="email-updates-status" role="status" aria-live="polite"></p></form>
+                </section>
                 <div class="v13-root" id="v13Root" aria-live="polite">
                     <div class="v13-loading">
                         <span class="v13-loading-mark" aria-hidden="true">V13</span>
@@ -1367,8 +1376,8 @@
     </footer>
 
     <script src="scenarios.js?v=3"></script>
-    <script src="app.js?v=121"></script>
-    <script src="members.js?v=4"></script>
-    <script src="engagement.js?v=4"></script>
+    <script src="app.js?v=122"></script>
+    <script src="members.js?v=5"></script>
+    <script src="engagement.js?v=5"></script>
 </body>
 </html>

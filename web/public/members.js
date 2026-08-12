@@ -212,5 +212,9 @@
         if (!panel) return;
         renderLoggedOut();
         loadSession();
+        if (new URLSearchParams(location.search).get('pitwall') === '1') {
+            document.querySelector('.mode-btn[data-mode="transfers"]')?.click();
+            window.setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250);
+        }
     });
 })();

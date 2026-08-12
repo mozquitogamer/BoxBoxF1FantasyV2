@@ -659,9 +659,9 @@ function renderV13() {
         if (typeof gtag === 'function') gtag('event', 'beat_v13_history_open');
     });
     root.querySelector('#v13RegisterButton')?.addEventListener('click', () => {
-        const panel = document.getElementById('emailUpdatesPanel');
+        const panel = document.querySelector('#tab-beatbot [data-email-updates]');
         panel?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        window.setTimeout(() => document.getElementById('emailUpdatesAddress')?.focus(), 450);
+        window.setTimeout(() => panel?.querySelector('input[name="email"]')?.focus(), 450);
         if (typeof gtag === 'function') gtag('event', 'beat_v13_registration_cta_click', { location: 'v13_tab' });
     });
     root.querySelector('.v13-kofi-button')?.addEventListener('click', () => {

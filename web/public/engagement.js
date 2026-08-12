@@ -186,3 +186,181 @@
         initEngagement();
     }
 })();
+
+/* Registration forms placed at the top of high-intent tabs. */
+(function () {
+    'use strict';
+    const deadline = Date.parse('2026-11-21T04:00:00Z');
+
+    async function initInlineRegistrations() {
+        const panels = [...document.querySelectorAll('[data-email-updates]')];
+        if (!panels.length) return;
+        let config;
+        try {
+            const configResponse = await fetch('/data/site_features.json', { cache: 'no-store' });
+            config = (await configResponse.json()).email_updates;
+            if (!config?.enabled) return;
+        } catch (_) { return; }
+
+        try {
+            const statusResponse = await fetch(config.status_endpoint || '/api/email/status', { cache: 'no-store' });
+            const availability = await statusResponse.json().catch(() => ({}));
+            if (statusResponse.ok && availability.available === false) return;
+        } catch (_) {
+            // Static previews do not run the serverless API. Keep the configured
+            // form visible so its layout can still be reviewed locally.
+        }
+
+        panels.forEach(panel => {
+            const form = panel.querySelector('.email-updates-form');
+            const status = panel.querySelector('.email-updates-status');
+            const submit = form?.querySelector('button[type="submit"]');
+            if (!form || !status || !submit) return;
+            panel.hidden = false;
+            if (Date.now() >= deadline) {
+                form.hidden = true;
+                panel.querySelector('.email-updates-eyebrow').textContent = 'Beat V13 registration · Closed';
+                panel.querySelector('.email-updates-copy h2').textContent = 'The grid is locked';
+                panel.querySelector('.email-updates-copy p').textContent = 'Registered entrants will receive the final submission instructions after the season.';
+                return;
+            }
+            form.addEventListener('submit', async event => {
+                event.preventDefault();
+                const email = form.elements.email.value.trim();
+                const consent = form.elements.consent.checked;
+                if (!email || !consent) {
+                    status.textContent = 'Enter your email and confirm your free Beat V13 registration.';
+                    status.dataset.state = 'error';
+                    return;
+                }
+                submit.disabled = true;
+                submit.textContent = 'Sending…';
+                status.textContent = '';
+                try {
+                    const response = await fetch(config.endpoint || '/api/email/subscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, consent, website: form.elements.website.value }),
+                    });
+                    const result = await response.json().catch(() => ({}));
+                    if (!response.ok) throw new Error(result.message || 'Sign-up could not be started.');
+                    form.reset();
+                    status.textContent = result.message || 'Check your inbox and confirm your registration.';
+                    status.dataset.state = 'success';
+                    if (typeof window.gtag === 'function') window.gtag('event', 'beat_v13_registration_started', { location: panel.dataset.registrationLocation });
+                } catch (error) {
+                    status.textContent = error.message || 'Something went wrong. Please try again.';
+                    status.dataset.state = 'error';
+                } finally {
+                    submit.disabled = false;
+                    submit.textContent = 'Register free';
+                }
+            });
+        });
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initInlineRegistrations, { once: true });
+    else initInlineRegistrations();
+})();
+
+/* Site-wide Pit Wall account entry point. Shared by the SPA and SEO pages. */
+(function () {
+    'use strict';
+
+    async function memberRequest(path, options = {}) {
+        const response = await fetch(path, {
+            method: options.method || 'GET',
+            headers: options.body ? { 'Content-Type': 'application/json' } : undefined,
+            body: options.body ? JSON.stringify(options.body) : undefined,
+            credentials: 'same-origin',
+            cache: 'no-store',
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.message || 'That request did not complete.');
+        return data;
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, character => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;',
+        })[character]);
+    }
+
+    function initPitWallAccount() {
+        if (document.getElementById('pitWallAccountButton')) return;
+
+        const button = document.createElement('button');
+        button.id = 'pitWallAccountButton';
+        button.className = 'pit-wall-account-button';
+        button.type = 'button';
+        button.textContent = 'Pit Wall login';
+        button.setAttribute('aria-haspopup', 'dialog');
+        const host = document.querySelector('.header-right') || document.querySelector('.topbar .wrap');
+        if (host) host.appendChild(button);
+        else { button.classList.add('floating'); document.body.appendChild(button); }
+
+        const modal = document.createElement('div');
+        modal.className = 'pit-wall-login-modal';
+        modal.hidden = true;
+        modal.innerHTML = `<div class="pit-wall-login-backdrop" data-pit-wall-close></div><section class="pit-wall-login-dialog" role="dialog" aria-modal="true" aria-labelledby="pitWallLoginTitle"><button class="pit-wall-login-close" type="button" data-pit-wall-close aria-label="Close">&times;</button><div id="pitWallLoginContent"><p>Loading Pit Wall&hellip;</p></div></section>`;
+        document.body.appendChild(modal);
+        const content = modal.querySelector('#pitWallLoginContent');
+        const close = () => { modal.hidden = true; button.focus(); };
+        modal.querySelectorAll('[data-pit-wall-close]').forEach(node => node.addEventListener('click', close));
+        document.addEventListener('keydown', event => { if (event.key === 'Escape' && !modal.hidden) close(); });
+
+        function renderLoggedOut(message = '') {
+            button.textContent = 'Pit Wall login';
+            content.innerHTML = `<span class="pit-wall-login-eyebrow">Member convenience</span><h2 id="pitWallLoginTitle">Sign in to the Pit Wall</h2><p>Use the email connected to your Ko-fi membership or complimentary account. We will send a secure, one-use sign-in link.</p><form id="sitePitWallSignIn"><label for="sitePitWallEmail">Email address</label><div><input id="sitePitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><button type="submit">Email my sign-in link</button></div></form><p class="pit-wall-login-status" role="status" aria-live="polite">${escapeHtml(message)}</p><a class="pit-wall-login-kofi" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join the Pit Wall on Ko-fi</a>`;
+            content.querySelector('#sitePitWallSignIn')?.addEventListener('submit', async event => {
+                event.preventDefault();
+                const form = event.currentTarget;
+                const submit = form.querySelector('button');
+                const status = content.querySelector('.pit-wall-login-status');
+                submit.disabled = true;
+                status.textContent = 'Preparing your secure link…';
+                try {
+                    const result = await memberRequest('/api/members/sign-in', { method: 'POST', body: { email: form.elements.email.value.trim() } });
+                    status.textContent = result.message;
+                    status.dataset.state = 'success';
+                    form.reset();
+                } catch (error) {
+                    status.textContent = error.message;
+                    status.dataset.state = 'error';
+                } finally { submit.disabled = false; }
+            });
+        }
+
+        function renderSignedIn(session) {
+            button.textContent = 'Pit Wall';
+            const active = session.entitlement?.active === true;
+            content.innerHTML = `<span class="pit-wall-login-eyebrow">Pit Wall account</span><h2 id="pitWallLoginTitle">${escapeHtml(session.email || 'Signed in')}</h2><p>${active ? 'Your membership is active. Open the Transfer Advisor to manage your saved and official F1 Fantasy teams.' : 'You are signed in, but this membership is not currently active.'}</p><div class="pit-wall-login-actions"><a href="/?pitwall=1#optimizer">Open my Pit Wall</a><button type="button" id="sitePitWallSignOut">Sign out</button></div>`;
+            content.querySelector('#sitePitWallSignOut')?.addEventListener('click', async () => {
+                await memberRequest('/api/members/sign-out', { method: 'POST' }).catch(() => null);
+                renderLoggedOut('Signed out.');
+            });
+        }
+
+        async function refresh() {
+            try {
+                const session = await memberRequest('/api/members/session');
+                if (session.authenticated) renderSignedIn(session);
+                else renderLoggedOut();
+            } catch (_) { renderLoggedOut('Sign-in is temporarily unavailable.'); }
+        }
+
+        button.addEventListener('click', () => {
+            modal.hidden = false;
+            refresh().finally(() => window.setTimeout(() => content.querySelector('input, a, button')?.focus(), 0));
+            if (typeof window.gtag === 'function') window.gtag('event', 'pit_wall_signin_click', { location: 'site_header' });
+        });
+        refresh();
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPitWallAccount, { once: true });
+    else initPitWallAccount();
+})();
