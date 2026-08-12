@@ -326,7 +326,7 @@ async function getOpponentSnapshot(link, round = 1) {
         return extractSnapshot(payload, link, round);
     } catch (error) {
         if (error.code === 'F1_INCOMPLETE_LINEUP') {
-            console.warn('[f1-sync] incomplete response shape', { round, gameDay, shape: payloadShape(payload) });
+            console.warn('[f1-sync] incomplete response shape', JSON.stringify({ round, gameDay, shape: payloadShape(payload) }));
         }
         throw error;
     }
