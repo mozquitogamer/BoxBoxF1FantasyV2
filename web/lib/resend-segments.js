@@ -3,22 +3,48 @@
 const { resendRequest } = require('./email-subscriptions');
 
 const PIT_WALL_SEGMENT_NAME = 'Pit Wall Members';
+const BEAT_V13_SEGMENT_NAME = 'Beat V13 Updates';
+const segmentCache = new Map();
 
-async function ensurePitWallSegment() {
-    const configured = String(process.env.RESEND_PIT_WALL_SEGMENT_ID || '').trim();
-    if (configured) return configured;
+async function ensureSegment(name, configuredId = '') {
     const apiKey = String(process.env.RESEND_API_KEY || '').trim();
     if (!apiKey) throw new Error('RESEND_API_KEY is not configured');
+    if (segmentCache.has(name)) return segmentCache.get(name);
+
+    const configured = String(configuredId || '').trim();
+    if (configured) {
+        try {
+            const segment = await resendRequest(`/segments/${encodeURIComponent(configured)}`, apiKey);
+            if (segment?.id) {
+                segmentCache.set(name, segment.id);
+                return segment.id;
+            }
+        } catch (_) {
+            // A deleted or rotated segment is recovered by name below.
+        }
+    }
 
     const listed = await resendRequest('/segments', apiKey);
-    const existing = (listed?.data || []).find(segment => segment.name === PIT_WALL_SEGMENT_NAME);
-    if (existing?.id) return existing.id;
+    const existing = (listed?.data || []).find(segment => segment.name === name);
+    if (existing?.id) {
+        segmentCache.set(name, existing.id);
+        return existing.id;
+    }
     const created = await resendRequest('/segments', apiKey, {
         method: 'POST',
-        body: { name: PIT_WALL_SEGMENT_NAME },
+        body: { name },
     });
-    if (!created?.id) throw new Error('Resend did not return a Pit Wall segment id');
+    if (!created?.id) throw new Error(`Resend did not return a segment id for ${name}`);
+    segmentCache.set(name, created.id);
     return created.id;
+}
+
+async function ensurePitWallSegment() {
+    return ensureSegment(PIT_WALL_SEGMENT_NAME, process.env.RESEND_PIT_WALL_SEGMENT_ID);
+}
+
+async function ensureBeatV13Segment() {
+    return ensureSegment(BEAT_V13_SEGMENT_NAME, process.env.RESEND_SIM_UPDATES_SEGMENT_ID);
 }
 
 async function addPitWallContact(email) {
@@ -40,4 +66,11 @@ async function addPitWallContact(email) {
     return segmentId;
 }
 
-module.exports = { PIT_WALL_SEGMENT_NAME, addPitWallContact, ensurePitWallSegment };
+module.exports = {
+    BEAT_V13_SEGMENT_NAME,
+    PIT_WALL_SEGMENT_NAME,
+    ensureSegment,
+    addPitWallContact,
+    ensureBeatV13Segment,
+    ensurePitWallSegment,
+};

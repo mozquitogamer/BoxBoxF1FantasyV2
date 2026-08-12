@@ -14,6 +14,7 @@ const {
 const subscribeHandler = require('../api/email/subscribe');
 const confirmHandler = require('../api/email/confirm');
 const statusHandler = require('../api/email/status');
+const { ensureSegment } = require('../lib/resend-segments');
 
 function mockResponse() {
     return {
@@ -155,8 +156,14 @@ test('confirm handler adds a verified address to the alert segment', async () =>
     const restoreEnv = withEmailEnv();
     const originalFetch = global.fetch;
     const calls = [];
-    global.fetch = async (url, options) => {
+    global.fetch = async (url, options = {}) => {
         calls.push({ url, options });
+        if (url === 'https://api.resend.com/segments/segment_test') {
+            return new Response(JSON.stringify({ id: 'segment_test', name: 'Beat V13 Updates' }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
         return new Response(JSON.stringify({ id: 'contact_test' }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
@@ -171,13 +178,53 @@ test('confirm handler adds a verified address to the alert segment', async () =>
 
         assert.equal(res.statusCode, 200);
         assert.match(res.body, /registered/);
-        assert.equal(calls.length, 1);
-        assert.equal(calls[0].url, 'https://api.resend.com/contacts');
-        const payload = JSON.parse(calls[0].options.body);
+        assert.equal(calls.length, 2);
+        assert.equal(calls[0].url, 'https://api.resend.com/segments/segment_test');
+        assert.equal(calls[1].url, 'https://api.resend.com/contacts');
+        const payload = JSON.parse(calls[1].options.body);
         assert.equal(payload.email, 'fan@example.com');
         assert.deepEqual(payload.segments, [{ id: 'segment_test' }]);
     } finally {
         global.fetch = originalFetch;
         restoreEnv();
+    }
+});
+
+test('recreates a missing configured segment by name', async () => {
+    const previousKey = process.env.RESEND_API_KEY;
+    process.env.RESEND_API_KEY = 're_test';
+    const originalFetch = global.fetch;
+    const calls = [];
+    global.fetch = async (url, options = {}) => {
+        calls.push({ url, options });
+        if (url.endsWith('/segments/deleted_segment')) {
+            return new Response(JSON.stringify({ message: 'Segment not found' }), {
+                status: 404,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+        if (url.endsWith('/segments') && (options.method || 'GET') === 'GET') {
+            return new Response(JSON.stringify({ data: [] }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+        return new Response(JSON.stringify({ id: 'new_segment', name: 'Recovery Test Segment' }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    };
+
+    try {
+        assert.equal(await ensureSegment('Recovery Test Segment', 'deleted_segment'), 'new_segment');
+        assert.deepEqual(calls.map(call => call.url), [
+            'https://api.resend.com/segments/deleted_segment',
+            'https://api.resend.com/segments',
+            'https://api.resend.com/segments',
+        ]);
+    } finally {
+        global.fetch = originalFetch;
+        if (previousKey === undefined) delete process.env.RESEND_API_KEY;
+        else process.env.RESEND_API_KEY = previousKey;
     }
 });

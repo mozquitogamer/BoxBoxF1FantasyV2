@@ -7,6 +7,7 @@ const {
     resendRequest,
     verifySubscriptionToken,
 } = require('../../lib/email-subscriptions');
+const { ensureBeatV13Segment } = require('../../lib/resend-segments');
 
 module.exports = async function confirm(req, res) {
     res.setHeader('Cache-Control', 'no-store');
@@ -41,13 +42,14 @@ module.exports = async function confirm(req, res) {
 
     const encodedEmail = encodeURIComponent(subscription.email);
     try {
+        const segmentId = await ensureBeatV13Segment();
         try {
             await resendRequest('/contacts', config.apiKey, {
                 method: 'POST',
                 body: {
                     email: subscription.email,
                     unsubscribed: false,
-                    segments: [{ id: config.segmentId }],
+                    segments: [{ id: segmentId }],
                 },
             });
         } catch (error) {
@@ -57,7 +59,7 @@ module.exports = async function confirm(req, res) {
                 body: { unsubscribed: false },
             });
             try {
-                await resendRequest(`/contacts/${encodedEmail}/segments/${config.segmentId}`, config.apiKey, {
+                await resendRequest(`/contacts/${encodedEmail}/segments/${encodeURIComponent(segmentId)}`, config.apiKey, {
                     method: 'POST',
                 });
             } catch (segmentError) {
