@@ -3,7 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { extractSnapshot, extractTeams, findTeams, officialGameDay } = require('../lib/f1-fantasy');
-const { normalizeRound } = require('../api/members/f1-sync');
+const { normalizeRound } = require('../api/members/team');
 
 test('extractTeams accepts current-style leaderboard fields and de-duplicates teams', () => {
     const payload = {

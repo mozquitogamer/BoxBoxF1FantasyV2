@@ -4672,6 +4672,7 @@ window.BoxBoxTeamMemory = {
     getSnapshot: getMemberTeamSnapshot,
     apply: applySavedMemberTeam,
     applyOfficial: applyOfficialMemberTeam,
+    currentRound: () => Number(data?.round || 0),
 };
 
 function getCompareBudget() {

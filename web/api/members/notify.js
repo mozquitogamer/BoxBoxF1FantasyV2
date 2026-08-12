@@ -10,6 +10,7 @@ const {
 const { buildRecommendation } = require('../../lib/personalized-recommendations');
 const { resendRequest } = require('../../lib/email-subscriptions');
 const { ensurePitWallSegment } = require('../../lib/resend-segments');
+const { syncOfficialLink } = require('./team');
 
 function inFilter(values) {
     return `in.(${values.map(value => String(value).replace(/[^a-zA-Z0-9_-]/g, '')).join(',')})`;
@@ -18,6 +19,37 @@ function inFilter(values) {
 function phaseLabel(phase) {
     return ({ pre_fp: 'Early thoughts', post_fp: 'Post-FP', post_quali: 'Post-qualifying' })[phase]
         || String(phase).replace(/_/g, ' ');
+}
+
+function normalizedName(value) {
+    return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function officialTeamForRecommendation(snapshot, predictions, fallback) {
+    if (!snapshot?.assets?.length) return fallback;
+    const drivers = new Map((predictions.drivers || []).flatMap(item => [
+        [normalizedName(item.name), String(item.driver_id)],
+        [normalizedName(item.driver_id), String(item.driver_id)],
+    ]));
+    const constructors = new Map((predictions.constructors || []).flatMap(item => [
+        [normalizedName(item.name), String(item.constructor_id)],
+        [normalizedName(item.full_name), String(item.constructor_id)],
+        [normalizedName(item.constructor_id), String(item.constructor_id)],
+    ]));
+    const assets = snapshot.assets.map(item => {
+        const lookup = item.asset_type === 'constructor' ? constructors : drivers;
+        const assetId = lookup.get(normalizedName(item.name)) || lookup.get(normalizedName(item.asset_id));
+        return assetId ? { ...item, asset_id: assetId } : null;
+    }).filter(Boolean);
+    const driverCount = assets.filter(item => item.asset_type === 'driver').length;
+    const constructorCount = assets.filter(item => item.asset_type === 'constructor').length;
+    if (driverCount !== 5 || constructorCount !== 2) return fallback;
+    return {
+        ...fallback,
+        budget_millions: snapshot.budget_millions ?? fallback.budget_millions,
+        free_transfers: snapshot.free_transfers ?? fallback.free_transfers,
+        assets,
+    };
 }
 
 function emailBody(profile, recommendation, origin) {
@@ -137,6 +169,10 @@ module.exports = async function notify(req, res) {
         }
 
         const usersFilter = inFilter(activeUserIds);
+        const officialLinks = await restRequest(`f1_team_links?user_id=${usersFilter}&status=eq.active&select=*`, { service: true }).catch(() => []);
+        for (const link of officialLinks || []) {
+            await syncOfficialLink(link, predictions.round).catch(error => console.error('Official-team refresh failed:', error.message));
+        }
         const [profiles, teams] = await Promise.all([
             restRequest(`member_profiles?user_id=${usersFilter}&email_simulation_updates=eq.true&select=user_id,email,display_name`, { service: true }),
             restRequest(`saved_teams?user_id=${usersFilter}&is_default=eq.true&select=id,user_id,name,budget_millions,free_transfers`, { service: true }),
@@ -145,7 +181,12 @@ module.exports = async function notify(req, res) {
         const assets = teamIds.length
             ? await restRequest(`saved_team_assets?team_id=${inFilter(teamIds)}&select=team_id,asset_type,asset_id,slot,is_boosted`, { service: true })
             : [];
+        const officialSnapshots = await restRequest(
+            `f1_team_snapshots?user_id=${usersFilter}&season=eq.${Number(predictions.season || 2026)}&round=eq.${Number(predictions.round)}&select=user_id,budget_millions,free_transfers,assets,captured_at`,
+            { service: true },
+        ).catch(() => []);
         const profilesByUser = new Map((profiles || []).map(profile => [profile.user_id, profile]));
+        const officialByUser = new Map((officialSnapshots || []).map(snapshot => [snapshot.user_id, snapshot]));
         const assetsByTeam = new Map();
         for (const asset of assets || []) {
             if (!assetsByTeam.has(asset.team_id)) assetsByTeam.set(asset.team_id, []);
@@ -172,7 +213,12 @@ module.exports = async function notify(req, res) {
                 continue;
             }
 
-            const recommendation = buildRecommendation(predictions, { ...team, assets: teamAssets });
+            const recommendationTeam = officialTeamForRecommendation(
+                officialByUser.get(team.user_id),
+                predictions,
+                { ...team, assets: teamAssets },
+            );
+            const recommendation = buildRecommendation(predictions, recommendationTeam);
             const recommendationRows = await restRequest('member_recommendations?on_conflict=event_id,team_id', {
                 service: true,
                 method: 'POST',
@@ -235,3 +281,4 @@ module.exports = async function notify(req, res) {
 
 module.exports.emailBody = emailBody;
 module.exports.inFilter = inFilter;
+module.exports.officialTeamForRecommendation = officialTeamForRecommendation;

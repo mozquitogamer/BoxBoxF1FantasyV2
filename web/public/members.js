@@ -141,12 +141,12 @@
             button.disabled = true;
             results.innerHTML = '<span>Searching the BoxBox league…</span>';
             try {
-                const data = await request(`/api/members/f1-link?q=${encodeURIComponent(form.elements.team_name.value.trim())}`);
+                const data = await request(`/api/members/team?action=f1-search&q=${encodeURIComponent(form.elements.team_name.value.trim())}`);
                 results.innerHTML = data.teams.length ? data.teams.map(team => `<button type="button" data-team-id="${escapeHtml(team.id)}" data-team-slot="${team.slot}"><strong>${escapeHtml(team.name)} · T${team.slot}</strong><small>${escapeHtml(team.manager || '')}${team.rank ? ` · League rank ${team.rank}` : ''}</small></button>`).join('') : '<span>No matching team found. Check the spelling and confirm you joined our league.</span>';
                 results.querySelectorAll('button').forEach(resultButton => resultButton.addEventListener('click', async () => {
                     resultButton.disabled = true;
                     try {
-                        const linked = await request('/api/members/f1-link', { method: 'POST', body: { official_team_id: resultButton.dataset.teamId, team_slot: Number(resultButton.dataset.teamSlot) } });
+                        const linked = await request('/api/members/team', { method: 'POST', body: { action: 'f1-link', official_team_id: resultButton.dataset.teamId, team_slot: Number(resultButton.dataset.teamSlot) } });
                         status(linked.message, 'success');
                         await loadSession(false);
                     } catch (error) { status(error.message, 'error'); resultButton.disabled = false; }
@@ -160,7 +160,7 @@
             button.disabled = true;
             status('Syncing your official lineup…');
             try {
-                const result = await request('/api/members/f1-sync', { method: 'POST', body: {} });
+                const result = await request('/api/members/team', { method: 'POST', body: { action: 'f1-sync', round: window.BoxBoxTeamMemory?.currentRound() } });
                 status(result.message, 'success');
                 await loadSession(true);
             } catch (error) { status(error.message, 'error'); }
@@ -170,7 +170,7 @@
         panel.querySelector('#pitWallDisconnectF1')?.addEventListener('click', async event => {
             event.currentTarget.disabled = true;
             try {
-                const result = await request('/api/members/f1-link', { method: 'DELETE', body: {} });
+                const result = await request('/api/members/team', { method: 'POST', body: { action: 'f1-unlink' } });
                 status(result.message, 'success');
                 await loadSession(false);
             } catch (error) { status(error.message, 'error'); event.currentTarget.disabled = false; }
