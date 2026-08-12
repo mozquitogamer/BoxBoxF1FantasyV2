@@ -51,10 +51,14 @@ async function request(path) {
     return readResponse(response);
 }
 
-function arrays(value) {
-    if (Array.isArray(value)) return [value, ...value.flatMap(arrays)];
-    if (!value || typeof value !== 'object') return [];
-    return Object.values(value).flatMap(arrays);
+function arrayEntries(value, path = [], found = []) {
+    if (Array.isArray(value)) {
+        found.push({ items: value, path });
+        value.forEach((item, index) => arrayEntries(item, [...path, String(index)], found));
+    } else if (value && typeof value === 'object') {
+        Object.entries(value).forEach(([key, item]) => arrayEntries(item, [...path, key], found));
+    }
+    return found;
 }
 
 function objects(value, found = []) {
@@ -71,6 +75,12 @@ function first(object, keys) {
     for (const key of keys) {
         const value = object?.[key];
         if (value !== undefined && value !== null && value !== '') return value;
+    }
+    if (!object || typeof object !== 'object') return null;
+    const wanted = new Set(keys.map(key => String(key).toLowerCase().replace(/[^a-z0-9]/g, '')));
+    for (const [key, value] of Object.entries(object)) {
+        const canonical = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (wanted.has(canonical) && value !== undefined && value !== null && value !== '') return value;
     }
     return null;
 }
@@ -137,30 +147,132 @@ function findTeams(teams, query) {
     return teams.filter(team => `${team.name} ${team.manager}`.toLowerCase().includes(needle)).slice(0, 12).map(safeTeam);
 }
 
-function mapAsset(item, index) {
-    const typeText = String(first(item, ['asset_type', 'assetType', 'type', 'player_type', 'playerType']) || '').toLowerCase();
-    const constructor = /constructor|team/.test(typeText) || first(item, ['is_constructor', 'isConstructor']) === true;
-    const name = normalizeName(first(item, ['display_name', 'displayName', 'full_name', 'fullName', 'name', 'player_name', 'playerName', 'team_name', 'teamName']));
-    const id = String(first(item, ['asset_id', 'assetId', 'player_id', 'playerId', 'team_id', 'teamId', 'id']) || '').trim();
+const CONSTRUCTOR_NAMES = new Set([
+    'alpine', 'aston martin', 'audi', 'cadillac', 'ferrari', 'haas', 'mclaren',
+    'mercedes', 'racing bulls', 'red bull', 'red bull racing', 'williams',
+]);
+
+function booleanValue(value) {
+    if (value === true || value === 1 || value === '1') return true;
+    if (value === false || value === 0 || value === '0') return false;
+    const text = String(value || '').toLowerCase();
+    if (text === 'true' || text === 'yes') return true;
+    if (text === 'false' || text === 'no') return false;
+    return null;
+}
+
+function constructorName(name) {
+    const raw = normalizeName(name).toLowerCase();
+    if ([...CONSTRUCTOR_NAMES].some(team => raw === team || raw.includes(team))) return true;
+    const normalized = raw
+        .replace(/\b(f1|formula one|formula 1|racing|team|scuderia|oracle|mastercard|atlassian|revolut|bwt|tgr|visa cash app|aramco|hp)\b/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    return [...CONSTRUCTOR_NAMES].some(team => normalized === team || normalized.includes(team));
+}
+
+function mapAsset(item, index, path = []) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return null;
+    const nested = first(item, ['player', 'driver', 'constructor', 'asset', 'details']);
+    const detail = nested && typeof nested === 'object' && !Array.isArray(nested) ? nested : {};
+    const read = keys => first(item, keys) ?? first(detail, keys);
+    const typeText = String(read([
+        'asset_type', 'type', 'player_type', 'position_type', 'position_name', 'role', 'category',
+    ]) || '').toLowerCase();
+    const pathText = path.join(' ').toLowerCase();
+    const constructorPath = path.some(segment => /constructor/i.test(segment) || /^teams?$/i.test(segment));
+    const driverPath = path.some(segment => /driver/i.test(segment));
+    const name = normalizeName(read([
+        'player_name', 'driver_name', 'constructor_name', 'display_name', 'full_name', 'short_name', 'name', 'team_name',
+    ]));
+    const id = String(read([
+        'player_id', 'driver_id', 'constructor_id', 'asset_id', 'team_id', 'id',
+    ]) || '').trim();
     if (!name || !id) return null;
+    const selected = booleanValue(read(['is_selected', 'selected', 'is_picked', 'picked', 'is_in_team', 'in_team']));
+    if (selected === false) return null;
+    const explicitConstructor = booleanValue(read(['is_constructor'])) === true;
+    const explicitDriver = booleanValue(read(['is_driver'])) === true;
+    let assetType = null;
+    if (/constructor|team/.test(typeText) || explicitConstructor) assetType = 'constructor';
+    else if (/driver|racer/.test(typeText) || explicitDriver) assetType = 'driver';
+    else if (constructorName(name)) assetType = 'constructor';
+    else if (constructorPath) assetType = 'constructor';
+    else if (driverPath) assetType = 'driver';
     return {
-        asset_type: constructor ? 'constructor' : 'driver',
+        asset_type: assetType,
         asset_id: id,
         name,
-        slot: Number(first(item, ['slot', 'position', 'sequence']) || index + 1),
-        is_boosted: Boolean(first(item, ['is_boosted', 'isBoosted', 'captain', 'is_captain', 'isCaptain'])),
+        slot: Number(read(['slot', 'position', 'sequence']) || index + 1),
+        is_boosted: Boolean(read(['is_boosted', 'captain', 'is_captain'])),
     };
+}
+
+function uniqueAssets(items) {
+    const seen = new Set();
+    return items.filter(item => {
+        const key = `${item.asset_type}:${item.asset_id}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+function extractAssets(payload) {
+    const candidates = arrayEntries(payload).map(({ items, path }) => {
+        let mapped = items.map((item, index) => mapAsset(item, index, path)).filter(Boolean);
+        const known = mapped.filter(item => item.asset_type);
+        const knownDrivers = known.filter(item => item.asset_type === 'driver').length;
+        const knownConstructors = known.filter(item => item.asset_type === 'constructor').length;
+        if (mapped.length === 7 && knownDrivers === 0 && knownConstructors === 2) {
+            mapped = mapped.map(item => item.asset_type ? item : { ...item, asset_type: 'driver' });
+        }
+        if (mapped.length === 7 && knownDrivers === 5 && knownConstructors === 0) {
+            mapped = mapped.map(item => item.asset_type ? item : { ...item, asset_type: 'constructor' });
+        }
+        if (!known.length && mapped.length === 5) mapped = mapped.map(item => ({ ...item, asset_type: 'driver' }));
+        if (!known.length && mapped.length === 2) mapped = mapped.map(item => ({ ...item, asset_type: 'constructor' }));
+
+        const pathText = path.join(' ').toLowerCase();
+        const score = (/lineup|picked|selection|playerteam|squad/.test(pathText) ? 20 : 0)
+            + (mapped.length === 7 ? 10 : 0)
+            + mapped.filter(item => item.asset_type).length;
+        return { mapped: uniqueAssets(mapped), score };
+    }).filter(candidate => candidate.mapped.length);
+
+    const complete = candidates
+        .filter(({ mapped }) => mapped.filter(item => item.asset_type === 'driver').length >= 5
+            && mapped.filter(item => item.asset_type === 'constructor').length >= 2)
+        .sort((a, b) => b.score - a.score)[0];
+    if (complete) {
+        return [
+            ...complete.mapped.filter(item => item.asset_type === 'driver').slice(0, 5),
+            ...complete.mapped.filter(item => item.asset_type === 'constructor').slice(0, 2),
+        ];
+    }
+
+    const driverSet = candidates
+        .filter(({ mapped }) => mapped.filter(item => item.asset_type === 'driver').length >= 5)
+        .sort((a, b) => b.score - a.score)[0];
+    const constructorSet = candidates
+        .filter(({ mapped }) => mapped.filter(item => item.asset_type === 'constructor').length >= 2)
+        .sort((a, b) => b.score - a.score)[0];
+    if (!driverSet || !constructorSet) return [];
+    return uniqueAssets([
+        ...driverSet.mapped.filter(item => item.asset_type === 'driver').slice(0, 5),
+        ...constructorSet.mapped.filter(item => item.asset_type === 'constructor').slice(0, 2),
+    ]);
 }
 
 function extractSnapshot(payload, link, round) {
     const allObjects = objects(payload);
-    const assetArrays = arrays(payload).filter(items => items.length >= 5 && items.length <= 12);
-    let assets = [];
-    for (const items of assetArrays) {
-        const mapped = items.map(mapAsset).filter(Boolean);
-        const drivers = mapped.filter(item => item.asset_type === 'driver').length;
-        const constructors = mapped.filter(item => item.asset_type === 'constructor').length;
-        if (mapped.length >= 7 && drivers >= 5 && constructors >= 2) { assets = mapped.slice(0, 8); break; }
+    const assets = extractAssets(payload);
+    const drivers = assets.filter(item => item.asset_type === 'driver').length;
+    const constructors = assets.filter(item => item.asset_type === 'constructor').length;
+    if (drivers !== 5 || constructors !== 2) {
+        const error = new Error(`F1 Fantasy returned an incomplete lineup (${drivers} drivers and ${constructors} constructors). Your saved team was not changed.`);
+        error.code = 'F1_INCOMPLETE_LINEUP';
+        throw error;
     }
     const summary = allObjects.find(row => String(first(row, ['team_id', 'teamId', 'id']) || '') === String(link.official_team_id)) || allObjects[0] || {};
     return {

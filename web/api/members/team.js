@@ -40,7 +40,17 @@ async function requirePaidMember(memberSession) {
 
 async function syncOfficialLink(link, round) {
     try {
-        const snapshot = await getOpponentSnapshot(link, round);
+        let snapshot;
+        let syncedRound = round;
+        let currentRoundError = null;
+        try {
+            snapshot = await getOpponentSnapshot(link, round);
+        } catch (error) {
+            if (error.code !== 'F1_INCOMPLETE_LINEUP' || round <= 1) throw error;
+            currentRoundError = error;
+            syncedRound = round - 1;
+            snapshot = await getOpponentSnapshot(link, syncedRound);
+        }
         await restRequest('f1_team_snapshots?on_conflict=user_id,season,round', {
             service: true,
             method: 'POST',
@@ -50,9 +60,13 @@ async function syncOfficialLink(link, round) {
         await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(link.user_id)}`, {
             service: true,
             method: 'PATCH',
-            body: { status: 'active', last_synced_at: new Date().toISOString(), last_error: null },
+            body: {
+                status: 'active',
+                last_synced_at: new Date().toISOString(),
+                last_error: currentRoundError ? `Round ${round} is not public yet; using the locked Round ${syncedRound} lineup.` : null,
+            },
         });
-        return snapshot;
+        return { snapshot, requestedRound: round, syncedRound, usedPreviousRound: syncedRound !== round };
     } catch (error) {
         await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(link.user_id)}`, {
             service: true,
@@ -128,8 +142,11 @@ module.exports = async function team(req, res) {
             if (!round) return res.status(400).json({ ok: false, message: 'The current round could not be determined.' });
             const links = await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(memberSession.user.id)}&status=eq.active&select=*`, { service: true });
             if (!links?.[0]) return res.status(404).json({ ok: false, message: 'Link an official team first.' });
-            const snapshot = await syncOfficialLink(links[0], round);
-            return res.status(200).json({ ok: true, message: `Official team synced for Round ${round}.`, snapshot });
+            const result = await syncOfficialLink(links[0], round);
+            const message = result.usedPreviousRound
+                ? `Your latest public official lineup (Round ${result.syncedRound}) has been loaded. Round ${round} stays hidden until the F1 deadline.`
+                : `Official team synced for Round ${round}.`;
+            return res.status(200).json({ ok: true, message, ...result });
         }
         const assets = normalizeAssets(body.assets);
         if (assets.length !== 7 || assets.some(item => !item.asset_id || !Number.isInteger(item.slot))) {
@@ -151,8 +168,11 @@ module.exports = async function team(req, res) {
         return res.status(200).json({ ok: true, message: 'Team saved. Future simulation emails will use this lineup.' });
     } catch (error) {
         console.error('Could not save Pit Wall team:', error.message);
-        const status = /active Pit Wall membership/i.test(error.message) ? 403 : 500;
-        return res.status(status).json({ ok: false, message: status === 403 ? error.message : 'We could not save your team. Please try again.' });
+        const status = /active Pit Wall membership/i.test(error.message) ? 403 : error.code === 'F1_INCOMPLETE_LINEUP' ? 502 : 500;
+        const message = status === 403 || error.code === 'F1_INCOMPLETE_LINEUP'
+            ? error.message
+            : 'We could not save your team. Please try again.';
+        return res.status(status).json({ ok: false, message });
     }
 };
 

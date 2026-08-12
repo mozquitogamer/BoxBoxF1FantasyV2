@@ -162,8 +162,8 @@
             status('Syncing your official lineup…');
             try {
                 const result = await request('/api/members/team/', { method: 'POST', body: { action: 'f1-sync', round: window.BoxBoxTeamMemory?.currentRound() } });
-                status(result.message, 'success');
                 await loadSession(true);
+                status(result.message, 'success');
             } catch (error) { status(error.message, 'error'); }
             finally { button.disabled = false; }
         });

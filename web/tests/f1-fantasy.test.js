@@ -46,6 +46,50 @@ test('extractSnapshot finds five drivers and two constructors', () => {
     assert.equal(snapshot.assets.filter(item => item.asset_type === 'constructor').length, 2);
 });
 
+test('extractSnapshot accepts PascalCase drivers and constructors in separate sections', () => {
+    const payload = {
+        Data: {
+            PlayerTeam: {
+                Drivers: ['A', 'B', 'C', 'D', 'E'].map((name, index) => ({
+                    PlayerId: `driver-${index}`,
+                    PlayerName: name,
+                    PositionName: 'Driver',
+                    Position: index + 1,
+                })),
+                Constructors: [
+                    { TeamId: 'team-1', TeamName: 'Ferrari', PositionName: 'Constructor', Position: 1 },
+                    { TeamId: 'team-2', TeamName: 'Mercedes', PositionName: 'Constructor', Position: 2 },
+                ],
+            },
+        },
+    };
+    const link = { user_id: 'user', official_team_id: 'official', official_team_name: 'My Team', team_slot: 1 };
+    const snapshot = extractSnapshot(payload, link, 14);
+    assert.equal(snapshot.assets.length, 7);
+    assert.equal(snapshot.assets.filter(item => item.asset_type === 'driver').length, 5);
+    assert.equal(snapshot.assets.filter(item => item.asset_type === 'constructor').length, 2);
+});
+
+test('extractSnapshot refuses to turn an empty F1 response into a saved lineup', () => {
+    const link = { user_id: 'user', official_team_id: 'official', official_team_name: 'My Team', team_slot: 1 };
+    assert.throws(
+        () => extractSnapshot({ Data: { PlayerTeam: [] } }, link, 14),
+        error => error.code === 'F1_INCOMPLETE_LINEUP' && /saved team was not changed/i.test(error.message),
+    );
+});
+
+test('extractSnapshot unwraps nested player records and recognizes constructor names', () => {
+    const picked = [
+        ...['A', 'B', 'C', 'D', 'E'].map((name, index) => ({ player: { id: `d${index}`, displayName: name } })),
+        { player: { id: 'c1', displayName: 'Visa Cash App Racing Bulls' } },
+        { player: { id: 'c2', displayName: 'Aston Martin Aramco F1 Team' } },
+    ];
+    const link = { user_id: 'user', official_team_id: 'official', official_team_name: 'My Team', team_slot: 1 };
+    const snapshot = extractSnapshot({ PlayerTeam: { PickedPlayers: picked } }, link, 13);
+    assert.equal(snapshot.assets.filter(item => item.asset_type === 'driver').length, 5);
+    assert.equal(snapshot.assets.filter(item => item.asset_type === 'constructor').length, 2);
+});
+
 test('round validation rejects unsafe values', () => {
     assert.equal(normalizeRound(12), 12);
     assert.equal(normalizeRound('24'), 24);
