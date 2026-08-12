@@ -81,11 +81,11 @@ async function sendWelcome(email, messageId) {
             html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#141821">
                 <p style="font-weight:700">BoxBox<span style="color:#e10600">F1</span>Fantasy · Pit Wall</p>
                 <h1 style="font-size:24px">Your member tools are ready</h1>
-                <p>Thank you for supporting the channel. Sign in with this same Ko-fi email, save your current F1 Fantasy team once, and future simulation updates will include a suggestion based on your lineup.</p>
-                <p><a href="${origin}/#optimizer" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 18px;border-radius:7px;font-weight:700">Save my team</a></p>
+                <p>Thank you for supporting the channel. Open Pit Wall with this same Ko-fi email, choose <strong>Create or reset password</strong>, then save your current F1 Fantasy team once. Future simulation updates will include a suggestion based on your lineup.</p>
+                <p><a href="${origin}/?pitwall=1#optimizer" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 18px;border-radius:7px;font-weight:700">Create my Pit Wall password</a></p>
                 <p style="color:#667085;font-size:13px">All public predictions and tools remain free. Pit Wall membership adds memory, delivery and personalization.</p>
             </div>`,
-            text: `Welcome to the BoxBox Pit Wall.\n\nSign in with this same Ko-fi email and save your team: ${origin}/#optimizer\n\nFuture simulation updates will include a suggestion based on your lineup.`,
+            text: `Welcome to the BoxBox Pit Wall.\n\nOpen Pit Wall with this same Ko-fi email, choose Create or reset password, then save your team: ${origin}/?pitwall=1#optimizer\n\nFuture simulation updates will include a suggestion based on your lineup.`,
         },
     });
 }

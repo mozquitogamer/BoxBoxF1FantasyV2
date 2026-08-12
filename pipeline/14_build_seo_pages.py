@@ -923,7 +923,7 @@ def page_head(
 <link rel="author" type="text/plain" href="/humans.txt">
 <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/picks/picks.css">
-<link rel="stylesheet" href="/engagement.css?v=4">
+<link rel="stylesheet" href="/engagement.css?v=5">
 {extra_ld}
 </head>
 <body>
@@ -978,7 +978,7 @@ FOOTER = f"""</main>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
-<script src="/engagement.js?v=7"></script>
+<script src="/engagement.js?v=8"></script>
 </body>
 </html>
 """
@@ -5475,7 +5475,7 @@ STATIC_PAGES = [
             "<p>BoxBox publishes current-round F1 Fantasy projections for every driver and constructor, race-week pick summaries, a lineup optimizer, Team Compare, transfer tools, budget/value signals, and an accuracy record for completed rounds. The goal is to turn a large amount of race, practice, price and reliability data into decisions a fantasy player can inspect rather than a single unexplained pick.</p>"
             "<h2>Free mailing list and Pit Wall membership</h2>"
             '<p><strong>Beat V13 registration is free and email-only.</strong> Confirming an address enters the Beat V13 challenge and joins the mailing list for V13 decisions, simulation updates and competition instructions. It does not create a site account and does not require payment.</p>'
-            '<p><strong>The public predictions and tools remain free with no login.</strong> Pit Wall is a separate, optional $5/month membership purchased through <a href="https://ko-fi.com/boxboxf1fantasy/tiers" rel="noopener">Ko-fi</a>. Members sign in with the exact email used on Ko-fi to remember and sync an official F1 Fantasy team and receive personalized suggestions when new simulations arrive.</p>'
+            '<p><strong>The public predictions and tools remain free with no login.</strong> Pit Wall is a separate, optional $5/month membership purchased through <a href="https://ko-fi.com/boxboxf1fantasy/tiers" rel="noopener">Ko-fi</a>. Members create a password once using the exact email used on Ko-fi, then sign in normally to remember and sync an official F1 Fantasy team and receive personalized suggestions when new simulations arrive.</p>'
             "<h2>Editorial authorship</h2>"
             '<p>Analysis, guides and generated race pages carry the <strong>BoxBoxF1Fantasy</strong> byline because they are published and maintained as part of this independent project rather than attributed to a fictional individual contributor. Recurring tables, rankings and scorecards are generated programmatically from the site\'s versioned prediction and result data. Longer explanations are assembled around those outputs, sources and documented model behavior. The site maintainer is responsible for the final published pages, corrections and disclosures.</p>'
             '<p>Each editorial byline links here for ownership and contact context and to the <a href="/methodology/">Methodology</a> for the production process, data layers, uncertainty and limitations.</p>'
@@ -5585,7 +5585,7 @@ STATIC_PAGES = [
             "<h2>Information we collect</h2>"
             "<p>Most BoxBoxF1Fantasy features do not require an account. If you email us, we receive the email address and any information you choose to include. If you register for Beat V13, we process your email address, confirmation status and later any team identifier, score screenshot or verification information you submit for the challenge.</p>"
             "<h2>Pit Wall member accounts</h2>"
-            "<p>Pit Wall membership is purchased through Ko-fi. For member access, we process the payment email, tier name, payment date, entitlement status and Ko-fi transaction identifiers supplied by Ko-fi. If you use member tools, we also store the F1 Fantasy team, budget, free-transfer count, email preferences and personalized recommendations you choose to associate with your account. Supabase provides passwordless authentication and database hosting; Vercel hosts the website and server functions; Resend delivers sign-in and simulation emails. Private team records use row-level access controls so an authenticated member can access only their own records.</p>"
+            "<p>Pit Wall membership is purchased through Ko-fi. For member access, we process the payment email, tier name, payment date, entitlement status and Ko-fi transaction identifiers supplied by Ko-fi. If you use member tools, we also store the F1 Fantasy team, budget, free-transfer count, email preferences and personalized recommendations you choose to associate with your account. Supabase securely hashes and verifies Pit Wall passwords and provides database hosting; BoxBoxF1Fantasy never stores readable passwords. Vercel hosts the website and server functions; Resend delivers password-recovery and simulation emails. Private team records use row-level access controls so an authenticated member can access only their own records.</p>"
             "<p>Ko-fi webhooks report successful payments but not cancellations. Access therefore expires automatically after the latest paid period unless a new payment is received, with a short processing grace period. We may reconcile current status against Ko-fi's member records. Member sign-in uses secure, HttpOnly session cookies; the browser does not receive database administrator credentials or decide whether an entitlement is paid.</p>"
             "<h2>Beat V13 registration and email updates</h2>"
             "<p>Registration uses a double-opt-in process: submitting an address sends a time-limited confirmation link, and the address is registered only after that link is opened before the stated deadline. Resend processes confirmation messages, subscriber records, delivery events and unsubscribes on our behalf. Registered entrants also receive V13, simulation and competition updates. Every broadcast includes an unsubscribe link, and you can ask us to remove your address.</p>"

@@ -1,9 +1,8 @@
 'use strict';
 
-const crypto = require('node:crypto');
-
 const {
-    authAdminRequest,
+    authPublicRequest,
+    clearSessionCookies,
     getMemberConfig,
     isAllowedOrigin,
     isEntitlementActive,
@@ -11,11 +10,10 @@ const {
     normalizeEmail,
     parseBody,
     restRequest,
+    setSessionCookies,
 } = require('../../lib/member-system');
-const { resendRequest } = require('../../lib/email-subscriptions');
 
-const GENERIC_MESSAGE = 'If that address has an active Pit Wall membership, a secure sign-in link is on its way.';
-const MIN_LINK_INTERVAL_MS = 15 * 60 * 1000;
+const GENERIC_ERROR = 'That email or password was not accepted.';
 
 module.exports = async function signIn(req, res) {
     res.setHeader('Cache-Control', 'no-store');
@@ -33,72 +31,35 @@ module.exports = async function signIn(req, res) {
         return res.status(403).json({ ok: false, message: 'Request origin was not accepted.' });
     }
 
-    const email = normalizeEmail(parseBody(req).email);
-    if (!isValidEmail(email)) return res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    const body = parseBody(req);
+    const email = normalizeEmail(body.email);
+    const password = typeof body.password === 'string' ? body.password : '';
+    if (!isValidEmail(email) || password.length < 8 || password.length > 128) {
+        return res.status(401).json({ ok: false, message: GENERIC_ERROR });
+    }
 
     try {
-        const profiles = await restRequest(
-            `member_profiles?email=eq.${encodeURIComponent(email)}&select=user_id,email,magic_link_sent_at&limit=1`,
-            { service: true },
-        );
-        const profile = profiles?.[0];
-        if (!profile) return res.status(202).json({ ok: true, message: GENERIC_MESSAGE });
-
+        const session = await authPublicRequest('/token?grant_type=password', {
+            method: 'POST',
+            body: { email, password },
+        });
+        if (!session?.access_token || !session?.refresh_token || !session?.user?.id) {
+            throw new Error('Supabase returned no password session');
+        }
         const entitlements = await restRequest(
-            `member_entitlements?user_id=eq.${encodeURIComponent(profile.user_id)}&select=status,current_period_end`,
-            { service: true },
+            `member_entitlements?user_id=eq.${encodeURIComponent(session.user.id)}&select=status,current_period_end`,
+            { accessToken: session.access_token },
         );
         if (!(entitlements || []).some(item => isEntitlementActive(item))) {
-            return res.status(202).json({ ok: true, message: GENERIC_MESSAGE });
+            await authPublicRequest('/logout', { method: 'POST', accessToken: session.access_token }).catch(() => null);
+            clearSessionCookies(res);
+            return res.status(403).json({ ok: false, message: 'This Pit Wall membership is not currently active.' });
         }
-
-        const lastSent = Date.parse(profile.magic_link_sent_at || '');
-        if (Number.isFinite(lastSent) && Date.now() - lastSent < MIN_LINK_INTERVAL_MS) {
-            return res.status(202).json({ ok: true, message: GENERIC_MESSAGE });
-        }
-
-        const link = await authAdminRequest('/admin/generate_link', {
-            method: 'POST',
-            body: {
-                type: 'magiclink',
-                email,
-                redirect_to: `${config.siteOrigin}/api/members/callback`,
-            },
-        });
-        const properties = link?.properties || link || {};
-        const tokenHash = properties.hashed_token || properties.token_hash;
-        if (!tokenHash) throw new Error('Supabase did not return a hashed sign-in token');
-
-        const callbackUrl = `${config.siteOrigin}/api/members/callback?token_hash=${encodeURIComponent(tokenHash)}&type=magiclink`;
-        const emailKey = crypto.createHash('sha256').update(email).digest('hex').slice(0, 32);
-        const intervalBucket = Math.floor(Date.now() / MIN_LINK_INTERVAL_MS);
-        await resendRequest('/emails', process.env.RESEND_API_KEY, {
-            method: 'POST',
-            headers: { 'Idempotency-Key': `pit-wall-sign-in-${emailKey}-${intervalBucket}` },
-            body: {
-                from: process.env.RESEND_FROM,
-                to: [email],
-                subject: 'Your BoxBox Pit Wall sign-in link',
-                html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#141821">
-                    <p style="font-weight:700">BoxBox<span style="color:#e10600">F1</span>Fantasy · Pit Wall</p>
-                    <h1 style="font-size:24px">Sign in to your saved team</h1>
-                    <p>Use this secure link to open your Pit Wall account, remember your current F1 Fantasy team and manage personalized simulation alerts.</p>
-                    <p><a href="${callbackUrl}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 18px;border-radius:7px;font-weight:700">Sign in to the Pit Wall</a></p>
-                    <p style="color:#667085;font-size:13px">The link expires automatically and can only be used once. If you did not request it, ignore this email.</p>
-                </div>`,
-                text: `Sign in to your BoxBox Pit Wall account:\n\n${callbackUrl}\n\nThe link expires automatically and can only be used once. If you did not request it, ignore this email.`,
-            },
-        });
-
-        await restRequest(`member_profiles?user_id=eq.${encodeURIComponent(profile.user_id)}`, {
-            service: true,
-            method: 'PATCH',
-            prefer: 'return=minimal',
-            body: { magic_link_sent_at: new Date().toISOString() },
-        });
-        return res.status(202).json({ ok: true, message: GENERIC_MESSAGE });
+        setSessionCookies(res, session);
+        return res.status(200).json({ ok: true, message: 'Signed in.' });
     } catch (error) {
-        console.error('Could not create Pit Wall sign-in link:', error.message);
-        return res.status(202).json({ ok: true, message: GENERIC_MESSAGE });
+        clearSessionCookies(res);
+        console.error('Pit Wall password sign-in failed:', error.message);
+        return res.status(401).json({ ok: false, message: GENERIC_ERROR });
     }
 };

@@ -315,23 +315,33 @@
 
         function renderLoggedOut(message = '') {
             button.textContent = 'Pit Wall member sign-in';
-            content.innerHTML = `<span class="pit-wall-login-eyebrow">Paid member account · $5/month</span><h2 id="pitWallLoginTitle">Sign in to the Pit Wall</h2><p>This is for active Pit Wall members. Use the exact email attached to your Ko-fi membership and we will send a secure, one-use sign-in link.</p><p class="pit-wall-login-note"><strong>Looking for Beat V13?</strong> Free Beat V13 registration is separate and does not create a Pit Wall account. <a href="/#beatbot">Enter Beat V13 free</a>.</p><form id="sitePitWallSignIn"><label for="sitePitWallEmail">Ko-fi membership email</label><div><input id="sitePitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><button type="submit">Send member sign-in link</button></div></form><p class="pit-wall-login-status" role="status" aria-live="polite">${escapeHtml(message)}</p><a class="pit-wall-login-kofi" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Not a member? Join the Pit Wall on Ko-fi</a>`;
+            content.innerHTML = `<span class="pit-wall-login-eyebrow">Paid member account · $5/month</span><h2 id="pitWallLoginTitle">Sign in to the Pit Wall</h2><p>Use the email attached to your Ko-fi membership and your Pit Wall password.</p><p class="pit-wall-login-note"><strong>Looking for Beat V13?</strong> Free Beat V13 registration is separate and does not create a Pit Wall account. <a href="/#beatbot">Enter Beat V13 free</a>.</p><form id="sitePitWallSignIn"><label for="sitePitWallEmail">Ko-fi membership email</label><input id="sitePitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><label for="sitePitWallPassword">Password</label><input id="sitePitWallPassword" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required><button type="submit">Sign in</button></form><p class="pit-wall-login-status" role="status" aria-live="polite">${escapeHtml(message)}</p><button type="button" class="pit-wall-login-reset" id="sitePitWallReset">Create or reset password</button><a class="pit-wall-login-kofi" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Not a member? Join the Pit Wall on Ko-fi</a>`;
             content.querySelector('#sitePitWallSignIn')?.addEventListener('submit', async event => {
                 event.preventDefault();
                 const form = event.currentTarget;
                 const submit = form.querySelector('button');
                 const status = content.querySelector('.pit-wall-login-status');
                 submit.disabled = true;
-                status.textContent = 'Preparing your secure link…';
+                status.textContent = 'Signing in…';
                 try {
-                    const result = await memberRequest('/api/members/sign-in/', { method: 'POST', body: { email: form.elements.email.value.trim() } });
-                    status.textContent = result.message;
-                    status.dataset.state = 'success';
-                    form.reset();
+                    await memberRequest('/api/members/sign-in/', { method: 'POST', body: { email: form.elements.email.value.trim(), password: form.elements.password.value } });
+                    await refresh();
                 } catch (error) {
                     status.textContent = error.message;
                     status.dataset.state = 'error';
                 } finally { submit.disabled = false; }
+            });
+            content.querySelector('#sitePitWallReset')?.addEventListener('click', async event => {
+                const email = content.querySelector('#sitePitWallEmail')?.value.trim();
+                const status = content.querySelector('.pit-wall-login-status');
+                if (!email) { status.textContent = 'Enter your Ko-fi membership email first.'; status.dataset.state = 'error'; return; }
+                event.currentTarget.disabled = true;
+                try {
+                    const result = await memberRequest('/api/members/password-reset/', { method: 'POST', body: { email } });
+                    status.textContent = result.message;
+                    status.dataset.state = 'success';
+                } catch (error) { status.textContent = error.message; status.dataset.state = 'error'; }
+                finally { event.currentTarget.disabled = false; }
             });
         }
 

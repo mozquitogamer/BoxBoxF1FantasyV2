@@ -1180,6 +1180,7 @@ select:focus, input:focus {
 .pit-wall-badge.active { color: #9bf0cf; background: rgba(34, 197, 94, .13); }
 .pit-wall-badge.inactive { color: #f9b9b9; background: rgba(239, 68, 68, .12); }
 .pit-wall-signin { margin-top: 13px; }
+.pit-wall-fields { display: grid !important; gap: 6px !important; }
 .pit-wall-signin label { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: .7rem; font-weight: 700; }
 .pit-wall-signin > div { display: flex; gap: 8px; }
 .pit-wall-signin input { min-width: 0; flex: 1; padding: 10px 11px; border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); background: var(--bg-primary); font: inherit; }
@@ -1203,6 +1204,7 @@ select:focus, input:focus {
 .pit-wall-save:disabled { opacity: .55; cursor: wait; }
 .pit-wall-links { display: flex; align-items: center; gap: 10px; margin-top: 9px; color: var(--text-muted); font-size: .68rem; }
 .pit-wall-links a { color: #a78bfa; font-weight: 750; }
+.pit-wall-text-button { padding: 0; border: 0; color: #a78bfa; background: transparent; font: inherit; font-weight: 750; cursor: pointer; }
 .pit-wall-actions { display: flex; gap: 8px; margin-top: 13px; }
 .pit-wall-secondary { padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); background: transparent; font: inherit; font-size: .74rem; font-weight: 750; cursor: pointer; }
 .pit-wall-pref { display: flex; align-items: center; gap: 8px; margin-top: 13px; color: var(--text-secondary); font-size: .76rem; cursor: pointer; }

@@ -120,13 +120,14 @@
 .pit-wall-login-dialog .pit-wall-login-note strong { color:var(--text,#e9edf3); }
 .pit-wall-login-dialog .pit-wall-login-note a { color:#6ff7e7; }
 .pit-wall-login-dialog form label { display:block; margin-bottom:6px; font-size:.76rem; font-weight:700; }
-.pit-wall-login-dialog form>div { display:flex; gap:8px; }
+.pit-wall-login-dialog form { display:grid; gap:7px; }
 .pit-wall-login-dialog input { min-width:0; flex:1; padding:10px 12px; border:1px solid var(--border,#2a3341); border-radius:7px; background:var(--bg-secondary,#0d1118); color:inherit; font:inherit; }
 .pit-wall-login-dialog form button,.pit-wall-login-actions a { padding:10px 13px; border:0; border-radius:7px; background:var(--accent,#e10600); color:#fff; font:inherit; font-weight:800; text-decoration:none; cursor:pointer; }
 .pit-wall-login-status { min-height:1.3em; margin:9px 0; }
 .pit-wall-login-status[data-state="success"] { color:var(--green,#22c55e); }
 .pit-wall-login-status[data-state="error"] { color:var(--red,#ef4444); }
 .pit-wall-login-kofi { color:var(--text-secondary,#9aa4b2); font-size:.76rem; }
+.pit-wall-login-reset { margin:0 10px 8px 0; padding:0; border:0; background:transparent; color:#a78bfa; font:inherit; font-size:.76rem; font-weight:750; cursor:pointer; }
 .pit-wall-login-actions { display:flex; align-items:center; gap:9px; }
 .pit-wall-login-actions button { padding:9px 12px; border:1px solid var(--border,#2a3341); border-radius:7px; background:transparent; color:inherit; cursor:pointer; }
 .adsense-banner {
@@ -221,5 +222,4 @@
     .adsense-banner { min-height: 92px; }
     .adsense-bottom-unit { min-height: 60px; }
     .pit-wall-account-button { padding:7px 10px; font-size:.7rem; }
-    .pit-wall-login-dialog form>div { flex-direction:column; }
 }

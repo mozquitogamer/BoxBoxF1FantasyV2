@@ -46,10 +46,9 @@
         </div>
         <p>This sign-in is only for active Pit Wall members. It is separate from free Beat V13 email registration.</p>
         <form class="pit-wall-signin" id="pitWallSignInForm">
-            <label for="pitWallEmail">Exact email used for Ko-fi membership</label>
-            <div><input id="pitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><button type="submit">Send member sign-in link</button></div>
+            <div class="pit-wall-fields"><label for="pitWallEmail">Ko-fi membership email</label><input id="pitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><label for="pitWallPassword">Password</label><input id="pitWallPassword" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required><button type="submit">Sign in</button></div>
         </form>
-        <div class="pit-wall-links"><a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join or renew on Ko-fi</a><a href="/#beatbot">Enter Beat V13 free instead</a></div>
+        <div class="pit-wall-links"><button type="button" class="pit-wall-text-button" id="pitWallResetPassword">Create or reset password</button><a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join or renew on Ko-fi</a><a href="/#beatbot">Enter Beat V13 free instead</a></div>
         <p class="pit-wall-status${message ? ' success' : ''}" id="pitWallStatus" role="status" aria-live="polite">${escapeHtml(message)}</p>`;
 
         panel.querySelector('#pitWallSignInForm')?.addEventListener('submit', async event => {
@@ -58,16 +57,45 @@
             const button = form.querySelector('button');
             const email = form.elements.email.value.trim();
             button.disabled = true;
-            status('Preparing your secure link…');
+            status('Signing in…');
             try {
-                const result = await request('/api/members/sign-in/', { method: 'POST', body: { email } });
+                const result = await request('/api/members/sign-in/', { method: 'POST', body: { email, password: form.elements.password.value } });
                 status(result.message, 'success');
-                form.elements.email.value = '';
+                await loadSession();
             } catch (error) {
                 status(error.message, 'error');
             } finally {
                 button.disabled = false;
             }
+        });
+        panel.querySelector('#pitWallResetPassword')?.addEventListener('click', async event => {
+            const email = panel.querySelector('#pitWallEmail')?.value.trim();
+            if (!email) { status('Enter your Ko-fi membership email first.', 'error'); return; }
+            event.currentTarget.disabled = true;
+            status('Preparing password setup…');
+            try {
+                const result = await request('/api/members/password-reset/', { method: 'POST', body: { email } });
+                status(result.message, 'success');
+            } catch (error) { status(error.message, 'error'); }
+            finally { event.currentTarget.disabled = false; }
+        });
+    }
+
+    function renderPasswordSetup() {
+        panel.innerHTML = `<div class="pit-wall-heading"><div><span>Pit Wall account</span><h4>Create your password</h4></div><span class="pit-wall-badge active">Secure setup</span></div><p>Choose a password for future Pit Wall sign-ins. Use at least 10 characters; a password manager is recommended.</p><form class="pit-wall-signin" id="pitWallPasswordForm"><div class="pit-wall-fields"><label for="pitWallNewPassword">New password</label><input id="pitWallNewPassword" name="password" type="password" autocomplete="new-password" minlength="10" maxlength="128" required><label for="pitWallConfirmPassword">Confirm password</label><input id="pitWallConfirmPassword" name="confirmation" type="password" autocomplete="new-password" minlength="10" maxlength="128" required><button type="submit">Save password</button></div></form><p class="pit-wall-status" id="pitWallStatus" role="status" aria-live="polite"></p>`;
+        panel.querySelector('#pitWallPasswordForm')?.addEventListener('submit', async event => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            if (form.elements.password.value !== form.elements.confirmation.value) { status('The passwords do not match.', 'error'); return; }
+            const button = form.querySelector('button');
+            button.disabled = true;
+            try {
+                const result = await request('/api/members/password/', { method: 'POST', body: { password: form.elements.password.value } });
+                history.replaceState(null, '', '/#optimizer');
+                await loadSession();
+                status(result.message, 'success');
+            } catch (error) { status(error.message, 'error'); }
+            finally { button.disabled = false; }
         });
     }
 
@@ -189,7 +217,11 @@
             dashboard = await request('/api/members/session/');
             if (!dashboard.authenticated) {
                 const welcome = new URLSearchParams(location.search).get('member') === 'welcome';
-                renderLoggedOut(welcome ? 'That sign-in link is no longer valid. Request a fresh one.' : '');
+                renderLoggedOut(welcome ? 'That account link is no longer valid. Create or reset your password to continue.' : '');
+                return;
+            }
+            if (new URLSearchParams(location.search).get('member') === 'password') {
+                renderPasswordSetup();
                 return;
             }
             renderSignedIn();
