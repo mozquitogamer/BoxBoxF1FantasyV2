@@ -1,16 +1,15 @@
-name: Notify paid members after production deploy
+name: Notify paid members after a fresh simulation
 
 on:
-  deployment_status:
+  # Deliberately manual. Weather, video, content and code deployments must never
+  # email members. Run this only after publishing a new simulation phase.
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   notify:
-    if: >-
-      github.event.deployment_status.state == 'success' &&
-      github.event.deployment.environment == 'Production'
     runs-on: ubuntu-latest
     steps:
       - name: Trigger idempotent personalized simulation emails
@@ -21,5 +20,5 @@ jobs:
             --request POST \
             --header "Authorization: Bearer ${MEMBER_NOTIFICATION_SECRET}" \
             --header "Content-Type: application/json" \
-            --data '{"source":"github_production_deployment"}' \
-            https://boxboxf1fantasy.com/api/members/notify
+            --data '{"source":"manual_fresh_simulation"}' \
+            https://boxboxf1fantasy.com/api/members/notify/

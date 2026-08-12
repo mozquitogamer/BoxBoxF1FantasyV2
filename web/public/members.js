@@ -41,15 +41,15 @@
 
     function renderLoggedOut(message = '') {
         panel.innerHTML = `<div class="pit-wall-heading">
-            <div><span>Pit Wall · $5/month</span><h4>Remember this team</h4></div>
-            <span class="pit-wall-badge">Member convenience</span>
+            <div><span>Paid Pit Wall account · $5/month</span><h4>Save and sync your team</h4></div>
+            <span class="pit-wall-badge">Ko-fi members</span>
         </div>
-        <p>Paid members can sign in with their Ko-fi email, save this lineup once, and receive a tailored suggestion whenever fresh simulations go live.</p>
+        <p>This sign-in is only for active Pit Wall members. It is separate from free Beat V13 email registration.</p>
         <form class="pit-wall-signin" id="pitWallSignInForm">
-            <label for="pitWallEmail">Ko-fi membership email</label>
-            <div><input id="pitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><button type="submit">Email me a sign-in link</button></div>
+            <label for="pitWallEmail">Exact email used for Ko-fi membership</label>
+            <div><input id="pitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><button type="submit">Send member sign-in link</button></div>
         </form>
-        <div class="pit-wall-links"><a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join or renew on Ko-fi</a><span>Use the same email as your Ko-fi payment.</span></div>
+        <div class="pit-wall-links"><a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join or renew on Ko-fi</a><a href="/#beatbot">Enter Beat V13 free instead</a></div>
         <p class="pit-wall-status${message ? ' success' : ''}" id="pitWallStatus" role="status" aria-live="polite">${escapeHtml(message)}</p>`;
 
         panel.querySelector('#pitWallSignInForm')?.addEventListener('submit', async event => {

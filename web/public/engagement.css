@@ -116,6 +116,9 @@
 .pit-wall-login-eyebrow { color:var(--accent,#e10600); font-size:.68rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
 .pit-wall-login-dialog h2 { margin:7px 28px 9px 0; font-size:1.35rem; }
 .pit-wall-login-dialog p { color:var(--text-secondary,#9aa4b2); font-size:.86rem; line-height:1.55; }
+.pit-wall-login-dialog .pit-wall-login-note { padding:10px 12px; border:1px solid rgba(55,230,208,.28); border-radius:8px; background:rgba(55,230,208,.06); }
+.pit-wall-login-dialog .pit-wall-login-note strong { color:var(--text,#e9edf3); }
+.pit-wall-login-dialog .pit-wall-login-note a { color:#6ff7e7; }
 .pit-wall-login-dialog form label { display:block; margin-bottom:6px; font-size:.76rem; font-weight:700; }
 .pit-wall-login-dialog form>div { display:flex; gap:8px; }
 .pit-wall-login-dialog input { min-width:0; flex:1; padding:10px 12px; border:1px solid var(--border,#2a3341); border-radius:7px; background:var(--bg-secondary,#0d1118); color:inherit; font:inherit; }

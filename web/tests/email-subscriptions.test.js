@@ -56,6 +56,29 @@ test('normalizes and validates subscriber addresses', () => {
     assert.equal(isValidEmail('not-an-email'), false);
 });
 
+test('passes Resend idempotency headers through to the provider', async () => {
+    const { resendRequest } = require('../lib/email-subscriptions');
+    const originalFetch = global.fetch;
+    let receivedHeaders;
+    global.fetch = async (_url, options) => {
+        receivedHeaders = options.headers;
+        return new Response(JSON.stringify({ id: 'email_test' }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    };
+    try {
+        await resendRequest('/emails', 're_test', {
+            method: 'POST',
+            headers: { 'Idempotency-Key': 'stable-email-key' },
+            body: { to: ['fan@example.com'] },
+        });
+        assert.equal(receivedHeaders['Idempotency-Key'], 'stable-email-key');
+    } finally {
+        global.fetch = originalFetch;
+    }
+});
+
 test('opens registration before the Round 22 lock and closes it at the deadline', () => {
     const deadline = Date.parse(BEAT_V13_REGISTRATION_DEADLINE);
     assert.equal(isBeatV13RegistrationOpen(deadline - 1), true);
@@ -107,6 +130,7 @@ test('subscribe handler sends only a confirmation email', async () => {
         assert.equal(res.body.ok, true);
         assert.equal(calls.length, 1);
         assert.equal(calls[0].url, 'https://api.resend.com/emails');
+        assert.match(calls[0].options.headers['Idempotency-Key'], /^beat-v13-confirm-[a-f0-9]{32}$/);
         const payload = JSON.parse(calls[0].options.body);
         assert.deepEqual(payload.to, ['fan@example.com']);
         assert.equal(payload.subject, 'Confirm your free Beat V13 registration');

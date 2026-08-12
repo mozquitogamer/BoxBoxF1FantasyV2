@@ -4741,6 +4741,20 @@ body.v13-popup-open { overflow: hidden; }
     line-height: 1.5;
     margin-bottom: 16px;
 }
+.access-explainer { margin:28px 0; padding:24px; border:1px solid var(--border); border-radius:12px; background:linear-gradient(135deg,rgba(55,230,208,.06),rgba(139,92,246,.06)); }
+.access-explainer > h2 { margin-top:0; }
+.access-explainer-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.access-explainer-grid article { padding:18px; border:1px solid var(--border); border-radius:10px; background:var(--bg-card); }
+.access-explainer-grid h3 { margin:10px 0 8px; font-size:1rem; }
+.access-explainer-grid p { min-height:7.5em; margin:0 0 14px; font-size:.82rem; line-height:1.55; color:var(--text-secondary); }
+.access-label { display:inline-flex; padding:4px 8px; border-radius:999px; font-size:.65rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
+.access-label.free,.access-label.public { color:#8ff7d7; background:rgba(16,185,129,.12); }
+.access-label.paid { color:#d8c2ff; background:rgba(139,92,246,.15); }
+.access-action { display:inline-flex; align-items:center; justify-content:center; padding:9px 12px; border:0; border-radius:7px; background:var(--accent); color:#fff; font:inherit; font-size:.76rem; font-weight:800; text-decoration:none; cursor:pointer; }
+.access-action.secondary { border:1px solid var(--border); background:transparent; color:var(--text); }
+.access-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.access-footnote { margin:16px 0 0 !important; min-height:0 !important; color:var(--text-secondary); font-size:.78rem; }
+@media (max-width:800px) { .access-explainer-grid { grid-template-columns:1fr; } .access-explainer-grid p { min-height:0; } }
 .support-buttons {
     display: flex;
     gap: 12px;

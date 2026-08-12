@@ -297,7 +297,7 @@
         button.id = 'pitWallAccountButton';
         button.className = 'pit-wall-account-button';
         button.type = 'button';
-        button.textContent = 'Pit Wall login';
+        button.textContent = 'Pit Wall member sign-in';
         button.setAttribute('aria-haspopup', 'dialog');
         const host = document.querySelector('.header-right') || document.querySelector('.topbar .wrap');
         if (host) host.appendChild(button);
@@ -314,8 +314,8 @@
         document.addEventListener('keydown', event => { if (event.key === 'Escape' && !modal.hidden) close(); });
 
         function renderLoggedOut(message = '') {
-            button.textContent = 'Pit Wall login';
-            content.innerHTML = `<span class="pit-wall-login-eyebrow">Member convenience</span><h2 id="pitWallLoginTitle">Sign in to the Pit Wall</h2><p>Use the email connected to your Ko-fi membership or complimentary account. We will send a secure, one-use sign-in link.</p><form id="sitePitWallSignIn"><label for="sitePitWallEmail">Email address</label><div><input id="sitePitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><button type="submit">Email my sign-in link</button></div></form><p class="pit-wall-login-status" role="status" aria-live="polite">${escapeHtml(message)}</p><a class="pit-wall-login-kofi" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join the Pit Wall on Ko-fi</a>`;
+            button.textContent = 'Pit Wall member sign-in';
+            content.innerHTML = `<span class="pit-wall-login-eyebrow">Paid member account · $5/month</span><h2 id="pitWallLoginTitle">Sign in to the Pit Wall</h2><p>This is for active Pit Wall members. Use the exact email attached to your Ko-fi membership and we will send a secure, one-use sign-in link.</p><p class="pit-wall-login-note"><strong>Looking for Beat V13?</strong> Free Beat V13 registration is separate and does not create a Pit Wall account. <a href="/#beatbot">Enter Beat V13 free</a>.</p><form id="sitePitWallSignIn"><label for="sitePitWallEmail">Ko-fi membership email</label><div><input id="sitePitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><button type="submit">Send member sign-in link</button></div></form><p class="pit-wall-login-status" role="status" aria-live="polite">${escapeHtml(message)}</p><a class="pit-wall-login-kofi" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Not a member? Join the Pit Wall on Ko-fi</a>`;
             content.querySelector('#sitePitWallSignIn')?.addEventListener('submit', async event => {
                 event.preventDefault();
                 const form = event.currentTarget;

@@ -68,11 +68,12 @@ async function syncResendMember(email) {
     await addPitWallContact(email);
 }
 
-async function sendWelcome(email) {
+async function sendWelcome(email, messageId) {
     if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM) return;
     const origin = getMemberConfig().siteOrigin;
     await resendRequest('/emails', process.env.RESEND_API_KEY, {
         method: 'POST',
+        headers: { 'Idempotency-Key': `pit-wall-welcome-${messageId}` },
         body: {
             from: process.env.RESEND_FROM,
             to: [email],
@@ -166,7 +167,7 @@ module.exports = async function kofiWebhook(req, res) {
             (payload.is_first_subscription_payment === true
                 || String(payload.is_first_subscription_payment).toLowerCase() === 'true'
                 || member.created)
-                ? sendWelcome(email)
+                ? sendWelcome(email, messageId)
                 : Promise.resolve(),
         ]);
 

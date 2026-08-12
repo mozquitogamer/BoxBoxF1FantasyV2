@@ -1,5 +1,7 @@
 'use strict';
 
+const crypto = require('node:crypto');
+
 const {
     createSubscriptionToken,
     getConfig,
@@ -63,8 +65,12 @@ module.exports = async function subscribe(req, res) {
     const confirmationUrl = `${config.siteOrigin}/api/email/confirm?token=${encodeURIComponent(token)}`;
 
     try {
+        // Keep repeated clicks/retries from sending a stack of identical
+        // confirmations. Resend deduplicates this address for 24 hours.
+        const emailKey = crypto.createHash('sha256').update(email).digest('hex').slice(0, 32);
         await resendRequest('/emails', config.apiKey, {
             method: 'POST',
+            headers: { 'Idempotency-Key': `beat-v13-confirm-${emailKey}` },
             body: {
                 from: config.from,
                 to: [email],

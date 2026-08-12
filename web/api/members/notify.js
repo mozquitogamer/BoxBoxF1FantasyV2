@@ -21,6 +21,10 @@ function phaseLabel(phase) {
         || String(phase).replace(/_/g, ' ');
 }
 
+function notificationEventKey(predictions) {
+    return `${predictions.season}:${predictions.round}:${predictions.phase}`;
+}
+
 function normalizedName(value) {
     return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
@@ -94,27 +98,55 @@ function emailBody(profile, recommendation, origin) {
 async function getOrCreateEvent(predictions) {
     const generatedAt = predictions.generated_at || predictions.exported_at;
     if (!generatedAt) throw new Error('Predictions do not include generated_at');
-    const eventKey = `${predictions.season}:${predictions.round}:${predictions.phase}:${generatedAt}`;
+    // One member alert per season/round/phase. A new export timestamp, weather
+    // refresh, content deploy or code deploy must not create another email.
+    const eventKey = notificationEventKey(predictions);
     const existing = await restRequest(
-        `notification_events?event_key=eq.${encodeURIComponent(eventKey)}&select=id,event_key,status&limit=1`,
+        `notification_events?season=eq.${Number(predictions.season)}&round=eq.${Number(predictions.round)}&phase=eq.${encodeURIComponent(predictions.phase)}&select=id,event_key,status,created_at&order=created_at.asc`,
         { service: true },
     );
-    if (existing?.[0]) return existing[0];
-    const created = await restRequest('notification_events', {
-        service: true,
-        method: 'POST',
-        prefer: 'return=representation',
-        body: {
-            event_key: eventKey,
-            season: predictions.season,
-            round: predictions.round,
-            phase: predictions.phase,
-            predictions_generated_at: generatedAt,
-            status: 'draft',
-            payload: { race: predictions.race, exported_at: predictions.exported_at || null },
+    if (existing?.length) {
+        return existing.find(item => item.status === 'sent') || existing[existing.length - 1];
+    }
+    try {
+        const created = await restRequest('notification_events', {
+            service: true,
+            method: 'POST',
+            prefer: 'return=representation',
+            body: {
+                event_key: eventKey,
+                season: predictions.season,
+                round: predictions.round,
+                phase: predictions.phase,
+                predictions_generated_at: generatedAt,
+                status: 'draft',
+                payload: { race: predictions.race, exported_at: predictions.exported_at || null },
+            },
+        });
+        return created?.[0];
+    } catch (error) {
+        // A simultaneous worker may have won the unique event-key insert.
+        const raced = await restRequest(
+            `notification_events?event_key=eq.${encodeURIComponent(eventKey)}&select=id,event_key,status,created_at&limit=1`,
+            { service: true },
+        );
+        if (raced?.[0]) return raced[0];
+        throw error;
+    }
+}
+
+async function claimEvent(event) {
+    if (!event || !['draft', 'failed'].includes(event.status)) return false;
+    const claimed = await restRequest(
+        `notification_events?id=eq.${encodeURIComponent(event.id)}&status=eq.${encodeURIComponent(event.status)}`,
+        {
+            service: true,
+            method: 'PATCH',
+            prefer: 'return=representation',
+            body: { status: 'processing', sent_at: null },
         },
-    });
-    return created?.[0];
+    );
+    return Boolean(claimed?.[0]);
 }
 
 async function setEventStatus(eventId, status) {
@@ -154,7 +186,9 @@ module.exports = async function notify(req, res) {
         event = await getOrCreateEvent(predictions);
         if (!event) throw new Error('Could not create notification event');
         if (event.status === 'sent') return res.status(200).json({ ok: true, duplicate: true });
-        await setEventStatus(event.id, 'processing');
+        if (!(await claimEvent(event))) {
+            return res.status(200).json({ ok: true, duplicate: true, processing: event.status === 'processing' });
+        }
 
         const entitlements = await restRequest(
             'member_entitlements?status=in.(active,trialing)&select=user_id,status,current_period_end',
@@ -239,6 +273,7 @@ module.exports = async function notify(req, res) {
                 const content = emailBody(profile, recommendation, config.siteOrigin);
                 const delivery = await resendRequest('/emails', process.env.RESEND_API_KEY, {
                     method: 'POST',
+                    headers: { 'Idempotency-Key': `pit-wall-${event.id}-${team.id}` },
                     body: {
                         from: process.env.RESEND_FROM,
                         to: [profile.email],
@@ -282,3 +317,5 @@ module.exports = async function notify(req, res) {
 module.exports.emailBody = emailBody;
 module.exports.inFilter = inFilter;
 module.exports.officialTeamForRecommendation = officialTeamForRecommendation;
+module.exports.claimEvent = claimEvent;
+module.exports.notificationEventKey = notificationEventKey;

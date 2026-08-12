@@ -1,5 +1,7 @@
 'use strict';
 
+const crypto = require('node:crypto');
+
 const {
     authAdminRequest,
     getMemberConfig,
@@ -13,7 +15,7 @@ const {
 const { resendRequest } = require('../../lib/email-subscriptions');
 
 const GENERIC_MESSAGE = 'If that address has an active Pit Wall membership, a secure sign-in link is on its way.';
-const MIN_LINK_INTERVAL_MS = 60 * 1000;
+const MIN_LINK_INTERVAL_MS = 15 * 60 * 1000;
 
 module.exports = async function signIn(req, res) {
     res.setHeader('Cache-Control', 'no-store');
@@ -68,8 +70,11 @@ module.exports = async function signIn(req, res) {
         if (!tokenHash) throw new Error('Supabase did not return a hashed sign-in token');
 
         const callbackUrl = `${config.siteOrigin}/api/members/callback?token_hash=${encodeURIComponent(tokenHash)}&type=magiclink`;
+        const emailKey = crypto.createHash('sha256').update(email).digest('hex').slice(0, 32);
+        const intervalBucket = Math.floor(Date.now() / MIN_LINK_INTERVAL_MS);
         await resendRequest('/emails', process.env.RESEND_API_KEY, {
             method: 'POST',
+            headers: { 'Idempotency-Key': `pit-wall-sign-in-${emailKey}-${intervalBucket}` },
             body: {
                 from: process.env.RESEND_FROM,
                 to: [email],

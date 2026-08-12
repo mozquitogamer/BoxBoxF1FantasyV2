@@ -83,6 +83,7 @@ async function resendRequest(path, apiKey, options = {}) {
         headers: {
             Authorization: `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
+            ...(options.headers || {}),
         },
         body: options.body ? JSON.stringify(options.body) : undefined,
     });

@@ -5,7 +5,7 @@ const test = require('node:test');
 
 const { buildRecommendation } = require('../lib/personalized-recommendations');
 const { safeEqual } = require('../lib/member-system');
-const { inFilter } = require('../api/members/notify');
+const { inFilter, notificationEventKey } = require('../api/members/notify');
 const { paidUntil, parseKofiPayload } = require('../api/webhooks/kofi');
 
 function predictions() {
@@ -83,4 +83,11 @@ test('uses timing-safe secret comparison and safe PostgREST filters', () => {
         inFilter(['21b4f9ba-1bf3-4dd4-a0de-c2af164f8463', 'unsafe),drop table']),
         'in.(21b4f9ba-1bf3-4dd4-a0de-c2af164f8463,unsafedroptable)',
     );
+});
+
+test('deduplicates member alerts across regenerated timestamps and deployments', () => {
+    const first = predictions();
+    const regenerated = { ...first, generated_at: '2026-09-01T12:30:00Z' };
+    assert.equal(notificationEventKey(first), '2026:15:post_fp');
+    assert.equal(notificationEventKey(regenerated), notificationEventKey(first));
 });

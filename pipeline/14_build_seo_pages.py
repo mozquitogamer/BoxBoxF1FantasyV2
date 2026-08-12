@@ -923,7 +923,7 @@ def page_head(
 <link rel="author" type="text/plain" href="/humans.txt">
 <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/picks/picks.css">
-<link rel="stylesheet" href="/engagement.css?v=2">
+<link rel="stylesheet" href="/engagement.css?v=4">
 {extra_ld}
 </head>
 <body>
@@ -938,9 +938,9 @@ def page_head(
 ENGAGEMENT_BLOCK = """<div class="engagement-shell">
 <section class="email-updates-panel" id="emailUpdatesPanel" aria-labelledby="emailUpdatesTitle" hidden>
   <div class="email-updates-copy">
-    <span class="email-updates-eyebrow">Beat V13 registration &middot; Open</span>
-    <h2 id="emailUpdatesTitle">Register free to Beat the Bot</h2>
-    <p>Confirm your email before the Round 22 Las Vegas team lock on 21 November 2026 at 04:00 UTC. You will also receive concise V13 early-thoughts, post-FP simulation updates and competition instructions.</p>
+    <span class="email-updates-eyebrow">Free competition entry &middot; No account needed</span>
+    <h2 id="emailUpdatesTitle">Enter Beat V13 by email</h2>
+    <p>Confirm your email before the Round 22 Las Vegas team lock on 21 November 2026 at 04:00 UTC. This free entry also adds you to the V13 update mailing list; it does not create a paid Pit Wall account.</p>
   </div>
   <form class="email-updates-form" id="emailUpdatesForm" novalidate>
     <div class="email-updates-fields">
@@ -978,7 +978,7 @@ FOOTER = f"""</main>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
-<script src="/engagement.js?v=4"></script>
+<script src="/engagement.js?v=7"></script>
 </body>
 </html>
 """
@@ -5465,7 +5465,7 @@ STATIC_PAGES = [
         "slug": "about",
         "crumb_self": "About",
         "title": "About BoxBoxF1Fantasy | Free F1 Fantasy Predictions & Tools",
-        "desc": "About BoxBoxF1Fantasy, an independent site with free F1 Fantasy predictions, optimizer tools, race picks, public accuracy and contact details.",
+        "desc": "About BoxBoxF1Fantasy, its free Beat V13 mailing list and optional Ko-fi Pit Wall membership for saved-team syncing and personalized alerts.",
         "h1": "About BoxBoxF1Fantasy",
         "lastmod": SEO_CONTENT_LASTMOD,
         "schema_type": "AboutPage",
@@ -5473,6 +5473,9 @@ STATIC_PAGES = [
         "body": (
             "<h2>What the site does</h2>"
             "<p>BoxBox publishes current-round F1 Fantasy projections for every driver and constructor, race-week pick summaries, a lineup optimizer, Team Compare, transfer tools, budget/value signals, and an accuracy record for completed rounds. The goal is to turn a large amount of race, practice, price and reliability data into decisions a fantasy player can inspect rather than a single unexplained pick.</p>"
+            "<h2>Free mailing list and Pit Wall membership</h2>"
+            '<p><strong>Beat V13 registration is free and email-only.</strong> Confirming an address enters the Beat V13 challenge and joins the mailing list for V13 decisions, simulation updates and competition instructions. It does not create a site account and does not require payment.</p>'
+            '<p><strong>The public predictions and tools remain free with no login.</strong> Pit Wall is a separate, optional $5/month membership purchased through <a href="https://ko-fi.com/boxboxf1fantasy/tiers" rel="noopener">Ko-fi</a>. Members sign in with the exact email used on Ko-fi to remember and sync an official F1 Fantasy team and receive personalized suggestions when new simulations arrive.</p>'
             "<h2>Editorial authorship</h2>"
             '<p>Analysis, guides and generated race pages carry the <strong>BoxBoxF1Fantasy</strong> byline because they are published and maintained as part of this independent project rather than attributed to a fictional individual contributor. Recurring tables, rankings and scorecards are generated programmatically from the site\'s versioned prediction and result data. Longer explanations are assembled around those outputs, sources and documented model behavior. The site maintainer is responsible for the final published pages, corrections and disclosures.</p>'
             '<p>Each editorial byline links here for ownership and contact context and to the <a href="/methodology/">Methodology</a> for the production process, data layers, uncertainty and limitations.</p>'
@@ -5503,6 +5506,8 @@ STATIC_PAGES = [
              "No. They are model-based estimates for entertainment and decision support. Weather, reliability, safety cars, penalties, strategy and incidents can produce outcomes outside the expected range."),
             ("Does BoxBox publish prediction accuracy?",
              "Yes. The Accuracy page records completed-round performance and confidence-range coverage, including misses. Material model and data changes are documented in the Changelog."),
+            ("What is the difference between Beat V13 registration and Pit Wall?",
+             "Beat V13 is a free email registration for the competition and update mailing list; it does not create an account. Pit Wall is an optional $5/month Ko-fi membership for saved-team syncing and personalized simulation emails. Public predictions and tools remain free without either signup."),
         ],
     },
     {
@@ -5576,23 +5581,27 @@ STATIC_PAGES = [
         "intro": '<p class="lede">This privacy policy explains what BoxBoxF1Fantasy collects and how the site uses it.</p>',
         "body": (
             "<p><strong>Last updated:</strong> 2026-08-11</p>"
+            "<p><strong>Official-team sync update (12 August 2026):</strong> If a Pit Wall member chooses official-team sync, we store the selected team name and slot plus its normalized lineup, round, score, rank, budget, transfers and chip status. We do not ask for or store a Formula 1 password, and we do not retain the raw Formula 1 response.</p>"
             "<h2>Information we collect</h2>"
             "<p>Most BoxBoxF1Fantasy features do not require an account. If you email us, we receive the email address and any information you choose to include. If you register for Beat V13, we process your email address, confirmation status and later any team identifier, score screenshot or verification information you submit for the challenge.</p>"
+            "<h2>Pit Wall member accounts</h2>"
+            "<p>Pit Wall membership is purchased through Ko-fi. For member access, we process the payment email, tier name, payment date, entitlement status and Ko-fi transaction identifiers supplied by Ko-fi. If you use member tools, we also store the F1 Fantasy team, budget, free-transfer count, email preferences and personalized recommendations you choose to associate with your account. Supabase provides passwordless authentication and database hosting; Vercel hosts the website and server functions; Resend delivers sign-in and simulation emails. Private team records use row-level access controls so an authenticated member can access only their own records.</p>"
+            "<p>Ko-fi webhooks report successful payments but not cancellations. Access therefore expires automatically after the latest paid period unless a new payment is received, with a short processing grace period. We may reconcile current status against Ko-fi's member records. Member sign-in uses secure, HttpOnly session cookies; the browser does not receive database administrator credentials or decide whether an entitlement is paid.</p>"
             "<h2>Beat V13 registration and email updates</h2>"
             "<p>Registration uses a double-opt-in process: submitting an address sends a time-limited confirmation link, and the address is registered only after that link is opened before the stated deadline. Resend processes confirmation messages, subscriber records, delivery events and unsubscribes on our behalf. Registered entrants also receive V13, simulation and competition updates. Every broadcast includes an unsubscribe link, and you can ask us to remove your address.</p>"
             "<h2>Analytics</h2>"
             "<p>The site uses Google Analytics to understand aggregate traffic, page usage and engagement. Analytics data may include device/browser information, approximate location, referrer, pages viewed and interaction events. This helps improve the site and understand which pages are useful.</p>"
             "<h2>Cookies and local storage</h2>"
-            "<p>Google Analytics and, when enabled, Google AdSense may use cookies, web beacons or similar technologies. The site also uses browser local storage for convenience features such as saved scenario settings or team inputs. Local-storage data stays in your browser unless a feature clearly says it will be submitted.</p>"
+            "<p>Google Analytics and, when enabled, Google AdSense may use cookies, web beacons or similar technologies. The site also uses browser local storage for convenience features such as saved scenario settings. Local-storage data stays in your browser unless a feature clearly says it will be submitted. Pit Wall sign-in uses first-party session cookies that are restricted from JavaScript access and are used only to keep the member securely signed in.</p>"
             "<h2>Advertising and Google AdSense</h2>"
             "<p>BoxBoxF1Fantasy is prepared to display advertising supplied by Google AdSense. When ads are enabled, Google and its advertising partners may process IP address, device/browser information, cookie identifiers and ad interactions to deliver and measure ads, prevent fraud and abuse, and show personalized, non-personalized or limited ads depending on your region, consent choices and browser settings.</p>"
             '<p>Google explains how it uses information from sites that use its services in <a href="https://policies.google.com/technologies/partner-sites" rel="noopener">How Google uses information from sites or apps that use its services</a>. Where consent is legally required, the site will use a Google-certified consent interface so visitors can accept, reject or manage non-essential advertising purposes before they are used.</p>'
             "<h2>External links</h2>"
             "<p>BoxBoxF1Fantasy links to third-party sites such as Google, social platforms, YouTube, Ko-fi, PayPal and data sources. Those sites have their own privacy policies and practices.</p>"
             "<h2>Data sharing</h2>"
-            "<p>We do not sell personal information. Information may be processed by service providers used to host, email, analyze, advertise on and maintain the site, only for those services and subject to their terms.</p>"
+            "<p>We do not sell personal information. Information may be processed by service providers used to host, authenticate, email, analyze, advertise on and maintain the site, only for those services and subject to their terms.</p>"
             "<h2>Retention and your choices</h2>"
-            "<p>Email subscription data is kept until you unsubscribe or ask for deletion, except for limited suppression or delivery records needed to honour an unsubscribe and protect email deliverability. Beat V13 entry and score-verification evidence is kept through challenge administration and prize verification, then removed when it is no longer reasonably needed, unless a longer period is required for legal, tax or dispute purposes. Advertising consent choices can be revisited through the consent interface when it is active. You may request access, correction or deletion by contacting us.</p>"
+            "<p>Email subscription data is kept until you unsubscribe or ask for deletion, except for limited suppression or delivery records needed to honour an unsubscribe and protect email deliverability. Saved Pit Wall teams and recommendation history are retained while they support the member convenience service and for a reasonable period after membership ends, so they can return if you renew; you may ask us to delete them sooner. Payment and webhook records may be retained where reasonably needed for entitlement, accounting, fraud-prevention, legal or dispute purposes. Beat V13 entry and score-verification evidence is kept through challenge administration and prize verification, then removed when it is no longer reasonably needed, unless a longer period is required for legal, tax or dispute purposes. Advertising consent choices can be revisited through the consent interface when it is active. You may request access, correction or deletion by contacting us.</p>"
             "<h2>Contact</h2>"
             f'<p>For privacy questions, email <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>'
         ),

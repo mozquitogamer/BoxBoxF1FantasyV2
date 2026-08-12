@@ -1331,6 +1331,18 @@ function setupTabs() {
         });
     });
 
+    document.querySelectorAll('[data-open-tab]').forEach(button => {
+        button.addEventListener('click', () => {
+            const tabName = button.dataset.openTab;
+            switchTab(tabName);
+            history.replaceState(null, '', `#${tabName}`);
+            document.getElementById(`tab-${tabName}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+    document.getElementById('aboutPitWallSignIn')?.addEventListener('click', () => {
+        document.getElementById('pitWallAccountButton')?.click();
+    });
+
     // Deep-link visual activation (sets the active class on .tab and
     // .tab-content). The actual data load + render is awaited by Phase 4
     // in DOMContentLoaded — calling switchTab() here would double-trigger
