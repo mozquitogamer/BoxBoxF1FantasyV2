@@ -3,7 +3,9 @@
 const { resendRequest } = require('./email-subscriptions');
 
 const PIT_WALL_SEGMENT_NAME = 'Pit Wall Members';
-const BEAT_V13_SEGMENT_NAME = 'Beat V13 Updates';
+// Reuse the original production list. Creating a renamed fourth segment fails
+// on Resend's three-segment plan and prevents confirmation from completing.
+const BEAT_V13_SEGMENT_NAME = 'V13 Simulation Updates';
 const segmentCache = new Map();
 
 async function ensureSegment(name, configuredId = '') {
