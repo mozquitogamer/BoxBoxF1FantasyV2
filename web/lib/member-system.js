@@ -213,6 +213,10 @@ function isEntitlementActive(entitlement, now = Date.now()) {
     return Date.parse(entitlement.current_period_end) > now;
 }
 
+function isMissingTable(error) {
+    return error?.status === 404 || /relation .* does not exist|schema cache|42P01/i.test(String(error?.message || ''));
+}
+
 async function getMemberDashboard(session) {
     const userId = session.user.id;
     const encodedUserId = encodeURIComponent(userId);
@@ -224,8 +228,26 @@ async function getMemberDashboard(session) {
     const active = isEntitlementActive(entitlement);
     let team = null;
     let recommendation = null;
+    let f1Link = null;
+    let f1Snapshot = null;
 
     if (active) {
+        try {
+            const links = await restRequest(
+                `f1_team_links?user_id=eq.${encodedUserId}&select=league_id,league_type,team_slot,official_team_id,official_team_name,manager_name,status,last_synced_at,last_error&limit=1`,
+                { accessToken: session.accessToken },
+            );
+            f1Link = links?.[0] || null;
+            if (f1Link) {
+                const snapshots = await restRequest(
+                    `f1_team_snapshots?user_id=eq.${encodedUserId}&select=season,round,official_team_name,fantasy_points,overall_points,league_rank,overall_rank,budget_millions,free_transfers,chip_code,assets,captured_at&order=season.desc,round.desc&limit=1`,
+                    { accessToken: session.accessToken },
+                );
+                f1Snapshot = snapshots?.[0] || null;
+            }
+        } catch (error) {
+            if (!isMissingTable(error)) throw error;
+        }
         const teams = await restRequest(
             `saved_teams?user_id=eq.${encodedUserId}&is_default=eq.true&select=id,name,budget_millions,free_transfers,updated_at&limit=1`,
             { accessToken: session.accessToken },
@@ -251,6 +273,8 @@ async function getMemberDashboard(session) {
         entitlement: entitlement ? { ...entitlement, active } : { active: false },
         team,
         recommendation,
+        f1_link: f1Link,
+        f1_snapshot: f1Snapshot,
     };
 }
 

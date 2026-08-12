@@ -4625,7 +4625,7 @@ function getMemberTeamSnapshot() {
 }
 
 function applySavedMemberTeam(team) {
-    if (!team || !Array.isArray(team.assets)) return;
+    if (!team || !Array.isArray(team.assets)) return false;
     const drivers = team.assets.filter(item => item.asset_type === 'driver').sort((a, b) => a.slot - b.slot);
     const constructors = team.assets.filter(item => item.asset_type === 'constructor').sort((a, b) => a.slot - b.slot);
     myTeamDrivers = [null, null, null, null, null];
@@ -4640,11 +4640,38 @@ function applySavedMemberTeam(team) {
     }
     if (freeTransfers) freeTransfers.value = String(Number(team.free_transfers || 0));
     renderMyTeamGrid();
+    return drivers.length === 5 && constructors.length === 2;
+}
+
+function normalizeOfficialAssetId(asset) {
+    if (!data || !asset) return null;
+    const name = String(asset.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const pool = asset.asset_type === 'constructor' ? data.constructors : data.drivers;
+    const idKey = asset.asset_type === 'constructor' ? 'constructor_id' : 'driver_id';
+    const nameKey = asset.asset_type === 'constructor' ? 'name' : 'name';
+    const exact = pool.find(item => String(item[idKey]) === String(asset.asset_id));
+    if (exact) return exact[idKey];
+    const matched = pool.find(item => String(item[nameKey] || '').toLowerCase().replace(/[^a-z0-9]/g, '') === name);
+    return matched?.[idKey] || null;
+}
+
+function applyOfficialMemberTeam(snapshot) {
+    if (!snapshot || !Array.isArray(snapshot.assets)) return false;
+    const converted = snapshot.assets.map(asset => ({ ...asset, asset_id: normalizeOfficialAssetId(asset) })).filter(asset => asset.asset_id);
+    const drivers = converted.filter(asset => asset.asset_type === 'driver');
+    const constructors = converted.filter(asset => asset.asset_type === 'constructor');
+    if (drivers.length !== 5 || constructors.length !== 2) return false;
+    return applySavedMemberTeam({
+        assets: converted,
+        budget_millions: snapshot.budget_millions || 100,
+        free_transfers: snapshot.free_transfers ?? 0,
+    });
 }
 
 window.BoxBoxTeamMemory = {
     getSnapshot: getMemberTeamSnapshot,
     apply: applySavedMemberTeam,
+    applyOfficial: applyOfficialMemberTeam,
 };
 
 function getCompareBudget() {

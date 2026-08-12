@@ -75,12 +75,18 @@
         const ending = friendlyDate(dashboard.entitlement?.current_period_end);
         const saved = dashboard.team;
         const latest = dashboard.recommendation?.recommendation;
+        const f1Link = dashboard.f1_link;
+        const f1Snapshot = dashboard.f1_snapshot;
         const savedText = saved
             ? `Saved ${friendlyDate(saved.updated_at)} · ${saved.assets?.length || 0}/7 picks remembered`
             : 'No team saved yet. Complete all seven slots, then save.';
         const latestHtml = latest?.headline
             ? `<div class="pit-wall-latest"><span>Latest personal check</span><strong>${escapeHtml(latest.headline)}</strong></div>`
             : '';
+
+        const officialHtml = f1Link
+            ? `<div class="pit-wall-official linked"><div><span>Official F1 team</span><strong>${escapeHtml(f1Link.official_team_name)} · T${f1Link.team_slot}</strong><small>${f1Link.last_synced_at ? `Last synced ${friendlyDate(f1Link.last_synced_at)}` : 'Linked · waiting for first sync'}${f1Snapshot?.round ? ` · Round ${f1Snapshot.round}` : ''}</small></div><div class="pit-wall-actions"><button type="button" class="pit-wall-secondary" id="pitWallSyncF1">Sync now</button><button type="button" class="pit-wall-link-danger" id="pitWallDisconnectF1">Disconnect</button></div></div>`
+            : `<div class="pit-wall-official"><span>Official F1 Fantasy sync</span><p>Join the <strong>Box Box F1 Fantasy</strong> league, then link one official team. We never ask for your F1 password.</p><form id="pitWallF1Search"><div><input name="team_name" type="search" placeholder="Search your official team name" minlength="2" required><button type="submit">Find team</button></div></form><div class="pit-wall-search-results" id="pitWallF1Results"></div></div>`;
 
         panel.innerHTML = `<div class="pit-wall-heading">
             <div><span>Pit Wall account</span><h4>${escapeHtml(dashboard.email)}</h4></div>
@@ -89,7 +95,7 @@
         ${active ? `<p>Your saved lineup is the source for personalized early-thoughts and post-FP simulation emails.</p>
             <div class="pit-wall-actions"><button type="button" class="pit-wall-save" id="pitWallSaveTeam">Save current team</button><button type="button" class="pit-wall-secondary" id="pitWallSignOut">Sign out</button></div>
             <label class="pit-wall-pref"><input type="checkbox" id="pitWallSimEmails" ${dashboard.profile?.email_simulation_updates !== false ? 'checked' : ''}> Email me personalized simulation updates</label>
-            <p class="pit-wall-saved">${escapeHtml(savedText)}</p>${latestHtml}` : `<p>Your Ko-fi entitlement is no longer active. Your saved data is retained and returns when you renew.</p>
+            <p class="pit-wall-saved">${escapeHtml(savedText)}</p>${officialHtml}${latestHtml}` : `<p>Your Ko-fi entitlement is no longer active. Your saved data is retained and returns when you renew.</p>
             <div class="pit-wall-actions"><a class="pit-wall-save" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Renew on Ko-fi</a><button type="button" class="pit-wall-secondary" id="pitWallSignOut">Sign out</button></div>`}
         <p class="pit-wall-status" id="pitWallStatus" role="status" aria-live="polite"></p>`;
 
@@ -127,6 +133,49 @@
             }
         });
 
+        panel.querySelector('#pitWallF1Search')?.addEventListener('submit', async event => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const button = form.querySelector('button');
+            const results = panel.querySelector('#pitWallF1Results');
+            button.disabled = true;
+            results.innerHTML = '<span>Searching the BoxBox league…</span>';
+            try {
+                const data = await request(`/api/members/f1-link?q=${encodeURIComponent(form.elements.team_name.value.trim())}`);
+                results.innerHTML = data.teams.length ? data.teams.map(team => `<button type="button" data-team-id="${escapeHtml(team.id)}" data-team-slot="${team.slot}"><strong>${escapeHtml(team.name)} · T${team.slot}</strong><small>${escapeHtml(team.manager || '')}${team.rank ? ` · League rank ${team.rank}` : ''}</small></button>`).join('') : '<span>No matching team found. Check the spelling and confirm you joined our league.</span>';
+                results.querySelectorAll('button').forEach(resultButton => resultButton.addEventListener('click', async () => {
+                    resultButton.disabled = true;
+                    try {
+                        const linked = await request('/api/members/f1-link', { method: 'POST', body: { official_team_id: resultButton.dataset.teamId, team_slot: Number(resultButton.dataset.teamSlot) } });
+                        status(linked.message, 'success');
+                        await loadSession(false);
+                    } catch (error) { status(error.message, 'error'); resultButton.disabled = false; }
+                }));
+            } catch (error) { results.innerHTML = `<span>${escapeHtml(error.message)}</span>`; }
+            finally { button.disabled = false; }
+        });
+
+        panel.querySelector('#pitWallSyncF1')?.addEventListener('click', async event => {
+            const button = event.currentTarget;
+            button.disabled = true;
+            status('Syncing your official lineup…');
+            try {
+                const result = await request('/api/members/f1-sync', { method: 'POST', body: {} });
+                status(result.message, 'success');
+                await loadSession(true);
+            } catch (error) { status(error.message, 'error'); }
+            finally { button.disabled = false; }
+        });
+
+        panel.querySelector('#pitWallDisconnectF1')?.addEventListener('click', async event => {
+            event.currentTarget.disabled = true;
+            try {
+                const result = await request('/api/members/f1-link', { method: 'DELETE', body: {} });
+                status(result.message, 'success');
+                await loadSession(false);
+            } catch (error) { status(error.message, 'error'); event.currentTarget.disabled = false; }
+        });
+
         panel.querySelector('#pitWallSignOut')?.addEventListener('click', async () => {
             await request('/api/members/sign-out', { method: 'POST' }).catch(() => null);
             dashboard = null;
@@ -143,7 +192,10 @@
                 return;
             }
             renderSignedIn();
-            if (applySavedTeam && dashboard.entitlement?.active && dashboard.team) {
+            if (applySavedTeam && dashboard.entitlement?.active && dashboard.f1_snapshot?.assets?.length >= 7
+                && window.BoxBoxTeamMemory?.applyOfficial(dashboard.f1_snapshot)) {
+                status('Your latest official F1 Fantasy team has been loaded.', 'success');
+            } else if (applySavedTeam && dashboard.entitlement?.active && dashboard.team) {
                 window.BoxBoxTeamMemory?.apply(dashboard.team);
                 status('Your saved team has been loaded.', 'success');
             } else if (new URLSearchParams(location.search).get('member') === 'welcome') {

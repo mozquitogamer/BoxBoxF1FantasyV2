@@ -1215,12 +1215,34 @@ select:focus, input:focus {
 .pit-wall-latest span { color: var(--text-muted); font-size: .64rem; text-transform: uppercase; letter-spacing: .06em; }
 .pit-wall-latest strong { font-size: .78rem; }
 .pit-wall-loading { margin: 0 !important; }
+.pit-wall-official { margin-top: 13px; padding: 12px; border: 1px solid rgba(55,230,208,.2); border-radius: 10px; background: rgba(55,230,208,.035); }
+.pit-wall-official > span,
+.pit-wall-official div > span { display: block; color: #77ead9; font-size: .64rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.pit-wall-official p { margin-top: 6px; font-size: .74rem; }
+.pit-wall-official form { margin-top: 9px; }
+.pit-wall-official form > div { display: flex; gap: 7px; }
+.pit-wall-official input { min-width: 0; flex: 1; padding: 9px 10px; border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); background: var(--bg-primary); }
+.pit-wall-official form button { padding: 9px 12px; border: 0; border-radius: 8px; color: #061c18; background: #55e3cf; font-weight: 800; cursor: pointer; }
+.pit-wall-official.linked { display: flex; justify-content: space-between; gap: 14px; align-items: center; }
+.pit-wall-official.linked strong,
+.pit-wall-official.linked small { display: block; }
+.pit-wall-official.linked strong { margin-top: 3px; font-size: .82rem; }
+.pit-wall-official.linked small { margin-top: 3px; color: var(--text-muted); font-size: .66rem; }
+.pit-wall-link-danger { padding: 9px 10px; border: 1px solid rgba(239,68,68,.28); border-radius: 8px; color: #f5abab; background: transparent; font-size: .7rem; font-weight: 750; cursor: pointer; }
+.pit-wall-search-results { display: grid; gap: 6px; margin-top: 8px; }
+.pit-wall-search-results > span { color: var(--text-muted); font-size: .7rem; }
+.pit-wall-search-results button { display: flex; justify-content: space-between; gap: 10px; padding: 9px 10px; border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); background: rgba(255,255,255,.025); text-align: left; cursor: pointer; }
+.pit-wall-search-results strong,
+.pit-wall-search-results small { font-size: .7rem; }
+.pit-wall-search-results small { color: var(--text-muted); }
 
 @media (max-width: 620px) {
     .pit-wall-heading { display: grid; }
     .pit-wall-badge { width: fit-content; }
     .pit-wall-signin > div,
-    .pit-wall-actions { align-items: stretch; flex-direction: column; }
+    .pit-wall-actions,
+    .pit-wall-official form > div,
+    .pit-wall-official.linked { align-items: stretch; flex-direction: column; }
     .pit-wall-signin button,
     .pit-wall-save,
     .pit-wall-secondary { width: 100%; }

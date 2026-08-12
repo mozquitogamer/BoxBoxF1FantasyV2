@@ -5,8 +5,15 @@
   "framework": null,
   "trailingSlash": true,
   "functions": {
-    "api/members/notify.js": { "maxDuration": 60 }
+    "api/members/notify.js": { "maxDuration": 60 },
+    "api/cron/f1-team-sync.js": { "maxDuration": 60 }
   },
+  "crons": [
+    {
+      "path": "/api/cron/f1-team-sync",
+      "schedule": "15 3 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/data/(.*)",
