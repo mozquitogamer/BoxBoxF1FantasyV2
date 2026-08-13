@@ -4,6 +4,10 @@
     let dashboard = null;
     let panel = null;
 
+    function announceAuthChange() {
+        window.dispatchEvent(new CustomEvent('boxbox:member-auth-changed', { detail: { source: 'member-panel' } }));
+    }
+
     function escapeHtml(value) {
         return String(value ?? '')
             .replace(/&/g, '&amp;')
@@ -62,6 +66,8 @@
                 const result = await request('/api/members/sign-in/', { method: 'POST', body: { email, password: form.elements.password.value } });
                 status(result.message, 'success');
                 await loadSession();
+                announceAuthChange();
+                window.BoxBoxOpenPitWall?.();
             } catch (error) {
                 status(error.message, 'error');
             } finally {
@@ -117,7 +123,8 @@
             ? `<div class="pit-wall-official linked"><div><span>Official F1 team</span><strong>${escapeHtml(f1Link.official_team_name)} · T${f1Link.team_slot}</strong><small>${f1Link.last_synced_at ? `Last synced ${friendlyDate(f1Link.last_synced_at)}` : 'Linked · waiting for first sync'}${f1Snapshot?.round ? ` · Round ${f1Snapshot.round}` : ''}</small></div><div class="pit-wall-actions"><button type="button" class="pit-wall-secondary" id="pitWallSyncF1">Sync now</button><button type="button" class="pit-wall-link-danger" id="pitWallDisconnectF1">Disconnect</button></div></div>`
             : `<div class="pit-wall-official"><span>Official F1 Fantasy sync</span><p>Join the <strong>Box Box F1 Fantasy</strong> league, then link one official team. We never ask for your F1 password.</p><form id="pitWallF1Search"><div><input name="team_name" type="search" placeholder="Search your official team name" minlength="2" required><button type="submit">Find team</button></div></form><div class="pit-wall-search-results" id="pitWallF1Results"></div></div>`;
 
-        panel.innerHTML = `<div class="pit-wall-heading">
+        panel.innerHTML = `<div class="pit-wall-signed-in"><strong>✓ Signed in to Pit Wall</strong><span>Your saved team and personalized suggestions are connected to this account.</span></div>
+        <div class="pit-wall-heading">
             <div><span>Pit Wall account</span><h4>${escapeHtml(dashboard.email)}</h4></div>
             <span class="pit-wall-badge ${active ? 'active' : 'inactive'}">${active ? `Active${ending ? ` to ${ending}` : ''}` : 'Membership inactive'}</span>
         </div>
@@ -209,6 +216,7 @@
             await request('/api/members/sign-out/', { method: 'POST' }).catch(() => null);
             dashboard = null;
             renderLoggedOut('Signed out.');
+            announceAuthChange();
         });
     }
 
@@ -245,9 +253,8 @@
         if (!panel) return;
         renderLoggedOut();
         loadSession();
-        if (new URLSearchParams(location.search).get('pitwall') === '1') {
-            document.querySelector('.mode-btn[data-mode="transfers"]')?.click();
-            window.setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250);
-        }
+        window.addEventListener('boxbox:member-auth-changed', event => {
+            if (event.detail?.source !== 'member-panel') loadSession(false);
+        });
     });
 })();
