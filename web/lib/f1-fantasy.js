@@ -340,9 +340,8 @@ function extractSnapshot(payload, link, round, rosterPayload = null) {
         const teamIds = allObjects.find(row => Array.isArray(first(row, ['playerid', 'player_id', 'playerIds', 'player_ids'])));
         const roster = rosterPayload ? rosterByPlayerId(rosterPayload) : new Map();
         console.warn('[f1-sync] lineup ID resolution failed', JSON.stringify({
-            teamIds: first(teamIds, ['playerid', 'player_id', 'playerIds', 'player_ids']) || [],
+            teamIdCount: (first(teamIds, ['playerid', 'player_id', 'playerIds', 'player_ids']) || []).length,
             rosterKeyCount: roster.size,
-            rosterKeySample: [...roster.keys()].slice(0, 20),
         }));
         const error = new Error(`F1 Fantasy returned an incomplete lineup (${drivers} drivers and ${constructors} constructors). Your saved team was not changed.`);
         error.code = 'F1_INCOMPLETE_LINEUP';

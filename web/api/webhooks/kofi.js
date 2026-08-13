@@ -23,10 +23,15 @@ function parseKofiPayload(req) {
     return body && typeof body === 'object' ? body : {};
 }
 
-function withoutVerificationToken(payload) {
-    const safe = { ...payload };
-    delete safe.verification_token;
-    return safe;
+function sanitizedKofiPayload(payload) {
+    return {
+        timestamp: payload.timestamp || null,
+        amount: payload.amount || null,
+        currency: payload.currency || null,
+        is_first_subscription_payment: payload.is_first_subscription_payment === true
+            || String(payload.is_first_subscription_payment).toLowerCase() === 'true',
+        kofi_transaction_id: payload.kofi_transaction_id || null,
+    };
 }
 
 function paidUntil(timestamp) {
@@ -137,7 +142,7 @@ module.exports = async function kofiWebhook(req, res) {
                     event_type: String(payload.type || 'Subscription'),
                     payment_email: email,
                     tier_name: tierName,
-                    payload: withoutVerificationToken(payload),
+                    payload: sanitizedKofiPayload(payload),
                 },
             });
         }
@@ -198,3 +203,4 @@ module.exports = async function kofiWebhook(req, res) {
 module.exports.findOrCreateMember = findOrCreateMember;
 module.exports.paidUntil = paidUntil;
 module.exports.parseKofiPayload = parseKofiPayload;
+module.exports.sanitizedKofiPayload = sanitizedKofiPayload;

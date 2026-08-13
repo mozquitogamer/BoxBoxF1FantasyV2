@@ -88,6 +88,8 @@ test('opens registration before the Round 22 lock and closes it at the deadline'
 test('creates and verifies a signed subscription token', () => {
     const now = Date.parse('2026-07-21T10:00:00Z');
     const token = createSubscriptionToken('Fan@Example.com', 'test-secret', 48, now);
+    assert.match(token, /^v2\./);
+    assert.equal(token.includes(Buffer.from('fan@example.com').toString('base64url')), false);
     assert.deepEqual(verifySubscriptionToken(token, 'test-secret', now + 1000), {
         email: 'fan@example.com',
         exp: now + 48 * 60 * 60 * 1000,

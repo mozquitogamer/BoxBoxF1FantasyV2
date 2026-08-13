@@ -12,6 +12,7 @@ const {
     restRequest,
     setSessionCookies,
 } = require('../../lib/member-system');
+const { consumeRateLimit, rateLimited } = require('../../lib/rate-limit');
 
 const GENERIC_ERROR = 'That email or password was not accepted.';
 
@@ -37,6 +38,8 @@ module.exports = async function signIn(req, res) {
     if (!isValidEmail(email) || password.length < 8 || password.length > 128) {
         return res.status(401).json({ ok: false, message: GENERIC_ERROR });
     }
+    const throttle = consumeRateLimit(req, 'member-sign-in', { limit: 10, windowMs: 10 * 60 * 1000 });
+    if (!throttle.allowed) return rateLimited(res, throttle, GENERIC_ERROR);
 
     try {
         const session = await authPublicRequest('/token?grant_type=password', {

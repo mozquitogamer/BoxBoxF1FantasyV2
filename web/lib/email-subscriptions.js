@@ -21,25 +21,47 @@ function isValidEmail(email) {
     return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function base64urlJson(value) {
-    return Buffer.from(JSON.stringify(value), 'utf8').toString('base64url');
-}
-
 function signPayload(payload, secret) {
     return crypto.createHmac('sha256', secret).update(payload).digest('base64url');
 }
 
 function createSubscriptionToken(email, secret, ttlHours = DEFAULT_TTL_HOURS, now = Date.now()) {
     if (!secret) throw new Error('SUBSCRIPTION_SIGNING_SECRET is not configured');
-    const payload = base64urlJson({
+    const payload = Buffer.from(JSON.stringify({
         email: normalizeEmail(email),
         exp: now + Number(ttlHours || DEFAULT_TTL_HOURS) * 60 * 60 * 1000,
-    });
-    return `${payload}.${signPayload(payload, secret)}`;
+    }), 'utf8');
+    const iv = crypto.randomBytes(12);
+    const key = crypto.createHash('sha256').update(String(secret)).digest();
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+    cipher.setAAD(Buffer.from('boxbox-beat-v13:v2'));
+    const ciphertext = Buffer.concat([cipher.update(payload), cipher.final()]);
+    return `v2.${iv.toString('base64url')}.${ciphertext.toString('base64url')}.${cipher.getAuthTag().toString('base64url')}`;
 }
 
 function verifySubscriptionToken(token, secret, now = Date.now()) {
     if (!secret || typeof token !== 'string') return null;
+    const encrypted = token.split('.');
+    if (encrypted.length === 4 && encrypted[0] === 'v2') {
+        try {
+            const key = crypto.createHash('sha256').update(String(secret)).digest();
+            const decipher = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(encrypted[1], 'base64url'));
+            decipher.setAAD(Buffer.from('boxbox-beat-v13:v2'));
+            decipher.setAuthTag(Buffer.from(encrypted[3], 'base64url'));
+            const cleartext = Buffer.concat([
+                decipher.update(Buffer.from(encrypted[2], 'base64url')),
+                decipher.final(),
+            ]);
+            const decoded = JSON.parse(cleartext.toString('utf8'));
+            const email = normalizeEmail(decoded.email);
+            if (!isValidEmail(email) || !Number.isFinite(decoded.exp) || decoded.exp < now) return null;
+            return { email, exp: decoded.exp };
+        } catch (_) {
+            return null;
+        }
+    }
+
+    // Accept previously issued signed tokens until their short expiration passes.
     const [payload, suppliedSignature, extra] = token.split('.');
     if (!payload || !suppliedSignature || extra) return null;
 
@@ -59,12 +81,19 @@ function verifySubscriptionToken(token, secret, now = Date.now()) {
 }
 
 function getConfig() {
+    const rawSiteOrigin = (process.env.SITE_ORIGIN || DEFAULT_SITE_ORIGIN).replace(/\/$/, '');
+    let siteOrigin;
+    try { siteOrigin = new URL(rawSiteOrigin).origin; }
+    catch (_) { throw new Error('SITE_ORIGIN is not a valid URL'); }
+    if (process.env.VERCEL_ENV === 'production' && !siteOrigin.startsWith('https://')) {
+        throw new Error('SITE_ORIGIN must use HTTPS in production');
+    }
     const config = {
         apiKey: process.env.RESEND_API_KEY || '',
         from: process.env.RESEND_FROM || '',
         segmentId: process.env.RESEND_SIM_UPDATES_SEGMENT_ID || '',
         signingSecret: process.env.SUBSCRIPTION_SIGNING_SECRET || '',
-        siteOrigin: (process.env.SITE_ORIGIN || DEFAULT_SITE_ORIGIN).replace(/\/$/, ''),
+        siteOrigin,
         ttlHours: Number(process.env.SUBSCRIPTION_TOKEN_TTL_HOURS || DEFAULT_TTL_HOURS),
     };
 
@@ -97,16 +126,27 @@ async function resendRequest(path, apiKey, options = {}) {
     return data;
 }
 
-function requestOrigin(req) {
-    const forwardedProto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
-    const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim();
-    return host ? `${forwardedProto}://${host}` : '';
+function allowedSiteOrigins(siteOrigin) {
+    const allowed = new Set([String(siteOrigin || '').replace(/\/$/, '')].filter(Boolean));
+    try {
+        const parsed = new URL(siteOrigin);
+        if (parsed.protocol === 'https:' && parsed.hostname === 'boxboxf1fantasy.com') {
+            parsed.hostname = 'www.boxboxf1fantasy.com';
+            allowed.add(parsed.origin);
+        } else if (parsed.protocol === 'https:' && parsed.hostname === 'www.boxboxf1fantasy.com') {
+            parsed.hostname = 'boxboxf1fantasy.com';
+            allowed.add(parsed.origin);
+        }
+    } catch (_) {
+        // Invalid origins are never added.
+    }
+    return allowed;
 }
 
 function isAllowedRequestOrigin(req, siteOrigin) {
     const origin = String(req.headers.origin || '').replace(/\/$/, '');
     if (!origin) return process.env.VERCEL_ENV !== 'production';
-    return origin === siteOrigin || origin === requestOrigin(req);
+    return allowedSiteOrigins(siteOrigin).has(origin);
 }
 
 function htmlPage(title, message, success) {
