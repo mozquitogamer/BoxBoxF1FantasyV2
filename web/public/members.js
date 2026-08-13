@@ -45,14 +45,14 @@
 
     function renderLoggedOut(message = '') {
         panel.innerHTML = `<div class="pit-wall-heading">
-            <div><span>Paid Pit Wall account · $5/month</span><h4>Save and sync your team</h4></div>
-            <span class="pit-wall-badge">Ko-fi members</span>
+            <div><span>Optional Pit Wall convenience · $5/month</span><h4>Connect your real team to this advisor</h4></div>
+            <span class="pit-wall-badge">Members only</span>
         </div>
-        <p>This sign-in is only for active Pit Wall members. It is separate from free Beat V13 email registration.</p>
+        <p>The Transfer Advisor itself is free. Pit Wall members can sign in here to remember and sync their official lineup, then receive advice personalized to it.</p>
         <form class="pit-wall-signin" id="pitWallSignInForm">
             <div class="pit-wall-fields"><label for="pitWallEmail">Ko-fi membership email</label><input id="pitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><label for="pitWallPassword">Password</label><input id="pitWallPassword" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required><button type="submit">Sign in</button></div>
         </form>
-        <div class="pit-wall-links"><button type="button" class="pit-wall-text-button" id="pitWallResetPassword">Create or reset password</button><a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join or renew on Ko-fi</a><a href="/#beatbot">Enter Beat V13 free instead</a></div>
+        <div class="pit-wall-links"><button type="button" class="pit-wall-text-button" id="pitWallResetPassword">Create or reset password</button><a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">See Pit Wall benefits on Ko-fi</a><a href="/#beatbot">Beat V13 entry is free</a></div>
         <p class="pit-wall-status${message ? ' success' : ''}" id="pitWallStatus" role="status" aria-live="polite">${escapeHtml(message)}</p>`;
 
         panel.querySelector('#pitWallSignInForm')?.addEventListener('submit', async event => {

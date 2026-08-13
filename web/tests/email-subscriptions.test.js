@@ -6,11 +6,22 @@ const test = require('node:test');
 const {
     BEAT_V13_REGISTRATION_DEADLINE,
     createSubscriptionToken,
+    beatV13BrowserCookie,
     isBeatV13RegistrationOpen,
     isValidEmail,
     normalizeEmail,
     verifySubscriptionToken,
 } = require('../lib/email-subscriptions');
+
+test('marks a confirmed Beat V13 entry without storing personal data', () => {
+    const cookie = beatV13BrowserCookie(3600);
+    assert.match(cookie, /^__Host-boxbox_beat_v13=confirmed;/);
+    assert.match(cookie, /Path=\//);
+    assert.match(cookie, /Max-Age=3600/);
+    assert.match(cookie, /Secure/);
+    assert.match(cookie, /SameSite=Strict/);
+    assert.doesNotMatch(cookie, /@/);
+});
 const subscribeHandler = require('../api/email/subscribe');
 const confirmHandler = require('../api/email/confirm');
 const statusHandler = require('../api/email/status');
@@ -204,6 +215,8 @@ test('confirm handler adds a verified address to the alert segment', async () =>
 
         assert.equal(res.statusCode, 200);
         assert.match(res.body, /registered/);
+        assert.match(res.body, /View Beat V13/);
+        assert.match(res.headers['Set-Cookie'], /^__Host-boxbox_beat_v13=confirmed;/);
         assert.equal(calls.length, 2);
         assert.equal(calls[0].url, 'https://api.resend.com/segments/segment_test');
         assert.equal(calls[1].url, 'https://api.resend.com/contacts');
