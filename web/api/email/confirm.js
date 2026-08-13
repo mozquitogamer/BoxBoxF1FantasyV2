@@ -4,6 +4,7 @@ const {
     getConfig,
     htmlPage,
     isBeatV13RegistrationOpen,
+    beatV13BrowserCookie,
     resendRequest,
     verifySubscriptionToken,
 } = require('../../lib/email-subscriptions');
@@ -67,10 +68,13 @@ module.exports = async function confirm(req, res) {
             }
         }
 
+        res.setHeader('Set-Cookie', beatV13BrowserCookie());
         return res.status(200).send(htmlPage(
             "You're registered",
             "Your free Beat V13 entry is confirmed. After the season, we'll send instructions to submit one official F1 Fantasy team and its full-season score screenshot. You'll also get concise V13 and simulation updates, and every alert includes an unsubscribe link.",
-            true
+            true,
+            '/#beatbot',
+            'View Beat V13'
         ));
     } catch (error) {
         console.error('Could not confirm subscription:', error.message);

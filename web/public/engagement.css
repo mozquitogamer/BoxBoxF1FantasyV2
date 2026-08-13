@@ -97,6 +97,9 @@
 }
 .email-updates-status[data-state="success"] { color: var(--green, #22c55e); }
 .email-updates-status[data-state="error"] { color: var(--red, #ef4444); }
+.email-updates-panel.is-confirmed { grid-template-columns: 1fr auto; border-color: rgba(34, 197, 94, .34); background: linear-gradient(135deg, rgba(34, 197, 94, .08), rgba(55, 230, 208, .05)); }
+.email-updates-panel.is-confirmed .email-updates-eyebrow { color: var(--green, #22c55e); }
+.email-updates-confirmed-action { display:inline-flex; align-items:center; justify-content:center; padding:10px 15px; border-radius:7px; color:#071915; background:#55e3cf; font-size:.78rem; font-weight:800; text-decoration:none; white-space:nowrap; }
 .email-updates-honeypot {
     position: absolute !important;
     width: 1px !important;
@@ -107,11 +110,14 @@
 }
 .pit-wall-account-button { flex:none; padding:9px 13px; border:1px solid var(--accent,#e10600); border-radius:7px; background:rgba(225,6,0,.1); color:var(--text,#e9edf3); font:inherit; font-size:.76rem; font-weight:800; cursor:pointer; white-space:nowrap; }
 .pit-wall-account-button:hover { background:var(--accent,#e10600); color:#fff; }
+.pit-wall-account-button.active { border-color:rgba(34,197,94,.55); background:rgba(34,197,94,.12); color:#9bf0cf; }
+.pit-wall-account-button.active:hover { background:rgba(34,197,94,.22); color:#c8ffe9; }
 .pit-wall-account-button.floating { position:fixed; z-index:900; top:14px; right:14px; box-shadow:0 8px 24px rgba(0,0,0,.28); }
 .pit-wall-login-modal[hidden] { display:none !important; }
 .pit-wall-login-modal { position:fixed; inset:0; z-index:1100; display:grid; place-items:center; padding:18px; }
 .pit-wall-login-backdrop { position:absolute; inset:0; background:rgba(3,6,12,.76); backdrop-filter:blur(4px); }
 .pit-wall-login-dialog { position:relative; width:min(480px,100%); padding:26px; border:1px solid var(--border,#2a3341); border-radius:12px; background:var(--bg-card,#12161f); color:var(--text,#e9edf3); box-shadow:0 24px 70px rgba(0,0,0,.48); }
+.access-hub-dialog { width:min(860px,100%); max-height:min(860px,calc(100vh - 36px)); overflow:auto; }
 .pit-wall-login-close { position:absolute; top:9px; right:11px; border:0; background:none; color:var(--text-secondary,#9aa4b2); font-size:1.65rem; cursor:pointer; }
 .pit-wall-login-eyebrow { color:var(--accent,#e10600); font-size:.68rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
 .pit-wall-login-dialog h2 { margin:7px 28px 9px 0; font-size:1.35rem; }
@@ -130,6 +136,35 @@
 .pit-wall-login-reset { margin:0 10px 8px 0; padding:0; border:0; background:transparent; color:#a78bfa; font:inherit; font-size:.76rem; font-weight:750; cursor:pointer; }
 .pit-wall-login-actions { display:flex; align-items:center; gap:9px; }
 .pit-wall-login-actions button { padding:9px 12px; border:1px solid var(--border,#2a3341); border-radius:7px; background:transparent; color:inherit; cursor:pointer; }
+.access-hub-intro { max-width:720px; margin-bottom:16px; }
+.access-status-strip { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:14px 0 18px; }
+.access-status-strip span { display:grid; gap:3px; padding:10px 12px; border:1px solid var(--border,#2a3341); border-radius:9px; background:rgba(255,255,255,.025); }
+.access-status-strip small { color:var(--text-secondary,#9aa4b2); font-size:.63rem; font-weight:750; letter-spacing:.06em; text-transform:uppercase; }
+.access-status-strip strong { font-size:.76rem; }
+.access-hub-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.access-hub-card { padding:18px; border:1px solid var(--border,#2a3341); border-radius:12px; background:rgba(255,255,255,.02); }
+.access-hub-card.free-access-card { border-color:rgba(55,230,208,.25); background:linear-gradient(145deg,rgba(55,230,208,.055),rgba(255,255,255,.015)); }
+.access-hub-card.pit-wall-access-card { border-color:rgba(139,92,246,.3); background:linear-gradient(145deg,rgba(139,92,246,.075),rgba(255,255,255,.015)); }
+.access-hub-card.pit-wall-access-card.is-active { border-color:rgba(34,197,94,.34); }
+.access-hub-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.access-hub-card h3 { margin:5px 0 0; font-size:1.03rem; }
+.access-hub-card p { margin:11px 0; font-size:.78rem; }
+.access-hub-card ul { display:grid; gap:7px; margin:12px 0 16px; padding:0; list-style:none; }
+.access-hub-card li { position:relative; padding-left:18px; color:var(--text-secondary,#9aa4b2); font-size:.74rem; line-height:1.4; }
+.access-hub-card li::before { content:'✓'; position:absolute; left:0; color:#55e3cf; font-weight:900; }
+.access-tier-label { display:inline-flex; padding:4px 7px; border-radius:999px; font-size:.6rem; font-weight:850; letter-spacing:.06em; text-transform:uppercase; }
+.access-tier-label.free { color:#7ef3e3; background:rgba(55,230,208,.11); }
+.access-tier-label.paid { color:#d8ccff; background:rgba(139,92,246,.16); }
+.access-state { flex:0 0 auto; color:var(--text-secondary,#9aa4b2); font-size:.64rem; }
+.access-state.active { color:#9bf0cf; }
+.access-entry-state { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 13px; padding:9px 10px; border-radius:8px; background:rgba(0,0,0,.14); color:var(--text-secondary,#9aa4b2); font-size:.68rem; }
+.access-entry-state strong { color:var(--text,#e9edf3); }
+.access-entry-state.confirmed strong { color:#9bf0cf; }
+.access-hub-action { display:inline-flex; padding:9px 12px; border-radius:7px; color:#061c18; background:#55e3cf; font-size:.74rem; font-weight:800; text-decoration:none; }
+.pit-wall-member-signin { margin-top:14px; padding-top:14px; border-top:1px solid rgba(139,92,246,.2); }
+.pit-wall-member-signin h4 { margin:0 0 9px; font-size:.8rem; }
+.pit-wall-member-signin form { display:grid; gap:7px; }
+.pit-wall-login-links { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
 .adsense-banner {
     position: relative;
     width: min(970px, calc(100% - 20px));
@@ -214,6 +249,11 @@
 }
 @media (max-width: 700px) {
     .email-updates-panel { grid-template-columns: 1fr; gap: 16px; }
+    .email-updates-panel.is-confirmed,
+    .access-status-strip,
+    .access-hub-grid { grid-template-columns:1fr; }
+    .access-status-strip { gap:5px; }
+    .access-hub-card-head { align-items:flex-start; flex-direction:column; }
 }
 @media (max-width: 520px) {
     .email-updates-fields { flex-direction: column; }

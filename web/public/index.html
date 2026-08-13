@@ -41,7 +41,7 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="manifest" href="/site.webmanifest">
     <link rel="stylesheet" href="styles.css?v=29">
-    <link rel="stylesheet" href="engagement.css?v=5">
+    <link rel="stylesheet" href="engagement.css?v=6">
     <link rel="stylesheet" href="scenarios.css?v=3">
     <link rel="stylesheet" href="weather.css?v=2">
     <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -530,7 +530,7 @@
                 </div>
 
                 <section class="email-updates-panel" data-email-updates data-registration-location="optimizer" aria-labelledby="optimizerRegistrationTitle" hidden>
-                    <div class="email-updates-copy"><span class="email-updates-eyebrow">Free competition entry &middot; No account needed</span><h2 id="optimizerRegistrationTitle">Enter Beat V13 by email</h2><p>This free signup enters the challenge and joins the Beat V13 mailing list. It does not create a Pit Wall account.</p></div>
+                    <div class="email-updates-copy"><span class="email-updates-eyebrow">Beat V13 &middot; Free email entry</span><h2 id="optimizerRegistrationTitle">Put your season score against the bot</h2><p>Confirm your email to enter Beat V13 and receive general V13, simulation and competition updates. No password, payment or Pit Wall membership is required.</p></div>
                     <form class="email-updates-form" novalidate><div class="email-updates-fields"><label class="sr-only">Email address</label><input name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required><button type="submit">Register free</button></div><div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div><label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Register me for Beat V13 and email me V13, simulation and competition updates. I can unsubscribe at any time.</span></label><p class="email-updates-privacy">Handled according to the <a href="/privacy/">privacy policy</a>.</p><p class="email-updates-status" role="status" aria-live="polite"></p></form>
                 </section>
 
@@ -963,7 +963,7 @@
             <!-- Beat V13 Tab -->
             <section class="tab-content" id="tab-beatbot">
                 <section class="email-updates-panel" data-email-updates data-registration-location="beat_v13" aria-labelledby="v13RegistrationTitleTop" hidden>
-                    <div class="email-updates-copy"><span class="email-updates-eyebrow">Free competition entry &middot; No account needed</span><h2 id="v13RegistrationTitleTop">Enter Beat V13 by email</h2><p>Confirm your email before the Round 22 lock. This also joins the free V13 mailing list; it does not create a Pit Wall account.</p></div>
+                    <div class="email-updates-copy"><span class="email-updates-eyebrow">Beat V13 &middot; Free email entry</span><h2 id="v13RegistrationTitleTop">Join the challenge</h2><p>Confirm your email before the Round 22 lock to enter. You can follow V13 and use every public tool without a password; Pit Wall is a separate optional membership.</p></div>
                     <form class="email-updates-form" novalidate><div class="email-updates-fields"><label class="sr-only">Email address</label><input name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required><button type="submit">Register free</button></div><div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div><label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Register me for Beat V13 and email me V13, simulation and competition updates. I can unsubscribe at any time.</span></label><p class="email-updates-privacy">Handled according to the <a href="/privacy/">privacy policy</a>.</p><p class="email-updates-status" role="status" aria-live="polite"></p></form>
                 </section>
                 <div class="v13-root" id="v13Root" aria-live="polite">
@@ -1149,14 +1149,14 @@
                     </div>
 
                     <div class="about-section access-explainer">
-                        <h2>Free Email List vs Pit Wall Membership</h2>
-                        <p class="about-section-intro">These are two separate signups. You can use either one, both, or neither.</p>
+                        <h2>Choose the access that suits you</h2>
+                        <p class="about-section-intro">The core site is free. Beat V13 adds a free email entry; Pit Wall is the optional convenience upgrade. They are separate, and you can use either or both.</p>
                         <div class="access-explainer-grid">
-                            <article><span class="access-label free">Free · email only</span><h3>Beat V13 + mailing list</h3><p>Enter the Beat V13 competition and receive V13 decisions, simulation updates and competition instructions. Confirming this email does <strong>not</strong> create a site account.</p><button type="button" class="access-action" data-open-tab="beatbot">Enter Beat V13 free</button></article>
-                            <article><span class="access-label public">Free · no login</span><h3>Public predictions and tools</h3><p>Browse predictions, simulations, the optimizer, Transfer Advisor, planners and the public accuracy history without signing in or paying.</p><button type="button" class="access-action secondary" data-open-tab="optimizer">Open the optimizer</button></article>
-                            <article><span class="access-label paid">Paid · $5/month</span><h3>Pit Wall membership</h3><p>Join on Ko-fi, create your password once using that same email, then sign in normally. Pit Wall remembers and syncs your official team and sends personalized suggestions when new simulations arrive.</p><div class="access-actions"><button type="button" class="access-action" id="aboutPitWallSignIn">Pit Wall member sign-in</button><a class="access-action secondary" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join on Ko-fi</a></div></article>
+                            <article><span class="access-label public">Always free · active for everyone</span><h3>Predictions and tools</h3><p>Use the simulations, optimizer, Transfer Advisor, planners, V13 history and public accuracy record without an account or payment.</p><button type="button" class="access-action secondary" data-open-tab="optimizer">Open the optimizer</button></article>
+                            <article><span class="access-label free">Free · confirm by email</span><h3>Beat V13 entry</h3><p>Enter the competition and receive general V13 decisions, simulation updates and submission instructions. This is an email entry—not a password account.</p><button type="button" class="access-action" data-open-tab="beatbot">Enter Beat V13 free</button></article>
+                            <article><span class="access-label paid">Optional · $5/month</span><h3>Pit Wall membership</h3><p>Join on Ko-fi, then use a password to access the convenience layer: official-team memory and syncing, personalized transfer advice, plus early-thoughts and post-FP updates tailored to your lineup.</p><div class="access-actions"><button type="button" class="access-action" id="aboutPitWallSignIn">See my access / sign in</button><a class="access-action secondary" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join Pit Wall</a></div></article>
                         </div>
-                        <p class="access-footnote"><strong>Important:</strong> registering for Beat V13 does not unlock Pit Wall. Pit Wall access is activated from a verified Ko-fi membership payment tied to the same email used at sign-in.</p>
+                        <p class="access-footnote"><strong>The simple rule:</strong> Beat V13 uses email confirmation. Pit Wall uses a password and is activated by a verified Ko-fi membership. Free entrants can still see V13’s public score and the full competition history.</p>
                     </div>
 
                     <h2>How It Works</h2>
@@ -1285,9 +1285,9 @@
             <!-- Enabled only when the server confirms that email delivery is configured. -->
             <section class="email-updates-panel" id="emailUpdatesPanel" aria-labelledby="emailUpdatesTitle" hidden>
                 <div class="email-updates-copy">
-                    <span class="email-updates-eyebrow">Free competition entry &middot; No account needed</span>
-                    <h2 id="emailUpdatesTitle">Enter Beat V13 by email</h2>
-                    <p>This free signup enters the challenge and joins the V13 update mailing list. It is separate from the paid Pit Wall member account.</p>
+                    <span class="email-updates-eyebrow">Beat V13 &middot; Free email entry</span>
+                    <h2 id="emailUpdatesTitle">Take your shot at the bot</h2>
+                    <p>Confirm your email to enter the challenge and receive general updates. No password or payment is required; Pit Wall remains a separate optional membership.</p>
                 </div>
                 <form class="email-updates-form" id="emailUpdatesForm" novalidate>
                     <div class="email-updates-fields">
@@ -1340,9 +1340,8 @@
             <p id="v13PopupBody">V13 has its own budget, risk rules, transfers and chips. Follow every decision, then take your shot at the $180 prize pool.</p>
             <div class="v13-popup-actions">
                 <button class="btn-primary" id="v13PopupExplore" type="button">Enter Beat V13</button>
-                <a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener" class="v13-popup-support">Pit Wall &middot; $5/mo</a>
             </div>
-            <p class="v13-popup-fineprint">Registration is open now and free. Confirm your email before the Round 22 Las Vegas F1 Fantasy team lock&mdash;the third-last race&mdash;on 21 November 2026 at 04:00 UTC.</p>
+            <p class="v13-popup-fineprint">Free email entry. No password, payment or Pit Wall membership required. Confirm before the Round 22 Las Vegas team lock on 21 November 2026 at 04:00 UTC.</p>
         </div>
     </div>
 
@@ -1374,7 +1373,7 @@
 
     <script src="scenarios.js?v=3"></script>
     <script src="app.js?v=125"></script>
-    <script src="members.js?v=12"></script>
-    <script src="engagement.js?v=9"></script>
+    <script src="members.js?v=13"></script>
+    <script src="engagement.js?v=10"></script>
 </body>
 </html>

@@ -7,9 +7,14 @@ const DEFAULT_SITE_ORIGIN = 'https://boxboxf1fantasy.com';
 const DEFAULT_TTL_HOURS = 48;
 const BEAT_V13_REGISTRATION_DEADLINE = '2026-11-21T04:00:00Z';
 const BEAT_V13_REGISTRATION_DEADLINE_MS = Date.parse(BEAT_V13_REGISTRATION_DEADLINE);
+const BEAT_V13_BROWSER_COOKIE = '__Host-boxbox_beat_v13';
 
 function isBeatV13RegistrationOpen(now = Date.now()) {
     return Number.isFinite(now) && now < BEAT_V13_REGISTRATION_DEADLINE_MS;
+}
+
+function beatV13BrowserCookie(maxAgeSeconds = 365 * 24 * 60 * 60) {
+    return `${BEAT_V13_BROWSER_COOKIE}=confirmed; Path=/; Max-Age=${Math.max(0, Math.floor(maxAgeSeconds))}; Secure; SameSite=Strict`;
 }
 
 function normalizeEmail(value) {
@@ -149,7 +154,7 @@ function isAllowedRequestOrigin(req, siteOrigin) {
     return allowedSiteOrigins(siteOrigin).has(origin);
 }
 
-function htmlPage(title, message, success) {
+function htmlPage(title, message, success, actionHref = '/', actionLabel = 'Open predictions') {
     const accent = success ? '#22c55e' : '#ef4444';
     return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -160,12 +165,14 @@ function htmlPage(title, message, success) {
 <p style="margin:0 0 8px;color:#aab4c3;font-size:14px">BoxBox<span style="color:#e10600">F1</span>Fantasy</p>
 <h1 style="margin:0 0 14px;font-size:28px">${title}</h1>
 <p style="margin:0 0 24px;color:#c7d0dc;line-height:1.6">${message}</p>
-<a href="/" style="display:inline-block;padding:11px 18px;border-radius:8px;background:#e10600;color:#fff;text-decoration:none;font-weight:700">Open predictions</a>
+<a href="${actionHref}" style="display:inline-block;padding:11px 18px;border-radius:8px;background:#e10600;color:#fff;text-decoration:none;font-weight:700">${actionLabel}</a>
 </div></main></body></html>`;
 }
 
 module.exports = {
     BEAT_V13_REGISTRATION_DEADLINE,
+    BEAT_V13_BROWSER_COOKIE,
+    beatV13BrowserCookie,
     createSubscriptionToken,
     getConfig,
     htmlPage,
