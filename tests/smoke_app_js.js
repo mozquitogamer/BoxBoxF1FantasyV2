@@ -60,6 +60,7 @@ src += `
     finalFixProjectedRacePoints: typeof ffProjectedRacePoints === 'function' ? ffProjectedRacePoints : null,
     hasOfficialRoundCoverageCheck: typeof officialRoundHasCompleteScores === 'function',
     hasBudgetFuturePointValue: typeof budgetFuturePointValue === 'function',
+    hasOpenPitWallTransferAdvisor: typeof openPitWallTransferAdvisor === 'function',
     budgetFuturePointValue: typeof budgetFuturePointValue === 'function' ? budgetFuturePointValue : null,
     renderSwapRow: typeof renderSwapRow === 'function' ? renderSwapRow : null,
     renderTransferCard: typeof renderTransferCard === 'function' ? renderTransferCard : null,
@@ -121,6 +122,7 @@ for (const [k, label] of [
   ['hasFinalFixRacePoints', 'calculateFinalFixRacePoints'],
   ['hasOfficialRoundCoverageCheck', 'officialRoundHasCompleteScores'],
   ['hasBudgetFuturePointValue', 'budgetFuturePointValue'],
+  ['hasOpenPitWallTransferAdvisor', 'openPitWallTransferAdvisor'],
 ]) {
   if (!S[k]) fail(`${label} is not defined as a function`);
 }

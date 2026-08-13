@@ -628,7 +628,7 @@ function renderV13() {
             </div>
             <div class="v13-membership-benefits">
                 <div><strong>Live now</strong><span>Save your team and budget once; get a tailored early-thoughts or post-FP suggestion when simulations update.</span></div>
-                <div><strong>Private by design</strong><span>Passwordless sign-in and row-level privacy keep each member’s lineup visible only to that member.</span></div>
+                <div><strong>Private by design</strong><span>Password sign-in and row-level privacy keep each member’s lineup visible only to that member.</span></div>
                 <small>Paid members get faster delivery and personalization, never hidden contest data or a private prediction advantage.</small>
             </div>
         </section>
@@ -796,6 +796,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupTabs();
     setupControls();
     setupV13Popup();
+
+    // The Pit Wall account entry point can load before the optimizer controls
+    // have attached their click handlers. Resolve the deep link here, after
+    // setupControls(), so members reliably land on Transfer Advisor instead of
+    // the default fresh-lineup mode.
+    try {
+        if (new URLSearchParams(location.search).get('pitwall') === '1') {
+            openPitWallTransferAdvisor();
+        }
+    } catch (e) {}
 
     // Phase 2: Render Drivers tab immediately
     renderHero();
@@ -1322,6 +1332,30 @@ function switchTab(tabName) {
     // GA4 virtual page view for this tab
     trackTabView(tabName);
 }
+
+function openPitWallTransferAdvisor(options = {}) {
+    const { scroll = true, updateHistory = true } = options;
+    switchTab('optimizer');
+    const transfersButton = document.querySelector('.mode-btn[data-mode="transfers"]');
+    const transfersPanel = document.getElementById('mode-transfers');
+    if (!transfersButton || !transfersPanel) return false;
+
+    transfersButton.click();
+    const opened = !transfersPanel.classList.contains('hidden');
+    if (!opened) return false;
+
+    if (updateHistory) {
+        try { history.replaceState(null, '', `${location.pathname}#optimizer`); } catch (e) {}
+    }
+    if (scroll) {
+        window.setTimeout(() => {
+            document.getElementById('pitWallMemberPanel')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 120);
+    }
+    return true;
+}
+
+window.BoxBoxOpenPitWall = openPitWallTransferAdvisor;
 
 function setupTabs() {
     document.querySelectorAll('.tab').forEach(tab => {

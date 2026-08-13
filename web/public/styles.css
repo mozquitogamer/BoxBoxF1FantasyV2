@@ -1173,6 +1173,9 @@ select:focus, input:focus {
     background: linear-gradient(135deg, rgba(139, 92, 246, .09), rgba(55, 230, 208, .035));
 }
 .pit-wall-panel p { margin: 8px 0 0; color: var(--text-secondary); font-size: .82rem; line-height: 1.55; }
+.pit-wall-signed-in { display: flex; align-items: center; gap: 9px; margin: -4px -4px 14px; padding: 10px 12px; border: 1px solid rgba(34, 197, 94, .24); border-radius: 9px; background: rgba(34, 197, 94, .08); }
+.pit-wall-signed-in strong { flex: 0 0 auto; color: #9bf0cf; font-size: .76rem; }
+.pit-wall-signed-in span { color: var(--text-secondary); font-size: .72rem; line-height: 1.4; }
 .pit-wall-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
 .pit-wall-heading span:first-child { color: #a78bfa; font-size: .66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .pit-wall-heading h4 { margin: 3px 0 0; font-size: .96rem; overflow-wrap: anywhere; }
@@ -1240,6 +1243,7 @@ select:focus, input:focus {
 
 @media (max-width: 620px) {
     .pit-wall-heading { display: grid; }
+    .pit-wall-signed-in { align-items: flex-start; flex-direction: column; gap: 3px; }
     .pit-wall-badge { width: fit-content; }
     .pit-wall-signin > div,
     .pit-wall-actions,

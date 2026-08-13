@@ -315,6 +315,7 @@
 
         function renderLoggedOut(message = '') {
             button.textContent = 'Pit Wall member sign-in';
+            button.setAttribute('aria-label', 'Pit Wall member sign-in');
             content.innerHTML = `<span class="pit-wall-login-eyebrow">Paid member account · $5/month</span><h2 id="pitWallLoginTitle">Sign in to the Pit Wall</h2><p>Use the email attached to your Ko-fi membership and your Pit Wall password.</p><p class="pit-wall-login-note"><strong>Looking for Beat V13?</strong> Free Beat V13 registration is separate and does not create a Pit Wall account. <a href="/#beatbot">Enter Beat V13 free</a>.</p><form id="sitePitWallSignIn"><label for="sitePitWallEmail">Ko-fi membership email</label><input id="sitePitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><label for="sitePitWallPassword">Password</label><input id="sitePitWallPassword" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required><button type="submit">Sign in</button></form><p class="pit-wall-login-status" role="status" aria-live="polite">${escapeHtml(message)}</p><button type="button" class="pit-wall-login-reset" id="sitePitWallReset">Create or reset password</button><a class="pit-wall-login-kofi" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Not a member? Join the Pit Wall on Ko-fi</a>`;
             content.querySelector('#sitePitWallSignIn')?.addEventListener('submit', async event => {
                 event.preventDefault();
@@ -326,6 +327,11 @@
                 try {
                     await memberRequest('/api/members/sign-in/', { method: 'POST', body: { email: form.elements.email.value.trim(), password: form.elements.password.value } });
                     await refresh();
+                    window.dispatchEvent(new CustomEvent('boxbox:member-auth-changed', { detail: { source: 'site-header' } }));
+                    if (typeof window.BoxBoxOpenPitWall === 'function') {
+                        close();
+                        window.BoxBoxOpenPitWall();
+                    }
                 } catch (error) {
                     status.textContent = error.message;
                     status.dataset.state = 'error';
@@ -346,12 +352,14 @@
         }
 
         function renderSignedIn(session) {
-            button.textContent = 'Pit Wall';
+            button.textContent = 'Pit Wall · Signed in';
+            button.setAttribute('aria-label', 'Pit Wall account — signed in');
             const active = session.entitlement?.active === true;
             content.innerHTML = `<span class="pit-wall-login-eyebrow">Pit Wall account</span><h2 id="pitWallLoginTitle">${escapeHtml(session.email || 'Signed in')}</h2><p>${active ? 'Your membership is active. Open the Transfer Advisor to manage your saved and official F1 Fantasy teams.' : 'You are signed in, but this membership is not currently active.'}</p><div class="pit-wall-login-actions"><a href="/?pitwall=1#optimizer">Open my Pit Wall</a><button type="button" id="sitePitWallSignOut">Sign out</button></div>`;
             content.querySelector('#sitePitWallSignOut')?.addEventListener('click', async () => {
                 await memberRequest('/api/members/sign-out/', { method: 'POST' }).catch(() => null);
                 renderLoggedOut('Signed out.');
+                window.dispatchEvent(new CustomEvent('boxbox:member-auth-changed', { detail: { source: 'site-header' } }));
             });
         }
 
@@ -367,6 +375,9 @@
             modal.hidden = false;
             refresh().finally(() => window.setTimeout(() => content.querySelector('input, a, button')?.focus(), 0));
             if (typeof window.gtag === 'function') window.gtag('event', 'pit_wall_signin_click', { location: 'site_header' });
+        });
+        window.addEventListener('boxbox:member-auth-changed', event => {
+            if (event.detail?.source !== 'site-header') refresh();
         });
         refresh();
     }
