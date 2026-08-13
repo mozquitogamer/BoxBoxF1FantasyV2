@@ -4,9 +4,10 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 const { buildRecommendation } = require('../lib/personalized-recommendations');
-const { safeEqual } = require('../lib/member-system');
+const { isAllowedOrigin, safeEqual } = require('../lib/member-system');
 const { inFilter, notificationEventKey } = require('../api/members/notify');
-const { paidUntil, parseKofiPayload } = require('../api/webhooks/kofi');
+const { paidUntil, parseKofiPayload, sanitizedKofiPayload } = require('../api/webhooks/kofi');
+const { consumeRateLimit } = require('../lib/rate-limit');
 
 function predictions() {
     const drivers = [
@@ -83,6 +84,48 @@ test('uses timing-safe secret comparison and safe PostgREST filters', () => {
         inFilter(['21b4f9ba-1bf3-4dd4-a0de-c2af164f8463', 'unsafe),drop table']),
         'in.(21b4f9ba-1bf3-4dd4-a0de-c2af164f8463,unsafedroptable)',
     );
+});
+
+test('stores only necessary Ko-fi payment metadata', () => {
+    const stored = sanitizedKofiPayload({
+        verification_token: 'must-not-be-stored',
+        email: 'fan@example.com',
+        from_name: 'Private Donor Name',
+        message: 'Private supporter message',
+        timestamp: '2026-08-01T00:00:00Z',
+        amount: '5.00',
+        currency: 'USD',
+        is_first_subscription_payment: 'true',
+        kofi_transaction_id: 'transaction-1',
+    });
+    assert.deepEqual(stored, {
+        timestamp: '2026-08-01T00:00:00Z',
+        amount: '5.00',
+        currency: 'USD',
+        is_first_subscription_payment: true,
+        kofi_transaction_id: 'transaction-1',
+    });
+});
+
+test('production origin checks do not trust a spoofed host header', () => {
+    const previous = process.env.VERCEL_ENV;
+    process.env.VERCEL_ENV = 'production';
+    try {
+        const req = { headers: { origin: 'https://attacker.example', host: 'attacker.example' } };
+        assert.equal(isAllowedOrigin(req, 'https://boxboxf1fantasy.com'), false);
+        assert.equal(isAllowedOrigin({ headers: { origin: 'https://www.boxboxf1fantasy.com' } }, 'https://boxboxf1fantasy.com'), true);
+    } finally {
+        if (previous === undefined) delete process.env.VERCEL_ENV;
+        else process.env.VERCEL_ENV = previous;
+    }
+});
+
+test('throttles repeated sensitive requests by client address', () => {
+    const req = { headers: { 'x-real-ip': '192.0.2.42' } };
+    const options = { limit: 2, windowMs: 60_000, now: 1_000 };
+    assert.equal(consumeRateLimit(req, 'security-test', options).allowed, true);
+    assert.equal(consumeRateLimit(req, 'security-test', options).allowed, true);
+    assert.equal(consumeRateLimit(req, 'security-test', options).allowed, false);
 });
 
 test('deduplicates member alerts across regenerated timestamps and deployments', () => {

@@ -3,8 +3,11 @@
 const crypto = require('node:crypto');
 
 const DEFAULT_SITE_ORIGIN = 'https://boxboxf1fantasy.com';
-const ACCESS_COOKIE = 'boxbox_member_access';
-const REFRESH_COOKIE = 'boxbox_member_refresh';
+const ACCESS_COOKIE = '__Host-boxbox_member_access';
+const REFRESH_COOKIE = '__Host-boxbox_member_refresh';
+const LEGACY_ACCESS_COOKIE = 'boxbox_member_access';
+const LEGACY_REFRESH_COOKIE = 'boxbox_member_refresh';
+const REFRESH_COOKIE_MAX_AGE = 30 * 24 * 60 * 60;
 
 function required(value, name) {
     const result = String(value || '').trim();
@@ -13,6 +16,13 @@ function required(value, name) {
 }
 
 function getMemberConfig() {
+    const siteOrigin = (process.env.SITE_ORIGIN || DEFAULT_SITE_ORIGIN).replace(/\/$/, '');
+    let parsedOrigin;
+    try { parsedOrigin = new URL(siteOrigin); }
+    catch (_) { throw new Error('SITE_ORIGIN is not a valid URL'); }
+    if (process.env.VERCEL_ENV === 'production' && parsedOrigin.protocol !== 'https:') {
+        throw new Error('SITE_ORIGIN must use HTTPS in production');
+    }
     return {
         supabaseUrl: required(process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL'),
         publicKey: required(
@@ -23,7 +33,7 @@ function getMemberConfig() {
             process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY,
             'SUPABASE_SERVICE_ROLE_KEY',
         ),
-        siteOrigin: (process.env.SITE_ORIGIN || DEFAULT_SITE_ORIGIN).replace(/\/$/, ''),
+        siteOrigin: parsedOrigin.origin,
     };
 }
 
@@ -35,16 +45,27 @@ function isValidEmail(email) {
     return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function requestOrigin(req) {
-    const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
-    const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim();
-    return host ? `${proto}://${host}` : '';
+function allowedSiteOrigins(configuredOrigin) {
+    const allowed = new Set([String(configuredOrigin || '').replace(/\/$/, '')].filter(Boolean));
+    try {
+        const parsed = new URL(configuredOrigin);
+        if (parsed.protocol === 'https:' && parsed.hostname === 'boxboxf1fantasy.com') {
+            parsed.hostname = 'www.boxboxf1fantasy.com';
+            allowed.add(parsed.origin);
+        } else if (parsed.protocol === 'https:' && parsed.hostname === 'www.boxboxf1fantasy.com') {
+            parsed.hostname = 'boxboxf1fantasy.com';
+            allowed.add(parsed.origin);
+        }
+    } catch (_) {
+        // Configuration validation happens in getMemberConfig; an invalid URL is never trusted here.
+    }
+    return allowed;
 }
 
 function isAllowedOrigin(req, configuredOrigin) {
     const origin = String(req.headers.origin || '').replace(/\/$/, '');
     if (!origin) return process.env.VERCEL_ENV !== 'production';
-    return origin === configuredOrigin || origin === requestOrigin(req);
+    return allowedSiteOrigins(configuredOrigin).has(origin);
 }
 
 function parseBody(req) {
@@ -74,7 +95,7 @@ function parseCookies(req) {
 }
 
 function cookie(name, value, options = {}) {
-    const parts = [`${name}=${encodeURIComponent(value)}`, 'Path=/', 'HttpOnly', 'Secure', 'SameSite=Lax'];
+    const parts = [`${name}=${encodeURIComponent(value)}`, 'Path=/', 'HttpOnly', 'Secure', 'SameSite=Strict'];
     if (Number.isFinite(options.maxAge)) parts.push(`Max-Age=${Math.max(0, Math.floor(options.maxAge))}`);
     return parts.join('; ');
 }
@@ -88,7 +109,9 @@ function appendCookies(res, values) {
 function setSessionCookies(res, session) {
     appendCookies(res, [
         cookie(ACCESS_COOKIE, session.access_token, { maxAge: Number(session.expires_in || 3600) }),
-        cookie(REFRESH_COOKIE, session.refresh_token, { maxAge: 60 * 24 * 60 * 60 }),
+        cookie(REFRESH_COOKIE, session.refresh_token, { maxAge: REFRESH_COOKIE_MAX_AGE }),
+        cookie(LEGACY_ACCESS_COOKIE, '', { maxAge: 0 }),
+        cookie(LEGACY_REFRESH_COOKIE, '', { maxAge: 0 }),
     ]);
 }
 
@@ -96,6 +119,8 @@ function clearSessionCookies(res) {
     appendCookies(res, [
         cookie(ACCESS_COOKIE, '', { maxAge: 0 }),
         cookie(REFRESH_COOKIE, '', { maxAge: 0 }),
+        cookie(LEGACY_ACCESS_COOKIE, '', { maxAge: 0 }),
+        cookie(LEGACY_REFRESH_COOKIE, '', { maxAge: 0 }),
     ]);
 }
 
@@ -186,8 +211,9 @@ async function refreshSession(refreshToken) {
 
 async function getMemberSession(req, res) {
     const cookies = parseCookies(req);
-    let accessToken = cookies[ACCESS_COOKIE] || '';
-    let refreshToken = cookies[REFRESH_COOKIE] || '';
+    const legacySession = !cookies[ACCESS_COOKIE] && Boolean(cookies[LEGACY_ACCESS_COOKIE] || cookies[LEGACY_REFRESH_COOKIE]);
+    let accessToken = cookies[ACCESS_COOKIE] || cookies[LEGACY_ACCESS_COOKIE] || '';
+    let refreshToken = cookies[REFRESH_COOKIE] || cookies[LEGACY_REFRESH_COOKIE] || '';
     let user = accessToken ? await fetchUser(accessToken) : null;
 
     if (!user && refreshToken) {
@@ -204,7 +230,31 @@ async function getMemberSession(req, res) {
         if (accessToken || refreshToken) clearSessionCookies(res);
         return null;
     }
+    if (legacySession && accessToken && refreshToken) {
+        setSessionCookies(res, { access_token: accessToken, refresh_token: refreshToken, expires_in: 3600 });
+    }
     return { user, accessToken, refreshToken };
+}
+
+function jwtPayload(accessToken) {
+    try {
+        const parts = String(accessToken || '').split('.');
+        if (parts.length !== 3) return null;
+        return JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    } catch (_) {
+        return null;
+    }
+}
+
+function hasRecentAuthMethod(accessToken, userId, method, maxAgeSeconds = 20 * 60, now = Date.now()) {
+    const claims = jwtPayload(accessToken);
+    if (!claims || claims.sub !== userId || !Array.isArray(claims.amr)) return false;
+    const nowSeconds = Math.floor(now / 1000);
+    return claims.amr.some(entry => {
+        if (!entry || entry.method !== method || !Number.isFinite(entry.timestamp)) return false;
+        const age = nowSeconds - entry.timestamp;
+        return age >= -60 && age <= maxAgeSeconds;
+    });
 }
 
 function isEntitlementActive(entitlement, now = Date.now()) {
@@ -300,6 +350,7 @@ module.exports = {
     getMemberConfig,
     getMemberDashboard,
     getMemberSession,
+    hasRecentAuthMethod,
     htmlEscape,
     isAllowedOrigin,
     isEntitlementActive,

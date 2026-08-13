@@ -864,12 +864,7 @@ def write_homepage_adsense_head() -> None:
 # Pages report. googletagmanager/google-analytics are allowed by the site CSP.
 GA_SNIPPET = """<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-T3HS76FJ7W"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-T3HS76FJ7W');
-</script>"""
+<script src="/site-init.js?v=1" data-ga-mode="page"></script>"""
 
 
 def page_head(

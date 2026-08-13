@@ -1983,7 +1983,7 @@ function driverCard(d, i) {
         <button class="scenario-btn ${scenBtnActive ? 'active' : ''}"
                 data-scen-type="driver" data-scen-id="${d.driver_id}"
                 title="What-if: bump ${d.name}'s pace by N positions">${scenBtnLabel}</button>
-        <button class="card-share-btn" type="button" onclick="sharePrediction('driver','${d.driver_id}', this)" title="Share ${d.name}'s prediction">🔗</button>
+        <button class="card-share-btn" type="button" data-share-type="driver" data-share-id="${encodeURIComponent(d.driver_id)}" title="Share ${d.name}'s prediction">🔗</button>
         <div class="card-header">
             <div class="driver-info">
                 <h3>${d.name}</h3>
@@ -2931,7 +2931,7 @@ function constructorCard(c, i) {
         <button class="scenario-btn ${scenBtnActive ? 'active' : ''}"
                 data-scen-type="team" data-scen-id="${c.constructor_id}"
                 title="What-if: bump ${c.name}'s pace by N positions (applies to both drivers)">${scenBtnLabel}</button>
-        <button class="card-share-btn" type="button" onclick="sharePrediction('constructor','${c.constructor_id}', this)" title="Share ${c.name}'s prediction">🔗</button>
+        <button class="card-share-btn" type="button" data-share-type="constructor" data-share-id="${encodeURIComponent(c.constructor_id)}" title="Share ${c.name}'s prediction">🔗</button>
         ${renderWeatherBadges()}
         <div class="constructor-header">
             <div>
@@ -4261,7 +4261,7 @@ function renderSingleLineup(lineup, index, strategy, budget) {
     const expandedClass = index === 0 ? ' expanded' : '';
     const shareDriverIds = lineup.drivers.map(d => d.driver_id).join(',');
     const shareConsIds = lineup.constructors.map(c => c.constructor_id).join(',');
-    let html = `<div class="lineup-block${expandedClass}" style="margin-bottom:24px;" onclick="this.classList.toggle('expanded')">
+    let html = `<div class="lineup-block${expandedClass}" style="margin-bottom:24px;" data-toggle-expanded>
         <div class="lineup-block-header">
             <h4><span class="lineup-expand-icon">\u25BC</span> Lineup #${index + 1}</h4>
             <div class="lineup-header-right">
@@ -4271,7 +4271,7 @@ function renderSingleLineup(lineup, index, strategy, budget) {
                     <span style="color:${totalExpChange >= 0 ? 'var(--green)' : 'var(--red, #ef4444)'}">${totalExpChange >= 0 ? '+' : ''}${totalExpChange.toFixed(1)}M exp change</span>
                     ${strategy === 'season_value' ? ` \u00b7 ${seasonOption >= 0 ? '+' : ''}${seasonOption.toFixed(1)} future pts` : ''}
                 </span>
-                <button type="button" class="share-team-btn" onclick="event.stopPropagation(); shareTeamFromIds('${shareDriverIds}','${shareConsIds}', this)">\ud83d\udd17 Share</button>
+                <button type="button" class="share-team-btn" data-share-drivers="${encodeURIComponent(shareDriverIds)}" data-share-constructors="${encodeURIComponent(shareConsIds)}">\ud83d\udd17 Share</button>
             </div>
         </div>
         <div class="lineup-details">
@@ -4416,7 +4416,6 @@ function shareTeam(driverIds, constructorIds, btn) {
     shareOrCopy(buildTeamBlurb(driverIds, constructorIds), buildShareTeamUrl(driverIds, constructorIds), btn);
 }
 
-// Called from the inline onclick on each optimizer lineup's Share button.
 function shareTeamFromIds(driverCsv, consCsv, btn) {
     shareTeam(driverCsv ? driverCsv.split(',') : [], consCsv ? consCsv.split(',') : [], btn);
 }
@@ -4443,6 +4442,51 @@ function sharePrediction(type, id, btn) {
 
 // Receiving end: ?driver=ID / ?constructor=ID → open the tab, scroll to and
 // briefly highlight that card.
+// Delegated interactions keep generated cards functional without inline script
+// attributes, allowing a strict Content Security Policy.
+document.addEventListener('click', event => {
+    const predictionButton = event.target.closest('[data-share-type][data-share-id]');
+    if (predictionButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        sharePrediction(
+            predictionButton.dataset.shareType,
+            decodeURIComponent(predictionButton.dataset.shareId),
+            predictionButton,
+        );
+        return;
+    }
+
+    const teamButton = event.target.closest('[data-share-drivers][data-share-constructors]');
+    if (teamButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        shareTeamFromIds(
+            decodeURIComponent(teamButton.dataset.shareDrivers),
+            decodeURIComponent(teamButton.dataset.shareConstructors),
+            teamButton,
+        );
+        return;
+    }
+
+    const collapsedHeader = event.target.closest('[data-toggle-collapsed]');
+    if (collapsedHeader) {
+        collapsedHeader.parentElement?.classList.toggle('collapsed');
+        return;
+    }
+
+    const openHeader = event.target.closest('[data-toggle-open]');
+    if (openHeader) {
+        openHeader.parentElement?.classList.toggle('open');
+        return;
+    }
+
+    const lineup = event.target.closest('[data-toggle-expanded]');
+    if (lineup && !event.target.closest('button, a, input, select, textarea')) {
+        lineup.classList.toggle('expanded');
+    }
+});
+
 function focusPrediction(type, id) {
     const tab = type === 'constructor' ? 'constructors' : 'drivers';
     switchTab(tab);  // triggers the lazy render if the tab hasn't been opened yet
@@ -5600,7 +5644,7 @@ function renderTransferCard(lineup, index, chip) {
             efficiencyHtml = `· <span style="color:${gainColor};font-weight:600;" title="Net points gained versus keeping your current team (after transfer penalties), and the gain per transfer used.">${gain >= 0 ? '+' : ''}${gain.toFixed(1)} vs hold · ${perTransfer >= 0 ? '+' : ''}${perTransfer.toFixed(1)}/transfer</span>`;
         }
     }
-    let html = `<div class="lineup-block${expandedClass}" style="margin-bottom:16px;" onclick="this.classList.toggle('expanded')">
+    let html = `<div class="lineup-block${expandedClass}" style="margin-bottom:16px;" data-toggle-expanded>
         <div class="lineup-block-header">
             <h4><span class="lineup-expand-icon">\u25BC</span> ${optionLabel}</h4>
             <span class="lineup-block-stats">
@@ -7640,7 +7684,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
         if (prData.results && prData.results.length > 0) {
             html += `
             <div class="analysis-block collapsible">
-                <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Race Results <span class="collapse-icon">▼</span></h3>
+                <h3 class="collapsible-header" data-toggle-collapsed>Race Results <span class="collapse-icon">▼</span></h3>
                 <div class="collapsible-content">
                 <div class="postrace-cards">
                     ${prData.results.map(r => {
@@ -7697,7 +7741,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
 
         html += `
         <div class="analysis-block collapsible">
-            <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Normalized Race Pace <span class="collapse-icon">▼</span></h3>
+            <h3 class="collapsible-header" data-toggle-collapsed>Normalized Race Pace <span class="collapse-icon">▼</span></h3>
             <div class="collapsible-content">
             <table class="data-table sortable">
                 <thead><tr>
@@ -7730,7 +7774,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
     if (roundPits && roundPits.length > 0) {
         html += `
         <div class="analysis-block collapsible">
-            <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Pit Stop Performance <span class="collapse-icon">▼</span></h3>
+            <h3 class="collapsible-header" data-toggle-collapsed>Pit Stop Performance <span class="collapse-icon">▼</span></h3>
             <div class="collapsible-content">
             <table class="data-table sortable">
                 <thead><tr>
@@ -7755,7 +7799,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
         // an honest note rather than the misleading ~20s pit-lane average.
         html += `
         <div class="analysis-block collapsible">
-            <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Pit Stop Performance <span class="collapse-icon">▼</span></h3>
+            <h3 class="collapsible-header" data-toggle-collapsed>Pit Stop Performance <span class="collapse-icon">▼</span></h3>
             <div class="collapsible-content">
             <p class="no-data">Wheels-up (stationary) pit stop times for this round aren't published yet — they land 24–48h after the race as public timing feeds catch up. Season-wide stationary times are on the Constructors tab.</p>
             </div>
@@ -7769,7 +7813,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
 
         html += `
         <div class="analysis-block collapsible">
-            <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Tyre Management <span class="collapse-icon">▼</span></h3>
+            <h3 class="collapsible-header" data-toggle-collapsed>Tyre Management <span class="collapse-icon">▼</span></h3>
             <div class="collapsible-content">
             <table class="data-table sortable">
                 <thead><tr>
@@ -7798,7 +7842,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
         if (prData.sprint_results && prData.sprint_results.length > 0) {
             html += `
             <div class="analysis-block collapsible">
-                <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Sprint Results <span class="collapse-icon">▼</span></h3>
+                <h3 class="collapsible-header" data-toggle-collapsed>Sprint Results <span class="collapse-icon">▼</span></h3>
                 <div class="collapsible-content">
                 <div class="postrace-cards">
                     ${prData.sprint_results.map(r => {
@@ -7836,7 +7880,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
 
             html += `
             <div class="analysis-block collapsible">
-                <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Sprint Race Pace <span class="collapse-icon">▼</span></h3>
+                <h3 class="collapsible-header" data-toggle-collapsed>Sprint Race Pace <span class="collapse-icon">▼</span></h3>
                 <div class="collapsible-content">
                 <table class="data-table sortable">
                     <thead><tr>
@@ -7869,7 +7913,7 @@ function renderPostRace(postRaceData, predictions, actual, roundNum) {
 
             html += `
             <div class="analysis-block collapsible">
-                <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Sprint Tyre Management <span class="collapse-icon">▼</span></h3>
+                <h3 class="collapsible-header" data-toggle-collapsed>Sprint Tyre Management <span class="collapse-icon">▼</span></h3>
                 <div class="collapsible-content">
                 <table class="data-table sortable">
                     <thead><tr>
@@ -8070,7 +8114,7 @@ function renderComparison(predictions, actual) {
     const hasMC = rows.some(r => r.mcMean != null);
     html += `
     <div class="analysis-block collapsible">
-        <h3 class="collapsible-header" onclick="this.parentElement.classList.toggle('collapsed')">Predicted vs Actual — Driver Comparison <span class="collapse-icon">▼</span></h3>
+        <h3 class="collapsible-header" data-toggle-collapsed>Predicted vs Actual — Driver Comparison <span class="collapse-icon">▼</span></h3>
         <div class="collapsible-content">
         <table class="data-table sortable">
             <thead><tr>
@@ -9983,7 +10027,7 @@ function renderArticles() {
         const isOpen = i === 0 ? ' open' : '';
         html += `
         <div class="article-card collapsible-section${isOpen}">
-            <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+            <div class="section-header" data-toggle-open>
                 <div class="article-header-content">
                     <h3>${art.title || 'Untitled'}</h3>
                     <div class="article-meta">

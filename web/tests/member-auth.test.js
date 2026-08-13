@@ -36,6 +36,12 @@ function memberReq(body, cookie = '') {
     };
 }
 
+function testJwt(payload) {
+    const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+    const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+    return `${header}.${body}.test-signature`;
+}
+
 function configure() {
     const names = [
         'NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
@@ -82,8 +88,8 @@ test('signs an active member in with a password and secure session cookies', asy
         await signIn(memberReq({ email: 'Member@Example.com', password: 'correct horse battery staple' }), res);
         assert.equal(res.statusCode, 200);
         assert.equal(res.body.ok, true);
-        assert.match(res.headers['Set-Cookie'][0], /^boxbox_member_access=access-token;.*HttpOnly.*Secure.*SameSite=Lax/);
-        assert.match(res.headers['Set-Cookie'][1], /^boxbox_member_refresh=refresh-token;.*HttpOnly.*Secure.*SameSite=Lax/);
+        assert.match(res.headers['Set-Cookie'][0], /^__Host-boxbox_member_access=access-token;.*HttpOnly.*Secure.*SameSite=Strict/);
+        assert.match(res.headers['Set-Cookie'][1], /^__Host-boxbox_member_refresh=refresh-token;.*HttpOnly.*Secure.*SameSite=Strict/);
         const credentials = JSON.parse(calls[0].options.body);
         assert.deepEqual(credentials, { email: 'member@example.com', password: 'correct horse battery staple' });
     } finally {
@@ -140,18 +146,52 @@ test('sets a new password from an authenticated recovery session', async () => {
         if (String(url).endsWith('/auth/v1/user') && options.method === 'PUT') {
             return response({ id: 'member-1' });
         }
+        if (String(url).endsWith('/auth/v1/logout') && options.method === 'POST') return response({});
+        throw new Error(`Unexpected request: ${url}`);
+    };
+    try {
+        const recoveryAccess = testJwt({
+            sub: 'member-1',
+            amr: [{ method: 'recovery', timestamp: Math.floor(Date.now() / 1000) }],
+        });
+        const res = mockRes();
+        await password(memberReq(
+            { action: 'update', password: 'a new secure password' },
+            `__Host-boxbox_member_access=${recoveryAccess}; __Host-boxbox_member_refresh=recovery-refresh`,
+        ), res);
+        assert.equal(res.statusCode, 200);
+        const update = calls.find(call => call.options.method === 'PUT');
+        assert.deepEqual(JSON.parse(update.options.body), { password: 'a new secure password' });
+        assert.equal(update.options.headers.Authorization, `Bearer ${recoveryAccess}`);
+        assert.match(res.body.message, /Sign in/);
+        assert.ok(res.headers['Set-Cookie'].some(value => /^__Host-boxbox_member_access=;.*Max-Age=0/.test(value)));
+    } finally {
+        global.fetch = originalFetch;
+        restoreEnv();
+    }
+});
+
+test('rejects password changes from a normal signed-in session', async () => {
+    const restoreEnv = configure();
+    const originalFetch = global.fetch;
+    const access = testJwt({
+        sub: 'member-1',
+        amr: [{ method: 'password', timestamp: Math.floor(Date.now() / 1000) }],
+    });
+    global.fetch = async (url, options = {}) => {
+        if (String(url).endsWith('/auth/v1/user') && (options.method || 'GET') === 'GET') {
+            return response({ id: 'member-1', email: 'member@example.com' });
+        }
         throw new Error(`Unexpected request: ${url}`);
     };
     try {
         const res = mockRes();
         await password(memberReq(
             { action: 'update', password: 'a new secure password' },
-            'boxbox_member_access=recovery-access; boxbox_member_refresh=recovery-refresh',
+            `__Host-boxbox_member_access=${access}; __Host-boxbox_member_refresh=refresh-token`,
         ), res);
-        assert.equal(res.statusCode, 200);
-        const update = calls.find(call => call.options.method === 'PUT');
-        assert.deepEqual(JSON.parse(update.options.body), { password: 'a new secure password' });
-        assert.equal(update.options.headers.Authorization, 'Bearer recovery-access');
+        assert.equal(res.statusCode, 403);
+        assert.match(res.body.message, /fresh password setup link/);
     } finally {
         global.fetch = originalFetch;
         restoreEnv();

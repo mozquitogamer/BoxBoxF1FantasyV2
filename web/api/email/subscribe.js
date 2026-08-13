@@ -11,6 +11,7 @@ const {
     normalizeEmail,
     resendRequest,
 } = require('../../lib/email-subscriptions');
+const { consumeRateLimit, rateLimited } = require('../../lib/rate-limit');
 
 module.exports = async function subscribe(req, res) {
     res.setHeader('Cache-Control', 'no-store');
@@ -60,6 +61,8 @@ module.exports = async function subscribe(req, res) {
     if (body.consent !== true) {
         return res.status(400).json({ ok: false, message: 'Please confirm your free Beat V13 registration.' });
     }
+    const throttle = consumeRateLimit(req, 'beat-v13-subscribe', { limit: 5, windowMs: 60 * 60 * 1000 });
+    if (!throttle.allowed) return rateLimited(res, throttle);
 
     const token = createSubscriptionToken(email, config.signingSecret, config.ttlHours);
     const confirmationUrl = `${config.siteOrigin}/api/email/confirm?token=${encodeURIComponent(token)}`;

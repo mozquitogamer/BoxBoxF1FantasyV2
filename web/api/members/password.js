@@ -4,8 +4,10 @@ const crypto = require('node:crypto');
 const {
     authAdminRequest,
     authPublicRequest,
+    clearSessionCookies,
     getMemberConfig,
     getMemberSession,
+    hasRecentAuthMethod,
     isAllowedOrigin,
     isEntitlementActive,
     isValidEmail,
@@ -14,6 +16,7 @@ const {
     restRequest,
 } = require('../../lib/member-system');
 const { resendRequest } = require('../../lib/email-subscriptions');
+const { consumeRateLimit, rateLimited } = require('../../lib/rate-limit');
 
 const GENERIC_MESSAGE = 'If that address has an active Pit Wall membership, a password setup email is on its way.';
 const RESET_INTERVAL_MS = 15 * 60 * 1000;
@@ -21,6 +24,8 @@ const RESET_INTERVAL_MS = 15 * 60 * 1000;
 async function requestReset(req, res, config, body) {
     const email = normalizeEmail(body.email);
     if (!isValidEmail(email)) return res.status(202).json({ ok: true, message: GENERIC_MESSAGE });
+    const throttle = consumeRateLimit(req, 'member-password-reset', { limit: 5, windowMs: 60 * 60 * 1000 });
+    if (!throttle.allowed) return rateLimited(res, throttle, GENERIC_MESSAGE);
 
     try {
         const profiles = await restRequest(
@@ -82,12 +87,21 @@ async function savePassword(req, res, body) {
     try {
         const session = await getMemberSession(req, res);
         if (!session) return res.status(401).json({ ok: false, message: 'Your password setup session expired. Request a new link.' });
+        if (!hasRecentAuthMethod(session.accessToken, session.user.id, 'recovery')) {
+            return res.status(403).json({ ok: false, message: 'Use a fresh password setup link before changing your password.' });
+        }
         await authPublicRequest('/user', {
             method: 'PUT',
             accessToken: session.accessToken,
             body: { password: newPassword },
         });
-        return res.status(200).json({ ok: true, message: 'Password saved. You are signed in.' });
+        try {
+            await authPublicRequest('/logout', { method: 'POST', accessToken: session.accessToken });
+        } catch (_) {
+            // The password is already changed; clearing the local cookies still closes this browser session.
+        }
+        clearSessionCookies(res);
+        return res.status(200).json({ ok: true, message: 'Password saved. Sign in with your new password.' });
     } catch (error) {
         console.error('Could not update Pit Wall password:', error.message);
         return res.status(400).json({ ok: false, message: 'That password could not be saved. Try a stronger password.' });
