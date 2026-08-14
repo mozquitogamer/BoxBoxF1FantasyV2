@@ -79,15 +79,15 @@
     align-items: flex-start;
     gap: 7px;
     margin-top: 9px;
-    color: var(--text-secondary, var(--muted, #9aa4b2));
-    font-size: 0.7rem;
+    color: #b8c0cc;
+    font-size: 0.74rem;
     line-height: 1.4;
 }
 .email-updates-consent input { margin-top: 2px; }
 .email-updates-privacy {
     margin: 5px 0 0;
-    color: var(--text-muted, var(--muted, #9aa4b2));
-    font-size: 0.68rem;
+    color: #aeb7c5;
+    font-size: 0.72rem;
 }
 .email-updates-status {
     min-height: 1em;
@@ -108,6 +108,28 @@
     clip: rect(1px, 1px, 1px, 1px) !important;
     white-space: nowrap !important;
 }
+.optimizer-registration-panel {
+    grid-template-columns: minmax(250px, 1fr) minmax(390px, 1.35fr);
+    gap: 18px;
+    margin: 15px 0 20px;
+    padding: 14px 16px;
+    border-left: 3px solid var(--accent, #e10600);
+}
+.optimizer-registration-panel .email-updates-copy h2 { margin:3px 0 4px; font-size:.98rem; }
+.optimizer-registration-panel .email-updates-copy p { font-size:.75rem; line-height:1.4; }
+.optimizer-registration-panel .email-updates-consent { margin-top:5px; font-size:.68rem; }
+.optimizer-registration-panel .email-updates-privacy { margin-top:2px; font-size:.65rem; }
+.optimizer-registration-panel .email-updates-status { margin-top:3px; min-height:0; }
+.v13-hero .v13-hero-registration {
+    position:relative;
+    z-index:1;
+    margin:28px 0 0;
+    padding:18px;
+    border-color:rgba(55,230,208,.28);
+    background:linear-gradient(135deg,rgba(55,230,208,.085),rgba(139,92,246,.085));
+}
+.v13-hero .v13-hero-registration .email-updates-eyebrow { color:#65f2df; }
+.v13-hero .v13-hero-registration .email-updates-copy h2 { font-size:1.08rem; }
 .pit-wall-account-button { flex:none; padding:9px 13px; border:1px solid var(--accent,#e10600); border-radius:7px; background:rgba(225,6,0,.1); color:var(--text,#e9edf3); font:inherit; font-size:.76rem; font-weight:800; cursor:pointer; white-space:nowrap; }
 .pit-wall-account-button:hover { background:var(--accent,#e10600); color:#fff; }
 .pit-wall-account-button.active { border-color:rgba(34,197,94,.55); background:rgba(34,197,94,.12); color:#9bf0cf; }
@@ -148,9 +170,9 @@
 .access-hub-card.pit-wall-access-card.is-active { border-color:rgba(34,197,94,.34); }
 .access-hub-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
 .access-hub-card h3 { margin:5px 0 0; font-size:1.03rem; }
-.access-hub-card p { margin:11px 0; font-size:.78rem; }
+.access-hub-card p { margin:11px 0; font-size:.8rem; color:#b4bdca; }
 .access-hub-card ul { display:grid; gap:7px; margin:12px 0 16px; padding:0; list-style:none; }
-.access-hub-card li { position:relative; padding-left:18px; color:var(--text-secondary,#9aa4b2); font-size:.74rem; line-height:1.4; }
+.access-hub-card li { position:relative; padding-left:18px; color:#b4bdca; font-size:.76rem; line-height:1.4; }
 .access-hub-card li::before { content:'✓'; position:absolute; left:0; color:#55e3cf; font-weight:900; }
 .access-tier-label { display:inline-flex; padding:4px 7px; border-radius:999px; font-size:.6rem; font-weight:850; letter-spacing:.06em; text-transform:uppercase; }
 .access-tier-label.free { color:#7ef3e3; background:rgba(55,230,208,.11); }
@@ -162,7 +184,12 @@
 .access-entry-state.confirmed strong { color:#9bf0cf; }
 .access-hub-action { display:inline-flex; padding:9px 12px; border-radius:7px; color:#061c18; background:#55e3cf; font-size:.74rem; font-weight:800; text-decoration:none; }
 .pit-wall-member-signin { margin-top:14px; padding-top:14px; border-top:1px solid rgba(139,92,246,.2); }
-.pit-wall-member-signin h4 { margin:0 0 9px; font-size:.8rem; }
+.pit-wall-member-signin summary { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 11px; border:1px solid rgba(139,92,246,.24); border-radius:8px; background:rgba(139,92,246,.075); cursor:pointer; list-style:none; font-size:.78rem; }
+.pit-wall-member-signin summary::-webkit-details-marker { display:none; }
+.pit-wall-member-signin summary::after { content:'+'; color:#cfc4ff; font-size:1.05rem; font-weight:800; }
+.pit-wall-member-signin[open] summary::after { content:'\2212'; }
+.pit-wall-member-signin summary strong { color:#d8ccff; }
+.pit-wall-member-signin-body { padding-top:12px; }
 .pit-wall-member-signin form { display:grid; gap:7px; }
 .pit-wall-login-links { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
 .adsense-banner {
@@ -254,6 +281,7 @@
     .access-hub-grid { grid-template-columns:1fr; }
     .access-status-strip { gap:5px; }
     .access-hub-card-head { align-items:flex-start; flex-direction:column; }
+    .optimizer-registration-panel { grid-template-columns:1fr; gap:10px; }
 }
 @media (max-width: 520px) {
     .email-updates-fields { flex-direction: column; }

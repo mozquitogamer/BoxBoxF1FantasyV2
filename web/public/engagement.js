@@ -20,8 +20,8 @@ window.BoxBoxFreeAccess = Object.freeze({
         if (!panel.querySelector('.email-updates-confirmed-action')) {
             const link = document.createElement('a');
             link.className = 'email-updates-confirmed-action';
-            link.href = '/#beatbot';
-            link.textContent = 'View Beat V13';
+            link.href = '/?v13=dashboard#beatbot';
+            link.textContent = panel.dataset.registrationLocation === 'beat_v13' ? 'Open my dashboard' : 'View challenge standings';
             panel.appendChild(link);
         }
         return true;
@@ -248,7 +248,9 @@ window.BoxBoxFreeAccess = Object.freeze({
             const status = panel.querySelector('.email-updates-status');
             const submit = form?.querySelector('button[type="submit"]');
             if (!form || !status || !submit) return;
+            const submitLabel = submit.textContent;
             panel.hidden = false;
+            if (window.BoxBoxFreeAccess.renderConfirmedPanel(panel)) return;
             if (Date.now() >= deadline) {
                 form.hidden = true;
                 panel.querySelector('.email-updates-eyebrow').textContent = 'Beat V13 registration · Closed';
@@ -285,7 +287,7 @@ window.BoxBoxFreeAccess = Object.freeze({
                     status.dataset.state = 'error';
                 } finally {
                     submit.disabled = false;
-                    submit.textContent = 'Register free';
+                    submit.textContent = submitLabel;
                 }
             });
         });
@@ -352,7 +354,7 @@ window.BoxBoxFreeAccess = Object.freeze({
                 <p>No password or payment is needed for predictions, simulations, V13’s score, the optimizer, Transfer Advisor, planners or the accuracy record.</p>
                 <ul><li>Use every public fantasy tool</li><li>Follow every V13 decision and score</li><li>Enter Beat V13 and receive general updates by email</li></ul>
                 <div class="access-entry-state ${confirmed ? 'confirmed' : ''}"><span>Beat V13 entry</span><strong>${confirmed ? '✓ Confirmed on this browser' : 'Free email confirmation'}</strong></div>
-                <a class="access-hub-action secondary" href="/#beatbot">${confirmed ? 'View Beat V13' : 'Enter Beat V13 free'}</a>
+                <a class="access-hub-action secondary" href="/?v13=dashboard#beatbot">${confirmed ? 'Open my challenge dashboard' : 'View challenge &amp; standings'}</a>
             </section>`;
         }
 
@@ -377,7 +379,7 @@ window.BoxBoxFreeAccess = Object.freeze({
 
         function renderLoggedOut(message = '') {
             updateHeaderButton(null);
-            content.innerHTML = `${accessHeader('Not signed in')}<div class="access-hub-grid">${freeAccessCard()}<section class="access-hub-card pit-wall-access-card"><div class="access-hub-card-head"><div><span class="access-tier-label paid">$5/month · Ko-fi</span><h3>Pit Wall membership</h3></div><strong class="access-state">Optional upgrade</strong></div><p>Everything free stays free. Pit Wall removes the weekly admin by remembering your real team and bringing the relevant advice to you.</p>${pitWallBenefits()}<div class="pit-wall-member-signin"><h4>Already a member? Sign in</h4><form id="sitePitWallSignIn"><label for="sitePitWallEmail">Ko-fi membership email</label><input id="sitePitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><label for="sitePitWallPassword">Pit Wall password</label><input id="sitePitWallPassword" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required><button type="submit">Sign in to Pit Wall</button></form><p class="pit-wall-login-status" role="status" aria-live="polite">${escapeHtml(message)}</p><div class="pit-wall-login-links"><button type="button" class="pit-wall-login-reset" id="sitePitWallReset">Create or reset password</button><a class="pit-wall-login-kofi" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join Pit Wall on Ko-fi</a></div></div></section></div>`;
+            content.innerHTML = `${accessHeader('Not signed in')}<div class="access-hub-grid">${freeAccessCard()}<section class="access-hub-card pit-wall-access-card"><div class="access-hub-card-head"><div><span class="access-tier-label paid">$5/month · Ko-fi</span><h3>Pit Wall membership</h3></div><strong class="access-state">Optional upgrade</strong></div><p>Everything free stays free. Pit Wall removes the weekly admin by remembering your real team and bringing the relevant advice to you.</p>${pitWallBenefits()}<details class="pit-wall-member-signin"${message ? ' open' : ''}><summary><span>Already a member?</span><strong>Sign in</strong></summary><div class="pit-wall-member-signin-body"><form id="sitePitWallSignIn"><label for="sitePitWallEmail">Ko-fi membership email</label><input id="sitePitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><label for="sitePitWallPassword">Pit Wall password</label><input id="sitePitWallPassword" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required><button type="submit">Sign in to Pit Wall</button></form><p class="pit-wall-login-status" role="status" aria-live="polite">${escapeHtml(message)}</p><div class="pit-wall-login-links"><button type="button" class="pit-wall-login-reset" id="sitePitWallReset">Create or reset password</button><a class="pit-wall-login-kofi" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join Pit Wall on Ko-fi</a></div></div></details></section></div>`;
             content.querySelector('#sitePitWallSignIn')?.addEventListener('submit', async event => {
                 event.preventDefault();
                 const form = event.currentTarget;
