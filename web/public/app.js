@@ -1497,7 +1497,7 @@ function switchTab(tabName) {
 
 async function loadV13Leaderboard() {
     try {
-        const response = await fetch('/api/beat-v13/leaderboard/');
+        const response = await fetch('/api/email/status/?resource=beat-v13-leaderboard');
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.message || `HTTP ${response.status}`);
         v13LeaderboardData = result;

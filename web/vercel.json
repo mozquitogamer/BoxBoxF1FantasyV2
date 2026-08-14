@@ -6,7 +6,7 @@
   "trailingSlash": true,
   "functions": {
     "api/members/notify.js": { "maxDuration": 60 },
-    "api/beat-v13/leaderboard.js": { "maxDuration": 30 }
+    "api/email/status.js": { "maxDuration": 30 }
   },
   "headers": [
     {
