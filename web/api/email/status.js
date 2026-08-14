@@ -28,10 +28,6 @@ async function beatV13Leaderboard(req, res) {
             getLeagueLeaderboard(),
             Promise.resolve(loadV13Record()),
         ]);
-        console.info('[beat-v13-shape]', JSON.stringify({
-            team_count: teams.length,
-            first_team_keys: Object.keys(teams[0]?.raw || {}).sort(),
-        }));
         const rows = buildLeaderboard(teams, v13);
         const v13Row = rows.find(row => row.kind === 'v13');
         const leader = rows[0] || null;

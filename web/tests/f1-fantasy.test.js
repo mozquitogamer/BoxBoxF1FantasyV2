@@ -54,6 +54,14 @@ test('extractTeams accepts the compact official overall-points fields', () => {
     assert.equal(teams[0].rank, 17);
 });
 
+test('extractTeams accepts the current league points and rank fields', () => {
+    const teams = extractTeams({
+        leaderboard: [{ user_guid: 'owner-3', team_name: 'Boxed In', team_no: 1, cur_points: 2412, cur_rank: 9 }],
+    });
+    assert.equal(teams[0].points, 2412);
+    assert.equal(teams[0].rank, 9);
+});
+
 test('extractSnapshot accepts PascalCase drivers and constructors in separate sections', () => {
     const payload = {
         Data: {
