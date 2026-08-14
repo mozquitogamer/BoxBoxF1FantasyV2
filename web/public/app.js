@@ -110,6 +110,8 @@ let trackData = null;
 let driverHistory = null;
 let budgetValueData = null;       // calibrated budget-to-future-points model
 let v13Data = null;                // V13 research replay + live manager state
+let v13LeaderboardData = null;     // live official-league standings with V13 inserted
+const V13_TEAM_STORAGE_KEY = 'boxbox-v13-dashboard-team';
 // P9: ML-based projections for future rounds, populated by pipeline/predict_horizon.py.
 // When present, projectScoresForRound prefers these over the affinity heuristic.
 let horizonProjections = null;
@@ -325,6 +327,7 @@ async function renderTabIfNeeded(tabName) {
             showTabSpinner(tabId);
             await ensureLoaded('v13', loadV13Data);
             renderV13();
+            ensureLoaded('v13Leaderboard', loadV13Leaderboard);
             removeTabSpinner(tabId);
             _tabRendered.beatbot = true;
             break;
@@ -547,6 +550,148 @@ function v13RoundHistory(round, isLatest) {
     </details>`;
 }
 
+function v13StoredTeamRef() {
+    try { return localStorage.getItem(V13_TEAM_STORAGE_KEY) || ''; }
+    catch (_) { return ''; }
+}
+
+function v13RememberTeam(teamRef) {
+    try {
+        if (teamRef) localStorage.setItem(V13_TEAM_STORAGE_KEY, teamRef);
+        else localStorage.removeItem(V13_TEAM_STORAGE_KEY);
+    } catch (_) {
+        // The dashboard still works for this visit if browser storage is unavailable.
+    }
+}
+
+function v13MarginLabel(row) {
+    if (row.kind === 'v13') return 'Benchmark';
+    const margin = Number(row.margin_vs_v13 || 0);
+    if (margin > 0) return `+${margin.toLocaleString()}`;
+    if (margin < 0) return `\u2212${Math.abs(margin).toLocaleString()}`;
+    return 'Level';
+}
+
+function v13LeaderboardRows(data, selectedRef) {
+    const allRows = Array.isArray(data?.leaderboard) ? data.leaderboard : [];
+    const visible = allRows.slice(0, 10);
+    const addIfMissing = row => {
+        if (row && !visible.some(item => item.team_ref === row.team_ref)) visible.push(row);
+    };
+    addIfMissing(allRows.find(row => row.kind === 'v13'));
+    addIfMissing(allRows.find(row => row.team_ref === selectedRef));
+    visible.sort((left, right) => Number(left.rank) - Number(right.rank));
+
+    return visible.map(row => {
+        const selected = row.team_ref === selectedRef;
+        const margin = Number(row.margin_vs_v13 || 0);
+        const marginClass = row.kind === 'v13' ? 'benchmark' : margin > 0 ? 'ahead' : margin < 0 ? 'behind' : 'level';
+        return `<tr class="${row.kind === 'v13' ? 'is-v13' : ''} ${selected ? 'is-selected' : ''}">
+            <td><strong>${Number(row.rank)}</strong></td>
+            <td><span class="v13-leaderboard-team">${v13Escape(row.team_name)}${row.kind === 'v13' ? '<em>BOT</em>' : ''}${selected ? '<em>YOU</em>' : ''}</span></td>
+            <td>${Number(row.points).toLocaleString()}</td>
+            <td class="v13-margin ${marginClass}">${v13MarginLabel(row)}</td>
+        </tr>`;
+    }).join('');
+}
+
+function v13PersonalPanel(data, selected) {
+    const confirmed = window.BoxBoxFreeAccess?.isBeatV13Confirmed() === true;
+    const entryState = confirmed
+        ? '<span class="v13-entry-state confirmed">\u2713 Entry email confirmed on this browser</span>'
+        : '<button class="v13-entry-state action" id="v13DashboardRegister" type="button">Confirm my free entry</button>';
+    if (selected) {
+        const margin = Number(selected.margin_vs_v13 || 0);
+        const headline = margin > 0
+            ? `${margin.toLocaleString()} points ahead of V13`
+            : margin < 0
+                ? `${Math.abs(margin).toLocaleString()} points behind V13`
+                : 'Level with V13';
+        return `<div class="v13-personal-team">
+            <div class="v13-personal-rank"><small>Live rank</small><strong>#${Number(selected.rank)}</strong></div>
+            <div><span>Your official team</span><h3>${v13Escape(selected.team_name)}</h3><p>${Number(selected.points).toLocaleString()} points &middot; ${headline}</p></div>
+        </div>
+        <div class="v13-personal-actions">${entryState}<button id="v13ChangeTeam" type="button">Change team</button></div>
+        <p class="v13-device-note">This team choice is remembered only on this device. It does not change your official competition submission.</p>`;
+    }
+    return `<div class="v13-team-finder-copy"><span>Your challenge dashboard</span><h3>Find your official team</h3><p>Choose a team from the Box Box F1 Fantasy league to see its live position against V13.</p></div>
+        <form class="v13-team-finder" id="v13TeamFinder">
+            <label for="v13TeamQuery">Official team name</label>
+            <div><input id="v13TeamQuery" name="team" type="search" minlength="2" maxlength="100" autocomplete="off" placeholder="e.g. Boxed In" required><button type="submit">Find team</button></div>
+        </form>
+        <div class="v13-team-results" id="v13TeamResults" role="status" aria-live="polite"></div>
+        <p class="v13-league-link">Not listed yet? <a href="https://fantasy.formula1.com/en/leagues/leaderboard/public/160604" target="_blank" rel="noopener">Open the Box Box F1 Fantasy league</a>, then search again.</p>
+        <div class="v13-personal-actions">${entryState}</div>`;
+}
+
+function renderV13Leaderboard() {
+    const body = document.getElementById('v13DashboardBody');
+    if (!body) return;
+    const data = v13LeaderboardData;
+    if (!data) {
+        body.innerHTML = '<div class="v13-dashboard-loading"><span></span><p>Loading the live community standings&hellip;</p></div>';
+        return;
+    }
+    if (!data.ok || !Array.isArray(data.leaderboard)) {
+        body.innerHTML = `<div class="v13-dashboard-unavailable"><strong>Live standings are taking a pit stop.</strong><p>${v13Escape(data.message || 'V13\'s decision record remains available below.')}</p></div>`;
+        return;
+    }
+
+    const selectedRef = v13StoredTeamRef();
+    const selected = data.leaderboard.find(row => row.kind === 'entrant' && row.team_ref === selectedRef) || null;
+    const v13 = data.v13 || data.leaderboard.find(row => row.kind === 'v13');
+    const leaderGap = data.leader?.kind === 'v13'
+        ? 'V13 currently leads'
+        : `${Math.max(0, Number(data.leader?.points || 0) - Number(v13?.points || 0)).toLocaleString()} pts to the leader`;
+
+    body.innerHTML = `<div class="v13-dashboard-summary">
+            <span><small>V13 live rank</small><strong>#${Number(v13?.rank || 0)}</strong></span>
+            <span><small>V13 score</small><strong>${Number(v13?.points || 0).toLocaleString()}</strong></span>
+            <span><small>Community field</small><strong>${Number(data.field_size || 0)}</strong></span>
+            <span><small>Through round</small><strong>R${Number(data.through_round || 0)}</strong><em>${v13Escape(leaderGap)}</em></span>
+        </div>
+        <div class="v13-dashboard-grid">
+            <article class="v13-personal-card">${v13PersonalPanel(data, selected)}</article>
+            <article class="v13-leaderboard-card">
+                <div class="v13-leaderboard-heading"><div><span>Live community leaderboard</span><h3>Who is beating the bot?</h3></div><em>Top 10</em></div>
+                <div class="v13-leaderboard-scroll"><table><thead><tr><th>Rank</th><th>Team</th><th>Points</th><th>vs V13</th></tr></thead><tbody>${v13LeaderboardRows(data, selectedRef)}</tbody></table></div>
+            </article>
+        </div>
+        <p class="v13-dashboard-eligibility">${v13Escape(data.eligibility_note)}</p>`;
+
+    body.querySelector('#v13TeamFinder')?.addEventListener('submit', event => {
+        event.preventDefault();
+        const query = String(event.currentTarget.elements.team.value || '').trim().toLowerCase();
+        const resultBox = body.querySelector('#v13TeamResults');
+        if (query.length < 2) {
+            resultBox.innerHTML = '<p>Enter at least two characters from your official team name.</p>';
+            return;
+        }
+        const matches = data.leaderboard
+            .filter(row => row.kind === 'entrant' && row.team_name.toLowerCase().includes(query))
+            .slice(0, 8);
+        resultBox.innerHTML = matches.length
+            ? matches.map(row => `<button type="button" data-v13-team-ref="${v13Escape(row.team_ref)}"><span>${v13Escape(row.team_name)}</span><strong>#${Number(row.rank)} &middot; ${Number(row.points).toLocaleString()} pts</strong></button>`).join('')
+            : '<p>No matching team was found. Make sure it is in the Box Box F1 Fantasy league, then try again.</p>';
+        resultBox.querySelectorAll('[data-v13-team-ref]').forEach(button => button.addEventListener('click', () => {
+            v13RememberTeam(button.dataset.v13TeamRef);
+            renderV13Leaderboard();
+            document.getElementById('v13Dashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (typeof gtag === 'function') gtag('event', 'beat_v13_team_pinned');
+        }));
+    });
+    body.querySelector('#v13ChangeTeam')?.addEventListener('click', () => {
+        v13RememberTeam('');
+        renderV13Leaderboard();
+        body.querySelector('#v13TeamQuery')?.focus();
+    });
+    body.querySelector('#v13DashboardRegister')?.addEventListener('click', () => {
+        const panel = document.querySelector('#tab-beatbot [data-email-updates]');
+        panel?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        window.setTimeout(() => panel?.querySelector('input[name="email"]')?.focus(), 450);
+    });
+}
+
 function renderV13() {
     const root = document.getElementById('v13Root');
     if (!root) return;
@@ -582,8 +727,8 @@ function renderV13() {
                 <div><small>Prize pool</small><strong>$${competition.prizes_usd.reduce((a, b) => a + b, 0)}</strong><span>$100 · $50 · $30</span></div>
             </div>
             <div class="v13-hero-actions">
-                <button class="btn-primary" id="v13HistoryButton" type="button">See every decision</button>
-                <a class="v13-kofi-button" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Pit Wall &middot; $5/month</a>
+                <button class="btn-primary" id="v13DashboardButton" type="button">Open live standings</button>
+                <button class="v13-secondary-button" id="v13HistoryButton" type="button">See every decision</button>
             </div>
         </section>
 
@@ -591,6 +736,14 @@ function renderV13() {
             <strong>Research replay, not a prospective claim.</strong>
             <span>${v13Escape(replay.disclaimer)}</span>
         </div>
+
+        <section class="v13-section v13-dashboard" id="v13Dashboard" aria-labelledby="v13DashboardTitle">
+            <div class="v13-section-heading">
+                <div><span>Challenge dashboard</span><h2 id="v13DashboardTitle">See who is beating the bot</h2></div>
+                <em>Official league scores &middot; refreshed automatically</em>
+            </div>
+            <div id="v13DashboardBody" aria-live="polite"><div class="v13-dashboard-loading"><span></span><p>Loading the live community standings&hellip;</p></div></div>
+        </section>
 
         <section class="v13-section">
             <div class="v13-section-heading">
@@ -634,7 +787,7 @@ function renderV13() {
         </section>
 
         <section class="v13-section" id="v13History">
-            <div class="v13-section-heading"><div><span>Transparent record</span><h2>The complete R1–R13 replay</h2></div><em>FP for teams · Qualifying for Final Fix</em></div>
+            <div class="v13-section-heading"><div><span>Transparent record</span><h2>The complete R1–R${replay.end_round} replay</h2></div><em>FP for teams · Qualifying for Final Fix</em></div>
             <div class="v13-history">${rounds.map((round, index) => v13RoundHistory(round, index === rounds.length - 1)).join('')}</div>
         </section>
 
@@ -654,6 +807,15 @@ function renderV13() {
         </section>
     `;
 
+    const registrationPanel = document.querySelector('#tab-beatbot [data-email-updates]');
+    if (registrationPanel) root.querySelector('.v13-hero')?.appendChild(registrationPanel);
+    renderV13Leaderboard();
+
+    root.querySelector('#v13DashboardButton')?.addEventListener('click', () => {
+        root.querySelector('#v13Dashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (typeof gtag === 'function') gtag('event', 'beat_v13_dashboard_open');
+    });
+
     root.querySelector('#v13HistoryButton')?.addEventListener('click', () => {
         root.querySelector('#v13History')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         if (typeof gtag === 'function') gtag('event', 'beat_v13_history_open');
@@ -664,9 +826,6 @@ function renderV13() {
         window.setTimeout(() => panel?.querySelector('input[name="email"]')?.focus(), 450);
         if (typeof gtag === 'function') gtag('event', 'beat_v13_registration_cta_click', { location: 'v13_tab' });
     });
-    root.querySelector('.v13-kofi-button')?.addEventListener('click', () => {
-        if (typeof gtag === 'function') gtag('event', 'beat_v13_kofi_click', { location: 'tab' });
-    });
     root.querySelector('.v13-membership-button')?.addEventListener('click', () => {
         if (typeof gtag === 'function') gtag('event', 'pit_wall_join_click', { location: 'v13_tab', price_usd: 5 });
     });
@@ -676,6 +835,9 @@ function renderV13() {
         document.getElementById('pitWallMemberPanel')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         if (typeof gtag === 'function') gtag('event', 'pit_wall_signin_click', { location: 'v13_tab' });
     });
+    if (new URLSearchParams(location.search).get('v13') === 'dashboard') {
+        window.setTimeout(() => root.querySelector('#v13Dashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    }
 }
 
 function setupV13Popup() {
@@ -1331,6 +1493,22 @@ function switchTab(tabName) {
 
     // GA4 virtual page view for this tab
     trackTabView(tabName);
+}
+
+async function loadV13Leaderboard() {
+    try {
+        const response = await fetch('/api/beat-v13/leaderboard/');
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.message || `HTTP ${response.status}`);
+        v13LeaderboardData = result;
+    } catch (error) {
+        v13LeaderboardData = {
+            ok: false,
+            message: error.message || 'Live community standings are temporarily unavailable.',
+        };
+        console.warn('Beat V13 leaderboard is unavailable:', error);
+    }
+    renderV13Leaderboard();
 }
 
 function openPitWallTransferAdvisor(options = {}) {

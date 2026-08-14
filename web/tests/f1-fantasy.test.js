@@ -46,6 +46,14 @@ test('extractSnapshot finds five drivers and two constructors', () => {
     assert.equal(snapshot.assets.filter(item => item.asset_type === 'constructor').length, 2);
 });
 
+test('extractTeams accepts the compact official overall-points fields', () => {
+    const teams = extractTeams({
+        leaderboard: [{ user_guid: 'owner-2', teamname: 'Margin Call', team_no: 1, ovpoints: 2548, ovrank: 17 }],
+    });
+    assert.equal(teams[0].points, 2548);
+    assert.equal(teams[0].rank, 17);
+});
+
 test('extractSnapshot accepts PascalCase drivers and constructors in separate sections', () => {
     const payload = {
         Data: {

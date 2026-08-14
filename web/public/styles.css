@@ -3608,6 +3608,17 @@ table.sortable th.sort-desc::after {
     flex-wrap: wrap;
 }
 .v13-hero-actions a { text-decoration: none; }
+.v13-secondary-button {
+    padding:10px 18px;
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:8px;
+    background:rgba(255,255,255,.045);
+    color:#e8ebf4;
+    font:inherit;
+    font-weight:750;
+    cursor:pointer;
+}
+.v13-secondary-button:hover { border-color:rgba(55,230,208,.45); background:rgba(55,230,208,.08); }
 .v13-kofi-button,
 .v13-popup-support {
     display: inline-flex;
@@ -3634,6 +3645,116 @@ table.sortable th.sort-desc::after {
     font-size: .82rem;
 }
 .v13-replay-warning strong { color: #f7d95d; white-space: nowrap; }
+.v13-dashboard { scroll-margin-top:180px; }
+.v13-dashboard-summary {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:9px;
+    margin-bottom:12px;
+}
+.v13-dashboard-summary > span {
+    display:grid;
+    gap:3px;
+    min-height:88px;
+    padding:14px 15px;
+    border:1px solid rgba(55,230,208,.16);
+    border-radius:12px;
+    background:linear-gradient(145deg,rgba(55,230,208,.055),rgba(139,92,246,.045));
+}
+.v13-dashboard-summary small { color:var(--text-secondary); font-size:.64rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.v13-dashboard-summary strong { align-self:end; font-size:1.45rem; letter-spacing:-.035em; }
+.v13-dashboard-summary em { color:var(--text-secondary); font-size:.66rem; font-style:normal; }
+.v13-dashboard-grid { display:grid; grid-template-columns:minmax(280px,.78fr) minmax(460px,1.22fr); gap:12px; }
+.v13-personal-card,
+.v13-leaderboard-card {
+    min-width:0;
+    padding:18px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:linear-gradient(145deg,rgba(27,30,44,.96),rgba(17,20,30,.96));
+}
+.v13-team-finder-copy > span,
+.v13-leaderboard-heading span,
+.v13-personal-team > div > span {
+    color:var(--v13-cyan);
+    font-size:.65rem;
+    font-weight:800;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+}
+.v13-team-finder-copy h3,
+.v13-leaderboard-heading h3,
+.v13-personal-team h3 { margin:4px 0 6px; font-size:1.05rem; }
+.v13-team-finder-copy p,
+.v13-personal-team p,
+.v13-device-note { color:#aeb7c5; font-size:.75rem; line-height:1.45; }
+.v13-team-finder { margin-top:14px; }
+.v13-team-finder label { display:block; margin-bottom:6px; color:#c9cfda; font-size:.7rem; font-weight:750; }
+.v13-team-finder > div { display:flex; gap:7px; }
+.v13-team-finder input {
+    min-width:0;
+    flex:1;
+    padding:10px 11px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:#0d1119;
+    color:var(--text);
+    font:inherit;
+}
+.v13-team-finder input:focus { outline:2px solid rgba(55,230,208,.18); border-color:rgba(55,230,208,.55); }
+.v13-team-finder button,
+.v13-entry-state.action {
+    border:0;
+    border-radius:8px;
+    padding:9px 12px;
+    background:var(--v13-cyan);
+    color:#071915;
+    font:inherit;
+    font-size:.72rem;
+    font-weight:850;
+    cursor:pointer;
+}
+.v13-team-results { display:grid; gap:6px; margin-top:9px; }
+.v13-team-results > p { margin:0; color:#b5becb; font-size:.72rem; }
+.v13-team-results button { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; padding:9px 10px; border:1px solid rgba(55,230,208,.16); border-radius:8px; background:rgba(55,230,208,.045); color:var(--text); text-align:left; cursor:pointer; }
+.v13-team-results button:hover { border-color:rgba(55,230,208,.48); }
+.v13-team-results button span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.75rem; font-weight:750; }
+.v13-team-results button strong { flex:none; color:#9cebdd; font-size:.67rem; }
+.v13-league-link { margin:9px 0 0; color:#aeb7c5; font-size:.68rem; line-height:1.45; }
+.v13-league-link a { color:#7feadb; }
+.v13-personal-team { display:flex; align-items:center; gap:14px; }
+.v13-personal-rank { flex:0 0 78px; display:grid; place-content:center; min-height:78px; border:1px solid rgba(55,230,208,.34); border-radius:18px 7px 18px 7px; background:rgba(55,230,208,.07); text-align:center; }
+.v13-personal-rank small { color:var(--text-secondary); font-size:.58rem; text-transform:uppercase; }
+.v13-personal-rank strong { color:var(--v13-cyan); font-size:1.55rem; }
+.v13-personal-actions { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-top:16px; }
+.v13-personal-actions > button:not(.v13-entry-state) { padding:7px 0; border:0; background:none; color:#bfb3f5; font:inherit; font-size:.7rem; font-weight:750; cursor:pointer; }
+.v13-entry-state { display:inline-flex; align-items:center; padding:7px 9px; border-radius:999px; font-size:.66rem; font-weight:800; }
+.v13-entry-state.confirmed { color:#a5f3d8; background:rgba(34,197,94,.11); }
+.v13-device-note { margin:10px 0 0; font-size:.67rem; }
+.v13-leaderboard-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:11px; }
+.v13-leaderboard-heading em { color:var(--text-secondary); font-size:.66rem; font-style:normal; text-transform:uppercase; }
+.v13-leaderboard-scroll { overflow-x:auto; }
+.v13-leaderboard-card table { width:100%; border-collapse:collapse; font-size:.74rem; }
+.v13-leaderboard-card th { padding:7px 9px; border-bottom:1px solid var(--border); color:var(--text-secondary); font-size:.62rem; letter-spacing:.07em; text-align:left; text-transform:uppercase; }
+.v13-leaderboard-card th:nth-child(3),
+.v13-leaderboard-card th:nth-child(4),
+.v13-leaderboard-card td:nth-child(3),
+.v13-leaderboard-card td:nth-child(4) { text-align:right; }
+.v13-leaderboard-card td { padding:9px; border-bottom:1px solid rgba(255,255,255,.055); color:#d8dde8; }
+.v13-leaderboard-card tr:last-child td { border-bottom:0; }
+.v13-leaderboard-card tr.is-v13 td { background:rgba(55,230,208,.065); }
+.v13-leaderboard-card tr.is-selected td { box-shadow:inset 0 1px rgba(139,92,246,.45),inset 0 -1px rgba(139,92,246,.45); }
+.v13-leaderboard-team { display:flex; align-items:center; gap:5px; min-width:0; font-weight:750; }
+.v13-leaderboard-team em { padding:2px 4px; border-radius:4px; color:#9ff4e6; background:rgba(55,230,208,.11); font-size:.52rem; font-style:normal; }
+.v13-margin.ahead { color:#79e7c3; }
+.v13-margin.behind { color:#f3a6a4; }
+.v13-margin.benchmark { color:var(--v13-cyan); }
+.v13-dashboard-eligibility { margin:10px 2px 0; color:#aeb7c5; font-size:.68rem; line-height:1.45; }
+.v13-dashboard-loading,
+.v13-dashboard-unavailable { display:grid; justify-items:center; min-height:170px; place-content:center; padding:22px; border:1px solid var(--border); border-radius:14px; color:#b5becb; text-align:center; }
+.v13-dashboard-loading span { width:24px; height:24px; border:2px solid rgba(55,230,208,.18); border-top-color:var(--v13-cyan); border-radius:50%; animation:spin .8s linear infinite; }
+.v13-dashboard-unavailable strong { color:var(--text); }
+.v13-dashboard-unavailable p { max-width:56ch; margin:6px 0 0; font-size:.78rem; }
 .v13-section {
     margin-top: 38px;
 }
@@ -4046,7 +4167,9 @@ body.v13-popup-open { overflow: hidden; }
     .v13-scoreboard strong { font-size: 1.65rem; }
     .v13-state-grid,
     .v13-rules-card,
-    .v13-membership-card { grid-template-columns: 1fr; }
+    .v13-membership-card,
+    .v13-dashboard-grid { grid-template-columns: 1fr; }
+    .v13-dashboard-summary { grid-template-columns:repeat(2,minmax(0,1fr)); }
     .v13-state-numbers { flex-wrap: wrap; }
     .v13-state-numbers span { flex: 1; }
     .v13-round > summary { grid-template-columns: 42px minmax(0, 1fr) 72px 72px; }
@@ -4071,6 +4194,12 @@ body.v13-popup-open { overflow: hidden; }
     .v13-round-body { padding: 0 10px 12px; }
     .v13-prizes { width: 100%; }
     .v13-prizes span { flex: 1; min-width: 0; }
+    .v13-dashboard-summary { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .v13-dashboard-summary > span { min-height:76px; padding:12px; }
+    .v13-dashboard-summary strong { font-size:1.25rem; }
+    .v13-personal-card,.v13-leaderboard-card { padding:14px; }
+    .v13-team-finder > div { flex-direction:column; }
+    .v13-leaderboard-card th,.v13-leaderboard-card td { padding:8px 6px; }
     .v13-popup-backdrop { align-items: end; padding: 0; }
     .v13-popup-card { width: 100%; border-radius: 22px 22px 0 0; padding: 25px 20px max(25px, env(safe-area-inset-bottom)); }
     .v13-popup-actions { flex-direction: column; }

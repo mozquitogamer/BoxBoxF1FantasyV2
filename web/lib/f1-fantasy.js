@@ -116,8 +116,13 @@ function candidateTeam(row) {
     ]) || '').trim();
     const slot = Number(first(row, ['team_no', 'teamNo', 'slot', 'team_slot', 'teamSlot']) || 0);
     const manager = normalizeName(first(row, ['manager_name', 'managerName', 'user_name', 'userName', 'fullname', 'full_name', 'username']));
-    const points = Number(first(row, ['total_points', 'totalPoints', 'points', 'score', 'overall_points']) || 0);
-    const rank = Number(first(row, ['rank', 'position', 'league_rank', 'leagueRank']) || 0);
+    const points = Number(first(row, [
+        'total_points', 'totalPoints', 'points', 'score', 'overall_points', 'overallPoints',
+        'ovpoints', 'ovPoints', 'overallpoints',
+    ]) || 0);
+    const rank = Number(first(row, [
+        'rank', 'position', 'league_rank', 'leagueRank', 'ovrank', 'ovRank', 'overall_rank', 'overallRank',
+    ]) || 0);
     if (!name || !id) return null;
     return { id, name, slot: slot >= 1 && slot <= 3 ? slot : null, manager, points, rank, raw: row };
 }

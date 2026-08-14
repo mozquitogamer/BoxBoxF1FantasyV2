@@ -40,8 +40,8 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="manifest" href="/site.webmanifest">
-    <link rel="stylesheet" href="styles.css?v=29">
-    <link rel="stylesheet" href="engagement.css?v=6">
+    <link rel="stylesheet" href="styles.css?v=30">
+    <link rel="stylesheet" href="engagement.css?v=7">
     <link rel="stylesheet" href="scenarios.css?v=3">
     <link rel="stylesheet" href="weather.css?v=2">
     <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -529,9 +529,9 @@
                     <p>Find the best F1 Fantasy lineups within your budget, or get transfer recommendations for your current team.</p>
                 </div>
 
-                <section class="email-updates-panel" data-email-updates data-registration-location="optimizer" aria-labelledby="optimizerRegistrationTitle" hidden>
-                    <div class="email-updates-copy"><span class="email-updates-eyebrow">Beat V13 &middot; Free email entry</span><h2 id="optimizerRegistrationTitle">Put your season score against the bot</h2><p>Confirm your email to enter Beat V13 and receive general V13, simulation and competition updates. No password, payment or Pit Wall membership is required.</p></div>
-                    <form class="email-updates-form" novalidate><div class="email-updates-fields"><label class="sr-only">Email address</label><input name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required><button type="submit">Register free</button></div><div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div><label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Register me for Beat V13 and email me V13, simulation and competition updates. I can unsubscribe at any time.</span></label><p class="email-updates-privacy">Handled according to the <a href="/privacy/">privacy policy</a>.</p><p class="email-updates-status" role="status" aria-live="polite"></p></form>
+                <section class="email-updates-panel optimizer-registration-panel" data-email-updates data-registration-location="optimizer" aria-labelledby="optimizerRegistrationTitle" hidden>
+                    <div class="email-updates-copy"><span class="email-updates-eyebrow">Beat V13 &middot; Free challenge</span><h2 id="optimizerRegistrationTitle">Think your lineup can beat the bot?</h2><p>Enter free before the Round 22 lock. The optimizer stays fully available without registering.</p></div>
+                    <form class="email-updates-form" novalidate><div class="email-updates-fields"><label class="sr-only" for="optimizerRegistrationEmail">Email address</label><input id="optimizerRegistrationEmail" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required><button type="submit">Enter free</button></div><div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div><label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Register me for Beat V13 and send me competition and simulation updates. I can unsubscribe at any time.</span></label><p class="email-updates-privacy"><a href="/privacy/">Privacy</a></p><p class="email-updates-status" role="status" aria-live="polite"></p></form>
                 </section>
 
                 <!-- Mode toggle -->
@@ -962,9 +962,9 @@
 
             <!-- Beat V13 Tab -->
             <section class="tab-content" id="tab-beatbot">
-                <section class="email-updates-panel" data-email-updates data-registration-location="beat_v13" aria-labelledby="v13RegistrationTitleTop" hidden>
-                    <div class="email-updates-copy"><span class="email-updates-eyebrow">Beat V13 &middot; Free email entry</span><h2 id="v13RegistrationTitleTop">Join the challenge</h2><p>Confirm your email before the Round 22 lock to enter. You can follow V13 and use every public tool without a password; Pit Wall is a separate optional membership.</p></div>
-                    <form class="email-updates-form" novalidate><div class="email-updates-fields"><label class="sr-only">Email address</label><input name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required><button type="submit">Register free</button></div><div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div><label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Register me for Beat V13 and email me V13, simulation and competition updates. I can unsubscribe at any time.</span></label><p class="email-updates-privacy">Handled according to the <a href="/privacy/">privacy policy</a>.</p><p class="email-updates-status" role="status" aria-live="polite"></p></form>
+                <section class="email-updates-panel v13-hero-registration" data-email-updates data-registration-location="beat_v13" aria-labelledby="v13RegistrationTitleTop" hidden>
+                    <div class="email-updates-copy"><span class="email-updates-eyebrow">Free 2026 challenge entry</span><h2 id="v13RegistrationTitleTop">Put your real team on the grid</h2><p>Confirm your email before the Round 22 lock. Follow the live standings now, then submit your official full-season score after Abu Dhabi.</p></div>
+                    <form class="email-updates-form" novalidate><div class="email-updates-fields"><label class="sr-only" for="v13RegistrationEmail">Email address</label><input id="v13RegistrationEmail" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required><button type="submit">Enter free</button></div><div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div><label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Register me for Beat V13 and send me V13, simulation and competition updates. I can unsubscribe at any time.</span></label><p class="email-updates-privacy">No password or payment required &middot; <a href="/privacy/">Privacy</a></p><p class="email-updates-status" role="status" aria-live="polite"></p></form>
                 </section>
                 <div class="v13-root" id="v13Root" aria-live="polite">
                     <div class="v13-loading">
@@ -1372,8 +1372,8 @@
     </footer>
 
     <script src="scenarios.js?v=3"></script>
-    <script src="app.js?v=125"></script>
+    <script src="app.js?v=126"></script>
     <script src="members.js?v=13"></script>
-    <script src="engagement.js?v=10"></script>
+    <script src="engagement.js?v=11"></script>
 </body>
 </html>
