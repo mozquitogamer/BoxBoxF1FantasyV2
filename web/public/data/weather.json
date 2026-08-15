@@ -14,19 +14,19 @@
     "end": "2026-08-23"
   },
   "overall_rain_risk": "MEDIUM",
-  "max_rain_probability": 68,
+  "max_rain_probability": 67,
   "daily": [
     {
       "date": "2026-08-21",
-      "temp_max": 18.1,
-      "temp_min": 16.6,
-      "precip_probability_max": 68,
-      "precip_sum_mm": 13.2,
-      "wind_max_kmh": 29.3,
-      "weather_description": "Moderate drizzle",
+      "temp_max": 18.4,
+      "temp_min": 15.9,
+      "precip_probability_max": 67,
+      "precip_sum_mm": 14.4,
+      "wind_max_kmh": 24.9,
+      "weather_description": "Dense drizzle",
       "weather_category": "drizzle",
       "weather_icon": "\ud83c\udf26\ufe0f",
-      "weather_code": 53,
+      "weather_code": 55,
       "rain_risk": "MEDIUM"
     },
     {
@@ -61,7 +61,7 @@
       "name": "FP1",
       "day_label": "Friday",
       "date": "2026-08-21",
-      "rain_probability": 68,
+      "rain_probability": 67,
       "rain_risk": "MEDIUM",
       "avg_temp": 17.1,
       "avg_wind": 22.3,
@@ -74,10 +74,10 @@
           "hour": 10,
           "temp": 16.9,
           "humidity": 79,
-          "precip_prob": 68,
+          "precip_prob": 61,
           "precip_mm": 0.7,
           "windspeed": 24.3,
-          "windgusts": 26.6,
+          "windgusts": 21.6,
           "weather_code": 53
         },
         {
@@ -87,27 +87,27 @@
           "precip_prob": 67,
           "precip_mm": 0.7,
           "windspeed": 24.8,
-          "windgusts": 29.2,
+          "windgusts": 25.9,
           "weather_code": 53
         },
         {
           "hour": 12,
           "temp": 16.9,
           "humidity": 80,
-          "precip_prob": 66,
+          "precip_prob": 67,
           "precip_mm": 0.7,
           "windspeed": 24.9,
-          "windgusts": 28.1,
+          "windgusts": 28.8,
           "weather_code": 53
         },
         {
           "hour": 13,
           "temp": 17.0,
           "humidity": 80,
-          "precip_prob": 64,
+          "precip_prob": 65,
           "precip_mm": 0.7,
           "windspeed": 24.5,
-          "windgusts": 25.2,
+          "windgusts": 30.6,
           "weather_code": 53
         },
         {
@@ -117,7 +117,7 @@
           "precip_prob": 63,
           "precip_mm": 0.7,
           "windspeed": 23.1,
-          "windgusts": 23.4,
+          "windgusts": 31.0,
           "weather_code": 53
         },
         {
@@ -127,7 +127,7 @@
           "precip_prob": 62,
           "precip_mm": 0.6,
           "windspeed": 20.7,
-          "windgusts": 23.4,
+          "windgusts": 29.5,
           "weather_code": 53
         },
         {
@@ -137,7 +137,7 @@
           "precip_prob": 60,
           "precip_mm": 0.6,
           "windspeed": 18.4,
-          "windgusts": 24.1,
+          "windgusts": 27.0,
           "weather_code": 53
         },
         {
@@ -147,7 +147,7 @@
           "precip_prob": 59,
           "precip_mm": 0.6,
           "windspeed": 17.7,
-          "windgusts": 24.8,
+          "windgusts": 24.1,
           "weather_code": 53
         }
       ]
@@ -172,7 +172,7 @@
           "precip_prob": 63,
           "precip_mm": 0.7,
           "windspeed": 23.1,
-          "windgusts": 23.4,
+          "windgusts": 31.0,
           "weather_code": 53
         },
         {
@@ -182,7 +182,7 @@
           "precip_prob": 62,
           "precip_mm": 0.6,
           "windspeed": 20.7,
-          "windgusts": 23.4,
+          "windgusts": 29.5,
           "weather_code": 53
         },
         {
@@ -192,7 +192,7 @@
           "precip_prob": 60,
           "precip_mm": 0.6,
           "windspeed": 18.4,
-          "windgusts": 24.1,
+          "windgusts": 27.0,
           "weather_code": 53
         },
         {
@@ -202,7 +202,7 @@
           "precip_prob": 59,
           "precip_mm": 0.6,
           "windspeed": 17.7,
-          "windgusts": 24.8,
+          "windgusts": 24.1,
           "weather_code": 53
         }
       ]
@@ -227,7 +227,7 @@
           "precip_prob": 50,
           "precip_mm": 0.1,
           "windspeed": 4.5,
-          "windgusts": 21.2,
+          "windgusts": 11.5,
           "weather_code": 51
         },
         {
@@ -237,7 +237,7 @@
           "precip_prob": 48,
           "precip_mm": 0.1,
           "windspeed": 5.9,
-          "windgusts": 27.0,
+          "windgusts": 17.3,
           "weather_code": 51
         },
         {
@@ -247,7 +247,7 @@
           "precip_prob": 46,
           "precip_mm": 0.1,
           "windspeed": 8.4,
-          "windgusts": 29.5,
+          "windgusts": 25.2,
           "weather_code": 51
         },
         {
@@ -257,7 +257,7 @@
           "precip_prob": 43,
           "precip_mm": 0.1,
           "windspeed": 10.7,
-          "windgusts": 30.2,
+          "windgusts": 34.6,
           "weather_code": 51
         }
       ]
@@ -282,7 +282,7 @@
           "precip_prob": 41,
           "precip_mm": 0.1,
           "windspeed": 12.3,
-          "windgusts": 30.6,
+          "windgusts": 40.7,
           "weather_code": 51
         },
         {
@@ -292,7 +292,7 @@
           "precip_prob": 39,
           "precip_mm": 0.0,
           "windspeed": 13.0,
-          "windgusts": null,
+          "windgusts": 41.0,
           "weather_code": 0
         },
         {
@@ -302,7 +302,7 @@
           "precip_prob": 36,
           "precip_mm": 0.0,
           "windspeed": 13.2,
-          "windgusts": null,
+          "windgusts": 38.2,
           "weather_code": 0
         },
         {
@@ -312,7 +312,7 @@
           "precip_prob": 34,
           "precip_mm": 0.0,
           "windspeed": 13.2,
-          "windgusts": null,
+          "windgusts": 36.0,
           "weather_code": 0
         }
       ]
@@ -373,10 +373,10 @@
       ]
     }
   ],
-  "last_updated": "2026-08-15T12:18:25Z",
-  "next_update": "2026-08-15T18:18:25Z",
+  "last_updated": "2026-08-15T18:15:00Z",
+  "next_update": "2026-08-16T00:15:00Z",
   "data_source": "Open-Meteo (open-meteo.com)",
-  "forecast_snapshot_id": "2026-08-15T12-18-25.430935Z",
-  "forecast_retrieved_at": "2026-08-15T12:18:25.430935+00:00",
-  "forecast_archive_path": "data/forecasts/weather/year2026/round14/2026-08-15T12-18-25.430935Z_open_meteo.json"
+  "forecast_snapshot_id": "2026-08-15T18-15-00.349240Z",
+  "forecast_retrieved_at": "2026-08-15T18:15:00.349240+00:00",
+  "forecast_archive_path": "data/forecasts/weather/year2026/round14/2026-08-15T18-15-00.349240Z_open_meteo.json"
 }
