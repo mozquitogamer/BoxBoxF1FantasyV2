@@ -2,7 +2,16 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { extractSnapshot, extractTeams, findGlobalTeams, findTeams, getOpponentSnapshot, officialGameDay } = require('../lib/f1-fantasy');
+const {
+    extractSnapshot,
+    extractTeams,
+    findGlobalTeams,
+    findLeagueTeams,
+    findTeams,
+    getOpponentSnapshot,
+    getPublicLeagueSnapshot,
+    officialGameDay,
+} = require('../lib/f1-fantasy');
 const { createTeamLinkToken, normalizeRound, verifyTeamLinkToken } = require('../api/members/team');
 
 test('extractTeams accepts current-style leaderboard fields and de-duplicates teams', () => {
@@ -185,6 +194,41 @@ test('extractSnapshot parses the live F1 player record array and explicit positi
     assert.equal(snapshot.assets.find(item => item.asset_id === '28').slot, 1);
 });
 
+test('extractSnapshot resolves the public league user_team array and ignores extra feed IDs', () => {
+    const lineup = ['115', '11032', '11149', '11051', '111', '28', '25', 'unused'];
+    const roster = {
+        Data: {
+            Value: [
+                ...lineup.slice(0, 5).map((id, index) => ({
+                    PlayerId: id,
+                    PositionName: 'DRIVER',
+                    FUllName: `Driver ${index + 1}`,
+                })),
+                { PlayerId: '28', PositionName: 'CONSTRUCTOR', FUllName: 'McLaren' },
+                { PlayerId: '25', PositionName: 'CONSTRUCTOR', FUllName: 'Ferrari' },
+                { PlayerId: 'unused', PositionName: 'DRIVER', FUllName: 'Extra Driver' },
+            ],
+        },
+    };
+    const payload = {
+        leaderboard: [{
+            user_guid: 'owner',
+            team_name: 'Boxed%20In',
+            team_no: 1,
+            user_team: lineup,
+            cur_points: 2048,
+            cur_rank: 12,
+        }],
+    };
+    const link = { user_id: 'member', official_team_id: 'owner', official_team_name: 'Boxed In', team_slot: 1 };
+    const snapshot = extractSnapshot(payload, link, 14, roster);
+    assert.equal(snapshot.assets.length, 7);
+    assert.equal(snapshot.assets.filter(item => item.asset_type === 'driver').length, 5);
+    assert.equal(snapshot.assets.filter(item => item.asset_type === 'constructor').length, 2);
+    assert.equal(snapshot.overall_points, 2048);
+    assert.equal(snapshot.league_rank, 12);
+});
+
 test('extractSnapshot refuses to turn an empty F1 response into a saved lineup', () => {
     const link = { user_id: 'user', official_team_id: 'official', official_team_name: 'My Team', team_slot: 1 };
     assert.throws(
@@ -242,6 +286,59 @@ test('official-team discovery uses exact name only across public F1 lists', asyn
         assert.ok(requested.every(url => !url.includes('/services/user/leaderboard/')));
     } finally {
         global.fetch = originalFetch;
+    }
+});
+
+test('league connection and lineup refresh use only unauthenticated public feeds', async () => {
+    const originalFetch = global.fetch;
+    const previousCookie = process.env.F1_FANTASY_SESSION_COOKIE;
+    process.env.F1_FANTASY_SESSION_COOKIE = 'secret-cookie-that-must-not-be-sent';
+    const requests = [];
+    const playerIds = ['115', '11032', '11149', '11051', '111', '28', '25'];
+    global.fetch = async (url, options = {}) => {
+        requests.push({ url: String(url), headers: options.headers || {} });
+        const payload = String(url).includes('/feeds/drivers/')
+            ? {
+                Data: {
+                    Value: [
+                        ...playerIds.slice(0, 5).map((id, index) => ({ PlayerId: id, PositionName: 'DRIVER', FUllName: `Driver ${index + 1}` })),
+                        { PlayerId: '28', PositionName: 'CONSTRUCTOR', FUllName: 'McLaren' },
+                        { PlayerId: '25', PositionName: 'CONSTRUCTOR', FUllName: 'Ferrari' },
+                    ],
+                },
+            }
+            : {
+                Value: {
+                    leaderboard: [{
+                        user_guid: 'league-owner',
+                        team_name: 'Boxed%20In',
+                        team_no: 1,
+                        user_name: 'League Manager',
+                        user_team: playerIds,
+                        cur_points: 2048,
+                        cur_rank: 12,
+                    }],
+                },
+            };
+        return new Response(JSON.stringify(payload), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    };
+    try {
+        const found = await findLeagueTeams('Boxed In');
+        assert.deepEqual(found.map(team => team.id), ['league-owner']);
+        const result = await getPublicLeagueSnapshot({
+            user_id: 'member',
+            official_team_id: 'league-owner',
+            official_team_name: 'Boxed In',
+            team_slot: 1,
+        }, 14);
+        assert.equal(result.source, 'public_league');
+        assert.equal(result.snapshot.assets.length, 7);
+        assert.ok(requests.every(request => !request.headers.Cookie));
+        assert.ok(requests.every(request => request.url.includes('/feeds/')));
+    } finally {
+        global.fetch = originalFetch;
+        if (previousCookie === undefined) delete process.env.F1_FANTASY_SESSION_COOKIE;
+        else process.env.F1_FANTASY_SESSION_COOKIE = previousCookie;
     }
 });
 

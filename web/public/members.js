@@ -221,8 +221,8 @@
             : '';
 
         const officialHtml = f1Link
-            ? `<div class="pit-wall-official linked"><div><span>Official F1 team</span><strong>${escapeHtml(f1Link.official_team_name)} · T${f1Link.team_slot}</strong><small>${f1Link.last_synced_at ? `Last synced ${friendlyDate(f1Link.last_synced_at)}` : 'Linked · waiting for first sync'}${f1Snapshot?.round ? ` · Round ${f1Snapshot.round}` : ''}</small></div><div class="pit-wall-actions"><button type="button" class="pit-wall-secondary" id="pitWallSyncF1">Sync now</button><button type="button" class="pit-wall-link-danger" id="pitWallDisconnectF1">Disconnect</button></div></div>`
-            : `<div class="pit-wall-official"><span>Official F1 Fantasy sync</span><p>Enter the exact team name shown in F1 Fantasy. We will show every matching team and T1/T2/T3 slot so you can choose yours. No rank or F1 password is required.</p><form id="pitWallF1Search"><div class="pit-wall-f1-fields"><label><small>Exact official team name</small><input name="team_name" type="search" placeholder="e.g. Boxed In" minlength="2" maxlength="100" required></label><button type="submit">Find team</button></div></form><p class="pit-wall-f1-help">F1 only publishes team identities in its visible standings lists. We check the Global top list and the Box Box league.</p><div class="pit-wall-f1-join"><span>Not in the league yet?</span><strong>Code: P1JZAGNMP04</strong><a href="https://fantasy.formula1.com/en/leagues/join/P1JZAGNMP04" target="_blank" rel="noopener">Join the Box Box league ↗</a></div><div class="pit-wall-search-results" id="pitWallF1Results"></div></div>`;
+            ? `<div class="pit-wall-official linked"><div><span>F1 Fantasy connected</span><strong>${escapeHtml(f1Link.official_team_name)} · T${f1Link.team_slot}</strong><small>${f1Link.last_synced_at ? `League feed refreshed ${friendlyDate(f1Link.last_synced_at)}` : 'Connected · waiting for first refresh'}${f1Snapshot?.round ? ` · Round ${f1Snapshot.round}` : ''}</small><small>No F1 password or browser cookie is stored.</small></div><div class="pit-wall-actions"><button type="button" class="pit-wall-secondary" id="pitWallSyncF1">Refresh official team</button><button type="button" class="pit-wall-link-danger" id="pitWallDisconnectF1">Disconnect</button></div></div>`
+            : `<div class="pit-wall-official"><span>Connect F1 Fantasy</span><p>Connect your official team once and Pit Wall will refresh its latest locked lineup whenever new simulations arrive. Your F1 password and browser cookies are never requested or stored.</p><div class="pit-wall-f1-join"><span>Step 1 · Join the Box Box league</span><strong>Code: P1JZAGNMP04</strong><a href="https://fantasy.formula1.com/en/leagues/join/P1JZAGNMP04" target="_blank" rel="noopener">Join the league on F1 Fantasy ↗</a></div><form id="pitWallF1Search"><div class="pit-wall-f1-fields"><label><small>Step 2 · Enter your exact official team name</small><input name="team_name" type="search" placeholder="e.g. Boxed In" minlength="2" maxlength="100" required></label><button type="submit">Find my team</button></div></form><p class="pit-wall-f1-help">Choose the correct T1/T2/T3 slot from the league results. You do not need to enter a rank.</p><div class="pit-wall-search-results" id="pitWallF1Results"></div></div>`;
         const resetButton = hasCompleteTeam(f1Snapshot)
             ? '<button type="button" class="pit-wall-secondary" id="pitWallResetOfficial">Reset to official team</button>'
             : '';
@@ -298,7 +298,7 @@
             const button = form.querySelector('button');
             const results = panel.querySelector('#pitWallF1Results');
             button.disabled = true;
-            results.innerHTML = '<span>Checking the official F1 Fantasy lists…</span>';
+            results.innerHTML = '<span>Checking the official Box Box league feed…</span>';
             try {
                 const query = encodeURIComponent(form.elements.team_name.value.trim());
                 const data = await request(`/api/members/team/?action=f1-search&q=${query}`);
@@ -307,8 +307,17 @@
                     resultButton.disabled = true;
                     try {
                         const linked = await request('/api/members/team/', { method: 'POST', body: { action: 'f1-link', link_token: resultButton.dataset.teamLinkToken } });
-                        status(linked.message, 'success');
-                        await loadSession(false);
+                        let syncMessage = '';
+                        let syncFailed = false;
+                        try {
+                            const synced = await request('/api/members/team/', { method: 'POST', body: { action: 'f1-sync', round: window.BoxBoxTeamMemory?.currentRound() } });
+                            syncMessage = synced.message;
+                        } catch (syncError) {
+                            syncFailed = true;
+                            syncMessage = syncError.message;
+                        }
+                        await loadSession(true);
+                        status(syncFailed ? `${linked.message} The first lineup refresh needs attention: ${syncMessage}` : `${linked.message} ${syncMessage}`, syncFailed ? 'error' : 'success');
                     } catch (error) { status(error.message, 'error'); resultButton.disabled = false; }
                 }));
             } catch (error) { results.innerHTML = `<span>${escapeHtml(error.message)}</span>`; }
