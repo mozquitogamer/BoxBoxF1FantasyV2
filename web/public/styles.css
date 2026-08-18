@@ -1866,6 +1866,7 @@ select:focus, input:focus {
 .optimizer-constraints {
     margin-bottom: 32px;
 }
+.optimizer-constraints-warning strong { color: var(--accent); }
 
 .optimizer-constraints h3 {
     font-size: 16px;
