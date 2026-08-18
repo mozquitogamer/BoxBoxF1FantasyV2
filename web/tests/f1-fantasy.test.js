@@ -2,8 +2,8 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { extractSnapshot, extractTeams, findTeams, officialGameDay } = require('../lib/f1-fantasy');
-const { normalizeRound } = require('../api/members/team');
+const { extractSnapshot, extractTeams, findTeams, globalPageForRank, officialGameDay } = require('../lib/f1-fantasy');
+const { createTeamLinkToken, normalizeRound, verifyTeamLinkToken } = require('../api/members/team');
 
 test('extractTeams accepts current-style leaderboard fields and de-duplicates teams', () => {
     const payload = {
@@ -216,4 +216,27 @@ test('maps internal rounds around the two cancelled races', () => {
     assert.equal(officialGameDay(3), 3);
     assert.equal(officialGameDay(6), 4);
     assert.equal(officialGameDay(13), 11);
+});
+
+test('maps an exact overall rank to its global leaderboard page', () => {
+    assert.equal(globalPageForRank(1), 1);
+    assert.equal(globalPageForRank(50), 1);
+    assert.equal(globalPageForRank(51), 2);
+    assert.equal(globalPageForRank(12_453), 250);
+});
+
+test('official-team link selections are signed, member-bound and short-lived', () => {
+    const previous = process.env.SUBSCRIPTION_SIGNING_SECRET;
+    process.env.SUBSCRIPTION_SIGNING_SECRET = 'test-only-team-link-secret';
+    try {
+        const team = { id: 'official-guid', name: 'Boxed In', manager: 'Example', slot: 1, rank: 102 };
+        const token = createTeamLinkToken(team, 'member-one', 1_000);
+        assert.equal(verifyTeamLinkToken(token, 'member-one', 2_000).id, 'official-guid');
+        assert.equal(verifyTeamLinkToken(token, 'member-two', 2_000), null);
+        assert.equal(verifyTeamLinkToken(`${token}x`, 'member-one', 2_000), null);
+        assert.equal(verifyTeamLinkToken(token, 'member-one', 1_000 + 11 * 60 * 1000), null);
+    } finally {
+        if (previous === undefined) delete process.env.SUBSCRIPTION_SIGNING_SECRET;
+        else process.env.SUBSCRIPTION_SIGNING_SECRET = previous;
+    }
 });

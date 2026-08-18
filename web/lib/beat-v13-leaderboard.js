@@ -35,9 +35,9 @@ function assignRanks(rows) {
 
 function buildLeaderboard(teams, v13Record) {
     const v13Points = numberOrZero(v13Record?.points);
-    const entrantRows = (Array.isArray(teams) ? teams : [])
+    const communityRows = (Array.isArray(teams) ? teams : [])
         .map(team => ({
-            kind: 'entrant',
+            kind: 'community',
             team_ref: teamReference(team),
             team_name: cleanTeamName(team.name),
             points: numberOrZero(team.points),
@@ -50,7 +50,7 @@ function buildLeaderboard(teams, v13Record) {
         .slice(0, MAX_PUBLIC_TEAMS);
 
     const ranked = assignRanks([
-        ...entrantRows,
+        ...communityRows,
         {
             kind: 'v13',
             team_ref: 'v13',

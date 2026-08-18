@@ -1,7 +1,7 @@
 'use strict';
 
 const { getConfig } = require('../../lib/email-subscriptions');
-const { getLeagueLeaderboard } = require('../../lib/f1-fantasy');
+const { getPublicLeagueLeaderboard } = require('../../lib/f1-fantasy');
 const { buildLeaderboard, loadV13Record } = require('../../lib/beat-v13-leaderboard');
 
 const LEADERBOARD_CACHE_MS = 5 * 60 * 1000;
@@ -25,7 +25,7 @@ async function beatV13Leaderboard(req, res) {
 
     try {
         const [{ teams, settings }, v13] = await Promise.all([
-            getLeagueLeaderboard(),
+            getPublicLeagueLeaderboard(),
             Promise.resolve(loadV13Record()),
         ]);
         const rows = buildLeaderboard(teams, v13);
@@ -42,11 +42,12 @@ async function beatV13Leaderboard(req, res) {
                 type: settings.leagueType,
                 name: 'Box Box F1 Fantasy',
             },
-            field_size: rows.filter(row => row.kind === 'entrant').length,
+            board_scope: 'public_league_benchmark',
+            field_size: rows.filter(row => row.kind === 'community').length,
             v13: v13Row,
             leader: leader ? { rank: leader.rank, team_name: leader.team_name, points: leader.points, kind: leader.kind } : null,
             leaderboard: rows,
-            eligibility_note: 'Live community standings are a progress view, not the final prize table. A confirmed Beat V13 email entry and end-of-season official score verification are still required.',
+            eligibility_note: 'Benchmark only: this table covers the public Box Box F1 Fantasy league, not the confirmed Beat V13 entrant list. Prize eligibility still requires a confirmed Beat V13 email entry and end-of-season official score verification.',
         };
         cachedLeaderboardAt = Date.now();
         return res.status(200).json(cachedLeaderboard);

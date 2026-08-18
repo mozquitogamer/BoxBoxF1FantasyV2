@@ -572,6 +572,10 @@ function v13MarginLabel(row) {
     return 'Level';
 }
 
+function v13IsCommunityRow(row) {
+    return row?.kind === 'community';
+}
+
 function v13LeaderboardRows(data, selectedRef) {
     const allRows = Array.isArray(data?.leaderboard) ? data.leaderboard : [];
     const visible = allRows.slice(0, 10);
@@ -609,18 +613,18 @@ function v13PersonalPanel(data, selected) {
                 : 'Level with V13';
         return `<div class="v13-personal-team">
             <div class="v13-personal-rank"><small>Live rank</small><strong>#${Number(selected.rank)}</strong></div>
-            <div><span>Your official team</span><h3>${v13Escape(selected.team_name)}</h3><p>${Number(selected.points).toLocaleString()} points &middot; ${headline}</p></div>
+            <div><span>Your benchmark team</span><h3>${v13Escape(selected.team_name)}</h3><p>${Number(selected.points).toLocaleString()} points &middot; ${headline}</p></div>
         </div>
         <div class="v13-personal-actions">${entryState}<button id="v13ChangeTeam" type="button">Change team</button></div>
         <p class="v13-device-note">This team choice is remembered only on this device. It does not change your official competition submission.</p>`;
     }
-    return `<div class="v13-team-finder-copy"><span>Your challenge dashboard</span><h3>Find your official team</h3><p>Choose a team from the Box Box F1 Fantasy league to see its live position against V13.</p></div>
+    return `<div class="v13-team-finder-copy"><span>Public league benchmark</span><h3>Find a league team</h3><p>Choose a team from the public Box Box F1 Fantasy league to compare it with V13. This does not link or verify a competition entry.</p></div>
         <form class="v13-team-finder" id="v13TeamFinder">
             <label for="v13TeamQuery">Official team name</label>
             <div><input id="v13TeamQuery" name="team" type="search" minlength="2" maxlength="100" autocomplete="off" placeholder="e.g. Boxed In" required><button type="submit">Find team</button></div>
         </form>
         <div class="v13-team-results" id="v13TeamResults" role="status" aria-live="polite"></div>
-        <p class="v13-league-link">Not listed yet? <a href="https://fantasy.formula1.com/en/leagues/leaderboard/public/160604" target="_blank" rel="noopener">Open the Box Box F1 Fantasy league</a>, then search again.</p>
+        <p class="v13-league-link">Want to appear in this optional benchmark? <a href="https://fantasy.formula1.com/en/leagues/leaderboard/public/160604" target="_blank" rel="noopener">Open the Box Box F1 Fantasy league</a>. League membership is not required to enter Beat V13.</p>
         <div class="v13-personal-actions">${entryState}</div>`;
 }
 
@@ -638,7 +642,7 @@ function renderV13Leaderboard() {
     }
 
     const selectedRef = v13StoredTeamRef();
-    const selected = data.leaderboard.find(row => row.kind === 'entrant' && row.team_ref === selectedRef) || null;
+    const selected = data.leaderboard.find(row => v13IsCommunityRow(row) && row.team_ref === selectedRef) || null;
     const v13 = data.v13 || data.leaderboard.find(row => row.kind === 'v13');
     const leaderGap = data.leader?.kind === 'v13'
         ? 'V13 currently leads'
@@ -647,13 +651,13 @@ function renderV13Leaderboard() {
     body.innerHTML = `<div class="v13-dashboard-summary">
             <span><small>V13 live rank</small><strong>#${Number(v13?.rank || 0)}</strong></span>
             <span><small>V13 score</small><strong>${Number(v13?.points || 0).toLocaleString()}</strong></span>
-            <span><small>Community field</small><strong>${Number(data.field_size || 0)}</strong></span>
+            <span><small>Public league field</small><strong>${Number(data.field_size || 0)}</strong></span>
             <span><small>Through round</small><strong>R${Number(data.through_round || 0)}</strong><em>${v13Escape(leaderGap)}</em></span>
         </div>
         <div class="v13-dashboard-grid">
             <article class="v13-personal-card">${v13PersonalPanel(data, selected)}</article>
             <article class="v13-leaderboard-card">
-                <div class="v13-leaderboard-heading"><div><span>Live community leaderboard</span><h3>Who is beating the bot?</h3></div><em>Top 10</em></div>
+                <div class="v13-leaderboard-heading"><div><span>Public league benchmark</span><h3>Who is beating the bot?</h3></div><em>Not the prize-entry list &middot; Top 10</em></div>
                 <div class="v13-leaderboard-scroll"><table><thead><tr><th>Rank</th><th>Team</th><th>Points</th><th>vs V13</th></tr></thead><tbody>${v13LeaderboardRows(data, selectedRef)}</tbody></table></div>
             </article>
         </div>
@@ -668,11 +672,11 @@ function renderV13Leaderboard() {
             return;
         }
         const matches = data.leaderboard
-            .filter(row => row.kind === 'entrant' && row.team_name.toLowerCase().includes(query))
+            .filter(row => v13IsCommunityRow(row) && row.team_name.toLowerCase().includes(query))
             .slice(0, 8);
         resultBox.innerHTML = matches.length
             ? matches.map(row => `<button type="button" data-v13-team-ref="${v13Escape(row.team_ref)}"><span>${v13Escape(row.team_name)}</span><strong>#${Number(row.rank)} &middot; ${Number(row.points).toLocaleString()} pts</strong></button>`).join('')
-            : '<p>No matching team was found. Make sure it is in the Box Box F1 Fantasy league, then try again.</p>';
+            : '<p>No matching team was found in the public Box Box league benchmark.</p>';
         resultBox.querySelectorAll('[data-v13-team-ref]').forEach(button => button.addEventListener('click', () => {
             v13RememberTeam(button.dataset.v13TeamRef);
             renderV13Leaderboard();

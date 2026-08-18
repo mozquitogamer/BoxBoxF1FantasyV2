@@ -22,6 +22,7 @@ test('buildLeaderboard combines official teams with V13 and calculates margins',
     ]);
     assert.equal(rows[0].margin_vs_v13, 159);
     assert.equal(rows[2].margin_vs_v13, -41);
+    assert.equal(rows[0].kind, 'community');
     assert.equal('manager' in rows[0], false);
 });
 

@@ -4,17 +4,10 @@ const DEFAULT_ORIGIN = 'https://fantasy.formula1.com';
 const DEFAULT_LEAGUE_ID = 160604;
 const DEFAULT_LEAGUE_TYPE = 'public';
 
-function required(value, name) {
-    const result = String(value || '').trim();
-    if (!result) throw new Error(`${name} is not configured`);
-    return result;
-}
-
 function config() {
     return {
         origin: (process.env.F1_FANTASY_ORIGIN || DEFAULT_ORIGIN).replace(/\/$/, ''),
         sessionCookie: String(process.env.F1_FANTASY_SESSION_COOKIE || '').trim(),
-        organiserUserId: required(process.env.F1_FANTASY_ORGANISER_USER_ID, 'F1_FANTASY_ORGANISER_USER_ID'),
         leagueId: Number(process.env.F1_FANTASY_LEAGUE_ID || DEFAULT_LEAGUE_ID),
         leagueType: process.env.F1_FANTASY_LEAGUE_TYPE === 'private' ? 'private' : DEFAULT_LEAGUE_TYPE,
     };
@@ -32,14 +25,15 @@ async function readResponse(response) {
     return data;
 }
 
-async function request(path) {
+async function request(path, options = {}) {
+    const authenticated = options.authenticated !== false;
     const settings = config();
     const headers = {
         Accept: 'application/json, text/plain, */*',
         Referer: `${settings.origin}/en/leagues/leaderboard/${settings.leagueType}/${settings.leagueId}`,
         'User-Agent': 'BoxBoxF1Fantasy/1.0 (+https://boxboxf1fantasy.com)',
     };
-    if (settings.sessionCookie) headers.Cookie = settings.sessionCookie;
+    if (authenticated && settings.sessionCookie) headers.Cookie = settings.sessionCookie;
     const response = await fetch(`${settings.origin}${path}`, {
         headers,
         redirect: 'manual',
@@ -142,11 +136,56 @@ function extractTeams(payload) {
     return teams;
 }
 
-async function getLeagueLeaderboard() {
+async function getPublicLeagueLeaderboard() {
     const settings = config();
-    const path = `/services/user/leaderboard/${encodeURIComponent(settings.organiserUserId)}/userrankgetv1/0/1/${settings.leagueType}/${settings.leagueId}?buster=${Date.now()}`;
-    const payload = await request(path);
+    const path = `/feeds/leaderboard/publicleague/list_1_${settings.leagueId}_0_1.json?buster=${Date.now()}`;
+    const payload = await request(path, { authenticated: false });
     return { payload, teams: extractTeams(payload), settings };
+}
+
+function globalPageForRank(rank, pageSize = 50) {
+    const normalizedRank = Number(rank);
+    const normalizedSize = Number(pageSize);
+    if (!Number.isInteger(normalizedRank) || normalizedRank < 1) throw new Error('Enter a valid overall rank.');
+    if (!Number.isInteger(normalizedSize) || normalizedSize < 10 || normalizedSize > 100) throw new Error('Invalid global page size.');
+    return Math.max(1, Math.ceil(normalizedRank / normalizedSize));
+}
+
+async function getGlobalLeaderboardPage(pageNo, pageSize = 50) {
+    const page = Number(pageNo);
+    const size = Number(pageSize);
+    if (!Number.isInteger(page) || page < 1) throw new Error('Invalid global leaderboard page.');
+    if (!Number.isInteger(size) || size < 10 || size > 100) throw new Error('Invalid global page size.');
+    const path = `/services/user/leaderboard/userrankget/1/0/1/${page}/${size}?buster=${Date.now()}`;
+    const payload = await request(path);
+    return extractTeams(payload);
+}
+
+async function findGlobalTeams(query, rank, slot) {
+    const needle = normalizeName(query).toLowerCase();
+    const overallRank = Number(rank);
+    const teamSlot = Number(slot);
+    if (needle.length < 2) throw new Error('Enter at least two characters from your official team name.');
+    if (!Number.isInteger(overallRank) || overallRank < 1 || overallRank > 5_000_000) throw new Error('Enter the current overall rank shown by F1 Fantasy.');
+    if (!Number.isInteger(teamSlot) || teamSlot < 1 || teamSlot > 3) throw new Error('Choose whether this is Team 1, Team 2 or Team 3.');
+
+    const pageSize = 50;
+    const targetPage = globalPageForRank(overallRank, pageSize);
+    const pages = [...new Set([targetPage - 1, targetPage, targetPage + 1].filter(page => page >= 1))];
+    const results = await Promise.all(pages.map(page => getGlobalLeaderboardPage(page, pageSize)));
+    const unique = new Map();
+    for (const team of results.flat()) unique.set(`${team.id}:${team.slot || ''}`, team);
+
+    return [...unique.values()]
+        .filter(team => team.slot === teamSlot && team.rank === overallRank)
+        .filter(team => `${team.name} ${team.manager}`.toLowerCase().includes(needle))
+        .sort((left, right) => {
+            const leftExact = left.name.toLowerCase() === needle ? 0 : 1;
+            const rightExact = right.name.toLowerCase() === needle ? 0 : 1;
+            return leftExact - rightExact || left.name.localeCompare(right.name);
+        })
+        .slice(0, 12)
+        .map(safeTeam);
 }
 
 function safeTeam(team) {
@@ -411,8 +450,11 @@ module.exports = {
     extractSnapshot,
     extractTeams,
     findTeams,
-    getLeagueLeaderboard,
+    findGlobalTeams,
+    getGlobalLeaderboardPage,
     getOpponentSnapshot,
+    getPublicLeagueLeaderboard,
+    globalPageForRank,
     officialGameDay,
     safeTeam,
 };
