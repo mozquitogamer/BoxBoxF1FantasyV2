@@ -8,6 +8,7 @@ const { isAllowedOrigin, safeEqual } = require('../lib/member-system');
 const { inFilter, notificationEventKey } = require('../api/members/notify');
 const { paidUntil, parseKofiPayload, sanitizedKofiPayload } = require('../api/webhooks/kofi');
 const { consumeRateLimit } = require('../lib/rate-limit');
+const { preferredMemberTeam, snapshotFingerprint } = require('../public/members');
 
 function predictions() {
     const drivers = [
@@ -64,6 +65,28 @@ test('accounts for an extra-transfer penalty before recommending action', () => 
     const result = buildRecommendation(predictions(), team(0));
     assert.equal(result.move, null);
     assert.equal(result.headline, 'Hold your current lineup');
+});
+
+test('loads a saved Transfer Advisor working team ahead of the official reset snapshot', () => {
+    const saved = team(1);
+    const official = { ...team(2), round: 14 };
+    const preferred = preferredMemberTeam({ team: saved, f1_snapshot: official });
+    assert.equal(preferred.source, 'saved');
+    assert.equal(preferred.team, saved);
+});
+
+test('uses the official snapshot only when no complete working team is saved', () => {
+    const official = { ...team(2), round: 14 };
+    const preferred = preferredMemberTeam({ team: null, f1_snapshot: official });
+    assert.equal(preferred.source, 'official');
+    assert.equal(preferred.team, official);
+});
+
+test('working-team fingerprints ignore asset order but retain budget and transfers', () => {
+    const original = team(1);
+    const reordered = { ...original, assets: [...original.assets].reverse() };
+    assert.equal(snapshotFingerprint(original), snapshotFingerprint(reordered));
+    assert.notEqual(snapshotFingerprint(original), snapshotFingerprint({ ...original, free_transfers: 2 }));
 });
 
 test('parses Ko-fi form payloads and grants only a bounded paid period', () => {
