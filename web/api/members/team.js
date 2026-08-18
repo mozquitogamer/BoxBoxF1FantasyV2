@@ -11,7 +11,7 @@ const {
     restRequest,
     isEntitlementActive,
 } = require('../../lib/member-system');
-const { findGlobalTeams, getOpponentSnapshot } = require('../../lib/f1-fantasy');
+const { findLeagueTeams, getOpponentSnapshot, getPublicLeagueSnapshot } = require('../../lib/f1-fantasy');
 const { consumeRateLimit } = require('../../lib/rate-limit');
 
 const TEAM_LINK_TOKEN_TTL_MS = 10 * 60 * 1000;
@@ -91,17 +91,21 @@ async function requirePaidMember(memberSession) {
 
 async function syncOfficialLink(link, round) {
     try {
-        let snapshot;
-        let syncedRound = round;
-        let currentRoundError = null;
+        let snapshotResult;
         try {
-            snapshot = await getOpponentSnapshot(link, round);
-        } catch (error) {
-            if (error.code !== 'F1_INCOMPLETE_LINEUP' || round <= 1) throw error;
-            currentRoundError = error;
-            syncedRound = round - 1;
-            snapshot = await getOpponentSnapshot(link, syncedRound);
+            snapshotResult = await getPublicLeagueSnapshot(link, round);
+        } catch (publicError) {
+            // Compatibility fallback for teams linked before the public league-feed flow shipped.
+            // Normal member syncs never need the private F1 session cookie.
+            try {
+                const snapshot = await getOpponentSnapshot(link, round);
+                snapshotResult = { snapshot, source: 'authenticated_fallback' };
+            } catch (fallbackError) {
+                if (publicError.code === 'F1_TEAM_NOT_IN_LEAGUE') throw publicError;
+                throw fallbackError;
+            }
         }
+        const snapshot = snapshotResult.snapshot;
         await restRequest('f1_team_snapshots?on_conflict=user_id,season,round', {
             service: true,
             method: 'POST',
@@ -114,10 +118,10 @@ async function syncOfficialLink(link, round) {
             body: {
                 status: 'active',
                 last_synced_at: new Date().toISOString(),
-                last_error: currentRoundError ? `Round ${round} is not public yet; using the locked Round ${syncedRound} lineup.` : null,
+                last_error: null,
             },
         });
-        return { snapshot, requestedRound: round, syncedRound, usedPreviousRound: syncedRound !== round };
+        return { snapshot, requestedRound: round, syncedRound: round, usedPreviousRound: false, source: snapshotResult.source };
     } catch (error) {
         await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(link.user_id)}`, {
             service: true,
@@ -153,10 +157,10 @@ module.exports = async function team(req, res) {
             if (!throttle.allowed) return res.status(429).json({ ok: false, message: 'Too many team searches. Please wait a few minutes and try again.' });
             const query = queryParam(req, 'q');
             if (query.length < 2) return res.status(400).json({ ok: false, message: 'Enter at least two characters from your official team name.' });
-            const teams = await findGlobalTeams(query);
+            const teams = await findLeagueTeams(query);
             return res.status(200).json({
                 ok: true,
-                scope: 'discoverable',
+                scope: 'boxbox_league',
                 join_code: F1_SYNC_LEAGUE_CODE,
                 join_url: F1_SYNC_LEAGUE_URL,
                 teams: teams.map(team => ({
@@ -186,9 +190,7 @@ module.exports = async function team(req, res) {
                 prefer: 'resolution=merge-duplicates,return=representation',
                 body: {
                     user_id: memberSession.user.id,
-                    // The existing schema requires these compatibility fields. Discovery is global;
-                    // weekly sync uses only the verified official team ID and slot below.
-                    league_id: 0,
+                    league_id: Number(process.env.F1_FANTASY_LEAGUE_ID || 160604),
                     league_type: 'public',
                     team_slot: selected.slot,
                     official_team_id: selected.id,
@@ -198,7 +200,7 @@ module.exports = async function team(req, res) {
                     last_error: null,
                 },
             });
-            return res.status(200).json({ ok: true, message: `${selected.name} is linked. Official updates can now refresh your Transfer Advisor.`, team: selected });
+            return res.status(200).json({ ok: true, message: `${selected.name} is connected. Official league updates can now refresh your Transfer Advisor.`, team: selected });
         }
         if (body.action === 'f1-sync') {
             const round = normalizeRound(body.round);
@@ -206,9 +208,7 @@ module.exports = async function team(req, res) {
             const links = await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(memberSession.user.id)}&status=eq.active&select=*`, { service: true });
             if (!links?.[0]) return res.status(404).json({ ok: false, message: 'Link an official team first.' });
             const result = await syncOfficialLink(links[0], round);
-            const message = result.usedPreviousRound
-                ? `Your latest public official lineup (Round ${result.syncedRound}) has been loaded. Round ${round} stays hidden until the F1 deadline.`
-                : `Official team synced for Round ${round}.`;
+            const message = `Your latest locked official lineup has been refreshed for Round ${round}.`;
             return res.status(200).json({ ok: true, message, ...result });
         }
         const assets = normalizeAssets(body.assets);
@@ -237,8 +237,10 @@ module.exports = async function team(req, res) {
                 ? 503
                 : error.code === 'F1_INCOMPLETE_LINEUP'
                     ? 502
+                    : error.code === 'F1_TEAM_NOT_IN_LEAGUE'
+                        ? 409
                     : 500;
-        const message = status === 403 || error.code === 'F1_SESSION_EXPIRED' || error.code === 'F1_INCOMPLETE_LINEUP'
+        const message = status === 403 || error.code === 'F1_SESSION_EXPIRED' || error.code === 'F1_INCOMPLETE_LINEUP' || error.code === 'F1_TEAM_NOT_IN_LEAGUE'
             ? error.message
             : 'We could not save your team. Please try again.';
         return res.status(status).json({ ok: false, message });

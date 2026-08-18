@@ -183,6 +183,22 @@ async function findGlobalTeams(query) {
         .map(safeTeam);
 }
 
+async function findLeagueTeams(query) {
+    const needle = normalizeName(query).toLowerCase();
+    if (needle.length < 2) throw new Error('Enter at least two characters from your official team name.');
+    const { teams } = await getPublicLeagueLeaderboard();
+    return teams
+        .filter(team => team.name.toLowerCase() === needle)
+        .filter(team => Number.isInteger(team.slot) && team.slot >= 1 && team.slot <= 3)
+        .sort((left, right) => {
+            return (left.rank || Number.MAX_SAFE_INTEGER) - (right.rank || Number.MAX_SAFE_INTEGER)
+                || left.manager.localeCompare(right.manager)
+                || left.slot - right.slot;
+        })
+        .slice(0, 12)
+        .map(safeTeam);
+}
+
 function safeTeam(team) {
     return {
         id: team.id,
@@ -338,37 +354,56 @@ function rosterByPlayerId(payload) {
 
 function extractIdLineup(payload, rosterPayload) {
     if (!rosterPayload) return [];
+    const lineupKeys = ['playerid', 'player_id', 'playerIds', 'player_ids', 'user_team', 'userTeam'];
     const team = objects(payload).find(row => {
-        const ids = first(row, ['playerid', 'player_id', 'playerIds', 'player_ids']);
-        return Array.isArray(ids) && ids.length === 7;
+        const ids = first(row, lineupKeys);
+        return Array.isArray(ids) && ids.length >= 7;
     });
     if (!team) return [];
 
-    const entries = first(team, ['playerid', 'player_id', 'playerIds', 'player_ids']);
+    const entries = first(team, lineupKeys);
     const roster = rosterByPlayerId(rosterPayload);
     const captainId = String(first(team, ['capplayerid', 'captainPlayerId', 'captain_id']) || '');
     const typeSlots = { driver: 0, constructor: 0 };
-    const assets = entries.map((entry, index) => {
+    const assets = [];
+    for (const [index, entry] of entries.entries()) {
         const record = entry && typeof entry === 'object' ? entry : null;
         const id = record ? first(record, ['id', 'playerid', 'player_id', 'PlayerId']) : entry;
-        const position = Number(record ? first(record, ['playerpostion', 'playerposition', 'player_position', 'position']) : index + 1);
+        const explicitPosition = numberOrNull(record ? first(record, ['playerpostion', 'playerposition', 'player_position', 'position']) : null);
+        const position = explicitPosition || index + 1;
         const choices = roster.get(String(id)) || [];
-        const expectedType = position >= 6 ? 'constructor' : 'driver';
-        const match = choices.find(item => item.asset_type === expectedType) || choices[0];
-        if (!match) return null;
+        const expectedType = explicitPosition !== null || entries.length === 7
+            ? (position >= 6 ? 'constructor' : 'driver')
+            : null;
+        const exactChoice = choices.find(item => item.asset_id === String(id)
+            && (!expectedType || item.asset_type === expectedType));
+        const match = exactChoice
+            || (expectedType ? choices.find(item => item.asset_type === expectedType) : null)
+            || choices.find(item => item.asset_type === 'driver' && typeSlots.driver < 5)
+            || choices.find(item => item.asset_type === 'constructor' && typeSlots.constructor < 2)
+            || choices[0];
+        if (!match || !['driver', 'constructor'].includes(match.asset_type)) continue;
+        if (typeSlots[match.asset_type] >= (match.asset_type === 'driver' ? 5 : 2)) continue;
         typeSlots[match.asset_type] += 1;
-        return {
+        assets.push({
             ...match,
-            slot: expectedType === 'driver' ? position : position - 5,
+            slot: explicitPosition !== null
+                ? (match.asset_type === 'driver' ? position : Math.max(1, position - 5))
+                : typeSlots[match.asset_type],
             is_boosted: booleanValue(record ? first(record, ['iscaptain', 'is_captain', 'captain']) : null) === true
                 || String(id) === captainId,
-        };
-    }).filter(Boolean);
+        });
+    }
     return uniqueAssets(assets);
 }
 
 function extractSnapshot(payload, link, round, rosterPayload = null) {
     const allObjects = objects(payload);
+    const lineupKeys = ['playerid', 'player_id', 'playerIds', 'player_ids', 'user_team', 'userTeam'];
+    const hasLineup = row => {
+        const ids = first(row, lineupKeys);
+        return Array.isArray(ids) && ids.length >= 7;
+    };
     let assets = extractAssets(payload);
     if (assets.filter(item => item.asset_type === 'driver').length !== 5
         || assets.filter(item => item.asset_type === 'constructor').length !== 2) {
@@ -377,17 +412,17 @@ function extractSnapshot(payload, link, round, rosterPayload = null) {
     const drivers = assets.filter(item => item.asset_type === 'driver').length;
     const constructors = assets.filter(item => item.asset_type === 'constructor').length;
     if (drivers !== 5 || constructors !== 2) {
-        const teamIds = allObjects.find(row => Array.isArray(first(row, ['playerid', 'player_id', 'playerIds', 'player_ids'])));
+        const teamIds = allObjects.find(hasLineup);
         const roster = rosterPayload ? rosterByPlayerId(rosterPayload) : new Map();
         console.warn('[f1-sync] lineup ID resolution failed', JSON.stringify({
-            teamIdCount: (first(teamIds, ['playerid', 'player_id', 'playerIds', 'player_ids']) || []).length,
+            teamIdCount: (first(teamIds, lineupKeys) || []).length,
             rosterKeyCount: roster.size,
         }));
         const error = new Error(`F1 Fantasy returned an incomplete lineup (${drivers} drivers and ${constructors} constructors). Your saved team was not changed.`);
         error.code = 'F1_INCOMPLETE_LINEUP';
         throw error;
     }
-    const summary = allObjects.find(row => Array.isArray(first(row, ['playerid', 'player_id', 'playerIds', 'player_ids'])))
+    const summary = allObjects.find(hasLineup)
         || allObjects.find(row => String(first(row, ['team_id', 'teamId', 'id']) || '') === String(link.official_team_id))
         || allObjects[0]
         || {};
@@ -400,8 +435,8 @@ function extractSnapshot(payload, link, round, rosterPayload = null) {
         official_team_name: link.official_team_name,
         manager_name: link.manager_name || null,
         fantasy_points: numberOrNull(first(summary, ['gdpoints', 'gameweek_points', 'gameWeekPoints', 'round_points', 'roundPoints', 'points', 'score'])),
-        overall_points: numberOrNull(first(summary, ['ovpoints', 'overall_points', 'overallPoints', 'total_points', 'totalPoints'])),
-        league_rank: numberOrNull(first(summary, ['gdrank', 'league_rank', 'leagueRank', 'rank', 'position'])),
+        overall_points: numberOrNull(first(summary, ['ovpoints', 'overall_points', 'overallPoints', 'total_points', 'totalPoints', 'cur_points', 'curPoints'])),
+        league_rank: numberOrNull(first(summary, ['gdrank', 'league_rank', 'leagueRank', 'rank', 'position', 'cur_rank', 'curRank'])),
         overall_rank: numberOrNull(first(summary, ['ovrank', 'overall_rank', 'overallRank', 'global_rank', 'globalRank'])),
         budget_millions: numberOrNull(first(summary, ['teambal', 'budget', 'budget_millions', 'budgetMillions', 'team_value', 'teamValue'])),
         free_transfers: numberOrNull(first(summary, ['usersubsleft', 'userSubsleft', 'free_transfers', 'freeTransfers', 'transfers_available', 'transfersAvailable'])),
@@ -412,6 +447,7 @@ function extractSnapshot(payload, link, round, rosterPayload = null) {
 }
 
 function numberOrNull(value) {
+    if (value === null || value === undefined || value === '') return null;
     const result = Number(value);
     return Number.isFinite(result) ? result : null;
 }
@@ -441,14 +477,46 @@ async function getOpponentSnapshot(link, round = 1) {
     }
 }
 
+async function getPublicLeagueSnapshot(link, round = 1) {
+    const gameDay = officialGameDay(round);
+    const { teams } = await getPublicLeagueLeaderboard();
+    const officialId = String(link.official_team_id || '');
+    const slot = Number(link.team_slot);
+    const normalizedLinkedName = normalizeName(link.official_team_name).toLowerCase();
+    const team = teams.find(item => item.id === officialId && item.slot === slot)
+        || teams.find(item => item.slot === slot && item.name.toLowerCase() === normalizedLinkedName);
+    if (!team) {
+        const error = new Error('Your team is not visible in the Box Box league yet. Join with code P1JZAGNMP04, then refresh your official team here.');
+        error.code = 'F1_TEAM_NOT_IN_LEAGUE';
+        throw error;
+    }
+
+    const rosterPayload = await request(`/feeds/drivers/${gameDay}_en.json?buster=${Date.now()}`, { authenticated: false });
+    const snapshot = extractSnapshot(
+        { leaderboard: [team.raw] },
+        {
+            ...link,
+            official_team_id: team.id,
+            official_team_name: team.name,
+            manager_name: team.manager || link.manager_name || null,
+            team_slot: team.slot,
+        },
+        round,
+        rosterPayload,
+    );
+    return { snapshot, team: safeTeam(team), source: 'public_league' };
+}
+
 module.exports = {
     extractSnapshot,
     extractTeams,
     findTeams,
     findGlobalTeams,
+    findLeagueTeams,
     getGlobalLeaderboard,
     getOpponentSnapshot,
     getPublicLeagueLeaderboard,
+    getPublicLeagueSnapshot,
     officialGameDay,
     safeTeam,
 };
