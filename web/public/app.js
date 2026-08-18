@@ -5447,11 +5447,31 @@ function runTransferAdvisor() {
     optimizeBasis = transferPointsBasis;
 
     // Validate team
-    const currentDriverIds = myTeamDrivers.filter(Boolean);
-    const currentConstructorIds = myTeamConstructors.filter(Boolean);
+    let currentDriverIds = myTeamDrivers.filter(Boolean);
+    let currentConstructorIds = myTeamConstructors.filter(Boolean);
     if (currentDriverIds.length < 5 || currentConstructorIds.length < 2) {
-        alert('Please select your full current team (5 drivers + 2 constructors) before running the transfer advisor.');
-        return;
+        const lockedLooksLikeTeam = lockedDrivers.size === 5 && lockedConstructors.size === 2;
+        if (lockedLooksLikeTeam && window.confirm('You selected 5 drivers and 2 constructors under Lock / Exclude Rules. Use those seven picks as My Current Team and clear the locks so the advisor can recommend transfers?')) {
+            myTeamDrivers = [...lockedDrivers];
+            myTeamConstructors = [...lockedConstructors];
+            lockedDrivers.clear();
+            lockedConstructors.clear();
+            currentDriverIds = myTeamDrivers.filter(Boolean);
+            currentConstructorIds = myTeamConstructors.filter(Boolean);
+            renderMyTeamGrid();
+            renderLockGrid();
+            notifyMyTeamChanged('promoted-locked-picks');
+        } else {
+            const missingDrivers = Math.max(0, 5 - currentDriverIds.length);
+            const missingConstructors = Math.max(0, 2 - currentConstructorIds.length);
+            const missing = [
+                missingDrivers ? `${missingDrivers} driver${missingDrivers === 1 ? '' : 's'}` : '',
+                missingConstructors ? `${missingConstructors} constructor${missingConstructors === 1 ? '' : 's'}` : '',
+            ].filter(Boolean).join(' and ');
+            alert(`My Current Team is missing ${missing}. Fill the seven slots near the top of Transfer Advisor; the Lock / Exclude Rules below do not add team members.`);
+            document.getElementById('myTeamGrid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
     }
 
     const isWildcard = chip === 'wild_card';

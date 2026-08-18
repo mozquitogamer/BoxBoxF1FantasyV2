@@ -18,8 +18,12 @@ async function readResponse(response) {
     let data = text;
     try { data = text ? JSON.parse(text) : null; } catch (_) { /* keep text */ }
     if (!response.ok) {
-        const error = new Error(data?.message || data?.error || `F1 Fantasy request failed (${response.status})`);
+        const sessionExpired = response.status === 401 || response.status === 403;
+        const error = new Error(sessionExpired
+            ? 'Official F1 Fantasy lookup is temporarily unavailable while its access session is refreshed. You can still fill, save and use the Transfer Advisor manually.'
+            : data?.message || data?.error || `F1 Fantasy request failed (${response.status})`);
         error.status = response.status;
+        if (sessionExpired) error.code = 'F1_SESSION_EXPIRED';
         throw error;
     }
     return data;
@@ -40,7 +44,9 @@ async function request(path, options = {}) {
         signal: AbortSignal.timeout(15000),
     });
     if (response.status >= 300 && response.status < 400) {
-        throw new Error('The organiser F1 Fantasy session has expired. Refresh F1_FANTASY_SESSION_COOKIE.');
+        const error = new Error('Official F1 Fantasy lookup is temporarily unavailable while its access session is refreshed. You can still fill, save and use the Transfer Advisor manually.');
+        error.code = 'F1_SESSION_EXPIRED';
+        throw error;
     }
     return readResponse(response);
 }

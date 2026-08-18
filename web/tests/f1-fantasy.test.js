@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { extractSnapshot, extractTeams, findTeams, globalPageForRank, officialGameDay } = require('../lib/f1-fantasy');
+const { extractSnapshot, extractTeams, findTeams, getGlobalLeaderboardPage, globalPageForRank, officialGameDay } = require('../lib/f1-fantasy');
 const { createTeamLinkToken, normalizeRound, verifyTeamLinkToken } = require('../api/members/team');
 
 test('extractTeams accepts current-style leaderboard fields and de-duplicates teams', () => {
@@ -238,5 +238,22 @@ test('official-team link selections are signed, member-bound and short-lived', (
     } finally {
         if (previous === undefined) delete process.env.SUBSCRIPTION_SIGNING_SECRET;
         else process.env.SUBSCRIPTION_SIGNING_SECRET = previous;
+    }
+});
+
+test('expired F1 access is reported as a temporary sync issue without blocking manual advisor use', async () => {
+    const originalFetch = global.fetch;
+    global.fetch = async () => new Response(JSON.stringify({ message: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+    });
+    try {
+        await assert.rejects(
+            () => getGlobalLeaderboardPage(1),
+            error => error.code === 'F1_SESSION_EXPIRED'
+                && /still fill, save and use the Transfer Advisor manually/i.test(error.message),
+        );
+    } finally {
+        global.fetch = originalFetch;
     }
 });

@@ -229,9 +229,15 @@ module.exports = async function team(req, res) {
         });
         return res.status(200).json({ ok: true, message: 'Team saved. Future simulation emails will use this lineup.' });
     } catch (error) {
-        console.error('Could not save Pit Wall team:', error.message);
-        const status = /active Pit Wall membership/i.test(error.message) ? 403 : error.code === 'F1_INCOMPLETE_LINEUP' ? 502 : 500;
-        const message = status === 403 || error.code === 'F1_INCOMPLETE_LINEUP'
+        console.error('Could not complete Pit Wall team request:', error.message);
+        const status = /active Pit Wall membership/i.test(error.message)
+            ? 403
+            : error.code === 'F1_SESSION_EXPIRED'
+                ? 503
+                : error.code === 'F1_INCOMPLETE_LINEUP'
+                    ? 502
+                    : 500;
+        const message = status === 403 || error.code === 'F1_SESSION_EXPIRED' || error.code === 'F1_INCOMPLETE_LINEUP'
             ? error.message
             : 'We could not save your team. Please try again.';
         return res.status(status).json({ ok: false, message });
