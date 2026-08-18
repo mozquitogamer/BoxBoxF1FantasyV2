@@ -222,7 +222,7 @@
 
         const officialHtml = f1Link
             ? `<div class="pit-wall-official linked"><div><span>Official F1 team</span><strong>${escapeHtml(f1Link.official_team_name)} · T${f1Link.team_slot}</strong><small>${f1Link.last_synced_at ? `Last synced ${friendlyDate(f1Link.last_synced_at)}` : 'Linked · waiting for first sync'}${f1Snapshot?.round ? ` · Round ${f1Snapshot.round}` : ''}</small></div><div class="pit-wall-actions"><button type="button" class="pit-wall-secondary" id="pitWallSyncF1">Sync now</button><button type="button" class="pit-wall-link-danger" id="pitWallDisconnectF1">Disconnect</button></div></div>`
-            : `<div class="pit-wall-official"><span>Official F1 Fantasy sync</span><p>Join the <strong>Box Box F1 Fantasy</strong> league, then link one official team. We never ask for your F1 password.</p><form id="pitWallF1Search"><div><input name="team_name" type="search" placeholder="Search your official team name" minlength="2" required><button type="submit">Find team</button></div></form><div class="pit-wall-search-results" id="pitWallF1Results"></div></div>`;
+            : `<div class="pit-wall-official"><span>Official F1 Fantasy sync</span><p>Link any official F1 Fantasy team using the team name, overall rank and T1/T2/T3 shown in F1 Fantasy. No league membership or F1 password is required.</p><form id="pitWallF1Search"><div class="pit-wall-f1-fields"><label><small>Official team name</small><input name="team_name" type="search" placeholder="e.g. Boxed In" minlength="2" maxlength="100" required></label><label><small>Current overall rank</small><input name="overall_rank" type="number" inputmode="numeric" placeholder="e.g. 12453" min="1" max="5000000" required></label><label><small>Team slot</small><select name="team_slot" required><option value="1">T1</option><option value="2">T2</option><option value="3">T3</option></select></label><button type="submit">Find team</button></div></form><p class="pit-wall-f1-help">In F1 Fantasy, open the team you want to link and use its current Overall rank. The rank prevents similarly named teams from being mixed up.</p><div class="pit-wall-search-results" id="pitWallF1Results"></div></div>`;
         const resetButton = hasCompleteTeam(f1Snapshot)
             ? '<button type="button" class="pit-wall-secondary" id="pitWallResetOfficial">Reset to official team</button>'
             : '';
@@ -298,14 +298,17 @@
             const button = form.querySelector('button');
             const results = panel.querySelector('#pitWallF1Results');
             button.disabled = true;
-            results.innerHTML = '<span>Searching the BoxBox league…</span>';
+            results.innerHTML = '<span>Checking the global F1 Fantasy standings…</span>';
             try {
-                const data = await request(`/api/members/team/?action=f1-search&q=${encodeURIComponent(form.elements.team_name.value.trim())}`);
-                results.innerHTML = data.teams.length ? data.teams.map(team => `<button type="button" data-team-id="${escapeHtml(team.id)}" data-team-slot="${team.slot}"><strong>${escapeHtml(team.name)} · T${team.slot}</strong><small>${escapeHtml(team.manager || '')}${team.rank ? ` · League rank ${team.rank}` : ''}</small></button>`).join('') : '<span>No matching team found. Check the spelling and confirm you joined our league.</span>';
+                const query = encodeURIComponent(form.elements.team_name.value.trim());
+                const rank = encodeURIComponent(form.elements.overall_rank.value);
+                const slot = encodeURIComponent(form.elements.team_slot.value);
+                const data = await request(`/api/members/team/?action=f1-search&q=${query}&rank=${rank}&slot=${slot}`);
+                results.innerHTML = data.teams.length ? data.teams.map(team => `<button type="button" data-team-link-token="${escapeHtml(team.link_token)}"><strong>${escapeHtml(team.name)} · T${team.slot}</strong><small>${escapeHtml(team.manager || '')}${team.rank ? ` · Overall #${Number(team.rank).toLocaleString()}` : ''}</small></button>`).join('') : '<span>No exact match was found at that overall rank. Refresh F1 Fantasy, then check the team name, rank and T number.</span>';
                 results.querySelectorAll('button').forEach(resultButton => resultButton.addEventListener('click', async () => {
                     resultButton.disabled = true;
                     try {
-                        const linked = await request('/api/members/team/', { method: 'POST', body: { action: 'f1-link', official_team_id: resultButton.dataset.teamId, team_slot: Number(resultButton.dataset.teamSlot) } });
+                        const linked = await request('/api/members/team/', { method: 'POST', body: { action: 'f1-link', link_token: resultButton.dataset.teamLinkToken } });
                         status(linked.message, 'success');
                         await loadSession(false);
                     } catch (error) { status(error.message, 'error'); resultButton.disabled = false; }

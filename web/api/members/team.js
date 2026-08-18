@@ -1,5 +1,7 @@
 'use strict';
 
+const crypto = require('node:crypto');
+
 const {
     getMemberConfig,
     getMemberDashboard,
@@ -9,7 +11,10 @@ const {
     restRequest,
     isEntitlementActive,
 } = require('../../lib/member-system');
-const { findTeams, getLeagueLeaderboard, getOpponentSnapshot } = require('../../lib/f1-fantasy');
+const { findGlobalTeams, getOpponentSnapshot } = require('../../lib/f1-fantasy');
+const { consumeRateLimit } = require('../../lib/rate-limit');
+
+const TEAM_LINK_TOKEN_TTL_MS = 10 * 60 * 1000;
 
 function normalizeAssets(items) {
     if (!Array.isArray(items)) return [];
@@ -28,6 +33,49 @@ function queryParam(req, name) {
 function normalizeRound(value) {
     const round = Number(value);
     return Number.isInteger(round) && round >= 1 && round <= 24 ? round : null;
+}
+
+function teamLinkSecret() {
+    const secret = String(process.env.SUBSCRIPTION_SIGNING_SECRET || '').trim();
+    if (!secret) throw new Error('Official-team linking is not configured yet.');
+    return secret;
+}
+
+function teamLinkSignature(payload, secret) {
+    return crypto.createHmac('sha256', secret)
+        .update(`boxbox-f1-team-link:v1:${payload}`)
+        .digest('base64url');
+}
+
+function createTeamLinkToken(team, userId, now = Date.now()) {
+    const payload = Buffer.from(JSON.stringify({
+        sub: String(userId || ''),
+        id: String(team?.id || '').slice(0, 160),
+        name: String(team?.name || '').trim().slice(0, 100),
+        manager: String(team?.manager || '').trim().slice(0, 100),
+        slot: Number(team?.slot),
+        rank: Number(team?.rank),
+        exp: now + TEAM_LINK_TOKEN_TTL_MS,
+    }), 'utf8').toString('base64url');
+    return `${payload}.${teamLinkSignature(payload, teamLinkSecret())}`;
+}
+
+function verifyTeamLinkToken(token, userId, now = Date.now()) {
+    const [payload, suppliedSignature, extra] = String(token || '').split('.');
+    if (!payload || !suppliedSignature || extra) return null;
+    const expectedSignature = teamLinkSignature(payload, teamLinkSecret());
+    const supplied = Buffer.from(suppliedSignature);
+    const expected = Buffer.from(expectedSignature);
+    if (supplied.length !== expected.length || !crypto.timingSafeEqual(supplied, expected)) return null;
+    try {
+        const team = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+        if (team.sub !== String(userId || '') || !Number.isFinite(team.exp) || team.exp < now) return null;
+        if (!team.id || !team.name || !Number.isInteger(team.slot) || team.slot < 1 || team.slot > 3) return null;
+        if (!Number.isInteger(team.rank) || team.rank < 1) return null;
+        return team;
+    } catch (_) {
+        return null;
+    }
 }
 
 async function requirePaidMember(memberSession) {
@@ -98,13 +146,26 @@ module.exports = async function team(req, res) {
         const action = queryParam(req, 'action');
         if (req.method === 'GET' && action === 'f1-search') {
             if (!await requirePaidMember(memberSession)) return res.status(403).json({ ok: false, message: 'An active Pit Wall membership is required.' });
+            const throttle = consumeRateLimit(req, `f1-global-search:${memberSession.user.id}`, { limit: 12, windowMs: 5 * 60 * 1000 });
+            if (!throttle.allowed) return res.status(429).json({ ok: false, message: 'Too many team searches. Please wait a few minutes and try again.' });
             const query = queryParam(req, 'q');
             if (query.length < 2) return res.status(400).json({ ok: false, message: 'Enter at least two characters from your official team name.' });
-            const { teams, settings } = await getLeagueLeaderboard();
+            const rank = Number(queryParam(req, 'rank'));
+            const slot = Number(queryParam(req, 'slot'));
+            if (!Number.isInteger(rank) || rank < 1 || rank > 5_000_000) return res.status(400).json({ ok: false, message: 'Enter the current overall rank shown by F1 Fantasy.' });
+            if (!Number.isInteger(slot) || slot < 1 || slot > 3) return res.status(400).json({ ok: false, message: 'Choose Team 1, Team 2 or Team 3.' });
+            const teams = await findGlobalTeams(query, rank, slot);
             return res.status(200).json({
                 ok: true,
-                league: { id: settings.leagueId, type: settings.leagueType, name: 'Box Box F1 Fantasy' },
-                teams: findTeams(teams, query),
+                scope: 'global',
+                teams: teams.map(team => ({
+                    name: team.name,
+                    slot: team.slot,
+                    manager: team.manager,
+                    points: team.points,
+                    rank: team.rank,
+                    link_token: createTeamLinkToken(team, memberSession.user.id),
+                })),
             });
         }
         if (req.method === 'GET') return res.status(200).json(await getMemberDashboard(memberSession));
@@ -116,17 +177,18 @@ module.exports = async function team(req, res) {
         }
         if (body.action === 'f1-link') {
             if (!await requirePaidMember(memberSession)) return res.status(403).json({ ok: false, message: 'An active Pit Wall membership is required.' });
-            const { teams, settings } = await getLeagueLeaderboard();
-            const selected = teams.find(item => item.id === String(body.official_team_id || '') && item.slot === Number(body.team_slot));
-            if (!selected) return res.status(400).json({ ok: false, message: 'That team was not found in the Box Box F1 Fantasy league. Search again.' });
+            const selected = verifyTeamLinkToken(body.link_token, memberSession.user.id);
+            if (!selected) return res.status(400).json({ ok: false, message: 'That team selection expired or could not be verified. Search again.' });
             await restRequest('f1_team_links?on_conflict=user_id', {
                 service: true,
                 method: 'POST',
                 prefer: 'resolution=merge-duplicates,return=representation',
                 body: {
                     user_id: memberSession.user.id,
-                    league_id: settings.leagueId,
-                    league_type: settings.leagueType,
+                    // The existing schema requires these compatibility fields. Discovery is global;
+                    // weekly sync uses only the verified official team ID and slot below.
+                    league_id: 0,
+                    league_type: 'public',
                     team_slot: selected.slot,
                     official_team_id: selected.id,
                     official_team_name: selected.name,
@@ -178,3 +240,5 @@ module.exports = async function team(req, res) {
 
 module.exports.syncOfficialLink = syncOfficialLink;
 module.exports.normalizeRound = normalizeRound;
+module.exports.createTeamLinkToken = createTeamLinkToken;
+module.exports.verifyTeamLinkToken = verifyTeamLinkToken;
