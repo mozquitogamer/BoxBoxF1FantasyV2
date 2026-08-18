@@ -1634,8 +1634,12 @@ function setupControls() {
     document.getElementById('runTransferAdvisor').addEventListener('click', runTransferAdvisor);
     const transferBudgetEl = document.getElementById('transferBudget');
     if (transferBudgetEl) {
-        transferBudgetEl.addEventListener('input', () => { transferBudgetTouched = true; });
+        transferBudgetEl.addEventListener('input', () => {
+            transferBudgetTouched = true;
+            notifyMyTeamChanged('budget');
+        });
     }
+    document.getElementById('freeTransfers')?.addEventListener('input', () => notifyMyTeamChanged('free-transfers'));
     const shareMyTeamBtn = document.getElementById('shareMyTeam');
     if (shareMyTeamBtn) {
         shareMyTeamBtn.addEventListener('click', () => {
@@ -4738,6 +4742,7 @@ function applySharedTeam(teamParam) {
     const transfersBtn = document.querySelector('.mode-btn[data-mode="transfers"]');
     if (transfersBtn) transfersBtn.click();
     renderMyTeamGrid();
+    notifyMyTeamChanged('shared-team');
     showSharedTeamBanner();
 
     // Tidy the address bar so a refresh doesn't re-trigger the import.
@@ -4824,6 +4829,7 @@ function renderMyTeamGrid() {
                     if (type === 'driver') myTeamDrivers[idx] = null;
                     else myTeamConstructors[idx] = null;
                     renderMyTeamGrid();
+                    notifyMyTeamChanged('slot-removed');
                     return;
                 }
                 const type = slot.dataset.slot;
@@ -4890,6 +4896,10 @@ function getMemberTeamSnapshot() {
             ...constructors.map((assetId, index) => ({ asset_type: 'constructor', asset_id: assetId, slot: index + 1, is_boosted: false })),
         ],
     };
+}
+
+function notifyMyTeamChanged(reason = 'team-edit') {
+    window.dispatchEvent(new CustomEvent('boxbox:team-changed', { detail: { reason } }));
 }
 
 function applySavedMemberTeam(team) {
@@ -5337,7 +5347,10 @@ function showSlotPicker(type, index) {
             overlay.remove();
             if (isCompare) renderTeamCompareGrid();
             else if (isTarget) renderTargetTeamGrid();
-            else renderMyTeamGrid();
+            else {
+                renderMyTeamGrid();
+                notifyMyTeamChanged('slot-selected');
+            }
         });
     });
 }
