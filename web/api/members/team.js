@@ -48,13 +48,14 @@ function teamLinkSignature(payload, secret) {
 }
 
 function createTeamLinkToken(team, userId, now = Date.now()) {
+    const rank = Number(team?.rank);
     const payload = Buffer.from(JSON.stringify({
         sub: String(userId || ''),
         id: String(team?.id || '').slice(0, 160),
         name: String(team?.name || '').trim().slice(0, 100),
         manager: String(team?.manager || '').trim().slice(0, 100),
         slot: Number(team?.slot),
-        rank: Number(team?.rank),
+        rank: Number.isInteger(rank) && rank >= 1 ? rank : null,
         exp: now + TEAM_LINK_TOKEN_TTL_MS,
     }), 'utf8').toString('base64url');
     return `${payload}.${teamLinkSignature(payload, teamLinkSecret())}`;
@@ -71,7 +72,7 @@ function verifyTeamLinkToken(token, userId, now = Date.now()) {
         const team = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
         if (team.sub !== String(userId || '') || !Number.isFinite(team.exp) || team.exp < now) return null;
         if (!team.id || !team.name || !Number.isInteger(team.slot) || team.slot < 1 || team.slot > 3) return null;
-        if (!Number.isInteger(team.rank) || team.rank < 1) return null;
+        if (team.rank !== null && (!Number.isInteger(team.rank) || team.rank < 1)) return null;
         return team;
     } catch (_) {
         return null;
@@ -150,14 +151,12 @@ module.exports = async function team(req, res) {
             if (!throttle.allowed) return res.status(429).json({ ok: false, message: 'Too many team searches. Please wait a few minutes and try again.' });
             const query = queryParam(req, 'q');
             if (query.length < 2) return res.status(400).json({ ok: false, message: 'Enter at least two characters from your official team name.' });
-            const rank = Number(queryParam(req, 'rank'));
-            const slot = Number(queryParam(req, 'slot'));
-            if (!Number.isInteger(rank) || rank < 1 || rank > 5_000_000) return res.status(400).json({ ok: false, message: 'Enter the current overall rank shown by F1 Fantasy.' });
-            if (!Number.isInteger(slot) || slot < 1 || slot > 3) return res.status(400).json({ ok: false, message: 'Choose Team 1, Team 2 or Team 3.' });
-            const teams = await findGlobalTeams(query, rank, slot);
+            const teams = await findGlobalTeams(query);
+            const leagueId = Number(process.env.F1_FANTASY_LEAGUE_ID || 160604);
             return res.status(200).json({
                 ok: true,
-                scope: 'global',
+                scope: 'discoverable',
+                join_url: `https://fantasy.formula1.com/en/leagues/leaderboard/public/${leagueId}`,
                 teams: teams.map(team => ({
                     name: team.name,
                     slot: team.slot,

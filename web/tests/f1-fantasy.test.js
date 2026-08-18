@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { extractSnapshot, extractTeams, findTeams, getGlobalLeaderboardPage, globalPageForRank, officialGameDay } = require('../lib/f1-fantasy');
+const { extractSnapshot, extractTeams, findGlobalTeams, findTeams, getOpponentSnapshot, officialGameDay } = require('../lib/f1-fantasy');
 const { createTeamLinkToken, normalizeRound, verifyTeamLinkToken } = require('../api/members/team');
 
 test('extractTeams accepts current-style leaderboard fields and de-duplicates teams', () => {
@@ -218,11 +218,31 @@ test('maps internal rounds around the two cancelled races', () => {
     assert.equal(officialGameDay(13), 11);
 });
 
-test('maps an exact overall rank to its global leaderboard page', () => {
-    assert.equal(globalPageForRank(1), 1);
-    assert.equal(globalPageForRank(50), 1);
-    assert.equal(globalPageForRank(51), 2);
-    assert.equal(globalPageForRank(12_453), 250);
+test('official-team discovery uses exact name only across public F1 lists', async () => {
+    const originalFetch = global.fetch;
+    const requested = [];
+    global.fetch = async url => {
+        requested.push(String(url));
+        const leaderboard = String(url).includes('/publicleague/')
+            ? [{ user_guid: 'league-user', team_name: 'Boxed%20In', team_no: 1, manager_name: 'League Manager', cur_rank: 12 }]
+            : [
+                { user_guid: 'global-user', team_name: 'Boxed In', team_no: 2, manager_name: 'Global Manager', ovrank: 8 },
+                { user_guid: 'near-user', team_name: 'Boxed Inside', team_no: 1, manager_name: 'Near Match', ovrank: 9 },
+            ];
+        return new Response(JSON.stringify({ leaderboard }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    };
+    try {
+        const teams = await findGlobalTeams('Boxed In');
+        assert.deepEqual(teams.map(team => team.id), ['global-user', 'league-user']);
+        assert.equal(requested.length, 2);
+        assert.ok(requested.every(url => url.includes('/feeds/leaderboard/')));
+        assert.ok(requested.every(url => !url.includes('/services/user/leaderboard/')));
+    } finally {
+        global.fetch = originalFetch;
+    }
 });
 
 test('official-team link selections are signed, member-bound and short-lived', () => {
@@ -235,6 +255,9 @@ test('official-team link selections are signed, member-bound and short-lived', (
         assert.equal(verifyTeamLinkToken(token, 'member-two', 2_000), null);
         assert.equal(verifyTeamLinkToken(`${token}x`, 'member-one', 2_000), null);
         assert.equal(verifyTeamLinkToken(token, 'member-one', 1_000 + 11 * 60 * 1000), null);
+
+        const unrankedToken = createTeamLinkToken({ ...team, rank: null }, 'member-one', 1_000);
+        assert.equal(verifyTeamLinkToken(unrankedToken, 'member-one', 2_000).rank, null);
     } finally {
         if (previous === undefined) delete process.env.SUBSCRIPTION_SIGNING_SECRET;
         else process.env.SUBSCRIPTION_SIGNING_SECRET = previous;
@@ -249,7 +272,7 @@ test('expired F1 access is reported as a temporary sync issue without blocking m
     });
     try {
         await assert.rejects(
-            () => getGlobalLeaderboardPage(1),
+            () => getOpponentSnapshot({ official_team_id: 'opponent', official_team_name: 'Boxed In', team_slot: 1, user_id: 'member' }, 14),
             error => error.code === 'F1_SESSION_EXPIRED'
                 && /still fill, save and use the Transfer Advisor manually/i.test(error.message),
         );

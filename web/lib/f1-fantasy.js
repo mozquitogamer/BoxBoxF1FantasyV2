@@ -149,46 +149,35 @@ async function getPublicLeagueLeaderboard() {
     return { payload, teams: extractTeams(payload), settings };
 }
 
-function globalPageForRank(rank, pageSize = 50) {
-    const normalizedRank = Number(rank);
-    const normalizedSize = Number(pageSize);
-    if (!Number.isInteger(normalizedRank) || normalizedRank < 1) throw new Error('Enter a valid overall rank.');
-    if (!Number.isInteger(normalizedSize) || normalizedSize < 10 || normalizedSize > 100) throw new Error('Invalid global page size.');
-    return Math.max(1, Math.ceil(normalizedRank / normalizedSize));
+async function getGlobalLeaderboard() {
+    const path = `/feeds/leaderboard/public/global/list_1_0_1.json?buster=${Date.now()}`;
+    const payload = await request(path, { authenticated: false });
+    return { payload, teams: extractTeams(payload) };
 }
 
-async function getGlobalLeaderboardPage(pageNo, pageSize = 50) {
-    const page = Number(pageNo);
-    const size = Number(pageSize);
-    if (!Number.isInteger(page) || page < 1) throw new Error('Invalid global leaderboard page.');
-    if (!Number.isInteger(size) || size < 10 || size > 100) throw new Error('Invalid global page size.');
-    const path = `/services/user/leaderboard/userrankget/1/0/1/${page}/${size}?buster=${Date.now()}`;
-    const payload = await request(path);
-    return extractTeams(payload);
-}
-
-async function findGlobalTeams(query, rank, slot) {
+async function findGlobalTeams(query) {
     const needle = normalizeName(query).toLowerCase();
-    const overallRank = Number(rank);
-    const teamSlot = Number(slot);
     if (needle.length < 2) throw new Error('Enter at least two characters from your official team name.');
-    if (!Number.isInteger(overallRank) || overallRank < 1 || overallRank > 5_000_000) throw new Error('Enter the current overall rank shown by F1 Fantasy.');
-    if (!Number.isInteger(teamSlot) || teamSlot < 1 || teamSlot > 3) throw new Error('Choose whether this is Team 1, Team 2 or Team 3.');
 
-    const pageSize = 50;
-    const targetPage = globalPageForRank(overallRank, pageSize);
-    const pages = [...new Set([targetPage - 1, targetPage, targetPage + 1].filter(page => page >= 1))];
-    const results = await Promise.all(pages.map(page => getGlobalLeaderboardPage(page, pageSize)));
+    const results = await Promise.allSettled([
+        getPublicLeagueLeaderboard(),
+        getGlobalLeaderboard(),
+    ]);
+    const successful = results.filter(result => result.status === 'fulfilled');
+    if (!successful.length) throw results[0].reason;
+
     const unique = new Map();
-    for (const team of results.flat()) unique.set(`${team.id}:${team.slot || ''}`, team);
+    for (const result of successful) {
+        for (const team of result.value.teams) unique.set(`${team.id}:${team.slot || ''}`, team);
+    }
 
     return [...unique.values()]
-        .filter(team => team.slot === teamSlot && team.rank === overallRank)
-        .filter(team => `${team.name} ${team.manager}`.toLowerCase().includes(needle))
+        .filter(team => team.name.toLowerCase() === needle)
+        .filter(team => Number.isInteger(team.slot) && team.slot >= 1 && team.slot <= 3)
         .sort((left, right) => {
-            const leftExact = left.name.toLowerCase() === needle ? 0 : 1;
-            const rightExact = right.name.toLowerCase() === needle ? 0 : 1;
-            return leftExact - rightExact || left.name.localeCompare(right.name);
+            return (left.rank || Number.MAX_SAFE_INTEGER) - (right.rank || Number.MAX_SAFE_INTEGER)
+                || left.manager.localeCompare(right.manager)
+                || left.slot - right.slot;
         })
         .slice(0, 12)
         .map(safeTeam);
@@ -457,10 +446,9 @@ module.exports = {
     extractTeams,
     findTeams,
     findGlobalTeams,
-    getGlobalLeaderboardPage,
+    getGlobalLeaderboard,
     getOpponentSnapshot,
     getPublicLeagueLeaderboard,
-    globalPageForRank,
     officialGameDay,
     safeTeam,
 };
