@@ -1232,6 +1232,10 @@ select:focus, input:focus {
 .pit-wall-f1-fields label { display: grid; gap: 4px; min-width: 0; }
 .pit-wall-f1-fields label small { color: var(--text-muted); font-size: .62rem; font-weight: 700; }
 .pit-wall-f1-help { color: var(--text-muted); font-size: .66rem !important; }
+.pit-wall-f1-join { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; padding: 9px 10px; border-radius: 8px; background: rgba(55,230,208,.07); }
+.pit-wall-f1-join span { color: var(--text-muted); font-size: .68rem; }
+.pit-wall-f1-join strong { color: var(--text-primary); font-size: .7rem; }
+.pit-wall-f1-join a { margin-left: auto; color: #77ead9; font-size: .7rem; font-weight: 800; }
 .pit-wall-official form button { padding: 9px 12px; border: 0; border-radius: 8px; color: #061c18; background: #55e3cf; font-weight: 800; cursor: pointer; }
 .pit-wall-official.linked { display: flex; justify-content: space-between; gap: 14px; align-items: center; }
 .pit-wall-official.linked strong,
@@ -1256,6 +1260,8 @@ select:focus, input:focus {
     .pit-wall-official form > div,
     .pit-wall-official.linked { align-items: stretch; flex-direction: column; }
     .pit-wall-f1-fields { grid-template-columns: 1fr !important; }
+    .pit-wall-f1-join { align-items: flex-start; flex-direction: column; }
+    .pit-wall-f1-join a { margin-left: 0; }
     .pit-wall-signin button,
     .pit-wall-save,
     .pit-wall-secondary { width: 100%; }

@@ -15,6 +15,8 @@ const { findGlobalTeams, getOpponentSnapshot } = require('../../lib/f1-fantasy')
 const { consumeRateLimit } = require('../../lib/rate-limit');
 
 const TEAM_LINK_TOKEN_TTL_MS = 10 * 60 * 1000;
+const F1_SYNC_LEAGUE_CODE = 'P1JZAGNMP04';
+const F1_SYNC_LEAGUE_URL = `https://fantasy.formula1.com/en/leagues/join/${F1_SYNC_LEAGUE_CODE}`;
 
 function normalizeAssets(items) {
     if (!Array.isArray(items)) return [];
@@ -152,11 +154,11 @@ module.exports = async function team(req, res) {
             const query = queryParam(req, 'q');
             if (query.length < 2) return res.status(400).json({ ok: false, message: 'Enter at least two characters from your official team name.' });
             const teams = await findGlobalTeams(query);
-            const leagueId = Number(process.env.F1_FANTASY_LEAGUE_ID || 160604);
             return res.status(200).json({
                 ok: true,
                 scope: 'discoverable',
-                join_url: `https://fantasy.formula1.com/en/leagues/leaderboard/public/${leagueId}`,
+                join_code: F1_SYNC_LEAGUE_CODE,
+                join_url: F1_SYNC_LEAGUE_URL,
                 teams: teams.map(team => ({
                     name: team.name,
                     slot: team.slot,
