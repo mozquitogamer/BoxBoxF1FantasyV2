@@ -256,7 +256,7 @@ Requires reading the `Compound` column from FastF1 lap data (already available i
   - `base_form` = rolling 3-round average of actual fantasy points
   - `track_affinity` = cosine similarity-weighted performance at similar circuits (9D feature vectors, sim > 0.7 threshold, clamped 0.6-1.4)
   - `sprint_multiplier` = 1.15x for sprint weekends
-- **Beam search:** Width 60, explores 0-2 swaps per round, transfer banking (max 5 banked), -10pts per extra transfer
+- **Beam search:** Width 60, explores 0-2 swaps per round, two free transfers each round with one rollover (max 3), -10pts per extra transfer
 - **Three strategies:** Max Points (pure projected points), Balanced (0.7 pts + 0.3 value), Budget Gain (0.4 pts + 0.6 price appreciation)
 - **Chip support:** Wild Card, Limitless, 3x Boost, No Negative, and Autopilot can be deployed on specific rounds. Final Fix is intentionally excluded from the multi-week beam search because it requires a completed qualifying classification and confirmed starting grid.
 - **New data exports:** `track_data.json` (22 circuits with 9D features, race-circuit mappings, sprint rounds) and `driver_history.json` (per-driver/constructor actual points per round with circuit_id)

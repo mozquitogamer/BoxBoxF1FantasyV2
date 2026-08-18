@@ -8,14 +8,23 @@ fantasy points, forecast price movement, and negative-P5 exposure. It does not
 read qualifying results when choosing its normal team.
 
 Qualifying-locked data is reserved for Final Fix. The R1–R13 research replay
-used the first trustworthy post-qualifying opportunity at R13, moving Leclerc
-to Norris for a realised four-point improvement. Final Fix is therefore no
+used the first trustworthy post-qualifying opportunity at R13, moving Hamilton
+to Norris with the 2x boost for a realised 22-point improvement. Final Fix is therefore no
 longer available to the live 2026 manager.
 
 The displayed R1–R13 total is a full-season counterfactual research replay:
-2,541 points after Final Fix. R1–R3 use reconstructed forecasts; later rounds
+2,594 points after Final Fix. R1–R3 use reconstructed forecasts; later rounds
 use preserved archives. This distinction must remain visible anywhere the
 replay score is promoted.
+
+The replay uses the corrected 2026 transfer bank: two free transfers are
+available every round after R1, one unused transfer can roll over, the minimum
+available at a new round is two, and the maximum is three. Wild Card and
+Limitless reset the following round to two. Correcting the
+earlier one-per-round/max-five implementation changed the full lineup path,
+penalties, chip timing, final budget and score. The original R14 pre-FP record
+is retained; revision 3 transparently supersedes the earlier records using the
+same pre-lock forecast archive and the corrected R13 state.
 
 ## Public record
 

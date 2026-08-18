@@ -42,7 +42,8 @@ from config.settings import CURRENT_SEASON, SEED_DIR, WEB_DATA_DIR
 STARTING_BUDGET = 100.0
 TRANSFER_PENALTY = 10
 INITIAL_FREE_TRANSFERS_AFTER_R1 = 2
-MAX_BANKED_TRANSFERS = 5
+BASE_FREE_TRANSFERS = 2
+MAX_BANKED_TRANSFERS = 3
 MAX_PAID_TRANSFERS_PER_ROUND = 1
 BALANCED_PRICE_GAIN_VALUE = 8.0
 BUDGET_BUILDER_PRICE_GAIN_VALUE = 20.0
@@ -55,6 +56,18 @@ TOTAL_RISK_AVOIDANCE = "total_avoidance"
 SPRINT_ROUNDS = {2, 6, 7, 11, 14, 18}
 CHIPS = ("wild_card", "limitless", "3x_boost", "no_negative", "autopilot")
 RAIN_RISK_BONUS = {"NONE": 0.0, "LOW": 1.0, "MEDIUM": 5.0, "HIGH": 10.0}
+
+
+def next_free_transfers(
+    free_before: int,
+    transfers_used: int,
+    chip: str | None = None,
+) -> int:
+    """Return next round's two free transfers plus at most one rollover."""
+    if chip in {"wild_card", "limitless"}:
+        return BASE_FREE_TRANSFERS
+    unused = max(0, int(free_before) - max(0, int(transfers_used)))
+    return min(MAX_BANKED_TRANSFERS, BASE_FREE_TRANSFERS + unused)
 
 
 def strategy_price_gain_value(
@@ -628,11 +641,8 @@ def simulate(
 
         if state is None:
             free_next = INITIAL_FREE_TRANSFERS_AFTER_R1
-        elif chip in {"wild_card", "limitless"}:
-            free_next = min(MAX_BANKED_TRANSFERS, free_before + 1)
         else:
-            remaining = max(0, free_before - effective_transfers)
-            free_next = min(MAX_BANKED_TRANSFERS, remaining + 1)
+            free_next = next_free_transfers(free_before, effective_transfers, chip)
 
         persistent_state = TeamState(
             drivers=persistent_drivers,
@@ -1148,7 +1158,7 @@ def build_markdown(result: dict[str, Any]) -> str:
         "",
         "- Start with $100.0M and select 5 drivers plus 2 constructors.",
         "- Default boost is 2x on the highest projected driver in the selected team.",
-        "- Two free transfers become available after round 1; one unused transfer is added per subsequent round, capped at five.",
+        "- Two free transfers are available every round after round 1. One unused transfer can roll over, so the next round has three; the floor is two and the cap is three.",
         "- At most one paid transfer is allowed per round at a 10-point penalty.",
         "- Max Points optimises projected fantasy points after transfer penalties.",
         f"- Balanced optimises projected points plus {BALANCED_PRICE_GAIN_VALUE:.0f} points for every projected $1M of appreciation.",
@@ -1297,6 +1307,15 @@ def validate_result(result: dict[str, Any], rounds: list[RoundInputs]) -> None:
                 float(row["bank_after_transfers"] + held_close_value), 1
             )
             assert math.isclose(expected_budget, row["budget_after"])
+
+            expected_free_next = (
+                INITIAL_FREE_TRANSFERS_AFTER_R1
+                if row["round"] == expected_rounds[0]
+                else next_free_transfers(
+                    row["free_transfers_before"], row["transfers"], row["chip"]
+                )
+            )
+            assert row["free_transfers_next"] == expected_free_next
 
             driver_actual = {
                 key: float(round_data.driver_actual[driver_lookup[key]])

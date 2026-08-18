@@ -110,7 +110,7 @@ let trackData = null;
 let driverHistory = null;
 let budgetValueData = null;       // calibrated budget-to-future-points model
 let v13Data = null;                // V13 research replay + live manager state
-let v13LeaderboardData = null;     // live official-league standings with V13 inserted
+let v13LeaderboardData = null;     // registered competition standings with V13 inserted
 const V13_TEAM_STORAGE_KEY = 'boxbox-v13-dashboard-team';
 // P9: ML-based projections for future rounds, populated by pipeline/predict_horizon.py.
 // When present, projectScoresForRound prefers these over the affinity heuristic.
@@ -599,33 +599,14 @@ function v13LeaderboardRows(data, selectedRef) {
     }).join('');
 }
 
-function v13PersonalPanel(data, selected) {
+function v13PersonalPanel() {
     const confirmed = window.BoxBoxFreeAccess?.isBeatV13Confirmed() === true;
     const entryState = confirmed
         ? '<span class="v13-entry-state confirmed">\u2713 Entry email confirmed on this browser</span>'
         : '<button class="v13-entry-state action" id="v13DashboardRegister" type="button">Confirm my free entry</button>';
-    if (selected) {
-        const margin = Number(selected.margin_vs_v13 || 0);
-        const headline = margin > 0
-            ? `${margin.toLocaleString()} points ahead of V13`
-            : margin < 0
-                ? `${Math.abs(margin).toLocaleString()} points behind V13`
-                : 'Level with V13';
-        return `<div class="v13-personal-team">
-            <div class="v13-personal-rank"><small>Live rank</small><strong>#${Number(selected.rank)}</strong></div>
-            <div><span>Your benchmark team</span><h3>${v13Escape(selected.team_name)}</h3><p>${Number(selected.points).toLocaleString()} points &middot; ${headline}</p></div>
-        </div>
-        <div class="v13-personal-actions">${entryState}<button id="v13ChangeTeam" type="button">Change team</button></div>
-        <p class="v13-device-note">This team choice is remembered only on this device. It does not change your official competition submission.</p>`;
-    }
-    return `<div class="v13-team-finder-copy"><span>Public league benchmark</span><h3>Find a league team</h3><p>Choose a team from the public Box Box F1 Fantasy league to compare it with V13. This does not link or verify a competition entry.</p></div>
-        <form class="v13-team-finder" id="v13TeamFinder">
-            <label for="v13TeamQuery">Official team name</label>
-            <div><input id="v13TeamQuery" name="team" type="search" minlength="2" maxlength="100" autocomplete="off" placeholder="e.g. Boxed In" required><button type="submit">Find team</button></div>
-        </form>
-        <div class="v13-team-results" id="v13TeamResults" role="status" aria-live="polite"></div>
-        <p class="v13-league-link">Want to appear in this optional benchmark? <a href="https://fantasy.formula1.com/en/leagues/leaderboard/public/160604" target="_blank" rel="noopener">Open the Box Box F1 Fantasy league</a>. League membership is not required to enter Beat V13.</p>
-        <div class="v13-personal-actions">${entryState}</div>`;
+    return `<div class="v13-team-finder-copy"><span>Official competition standings</span><h3>Registered entrants only</h3><p>Joining the public league by itself does not place anyone on this board. A competitor appears only after confirming a free Beat V13 entry and submitting an official team for verification.</p></div>
+        <div class="v13-personal-actions">${entryState}</div>
+        <p class="v13-device-note">Team submissions and verified scores are collected after the season, so no unregistered league teams are shown here.</p>`;
 }
 
 function renderV13Leaderboard() {
@@ -633,7 +614,7 @@ function renderV13Leaderboard() {
     if (!body) return;
     const data = v13LeaderboardData;
     if (!data) {
-        body.innerHTML = '<div class="v13-dashboard-loading"><span></span><p>Loading the live community standings&hellip;</p></div>';
+        body.innerHTML = '<div class="v13-dashboard-loading"><span></span><p>Loading the registered competition standings&hellip;</p></div>';
         return;
     }
     if (!data.ok || !Array.isArray(data.leaderboard)) {
@@ -641,8 +622,6 @@ function renderV13Leaderboard() {
         return;
     }
 
-    const selectedRef = v13StoredTeamRef();
-    const selected = data.leaderboard.find(row => v13IsCommunityRow(row) && row.team_ref === selectedRef) || null;
     const v13 = data.v13 || data.leaderboard.find(row => row.kind === 'v13');
     const leaderGap = data.leader?.kind === 'v13'
         ? 'V13 currently leads'
@@ -651,44 +630,18 @@ function renderV13Leaderboard() {
     body.innerHTML = `<div class="v13-dashboard-summary">
             <span><small>V13 live rank</small><strong>#${Number(v13?.rank || 0)}</strong></span>
             <span><small>V13 score</small><strong>${Number(v13?.points || 0).toLocaleString()}</strong></span>
-            <span><small>Public league field</small><strong>${Number(data.field_size || 0)}</strong></span>
+            <span><small>Verified entrants scored</small><strong>${Number(data.field_size || 0)}</strong></span>
             <span><small>Through round</small><strong>R${Number(data.through_round || 0)}</strong><em>${v13Escape(leaderGap)}</em></span>
         </div>
         <div class="v13-dashboard-grid">
-            <article class="v13-personal-card">${v13PersonalPanel(data, selected)}</article>
+            <article class="v13-personal-card">${v13PersonalPanel()}</article>
             <article class="v13-leaderboard-card">
-                <div class="v13-leaderboard-heading"><div><span>Public league benchmark</span><h3>Who is beating the bot?</h3></div><em>Not the prize-entry list &middot; Top 10</em></div>
-                <div class="v13-leaderboard-scroll"><table><thead><tr><th>Rank</th><th>Team</th><th>Points</th><th>vs V13</th></tr></thead><tbody>${v13LeaderboardRows(data, selectedRef)}</tbody></table></div>
+                <div class="v13-leaderboard-heading"><div><span>Beat V13 competition</span><h3>Registered standings</h3></div><em>Verified entries only &middot; Top 10</em></div>
+                <div class="v13-leaderboard-scroll"><table><thead><tr><th>Rank</th><th>Team</th><th>Points</th><th>vs V13</th></tr></thead><tbody>${v13LeaderboardRows(data, '')}</tbody></table></div>
             </article>
         </div>
         <p class="v13-dashboard-eligibility">${v13Escape(data.eligibility_note)}</p>`;
 
-    body.querySelector('#v13TeamFinder')?.addEventListener('submit', event => {
-        event.preventDefault();
-        const query = String(event.currentTarget.elements.team.value || '').trim().toLowerCase();
-        const resultBox = body.querySelector('#v13TeamResults');
-        if (query.length < 2) {
-            resultBox.innerHTML = '<p>Enter at least two characters from your official team name.</p>';
-            return;
-        }
-        const matches = data.leaderboard
-            .filter(row => v13IsCommunityRow(row) && row.team_name.toLowerCase().includes(query))
-            .slice(0, 8);
-        resultBox.innerHTML = matches.length
-            ? matches.map(row => `<button type="button" data-v13-team-ref="${v13Escape(row.team_ref)}"><span>${v13Escape(row.team_name)}</span><strong>#${Number(row.rank)} &middot; ${Number(row.points).toLocaleString()} pts</strong></button>`).join('')
-            : '<p>No matching team was found in the public Box Box league benchmark.</p>';
-        resultBox.querySelectorAll('[data-v13-team-ref]').forEach(button => button.addEventListener('click', () => {
-            v13RememberTeam(button.dataset.v13TeamRef);
-            renderV13Leaderboard();
-            document.getElementById('v13Dashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            if (typeof gtag === 'function') gtag('event', 'beat_v13_team_pinned');
-        }));
-    });
-    body.querySelector('#v13ChangeTeam')?.addEventListener('click', () => {
-        v13RememberTeam('');
-        renderV13Leaderboard();
-        body.querySelector('#v13TeamQuery')?.focus();
-    });
     body.querySelector('#v13DashboardRegister')?.addEventListener('click', () => {
         const panel = document.querySelector('#tab-beatbot [data-email-updates]');
         panel?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -744,9 +697,9 @@ function renderV13() {
         <section class="v13-section v13-dashboard" id="v13Dashboard" aria-labelledby="v13DashboardTitle">
             <div class="v13-section-heading">
                 <div><span>Challenge dashboard</span><h2 id="v13DashboardTitle">See who is beating the bot</h2></div>
-                <em>Official league scores &middot; refreshed automatically</em>
+                <em>Confirmed entries &middot; verified scores only</em>
             </div>
-            <div id="v13DashboardBody" aria-live="polite"><div class="v13-dashboard-loading"><span></span><p>Loading the live community standings&hellip;</p></div></div>
+            <div id="v13DashboardBody" aria-live="polite"><div class="v13-dashboard-loading"><span></span><p>Loading the registered competition standings&hellip;</p></div></div>
         </section>
 
         <section class="v13-section">
@@ -773,6 +726,7 @@ function renderV13() {
                     <span><small>Chip remaining</small><strong>${v13Escape(v13ChipLabel(current.chips_remaining?.[0]))}</strong></span>
                 </div>
             </div>
+            <p class="v13-rules-note">Transfer rule: V13 receives two free transfers every round. One unused transfer can roll over, so the next round can have three, but the bank can never drop below two or rise above three.</p>
             <div class="v13-chip-ledger">${usedChips}</div>
         </section>
 
@@ -1508,7 +1462,7 @@ async function loadV13Leaderboard() {
     } catch (error) {
         v13LeaderboardData = {
             ok: false,
-            message: error.message || 'Live community standings are temporarily unavailable.',
+            message: error.message || 'Registered competition standings are temporarily unavailable.',
         };
         console.warn('Beat V13 leaderboard is unavailable:', error);
     }
@@ -4891,7 +4845,9 @@ function getMemberTeamSnapshot() {
     const budget = Number(document.getElementById('transferBudget')?.value);
     const freeTransfers = Number(document.getElementById('freeTransfers')?.value);
     if (!Number.isFinite(budget) || budget < 0) throw new Error('Enter a valid available budget.');
-    if (!Number.isInteger(freeTransfers) || freeTransfers < 0) throw new Error('Enter a valid number of free transfers.');
+    if (!Number.isInteger(freeTransfers) || freeTransfers < 2 || freeTransfers > 3) {
+        throw new Error('Free transfers must be 2, or 3 when one was rolled over.');
+    }
     return {
         budget_millions: budget,
         free_transfers: freeTransfers,
@@ -6059,7 +6015,8 @@ const MW_TUNABLES = {
     // --- Beam search ---
     beamWidth: 60,                  // # of states kept per round. Higher = more thorough but slower (quadratic-ish). Sweet spot 40-80.
     transferPenalty: 10,            // Points deducted per extra (non-banked) transfer. F1 Fantasy official rule = 10.
-    maxBankedTransfers: 5,          // Max banked FT. F1 Fantasy official rule = 5.
+    baseFreeTransfers: 2,           // Every new round supplies two free transfers.
+    maxBankedTransfers: 3,          // One unused transfer can roll over; hard cap is three.
 
     // --- Target team ---
     targetWeight: 30,               // Default points-per-off-target-pick penalty (final round). Overridden by intensity dropdown.
@@ -6532,6 +6489,10 @@ async function runMultiWeekPlanner() {
     const horizon = parseInt(document.getElementById('mwHorizon').value) || 3;
     const strategy = document.getElementById('mwStrategy').value;
     optimizeBasis = document.getElementById('pointsBasisMW')?.value || 'balanced';
+    if (freeTransfers < MW_TUNABLES.baseFreeTransfers || freeTransfers > MW_TUNABLES.maxBankedTransfers) {
+        alert('Free transfers must be 2, or 3 when one was rolled over.');
+        return;
+    }
 
     // Get available chips
     const availableChips = [];
@@ -6739,7 +6700,7 @@ async function runMultiWeekPlanner() {
         drivers: [...teamDrivers],
         constructors: [...teamCons],
         budget: budget,
-        bankedTransfers: freeTransfers,
+        bankedTransfers: Math.max(MW_TUNABLES.baseFreeTransfers, Math.min(MW_TUNABLES.maxBankedTransfers, freeTransfers)),
         chipsUsed: [],
         chipsAvailable: [...availableChips],
         totalPoints: 0,
@@ -6771,9 +6732,7 @@ async function runMultiWeekPlanner() {
         }
 
         for (const state of beam) {
-            // Transfers gained this round (1 per round, max 5 banked)
-            // For the current round (ri===0), use banked transfers as-is (no +1 since we haven't passed a round yet)
-            const transfersThisRound = ri === 0 ? state.bankedTransfers : Math.min(state.bankedTransfers + 1, MW_TUNABLES.maxBankedTransfers);
+            const transfersThisRound = state.bankedTransfers;
 
             // Generate candidates: 0, 1, or 2 swaps
             const maxSwaps = Math.min(2, transfersThisRound);
@@ -6904,6 +6863,12 @@ async function runMultiWeekPlanner() {
                 }
 
                 const netPts = pts - penalty;
+                const freeTransfersNext = (activeChip === 'wildcard' || activeChip === 'limitless')
+                    ? MW_TUNABLES.baseFreeTransfers
+                    : Math.min(
+                        MW_TUNABLES.maxBankedTransfers,
+                        MW_TUNABLES.baseFreeTransfers + remainingTransfers,
+                    );
 
                 // Round-level strategy score. Budget strategies stay on raw net
                 // points here. Their budget option is added once after budget
@@ -7036,7 +7001,7 @@ async function runMultiWeekPlanner() {
                     drivers: persistedDrivers,
                     constructors: persistedCons,
                     budget: budgetAfter, // P1: budget now propagates with projected appreciation
-                    bankedTransfers: remainingTransfers,
+                    bankedTransfers: freeTransfersNext,
                     chipsUsed: usedChip ? [...state.chipsUsed, { round: proj.round, chip: usedChip }] : [...state.chipsUsed],
                     chipsAvailable: newChipsAvail,
                     totalPoints: nextTotalPoints,
@@ -7055,7 +7020,7 @@ async function runMultiWeekPlanner() {
                         penalty,
                         netPoints: Math.round(netPts * 10) / 10,
                         chip: usedChip,
-                        bankedAfter: remainingTransfers,
+                        bankedAfter: freeTransfersNext,
                         // P1: track budget evolution for later display (P4)
                         budgetBefore: Math.round(budgetBefore * 100) / 100,
                         appreciation: Math.round(roundAppreciation * 100) / 100,

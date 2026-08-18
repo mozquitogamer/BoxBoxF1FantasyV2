@@ -25,6 +25,17 @@ def test_expected_price_change_matches_ppm_brackets_and_floor() -> None:
     ) == 0.0
 
 
+def test_free_transfers_have_two_per_round_with_one_rollover_and_cap_three() -> None:
+    assert sim.next_free_transfers(2, 2) == 2
+    assert sim.next_free_transfers(2, 1) == 3
+    assert sim.next_free_transfers(2, 0) == 3
+    assert sim.next_free_transfers(3, 3) == 2
+    assert sim.next_free_transfers(3, 2) == 3
+    assert sim.next_free_transfers(3, 0) == 3
+    assert sim.next_free_transfers(3, 0, "wild_card") == 2
+    assert sim.next_free_transfers(3, 0, "limitless") == 2
+
+
 def _synthetic_round() -> sim.RoundInputs:
     drivers = ("A", "B", "C", "D", "E")
     constructors = ("X", "Y")

@@ -350,9 +350,17 @@ def _reason_lines(row: dict[str, Any]) -> list[str]:
 
 def _live_decision(round_num: int, phase: str) -> dict[str, Any] | None:
     """Load an immutable live decision, if one has been published locally."""
-    path = DECISION_DIR / f"round{round_num}_{phase}.json"
-    if not path.exists():
+    candidates = [DECISION_DIR / f"round{round_num}_{phase}.json"]
+    candidates.extend(
+        sorted(
+            DECISION_DIR.glob(f"round{round_num}_{phase}_revision*.json"),
+            key=lambda path: int(path.stem.rsplit("revision", 1)[1]),
+        )
+    )
+    existing = [path for path in candidates if path.exists()]
+    if not existing:
         return None
+    path = existing[-1]
     decision = _load_json(path)
     if decision.get("round") != round_num or decision.get("phase") != phase:
         raise ValueError(f"Malformed V13 decision record: {path}")
@@ -443,12 +451,14 @@ def build_payload() -> dict[str, Any]:
             "tagline": "Budget-aware. Medium-risk. Transparent at every decision.",
             "strategy": V13_STRATEGY,
             "risk_profile": V13_RISK_PROFILE,
-            "policy_version": "2026.1",
+            "policy_version": "2026.2",
             "policy": {
                 "team_selection_phase": "post_fp",
                 "early_thoughts_phase": "pre_fp",
                 "price_gain_weight": season.BUDGET_BUILDER_PRICE_GAIN_VALUE,
                 "negative_p5_weight": season.RISK_PROFILE_WEIGHTS[V13_RISK_PROFILE],
+                "free_transfers_per_round": season.BASE_FREE_TRANSFERS,
+                "max_free_transfers_after_rollover": season.MAX_BANKED_TRANSFERS,
                 "final_fix_basis": "qualifying_locked_projected_race_points",
                 "three_x_timing": (
                     "At post-FP lock, play only when the selected team's extra "
@@ -498,10 +508,10 @@ def build_payload() -> dict[str, Any]:
             "free_transfers": final_rows[-1]["free_transfers_next"],
             "chips_remaining": ["3x_boost"],
             "chips_used": {
-                "wild_card": 6,
-                "limitless": 8,
-                "no_negative": 10,
-                "autopilot": 12,
+                **{
+                    chip: int(round_num)
+                    for round_num, chip in manager.get("chip_schedule", {}).items()
+                },
                 "final_fix": final_fix["round"] if final_fix else None,
             },
             "next_round": 14,

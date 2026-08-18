@@ -949,7 +949,7 @@ ML predictions exist for the current round; future rounds are projected in two l
 - **Width:** 60 beams (top 60 states kept at each round). See `MW_TUNABLES.beamWidth`.
 - **Candidates per state:** 0 swaps (hold) + every single swap + 2-swap combos (driver+driver, driver+constructor, constructor+constructor) + Wild Card optimal team + Limitless dream team + each "chip on top of swap" augmentation.
 - **2-swap pool (P11):** `(top-N by raw projected score) ∪ (top-N by PPM)` for both drivers and constructors. PPM pool surfaces cheap high-value picks that enable budget-relief swaps. Defaults: 8+8 drivers, 4+3 constructors (deduped).
-- **State tracking:** team composition, budget, banked transfers (max 5), chips used + remaining, cumulative score, transfer history, per-round budget evolution.
+- **State tracking:** team composition, budget, two free transfers per round with one rollover (max 3), chips used + remaining, cumulative score, transfer history, per-round budget evolution.
 - **Budget propagation (P1):** after each round, `state.budget` advances by `Σ predictPriceChange(pick).expectedChange` across the persisted team, so the next round's transfer search sees the appreciated spending ceiling.
 - **Deduplication (P6):** key = `sorted(drivers) | sorted(constructors) | sorted(chipsAvailable) | bankedTransfers`. Earlier version collapsed states with same team but different chip/FT portfolios, silently losing strictly-better futures.
 - **Penalty:** -10 pts per extra transfer beyond free allocation (`MW_TUNABLES.transferPenalty`).
