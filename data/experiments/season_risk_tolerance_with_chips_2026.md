@@ -12,52 +12,52 @@ Twelve virtual seasons were replayed: three manager philosophies crossed with fo
 
 | Manager | Risk profile | Full pts | Genuine pts | Final budget | Mean forecast downside | Realised negative pts | Worst round | Round SD |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
-| Max Points | Total avoidance | 2245 | 1587 | $123.3M | 20.7 | -65 | 117 | 54.4 |
-| Max Points | Minimal risk accepted | 2431 | 1659 | $120.6M | 25.6 | -82 | 151 | 48.4 |
-| Max Points | Medium tolerance | 2493 | 1698 | $116.6M | 32.1 | -101 | 99 | 62.0 |
-| Max Points | Maximum tolerance | 2267 | 1562 | $107.8M | 48.8 | -185 | 65 | 57.7 |
-| Balanced | Total avoidance | 2245 | 1587 | $123.3M | 20.7 | -65 | 117 | 54.4 |
-| Balanced | Minimal risk accepted | 2443 | 1671 | $121.0M | 25.7 | -82 | 151 | 49.0 |
-| Balanced | Medium tolerance | 2502 | 1707 | $118.9M | 29.8 | -113 | 101 | 62.0 |
-| Balanced | Maximum tolerance | 2438 | 1719 | $117.7M | 38.6 | -120 | 108 | 58.6 |
-| Budget Builder | Total avoidance | 2245 | 1587 | $123.3M | 20.7 | -65 | 117 | 54.4 |
-| Budget Builder | Minimal risk accepted | 2387 | 1647 | $124.3M | 24.1 | -88 | 156 | 42.0 |
-| Budget Builder | Medium tolerance | 2537 | 1720 | $124.3M | 27.0 | -75 | 156 | 50.4 |
-| Budget Builder | Maximum tolerance | 2449 | 1667 | $120.3M | 38.1 | -132 | 118 | 64.8 |
+| Max Points | Total avoidance | 2234 | 1535 | $123.3M | 20.7 | -68 | 102 | 47.5 |
+| Max Points | Minimal risk accepted | 2437 | 1665 | $121.4M | 24.3 | -94 | 141 | 54.9 |
+| Max Points | Medium tolerance | 2472 | 1677 | $117.4M | 32.4 | -118 | 125 | 56.7 |
+| Max Points | Maximum tolerance | 2281 | 1603 | $110.9M | 44.0 | -159 | 75 | 56.5 |
+| Balanced | Total avoidance | 2234 | 1535 | $123.3M | 20.7 | -68 | 102 | 47.5 |
+| Balanced | Minimal risk accepted | 2461 | 1688 | $123.6M | 24.3 | -94 | 141 | 51.4 |
+| Balanced | Medium tolerance | 2379 | 1583 | $117.8M | 30.4 | -130 | 99 | 57.9 |
+| Balanced | Maximum tolerance | 2335 | 1634 | $118.3M | 40.0 | -138 | 99 | 55.2 |
+| Budget Builder | Total avoidance | 2234 | 1535 | $123.3M | 20.7 | -68 | 102 | 47.5 |
+| Budget Builder | Minimal risk accepted | 2437 | 1687 | $124.7M | 24.1 | -88 | 156 | 42.5 |
+| Budget Builder | Medium tolerance | 2572 | 1784 | $125.3M | 27.8 | -79 | 113 | 64.7 |
+| Budget Builder | Maximum tolerance | 2463 | 1652 | $121.6M | 41.0 | -134 | 107 | 62.6 |
 
 ## Chip impact versus the matching no-chip path
 
 | Manager | Risk profile | Full-points Δ | Genuine-points Δ | Budget Δ |
 |---|---|---:|---:|---:|
-| Max Points | Total avoidance | +305 | +305 | +3.6M |
-| Max Points | Minimal risk accepted | +69 | +69 | +1.4M |
-| Max Points | Medium tolerance | +135 | +135 | +3.6M |
-| Max Points | Maximum tolerance | -113 | -113 | -5.9M |
-| Balanced | Total avoidance | +213 | +213 | +2.8M |
-| Balanced | Minimal risk accepted | +159 | +159 | -1.6M |
-| Balanced | Medium tolerance | +69 | +69 | -0.1M |
-| Balanced | Maximum tolerance | -57 | -57 | -0.7M |
-| Budget Builder | Total avoidance | +213 | +213 | +2.8M |
-| Budget Builder | Minimal risk accepted | -33 | -33 | +0.3M |
-| Budget Builder | Medium tolerance | +73 | +73 | +0.0M |
-| Budget Builder | Maximum tolerance | +86 | +86 | -3.5M |
+| Max Points | Total avoidance | +146 | +146 | +4.3M |
+| Max Points | Minimal risk accepted | +173 | +173 | +1.0M |
+| Max Points | Medium tolerance | +56 | +56 | +5.2M |
+| Max Points | Maximum tolerance | +67 | +67 | +0.1M |
+| Balanced | Total avoidance | +105 | +105 | +1.1M |
+| Balanced | Minimal risk accepted | +13 | +13 | +1.0M |
+| Balanced | Medium tolerance | -141 | -141 | +0.0M |
+| Balanced | Maximum tolerance | -119 | -119 | +0.9M |
+| Budget Builder | Total avoidance | +105 | +105 | +1.1M |
+| Budget Builder | Minimal risk accepted | +35 | +35 | +3.0M |
+| Budget Builder | Medium tolerance | +283 | +283 | +4.6M |
+| Budget Builder | Maximum tolerance | -16 | -16 | +1.5M |
 
 ## Chip schedules
 
 | Manager | Risk profile | Limitless | Wild Card | No Negative | Autopilot | 3x Boost |
 |---|---|---:|---:|---:|---:|---:|
 | Max Points | Total avoidance | 8 | 7 | 10 | 11 | Saved |
-| Max Points | Minimal risk accepted | 8 | 12 | 10 | 11 | Saved |
-| Max Points | Medium tolerance | 8 | Saved | 10 | 12 | Saved |
-| Max Points | Maximum tolerance | 8 | 12 | 10 | 11 | Saved |
+| Max Points | Minimal risk accepted | 8 | 7 | 10 | 11 | Saved |
+| Max Points | Medium tolerance | 8 | 6 | 10 | 11 | Saved |
+| Max Points | Maximum tolerance | 8 | 9 | 10 | 12 | Saved |
 | Balanced | Total avoidance | 8 | 7 | 10 | 11 | Saved |
-| Balanced | Minimal risk accepted | 8 | 12 | 10 | 11 | Saved |
-| Balanced | Medium tolerance | 8 | 12 | 10 | 11 | Saved |
+| Balanced | Minimal risk accepted | 8 | 7 | 10 | 11 | Saved |
+| Balanced | Medium tolerance | 8 | 7 | 10 | 12 | Saved |
 | Balanced | Maximum tolerance | 8 | 7 | 10 | 12 | Saved |
 | Budget Builder | Total avoidance | 8 | 7 | 10 | 11 | Saved |
 | Budget Builder | Minimal risk accepted | 8 | 6 | 10 | 12 | Saved |
-| Budget Builder | Medium tolerance | 8 | 6 | 10 | 12 | Saved |
-| Budget Builder | Maximum tolerance | 8 | 6 | 10 | 12 | Saved |
+| Budget Builder | Medium tolerance | 8 | 7 | 10 | 12 | Saved |
+| Budget Builder | Maximum tolerance | 8 | 9 | 10 | 12 | Saved |
 
 ## Conditional chip contribution
 
@@ -66,30 +66,30 @@ These conditional effects are not additive because removing a chip can alter lat
 
 | Chip | Paths played | Positive return | Mean points | Median points | Range | Mean budget |
 |---|---:|---:|---:|---:|---:|---:|
-| Limitless | 12 | 92% | +81.0 | +71.0 | -164 to +218 | +0.1M |
-| Wild Card | 11 | 100% | +43.5 | +40.0 | +15 to +156 | -0.2M |
+| Limitless | 12 | 75% | +39.7 | +58.5 | -50 to +98 | +1.4M |
+| Wild Card | 12 | 58% | +14.2 | +7.0 | -53 to +82 | +0.9M |
 | No Negative | 12 | 8% | +1.4 | +0.0 | +0 to +17 | +0.0M |
-| Autopilot | 12 | 50% | +7.5 | +2.0 | +0 to +30 | +0.0M |
+| Autopilot | 12 | 75% | +13.9 | +12.0 | +0 to +36 | +0.0M |
 
 ## Headline outcomes
 
-- Highest score: Budget Builder / Medium tolerance — 2537 points.
-- Highest score on genuine lock-time archives: Budget Builder / Medium tolerance — 1720 points.
-- Highest final budget: Budget Builder / Minimal risk accepted — $124.3M.
+- Highest score: Budget Builder / Medium tolerance — 2572 points.
+- Highest score on genuine lock-time archives: Budget Builder / Medium tolerance — 1784 points.
+- Highest final budget: Budget Builder / Medium tolerance — $125.3M.
 - Lowest forecast downside: Max Points / Total avoidance — 20.7 mean negative-P5 exposure.
 
 ## Within-manager trade-offs
 
-- Max Points: its strongest risk-managed version was Medium tolerance, scoring +136 genuine-archive points and finishing with $8.8M more versus maximum tolerance.
-- Balanced: its strongest risk-managed version was Medium tolerance, scoring -12 genuine-archive points and finishing with $1.2M more versus maximum tolerance.
-- Budget Builder: its strongest risk-managed version was Medium tolerance, scoring +53 genuine-archive points and finishing with $4.0M more versus maximum tolerance.
-- The highest-budget path finished -150 full-season points, -73 genuine-archive points, and $0.0M more relative to the highest-scoring path.
+- Max Points: its strongest risk-managed version was Medium tolerance, scoring +74 genuine-archive points and finishing with $6.5M more versus maximum tolerance.
+- Balanced: its strongest risk-managed version was Minimal risk accepted, scoring +54 genuine-archive points and finishing with $5.3M more versus maximum tolerance.
+- Budget Builder: its strongest risk-managed version was Medium tolerance, scoring +132 genuine-archive points and finishing with $3.7M more versus maximum tolerance.
+- The highest-budget path finished +0 full-season points, +0 genuine-archive points, and $0.0M more relative to the highest-scoring path.
 
 ## Did forecast risk predict realised damage?
 
-- The descriptive correlation between mean forecast negative-P5 exposure and realised negative-point magnitude was 0.968, a strong relationship in this sample.
-- Restricting to genuine archives, the forecast-risk versus realised-negative correlation was 0.960, also strong.
-- Genuine-archive forecast downside and points had a 0.100 correlation, a weak relationship.
+- The descriptive correlation between mean forecast negative-P5 exposure and realised negative-point magnitude was 0.941, a strong relationship in this sample.
+- Restricting to genuine archives, the forecast-risk versus realised-negative correlation was 0.942, also strong.
+- Genuine-archive forecast downside and points had a 0.185 correlation, a weak relationship.
 - Descriptive only: the 12 paths share rounds and many assets, so they are not independent observations.
 
 ## Interpretation guardrails

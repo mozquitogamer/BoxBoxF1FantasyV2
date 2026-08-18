@@ -208,7 +208,7 @@ The brute-force evaluates ~1.4M combinations with budget pruning, returns top 20
 **Tips:**
 - Check "Wild Card" if available — the planner finds the optimal round to deploy it
 - Sprint rounds have +15% projected points (extra scoring opportunity)
-- Bank transfers when the upcoming round doesn't benefit from a swap (max 5 banked)
+- Bank one unused transfer when the upcoming round doesn't benefit from a swap (2 free each round, max 3 after rollover)
 - "Hold" entries mean your current team is already well-suited for that circuit
 - Use "Target Team" mode when you have a roster you want to end up with but need help planning the path; start with Balanced intensity and switch to Strict if you really want to force the convergence regardless of point cost
 

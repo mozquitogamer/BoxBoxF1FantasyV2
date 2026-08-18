@@ -145,8 +145,9 @@ def simulate_continuation(
         if is_season_start:
             free_next = season.INITIAL_FREE_TRANSFERS_AFTER_R1
         else:
-            remaining = max(0, state.free_transfers - transfers)
-            free_next = min(season.MAX_BANKED_TRANSFERS, remaining + 1)
+            free_next = season.next_free_transfers(
+                state.free_transfers, transfers
+            )
         state = season.TeamState(
             drivers=candidate.drivers,
             constructors=candidate.constructors,

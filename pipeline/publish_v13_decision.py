@@ -229,8 +229,11 @@ def _three_x_decision(
 def _previous_record() -> tuple[str | None, str | None]:
     if not DECISION_DIR.exists():
         return None, None
-    records: list[tuple[int, int, Path]] = []
-    pattern = re.compile(r"round(?P<round>\d+)_(?P<phase>pre_fp|post_fp)\.json$")
+    records: list[tuple[int, int, int, Path]] = []
+    pattern = re.compile(
+        r"round(?P<round>\d+)_(?P<phase>pre_fp|post_fp)"
+        r"(?:_revision(?P<revision>\d+))?\.json$"
+    )
     for path in DECISION_DIR.glob("round*_*.json"):
         match = pattern.match(path.name)
         if match:
@@ -238,12 +241,13 @@ def _previous_record() -> tuple[str | None, str | None]:
                 (
                     int(match.group("round")),
                     PHASE_ORDER[match.group("phase")],
+                    int(match.group("revision") or 1),
                     path,
                 )
             )
     if not records:
         return None, None
-    path = max(records)[2]
+    path = max(records)[3]
     value = v13._load_json(path)
     return str(path.relative_to(ROOT)).replace("\\", "/"), _record_sha256(value)
 
@@ -363,8 +367,13 @@ def publish(round_num: int, phase: str) -> dict[str, Any]:
             raise RuntimeError(
                 f"{path.name} is frozen but its source archive has changed; investigate"
             )
-        _sync_public(public, existing)
-        return existing
+        revisions = sorted(
+            DECISION_DIR.glob(f"round{round_num}_{phase}_revision*.json"),
+            key=lambda item: int(item.stem.rsplit("revision", 1)[1]),
+        )
+        active = v13._load_json(revisions[-1]) if revisions else existing
+        _sync_public(public, active)
+        return active
 
     if phase == "post_fp" and not (DECISION_DIR / f"round{round_num}_pre_fp.json").exists():
         raise RuntimeError("Publish the pre-FP early-thoughts record first")
@@ -376,12 +385,59 @@ def publish(round_num: int, phase: str) -> dict[str, Any]:
     return decision
 
 
+def publish_correction(round_num: int, phase: str, reason: str) -> dict[str, Any]:
+    """Append an explicit audited correction without rewriting the original."""
+    reason = str(reason or "").strip()
+    if not reason:
+        raise ValueError("A correction reason is required")
+    base_path = DECISION_DIR / f"round{round_num}_{phase}.json"
+    if not base_path.exists():
+        raise FileNotFoundError("Publish the original decision before a correction")
+
+    public = v13.build_payload()
+    revisions = sorted(
+        DECISION_DIR.glob(f"round{round_num}_{phase}_revision*.json"),
+        key=lambda path: int(path.stem.rsplit("revision", 1)[1]),
+    )
+    if revisions:
+        latest = v13._load_json(revisions[-1])
+        if latest.get("correction_reason") == reason:
+            _sync_public(public, latest)
+            return latest
+
+    superseded_path = revisions[-1] if revisions else base_path
+    superseded = v13._load_json(superseded_path)
+    revision = int(superseded.get("revision", 1)) + 1
+    decision = _decision(round_num, phase, public)
+    decision.update(
+        {
+            "revision": revision,
+            "status": "corrected_provisional" if phase == "pre_fp" else "corrected_before_lock",
+            "correction_reason": reason,
+            "supersedes": str(superseded_path.relative_to(ROOT)).replace("\\", "/"),
+            "supersedes_sha256": _record_sha256(superseded),
+        }
+    )
+    path = DECISION_DIR / f"round{round_num}_{phase}_revision{revision}.json"
+    path.write_bytes(_canonical_bytes(decision))
+    _sync_public(public, decision)
+    return decision
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--round", type=int, required=True)
     parser.add_argument("--phase", choices=tuple(PHASE_ORDER), required=True)
+    parser.add_argument(
+        "--correction-reason",
+        help="Append an audited revision instead of rewriting the original decision.",
+    )
     args = parser.parse_args()
-    decision = publish(args.round, args.phase)
+    decision = (
+        publish_correction(args.round, args.phase, args.correction_reason)
+        if args.correction_reason
+        else publish(args.round, args.phase)
+    )
     print(
         f"V13 R{decision['round']} {decision['phase']} {decision['status']}: "
         f"{decision['projected_points']:.1f} projected, "

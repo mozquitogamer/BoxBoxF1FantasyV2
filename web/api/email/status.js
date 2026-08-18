@@ -1,7 +1,6 @@
 'use strict';
 
 const { getConfig } = require('../../lib/email-subscriptions');
-const { getPublicLeagueLeaderboard } = require('../../lib/f1-fantasy');
 const { buildLeaderboard, loadV13Record } = require('../../lib/beat-v13-leaderboard');
 
 const LEADERBOARD_CACHE_MS = 5 * 60 * 1000;
@@ -24,11 +23,11 @@ async function beatV13Leaderboard(req, res) {
     }
 
     try {
-        const [{ teams, settings }, v13] = await Promise.all([
-            getPublicLeagueLeaderboard(),
-            Promise.resolve(loadV13Record()),
-        ]);
-        const rows = buildLeaderboard(teams, v13);
+        const v13 = loadV13Record();
+        // Competition rows are intentionally empty until a confirmed entrant
+        // submits and verifies the official team they want scored. Public-league
+        // membership alone is never treated as competition registration.
+        const rows = buildLeaderboard([], v13);
         const v13Row = rows.find(row => row.kind === 'v13');
         const leader = rows[0] || null;
         cachedLeaderboard = {
@@ -37,17 +36,13 @@ async function beatV13Leaderboard(req, res) {
             through_round: v13.through_round,
             generated_at: new Date().toISOString(),
             provisional: true,
-            league: {
-                id: settings.leagueId,
-                type: settings.leagueType,
-                name: 'Box Box F1 Fantasy',
-            },
-            board_scope: 'public_league_benchmark',
+            league: null,
+            board_scope: 'registered_competition_entries',
             field_size: rows.filter(row => row.kind === 'community').length,
             v13: v13Row,
             leader: leader ? { rank: leader.rank, team_name: leader.team_name, points: leader.points, kind: leader.kind } : null,
             leaderboard: rows,
-            eligibility_note: 'Benchmark only: this table covers the public Box Box F1 Fantasy league, not the confirmed Beat V13 entrant list. Prize eligibility still requires a confirmed Beat V13 email entry and end-of-season official score verification.',
+            eligibility_note: 'Only confirmed Beat V13 entrants with a submitted and verified official team can appear here. Email addresses remain private. Because team submissions are collected after the season, V13 is the only scored row for now.',
         };
         cachedLeaderboardAt = Date.now();
         return res.status(200).json(cachedLeaderboard);
@@ -55,7 +50,7 @@ async function beatV13Leaderboard(req, res) {
         console.error('Could not load the Beat V13 leaderboard:', error.message);
         return res.status(503).json({
             ok: false,
-            message: 'Live community standings are temporarily unavailable. V13\'s public decision record is still available below.',
+            message: 'Registered competition standings are temporarily unavailable. V13\'s public decision record is still available below.',
         });
     }
 }

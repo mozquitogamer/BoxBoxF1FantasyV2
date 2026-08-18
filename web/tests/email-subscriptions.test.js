@@ -189,6 +189,22 @@ test('status handler exposes sign-up after delivery is configured', () => {
     }
 });
 
+test('competition standings exclude unregistered public-league teams', async () => {
+    statusHandler._resetLeaderboardCache();
+    const res = mockResponse();
+    await statusHandler({
+        method: 'GET',
+        query: { resource: 'beat-v13-leaderboard' },
+        url: '/api/email/status?resource=beat-v13-leaderboard',
+    }, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.ok, true);
+    assert.equal(res.body.board_scope, 'registered_competition_entries');
+    assert.equal(res.body.field_size, 0);
+    assert.deepEqual(res.body.leaderboard.map(row => row.kind), ['v13']);
+});
+
 test('confirm handler adds a verified address to the alert segment', async () => {
     const restoreEnv = withEmailEnv();
     const originalFetch = global.fetch;

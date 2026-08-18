@@ -1,18 +1,20 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-11T20:33:44.747426+02:00",
+  "generated_at": "2026-08-18T12:30:29.383554+02:00",
   "manager": {
     "id": "v13",
     "name": "V13",
     "tagline": "Budget-aware. Medium-risk. Transparent at every decision.",
     "strategy": "budget_builder",
     "risk_profile": "medium_tolerance",
-    "policy_version": "2026.1",
+    "policy_version": "2026.2",
     "policy": {
       "team_selection_phase": "post_fp",
       "early_thoughts_phase": "pre_fp",
       "price_gain_weight": 20.0,
       "negative_p5_weight": 0.75,
+      "free_transfers_per_round": 2,
+      "max_free_transfers_after_rollover": 3,
       "final_fix_basis": "qualifying_locked_projected_race_points",
       "three_x_timing": "At post-FP lock, play only when the selected team's extra 3x value is at least the largest remaining priors-only top-two driver forecast; otherwise save it."
     }
@@ -38,12 +40,12 @@
     "disclaimer": "Full-season counterfactual. R1-R3 forecasts were reconstructed, and the V13 policy was selected after the underlying experiments.",
     "start_round": 1,
     "end_round": 13,
-    "base_points_before_final_fix": 2537.0,
-    "final_fix_adjustment": 4.0,
-    "total_points": 2541.0,
-    "final_budget": 124.3,
-    "final_bank": 0.1,
-    "genuine_archive_points_before_final_fix": 1720.0,
+    "base_points_before_final_fix": 2572.0,
+    "final_fix_adjustment": 22.0,
+    "total_points": 2594.0,
+    "final_budget": 125.3,
+    "final_bank": 1.3,
+    "genuine_archive_points_before_final_fix": 1784.0,
     "rounds": [
       {
         "round": 1,
@@ -205,7 +207,7 @@
         "actual_points": 331.0,
         "cumulative_points": 582.0,
         "budget_after": 103.4,
-        "free_transfers_next": 1
+        "free_transfers_next": 2
       },
       {
         "round": 3,
@@ -252,7 +254,7 @@
           ],
           "constructors": [
             "mercedes",
-            "alpine"
+            "haas"
           ],
           "persistent_drivers": [
             "ANT",
@@ -263,30 +265,30 @@
           ],
           "persistent_constructors": [
             "mercedes",
-            "alpine"
+            "haas"
           ],
           "captain": "ANT",
           "second_boost": null,
           "chip": null,
-          "transfers": 1,
+          "transfers": 2,
           "transfer_penalty": 0,
-          "projected_points": 232.4,
+          "projected_points": 231.3,
           "projected_price_gain": 3.2,
-          "downside_risk": 20.5,
-          "team_cost": 102.5,
+          "downside_risk": 17.5,
+          "team_cost": 97.4,
           "budget_before": 103.4,
-          "bank_after_transfers": 0.9,
+          "bank_after_transfers": 6.0,
           "reasons": [
-            "The post-FP lineup projected 232.4 points.",
+            "The post-FP lineup projected 231.3 points.",
             "It carried $3.2M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 20.5 under V13's medium-risk rule."
+            "Its combined negative-P5 exposure was 17.5 under V13's medium-risk rule."
           ]
         },
         "final_fix": null,
-        "actual_points": 235.0,
-        "cumulative_points": 817.0,
+        "actual_points": 206.0,
+        "cumulative_points": 788.0,
         "budget_after": 106.2,
-        "free_transfers_next": 1
+        "free_transfers_next": 2
       },
       {
         "round": 6,
@@ -308,7 +310,7 @@
           ],
           "constructors": [
             "ferrari",
-            "racing_bulls"
+            "haas"
           ],
           "persistent_drivers": [
             "ANT",
@@ -319,29 +321,28 @@
           ],
           "persistent_constructors": [
             "ferrari",
-            "racing_bulls"
+            "haas"
           ],
           "captain": "ANT",
           "second_boost": null,
-          "chip": "wild_card",
-          "transfers": 4,
-          "transfer_penalty": 0,
-          "projected_points": 378.5,
+          "chip": null,
+          "transfers": 3,
+          "transfer_penalty": 10,
+          "projected_points": 367.1,
           "projected_price_gain": 3.3,
           "downside_risk": 0.0,
-          "team_cost": 104.3,
+          "team_cost": 105.4,
           "budget_before": 106.2,
-          "bank_after_transfers": 1.9,
+          "bank_after_transfers": 0.8,
           "reasons": [
-            "The post-FP lineup projected 378.5 points.",
+            "The post-FP lineup projected 367.1 points after a 10-point transfer penalty.",
             "It carried $3.3M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 0.0 under V13's medium-risk rule.",
-            "V13 played Wild Card under the frozen research chip policy."
+            "Its combined negative-P5 exposure was 0.0 under V13's medium-risk rule."
           ]
         },
         "final_fix": null,
-        "actual_points": 168.0,
-        "cumulative_points": 985.0,
+        "actual_points": 179.0,
+        "cumulative_points": 967.0,
         "budget_after": 108.3,
         "free_transfers_next": 2
       },
@@ -357,23 +358,23 @@
           "archive_reconstructed": false,
           "drivers": [
             "ANT",
+            "ALB",
             "OCO",
-            "LIN",
             "COL",
             "BOR"
           ],
           "constructors": [
-            "mclaren",
-            "ferrari"
+            "mercedes",
+            "williams"
           ],
           "captain": "ANT",
           "second_boost": null,
-          "projected_points": 331.8,
-          "projected_price_gain": 2.1,
-          "downside_risk": 26.0,
-          "transfers": 3,
-          "transfer_penalty": 10,
-          "team_cost": 107.9
+          "projected_points": 308.8,
+          "projected_price_gain": 3.6,
+          "downside_risk": 23.0,
+          "transfers": 5,
+          "transfer_penalty": 0,
+          "team_cost": 102.0
         },
         "post_fp_final": {
           "status": "frozen_replay",
@@ -383,48 +384,49 @@
           "archive_reconstructed": false,
           "drivers": [
             "ANT",
-            "LEC",
-            "OCO",
+            "HAM",
             "COL",
+            "BOR",
             "PER"
           ],
           "constructors": [
-            "ferrari",
+            "mercedes",
             "racing_bulls"
           ],
           "persistent_drivers": [
             "ANT",
-            "LEC",
-            "OCO",
+            "HAM",
             "COL",
+            "BOR",
             "PER"
           ],
           "persistent_constructors": [
-            "ferrari",
+            "mercedes",
             "racing_bulls"
           ],
           "captain": "ANT",
           "second_boost": null,
-          "chip": null,
-          "transfers": 2,
+          "chip": "wild_card",
+          "transfers": 6,
           "transfer_penalty": 0,
-          "projected_points": 293.9,
-          "projected_price_gain": 3.3,
-          "downside_risk": 25.0,
-          "team_cost": 107.1,
+          "projected_points": 317.2,
+          "projected_price_gain": 2.7,
+          "downside_risk": 29.0,
+          "team_cost": 108.1,
           "budget_before": 108.3,
-          "bank_after_transfers": 1.2,
+          "bank_after_transfers": 0.2,
           "reasons": [
-            "The post-FP lineup projected 293.9 points.",
-            "It carried $3.3M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 25.0 under V13's medium-risk rule."
+            "The post-FP lineup projected 317.2 points.",
+            "It carried $2.7M of forecast price movement into the budget-first objective.",
+            "Its combined negative-P5 exposure was 29.0 under V13's medium-risk rule.",
+            "V13 played Wild Card under the frozen research chip policy."
           ]
         },
         "final_fix": null,
-        "actual_points": 264.0,
-        "cumulative_points": 1249.0,
+        "actual_points": 283.0,
+        "cumulative_points": 1250.0,
         "budget_after": 109.8,
-        "free_transfers_next": 1
+        "free_transfers_next": 2
       },
       {
         "round": 8,
@@ -475,13 +477,13 @@
           ],
           "persistent_drivers": [
             "ANT",
-            "LEC",
-            "OCO",
+            "HAM",
             "COL",
+            "BOR",
             "PER"
           ],
           "persistent_constructors": [
-            "ferrari",
+            "mercedes",
             "racing_bulls"
           ],
           "captain": "LEC",
@@ -494,7 +496,7 @@
           "downside_risk": 6.0,
           "team_cost": 181.5,
           "budget_before": 109.8,
-          "bank_after_transfers": 1.2,
+          "bank_after_transfers": 0.2,
           "reasons": [
             "The post-FP lineup projected 310.6 points.",
             "It carried $1.3M of forecast price movement into the budget-first objective.",
@@ -504,8 +506,8 @@
         },
         "final_fix": null,
         "actual_points": 171.0,
-        "cumulative_points": 1420.0,
-        "budget_after": 111.3,
+        "cumulative_points": 1421.0,
+        "budget_after": 111.9,
         "free_transfers_next": 2
       },
       {
@@ -520,7 +522,7 @@
           "archive_reconstructed": false,
           "drivers": [
             "ANT",
-            "OCO",
+            "GAS",
             "COL",
             "BOR",
             "HUL"
@@ -531,12 +533,12 @@
           ],
           "captain": "ANT",
           "second_boost": null,
-          "projected_points": 242.5,
-          "projected_price_gain": 1.7,
-          "downside_risk": 24.0,
+          "projected_points": 241.9,
+          "projected_price_gain": 2.1,
+          "downside_risk": 33.0,
           "transfers": 3,
           "transfer_penalty": 10,
-          "team_cost": 109.5
+          "team_cost": 111.0
         },
         "post_fp_final": {
           "status": "frozen_replay",
@@ -552,8 +554,8 @@
             "BOR"
           ],
           "constructors": [
-            "ferrari",
-            "racing_bulls"
+            "mercedes",
+            "audi"
           ],
           "persistent_drivers": [
             "ANT",
@@ -563,31 +565,31 @@
             "BOR"
           ],
           "persistent_constructors": [
-            "ferrari",
-            "racing_bulls"
+            "mercedes",
+            "audi"
           ],
           "captain": "ANT",
           "second_boost": null,
           "chip": null,
           "transfers": 2,
           "transfer_penalty": 0,
-          "projected_points": 193.8,
+          "projected_points": 196.1,
           "projected_price_gain": 1.7,
-          "downside_risk": 7.0,
-          "team_cost": 109.0,
-          "budget_before": 111.3,
-          "bank_after_transfers": 2.3,
+          "downside_risk": 7.5,
+          "team_cost": 108.9,
+          "budget_before": 111.9,
+          "bank_after_transfers": 3.0,
           "reasons": [
-            "The post-FP lineup projected 193.8 points.",
+            "The post-FP lineup projected 196.1 points.",
             "It carried $1.7M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 7.0 under V13's medium-risk rule."
+            "Its combined negative-P5 exposure was 7.5 under V13's medium-risk rule."
           ]
         },
         "final_fix": null,
-        "actual_points": 156.0,
-        "cumulative_points": 1576.0,
-        "budget_after": 113.8,
-        "free_transfers_next": 1
+        "actual_points": 113.0,
+        "cumulative_points": 1534.0,
+        "budget_after": 114.4,
+        "free_transfers_next": 2
       },
       {
         "round": 10,
@@ -616,7 +618,7 @@
           "projected_price_gain": 1.9,
           "downside_risk": 27.7,
           "transfers": 2,
-          "transfer_penalty": 10,
+          "transfer_penalty": 0,
           "team_cost": 113.1
         },
         "post_fp_final": {
@@ -651,25 +653,25 @@
           "second_boost": null,
           "chip": "no_negative",
           "transfers": 2,
-          "transfer_penalty": 10,
+          "transfer_penalty": 0,
           "projected_points": 199.8,
           "projected_price_gain": 1.9,
           "downside_risk": 24.4,
           "team_cost": 113.1,
-          "budget_before": 113.8,
-          "bank_after_transfers": 0.7,
+          "budget_before": 114.4,
+          "bank_after_transfers": 1.3,
           "reasons": [
-            "The post-FP lineup projected 199.8 points after a 10-point transfer penalty.",
+            "The post-FP lineup projected 199.8 points.",
             "It carried $1.9M of forecast price movement into the budget-first objective.",
             "Its combined negative-P5 exposure was 24.4 under V13's medium-risk rule.",
             "V13 played No Negative under the frozen research chip policy."
           ]
         },
         "final_fix": null,
-        "actual_points": 228.0,
-        "cumulative_points": 1804.0,
-        "budget_after": 115.7,
-        "free_transfers_next": 1
+        "actual_points": 238.0,
+        "cumulative_points": 1772.0,
+        "budget_after": 116.3,
+        "free_transfers_next": 2
       },
       {
         "round": 11,
@@ -682,24 +684,24 @@
           "archive_sha256": "6de37e3a121de199c8af4ee7131f76b8064b3ff8746d6f831bcc29a26f7b2c45",
           "archive_reconstructed": false,
           "drivers": [
-            "ANT",
+            "VER",
             "HAM",
             "LIN",
-            "COL",
+            "LAW",
             "BOR"
           ],
           "constructors": [
             "mercedes",
             "racing_bulls"
           ],
-          "captain": "HAM",
+          "captain": "VER",
           "second_boost": null,
-          "projected_points": 226.0,
-          "projected_price_gain": 2.1,
-          "downside_risk": 46.8,
-          "transfers": 1,
+          "projected_points": 230.7,
+          "projected_price_gain": 2.3,
+          "downside_risk": 51.5,
+          "transfers": 2,
           "transfer_penalty": 0,
-          "team_cost": 114.7
+          "team_cost": 116.3
         },
         "post_fp_final": {
           "status": "frozen_replay",
@@ -708,49 +710,49 @@
           "archive_sha256": "c7d46b32fb4a996871f1f582a9bc3da516291dbf8ffdfc4dd7ee570c0717ae5d",
           "archive_reconstructed": false,
           "drivers": [
-            "ANT",
             "HAM",
+            "OCO",
             "LIN",
             "COL",
             "BOR"
           ],
           "constructors": [
             "mercedes",
-            "racing_bulls"
+            "ferrari"
           ],
           "persistent_drivers": [
-            "ANT",
             "HAM",
+            "OCO",
             "LIN",
             "COL",
             "BOR"
           ],
           "persistent_constructors": [
             "mercedes",
-            "racing_bulls"
+            "ferrari"
           ],
-          "captain": "ANT",
+          "captain": "HAM",
           "second_boost": null,
           "chip": null,
-          "transfers": 1,
+          "transfers": 2,
           "transfer_penalty": 0,
-          "projected_points": 230.5,
-          "projected_price_gain": 2.1,
-          "downside_risk": 36.3,
-          "team_cost": 114.7,
-          "budget_before": 115.7,
-          "bank_after_transfers": 1.0,
+          "projected_points": 248.3,
+          "projected_price_gain": 1.7,
+          "downside_risk": 44.1,
+          "team_cost": 114.0,
+          "budget_before": 116.3,
+          "bank_after_transfers": 2.3,
           "reasons": [
-            "The post-FP lineup projected 230.5 points.",
-            "It carried $2.1M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 36.3 under V13's medium-risk rule."
+            "The post-FP lineup projected 248.3 points.",
+            "It carried $1.7M of forecast price movement into the budget-first objective.",
+            "Its combined negative-P5 exposure was 44.1 under V13's medium-risk rule."
           ]
         },
         "final_fix": null,
-        "actual_points": 287.0,
-        "cumulative_points": 2091.0,
-        "budget_after": 118.6,
-        "free_transfers_next": 1
+        "actual_points": 330.0,
+        "cumulative_points": 2102.0,
+        "budget_after": 119.2,
+        "free_transfers_next": 2
       },
       {
         "round": 12,
@@ -764,23 +766,23 @@
           "archive_reconstructed": false,
           "drivers": [
             "ANT",
-            "HAM",
+            "OCO",
             "LIN",
             "COL",
             "BOR"
           ],
           "constructors": [
             "mercedes",
-            "racing_bulls"
+            "ferrari"
           ],
           "captain": "ANT",
           "second_boost": null,
-          "projected_points": 152.1,
-          "projected_price_gain": 2.9,
-          "downside_risk": 82.2,
-          "transfers": 0,
+          "projected_points": 159.0,
+          "projected_price_gain": 2.7,
+          "downside_risk": 77.4,
+          "transfers": 1,
           "transfer_penalty": 0,
-          "team_cost": 117.6
+          "team_cost": 117.4
         },
         "post_fp_final": {
           "status": "frozen_replay",
@@ -789,50 +791,50 @@
           "archive_sha256": "974ab67bebaa7aa503f21494b9071813de79aa907a6ce8b778ab8e346841c394",
           "archive_reconstructed": false,
           "drivers": [
-            "ANT",
             "HAM",
             "HAD",
             "LIN",
-            "COL"
+            "COL",
+            "BOR"
           ],
           "constructors": [
-            "ferrari",
-            "racing_bulls"
+            "red_bull",
+            "ferrari"
           ],
           "persistent_drivers": [
-            "ANT",
             "HAM",
             "HAD",
             "LIN",
-            "COL"
+            "COL",
+            "BOR"
           ],
           "persistent_constructors": [
-            "ferrari",
-            "racing_bulls"
+            "red_bull",
+            "ferrari"
           ],
-          "captain": "ANT",
+          "captain": "HAD",
           "second_boost": null,
           "chip": "autopilot",
           "transfers": 2,
-          "transfer_penalty": 10,
-          "projected_points": 194.3,
-          "projected_price_gain": 2.9,
-          "downside_risk": 65.7,
-          "team_cost": 118.3,
-          "budget_before": 118.6,
-          "bank_after_transfers": 0.3,
+          "transfer_penalty": 0,
+          "projected_points": 225.5,
+          "projected_price_gain": 2.7,
+          "downside_risk": 67.0,
+          "team_cost": 118.2,
+          "budget_before": 119.2,
+          "bank_after_transfers": 1.0,
           "reasons": [
-            "The post-FP lineup projected 194.3 points after a 10-point transfer penalty.",
-            "It carried $2.9M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 65.7 under V13's medium-risk rule.",
+            "The post-FP lineup projected 225.5 points.",
+            "It carried $2.7M of forecast price movement into the budget-first objective.",
+            "Its combined negative-P5 exposure was 67.0 under V13's medium-risk rule.",
             "V13 played Autopilot under the frozen research chip policy."
           ]
         },
         "final_fix": null,
-        "actual_points": 225.0,
-        "cumulative_points": 2316.0,
-        "budget_after": 121.7,
-        "free_transfers_next": 1
+        "actual_points": 269.0,
+        "cumulative_points": 2371.0,
+        "budget_after": 122.3,
+        "free_transfers_next": 2
       },
       {
         "round": 13,
@@ -845,24 +847,24 @@
           "archive_sha256": "ccd13832cc31750eb01d94f2e683a6eda0632c717a170b4a48ed3ceaa742dd76",
           "archive_reconstructed": false,
           "drivers": [
-            "ANT",
             "HAM",
             "HAD",
             "LIN",
+            "LAW",
             "BOR"
           ],
           "constructors": [
-            "ferrari",
-            "racing_bulls"
+            "mercedes",
+            "ferrari"
           ],
-          "captain": "ANT",
+          "captain": "HAM",
           "second_boost": null,
-          "projected_points": 155.8,
-          "projected_price_gain": 2.5,
-          "downside_risk": 66.6,
-          "transfers": 1,
+          "projected_points": 173.1,
+          "projected_price_gain": 2.3,
+          "downside_risk": 67.0,
+          "transfers": 2,
           "transfer_penalty": 0,
-          "team_cost": 117.6
+          "team_cost": 121.7
         },
         "post_fp_final": {
           "status": "frozen_replay",
@@ -871,54 +873,54 @@
           "archive_sha256": "f010fae21efe2c5662bdf10f1747ebe016051d89710d840aaf7e05f111050924",
           "archive_reconstructed": false,
           "drivers": [
-            "LEC",
             "HAM",
             "HAD",
             "LIN",
-            "COL"
+            "LAW",
+            "BOR"
           ],
           "constructors": [
-            "ferrari",
-            "racing_bulls"
+            "mclaren",
+            "ferrari"
           ],
           "persistent_drivers": [
-            "LEC",
             "HAM",
             "HAD",
             "LIN",
-            "COL"
+            "LAW",
+            "BOR"
           ],
           "persistent_constructors": [
-            "ferrari",
-            "racing_bulls"
+            "mclaren",
+            "ferrari"
           ],
           "captain": "HAM",
           "second_boost": null,
           "chip": null,
-          "transfers": 1,
+          "transfers": 2,
           "transfer_penalty": 0,
-          "projected_points": 168.9,
-          "projected_price_gain": 2.3,
-          "downside_risk": 67.1,
-          "team_cost": 119.4,
-          "budget_before": 121.7,
-          "bank_after_transfers": 2.3,
+          "projected_points": 187.0,
+          "projected_price_gain": 1.9,
+          "downside_risk": 65.0,
+          "team_cost": 120.1,
+          "budget_before": 122.3,
+          "bank_after_transfers": 2.2,
           "reasons": [
-            "The post-FP lineup projected 168.9 points.",
-            "It carried $2.3M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 67.1 under V13's medium-risk rule."
+            "The post-FP lineup projected 187.0 points.",
+            "It carried $1.9M of forecast price movement into the budget-first objective.",
+            "Its combined negative-P5 exposure was 65.0 under V13's medium-risk rule."
           ]
         },
         "final_fix": {
-          "outgoing": "LEC",
+          "outgoing": "HAM",
           "incoming": "NOR",
-          "outgoing_name": "Charles Leclerc",
+          "outgoing_name": "Lewis Hamilton",
           "incoming_name": "Lando Norris",
-          "projected_gain": 3.8,
-          "bank_before": 2.3,
-          "bank_after": 0.1,
-          "boost_transferred": false,
-          "actual_gain": 4.0,
+          "projected_gain": 3.4,
+          "bank_before": 2.2,
+          "bank_after": 1.3,
+          "boost_transferred": true,
+          "actual_gain": 22.0,
           "status": "played",
           "phase": "post_quali",
           "round": 13,
@@ -926,12 +928,12 @@
           "archive_sha256": "da37bc564ba27f82c4ecadb7652270e8ef0ee1f61440328ec2823b7295de52b3",
           "generated_at": "2026-07-25T22:06:20.359358+00:00",
           "points_basis": "projected_points_race",
-          "banked_qualifying_driver": "LEC"
+          "banked_qualifying_driver": "HAM"
         },
-        "actual_points": 225.0,
-        "cumulative_points": 2541.0,
-        "budget_after": 124.3,
-        "free_transfers_next": 1
+        "actual_points": 223.0,
+        "cumulative_points": 2594.0,
+        "budget_after": 125.3,
+        "free_transfers_next": 2
       }
     ]
   },
@@ -939,23 +941,23 @@
     "as_of_round": 13,
     "drivers": [
       "NOR",
-      "HAM",
       "HAD",
       "LIN",
-      "COL"
+      "LAW",
+      "BOR"
     ],
     "constructors": [
-      "ferrari",
-      "racing_bulls"
+      "mclaren",
+      "ferrari"
     ],
-    "budget": 124.3,
-    "bank": 0.1,
-    "free_transfers": 1,
+    "budget": 125.3,
+    "bank": 1.3,
+    "free_transfers": 2,
     "chips_remaining": [
       "3x_boost"
     ],
     "chips_used": {
-      "wild_card": 6,
+      "wild_card": 7,
       "limitless": 8,
       "no_negative": 10,
       "autopilot": 12,
@@ -967,11 +969,15 @@
       "archive_sha256": "bc3d4205db6d3515eb10cbe9a81948b056db2c7500a4f574940027b8dbf87def",
       "captain": "ANT",
       "changes": {
-        "constructors_in": [],
-        "constructors_out": [],
+        "constructors_in": [
+          "mercedes"
+        ],
+        "constructors_out": [
+          "mclaren"
+        ],
         "drivers_in": [
           "ANT",
-          "BOR"
+          "HUL"
         ],
         "drivers_out": [
           "LIN",
@@ -984,16 +990,17 @@
         "result": "not_evaluated"
       },
       "constructors": [
-        "ferrari",
-        "racing_bulls"
+        "mercedes",
+        "ferrari"
       ],
-      "downside_risk": 48.1,
+      "correction_reason": "Transfer bank corrected to two free transfers per round with one rollover and a maximum of three; Wild Card and Limitless reset the following round to two; original R14 pre-FP archive retained.",
+      "downside_risk": 64.4,
       "drivers": [
         "ANT",
-        "HAM",
         "HAD",
-        "COL",
-        "BOR"
+        "LAW",
+        "BOR",
+        "HUL"
       ],
       "lock_deadline": "2026-08-22T13:00:00Z",
       "manager": "v13",
@@ -1004,21 +1011,24 @@
         "risk_profile": "medium_tolerance",
         "strategy": "budget_builder"
       },
-      "previous_decision": null,
-      "previous_decision_sha256": null,
+      "previous_decision": "data/v13/decisions/round14_pre_fp_revision2.json",
+      "previous_decision_sha256": "9660629825507d1c4b2df8dfa6652a7b0fc2845dca74cbc1e2e911adb5c01bec",
       "price_snapshot_after_round": 13,
-      "projected_points": 202.5,
-      "projected_price_gain": 1.5,
-      "published_at": "2026-08-11T08:56:18.805189+00:00",
+      "projected_points": 224.4,
+      "projected_price_gain": 2.1,
+      "published_at": "2026-08-18T10:29:06.523031+00:00",
       "race": "Dutch Grand Prix",
+      "revision": 3,
       "round": 14,
       "schema_version": 1,
       "second_boost": null,
       "source_generated_at": "2026-07-27T11:55:04.409937+00:00",
-      "status": "provisional",
-      "team_cost": 123.6,
+      "status": "corrected_provisional",
+      "supersedes": "data/v13/decisions/round14_pre_fp_revision2.json",
+      "supersedes_sha256": "9660629825507d1c4b2df8dfa6652a7b0fc2845dca74cbc1e2e911adb5c01bec",
+      "team_cost": 120.5,
       "transfer_penalty": 10,
-      "transfers": 2
+      "transfers": 3
     },
     "post_fp_final": null
   },
@@ -1063,6 +1073,6 @@
   },
   "source": {
     "experiment": "data/experiments/season_risk_tolerance_with_chips_2026.json",
-    "experiment_sha256": "0074aaf48a360d4d33b6a0efb10c2baa7e5957430a98f8ad2b82678d665d51a2"
+    "experiment_sha256": "d62b8b2545965d1cf7633e1e0186d0c3d422f0b277c7dd8fc01be2366b19e09d"
   }
 }
