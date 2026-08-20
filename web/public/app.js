@@ -62,7 +62,7 @@ const LOCK_DEADLINES = [
     { round: 11, race: 'British Grand Prix',           lock: '2026-07-04T11:00:00Z', sprint: true  },  // sprint race start (13:00 CEST)
     { round: 12, race: 'Belgian Grand Prix',           lock: '2026-07-18T14:00:00Z', sprint: false },
     { round: 13, race: 'Hungarian Grand Prix',         lock: '2026-07-25T14:00:00Z', sprint: false },
-    { round: 14, race: 'Dutch Grand Prix',             lock: '2026-08-22T13:00:00Z', sprint: true  },
+    { round: 14, race: 'Dutch Grand Prix',             lock: '2026-08-22T10:00:00Z', sprint: true  },  // sprint race start (12:00 CEST)
     { round: 15, race: 'Italian Grand Prix',           lock: '2026-09-05T14:00:00Z', sprint: false },
     { round: 16, race: 'Spanish Grand Prix (Madrid)',   lock: '2026-09-12T14:00:00Z', sprint: false },
     { round: 17, race: 'Azerbaijan Grand Prix',        lock: '2026-09-25T12:00:00Z', sprint: false },
@@ -714,6 +714,20 @@ function renderV13() {
                 <button class="btn-primary" id="v13DashboardButton" type="button">Open live standings</button>
                 <button class="v13-secondary-button" id="v13HistoryButton" type="button">See every decision</button>
             </div>
+            <div class="v13-entry-guide" aria-labelledby="v13EntryGuideTitle">
+                <div class="v13-entry-guide-heading">
+                    <span>Free competition entry</span>
+                    <h2 id="v13EntryGuideTitle">Enter, connect, then follow your live score</h2>
+                    <p>Pit Wall is not required. Complete these three steps with the same email address and one official F1 Fantasy team.</p>
+                </div>
+                <ol>
+                    <li><b>1</b><span><strong>Register and confirm</strong>Enter your email below and use the secure link we send you.</span></li>
+                    <li><b>2</b><span><strong>Join the Box Box league</strong>Use code <em>P1JZAGNMP04</em> so the official league feed can find your team.</span></li>
+                    <li><b>3</b><span><strong>Link your team here</strong>Sign in with that email, search the exact team name, and choose the right T1/T2/T3 slot.</span></li>
+                </ol>
+                <div class="v13-entry-guide-actions"><a href="https://fantasy.formula1.com/en/leagues/join/P1JZAGNMP04" target="_blank" rel="noopener">Join the F1 Fantasy league ↗</a><button id="v13EntryGuideRegister" type="button">Register or access my entry</button></div>
+                <small>Only confirmed entrants with a linked team appear in the live leaderboard. Linking lets us verify the official score used for prize eligibility.</small>
+            </div>
         </section>
 
         <div class="v13-replay-warning">
@@ -810,6 +824,11 @@ function renderV13() {
         panel?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         window.setTimeout(() => panel?.querySelector('input[name="email"]')?.focus(), 450);
         if (typeof gtag === 'function') gtag('event', 'beat_v13_registration_cta_click', { location: 'v13_tab' });
+    });
+    root.querySelector('#v13EntryGuideRegister')?.addEventListener('click', () => {
+        const panel = document.querySelector('#tab-beatbot [data-email-updates]');
+        panel?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        window.setTimeout(() => panel?.querySelector('input[name="email"]')?.focus(), 450);
     });
     root.querySelector('.v13-membership-button')?.addEventListener('click', () => {
         if (typeof gtag === 'function') gtag('event', 'pit_wall_join_click', { location: 'v13_tab', price_usd: 5 });

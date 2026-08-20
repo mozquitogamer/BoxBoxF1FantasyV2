@@ -47,8 +47,9 @@ def test_r14_early_thoughts_are_frozen_from_a_pre_lock_archive() -> None:
 
     assert decision["phase"] == "pre_fp"
     assert decision["status"] == "corrected_provisional"
-    assert decision["revision"] == 5
-    assert "mandatory R14 transfers" in decision["correction_reason"]
+    assert decision["revision"] == 6
+    assert "Sprint start" in decision["correction_reason"]
+    assert decision["lock_deadline"] == "2026-08-22T10:00:00Z"
     assert datetime.fromisoformat(decision["source_generated_at"]) < datetime.fromisoformat(
         decision["lock_deadline"].replace("Z", "+00:00")
     )
