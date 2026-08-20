@@ -56,7 +56,7 @@ async function cancelScheduledReminder(providerMessageId, config) {
 async function sendConfirmation(entry, email, config, now) {
     const token = createSubscriptionToken(email, config.signingSecret, config.ttlHours, now);
     const confirmationUrl = `${config.siteOrigin}/api/email/confirm?token=${encodeURIComponent(token)}`;
-    const cancelUrl = `${config.siteOrigin}/api/email/cancel?token=${encodeURIComponent(token)}`;
+    const cancelUrl = `${config.siteOrigin}/api/email/confirm?action=cancel&token=${encodeURIComponent(token)}`;
     const emailKey = crypto.createHash('sha256').update(email).digest('hex').slice(0, 32);
     const result = await resendRequest('/emails', config.apiKey, {
         method: 'POST',
@@ -91,7 +91,7 @@ async function scheduleReminder(entry, email, config, now) {
     const scheduledAt = new Date(now + REMINDER_DELAY_MS).toISOString();
     const token = createSubscriptionToken(email, config.signingSecret, config.ttlHours, now);
     const confirmationUrl = `${config.siteOrigin}/api/email/confirm?token=${encodeURIComponent(token)}`;
-    const cancelUrl = `${config.siteOrigin}/api/email/cancel?token=${encodeURIComponent(token)}`;
+    const cancelUrl = `${config.siteOrigin}/api/email/confirm?action=cancel&token=${encodeURIComponent(token)}`;
 
     let scheduledProviderId = '';
     try {

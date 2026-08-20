@@ -1467,7 +1467,7 @@ function trackTabView(tabName) {
 
 async function loadV13Session() {
     try {
-        const response = await fetch('/api/beat-v13/session/', { credentials: 'same-origin', cache: 'no-store' });
+        const response = await fetch('/api/members/session/?scope=beat-v13', { credentials: 'same-origin', cache: 'no-store' });
         const result = await response.json().catch(() => ({}));
         if (response.status === 401 || result.authenticated === false) {
             v13SessionData = { authenticated: false };
@@ -1491,7 +1491,7 @@ async function handleV13TeamSearch(event) {
     button.disabled = true;
     results.textContent = 'Checking the official Box Box league feed…';
     try {
-        const response = await fetch(`/api/beat-v13/team/?action=search&q=${encodeURIComponent(query)}`, { credentials: 'same-origin', cache: 'no-store' });
+        const response = await fetch(`/api/members/team/?scope=beat-v13&action=search&q=${encodeURIComponent(query)}`, { credentials: 'same-origin', cache: 'no-store' });
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.message || 'The team search could not be completed.');
         if (!Array.isArray(result.teams) || !result.teams.length) {
@@ -1503,7 +1503,7 @@ async function handleV13TeamSearch(event) {
             choice.disabled = true;
             results.setAttribute('aria-busy', 'true');
             try {
-                const linkResponse = await fetch('/api/beat-v13/team/', {
+                const linkResponse = await fetch('/api/members/team/?scope=beat-v13', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'same-origin',
