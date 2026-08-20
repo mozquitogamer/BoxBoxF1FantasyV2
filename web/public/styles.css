@@ -1180,6 +1180,8 @@ select:focus, input:focus {
 .pit-wall-heading span:first-child { color: #a78bfa; font-size: .66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .pit-wall-heading h4 { margin: 3px 0 0; font-size: .96rem; overflow-wrap: anywhere; }
 .pit-wall-account-email { color: var(--text-muted); letter-spacing: .12em; user-select: none; }
+.pit-wall-panel .pit-wall-heading h4 { font-size: 0; }
+.pit-wall-panel .pit-wall-heading h4::after { color: var(--text-muted); content: '••••••••••••••••'; font-size: .96rem; letter-spacing: .12em; }
 .pit-wall-badge { flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; color: #d8ccff; background: rgba(139, 92, 246, .16); font-size: .64rem; font-weight: 800; }
 .pit-wall-badge.active { color: #9bf0cf; background: rgba(34, 197, 94, .13); }
 .pit-wall-badge.inactive { color: #f9b9b9; background: rgba(239, 68, 68, .12); }
