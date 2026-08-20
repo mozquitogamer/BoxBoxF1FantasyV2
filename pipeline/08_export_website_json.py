@@ -55,9 +55,28 @@ from config.fantasy_prices import (
     current_price_mismatches,
     load_fantasy_price_data,
 )
+from config.driver_assets import active_driver_assets, roster_provenance
 
 
 VALID_PHASES = ("pre_fp", "post_fp", "post_quali")
+
+
+def _normalise_asset_legacy_ids(value) -> list[str]:
+    """Return legacy seat IDs as plain JSON-safe strings.
+
+    Parquet round-trips a list-valued column as a NumPy array on some pandas/
+    Arrow combinations.  Keep the public payload stable and serialisable while
+    retaining the aliases used to resolve saved line-ups.
+    """
+    if value is None:
+        return []
+    if hasattr(value, "tolist"):
+        value = value.tolist()
+    if isinstance(value, str):
+        return [value] if value else []
+    if isinstance(value, (list, tuple, set)):
+        return [str(item) for item in value if item]
+    return [str(value)]
 
 
 def detect_phase(round_num: int, year: int = CURRENT_SEASON) -> str:
@@ -178,10 +197,12 @@ def load_race_info() -> dict:
     return {r["round"]: r for r in data["races"]}
 
 
-def load_driver_info() -> dict:
-    """Load driver metadata keyed by abbreviation."""
-    with open(SEED_DIR / "drivers.json") as f:
-        return {d["driver_id"]: d for d in json.load(f)["drivers"]}
+def load_driver_info(round_num: int | None = None) -> dict:
+    """Load driver metadata keyed by canonical or active asset ID."""
+    if round_num is None:
+        with open(SEED_DIR / "drivers.json") as f:
+            return {d["driver_id"]: d for d in json.load(f)["drivers"]}
+    return {asset["asset_id"]: asset for asset in active_driver_assets(round_num)}
 
 
 def load_constructor_info() -> dict:
@@ -254,17 +275,17 @@ def _warn_if_prices_stale() -> None:
         print()
 
 
-def load_fantasy_prices() -> dict:
-    """Load current fantasy prices."""
-    return load_fantasy_price_data()
+def load_fantasy_prices(round_num: int | None = None) -> dict:
+    """Load current fantasy prices, applying any round-scoped overlay."""
+    return load_fantasy_price_data(round_num=round_num)
 
 
 def build_predictions_json(round_num: int) -> dict | None:
     """Build the main predictions.json for a round."""
     race_info = load_race_info()
-    driver_info = load_driver_info()
+    driver_info = load_driver_info(round_num)
     constructor_info = load_constructor_info()
-    prices = load_fantasy_prices()
+    prices = load_fantasy_prices(round_num)
 
     race = race_info.get(round_num, {})
     race_name = race.get("name", f"Round {round_num}")
@@ -326,6 +347,12 @@ def build_predictions_json(round_num: int) -> dict | None:
 
         entry = {
             "driver_id": abbrev,
+            "asset_id": row.get("asset_id", abbrev),
+            "model_driver_id": row.get("model_driver_id", row.get("driver_id", "")),
+            "asset_context": row.get("asset_context", "canonical_season_asset"),
+            "asset_legacy_ids": _normalise_asset_legacy_ids(
+                row.get("asset_legacy_ids", [])
+            ),
             "name": f"{info.get('first_name', '')} {info.get('last_name', '')}".strip() or abbrev,
             "constructor": info.get("constructor_id", row.get("constructor_id", "")),
             "number": info.get("number", 0),
@@ -350,6 +377,9 @@ def build_predictions_json(round_num: int) -> dict | None:
             "expected_points_quali": round(float(row.get("expected_quali_pts", row.get("expected_fantasy_points_from_quali", 0))), 1),
             "expected_points_race": round(float(row.get("expected_race_pts", row.get("expected_fantasy_points_from_race", 0))), 1),
             "confidence": int(row.get("confidence", 50)),
+            "confidence_base": int(row.get("confidence_base", row.get("confidence", 50))),
+            "asset_confidence_multiplier": float(row.get("asset_confidence_multiplier", 1.0)),
+            "asset_mc_noise_multiplier": float(row.get("asset_mc_noise_multiplier", 1.0)),
             "risk": row.get("risk_label", "MEDIUM"),
             "risk_rating": float(row.get("risk_rating", 15)),
             "dnf_probability": float(row.get("dnf_probability", 0.15)),
@@ -441,6 +471,12 @@ def build_predictions_json(round_num: int) -> dict | None:
                     entry["mc_race_pts_median"] = round(mc.get("mc_race_pts_median", 0), 1)
                     entry["mc_race_pts_p75"] = round(mc.get("mc_race_pts_p75", 0), 1)
                     entry["mc_race_pts_p95"] = round(mc.get("mc_race_pts_p95", 0), 1)
+                    entry["mc_asset_id"] = mc.get("asset_id", entry.get("asset_id", entry["driver_id"]))
+                    entry["mc_model_driver_id"] = mc.get("model_driver_id", entry.get("model_driver_id", ""))
+                    entry["mc_asset_noise_multiplier"] = round(
+                        float(mc.get("asset_mc_noise_multiplier", entry.get("asset_mc_noise_multiplier", 1.0))),
+                        3,
+                    )
                     # Use MC mean as primary expected_points (more accurate than deterministic)
                     entry["expected_points"] = round(mc.get("mc_total_mean", 0), 1)
                     entry["expected_points_quali"] = round(mc.get("mc_quali_pts_mean", 0), 1)
@@ -482,6 +518,12 @@ def build_predictions_json(round_num: int) -> dict | None:
             "value_score": float(row.get("value_score", 0)),
             "current_price": float(row.get("current_price", 10)),
         }
+        for key in ("driver_1", "driver_2"):
+            asset = driver_info.get(entry[key], {})
+            entry[f"{key}_name"] = (
+                f"{asset.get('first_name', '')} {asset.get('last_name', '')}".strip()
+                or asset.get("name", entry[key])
+            )
 
         # Override price from latest fantasy_prices.json if available
         if cid in constructor_prices:
@@ -609,17 +651,21 @@ def build_predictions_json(round_num: int) -> dict | None:
         payload["calibration"] = calibration_meta
     if final_fix_meta is not None:
         payload["final_fix"] = final_fix_meta
+    payload["driver_assets"] = roster_provenance(round_num)
     return payload
 
 
-def build_season_summary() -> dict:
+def build_season_summary(current_round: int | None = None) -> dict:
     """
     Build season summary: completed rounds with results,
     price history, cumulative PPM, and standings.
     """
     race_info = load_race_info()
-    driver_info = load_driver_info()
-    prices = load_fantasy_prices()
+    # Summary remains historical/canonical by default; current R14 live
+    # prices/roster are exposed by build_predictions_json without rewriting
+    # prior driver history rows.
+    driver_info = load_driver_info(current_round)
+    prices = load_fantasy_prices(current_round)
 
     # Gather completed rounds
     completed_rounds = []
@@ -970,7 +1016,7 @@ def main():
 
     # 2. Season summary
     print("[2] Building season summary...")
-    summary = build_season_summary()
+    summary = build_season_summary(round_num)
     with open(WEB_DATA_DIR / "season_summary.json", "w") as f:
         json.dump(summary, f, indent=2)
     print(f"  {len(summary['rounds'])} rounds, {len(summary['driver_prices'])} driver prices, {len(summary.get('constructor_prices', {}))} constructor prices")

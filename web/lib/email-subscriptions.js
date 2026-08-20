@@ -9,6 +9,13 @@ const BEAT_V13_REGISTRATION_DEADLINE = '2026-11-21T04:00:00Z';
 const BEAT_V13_REGISTRATION_DEADLINE_MS = Date.parse(BEAT_V13_REGISTRATION_DEADLINE);
 const BEAT_V13_BROWSER_COOKIE = '__Host-boxbox_beat_v13';
 
+const {
+    beatV13SessionCookie,
+    parseBeatV13Session,
+    sessionSecret,
+    verifyBeatV13SessionCookie,
+} = require('./beat-v13-entries');
+
 function isBeatV13RegistrationOpen(now = Date.now()) {
     return Number.isFinite(now) && now < BEAT_V13_REGISTRATION_DEADLINE_MS;
 }
@@ -100,6 +107,7 @@ function getConfig() {
         signingSecret: process.env.SUBSCRIPTION_SIGNING_SECRET || '',
         siteOrigin,
         ttlHours: Number(process.env.SUBSCRIPTION_TOKEN_TTL_HOURS || DEFAULT_TTL_HOURS),
+        sessionSecret: sessionSecret(),
     };
 
     const missing = [];
@@ -173,6 +181,7 @@ module.exports = {
     BEAT_V13_REGISTRATION_DEADLINE,
     BEAT_V13_BROWSER_COOKIE,
     beatV13BrowserCookie,
+    beatV13SessionCookie,
     createSubscriptionToken,
     getConfig,
     htmlPage,
@@ -180,6 +189,9 @@ module.exports = {
     isAllowedRequestOrigin,
     isValidEmail,
     normalizeEmail,
+    parseBeatV13Session,
     resendRequest,
+    sessionSecret,
+    verifyBeatV13SessionCookie,
     verifySubscriptionToken,
 };

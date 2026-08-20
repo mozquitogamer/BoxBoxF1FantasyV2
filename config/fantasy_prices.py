@@ -113,20 +113,70 @@ def resolve_fantasy_price_data(data: dict[str, Any]) -> dict[str, Any]:
     return resolved
 
 
-def load_fantasy_price_data(path: Path | None = None) -> dict[str, Any]:
-    """Load fantasy prices with the latest complete history snapshot applied."""
+def resolve_round_fantasy_price_data(
+    data: dict[str, Any],
+    round_num: int | None,
+) -> dict[str, Any]:
+    """Apply an explicit round-scoped asset overlay after history resolution.
+
+    Historical price snapshots remain the source of truth for completed rounds.
+    A future/current round can additionally declare a seat substitution under
+    ``round_overrides``; this removes inactive legacy assets and adds the new
+    seat assets without rewriting the R1-R13 history.
+    """
+    resolved = resolve_fantasy_price_data(data)
+    if round_num is None:
+        return resolved
+
+    override = (resolved.get("round_overrides") or {}).get(str(int(round_num)))
+    if not isinstance(override, dict):
+        return resolved
+
+    drivers = resolved.setdefault("drivers", {})
+    for asset_id in override.get("inactive_driver_ids", []) or []:
+        drivers.pop(str(asset_id), None)
+    for asset_id, entry in (override.get("drivers") or {}).items():
+        if not isinstance(entry, dict) or "current_price" not in entry:
+            raise FantasyPriceDataError(
+                f"Invalid round {round_num} driver price override for {asset_id}"
+            )
+        drivers[str(asset_id)] = copy.deepcopy(entry)
+
+    constructors = resolved.setdefault("constructors", {})
+    for cid, entry in (override.get("constructors") or {}).items():
+        if not isinstance(entry, dict) or "current_price" not in entry:
+            raise FantasyPriceDataError(
+                f"Invalid round {round_num} constructor price override for {cid}"
+            )
+        constructors[str(cid)] = copy.deepcopy(entry)
+
+    resolved["active_round"] = int(round_num)
+    resolved["active_round_override"] = {
+        key: copy.deepcopy(value)
+        for key, value in override.items()
+        if key != "drivers" and key != "constructors"
+    }
+    return resolved
+
+
+def load_fantasy_price_data(
+    path: Path | None = None,
+    round_num: int | None = None,
+) -> dict[str, Any]:
+    """Load prices with history resolution and optional round overlay."""
     prices_path = path or (SEED_DIR / "fantasy_prices.json")
     if not prices_path.exists():
         return {}
     with prices_path.open(encoding="utf-8") as handle:
-        return resolve_fantasy_price_data(json.load(handle))
+        return resolve_round_fantasy_price_data(json.load(handle), round_num)
 
 
 def load_fantasy_price_maps(
     path: Path | None = None,
+    round_num: int | None = None,
 ) -> tuple[dict[str, float], dict[str, float]]:
-    """Return current driver and constructor prices keyed by their IDs."""
-    data = load_fantasy_price_data(path)
+    """Return driver/constructor prices keyed by active round asset IDs."""
+    data = load_fantasy_price_data(path, round_num=round_num)
     driver_prices = {
         key: float(value["current_price"])
         for key, value in data.get("drivers", {}).items()

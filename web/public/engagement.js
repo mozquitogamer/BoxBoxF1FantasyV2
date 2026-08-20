@@ -14,8 +14,8 @@ window.BoxBoxFreeAccess = Object.freeze({
         const body = panel.querySelector('.email-updates-copy p');
         const form = panel.querySelector('.email-updates-form');
         if (eyebrow) eyebrow.textContent = 'Free Beat V13 entry · Confirmed';
-        if (title) title.textContent = "You're on the grid";
-        if (body) body.textContent = 'This browser remembers that your Beat V13 entry is confirmed. Watch V13’s score and decisions now; final submission instructions arrive by email.';
+        if (title) title.textContent = "You're officially entered";
+        if (body) body.textContent = 'Your Beat V13 email is confirmed and this browser remembers the non-sensitive confirmation state. Watch V13’s score and decisions now; final submission instructions arrive by email.';
         if (form) form.hidden = true;
         if (!panel.querySelector('.email-updates-confirmed-action')) {
             const link = document.createElement('a');
@@ -25,6 +25,90 @@ window.BoxBoxFreeAccess = Object.freeze({
             panel.appendChild(link);
         }
         return true;
+    },
+    showRegistrationDialog({ state = 'pending', message = '', form = null } = {}) {
+        const previousFocus = document.activeElement;
+        document.getElementById('beatV13RegistrationDialog')?.remove();
+
+        const backdrop = document.createElement('div');
+        backdrop.id = 'beatV13RegistrationDialog';
+        backdrop.className = 'beat-v13-registration-modal';
+        backdrop.setAttribute('role', 'presentation');
+
+        const dialog = document.createElement('section');
+        dialog.className = 'beat-v13-registration-dialog';
+        dialog.setAttribute('role', 'dialog');
+        dialog.setAttribute('aria-modal', 'true');
+        dialog.setAttribute('aria-labelledby', 'beatV13RegistrationDialogTitle');
+        dialog.setAttribute('aria-describedby', 'beatV13RegistrationDialogBody');
+        dialog.tabIndex = -1;
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'beat-v13-registration-close';
+        close.setAttribute('aria-label', 'Close Beat V13 registration message');
+        close.textContent = '×';
+
+        const title = document.createElement('h2');
+        title.id = 'beatV13RegistrationDialogTitle';
+        title.textContent = state === 'confirmed'
+            ? "You're officially entered"
+            : state === 'error' ? "Registration couldn't be completed" : 'Confirmation email sent';
+
+        const body = document.createElement('p');
+        body.id = 'beatV13RegistrationDialogBody';
+        body.textContent = message || (state === 'confirmed'
+            ? 'Your email address is confirmed. You may now follow Beat V13.'
+            : state === 'error'
+                ? 'Please try again.'
+                : 'One more step is required: open the email and confirm your address before the Round 22 lock.');
+
+        const actions = document.createElement('div');
+        actions.className = 'beat-v13-registration-dialog-actions';
+
+        const dismiss = document.createElement('button');
+        dismiss.type = 'button';
+        dismiss.className = 'beat-v13-registration-dialog-primary';
+        dismiss.textContent = state === 'error' ? 'Try again' : 'Close';
+        actions.appendChild(dismiss);
+
+        if (state === 'pending') {
+            const note = document.createElement('p');
+            note.className = 'beat-v13-registration-dialog-note';
+            note.textContent = 'Your entry is not active until you use the confirmation link.';
+            dialog.append(close, title, body, note, actions);
+        } else {
+            dialog.append(close, title, body, actions);
+        }
+        backdrop.appendChild(dialog);
+        document.body.appendChild(backdrop);
+        document.body.classList.add('beat-v13-registration-modal-open');
+
+        const hide = () => {
+            backdrop.remove();
+            document.body.classList.remove('beat-v13-registration-modal-open');
+            if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
+        };
+        close.addEventListener('click', hide);
+        backdrop.addEventListener('click', event => { if (event.target === backdrop) hide(); });
+        dismiss.addEventListener('click', () => {
+            hide();
+            if (state === 'error') form?.querySelector('input[name="email"]')?.focus();
+        });
+        dialog.addEventListener('keydown', event => {
+            if (event.key === 'Escape') { event.preventDefault(); hide(); }
+        });
+        dialog.focus();
+        return { hide };
+    },
+    showRegistrationPending(message, form) {
+        return this.showRegistrationDialog({ state: 'pending', message, form });
+    },
+    showRegistrationError(message, form) {
+        return this.showRegistrationDialog({ state: 'error', message, form });
+    },
+    showRegistrationConfirmed(message, form) {
+        return this.showRegistrationDialog({ state: 'confirmed', message, form });
     },
 });
 
@@ -115,6 +199,11 @@ window.BoxBoxFreeAccess = Object.freeze({
                     result.message || 'Check your inbox and confirm your free Beat V13 registration.',
                     'success'
                 );
+                if (result.entry_status === 'confirmed') {
+                    window.BoxBoxFreeAccess.showRegistrationConfirmed(result.message, form);
+                } else {
+                    window.BoxBoxFreeAccess.showRegistrationPending(result.message, form);
+                }
                 track('beat_v13_registration_started', { location: 'site_footer' });
             } catch (error) {
                 setStatus(
@@ -122,6 +211,7 @@ window.BoxBoxFreeAccess = Object.freeze({
                     error.message || 'Something went wrong. Please try again in a moment.',
                     'error'
                 );
+                window.BoxBoxFreeAccess.showRegistrationError(error.message || 'Something went wrong. Please try again in a moment.', form);
             } finally {
                 submit.disabled = false;
                 submit.textContent = 'Register free';
@@ -172,6 +262,20 @@ window.BoxBoxFreeAccess = Object.freeze({
         return /^\d{10}$/.test(String(value || '').trim());
     }
 
+    function showConfirmationRedirectMessage() {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('v13') !== 'confirmed') return;
+            window.BoxBoxFreeAccess.showRegistrationConfirmed(
+                "You're officially entered. Your email address is confirmed, and the non-sensitive confirmation state is saved in this browser.",
+                document.querySelector('[data-email-updates] form'),
+            );
+        } catch (_) {
+            // Older static previews may not provide URLSearchParams. The
+            // confirmation panel still renders from the display cookie.
+        }
+    }
+
     function initAdSense(config) {
         const banner = document.getElementById('adsenseBanner');
         const unit = document.getElementById('adsenseBottomUnit');
@@ -200,6 +304,7 @@ window.BoxBoxFreeAccess = Object.freeze({
     }
 
     async function initEngagement() {
+        showConfirmationRedirectMessage();
         try {
             const response = await fetch(CONFIG_URL, { cache: 'no-store' });
             if (!response.ok) return;
@@ -281,10 +386,16 @@ window.BoxBoxFreeAccess = Object.freeze({
                     form.reset();
                     status.textContent = result.message || 'Check your inbox and confirm your registration.';
                     status.dataset.state = 'success';
+                    if (result.entry_status === 'confirmed') {
+                        window.BoxBoxFreeAccess.showRegistrationConfirmed(result.message, form);
+                    } else {
+                        window.BoxBoxFreeAccess.showRegistrationPending(result.message, form);
+                    }
                     if (typeof window.gtag === 'function') window.gtag('event', 'beat_v13_registration_started', { location: panel.dataset.registrationLocation });
                 } catch (error) {
                     status.textContent = error.message || 'Something went wrong. Please try again.';
                     status.dataset.state = 'error';
+                    window.BoxBoxFreeAccess.showRegistrationError(error.message || 'Something went wrong. Please try again.', form);
                 } finally {
                     submit.disabled = false;
                     submit.textContent = submitLabel;
@@ -339,12 +450,14 @@ window.BoxBoxFreeAccess = Object.freeze({
         modal.innerHTML = `<div class="pit-wall-login-backdrop" data-pit-wall-close></div><section class="pit-wall-login-dialog access-hub-dialog" role="dialog" aria-modal="true" aria-labelledby="pitWallLoginTitle"><button class="pit-wall-login-close" type="button" data-pit-wall-close aria-label="Close">&times;</button><div id="pitWallLoginContent"><p>Checking your access&hellip;</p></div></section>`;
         document.body.appendChild(modal);
         const content = modal.querySelector('#pitWallLoginContent');
+        let beatSession = null;
         const close = () => { modal.hidden = true; button.focus(); };
         modal.querySelectorAll('[data-pit-wall-close]').forEach(node => node.addEventListener('click', close));
         document.addEventListener('keydown', event => { if (event.key === 'Escape' && !modal.hidden) close(); });
 
         function beatConfirmed() {
-            return window.BoxBoxFreeAccess?.isBeatV13Confirmed() === true;
+            return beatSession?.authenticated === true
+                || window.BoxBoxFreeAccess?.isBeatV13Confirmed() === true;
         }
 
         function freeAccessCard() {
@@ -353,7 +466,7 @@ window.BoxBoxFreeAccess = Object.freeze({
                 <div class="access-hub-card-head"><div><span class="access-tier-label free">Always free</span><h3>Free BoxBox access</h3></div><strong class="access-state active">Active</strong></div>
                 <p>No password or payment is needed for predictions, simulations, V13’s score, the optimizer, Transfer Advisor, planners or the accuracy record.</p>
                 <ul><li>Use every public fantasy tool</li><li>Follow every V13 decision and score</li><li>Enter Beat V13 and receive general updates by email</li></ul>
-                <div class="access-entry-state ${confirmed ? 'confirmed' : ''}"><span>Beat V13 entry</span><strong>${confirmed ? '✓ Confirmed on this browser' : 'Free email confirmation'}</strong></div>
+                <div class="access-entry-state ${confirmed ? 'confirmed' : ''}"><span>Beat V13 entry</span><strong>${beatSession?.authenticated ? '✓ Confirmed account signed in' : confirmed ? '✓ Confirmed on this browser' : 'Free email confirmation'}</strong></div>
                 <a class="access-hub-action secondary" href="/?v13=dashboard#beatbot">${confirmed ? 'Open my challenge dashboard' : 'View challenge &amp; standings'}</a>
             </section>`;
         }
@@ -372,6 +485,7 @@ window.BoxBoxFreeAccess = Object.freeze({
             button.classList.toggle('active', active);
             if (active) button.textContent = 'Pit Wall active';
             else if (session?.authenticated) button.textContent = 'Pit Wall · Signed in';
+            else if (beatSession?.authenticated) button.textContent = 'Beat V13 · Signed in';
             else if (beatConfirmed()) button.textContent = 'Beat V13 ✓ · My access';
             else button.textContent = 'My access';
             button.setAttribute('aria-label', `${button.textContent}. Open access details.`);
@@ -379,7 +493,11 @@ window.BoxBoxFreeAccess = Object.freeze({
 
         function renderLoggedOut(message = '') {
             updateHeaderButton(null);
-            content.innerHTML = `${accessHeader('Not signed in')}<div class="access-hub-grid">${freeAccessCard()}<section class="access-hub-card pit-wall-access-card"><div class="access-hub-card-head"><div><span class="access-tier-label paid">$5/month · Ko-fi</span><h3>Pit Wall membership</h3></div><strong class="access-state">Optional upgrade</strong></div><p>Everything free stays free. Pit Wall removes the weekly admin by remembering your real team and bringing the relevant advice to you.</p>${pitWallBenefits()}<details class="pit-wall-member-signin"${message ? ' open' : ''}><summary><span>Already a member?</span><strong>Sign in</strong></summary><div class="pit-wall-member-signin-body"><form id="sitePitWallSignIn"><label for="sitePitWallEmail">Ko-fi membership email</label><input id="sitePitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><label for="sitePitWallPassword">Pit Wall password</label><input id="sitePitWallPassword" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required><button type="submit">Sign in to Pit Wall</button></form><p class="pit-wall-login-status" role="status" aria-live="polite">${escapeHtml(message)}</p><div class="pit-wall-login-links"><button type="button" class="pit-wall-login-reset" id="sitePitWallReset">Create or reset password</button><a class="pit-wall-login-kofi" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join Pit Wall on Ko-fi</a></div></div></details></section></div>`;
+            const freeSignOut = beatSession?.authenticated
+                ? '<div class="pit-wall-login-actions access-hub-unified-signout"><span>Beat V13 account signed in</span><button type="button" id="siteUnifiedSignOut">Sign out of BoxBox</button></div>'
+                : '';
+            content.innerHTML = `${accessHeader('Not signed in')}${freeSignOut}<div class="access-hub-grid">${freeAccessCard()}<section class="access-hub-card pit-wall-access-card"><div class="access-hub-card-head"><div><span class="access-tier-label paid">$5/month · Ko-fi</span><h3>Pit Wall membership</h3></div><strong class="access-state">Optional upgrade</strong></div><p>Everything free stays free. Pit Wall removes the weekly admin by remembering your real team and bringing the relevant advice to you.</p>${pitWallBenefits()}<details class="pit-wall-member-signin"${message ? ' open' : ''}><summary><span>Already a member?</span><strong>Sign in</strong></summary><div class="pit-wall-member-signin-body"><form id="sitePitWallSignIn"><label for="sitePitWallEmail">Ko-fi membership email</label><input id="sitePitWallEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required><label for="sitePitWallPassword">Pit Wall password</label><input id="sitePitWallPassword" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required><button type="submit">Sign in to Pit Wall</button></form><p class="pit-wall-login-status" role="status" aria-live="polite">${escapeHtml(message)}</p><div class="pit-wall-login-links"><button type="button" class="pit-wall-login-reset" id="sitePitWallReset">Create or reset password</button><a class="pit-wall-login-kofi" href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Join Pit Wall on Ko-fi</a></div></div></details></section></div>`;
+            content.querySelector('#siteUnifiedSignOut')?.addEventListener('click', signOutEverywhere);
             content.querySelector('#sitePitWallSignIn')?.addEventListener('submit', async event => {
                 event.preventDefault();
                 const form = event.currentTarget;
@@ -419,20 +537,29 @@ window.BoxBoxFreeAccess = Object.freeze({
             const active = session.entitlement?.active === true;
             updateHeaderButton(session);
             const pitState = active ? 'Active member' : 'Signed in · inactive';
-            content.innerHTML = `${accessHeader(pitState)}<div class="access-hub-grid">${freeAccessCard()}<section class="access-hub-card pit-wall-access-card ${active ? 'is-active' : ''}"><div class="access-hub-card-head"><div><span class="access-tier-label paid">Pit Wall account</span><h3>${escapeHtml(session.email || 'Signed in')}</h3></div><strong class="access-state ${active ? 'active' : ''}">${active ? '✓ Active' : 'Membership inactive'}</strong></div><p>${active ? 'Your paid convenience tools are unlocked and connected to this account.' : 'Your login works, but the Ko-fi membership linked to it is not currently active.'}</p>${pitWallBenefits()}<div class="pit-wall-login-actions">${active ? '<a href="/?pitwall=1#optimizer">Open Transfer Advisor</a>' : '<a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Renew on Ko-fi</a>'}<button type="button" id="sitePitWallSignOut">Sign out</button></div></section></div>`;
-            content.querySelector('#sitePitWallSignOut')?.addEventListener('click', async () => {
-                await memberRequest('/api/members/sign-out/', { method: 'POST' }).catch(() => null);
-                renderLoggedOut('Signed out.');
-                window.dispatchEvent(new CustomEvent('boxbox:member-auth-changed', { detail: { source: 'site-header' } }));
-            });
+            content.innerHTML = `${accessHeader(pitState)}<div class="access-hub-grid">${freeAccessCard()}<section class="access-hub-card pit-wall-access-card ${active ? 'is-active' : ''}"><div class="access-hub-card-head"><div><span class="access-tier-label paid">Pit Wall account</span><h3>${escapeHtml(session.email || 'Signed in')}</h3></div><strong class="access-state ${active ? 'active' : ''}">${active ? '✓ Active' : 'Membership inactive'}</strong></div><p>${active ? 'Your paid convenience tools are unlocked and connected to this account.' : 'Your login works, but the Ko-fi membership linked to it is not currently active.'}</p>${pitWallBenefits()}<div class="pit-wall-login-actions">${active ? '<a href="/?pitwall=1#optimizer">Open Transfer Advisor</a>' : '<a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Renew on Ko-fi</a>'}<button type="button" id="sitePitWallSignOut">Sign out of BoxBox</button></div></section></div>`;
+            content.querySelector('#sitePitWallSignOut')?.addEventListener('click', signOutEverywhere);
+        }
+
+        async function signOutEverywhere() {
+            await memberRequest('/api/members/sign-out/', { method: 'POST' }).catch(() => null);
+            beatSession = { authenticated: false };
+            renderLoggedOut('Signed out of BoxBox.');
+            window.dispatchEvent(new CustomEvent('boxbox:member-auth-changed', { detail: { source: 'site-header' } }));
+            window.dispatchEvent(new CustomEvent('boxbox:beat-v13-auth-changed', { detail: { source: 'site-header' } }));
         }
 
         async function refresh() {
-            try {
-                const session = await memberRequest('/api/members/session/');
-                if (session.authenticated) renderSignedIn(session);
-                else renderLoggedOut();
-            } catch (_) { renderLoggedOut('Pit Wall sign-in is temporarily unavailable.'); }
+            const [memberResult, beatResult] = await Promise.allSettled([
+                memberRequest('/api/members/session/'),
+                fetch('/api/beat-v13/session/', { credentials: 'same-origin', cache: 'no-store' }).then(async response => {
+                    const data = await response.json().catch(() => ({}));
+                    return response.ok ? data : { authenticated: false };
+                }),
+            ]);
+            beatSession = beatResult.status === 'fulfilled' ? beatResult.value : { authenticated: false };
+            if (memberResult.status === 'fulfilled' && memberResult.value.authenticated) renderSignedIn(memberResult.value);
+            else renderLoggedOut(memberResult.status === 'rejected' ? 'Pit Wall sign-in is temporarily unavailable.' : '');
         }
 
         button.addEventListener('click', () => {

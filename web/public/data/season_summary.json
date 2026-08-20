@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-07-27T12:32:17.784442+00:00",
+  "generated_at": "2026-08-20T08:06:57.807488+00:00",
   "rounds": [
     {
       "round": 1,
@@ -258,14 +258,6 @@
       "price_change": 2.4,
       "price_trend": "up"
     },
-    "HAD": {
-      "name": "Isack Hadjar",
-      "constructor": "red_bull",
-      "current_price": 14.5,
-      "starting_price": 15.1,
-      "price_change": -0.6,
-      "price_trend": "down"
-    },
     "GAS": {
       "name": "Pierre Gasly",
       "constructor": "alpine",
@@ -330,14 +322,6 @@
       "price_change": 5.0,
       "price_trend": "up"
     },
-    "LAW": {
-      "name": "Liam Lawson",
-      "constructor": "racing_bulls",
-      "current_price": 10.3,
-      "starting_price": 7.0,
-      "price_change": 3.3,
-      "price_trend": "up"
-    },
     "STR": {
       "name": "Lance Stroll",
       "constructor": "aston_martin",
@@ -377,6 +361,22 @@
       "starting_price": 5.0,
       "price_change": -2.0,
       "price_trend": "down"
+    },
+    "LAW_RED_BULL": {
+      "name": "Liam Lawson",
+      "constructor": "red_bull",
+      "current_price": 14.5,
+      "starting_price": 14.5,
+      "price_change": 0.0,
+      "price_trend": "stable"
+    },
+    "TSU_RACING_BULLS": {
+      "name": "Yuki Tsunoda",
+      "constructor": "racing_bulls",
+      "current_price": 10.3,
+      "starting_price": 10.3,
+      "price_change": 0.0,
+      "price_trend": "stable"
     }
   },
   "constructor_prices": {

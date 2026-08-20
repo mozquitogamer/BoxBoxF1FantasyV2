@@ -67,6 +67,11 @@ from config.circuit_priors import (
     apply_driver_circuit_effect,
     driver_circuit_reliability,
 )
+from config.driver_assets import (
+    active_driver_assets,
+    apply_active_asset_context,
+    roster_provenance,
+)
 
 
 # ============================================================
@@ -398,14 +403,17 @@ def build_live_priors(
     # for example, include the completed R11 result without leaking R12.
     print(f"  No pre-computed rows for {year} R{round_num} — building live stub rows")
 
-    with open(SEED_DIR / "drivers.json") as f:
-        current_drivers = json.load(f)["drivers"]
+    # Build target stubs from the round-scoped Fantasy roster while retaining
+    # each person's historical Jolpica/model identity.  This is what lets a
+    # substitution inherit personal priors without accidentally carrying the
+    # old constructor/seat context into the new weekend.
+    current_drivers = active_driver_assets(round_num, year)
     abbrev_to_jolpica, _ = load_driver_id_maps()
     target_circuit = _resolve_circuit(round_num, year)
 
     stubs: list[dict] = []
     for driver in current_drivers:
-        driver_id = abbrev_to_jolpica.get(driver["driver_id"], driver["driver_id"])
+        driver_id = driver["model_driver_id"]
         stub = {col: np.nan for col in completed.columns}
         stub.update({
             "season": year,
@@ -979,6 +987,10 @@ def run_predictions(
     # ---- Step 3: Merge FP onto priors ----
     print(f"\n[Step 3] Merging FP features onto priors...")
     pred_df = priors_df.copy()
+    # Attach the seat asset after priors are built.  ``driver_id`` remains the
+    # model/Jolpica identity; asset_id/driver_abbrev are the round-scoped
+    # Fantasy keys used by scoring, MC and the website.
+    pred_df = apply_active_asset_context(pred_df, round_num, year)
 
     if fp_df is not None and not fp_df.empty:
         # Convert FP driver_id (abbreviation) to Jolpica ID
@@ -1319,14 +1331,31 @@ def run_predictions(
     # ---- Step 8: FP signal + confidence ----
     print(f"\n[Step 8] Computing confidence scores...")
     fp_signal_pred = None
-    if fp_info is not None:
+    # The FP signal model is evidence-only.  Do not invoke it on an all-NaN
+    # pre-FP frame: besides being meaningless, some sklearn/joblib builds try
+    # to create a worker pool there and can fail in restricted runtimes.
+    if fp_info is not None and fp_df is not None and not fp_df.empty:
         fp_features = [c for c in fp_info["features"] if c in pred_df.columns]
         if fp_features:
             X_fp = pred_df[fp_features].fillna(pred_df[fp_features].median())
             fp_signal_pred = fp_info["model"].predict(X_fp)
 
     confidence = calculate_confidence(pred_df, quali_raw, race_raw, fp_signal_pred)
-    pred_df["confidence"] = confidence
+    # New seats keep the person's model prior but have no same-seat evidence
+    # before this weekend.  Lower confidence is explicit and feeds the MC's
+    # wider intervals through its confidence-scaled noise.
+    confidence_multiplier_series = (
+        pred_df["asset_confidence_multiplier"]
+        if "asset_confidence_multiplier" in pred_df.columns
+        else pd.Series(1.0, index=pred_df.index)
+    )
+    confidence_multiplier = pd.to_numeric(
+        confidence_multiplier_series, errors="coerce"
+    ).fillna(1.0).to_numpy(dtype=float)
+    pred_df["confidence_base"] = confidence
+    pred_df["confidence"] = np.clip(
+        np.rint(confidence * confidence_multiplier), 0, 100
+    ).astype(int)
 
     # ---- Sprint predictions (dedicated sprint model) ----
     if is_sprint:
@@ -1482,16 +1511,25 @@ def run_predictions(
             pred_df["predicted_sprint_raw"] = race_raw
 
     # ---- Build output ----
-    # Map driver_id back to abbreviation for readability
+    # Map model IDs back to abbreviations for legacy rounds.  R14 already has
+    # seat-scoped abbreviations from apply_active_asset_context; do not replace
+    # those with the ambiguous legacy LAW code.
     _, jolpica_to_abbrev = load_driver_id_maps()
-    pred_df["driver_abbrev"] = pred_df["driver_id"].map(jolpica_to_abbrev)
+    if "driver_abbrev" not in pred_df.columns:
+        pred_df["driver_abbrev"] = pred_df["driver_id"].map(jolpica_to_abbrev)
+    else:
+        pred_df["driver_abbrev"] = pred_df["driver_abbrev"].fillna(
+            pred_df["driver_id"].map(jolpica_to_abbrev)
+        )
 
     # Manual per-round position overrides (data/seed/pace_overrides.json) — applied
     # LAST so the imposed order flows to every downstream artifact (07/08/MC/export).
     pred_df = _apply_pace_overrides(pred_df, round_num)
 
     output_cols = [
-        "driver_id", "driver_abbrev", "constructor_id",
+        "driver_id", "model_driver_id", "asset_id", "driver_abbrev", "driver_name",
+        "driver_number", "constructor_id", "asset_context",
+        "asset_legacy_ids", "asset_confidence_multiplier", "asset_mc_noise_multiplier",
         "predicted_quali_position", "actual_quali_position",
         "predicted_grid_position",
         "grid_penalty_places", "grid_back_of_grid",
@@ -1578,6 +1616,7 @@ def run_predictions(
         # so the Accuracy / Changelog tabs can diagnose "why does this round
         # predict X" without re-running the pipeline.
         "weather_features_used": weather_meta,
+        "driver_assets": roster_provenance(round_num, year),
     }
     # P9: suffix the metadata file alongside the predictions parquet
     meta_filename = f"prediction_metadata_{output_suffix}.json" if output_suffix else "prediction_metadata.json"

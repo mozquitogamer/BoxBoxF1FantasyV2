@@ -3,11 +3,45 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
+    buildConfirmedLeaderboardEntries,
     buildLeaderboard,
     cleanTeamName,
     loadV13Record,
     teamReference,
 } = require('../lib/beat-v13-leaderboard');
+
+test('only confirmed entrants with a live linked team become public rows', () => {
+    const result = buildConfirmedLeaderboardEntries([
+        {
+            id: 'pending', email_normalized: 'pending@example.com', status: 'pending',
+            official_team_id: 'not-yet', official_team_name: 'Not Yet', official_team_slot: 1,
+        },
+        {
+            id: 'confirmed-unlinked', email_normalized: 'private@example.com', status: 'confirmed',
+        },
+        {
+            id: 'confirmed-linked', email_normalized: 'hidden@example.com', status: 'confirmed',
+            official_team_id: 'official-1', official_team_name: 'Fast Team', official_team_slot: 2,
+            manager_name: 'Private Manager',
+        },
+        {
+            id: 'confirmed-not-visible', status: 'confirmed',
+            official_team_id: 'official-2', official_team_name: 'Missing Feed Team', official_team_slot: 1,
+        },
+    ], [
+        { id: 'official-1', slot: 2, name: 'Fast Team', points: 2700, rank: 4, manager: 'Private Manager' },
+    ]);
+
+    assert.equal(result.confirmed_count, 3);
+    assert.equal(result.linked_count, 2);
+    assert.equal(result.scored_count, 1);
+    assert.deepEqual(result.teams, [{ id: 'official-1', slot: 2, name: 'Fast Team', points: 2700, rank: 4 }]);
+    const publicRows = buildLeaderboard(result.teams, { points: 2541 });
+    assert.equal(publicRows.some(row => row.team_name === 'Not Yet'), false);
+    assert.equal(publicRows.some(row => row.team_name === 'Missing Feed Team'), false);
+    assert.equal(JSON.stringify(publicRows).includes('@example.com'), false);
+    assert.equal(JSON.stringify(publicRows).includes('Private Manager'), false);
+});
 
 test('buildLeaderboard combines official teams with V13 and calculates margins', () => {
     const rows = buildLeaderboard([

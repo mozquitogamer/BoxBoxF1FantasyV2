@@ -111,6 +111,7 @@ let driverHistory = null;
 let budgetValueData = null;       // calibrated budget-to-future-points model
 let v13Data = null;                // V13 research replay + live manager state
 let v13LeaderboardData = null;     // registered competition standings with V13 inserted
+let v13SessionData = null;         // confirmed free entrant session (never email/manager)
 const V13_TEAM_STORAGE_KEY = 'boxbox-v13-dashboard-team';
 // P9: ML-based projections for future rounds, populated by pipeline/predict_horizon.py.
 // When present, projectScoresForRound prefers these over the affinity heuristic.
@@ -327,6 +328,7 @@ async function renderTabIfNeeded(tabName) {
             showTabSpinner(tabId);
             await ensureLoaded('v13', loadV13Data);
             renderV13();
+            await ensureLoaded('v13Session', loadV13Session);
             ensureLoaded('v13Leaderboard', loadV13Leaderboard);
             removeTabSpinner(tabId);
             _tabRendered.beatbot = true;
@@ -600,13 +602,23 @@ function v13LeaderboardRows(data, selectedRef) {
 }
 
 function v13PersonalPanel() {
-    const confirmed = window.BoxBoxFreeAccess?.isBeatV13Confirmed() === true;
-    const entryState = confirmed
-        ? '<span class="v13-entry-state confirmed">\u2713 Entry email confirmed on this browser</span>'
-        : '<button class="v13-entry-state action" id="v13DashboardRegister" type="button">Confirm my free entry</button>';
-    return `<div class="v13-team-finder-copy"><span>Official competition standings</span><h3>Registered entrants only</h3><p>Joining the public league by itself does not place anyone on this board. A competitor appears only after confirming a free Beat V13 entry and submitting an official team for verification.</p></div>
+    const confirmedOnBrowser = window.BoxBoxFreeAccess?.isBeatV13Confirmed() === true;
+    const signedIn = v13SessionData?.authenticated === true && v13SessionData.confirmed === true;
+    const entryState = signedIn
+        ? `<div class="v13-entry-state confirmed">\u2713 Free entrant account signed in</div>
+           <button class="v13-entry-state action" id="v13DashboardSignOut" type="button">Sign out</button>`
+        : confirmedOnBrowser
+            ? '<span class="v13-entry-state confirmed">\u2713 Entry email confirmed on this browser</span>'
+            : '<button class="v13-entry-state action" id="v13DashboardRegister" type="button">Confirm my free entry</button>';
+    const linkedTeam = signedIn && v13SessionData.linked
+        ? `<div class="v13-linked-team"><span>Live team connected</span><strong>${v13Escape(v13SessionData.official_team_name)} · T${Number(v13SessionData.team_slot || 0)}</strong>${v13SessionData.scored ? `<small>${Number(v13SessionData.points || 0).toLocaleString()} pts${v13SessionData.rank ? ` · Rank #${Number(v13SessionData.rank).toLocaleString()}` : ''}</small>` : '<small>Waiting for the public league feed to refresh</small>'}</div>`
+        : signedIn
+            ? `<div class="v13-team-link-box"><strong>Connect your official team for live scoring</strong><p>Join the Box Box F1 Fantasy league with code <b>P1JZAGNMP04</b>, then search your exact team name and choose the correct T1/T2/T3 slot. Pit Wall is not required.</p><a href="https://fantasy.formula1.com/en/leagues/join/P1JZAGNMP04" target="_blank" rel="noopener">Join the Box Box league ↗</a><form id="v13TeamLinkForm"><label for="v13TeamSearch">Exact official team name</label><div><input id="v13TeamSearch" name="team_name" type="search" minlength="2" maxlength="100" placeholder="e.g. Boxed In" required><button type="submit">Find my team</button></div></form><div id="v13TeamLinkResults" role="status" aria-live="polite"></div></div>`
+            : '';
+    return `<div class="v13-team-finder-copy"><span>Official competition standings</span><h3>Confirmed entrants only</h3><p>Joining the public league by itself does not enter the competition. Confirm your free Beat V13 account, then connect an official team if you want its live score shown here.</p></div>
         <div class="v13-personal-actions">${entryState}</div>
-        <p class="v13-device-note">Team submissions and verified scores are collected after the season, so no unregistered league teams are shown here.</p>`;
+        ${linkedTeam}
+        <p class="v13-device-note">Email addresses and manager names stay private. League membership is used only for automated live tracking; the original end-season screenshot eligibility remains.</p>`;
 }
 
 function renderV13Leaderboard() {
@@ -630,13 +642,14 @@ function renderV13Leaderboard() {
     body.innerHTML = `<div class="v13-dashboard-summary">
             <span><small>V13 live rank</small><strong>#${Number(v13?.rank || 0)}</strong></span>
             <span><small>V13 score</small><strong>${Number(v13?.points || 0).toLocaleString()}</strong></span>
-            <span><small>Verified entrants scored</small><strong>${Number(data.field_size || 0)}</strong></span>
+            <span><small>Confirmed entrants</small><strong>${Number(data.confirmed_entrant_count || 0)}</strong></span>
+            <span><small>Linked &amp; scored</small><strong>${Number(data.scored_entrant_count ?? data.field_size ?? 0)}</strong></span>
             <span><small>Through round</small><strong>R${Number(data.through_round || 0)}</strong><em>${v13Escape(leaderGap)}</em></span>
         </div>
         <div class="v13-dashboard-grid">
             <article class="v13-personal-card">${v13PersonalPanel()}</article>
             <article class="v13-leaderboard-card">
-                <div class="v13-leaderboard-heading"><div><span>Beat V13 competition</span><h3>Registered standings</h3></div><em>Verified entries only &middot; Top 10</em></div>
+                <div class="v13-leaderboard-heading"><div><span>Beat V13 competition</span><h3>Provisional live standings</h3></div><em>Confirmed + linked teams only &middot; Top 10</em></div>
                 <div class="v13-leaderboard-scroll"><table><thead><tr><th>Rank</th><th>Team</th><th>Points</th><th>vs V13</th></tr></thead><tbody>${v13LeaderboardRows(data, '')}</tbody></table></div>
             </article>
         </div>
@@ -647,6 +660,20 @@ function renderV13Leaderboard() {
         panel?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         window.setTimeout(() => panel?.querySelector('input[name="email"]')?.focus(), 450);
     });
+    body.querySelector('#v13DashboardSignOut')?.addEventListener('click', async event => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        try {
+            await fetch('/api/members/sign-out/', { method: 'POST', credentials: 'same-origin' }).catch(() => null);
+        } finally {
+            try { localStorage.removeItem(V13_TEAM_STORAGE_KEY); } catch (_) { /* no-op */ }
+            v13SessionData = { authenticated: false };
+            v13LeaderboardData = null;
+            renderV13Leaderboard();
+            window.dispatchEvent(new CustomEvent('boxbox:beat-v13-auth-changed', { detail: { source: 'v13-dashboard' } }));
+        }
+    });
+    body.querySelector('#v13TeamLinkForm')?.addEventListener('submit', handleV13TeamSearch);
 }
 
 function renderV13() {
@@ -1436,6 +1463,69 @@ function trackTabView(tabName) {
         page_title: `${label} | BoxBoxF1Fantasy`,
         page_location: `${location.origin}/${tabName}`,
     });
+}
+
+async function loadV13Session() {
+    try {
+        const response = await fetch('/api/beat-v13/session/', { credentials: 'same-origin', cache: 'no-store' });
+        const result = await response.json().catch(() => ({}));
+        if (response.status === 401 || result.authenticated === false) {
+            v13SessionData = { authenticated: false };
+            return;
+        }
+        if (!response.ok) throw new Error(result.message || `HTTP ${response.status}`);
+        v13SessionData = result;
+    } catch (error) {
+        v13SessionData = { authenticated: false };
+        console.warn('Beat V13 account session is unavailable:', error);
+    }
+}
+
+async function handleV13TeamSearch(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = form.querySelector('button[type="submit"]');
+    const results = document.getElementById('v13TeamLinkResults');
+    if (!button || !results) return;
+    const query = form.elements.team_name.value.trim();
+    button.disabled = true;
+    results.textContent = 'Checking the official Box Box league feed…';
+    try {
+        const response = await fetch(`/api/beat-v13/team/?action=search&q=${encodeURIComponent(query)}`, { credentials: 'same-origin', cache: 'no-store' });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.message || 'The team search could not be completed.');
+        if (!Array.isArray(result.teams) || !result.teams.length) {
+            results.innerHTML = `No exact match is visible yet. Join the Box Box league with code <strong>P1JZAGNMP04</strong>, wait for F1’s feed to update, then search again.`;
+            return;
+        }
+        results.innerHTML = result.teams.map(team => `<button type="button" data-selection-token="${v13Escape(team.selection_token)}"><strong>${v13Escape(team.name)} · T${Number(team.slot)}</strong><small>${team.rank ? `League rank #${Number(team.rank).toLocaleString()}` : 'Rank pending'}${team.points !== null && team.points !== undefined ? ` · ${Number(team.points).toLocaleString()} pts` : ''}</small></button>`).join('');
+        results.querySelectorAll('button[data-selection-token]').forEach(choice => choice.addEventListener('click', async () => {
+            choice.disabled = true;
+            results.setAttribute('aria-busy', 'true');
+            try {
+                const linkResponse = await fetch('/api/beat-v13/team/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ action: 'link', selection_token: choice.dataset.selectionToken }),
+                });
+                const linked = await linkResponse.json().catch(() => ({}));
+                if (!linkResponse.ok) throw new Error(linked.message || 'That team could not be connected.');
+                v13SessionData = linked.entry || { ...v13SessionData, linked: true };
+                results.innerHTML = `<span class="success">${v13Escape(linked.message || 'Official team connected.')}</span>`;
+                renderV13Leaderboard();
+            } catch (error) {
+                results.innerHTML = `<span class="error">${v13Escape(error.message || 'That team could not be connected. Search again.')}</span>`;
+                choice.disabled = false;
+            } finally {
+                results.removeAttribute('aria-busy');
+            }
+        }));
+    } catch (error) {
+        results.innerHTML = `<span class="error">${v13Escape(error.message || 'The team search could not be completed. Try again.')}</span>`;
+    } finally {
+        button.disabled = false;
+    }
 }
 
 function switchTab(tabName) {
@@ -4862,13 +4952,29 @@ function notifyMyTeamChanged(reason = 'team-edit') {
     window.dispatchEvent(new CustomEvent('boxbox:team-changed', { detail: { reason } }));
 }
 
+function normalizeSavedDriverAssetId(assetId) {
+    const id = String(assetId || '');
+    if (!data || data.drivers.some(driver => driver.driver_id === id)) return id;
+    if (Number(data.round) === 14 && data.driver_assets?.override_active === true) {
+        // Preserve saved teams through the one-round availability replacement:
+        // Hadjar's seat becomes Lawson/Red Bull and the old Lawson asset
+        // becomes Tsunoda/Racing Bulls at the same respective prices.
+        const replacement = {
+            HAD: 'LAW_RED_BULL',
+            LAW: 'TSU_RACING_BULLS',
+        }[id];
+        if (replacement && data.drivers.some(driver => driver.driver_id === replacement)) return replacement;
+    }
+    return id;
+}
+
 function applySavedMemberTeam(team) {
     if (!team || !Array.isArray(team.assets)) return false;
     const drivers = team.assets.filter(item => item.asset_type === 'driver').sort((a, b) => a.slot - b.slot);
     const constructors = team.assets.filter(item => item.asset_type === 'constructor').sort((a, b) => a.slot - b.slot);
     myTeamDrivers = [null, null, null, null, null];
     myTeamConstructors = [null, null];
-    drivers.slice(0, 5).forEach((item, index) => { myTeamDrivers[index] = item.asset_id; });
+    drivers.slice(0, 5).forEach((item, index) => { myTeamDrivers[index] = normalizeSavedDriverAssetId(item.asset_id); });
     constructors.slice(0, 2).forEach((item, index) => { myTeamConstructors[index] = item.asset_id; });
     const budget = document.getElementById('transferBudget');
     const freeTransfers = document.getElementById('freeTransfers');
