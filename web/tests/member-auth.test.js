@@ -5,6 +5,7 @@ const test = require('node:test');
 
 const signIn = require('../api/members/sign-in');
 const password = require('../api/members/password');
+const callback = require('../api/members/callback');
 
 function response(body, status = 200) {
     return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -134,12 +135,26 @@ test('creates a recovery email only for an active member', async () => {
     }
 });
 
-test('sets a new password from an authenticated recovery session', async () => {
+test('sets a new password using the signed grant from a real-shaped recovery callback', async () => {
     const restoreEnv = configure();
     const originalFetch = global.fetch;
     const calls = [];
+    const recoveryAccess = testJwt({
+        sub: 'member-1',
+        session_id: 'recovery-session-1',
+        // Supabase POST /verify currently records this flow as OTP.
+        amr: [{ method: 'otp', timestamp: Math.floor(Date.now() / 1000) }],
+    });
     global.fetch = async (url, options = {}) => {
         calls.push({ url: String(url), options });
+        if (String(url).endsWith('/auth/v1/verify') && options.method === 'POST') {
+            return response({
+                access_token: recoveryAccess,
+                refresh_token: 'recovery-refresh',
+                expires_in: 3600,
+                user: { id: 'member-1', email: 'member@example.com' },
+            });
+        }
         if (String(url).endsWith('/auth/v1/user') && (options.method || 'GET') === 'GET') {
             return response({ id: 'member-1', email: 'member@example.com' });
         }
@@ -150,14 +165,31 @@ test('sets a new password from an authenticated recovery session', async () => {
         throw new Error(`Unexpected request: ${url}`);
     };
     try {
-        const recoveryAccess = testJwt({
-            sub: 'member-1',
-            amr: [{ method: 'recovery', timestamp: Math.floor(Date.now() / 1000) }],
-        });
+        const callbackRes = mockRes();
+        await callback({ method: 'GET', query: { token_hash: 'recovery-token', type: 'recovery' } }, callbackRes);
+        assert.equal(callbackRes.statusCode, 302);
+        assert.equal(callbackRes.headers.Location, 'https://boxboxf1fantasy.com/?member=password#optimizer');
+        assert.ok(callbackRes.headers['Set-Cookie'].some(value => /^__Host-boxbox_member_access=.*SameSite=Lax/.test(value)));
+        assert.ok(callbackRes.headers['Set-Cookie'].some(value => /^__Host-boxbox_member_recovery=.*SameSite=Lax/.test(value)));
+
+        const browserCookie = callbackRes.headers['Set-Cookie']
+            .map(value => value.split(';', 1)[0])
+            .join('; ');
+        const tamperedCookie = browserCookie.split('; ')
+            .map(value => value.startsWith('__Host-boxbox_member_recovery=') ? `${value}x` : value)
+            .join('; ');
+        const rejected = mockRes();
+        await password(memberReq(
+            { action: 'update', password: 'a new secure password' },
+            tamperedCookie,
+        ), rejected);
+        assert.equal(rejected.statusCode, 403);
+        assert.equal(calls.some(call => call.options.method === 'PUT'), false);
+
         const res = mockRes();
         await password(memberReq(
             { action: 'update', password: 'a new secure password' },
-            `__Host-boxbox_member_access=${recoveryAccess}; __Host-boxbox_member_refresh=recovery-refresh`,
+            browserCookie,
         ), res);
         assert.equal(res.statusCode, 200);
         const update = calls.find(call => call.options.method === 'PUT');
@@ -165,6 +197,7 @@ test('sets a new password from an authenticated recovery session', async () => {
         assert.equal(update.options.headers.Authorization, `Bearer ${recoveryAccess}`);
         assert.match(res.body.message, /Sign in/);
         assert.ok(res.headers['Set-Cookie'].some(value => /^__Host-boxbox_member_access=;.*Max-Age=0/.test(value)));
+        assert.ok(res.headers['Set-Cookie'].some(value => /^__Host-boxbox_member_recovery=;.*Max-Age=0/.test(value)));
     } finally {
         global.fetch = originalFetch;
         restoreEnv();
@@ -176,6 +209,7 @@ test('rejects password changes from a normal signed-in session', async () => {
     const originalFetch = global.fetch;
     const access = testJwt({
         sub: 'member-1',
+        session_id: 'password-session-1',
         amr: [{ method: 'password', timestamp: Math.floor(Date.now() / 1000) }],
     });
     global.fetch = async (url, options = {}) => {

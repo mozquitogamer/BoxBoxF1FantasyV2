@@ -2,8 +2,10 @@
 
 const {
     authPublicRequest,
+    clearRecoveryGrantCookie,
     clearSessionCookies,
     getMemberConfig,
+    setRecoveryGrantCookie,
     setSessionCookies,
 } = require('../../lib/member-system');
 const { htmlPage } = require('../../lib/email-subscriptions');
@@ -26,7 +28,11 @@ module.exports = async function callback(req, res) {
             body: { token_hash: tokenHash, type },
         });
         if (!session?.access_token || !session?.refresh_token) throw new Error('Supabase returned no session');
-        setSessionCookies(res, session);
+        // Recovery starts from an external email client. Lax permits the
+        // top-level callback navigation while still excluding cross-site POSTs.
+        setSessionCookies(res, session, { sameSite: 'Lax' });
+        if (type === 'recovery') setRecoveryGrantCookie(res, session.access_token);
+        else clearRecoveryGrantCookie(res);
         const origin = getMemberConfig().siteOrigin;
         res.setHeader('Location', `${origin}/?member=${type === 'recovery' ? 'password' : 'welcome'}#optimizer`);
         return res.status(302).send('Signed in.');

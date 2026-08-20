@@ -7,7 +7,7 @@ const {
     clearSessionCookies,
     getMemberConfig,
     getMemberSession,
-    hasRecentAuthMethod,
+    hasValidRecoveryGrant,
     isAllowedOrigin,
     isEntitlementActive,
     isValidEmail,
@@ -87,7 +87,7 @@ async function savePassword(req, res, body) {
     try {
         const session = await getMemberSession(req, res);
         if (!session) return res.status(401).json({ ok: false, message: 'Your password setup session expired. Request a new link.' });
-        if (!hasRecentAuthMethod(session.accessToken, session.user.id, 'recovery')) {
+        if (!hasValidRecoveryGrant(req, session)) {
             return res.status(403).json({ ok: false, message: 'Use a fresh password setup link before changing your password.' });
         }
         await authPublicRequest('/user', {
