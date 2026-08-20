@@ -1,6 +1,6 @@
 # BoxBoxF1Fantasy - Full Site Summary for LLMs and Agents
 
-Last updated: 2026-08-13
+Last updated: 2026-08-20
 Canonical site: https://boxboxf1fantasy.com/
 Primary language: English
 Season covered: 2026 F1 Fantasy
@@ -45,7 +45,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 ## Current round context
 - Current round: 14
 - Race: Dutch Grand Prix
-- Prediction file generated: 2026-07-27
+- Prediction file generated: 2026-08-20
 - Compact AI answer summary: https://boxboxf1fantasy.com/data/ai-summary.json
 - Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json
 - Predictions JSON Schema: https://boxboxf1fantasy.com/data/predictions.schema.json
@@ -66,26 +66,26 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Weather JSON: https://boxboxf1fantasy.com/data/weather.json
 
 ## Current top projected drivers
-- Kimi Antonelli: 27.7 expected points, $25.7M, PPM 1.08
-- Lewis Hamilton: 26.3 expected points, $24.9M, PPM 1.06
-- Max Verstappen: 24.5 expected points, $27.6M, PPM 0.89
-- George Russell: 21.3 expected points, $27.9M, PPM 0.76
-- Charles Leclerc: 20.9 expected points, $23.9M, PPM 0.87
-- Lando Norris: 20.7 expected points, $26.1M, PPM 0.79
-- Oscar Piastri: 15.3 expected points, $24.4M, PPM 0.63
-- Isack Hadjar: 10.4 expected points, $14.5M, PPM 0.72
-- Gabriel Bortoleto: 8.8 expected points, $7.8M, PPM 1.13
-- Liam Lawson: 8.4 expected points, $10.3M, PPM 0.82
+- Kimi Antonelli: 26.8 expected points, $25.7M, PPM 1.04
+- Lewis Hamilton: 24.7 expected points, $24.9M, PPM 0.99
+- Max Verstappen: 23.2 expected points, $27.6M, PPM 0.84
+- George Russell: 20.5 expected points, $27.9M, PPM 0.73
+- Lando Norris: 19.2 expected points, $26.1M, PPM 0.74
+- Charles Leclerc: 19.0 expected points, $23.9M, PPM 0.79
+- Oscar Piastri: 14.7 expected points, $24.4M, PPM 0.60
+- Liam Lawson: 13.4 expected points, $14.5M, PPM 0.92
+- Yuki Tsunoda: 10.5 expected points, $10.3M, PPM 1.02
+- Gabriel Bortoleto: 8.4 expected points, $7.8M, PPM 1.08
 
 ## Current top projected constructors
-- Mercedes: 65.3 expected points, $32.6M, PPM 2.00
-- Ferrari: 61.2 expected points, $26.6M, PPM 2.30
-- McLaren: 48.1 expected points, $31.0M, PPM 1.55
-- Red Bull: 45.6 expected points, $30.9M, PPM 1.48
-- Racing Bulls: 26.6 expected points, $12.9M, PPM 2.06
-- Alpine: 19.8 expected points, $18.8M, PPM 1.05
-- Audi: 19.1 expected points, $6.8M, PPM 2.81
-- Haas: 7.2 expected points, $12.0M, PPM 0.60
+- Mercedes: 63.5 expected points, $32.6M, PPM 1.95
+- Ferrari: 57.7 expected points, $26.6M, PPM 2.17
+- Red Bull: 46.4 expected points, $30.9M, PPM 1.50
+- McLaren: 46.0 expected points, $31.0M, PPM 1.48
+- Racing Bulls: 29.9 expected points, $12.9M, PPM 2.32
+- Alpine: 20.9 expected points, $18.8M, PPM 1.11
+- Audi: 18.5 expected points, $6.8M, PPM 2.72
+- Williams: 7.3 expected points, $13.0M, PPM 0.56
 
 ## Tools and what they do
 - F1 Fantasy predictions: current driver and constructor projections with confidence ranges and price/value signals.
@@ -138,40 +138,40 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - F1 Fantasy Chinese GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/chinese-gp-2026/ - F1 Fantasy Chinese GP 2026 results: Kimi Antonelli led drivers with 68 points. See every driver and constructor score plus the archived forecast review.
 - F1 Fantasy Australian GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/australian-gp-2026/ - F1 Fantasy Australian GP 2026 results: Max Verstappen led drivers with 50 points. See every driver and constructor score plus the archived forecast review.
 - F1 Fantasy Drivers 2026: Points, Prices & Value | BoxBox: https://boxboxf1fantasy.com/drivers/ - Current F1 Fantasy 2026 driver projections: expected points, prices, value ratings, predicted qualifying and race finish for every driver.
-- Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/kimi-antonelli/ - Kimi Antonelli F1 Fantasy 2026 projection: 27.7 expected points for the Dutch GP, $25.7M price, value rating and confidence range.
-- Lewis Hamilton F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lewis-hamilton/ - Lewis Hamilton F1 Fantasy 2026 projection: 26.3 expected points for the Dutch GP, $24.9M price, value rating and confidence range.
-- Max Verstappen F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/max-verstappen/ - Max Verstappen F1 Fantasy 2026 projection: 24.5 expected points for the Dutch GP, $27.6M price, value rating and confidence range.
-- George Russell F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/george-russell/ - George Russell F1 Fantasy 2026 projection: 21.3 expected points for the Dutch GP, $27.9M price, value rating and confidence range.
-- Charles Leclerc F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/charles-leclerc/ - Charles Leclerc F1 Fantasy 2026 projection: 20.9 expected points for the Dutch GP, $23.9M price, value rating and confidence range.
-- Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lando-norris/ - Lando Norris F1 Fantasy 2026 projection: 20.7 expected points for the Dutch GP, $26.1M price, value rating and confidence range.
-- Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oscar-piastri/ - Oscar Piastri F1 Fantasy 2026 projection: 15.3 expected points for the Dutch GP, $24.4M price, value rating and confidence range.
-- Isack Hadjar F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/isack-hadjar/ - Isack Hadjar F1 Fantasy 2026 projection: 10.4 expected points for the Dutch GP, $14.5M price, value rating and confidence range.
-- Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/ - Gabriel Bortoleto F1 Fantasy 2026 projection: 8.8 expected points for the Dutch GP, $7.8M price, value rating and confidence range.
-- Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/liam-lawson/ - Liam Lawson F1 Fantasy 2026 projection: 8.4 expected points for the Dutch GP, $10.3M price, value rating and confidence range.
-- Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/franco-colapinto/ - Franco Colapinto F1 Fantasy 2026 projection: 8.2 expected points for the Dutch GP, $11.2M price, value rating and confidence range.
-- Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/pierre-gasly/ - Pierre Gasly F1 Fantasy 2026 projection: 6.2 expected points for the Dutch GP, $13.0M price, value rating and confidence range.
-- Esteban Ocon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/esteban-ocon/ - Esteban Ocon F1 Fantasy 2026 projection: 5.3 expected points for the Dutch GP, $10.7M price, value rating and confidence range.
-- Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/arvid-lindblad/ - Arvid Lindblad F1 Fantasy 2026 projection: 5.3 expected points for the Dutch GP, $8.0M price, value rating and confidence range.
-- Nico Hulkenberg F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/nico-hulkenberg/ - Nico Hulkenberg F1 Fantasy 2026 projection: 4.3 expected points for the Dutch GP, $3.0M price, value rating and confidence range.
-- Fernando Alonso F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/fernando-alonso/ - Fernando Alonso F1 Fantasy 2026 projection: 1.3 expected points for the Dutch GP, $6.2M price, value rating and confidence range.
-- Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/carlos-sainz/ - Carlos Sainz F1 Fantasy 2026 projection: 0.8 expected points for the Dutch GP, $10.0M price, value rating and confidence range.
-- Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/alex-albon/ - Alex Albon F1 Fantasy 2026 projection: 0.7 expected points for the Dutch GP, $5.8M price, value rating and confidence range.
-- Sergio Perez F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/sergio-perez/ - Sergio Perez F1 Fantasy 2026 projection: 0.5 expected points for the Dutch GP, $3.8M price, value rating and confidence range.
-- Lance Stroll F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lance-stroll/ - Lance Stroll F1 Fantasy 2026 projection: -0.5 expected points for the Dutch GP, $3.0M price, value rating and confidence range.
-- Valtteri Bottas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/valtteri-bottas/ - Valtteri Bottas F1 Fantasy 2026 projection: -0.7 expected points for the Dutch GP, $3.0M price, value rating and confidence range.
-- Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oliver-bearman/ - Oliver Bearman F1 Fantasy 2026 projection: -1.0 expected points for the Dutch GP, $7.6M price, value rating and confidence range.
+- Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/kimi-antonelli/ - Kimi Antonelli F1 Fantasy 2026 projection: 26.8 expected points for the Dutch GP, $25.7M price, value rating and confidence range.
+- Lewis Hamilton F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lewis-hamilton/ - Lewis Hamilton F1 Fantasy 2026 projection: 24.7 expected points for the Dutch GP, $24.9M price, value rating and confidence range.
+- Max Verstappen F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/max-verstappen/ - Max Verstappen F1 Fantasy 2026 projection: 23.2 expected points for the Dutch GP, $27.6M price, value rating and confidence range.
+- George Russell F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/george-russell/ - George Russell F1 Fantasy 2026 projection: 20.5 expected points for the Dutch GP, $27.9M price, value rating and confidence range.
+- Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lando-norris/ - Lando Norris F1 Fantasy 2026 projection: 19.2 expected points for the Dutch GP, $26.1M price, value rating and confidence range.
+- Charles Leclerc F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/charles-leclerc/ - Charles Leclerc F1 Fantasy 2026 projection: 19.0 expected points for the Dutch GP, $23.9M price, value rating and confidence range.
+- Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oscar-piastri/ - Oscar Piastri F1 Fantasy 2026 projection: 14.7 expected points for the Dutch GP, $24.4M price, value rating and confidence range.
+- Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/liam-lawson/ - Liam Lawson F1 Fantasy 2026 projection: 13.4 expected points for the Dutch GP, $14.5M price, value rating and confidence range.
+- Yuki Tsunoda F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/yuki-tsunoda/ - Yuki Tsunoda F1 Fantasy 2026 projection: 10.5 expected points for the Dutch GP, $10.3M price, value rating and confidence range.
+- Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/ - Gabriel Bortoleto F1 Fantasy 2026 projection: 8.4 expected points for the Dutch GP, $7.8M price, value rating and confidence range.
+- Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/franco-colapinto/ - Franco Colapinto F1 Fantasy 2026 projection: 8.4 expected points for the Dutch GP, $11.2M price, value rating and confidence range.
+- Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/arvid-lindblad/ - Arvid Lindblad F1 Fantasy 2026 projection: 7.5 expected points for the Dutch GP, $8.0M price, value rating and confidence range.
+- Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/pierre-gasly/ - Pierre Gasly F1 Fantasy 2026 projection: 7.0 expected points for the Dutch GP, $13.0M price, value rating and confidence range.
+- Esteban Ocon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/esteban-ocon/ - Esteban Ocon F1 Fantasy 2026 projection: 5.2 expected points for the Dutch GP, $10.7M price, value rating and confidence range.
+- Nico Hulkenberg F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/nico-hulkenberg/ - Nico Hulkenberg F1 Fantasy 2026 projection: 3.8 expected points for the Dutch GP, $3.0M price, value rating and confidence range.
+- Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/carlos-sainz/ - Carlos Sainz F1 Fantasy 2026 projection: 1.8 expected points for the Dutch GP, $10.0M price, value rating and confidence range.
+- Fernando Alonso F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/fernando-alonso/ - Fernando Alonso F1 Fantasy 2026 projection: 1.0 expected points for the Dutch GP, $6.2M price, value rating and confidence range.
+- Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/alex-albon/ - Alex Albon F1 Fantasy 2026 projection: 0.5 expected points for the Dutch GP, $5.8M price, value rating and confidence range.
+- Sergio Perez F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/sergio-perez/ - Sergio Perez F1 Fantasy 2026 projection: -0.0 expected points for the Dutch GP, $3.8M price, value rating and confidence range.
+- Lance Stroll F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lance-stroll/ - Lance Stroll F1 Fantasy 2026 projection: -0.6 expected points for the Dutch GP, $3.0M price, value rating and confidence range.
+- Valtteri Bottas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/valtteri-bottas/ - Valtteri Bottas F1 Fantasy 2026 projection: -0.9 expected points for the Dutch GP, $3.0M price, value rating and confidence range.
+- Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oliver-bearman/ - Oliver Bearman F1 Fantasy 2026 projection: -1.3 expected points for the Dutch GP, $7.6M price, value rating and confidence range.
 - F1 Fantasy Constructors 2026: Points & Value | BoxBox: https://boxboxf1fantasy.com/constructors/ - Current F1 Fantasy 2026 constructor projections: expected points, prices, pit-stop points, value ratings and risk for every constructor.
-- Mercedes F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mercedes/ - Mercedes F1 Fantasy 2026 constructor projection: 65.3 expected points for the Dutch GP, $32.6M price, pit-stop points and value rating.
-- Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/ferrari/ - Ferrari F1 Fantasy 2026 constructor projection: 61.2 expected points for the Dutch GP, $26.6M price, pit-stop points and value rating.
-- McLaren F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mclaren/ - McLaren F1 Fantasy 2026 constructor projection: 48.1 expected points for the Dutch GP, $31.0M price, pit-stop points and value rating.
-- Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/red-bull/ - Red Bull F1 Fantasy 2026 constructor projection: 45.6 expected points for the Dutch GP, $30.9M price, pit-stop points and value rating.
-- Racing Bulls F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/racing-bulls/ - Racing Bulls F1 Fantasy 2026 constructor projection: 26.6 expected points for the Dutch GP, $12.9M price, pit-stop points and value rating.
-- Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/alpine/ - Alpine F1 Fantasy 2026 constructor projection: 19.8 expected points for the Dutch GP, $18.8M price, pit-stop points and value rating.
-- Audi F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/audi/ - Audi F1 Fantasy 2026 constructor projection: 19.1 expected points for the Dutch GP, $6.8M price, pit-stop points and value rating.
-- Haas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/haas/ - Haas F1 Fantasy 2026 constructor projection: 7.2 expected points for the Dutch GP, $12.0M price, pit-stop points and value rating.
-- Williams F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/williams/ - Williams F1 Fantasy 2026 constructor projection: 6.1 expected points for the Dutch GP, $13.0M price, pit-stop points and value rating.
-- Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/aston-martin/ - Aston Martin F1 Fantasy 2026 constructor projection: 2.2 expected points for the Dutch GP, $5.7M price, pit-stop points and value rating.
-- Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/cadillac/ - Cadillac F1 Fantasy 2026 constructor projection: -0.6 expected points for the Dutch GP, $3.0M price, pit-stop points and value rating.
+- Mercedes F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mercedes/ - Mercedes F1 Fantasy 2026 constructor projection: 63.5 expected points for the Dutch GP, $32.6M price, pit-stop points and value rating.
+- Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/ferrari/ - Ferrari F1 Fantasy 2026 constructor projection: 57.7 expected points for the Dutch GP, $26.6M price, pit-stop points and value rating.
+- Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/red-bull/ - Red Bull F1 Fantasy 2026 constructor projection: 46.4 expected points for the Dutch GP, $30.9M price, pit-stop points and value rating.
+- McLaren F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mclaren/ - McLaren F1 Fantasy 2026 constructor projection: 46.0 expected points for the Dutch GP, $31.0M price, pit-stop points and value rating.
+- Racing Bulls F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/racing-bulls/ - Racing Bulls F1 Fantasy 2026 constructor projection: 29.9 expected points for the Dutch GP, $12.9M price, pit-stop points and value rating.
+- Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/alpine/ - Alpine F1 Fantasy 2026 constructor projection: 20.9 expected points for the Dutch GP, $18.8M price, pit-stop points and value rating.
+- Audi F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/audi/ - Audi F1 Fantasy 2026 constructor projection: 18.5 expected points for the Dutch GP, $6.8M price, pit-stop points and value rating.
+- Williams F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/williams/ - Williams F1 Fantasy 2026 constructor projection: 7.3 expected points for the Dutch GP, $13.0M price, pit-stop points and value rating.
+- Haas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/haas/ - Haas F1 Fantasy 2026 constructor projection: 7.1 expected points for the Dutch GP, $12.0M price, pit-stop points and value rating.
+- Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/aston-martin/ - Aston Martin F1 Fantasy 2026 constructor projection: 2.1 expected points for the Dutch GP, $5.7M price, pit-stop points and value rating.
+- Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/cadillac/ - Cadillac F1 Fantasy 2026 constructor projection: -1.0 expected points for the Dutch GP, $3.0M price, pit-stop points and value rating.
 - F1 Fantasy Points & Price Tracker 2026 | BoxBox: https://boxboxf1fantasy.com/stats/ - F1 Fantasy 2026 driver and constructor points, current prices, season changes, points per race and last-three form, updated after each Grand Prix.
 - F1 Fantasy Guides 2026: Scoring, Strategy & Chips | BoxBox: https://boxboxf1fantasy.com/guides/ - Free F1 Fantasy 2026 guides: how scoring works, how to win, chips explained, drivers vs constructors, and a beginner's how-to-play walkthrough.
 - How F1 Fantasy Scoring Works (2026) | BoxBox: https://boxboxf1fantasy.com/guides/how-f1-fantasy-scoring-works/ - F1 Fantasy 2026 scoring explained: qualifying, race and sprint points, overtakes, bonuses, DNF penalties, constructors and pit stops.
