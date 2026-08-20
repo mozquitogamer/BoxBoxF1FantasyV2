@@ -70,6 +70,8 @@ src += `
     finalFixRacePoints: typeof calculateFinalFixRacePoints === 'function' ? calculateFinalFixRacePoints : null,
     officialRoundHasCompleteScores: typeof officialRoundHasCompleteScores === 'function' ? officialRoundHasCompleteScores : null,
     normalizeOfficialAssetId: typeof normalizeOfficialAssetId === 'function' ? normalizeOfficialAssetId : null,
+    normalizeSavedDriverAssetId: typeof normalizeSavedDriverAssetId === 'function' ? normalizeSavedDriverAssetId : null,
+    findDriverAsset: typeof findDriverAsset === 'function' ? findDriverAsset : null,
     setTransferRenderState(basis, nextData, driverIds, constructorIds) {
       optimizeBasis = basis;
       data = nextData;
@@ -145,16 +147,16 @@ try {
     round: 14,
     driver_assets: { override_active: true },
     drivers: [
-      { driver_id: 'LAW_RED_BULL', name: 'Liam Lawson' },
-      { driver_id: 'TSU_RACING_BULLS', name: 'Yuki Tsunoda' },
+      { driver_id: 'LAW_RED_BULL', name: 'Liam Lawson', constructor: 'red_bull', current_price: 14.5, expected_points: 20, projected_points: 22 },
+      { driver_id: 'TSU_RACING_BULLS', name: 'Yuki Tsunoda', constructor: 'racing_bulls', current_price: 10.3, expected_points: 12, projected_points: 14 },
       { driver_id: 'NOR', name: 'Lando Norris' },
     ],
     constructors: [{ constructor_id: 'red_bull', name: 'Red Bull' }],
   }, [], []);
   const officialCases = [
-    [{ asset_type: 'driver', asset_id: '11032', name: 'Isack Hadjar' }, 'LAW_RED_BULL'],
+    [{ asset_type: 'driver', asset_id: '11032', name: 'Isack Hadjar' }, 'HAD'],
     [{ asset_type: 'driver', asset_id: '116', name: 'Liam Lawson' }, 'LAW_RED_BULL'],
-    [{ asset_type: 'driver', asset_id: '114', name: 'Liam Lawson' }, 'TSU_RACING_BULLS'],
+    [{ asset_type: 'driver', asset_id: '114', name: 'Liam Lawson' }, 'LAW'],
     [{ asset_type: 'driver', asset_id: '130', name: 'Yuki Tsunoda' }, 'TSU_RACING_BULLS'],
     [{ asset_type: 'driver', asset_id: '117', name: 'Lando Norris' }, 'NOR'],
     [{ asset_type: 'constructor', asset_id: '29', name: 'Red Bull Racing' }, 'red_bull'],
@@ -163,6 +165,18 @@ try {
     const actual = S.normalizeOfficialAssetId(asset);
     if (actual !== expected) fail(`official sync mapped ${asset.name}/${asset.asset_id} to ${actual}, expected ${expected}`);
   }
+  if (S.normalizeSavedDriverAssetId('HAD') !== 'HAD' || S.normalizeSavedDriverAssetId('LAW') !== 'LAW') {
+    fail('saved legacy ownership IDs were rewritten');
+  }
+  const hadjar = S.findDriverAsset('HAD');
+  const oldLawson = S.findDriverAsset('LAW');
+  if (!hadjar?.held_only || hadjar.name !== 'Isack Hadjar' || hadjar.expected_points !== 0) {
+    fail('held Hadjar asset was not preserved as a non-purchasable zero-projection holding');
+  }
+  if (!oldLawson?.held_only || oldLawson.name !== 'Liam Lawson' || oldLawson.expected_points !== 0) {
+    fail('held original Lawson asset was not preserved as a non-purchasable zero-projection holding');
+  }
+  if (S.findDriverAsset('NOT_OWNED') !== null) fail('unknown driver was synthesized as a held asset');
 } catch (e) {
   fail('Round 14 official asset normalization threw: ' + e.message);
 }

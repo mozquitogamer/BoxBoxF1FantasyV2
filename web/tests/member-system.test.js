@@ -5,7 +5,7 @@ const test = require('node:test');
 
 const { buildRecommendation } = require('../lib/personalized-recommendations');
 const { isAllowedOrigin, safeEqual } = require('../lib/member-system');
-const { inFilter, notificationEventKey } = require('../api/members/notify');
+const { inFilter, notificationEventKey, officialTeamForRecommendation } = require('../api/members/notify');
 const { paidUntil, parseKofiPayload, sanitizedKofiPayload } = require('../api/webhooks/kofi');
 const { consumeRateLimit } = require('../lib/rate-limit');
 const { applySyncedOfficialSnapshot, preferredMemberTeam, snapshotFingerprint } = require('../public/members');
@@ -87,6 +87,42 @@ test('working-team fingerprints ignore asset order but retain budget and transfe
     const reordered = { ...original, assets: [...original.assets].reverse() };
     assert.equal(snapshotFingerprint(original), snapshotFingerprint(reordered));
     assert.notEqual(snapshotFingerprint(original), snapshotFingerprint({ ...original, free_transfers: 2 }));
+});
+
+test('keeps legacy Hadjar ownership while treating it as held-only', () => {
+    const current = predictions();
+    current.round = 14;
+    current.driver_assets = { override_active: true };
+    current.drivers.push(
+        { driver_id: 'LAW_RED_BULL', name: 'Liam Lawson', constructor: 'red_bull', projected_points: 20, expected_points: 20, current_price: 14.5 },
+        { driver_id: 'TSU_RACING_BULLS', name: 'Yuki Tsunoda', constructor: 'racing_bulls', projected_points: 12, expected_points: 12, current_price: 10.3 },
+    );
+    const heldTeam = team(2);
+    heldTeam.assets[0].asset_id = 'HAD';
+    const result = buildRecommendation(current, heldTeam);
+    assert.equal(result.lineup.drivers.includes('Isack Hadjar'), true);
+    assert.equal(result.move.outgoing_id, 'HAD');
+    assert.equal(result.move.outgoing_name, 'Isack Hadjar');
+});
+
+test('official recommendation snapshots preserve all four R14 ownership records', () => {
+    const current = predictions();
+    current.round = 14;
+    current.driver_assets = { override_active: true };
+    current.drivers.push(
+        { driver_id: 'LAW_RED_BULL', name: 'Liam Lawson' },
+        { driver_id: 'TSU_RACING_BULLS', name: 'Yuki Tsunoda' },
+    );
+    const fallback = team(2);
+    const snapshot = {
+        assets: [
+            { asset_type: 'driver', asset_id: '11032', name: 'Isack Hadjar', slot: 1 },
+            ...fallback.assets.filter(item => item.asset_type === 'driver').slice(1).map((item, index) => ({ ...item, name: `Driver ${item.asset_id}`, slot: index + 2 })),
+            ...fallback.assets.filter(item => item.asset_type === 'constructor').map(item => ({ ...item, name: item.asset_id === 'one' ? 'One' : 'Two' })),
+        ],
+    };
+    const normalized = officialTeamForRecommendation(snapshot, current, fallback);
+    assert.equal(normalized.assets.find(item => item.slot === 1).asset_id, 'HAD');
 });
 
 test('official sync stops with a roster-specific error instead of trying to save an incomplete grid', () => {
