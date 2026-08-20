@@ -23,8 +23,10 @@ available at a new round is two, and the maximum is three. Wild Card and
 Limitless reset the following round to two. Correcting the
 earlier one-per-round/max-five implementation changed the full lineup path,
 penalties, chip timing, final budget and score. The original R14 pre-FP record
-and revisions 1–3 remain unchanged; revision 4 appends the audited seat-
-availability correction and points to a separate corrected pre-lock snapshot.
+and revisions 1–4 remain unchanged. Revision 4 introduced the corrected active
+roster; revision 5 fixes the ownership rule: an unavailable held driver must
+be transferred out and cannot silently become the replacement occupying that
+seat.
 
 ## R14 Dutch GP seat correction
 
@@ -52,6 +54,11 @@ refresh can replace the fallback IDs without rewriting prior rounds. The
 corrected V13 source is kept at
 `web/public/data/predictions_round14_pre_fp_availability_corrected.json`; the
 original frozen phase archive remains intact.
+
+V13 ended R13 holding both `HAD` and the old Racing Bulls `LAW` asset. They are
+therefore two mandatory outgoing transfers in R14. `LAW_RED_BULL` and
+`TSU_RACING_BULLS` remain eligible incoming assets, but neither is treated as
+already owned merely because they occupy a corresponding real-world seat.
 
 ## Public record
 

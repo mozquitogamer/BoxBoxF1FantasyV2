@@ -36,6 +36,17 @@ def test_free_transfers_have_two_per_round_with_one_rollover_and_cap_three() -> 
     assert sim.next_free_transfers(3, 0, "limitless") == 2
 
 
+def test_unavailable_held_assets_count_as_mandatory_transfers() -> None:
+    combinations = np.array([[0, 1, 2, 3, 4]], dtype=np.int16)
+    transfers = sim._count_transfers(
+        combinations,
+        ("A", "B", "C", "OLD_HAD", "OLD_LAW"),
+        ("A", "B", "C", "D", "E"),
+        5,
+    )
+    assert transfers.tolist() == [2]
+
+
 def _synthetic_round() -> sim.RoundInputs:
     drivers = ("A", "B", "C", "D", "E")
     constructors = ("X", "Y")

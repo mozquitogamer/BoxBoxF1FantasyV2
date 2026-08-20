@@ -47,8 +47,8 @@ def test_r14_early_thoughts_are_frozen_from_a_pre_lock_archive() -> None:
 
     assert decision["phase"] == "pre_fp"
     assert decision["status"] == "corrected_provisional"
-    assert decision["revision"] == 4
-    assert "availability correction" in decision["correction_reason"]
+    assert decision["revision"] == 5
+    assert "mandatory R14 transfers" in decision["correction_reason"]
     assert datetime.fromisoformat(decision["source_generated_at"]) < datetime.fromisoformat(
         decision["lock_deadline"].replace("Z", "+00:00")
     )
@@ -58,8 +58,9 @@ def test_r14_early_thoughts_are_frozen_from_a_pre_lock_archive() -> None:
     assert set(decision["drivers"]).issubset(
         {row["asset_id"] for row in v13.active_driver_assets(14)}
     )
-    assert decision["constructors"] == ["mercedes", "ferrari"]
-    assert decision["captain"] == "ANT"
+    assert {"HAD", "LAW"}.issubset(decision["changes"]["drivers_out"])
+    assert not {"HAD", "LAW"}.intersection(decision["drivers"])
+    assert decision["transfers"] == 3
     assert decision["transfer_penalty"] == 10
 
 

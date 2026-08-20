@@ -400,7 +400,12 @@ def _count_transfers(
     if not current_ids:
         return np.zeros(len(combinations), dtype=np.int16)
     lookup = {key: index for index, key in enumerate(all_ids)}
-    current_indices = np.array([lookup[key] for key in current_ids])
+    # A held asset can disappear from the next round's active roster after a
+    # substitution. It must count as an outgoing transfer, not be silently
+    # remapped to whichever driver inherits that seat.
+    current_indices = np.array(
+        [lookup[key] for key in current_ids if key in lookup], dtype=np.int64
+    )
     shared = np.isin(combinations, current_indices).sum(axis=1)
     return slot_count - shared
 
