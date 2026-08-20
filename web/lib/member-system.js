@@ -5,9 +5,11 @@ const crypto = require('node:crypto');
 const DEFAULT_SITE_ORIGIN = 'https://boxboxf1fantasy.com';
 const ACCESS_COOKIE = '__Host-boxbox_member_access';
 const REFRESH_COOKIE = '__Host-boxbox_member_refresh';
+const RECOVERY_COOKIE = '__Host-boxbox_member_recovery';
 const LEGACY_ACCESS_COOKIE = 'boxbox_member_access';
 const LEGACY_REFRESH_COOKIE = 'boxbox_member_refresh';
 const REFRESH_COOKIE_MAX_AGE = 30 * 24 * 60 * 60;
+const RECOVERY_COOKIE_MAX_AGE = 20 * 60;
 
 function required(value, name) {
     const result = String(value || '').trim();
@@ -95,7 +97,8 @@ function parseCookies(req) {
 }
 
 function cookie(name, value, options = {}) {
-    const parts = [`${name}=${encodeURIComponent(value)}`, 'Path=/', 'HttpOnly', 'Secure', 'SameSite=Strict'];
+    const sameSite = options.sameSite === 'Lax' ? 'Lax' : 'Strict';
+    const parts = [`${name}=${encodeURIComponent(value)}`, 'Path=/', 'HttpOnly', 'Secure', `SameSite=${sameSite}`];
     if (Number.isFinite(options.maxAge)) parts.push(`Max-Age=${Math.max(0, Math.floor(options.maxAge))}`);
     return parts.join('; ');
 }
@@ -106,10 +109,10 @@ function appendCookies(res, values) {
     res.setHeader('Set-Cookie', [...existing, ...values]);
 }
 
-function setSessionCookies(res, session) {
+function setSessionCookies(res, session, options = {}) {
     appendCookies(res, [
-        cookie(ACCESS_COOKIE, session.access_token, { maxAge: Number(session.expires_in || 3600) }),
-        cookie(REFRESH_COOKIE, session.refresh_token, { maxAge: REFRESH_COOKIE_MAX_AGE }),
+        cookie(ACCESS_COOKIE, session.access_token, { maxAge: Number(session.expires_in || 3600), sameSite: options.sameSite }),
+        cookie(REFRESH_COOKIE, session.refresh_token, { maxAge: REFRESH_COOKIE_MAX_AGE, sameSite: options.sameSite }),
         cookie(LEGACY_ACCESS_COOKIE, '', { maxAge: 0 }),
         cookie(LEGACY_REFRESH_COOKIE, '', { maxAge: 0 }),
     ]);
@@ -119,6 +122,7 @@ function clearSessionCookies(res) {
     appendCookies(res, [
         cookie(ACCESS_COOKIE, '', { maxAge: 0 }),
         cookie(REFRESH_COOKIE, '', { maxAge: 0 }),
+        cookie(RECOVERY_COOKIE, '', { maxAge: 0 }),
         cookie(LEGACY_ACCESS_COOKIE, '', { maxAge: 0 }),
         cookie(LEGACY_REFRESH_COOKIE, '', { maxAge: 0 }),
     ]);
@@ -246,15 +250,63 @@ function jwtPayload(accessToken) {
     }
 }
 
-function hasRecentAuthMethod(accessToken, userId, method, maxAgeSeconds = 20 * 60, now = Date.now()) {
+function recoveryGrantSignature(payload) {
+    const secret = getMemberConfig().serviceKey;
+    return crypto.createHmac('sha256', secret)
+        .update(`boxbox-member-recovery:v1:${payload}`)
+        .digest('base64url');
+}
+
+function createRecoveryGrant(accessToken, now = Date.now()) {
     const claims = jwtPayload(accessToken);
-    if (!claims || claims.sub !== userId || !Array.isArray(claims.amr)) return false;
-    const nowSeconds = Math.floor(now / 1000);
-    return claims.amr.some(entry => {
-        if (!entry || entry.method !== method || !Number.isFinite(entry.timestamp)) return false;
-        const age = nowSeconds - entry.timestamp;
-        return age >= -60 && age <= maxAgeSeconds;
-    });
+    if (!claims?.sub || !claims?.session_id) throw new Error('Supabase recovery session is missing required claims');
+    const issuedAt = Math.floor(now / 1000);
+    const payload = Buffer.from(JSON.stringify({
+        v: 1,
+        sub: claims.sub,
+        sid: claims.session_id,
+        iat: issuedAt,
+        exp: issuedAt + RECOVERY_COOKIE_MAX_AGE,
+    }), 'utf8').toString('base64url');
+    return `${payload}.${recoveryGrantSignature(payload)}`;
+}
+
+function setRecoveryGrantCookie(res, accessToken, now = Date.now()) {
+    const grant = createRecoveryGrant(accessToken, now);
+    appendCookies(res, [cookie(RECOVERY_COOKIE, grant, { maxAge: RECOVERY_COOKIE_MAX_AGE, sameSite: 'Lax' })]);
+}
+
+function clearRecoveryGrantCookie(res) {
+    appendCookies(res, [cookie(RECOVERY_COOKIE, '', { maxAge: 0 })]);
+}
+
+function hasValidRecoveryGrant(req, session, now = Date.now()) {
+    const token = parseCookies(req)[RECOVERY_COOKIE];
+    const [payload, supplied, extra] = String(token || '').split('.');
+    if (!payload || !supplied || extra) return false;
+    let expected;
+    try { expected = recoveryGrantSignature(payload); }
+    catch (_) { return false; }
+    const suppliedBuffer = Buffer.from(supplied);
+    const expectedBuffer = Buffer.from(expected);
+    if (suppliedBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(suppliedBuffer, expectedBuffer)) return false;
+    try {
+        const grant = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+        const claims = jwtPayload(session?.accessToken);
+        const nowSeconds = Math.floor(now / 1000);
+        return grant.v === 1
+            && grant.sub === session?.user?.id
+            && grant.sub === claims?.sub
+            && grant.sid === claims?.session_id
+            && Number.isFinite(grant.iat)
+            && Number.isFinite(grant.exp)
+            && grant.iat >= nowSeconds - RECOVERY_COOKIE_MAX_AGE
+            && grant.iat <= nowSeconds + 60
+            && grant.exp >= nowSeconds
+            && grant.exp <= grant.iat + RECOVERY_COOKIE_MAX_AGE;
+    } catch (_) {
+        return false;
+    }
 }
 
 function isEntitlementActive(entitlement, now = Date.now()) {
@@ -346,11 +398,12 @@ function htmlEscape(value) {
 module.exports = {
     authAdminRequest,
     authPublicRequest,
+    clearRecoveryGrantCookie,
     clearSessionCookies,
     getMemberConfig,
     getMemberDashboard,
     getMemberSession,
-    hasRecentAuthMethod,
+    hasValidRecoveryGrant,
     htmlEscape,
     isAllowedOrigin,
     isEntitlementActive,
@@ -359,5 +412,6 @@ module.exports = {
     parseBody,
     restRequest,
     safeEqual,
+    setRecoveryGrantCookie,
     setSessionCookies,
 };
