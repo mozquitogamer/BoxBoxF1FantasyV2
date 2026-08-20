@@ -620,5 +620,35 @@
         "cadillac": 3.0
       }
     }
+  },
+  "round_overrides": {
+    "14": {
+      "note": "Dutch GP R14 seat correction; historical R1-R13 assets remain unchanged and R15 defaults to the canonical roster unless extended.",
+      "source": {
+        "url": "https://www.formula1.com/en/drivers",
+        "accessed_at": "2026-08-20",
+        "official_fantasy_feed": "https://fantasy.formula1.com/feeds/drivers/14_en.json",
+        "official_fantasy_feed_status": "unavailable_in_restricted_runtime"
+      },
+      "inactive_driver_ids": ["HAD", "LAW"],
+      "drivers": {
+        "LAW_RED_BULL": {
+          "current_price": 14.5,
+          "starting_price": 14.5,
+          "model_driver_id": "lawson",
+          "constructor_id": "red_bull",
+          "availability": {"from_round": 14, "to_round": 14},
+          "legacy_asset_ids": ["LAW"]
+        },
+        "TSU_RACING_BULLS": {
+          "current_price": 10.3,
+          "starting_price": 10.3,
+          "model_driver_id": "tsunoda",
+          "constructor_id": "racing_bulls",
+          "availability": {"from_round": 14, "to_round": 14},
+          "legacy_asset_ids": ["TSU"]
+        }
+      }
+    }
   }
 }

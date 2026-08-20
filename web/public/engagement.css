@@ -108,6 +108,60 @@
     clip: rect(1px, 1px, 1px, 1px) !important;
     white-space: nowrap !important;
 }
+.beat-v13-registration-modal-open { overflow: hidden; }
+.beat-v13-registration-modal {
+    position: fixed;
+    z-index: 1200;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    background: rgba(3, 6, 12, .78);
+    backdrop-filter: blur(5px);
+}
+.beat-v13-registration-dialog {
+    position: relative;
+    width: min(480px, 100%);
+    padding: 28px;
+    border: 1px solid rgba(55, 230, 208, .35);
+    border-radius: 14px;
+    background: var(--bg-card, #121821);
+    color: var(--text, #e9edf3);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .5);
+}
+.beat-v13-registration-dialog h2 { margin: 0 34px 10px 0; font-size: 1.35rem; }
+.beat-v13-registration-dialog p { color: var(--text-secondary, #b8c0cc); font-size: .86rem; line-height: 1.55; }
+.beat-v13-registration-dialog-note { margin: 14px 0 0; color: #9bf0cf !important; font-size: .78rem !important; }
+.beat-v13-registration-close {
+    position: absolute;
+    top: 9px;
+    right: 11px;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,.06);
+    color: var(--text-secondary, #b8c0cc);
+    font-size: 1.45rem;
+    cursor: pointer;
+}
+.beat-v13-registration-dialog-actions { display: flex; gap: 9px; margin-top: 20px; }
+.beat-v13-registration-dialog-primary {
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 7px;
+    background: #55e3cf;
+    color: #071915;
+    font: inherit;
+    font-size: .78rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+.beat-v13-registration-close:focus-visible,
+.beat-v13-registration-dialog-primary:focus-visible {
+    outline: 3px solid rgba(55, 230, 208, .45);
+    outline-offset: 3px;
+}
 .optimizer-registration-panel {
     grid-template-columns: minmax(250px, 1fr) minmax(390px, 1.35fr);
     gap: 18px;

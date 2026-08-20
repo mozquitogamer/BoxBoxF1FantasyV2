@@ -83,6 +83,24 @@ Implementation status: live foundation completed on 2026-08-11. The remaining re
 
 The live implementation uses same-origin, HttpOnly session cookies; verifies active entitlement before generating a passwordless link; stores complete teams transactionally; and triggers the recommendation worker only after a successful Production deployment. The worker skips non-actionable or stale predictions and snapshots each personalized recommendation before delivery.
 
+### Pit Wall weekly-email preview
+
+The editorial shape for a paid-member weekly email can be reviewed locally
+without touching any recipient list:
+
+```powershell
+python pipeline/pit_wall_weekly_preview.py
+python pipeline/pit_wall_weekly_preview.py --preview-html outputs/pit_wall_weekly_preview.html
+```
+
+The preview reads only the current published
+`web/public/data/predictions.json` export and shows market-wide top driver /
+constructor picks plus likely-sell candidates. It is explicitly labelled for
+Pit Wall paid members. This utility has no network client, Resend operation,
+draft mode, broadcast mode, or recipient lookup; it must not be confused with
+the existing personalized member notification worker or the separate free
+simulation-alert broadcaster.
+
 Suggested product boundary: public users keep the full tools; paid users get saved teams, zero re-entry, personalized transfer/chip advice after every actionable simulation update, and the member newsletter. That is a strong convenience product without weakening the site's SEO or goodwill with a paywall.
 
 ## Phase 4 — paid newsletter and YouTube members

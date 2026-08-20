@@ -65,6 +65,7 @@ from config.fantasy_scoring import (
     calc_constructor_quali_bonus,
 )
 from config.fantasy_prices import load_fantasy_price_maps
+from config.driver_assets import active_constructor_driver_assets, active_driver_assets
 
 
 # -- ID mapping ----------------------------------------------------------------
@@ -333,9 +334,9 @@ def estimate_sprint_overtakes(predicted_quali: int, predicted_race: int,
 
 # -- Fantasy prices ------------------------------------------------------------
 
-def load_fantasy_prices() -> tuple[dict[str, float], dict[str, float]]:
-    """Load current fantasy prices (keyed by abbreviation)."""
-    return load_fantasy_price_maps()
+def load_fantasy_prices(round_num: int | None = None) -> tuple[dict[str, float], dict[str, float]]:
+    """Load current fantasy prices (keyed by round-scoped asset ID)."""
+    return load_fantasy_price_maps(round_num=round_num)
 
 
 # -- Recent fantasy points for PPM --------------------------------------------
@@ -400,7 +401,21 @@ def _build_recent_pts(current_round: int) -> dict[str, list[float]]:
 
 def load_recent_fantasy_points(driver_abbrev: str, current_round: int) -> float:
     """Average REAL fantasy points over the last 3 rounds (official>actuals>pred)."""
-    vals = _build_recent_pts(current_round).get(driver_abbrev, [])
+    recent = _build_recent_pts(current_round)
+    vals = recent.get(driver_abbrev, [])
+    # A substitute seat has a new Fantasy asset ID but should retain the
+    # person's historical form/PPM context where that is available.  This is
+    # intentionally a read-only fallback; it does not merge the two assets in
+    # archives or in the current-round output.
+    if not vals:
+        for asset in active_driver_assets(current_round):
+            if asset.get("driver_abbrev") == driver_abbrev:
+                for legacy_id in asset.get("legacy_asset_ids", []):
+                    vals = recent.get(legacy_id, [])
+                    if vals:
+                        break
+            if vals:
+                break
     return sum(vals) / len(vals) if vals else 0.0
 
 
@@ -413,7 +428,7 @@ def calculate_driver_fantasy(
     """Calculate expected fantasy points for all drivers."""
     is_sprint = round_num in SPRINT_ROUNDS_2026
     jolpica_to_abbrev, _ = load_id_maps()
-    driver_prices, _ = load_fantasy_prices()
+    driver_prices, _ = load_fantasy_prices(round_num)
     risk_ratings = calculate_risk_ratings(predictions)
 
     # Track-difficulty overtake damping (hard-to-pass circuits like Monaco get
@@ -571,8 +586,15 @@ def calculate_driver_fantasy(
 
         rows.append({
             "driver_id": driver_id,
+            "model_driver_id": row.get("model_driver_id", driver_id),
+            "asset_id": row.get("asset_id", driver_abbrev),
             "driver_abbrev": driver_abbrev,
+            "driver_name": row.get("driver_name", ""),
             "constructor_id": constructor_id,
+            "asset_context": row.get("asset_context", "canonical_season_asset"),
+            "asset_legacy_ids": row.get("asset_legacy_ids", []),
+            "asset_confidence_multiplier": float(row.get("asset_confidence_multiplier", 1.0)),
+            "asset_mc_noise_multiplier": float(row.get("asset_mc_noise_multiplier", 1.0)),
             "predicted_quali_position": scoring_quali,
             "model_predicted_quali_position": model_pred_quali,
             "predicted_grid_position": pred_grid,
@@ -607,19 +629,15 @@ def calculate_constructor_fantasy(
     round_num: int,
 ) -> pd.DataFrame:
     """Calculate expected fantasy points for constructors."""
-    _, constructor_prices = load_fantasy_prices()
+    _, constructor_prices = load_fantasy_prices(round_num)
 
     with open(SEED_DIR / "constructors.json") as f:
         constructors = json.load(f)["constructors"]
 
-    with open(SEED_DIR / "drivers.json") as f:
-        drivers_data = json.load(f)["drivers"]
-
-    # Map constructor -> driver abbreviations
-    constructor_drivers: dict[str, list[str]] = {}
-    for d in drivers_data:
-        cid = d["constructor_id"]
-        constructor_drivers.setdefault(cid, []).append(d["driver_id"])
+    # Map constructor -> active round-scoped Fantasy assets.  This leaves the
+    # historical seed roster unchanged while ensuring R14 Red Bull is VER +
+    # Lawson's new Red Bull asset and Racing Bulls is LIN + Tsunoda.
+    constructor_drivers = active_constructor_driver_assets(round_num)
 
     is_sprint = round_num in SPRINT_ROUNDS_2026
     pitstop_priors = _load_pitstop_priors()

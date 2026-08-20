@@ -87,6 +87,7 @@ from config.team_driver_ratings import (
 )
 from config.grid_penalties import apply_grid_penalties
 from config.fantasy_prices import load_fantasy_price_maps
+from config.driver_assets import active_driver_assets, roster_provenance
 
 
 # ==============================================================================
@@ -568,23 +569,39 @@ def load_fantasy_points(round_num: int) -> pd.DataFrame:
     return pd.read_parquet(path)
 
 
-def load_driver_prices() -> dict[str, float]:
-    """Load current fantasy prices by driver abbreviation."""
-    driver_prices, _ = load_fantasy_price_maps()
+def load_driver_prices(round_num: int | None = None) -> dict[str, float]:
+    """Load current Fantasy prices by active round asset ID."""
+    driver_prices, _ = load_fantasy_price_maps(round_num=round_num)
     return driver_prices
 
 
-def load_constructor_prices() -> dict[str, float]:
-    """Load current fantasy prices by constructor ID."""
-    _, constructor_prices = load_fantasy_price_maps()
+def load_constructor_prices(round_num: int | None = None) -> dict[str, float]:
+    """Load current Fantasy constructor prices by constructor ID."""
+    _, constructor_prices = load_fantasy_price_maps(round_num=round_num)
     return constructor_prices
 
 
-def load_drivers_info() -> dict:
-    """Load driver seed data keyed by abbreviation."""
-    with open(SEED_DIR / "drivers.json") as f:
-        data = json.load(f)
-    return {d["driver_id"]: d for d in data["drivers"]}
+def load_drivers_info(round_num: int | None = None, year: int = CURRENT_SEASON) -> dict:
+    """Load active driver asset metadata keyed by Fantasy asset ID.
+
+    With no round argument this preserves the legacy canonical seed behavior;
+    the MC entry point passes the target round so constructor aggregation uses
+    the correct R14 seat pairing.
+    """
+    if round_num is None:
+        with open(SEED_DIR / "drivers.json") as f:
+            data = json.load(f)
+        return {d["driver_id"]: d for d in data["drivers"]}
+    return {
+        asset["asset_id"]: {
+            **asset,
+            # aggregate_constructors historically uses driver_id for its
+            # abbreviation key; make the round-scoped asset explicit there.
+            "driver_id": asset["asset_id"],
+            "abbreviation": asset["asset_id"],
+        }
+        for asset in active_driver_assets(round_num, year)
+    }
 
 
 def load_constructors_info() -> dict:
@@ -757,7 +774,8 @@ def sample_pitstops(constructor_ids, rng, pitstop_priors):
 def sample_positions(raw_scores: np.ndarray, noise_base: float,
                      confidences: np.ndarray, rng: np.random.Generator,
                      constructor_ids: np.ndarray | None = None,
-                     team_shocks: np.ndarray | None = None) -> np.ndarray:
+                     team_shocks: np.ndarray | None = None,
+                     asset_noise_multipliers: np.ndarray | None = None) -> np.ndarray:
     """Sample a full grid of positions by adding noise to raw model scores.
 
     This naturally enforces the constraint that each position is used exactly
@@ -786,6 +804,13 @@ def sample_positions(raw_scores: np.ndarray, noise_base: float,
     n = len(raw_scores)
     # Scale noise inversely with confidence
     confidence_multipliers = 1.0 + CONFIDENCE_NOISE_FACTOR * (100.0 - confidences) / 50.0
+    if asset_noise_multipliers is not None:
+        # Substitution assets have no same-seat evidence before FP1.  Their
+        # explicit multiplier widens only their own distribution and leaves
+        # the calibrated field noise untouched.
+        confidence_multipliers = confidence_multipliers * np.asarray(
+            asset_noise_multipliers, dtype=float
+        )
 
     if team_shocks is not None:
         # Team-correlated noise: shared team component + individual component
@@ -1166,6 +1191,21 @@ def run_simulations(
         print(f"  Applied z-score normalization (preserving performance gaps)")
 
     confidences = pred_df["confidence"].values.astype(float)
+    if "asset_mc_noise_multiplier" in pred_df.columns:
+        asset_noise_multipliers = pd.to_numeric(
+            pred_df["asset_mc_noise_multiplier"], errors="coerce"
+        ).fillna(1.0).to_numpy(dtype=float)
+    else:
+        asset_noise_multipliers = np.ones(n_drivers, dtype=float)
+    if np.any(np.abs(asset_noise_multipliers - 1.0) > 1e-9):
+        print(
+            "  Seat-context MC widening active: "
+            + ", ".join(
+                f"{abbrev} x{mult:.2f}"
+                for abbrev, mult in zip(abbrevs, asset_noise_multipliers)
+                if abs(mult - 1.0) > 1e-9
+            )
+        )
 
     # Apply calibration noise multiplier
     cal = calibration or {"noise_multiplier": 1.0, "bias_correction": 0.0}
@@ -1310,7 +1350,8 @@ def run_simulations(
 
             quali_positions = sample_positions(
                 quali_raw, cal_quali_noise, confidences, rng,
-                constructor_ids=constructors, team_shocks=quali_team_shocks
+                constructor_ids=constructors, team_shocks=quali_team_shocks,
+                asset_noise_multipliers=asset_noise_multipliers,
             )
             grid_positions = apply_grid_penalties(
                 quali_positions, abbrevs, grid_penalty_rules
@@ -1348,8 +1389,11 @@ def run_simulations(
         for i in range(n_drivers):
             race_team_shocks[i] = race_shock_by_cid[constructors[i]]
 
-        race_positions = sample_positions(race_raw, cal_race_noise, confidences, rng,
-                                          constructor_ids=constructors, team_shocks=race_team_shocks)
+        race_positions = sample_positions(
+            race_raw, cal_race_noise, confidences, rng,
+            constructor_ids=constructors, team_shocks=race_team_shocks,
+            asset_noise_multipliers=asset_noise_multipliers,
+        )
         # DNF drivers get position = grid_size (last)
         race_positions[dnf_mask] = GRID_SIZE
 
@@ -1396,7 +1440,8 @@ def run_simulations(
             sprint_positions = sample_positions(sprint_raw, cal_race_noise * 0.8,
                                                 confidences, rng,
                                                 constructor_ids=constructors,
-                                                team_shocks=sprint_team_shocks)
+                                                team_shocks=sprint_team_shocks,
+                                                asset_noise_multipliers=asset_noise_multipliers)
             sprint_dnf_mask = rng.random(n_drivers) < (dnf_probs * 0.5)  # Lower DNF in sprint
             sprint_positions[sprint_dnf_mask] = GRID_SIZE
             # Sprint grid: fixed actual (post-SQ) or this sim's sampled quali (pre-SQ)
@@ -1478,7 +1523,13 @@ def run_simulations(
 
         driver_results.append({
             "driver_abbrev": abbrevs[i],
+            "asset_id": pred_df.iloc[i].get("asset_id", abbrevs[i]),
+            "model_driver_id": pred_df.iloc[i].get("model_driver_id", pred_df.iloc[i].get("driver_id", "")),
+            "driver_name": pred_df.iloc[i].get("driver_name", ""),
             "constructor_id": constructors[i],
+            "asset_context": pred_df.iloc[i].get("asset_context", "canonical_season_asset"),
+            "asset_confidence_multiplier": float(pred_df.iloc[i].get("asset_confidence_multiplier", 1.0)),
+            "asset_mc_noise_multiplier": float(asset_noise_multipliers[i]),
             # Point predictions (deterministic, for reference)
             "det_quali_position": int(
                 pred_df.iloc[i]["actual_quali_position"]
@@ -1564,6 +1615,20 @@ def run_simulations(
                 "wet_weight": wx.get("wet_weight", 0.0),
                 "cold_weight": wx.get("cold_weight", 0.0),
                 "source": wx.get("source", "missing"),
+            },
+            "driver_assets": {
+                "substitution_assets_active": bool(
+                    np.any(np.abs(asset_noise_multipliers - 1.0) > 1e-9)
+                ),
+                "widened_asset_ids": [
+                    str(abbrev)
+                    for abbrev, mult in zip(abbrevs, asset_noise_multipliers)
+                    if abs(mult - 1.0) > 1e-9
+                ],
+                "noise_multipliers": {
+                    str(abbrev): round(float(mult), 3)
+                    for abbrev, mult in zip(abbrevs, asset_noise_multipliers)
+                },
             },
         },
         # Return raw arrays for constructor per-iteration simulation
@@ -1990,9 +2055,9 @@ def main() -> None:
     print("\n  Loading predictions...")
     pred_df = load_predictions(args.round)
     fantasy_df = load_fantasy_points(args.round)
-    driver_prices = load_driver_prices()
-    constructor_prices = load_constructor_prices()
-    drivers_info = load_drivers_info()
+    driver_prices = load_driver_prices(args.round)
+    constructor_prices = load_constructor_prices(args.round)
+    drivers_info = load_drivers_info(args.round, args.year)
     constructors_info = load_constructors_info()
 
     print(f"  {len(pred_df)} drivers loaded")

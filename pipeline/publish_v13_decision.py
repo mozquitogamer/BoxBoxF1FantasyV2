@@ -28,6 +28,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from config.settings import SEED_DIR, WEB_DATA_DIR
+from config.driver_assets import active_driver_assets
+from config.fantasy_prices import load_fantasy_price_data
 from pipeline import build_v13_manager as v13
 from pipeline import simulate_fantasy_season_strategies as season
 
@@ -37,6 +39,9 @@ PUBLIC_PATH = WEB_DATA_DIR / "v13_manager.json"
 HORIZON_PATH = WEB_DATA_DIR / "horizon_projections.json"
 APP_JS_PATH = ROOT / "web" / "public" / "app.js"
 PHASE_ORDER = {"pre_fp": 0, "post_fp": 1}
+R14_CORRECTED_PRE_FP_ARCHIVE = (
+    "predictions_round14_pre_fp_availability_corrected.json"
+)
 
 
 def _canonical_bytes(value: dict[str, Any]) -> bytes:
@@ -83,6 +88,13 @@ def _opening_prices(round_num: int) -> tuple[str, dict[str, Any]]:
 
 def _round_input(round_num: int, phase: str) -> season.RoundInputs:
     archive = WEB_DATA_DIR / f"predictions_round{round_num}_{phase}.json"
+    # Keep the original frozen phase archive immutable for V13 auditability.
+    # An explicit R14 availability correction may publish a separate source
+    # snapshot; post-FP refreshes naturally fall back to the normal archive.
+    if round_num == 14 and phase == "pre_fp":
+        corrected = WEB_DATA_DIR / R14_CORRECTED_PRE_FP_ARCHIVE
+        if corrected.exists():
+            archive = corrected
     if not archive.exists():
         raise FileNotFoundError(f"Missing {phase} archive: {archive}")
     payload = v13._load_json(archive)
@@ -99,15 +111,22 @@ def _round_input(round_num: int, phase: str) -> season.RoundInputs:
             f"after the {lock} lock"
         )
 
-    driver_roster = v13._load_json(SEED_DIR / "drivers.json")["drivers"]
     constructor_roster = v13._load_json(SEED_DIR / "constructors.json")["constructors"]
-    drivers = tuple(row["driver_id"] for row in driver_roster)
+    # Resolve the active Fantasy asset set for this round.  The model's
+    # historical identities remain underneath the archived prediction, while
+    # V13 decisions use the seat-scoped IDs for the live lineup.
+    driver_roster = active_driver_assets(round_num)
+    drivers = tuple(row["asset_id"] for row in driver_roster)
     constructors = tuple(row["constructor_id"] for row in constructor_roster)
-    _, prices = _opening_prices(round_num)
-    driver_prices = np.array([float(prices["drivers"][key]) for key in drivers])
-    constructor_prices = np.array(
-        [float(prices["constructors"][key]) for key in constructors]
-    )
+    prices = load_fantasy_price_data(round_num=round_num)
+    driver_prices = np.array([
+        float((prices.get("drivers", {}).get(key) or {}).get("current_price", 0.0))
+        for key in drivers
+    ])
+    constructor_prices = np.array([
+        float((prices.get("constructors", {}).get(key) or {}).get("current_price", 0.0))
+        for key in constructors
+    ])
 
     official = v13._load_json(SEED_DIR / "official_fantasy_points.json")["rounds"]
     completed = sorted(int(value) for value in official if int(value) < round_num)
@@ -159,6 +178,28 @@ def _state(payload: dict[str, Any]) -> season.TeamState:
         bank=float(current["bank"]),
         budget=float(current["budget"]),
         free_transfers=int(current["free_transfers"]),
+    )
+
+
+def _state_for_round(payload: dict[str, Any], round_num: int) -> season.TeamState:
+    """Map legacy saved picks to active R14 seat assets for one correction.
+
+    The mapping is explicit and one-way: historical ``LAW`` remains valid in
+    R1-R13 archives, while a live R14 decision cannot silently treat it as the
+    new Red Bull asset.  The old Hadjar Red Bull slot becomes Lawson and the
+    old Racing Bulls Lawson slot becomes Tsunoda so the saved five-driver shape
+    remains intact without inventing an extra transfer.
+    """
+    state = _state(payload)
+    if int(round_num) != 14:
+        return state
+    aliases = {"HAD": "LAW_RED_BULL", "LAW": "TSU_RACING_BULLS"}
+    return season.TeamState(
+        drivers=tuple(aliases.get(driver, driver) for driver in state.drivers),
+        constructors=state.constructors,
+        bank=state.bank,
+        budget=state.budget,
+        free_transfers=state.free_transfers,
     )
 
 
@@ -258,7 +299,7 @@ def _decision(
     public: dict[str, Any],
 ) -> dict[str, Any]:
     round_data = _round_input(round_num, phase)
-    state = _state(public)
+    state = _state_for_round(public, round_num)
     combos = season.build_combo_matrices(round_data)
     normal = season.choose_lineup(
         round_data=round_data,

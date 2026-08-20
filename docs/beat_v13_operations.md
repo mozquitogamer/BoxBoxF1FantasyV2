@@ -23,8 +23,35 @@ available at a new round is two, and the maximum is three. Wild Card and
 Limitless reset the following round to two. Correcting the
 earlier one-per-round/max-five implementation changed the full lineup path,
 penalties, chip timing, final budget and score. The original R14 pre-FP record
-is retained; revision 3 transparently supersedes the earlier records using the
-same pre-lock forecast archive and the corrected R13 state.
+and revisions 1–3 remain unchanged; revision 4 appends the audited seat-
+availability correction and points to a separate corrected pre-lock snapshot.
+
+## R14 Dutch GP seat correction
+
+R14 is a Sprint weekend, so the pre-FP snapshot is priors-only and the
+post-FP refresh consumes actual FP1. For R14 only, the active Fantasy assets
+are `LAW_RED_BULL` (Liam Lawson, Red Bull, £14.5M) and `TSU_RACING_BULLS`
+(Yuki Tsunoda, Racing Bulls, £10.3M). `HAD` and the old Racing Bulls `LAW`
+asset are inactive for R14; the canonical seed roster and all R1–R13 history
+remain unchanged, and R15 falls back to that canonical roster unless a new
+overlay is added.
+
+The prediction rows retain the personal model identities (`lawson` and
+`tsunoda`) while applying the new constructor context. Both substitute assets
+carry a 0.68 confidence multiplier and 1.35 Monte Carlo noise multiplier. The
+constructor pairs are therefore Red Bull = VER + `LAW_RED_BULL` and Racing
+Bulls = LIN + `TSU_RACING_BULLS`.
+
+Authoritative roster checks were made on 2026-08-20 (UTC): the [official F1
+driver roster](https://www.formula1.com/en/drivers) still showed the canonical
+Hadjar/Lawson seats, while the [public F1 Fantasy driver feed](https://fantasy.formula1.com/feeds/drivers/14_en.json)
+was unavailable in the restricted runtime and did not expose a stable TSU
+asset to mirror. The deterministic internal IDs and their `model_driver_id`
+underlay are documented in `config/driver_assets.py`. A future official-feed
+refresh can replace the fallback IDs without rewriting prior rounds. The
+corrected V13 source is kept at
+`web/public/data/predictions_round14_pre_fp_availability_corrected.json`; the
+original frozen phase archive remains intact.
 
 ## Public record
 
@@ -147,3 +174,16 @@ table with these fields:
 Never expose emails, Ko-fi identities, or screenshots in the public leaderboard.
 Publish a display name, verified score, margin over V13, and verification state
 only after consent.
+
+## Registration delivery deployment checklist
+
+Before enabling the public registration form, run
+`infrastructure/supabase/004_beat_v13_entries.sql` in the private Supabase
+project. The table has RLS enabled with no anon/authenticated policies; only
+the server-side Supabase service-role key may access it. Set the existing
+Resend and `SUBSCRIPTION_SIGNING_SECRET` values, plus
+`SUPABASE_SERVICE_ROLE_KEY` (or `SUPABASE_SECRET_KEY`) and
+`NEXT_PUBLIC_SUPABASE_URL`. `BEAT_V13_SESSION_SECRET` is recommended for the
+HttpOnly entrant session and falls back to `SUBSCRIPTION_SIGNING_SECRET` when
+omitted. Do not run the migration from the browser or expose any of these
+values in public JavaScript.

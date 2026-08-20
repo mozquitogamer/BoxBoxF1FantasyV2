@@ -31,6 +31,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from config.settings import SEED_DIR, WEB_DATA_DIR
+from config.driver_assets import active_driver_assets
 from pipeline import simulate_fantasy_season_strategies as season
 
 
@@ -79,6 +80,40 @@ def _v13_manager(experiment: dict[str, Any]) -> dict[str, Any]:
     raise RuntimeError("Budget Builder / medium-tolerance manager is missing")
 
 
+def _phase_archive_path(round_num: int, phase: str) -> Path:
+    """Resolve an immutable phase source, including the explicit R14 fix."""
+    archive = WEB_DATA_DIR / f"predictions_round{round_num}_{phase}.json"
+    if round_num == 14 and phase == "pre_fp":
+        corrected = WEB_DATA_DIR / (
+            "predictions_round14_pre_fp_availability_corrected.json"
+        )
+        if corrected.exists():
+            return corrected
+    return archive
+
+
+def _official_driver_points(
+    official: dict[str, Any], round_num: int, asset_id: str
+) -> float:
+    """Resolve an active seat ID to its historical official points key."""
+    rows = official[str(round_num)]["drivers"]
+    if asset_id in rows:
+        return float(rows[asset_id])
+    for asset in active_driver_assets(14):
+        if asset["asset_id"] != asset_id:
+            continue
+        candidates = [asset.get("model_driver_id"), *asset.get("legacy_asset_ids", [])]
+        for candidate in candidates:
+            if candidate in rows:
+                return float(rows[candidate])
+        # Tsunoda has no 2026 official fantasy history because he was not in
+        # the canonical season roster before this one-round seat correction.
+        # A zero history is explicit and keeps R1-R13 records untouched.
+        if asset.get("asset_context", "").startswith("substitute"):
+            return 0.0
+    raise KeyError(asset_id)
+
+
 def _phase_projection(
     base: season.RoundInputs,
     *,
@@ -86,7 +121,7 @@ def _phase_projection(
     official: dict[str, Any],
     completed_rounds: list[int],
 ) -> season.RoundInputs | None:
-    archive = WEB_DATA_DIR / f"predictions_round{base.round_num}_{phase}.json"
+    archive = _phase_archive_path(base.round_num, phase)
     if not archive.exists():
         return None
     payload = _load_json(archive)
@@ -115,7 +150,7 @@ def _phase_projection(
                 price=float(base.driver_prices[index]),
                 projected_points=float(driver_projection[index]),
                 past_points=[
-                    float(official[str(round_num)]["drivers"][key])
+                    _official_driver_points(official, round_num, key)
                     for round_num in prior_rounds
                 ],
             )

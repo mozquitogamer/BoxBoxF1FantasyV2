@@ -46,6 +46,9 @@ function withEmailEnv() {
         RESEND_FROM: 'BoxBox Updates <updates@example.com>',
         RESEND_SIM_UPDATES_SEGMENT_ID: 'segment_test',
         SUBSCRIPTION_SIGNING_SECRET: 'test-secret',
+        BEAT_V13_SESSION_SECRET: 'session-test-secret',
+        NEXT_PUBLIC_SUPABASE_URL: 'https://project.supabase.test',
+        SUPABASE_SERVICE_ROLE_KEY: 'service-test-key',
         SITE_ORIGIN: 'https://boxboxf1fantasy.com',
         VERCEL_ENV: 'production',
     };
@@ -115,12 +118,22 @@ test('rejects tampered and expired subscription tokens', () => {
     assert.equal(verifySubscriptionToken(token, 'test-secret', now + 61 * 60 * 1000), null);
 });
 
-test('subscribe handler sends only a confirmation email', async () => {
+test('subscribe handler sends a confirmation email and one scheduled reminder', async () => {
     const restoreEnv = withEmailEnv();
     const originalFetch = global.fetch;
     const calls = [];
-    global.fetch = async (url, options) => {
+    let entry = null;
+    global.fetch = async (url, options = {}) => {
         calls.push({ url, options });
+        if (url.startsWith('https://project.supabase.test/rest/v1/beat_v13_entries')) {
+            if ((options.method || 'GET') === 'GET') return new Response(JSON.stringify(entry ? [entry] : []), { status: 200 });
+            if ((options.method || 'GET') === 'POST') {
+                entry = { id: '11111111-1111-4111-8111-111111111111', email_normalized: 'fan@example.com', status: 'pending', confirmation_sent_at: null, confirmation_provider_id: null, reminder_claimed_at: null, reminder_provider_id: null, reminder_scheduled_at: null, reminder_sent_at: null };
+                return new Response(JSON.stringify([entry]), { status: 200 });
+            }
+            Object.assign(entry, JSON.parse(options.body || '{}'));
+            return new Response(JSON.stringify([entry]), { status: 200 });
+        }
         return new Response(JSON.stringify({ id: 'email_test' }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
@@ -141,13 +154,17 @@ test('subscribe handler sends only a confirmation email', async () => {
 
         assert.equal(res.statusCode, 202);
         assert.equal(res.body.ok, true);
-        assert.equal(calls.length, 1);
-        assert.equal(calls[0].url, 'https://api.resend.com/emails');
-        assert.match(calls[0].options.headers['Idempotency-Key'], /^beat-v13-confirm-[a-f0-9]{32}$/);
-        const payload = JSON.parse(calls[0].options.body);
+        const emailCalls = calls.filter(call => call.url === 'https://api.resend.com/emails');
+        assert.equal(emailCalls.length, 2);
+        assert.match(emailCalls[0].options.headers['Idempotency-Key'], /^beat-v13-confirm-[a-f0-9]{32}$/);
+        const payload = JSON.parse(emailCalls[0].options.body);
         assert.deepEqual(payload.to, ['fan@example.com']);
         assert.equal(payload.subject, 'Confirm your free Beat V13 registration');
         assert.match(payload.text, /\/api\/email\/confirm\?token=/);
+        const reminder = JSON.parse(emailCalls[1].options.body);
+        assert.match(emailCalls[1].options.headers['Idempotency-Key'], /^beat-v13-reminder-/);
+        assert.match(reminder.scheduled_at, /T/);
+        assert.equal(reminder.scheduledAt, undefined);
     } finally {
         global.fetch = originalFetch;
         restoreEnv();
@@ -209,8 +226,21 @@ test('confirm handler adds a verified address to the alert segment', async () =>
     const restoreEnv = withEmailEnv();
     const originalFetch = global.fetch;
     const calls = [];
+    const entry = {
+        id: '11111111-1111-4111-8111-111111111111',
+        email_normalized: 'fan@example.com',
+        status: 'pending',
+        confirmation_sent_at: new Date().toISOString(),
+        confirmation_provider_id: 'email_confirmation',
+        reminder_provider_id: null,
+        reminder_claimed_at: null,
+    };
     global.fetch = async (url, options = {}) => {
         calls.push({ url, options });
+        if (url.startsWith('https://project.supabase.test/rest/v1/beat_v13_entries')) {
+            if ((options.method || 'GET') === 'PATCH') Object.assign(entry, JSON.parse(options.body || '{}'));
+            return new Response(JSON.stringify([entry]), { status: 200 });
+        }
         if (url === 'https://api.resend.com/segments/segment_test') {
             return new Response(JSON.stringify({ id: 'segment_test', name: 'Beat V13 Updates' }), {
                 status: 200,
@@ -229,14 +259,16 @@ test('confirm handler adds a verified address to the alert segment', async () =>
         const res = mockResponse();
         await confirmHandler(req, res);
 
-        assert.equal(res.statusCode, 200);
-        assert.match(res.body, /registered/);
-        assert.match(res.body, /View Beat V13/);
-        assert.match(res.headers['Set-Cookie'], /^__Host-boxbox_beat_v13=confirmed;/);
-        assert.equal(calls.length, 2);
-        assert.equal(calls[0].url, 'https://api.resend.com/segments/segment_test');
-        assert.equal(calls[1].url, 'https://api.resend.com/contacts');
-        const payload = JSON.parse(calls[1].options.body);
+        assert.equal(res.statusCode, 303);
+        assert.match(res.body, /You're officially entered/);
+        assert.equal(res.headers.Location, '/?v13=confirmed#beatbot');
+        assert.ok(Array.isArray(res.headers['Set-Cookie']));
+        assert.match(res.headers['Set-Cookie'][0], /^__Host-boxbox_beat_v13_session=/);
+        const resendCalls = calls.filter(call => call.url.startsWith('https://api.resend.com'));
+        assert.ok(resendCalls.length >= 1);
+        const contactCall = resendCalls.find(call => call.url === 'https://api.resend.com/contacts');
+        assert.ok(contactCall);
+        const payload = JSON.parse(contactCall.options.body);
         assert.equal(payload.email, 'fan@example.com');
         assert.deepEqual(payload.segments, [{ id: 'segment_test' }]);
     } finally {

@@ -61,6 +61,8 @@ src += `
     hasOfficialRoundCoverageCheck: typeof officialRoundHasCompleteScores === 'function',
     hasBudgetFuturePointValue: typeof budgetFuturePointValue === 'function',
     hasOpenPitWallTransferAdvisor: typeof openPitWallTransferAdvisor === 'function',
+    hasLoadV13Session: typeof loadV13Session === 'function',
+    hasHandleV13TeamSearch: typeof handleV13TeamSearch === 'function',
     budgetFuturePointValue: typeof budgetFuturePointValue === 'function' ? budgetFuturePointValue : null,
     renderSwapRow: typeof renderSwapRow === 'function' ? renderSwapRow : null,
     renderTransferCard: typeof renderTransferCard === 'function' ? renderTransferCard : null,
@@ -123,8 +125,17 @@ for (const [k, label] of [
   ['hasOfficialRoundCoverageCheck', 'officialRoundHasCompleteScores'],
   ['hasBudgetFuturePointValue', 'budgetFuturePointValue'],
   ['hasOpenPitWallTransferAdvisor', 'openPitWallTransferAdvisor'],
+  ['hasLoadV13Session', 'loadV13Session'],
+  ['hasHandleV13TeamSearch', 'handleV13TeamSearch'],
 ]) {
   if (!S[k]) fail(`${label} is not defined as a function`);
+}
+
+// The account hub is a separate browser script; keep its visible unified
+// sign-out copy covered by the same lightweight frontend smoke check.
+const engagement = fs.readFileSync(path.join(__dirname, '..', 'web', 'public', 'engagement.js'), 'utf8');
+if (!engagement.includes('Sign out of BoxBox') || !engagement.includes('/api/members/sign-out/')) {
+  fail('access hub is missing the visible unified sign-out action');
 }
 
 // 3) Calibrated budget value observes timing and forecast reliability.
