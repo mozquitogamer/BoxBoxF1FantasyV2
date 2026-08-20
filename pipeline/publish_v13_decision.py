@@ -182,25 +182,13 @@ def _state(payload: dict[str, Any]) -> season.TeamState:
 
 
 def _state_for_round(payload: dict[str, Any], round_num: int) -> season.TeamState:
-    """Map legacy saved picks to active R14 seat assets for one correction.
+    """Return the genuine held team without inheriting replacement seats.
 
-    The mapping is explicit and one-way: historical ``LAW`` remains valid in
-    R1-R13 archives, while a live R14 decision cannot silently treat it as the
-    new Red Bull asset.  The old Hadjar Red Bull slot becomes Lawson and the
-    old Racing Bulls Lawson slot becomes Tsunoda so the saved five-driver shape
-    remains intact without inventing an extra transfer.
+    If a held driver is absent from the active round roster, the optimizer's
+    transfer counter treats that asset as a mandatory outgoing transfer. A
+    new driver in the same physical seat is still a distinct Fantasy asset.
     """
-    state = _state(payload)
-    if int(round_num) != 14:
-        return state
-    aliases = {"HAD": "LAW_RED_BULL", "LAW": "TSU_RACING_BULLS"}
-    return season.TeamState(
-        drivers=tuple(aliases.get(driver, driver) for driver in state.drivers),
-        constructors=state.constructors,
-        bank=state.bank,
-        budget=state.budget,
-        free_transfers=state.free_transfers,
-    )
+    return _state(payload)
 
 
 def _future_three_x_ceiling(round_num: int) -> tuple[float | None, int | None]:
