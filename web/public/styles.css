@@ -3937,6 +3937,22 @@ table.sortable th.sort-desc::after {
         radial-gradient(circle at 100% 0, rgba(255, 94, 91, .12), transparent 38%),
         linear-gradient(145deg, rgba(24, 20, 32, .98), rgba(15, 18, 29, .98));
 }
+
+.v13-entry-guide { grid-column: 1 / -1; margin-top: 4px; padding: 20px; border: 1px solid rgba(55,230,208,.26); border-radius: 16px; background: rgba(7,22,28,.72); }
+.v13-entry-guide-heading span { color: #55e3cf; font-size: .7rem; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+.v13-entry-guide-heading h2 { margin: 5px 0; color: #fff; font-size: 1.15rem; }
+.v13-entry-guide-heading p { margin: 0; color: var(--text-secondary); font-size: .8rem; line-height: 1.5; }
+.v13-entry-guide ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 16px 0 13px; padding: 0; list-style: none; }
+.v13-entry-guide li { display: flex; gap: 10px; min-width: 0; padding: 12px; border-radius: 11px; background: rgba(255,255,255,.045); }
+.v13-entry-guide li > b { display: grid; flex: 0 0 28px; width: 28px; height: 28px; place-items: center; border-radius: 50%; color: #061c18; background: #55e3cf; font-size: .75rem; }
+.v13-entry-guide li span, .v13-entry-guide li strong { display: block; }
+.v13-entry-guide li strong { margin-bottom: 3px; color: #fff; font-size: .78rem; }
+.v13-entry-guide li span { color: var(--text-secondary); font-size: .7rem; line-height: 1.45; }
+.v13-entry-guide li em { color: #b9fff5; font-style: normal; font-weight: 800; }
+.v13-entry-guide-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+.v13-entry-guide-actions a, .v13-entry-guide-actions button { padding: 10px 13px; border: 1px solid rgba(55,230,208,.42); border-radius: 9px; color: #b9fff5; background: rgba(55,230,208,.08); font: inherit; font-size: .72rem; font-weight: 800; text-decoration: none; cursor: pointer; }
+.v13-entry-guide-actions button { border-color: transparent; color: #061c18; background: #55e3cf; }
+.v13-entry-guide > small { display: block; margin-top: 11px; color: var(--text-muted); font-size: .66rem; line-height: 1.5; }
 .v13-membership-badge {
     display: inline-flex;
     margin-bottom: 10px;
@@ -4190,6 +4206,7 @@ body.v13-popup-open { overflow: hidden; }
     .v13-provenance { display: none; }
 }
 @media (max-width: 640px) {
+    .v13-entry-guide ol { grid-template-columns: 1fr; }
     .v13-hero { padding: 23px 18px; border-radius: 17px; }
     .v13-identity { align-items: flex-start; gap: 13px; }
     .v13-mark { width: 60px; height: 60px; flex-basis: 60px; border-radius: 18px 7px 18px 7px; }
