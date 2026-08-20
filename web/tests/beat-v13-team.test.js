@@ -3,8 +3,9 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const teamHandler = require('../api/beat-v13/team');
-const signOutHandler = require('../api/beat-v13/sign-out');
+const teamHandler = require('../api/members/team');
+const signOutHandler = require('../api/members/sign-out');
+const sessionHandler = require('../api/members/session');
 const statusHandler = require('../api/email/status');
 const { beatV13SessionCookie } = require('../lib/beat-v13-entries');
 
@@ -59,8 +60,10 @@ function request(method, body, cookie) {
             host: 'boxboxf1fantasy.com',
             cookie,
         },
-        query: method === 'GET' ? { action: 'search', q: 'Exact Team' } : {},
-        url: '/api/beat-v13/team/?action=search&q=Exact%20Team',
+        query: method === 'GET'
+            ? { scope: 'beat-v13', action: 'search', q: 'Exact Team' }
+            : { scope: 'beat-v13' },
+        url: '/api/members/team/?scope=beat-v13&action=search&q=Exact%20Team',
     };
 }
 
@@ -131,6 +134,39 @@ test('unified Beat V13 sign-out expires free and Pit Wall session cookies', asyn
         assert.ok(cookies.some(cookie => cookie.startsWith('__Host-boxbox_member_access=') && cookie.includes('Max-Age=0')));
         assert.ok(cookies.some(cookie => cookie.startsWith('__Host-boxbox_member_refresh=') && cookie.includes('Max-Age=0')));
     } finally {
+        restoreEnv();
+    }
+});
+
+test('shared session endpoint returns a confirmed free Beat V13 account', async () => {
+    const restoreEnv = configure();
+    const originalFetch = global.fetch;
+    const entrantId = '11111111-1111-4111-8111-111111111111';
+    const cookie = beatV13SessionCookie(entrantId);
+    global.fetch = async (url) => {
+        if (String(url).includes('/rest/v1/beat_v13_entries?id=eq.')) {
+            return response([{
+                id: entrantId,
+                status: 'confirmed',
+                confirmed_at: '2026-08-01T00:00:00Z',
+            }]);
+        }
+        throw new Error(`Unexpected request: ${url}`);
+    };
+    try {
+        const res = mockRes();
+        await sessionHandler({
+            method: 'GET',
+            headers: { cookie },
+            query: { scope: 'beat-v13' },
+            url: '/api/members/session/?scope=beat-v13',
+        }, res);
+        assert.equal(res.statusCode, 200);
+        assert.equal(res.body.authenticated, true);
+        assert.equal(res.body.confirmed, true);
+        assert.equal(res.body.linked, false);
+    } finally {
+        global.fetch = originalFetch;
         restoreEnv();
     }
 });

@@ -6,7 +6,6 @@ const test = require('node:test');
 
 const subscribe = require('../api/email/subscribe');
 const confirm = require('../api/email/confirm');
-const cancel = require('../api/email/cancel');
 const {
     beatV13SessionCookie,
     verifyBeatV13SessionCookie,
@@ -242,14 +241,14 @@ test('not-me cancellation requires an explicit POST, then withdraws and cancels 
         await subscribe(request('cancel@example.com', '127.0.0.14'), registration);
         const token = tokenFromCall(provider);
         const preview = mockResponse();
-        await cancel({ method: 'GET', headers: {}, query: { token } }, preview);
+        await confirm({ method: 'GET', headers: {}, query: { action: 'cancel', token } }, preview);
         assert.equal(preview.statusCode, 200);
         assert.match(preview.body, /Cancel this pending registration\?/);
         assert.equal(provider.entry.status, 'pending');
         assert.equal(provider.cancellations.length, 0);
 
         const cancellation = mockResponse();
-        await cancel({ method: 'POST', headers: {}, query: { token } }, cancellation);
+        await confirm({ method: 'POST', headers: {}, query: { action: 'cancel', token } }, cancellation);
         assert.equal(cancellation.statusCode, 200);
         assert.match(cancellation.body, /Registration cancelled/);
         assert.equal(provider.entry.status, 'withdrawn');

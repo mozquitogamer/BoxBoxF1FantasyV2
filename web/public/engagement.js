@@ -552,7 +552,7 @@ window.BoxBoxFreeAccess = Object.freeze({
         async function refresh() {
             const [memberResult, beatResult] = await Promise.allSettled([
                 memberRequest('/api/members/session/'),
-                fetch('/api/beat-v13/session/', { credentials: 'same-origin', cache: 'no-store' }).then(async response => {
+                fetch('/api/members/session/?scope=beat-v13', { credentials: 'same-origin', cache: 'no-store' }).then(async response => {
                     const data = await response.json().catch(() => ({}));
                     return response.ok ? data : { authenticated: false };
                 }),
