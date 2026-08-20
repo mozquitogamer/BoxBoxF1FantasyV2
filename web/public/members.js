@@ -78,6 +78,13 @@
         return null;
     }
 
+    function applySyncedOfficialSnapshot(snapshot, memory = (typeof window !== 'undefined' ? window.BoxBoxTeamMemory : null)) {
+        if (!snapshot || !memory?.applyOfficial?.(snapshot)) {
+            throw new Error('Your official lineup was refreshed, but one or more picks could not be matched to the current race roster. Your saved team was not changed.');
+        }
+        return memory.getSnapshot();
+    }
+
     function updateSavedSummary(snapshot) {
         if (!dashboard) return;
         dashboard.team = {
@@ -308,16 +315,25 @@
                     try {
                         const linked = await request('/api/members/team/', { method: 'POST', body: { action: 'f1-link', link_token: resultButton.dataset.teamLinkToken } });
                         let syncMessage = '';
+                        let syncedSnapshot = null;
                         let syncFailed = false;
                         try {
                             const synced = await request('/api/members/team/', { method: 'POST', body: { action: 'f1-sync', round: window.BoxBoxTeamMemory?.currentRound() } });
                             syncMessage = synced.message;
+                            syncedSnapshot = synced.snapshot;
                         } catch (syncError) {
                             syncFailed = true;
                             syncMessage = syncError.message;
                         }
-                        await loadSession(true);
-                        status(syncFailed ? `${linked.message} The first lineup refresh needs attention: ${syncMessage}` : `${linked.message} ${syncMessage}`, syncFailed ? 'error' : 'success');
+                        await loadSession(false);
+                        if (syncFailed) {
+                            status(`${linked.message} The first lineup refresh needs attention: ${syncMessage}`, 'error');
+                        } else if (!hasCompleteTeam(dashboard.team)) {
+                            const snapshot = applySyncedOfficialSnapshot(syncedSnapshot || dashboard.f1_snapshot);
+                            await persistWorkingTeam(snapshot, `${linked.message} ${syncMessage} It is now your saved Transfer Advisor team.`);
+                        } else {
+                            status(`${linked.message} ${syncMessage}`, 'success');
+                        }
                     } catch (error) { status(error.message, 'error'); resultButton.disabled = false; }
                 }));
             } catch (error) { results.innerHTML = `<span>${escapeHtml(error.message)}</span>`; }
@@ -331,9 +347,9 @@
             status('Syncing your official lineup…');
             try {
                 const result = await request('/api/members/team/', { method: 'POST', body: { action: 'f1-sync', round: window.BoxBoxTeamMemory?.currentRound() } });
-                await loadSession(true);
+                await loadSession(false);
                 if (!hadWorkingTeam && !hasCompleteTeam(dashboard.team)) {
-                    const snapshot = window.BoxBoxTeamMemory?.getSnapshot();
+                    const snapshot = applySyncedOfficialSnapshot(result.snapshot || dashboard.f1_snapshot);
                     await persistWorkingTeam(snapshot, `${result.message} It is now your saved Transfer Advisor team.`);
                 } else {
                     status(`${result.message} Your saved Transfer Advisor changes were kept; use Reset to official team whenever you want the synced baseline.`, 'success');
@@ -390,7 +406,7 @@
     }
 
     if (typeof module !== 'undefined' && module.exports) {
-        module.exports = { canonicalTeamSnapshot, hasCompleteTeam, preferredMemberTeam, snapshotFingerprint };
+        module.exports = { applySyncedOfficialSnapshot, canonicalTeamSnapshot, hasCompleteTeam, preferredMemberTeam, snapshotFingerprint };
     }
     if (typeof document === 'undefined' || typeof window === 'undefined') return;
 

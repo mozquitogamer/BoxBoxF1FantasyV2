@@ -69,6 +69,7 @@ src += `
     scoreTeamPicks: typeof scoreTeamPicks === 'function' ? scoreTeamPicks : null,
     finalFixRacePoints: typeof calculateFinalFixRacePoints === 'function' ? calculateFinalFixRacePoints : null,
     officialRoundHasCompleteScores: typeof officialRoundHasCompleteScores === 'function' ? officialRoundHasCompleteScores : null,
+    normalizeOfficialAssetId: typeof normalizeOfficialAssetId === 'function' ? normalizeOfficialAssetId : null,
     setTransferRenderState(basis, nextData, driverIds, constructorIds) {
       optimizeBasis = basis;
       data = nextData;
@@ -139,6 +140,34 @@ if (!engagement.includes('Sign out of BoxBox') || !engagement.includes('/api/mem
 }
 
 // 3) Calibrated budget value observes timing and forecast reliability.
+try {
+  S.setTransferRenderState('projected', {
+    round: 14,
+    driver_assets: { override_active: true },
+    drivers: [
+      { driver_id: 'LAW_RED_BULL', name: 'Liam Lawson' },
+      { driver_id: 'TSU_RACING_BULLS', name: 'Yuki Tsunoda' },
+      { driver_id: 'NOR', name: 'Lando Norris' },
+    ],
+    constructors: [{ constructor_id: 'red_bull', name: 'Red Bull' }],
+  }, [], []);
+  const officialCases = [
+    [{ asset_type: 'driver', asset_id: '11032', name: 'Isack Hadjar' }, 'LAW_RED_BULL'],
+    [{ asset_type: 'driver', asset_id: '116', name: 'Liam Lawson' }, 'LAW_RED_BULL'],
+    [{ asset_type: 'driver', asset_id: '114', name: 'Liam Lawson' }, 'TSU_RACING_BULLS'],
+    [{ asset_type: 'driver', asset_id: '130', name: 'Yuki Tsunoda' }, 'TSU_RACING_BULLS'],
+    [{ asset_type: 'driver', asset_id: '117', name: 'Lando Norris' }, 'NOR'],
+    [{ asset_type: 'constructor', asset_id: '29', name: 'Red Bull Racing' }, 'red_bull'],
+  ];
+  for (const [asset, expected] of officialCases) {
+    const actual = S.normalizeOfficialAssetId(asset);
+    if (actual !== expected) fail(`official sync mapped ${asset.name}/${asset.asset_id} to ${actual}, expected ${expected}`);
+  }
+} catch (e) {
+  fail('Round 14 official asset normalization threw: ' + e.message);
+}
+
+// 4) Calibrated budget value observes timing and forecast reliability.
 try {
   S.setBudgetValueData({
     current_races_remaining: 11,

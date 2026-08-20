@@ -5013,6 +5013,24 @@ function normalizeOfficialAssetId(asset) {
     const pool = asset.asset_type === 'constructor' ? data.constructors : data.drivers;
     const idKey = asset.asset_type === 'constructor' ? 'constructor_id' : 'driver_id';
     const nameKey = asset.asset_type === 'constructor' ? 'name' : 'name';
+    if (asset.asset_type === 'driver' && Number(data.round) === 14 && data.driver_assets?.override_active === true) {
+        // The official R14 feed retains both the original and substitute seat
+        // records. Translate its player IDs into the one-round website assets
+        // before matching by name; Lawson appears twice, so name-only matching
+        // cannot distinguish his old Racing Bulls asset from his Red Bull seat.
+        const replacementByOfficialId = {
+            11032: 'LAW_RED_BULL', // Hadjar's Red Bull asset
+            116: 'LAW_RED_BULL',   // Lawson's replacement Red Bull record
+            114: 'TSU_RACING_BULLS', // Lawson's original Racing Bulls asset
+            130: 'TSU_RACING_BULLS', // Tsunoda's replacement Racing Bulls record
+        };
+        const replacementByName = {
+            isackhadjar: 'LAW_RED_BULL',
+            yukitsunoda: 'TSU_RACING_BULLS',
+        };
+        const replacement = replacementByOfficialId[String(asset.asset_id)] || replacementByName[name];
+        if (replacement && pool.some(driver => driver.driver_id === replacement)) return replacement;
+    }
     const exact = pool.find(item => String(item[idKey]) === String(asset.asset_id));
     if (exact) return exact[idKey];
     const matched = pool.find(item => {
@@ -5034,11 +5052,25 @@ function applyOfficialMemberTeam(snapshot) {
     const drivers = converted.filter(asset => asset.asset_type === 'driver');
     const constructors = converted.filter(asset => asset.asset_type === 'constructor');
     if (drivers.length !== 5 || constructors.length !== 2) return false;
-    return applySavedMemberTeam({
+    const syncedBudget = Number(snapshot.budget_millions);
+    const hasSyncedBudget = Number.isFinite(syncedBudget) && syncedBudget > 0;
+    const syncedTransfers = Number(snapshot.free_transfers);
+    const currentTransfers = Number(document.getElementById('freeTransfers')?.value);
+    const fallbackTransfers = [2, 3].includes(currentTransfers) ? currentTransfers : 2;
+    const applied = applySavedMemberTeam({
         assets: converted,
-        budget_millions: snapshot.budget_millions || 100,
-        free_transfers: snapshot.free_transfers ?? 0,
+        budget_millions: hasSyncedBudget ? syncedBudget : 100,
+        free_transfers: [2, 3].includes(syncedTransfers) ? syncedTransfers : fallbackTransfers,
     });
+    // The public league feed exposes the seven picks but not team value or
+    // free-transfer balance. Use the current lineup cost as the safe spending
+    // floor and leave the editable free-transfer control at its existing/default
+    // value instead of poisoning the saved team with zero.
+    if (applied && !hasSyncedBudget) {
+        transferBudgetTouched = false;
+        syncBudgetInputsFromTeamCost(getMyTeamCost());
+    }
+    return applied;
 }
 
 window.BoxBoxTeamMemory = {

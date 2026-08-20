@@ -8,7 +8,7 @@ const { isAllowedOrigin, safeEqual } = require('../lib/member-system');
 const { inFilter, notificationEventKey } = require('../api/members/notify');
 const { paidUntil, parseKofiPayload, sanitizedKofiPayload } = require('../api/webhooks/kofi');
 const { consumeRateLimit } = require('../lib/rate-limit');
-const { preferredMemberTeam, snapshotFingerprint } = require('../public/members');
+const { applySyncedOfficialSnapshot, preferredMemberTeam, snapshotFingerprint } = require('../public/members');
 
 function predictions() {
     const drivers = [
@@ -87,6 +87,18 @@ test('working-team fingerprints ignore asset order but retain budget and transfe
     const reordered = { ...original, assets: [...original.assets].reverse() };
     assert.equal(snapshotFingerprint(original), snapshotFingerprint(reordered));
     assert.notEqual(snapshotFingerprint(original), snapshotFingerprint({ ...original, free_transfers: 2 }));
+});
+
+test('official sync stops with a roster-specific error instead of trying to save an incomplete grid', () => {
+    assert.throws(
+        () => applySyncedOfficialSnapshot({ assets: team().assets }, { applyOfficial: () => false }),
+        /could not be matched to the current race roster/i,
+    );
+    const expected = team();
+    assert.equal(applySyncedOfficialSnapshot(
+        { assets: expected.assets },
+        { applyOfficial: () => true, getSnapshot: () => expected },
+    ), expected);
 });
 
 test('parses Ko-fi form payloads and grants only a bounded paid period', () => {
