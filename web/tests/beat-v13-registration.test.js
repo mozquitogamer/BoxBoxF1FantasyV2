@@ -204,6 +204,18 @@ test('registration status is pending until confirmation, then confirms and cance
         assert.match(cookies[0], /^__Host-boxbox_beat_v13_session=/);
         assert.match(cookies[0], /HttpOnly/);
         assert.match(cookies[1], /^__Host-boxbox_beat_v13=confirmed/);
+
+        const accessResponse = mockResponse();
+        await subscribe(request('fan@example.com', '127.0.0.15'), accessResponse);
+        assert.equal(accessResponse.statusCode, 202);
+        assert.equal(accessResponse.body.entry_status, 'confirmed');
+        assert.equal(accessResponse.body.access_email_sent, true);
+        assert.match(accessResponse.body.message, /secure link/i);
+        const accessEmail = provider.resendCalls.find(call => call.body.subject === 'Your Beat V13 access link');
+        assert.ok(accessEmail, 'confirmed entrants should receive a fresh access link');
+        assert.match(accessEmail.headers['Idempotency-Key'], /^beat-v13-access-/);
+        assert.match(accessEmail.body.text, /connect one official F1 Fantasy team/i);
+        assert.equal(provider.resendCalls.filter(call => call.body.scheduled_at).length, 1);
     } finally {
         global.fetch = originalFetch;
         restore();

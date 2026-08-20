@@ -782,7 +782,7 @@ function renderV13() {
                 <h2>${registrationOpen ? 'Registration is open now' : 'Registration is closed'}</h2>
                 <p>${registrationOpen ? v13Escape(competition.registration_window) : 'Registration closed at the Round 22 Las Vegas F1 Fantasy team lock.'} Scores use the official full-2026 total, leaving R23 and R24 to decide the challenge. ${registrationOpen ? 'Confirm your email now; after the season, submit one official team and its full-season score screenshot.' : 'Registered entrants will receive end-of-season score-submission instructions.'} A private league remains available as a verification backup.</p>
                 <p class="v13-rules-note">${v13Escape(competition.eligibility_note)}</p>
-                ${registrationOpen ? '<button class="v13-registration-button" id="v13RegisterButton" type="button">Register free with email</button>' : ''}
+                ${registrationOpen ? '<button class="v13-registration-button" id="v13RegisterButton" type="button">Register or access my entry</button>' : ''}
             </div>
             <div class="v13-prizes" aria-label="Prize positions">
                 <span><small>1st</small><strong>$${competition.prizes_usd[0]}</strong></span>
