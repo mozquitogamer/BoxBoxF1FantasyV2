@@ -82,6 +82,34 @@ async function sendConfirmation(entry, email, config, now) {
     return { id, token };
 }
 
+async function sendAccessLink(entry, email, config, now) {
+    const token = createSubscriptionToken(email, config.signingSecret, config.ttlHours, now);
+    const accessUrl = `${config.siteOrigin}/api/email/confirm?token=${encodeURIComponent(token)}`;
+    // Resend deduplicates repeated clicks within the same ten-minute window,
+    // while still allowing an entrant to request a fresh link later.
+    const windowKey = Math.floor(now / (10 * 60 * 1000));
+    const result = await resendRequest('/emails', config.apiKey, {
+        method: 'POST',
+        headers: { 'Idempotency-Key': `beat-v13-access-${entry.id}-${windowKey}` },
+        body: {
+            from: config.from,
+            to: [email],
+            subject: 'Your Beat V13 access link',
+            html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#141821">
+                <h1 style="font-size:24px">Open your Beat V13 entry</h1>
+                <p>Your email is already confirmed and your free competition entry is active.</p>
+                <p><a href="${accessUrl}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 18px;border-radius:7px;font-weight:700">Open my Beat V13 dashboard</a></p>
+                <p>From there you can connect one official F1 Fantasy team for live leaderboard tracking. Pit Wall membership is not required for competition team linking.</p>
+                <p style="color:#667085;font-size:13px">This secure link expires in ${config.ttlHours} hours. If you did not request it, ignore this email; your entry remains unchanged.</p>
+            </div>`,
+            text: `Open your confirmed Beat V13 entry:\n\n${accessUrl}\n\nYour free competition entry is already active. Use this secure link to open your dashboard and connect one official F1 Fantasy team for leaderboard tracking. Pit Wall membership is not required. This link expires in ${config.ttlHours} hours. If you did not request it, ignore this email.`,
+        },
+    });
+    const id = providerId(result);
+    if (!id) throw new Error('Resend did not return an access email ID');
+    return { id, token };
+}
+
 async function scheduleReminder(entry, email, config, now) {
     if (!entry || entry.status !== 'pending' || entry.reminder_provider_id) return false;
     const claimed = await claimBeatV13Reminder(entry, new Date(now));
@@ -201,10 +229,12 @@ module.exports = async function subscribe(req, res) {
         const entry = await ensurePendingBeatV13Entry(email);
 
         if (entry.status === 'confirmed') {
+            await sendAccessLink(entry, email, config, now);
             return res.status(202).json({
                 ok: true,
                 entry_status: 'confirmed',
-                message: 'This address is already confirmed. You’re officially entered; no new confirmation email was sent.',
+                access_email_sent: true,
+                message: 'You’re already confirmed. We emailed you a secure link to open your Beat V13 dashboard and connect your team.',
             });
         }
 
@@ -245,3 +275,4 @@ module.exports = async function subscribe(req, res) {
 
 module.exports._cancelScheduledReminder = cancelScheduledReminder;
 module.exports._scheduleReminder = scheduleReminder;
+module.exports._sendAccessLink = sendAccessLink;
