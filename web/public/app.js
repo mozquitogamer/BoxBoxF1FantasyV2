@@ -291,6 +291,49 @@ function getScenarioView() {
     return data;
 }
 
+// A mid-season substitution can leave an asset in a manager's locked F1 team
+// after it disappears from the current purchase roster. Keep that ownership
+// identity intact. These objects are created only when an existing lineup asks
+// for the legacy ID, so they can be held or sold but never bought from a picker
+// or introduced by an optimizer search.
+const HELD_ONLY_DRIVER_ASSETS = {
+    HAD: { name: 'Isack Hadjar', constructor: 'red_bull', priceSourceId: 'LAW_RED_BULL' },
+    LAW: { name: 'Liam Lawson', constructor: 'racing_bulls', priceSourceId: 'TSU_RACING_BULLS' },
+};
+
+function findDriverAsset(assetId, pool = data?.drivers) {
+    const id = String(assetId || '');
+    const drivers = Array.isArray(pool) ? pool : [];
+    const active = drivers.find(driver => driver.driver_id === id)
+        || (data?.drivers || []).find(driver => driver.driver_id === id);
+    if (active) return active;
+    if (Number(data?.round) !== 14 || data?.driver_assets?.override_active !== true) return null;
+
+    const held = HELD_ONLY_DRIVER_ASSETS[id];
+    if (!held) return null;
+    const priceSource = drivers.find(driver => driver.driver_id === held.priceSourceId)
+        || (data?.drivers || []).find(driver => driver.driver_id === held.priceSourceId);
+    if (!priceSource) return null;
+
+    return {
+        ...priceSource,
+        driver_id: id,
+        name: held.name,
+        constructor: held.constructor,
+        expected_points: 0,
+        projected_points: 0,
+        expected_points_quali: 0,
+        expected_points_race: 0,
+        expected_points_sprint_race: 0,
+        projected_points_quali: 0,
+        projected_points_race: 0,
+        projected_points_sprint_race: 0,
+        value_score: 0,
+        held_only: true,
+        availability_label: 'Held asset — unavailable to buy',
+    };
+}
+
 // Returns "" or a small banner HTML announcing that the lineup/transfer/planner
 // results are based on the user's active scenario, not the baseline ML view.
 function scenarioBannerHtml() {
@@ -4636,7 +4679,7 @@ function buildTeamBlurb(driverIds, constructorIds) {
     let pts = 0;
     const names = [];
     driverIds.filter(Boolean).forEach(id => {
-        const d = data.drivers.find(x => x.driver_id === id);
+        const d = findDriverAsset(id);
         if (d) { pts += d.expected_points || 0; names.push(d.name.split(' ').pop()); }
     });
     constructorIds.filter(Boolean).forEach(id => {
@@ -4712,7 +4755,7 @@ function buildPredictionBlurb(type, id) {
         if (!c) return `BoxBox F1 Fantasy prediction for ${race}`;
         return `${(c.name || c.constructor_id).toUpperCase()} — ${race}: ${Math.round(c.expected_points)} predicted pts on BoxBoxF1Fantasy`;
     }
-    const d = data.drivers.find(x => x.driver_id === id);
+    const d = findDriverAsset(id);
     if (!d) return `BoxBox F1 Fantasy prediction for ${race}`;
     return `${d.name} — ${race}: P${d.predicted_quali} quali, P${d.predicted_finish} finish, ${Math.round(d.expected_points)} predicted pts on BoxBoxF1Fantasy`;
 }
@@ -4794,7 +4837,7 @@ function applySharedTeam(teamParam) {
     const ids = teamParam.split(',').map(s => s.trim()).filter(Boolean);
     const dIds = [], cIds = [];
     ids.forEach(id => {
-        if (data.drivers.some(d => d.driver_id === id)) dIds.push(id);
+        if (findDriverAsset(id)) dIds.push(id);
         else if (data.constructors.some(c => c.constructor_id === id)) cIds.push(id);
     });
     if (!dIds.length && !cIds.length) return;  // nothing recognisable in the link
@@ -4844,13 +4887,13 @@ function renderMyTeamGrid() {
     // 5 driver slots
     for (let i = 0; i < 5; i++) {
         const did = myTeamDrivers[i];
-        const driver = did ? data.drivers.find(d => d.driver_id === did) : null;
+        const driver = did ? findDriverAsset(did) : null;
         if (driver) {
             const team = TEAMS[driver.constructor] || { color: '#666' };
             html += `<div class="my-team-slot filled" style="--team-color:${team.color}" data-slot="driver" data-index="${i}">
                 <div class="slot-label">Driver ${i + 1}</div>
                 <div class="slot-name">${driver.name.split(' ').pop()}</div>
-                <div class="slot-price">$${driver.current_price.toFixed(1)}M</div>
+                <div class="slot-price">$${driver.current_price.toFixed(1)}M${driver.held_only ? ' · Held only' : ''}</div>
                 <span class="slot-remove" data-slot="driver" data-index="${i}">&times;</span>
             </div>`;
         } else {
@@ -4921,7 +4964,7 @@ function getMyTeamCost() {
     let cost = 0;
     for (const did of myTeamDrivers) {
         if (!did || !data) continue;
-        const d = data.drivers.find(x => x.driver_id === did);
+        const d = findDriverAsset(did);
         if (d) cost += d.current_price;
     }
     for (const cid of myTeamConstructors) {
@@ -4972,19 +5015,7 @@ function notifyMyTeamChanged(reason = 'team-edit') {
 }
 
 function normalizeSavedDriverAssetId(assetId) {
-    const id = String(assetId || '');
-    if (!data || data.drivers.some(driver => driver.driver_id === id)) return id;
-    if (Number(data.round) === 14 && data.driver_assets?.override_active === true) {
-        // Preserve saved teams through the one-round availability replacement:
-        // Hadjar's seat becomes Lawson/Red Bull and the old Lawson asset
-        // becomes Tsunoda/Racing Bulls at the same respective prices.
-        const replacement = {
-            HAD: 'LAW_RED_BULL',
-            LAW: 'TSU_RACING_BULLS',
-        }[id];
-        if (replacement && data.drivers.some(driver => driver.driver_id === replacement)) return replacement;
-    }
-    return id;
+    return String(assetId || '');
 }
 
 function applySavedMemberTeam(team) {
@@ -5014,22 +5045,21 @@ function normalizeOfficialAssetId(asset) {
     const idKey = asset.asset_type === 'constructor' ? 'constructor_id' : 'driver_id';
     const nameKey = asset.asset_type === 'constructor' ? 'name' : 'name';
     if (asset.asset_type === 'driver' && Number(data.round) === 14 && data.driver_assets?.override_active === true) {
-        // The official R14 feed retains both the original and substitute seat
-        // records. Translate its player IDs into the one-round website assets
-        // before matching by name; Lawson appears twice, so name-only matching
-        // cannot distinguish his old Racing Bulls asset from his Red Bull seat.
-        const replacementByOfficialId = {
-            11032: 'LAW_RED_BULL', // Hadjar's Red Bull asset
-            116: 'LAW_RED_BULL',   // Lawson's replacement Red Bull record
-            114: 'TSU_RACING_BULLS', // Lawson's original Racing Bulls asset
-            130: 'TSU_RACING_BULLS', // Tsunoda's replacement Racing Bulls record
+        // The official feed exposes four distinct ownership records. Preserve
+        // the exact held identity instead of silently changing a manager's
+        // Hadjar or original Lawson asset into a replacement driver.
+        const ownershipByOfficialId = {
+            11032: 'HAD',             // held Hadjar record
+            116: 'LAW_RED_BULL',      // new Lawson/Red Bull record
+            114: 'LAW',               // held original Lawson record
+            130: 'TSU_RACING_BULLS',  // new Tsunoda/Racing Bulls record
         };
-        const replacementByName = {
-            isackhadjar: 'LAW_RED_BULL',
+        const ownershipByName = {
+            isackhadjar: 'HAD',
             yukitsunoda: 'TSU_RACING_BULLS',
         };
-        const replacement = replacementByOfficialId[String(asset.asset_id)] || replacementByName[name];
-        if (replacement && pool.some(driver => driver.driver_id === replacement)) return replacement;
+        const ownershipId = ownershipByOfficialId[String(asset.asset_id)] || ownershipByName[name];
+        if (ownershipId && findDriverAsset(ownershipId, pool)) return ownershipId;
     }
     const exact = pool.find(item => String(item[idKey]) === String(asset.asset_id));
     if (exact) return exact[idKey];
@@ -5090,7 +5120,7 @@ function compareTeamCost(teamState, omit = {}) {
     let cost = 0;
     teamState.drivers.forEach((id, idx) => {
         if (!id || (omit.type === 'driver' && omit.index === idx)) return;
-        const driver = data.drivers.find(d => d.driver_id === id);
+        const driver = findDriverAsset(id);
         cost += driver?.current_price || 0;
     });
     teamState.constructors.forEach((id, idx) => {
@@ -5183,7 +5213,7 @@ function renderTeamCompareGrid() {
         let slots = '';
         for (let i = 0; i < 5; i++) {
             const did = teamState.drivers[i];
-            const driver = did ? data.drivers.find(d => d.driver_id === did) : null;
+            const driver = did ? findDriverAsset(did) : null;
             if (driver) {
                 const team = TEAMS[driver.constructor] || { color: '#666' };
                 slots += `<div class="my-team-slot filled compare-slot" style="--team-color:${team.color}" data-team="${teamIdx}" data-slot="driver" data-index="${i}">
@@ -5485,7 +5515,7 @@ function renderTargetTeamGrid() {
     // 5 driver slots
     for (let i = 0; i < 5; i++) {
         const did = targetTeamDrivers[i];
-        const driver = did ? data.drivers.find(d => d.driver_id === did) : null;
+        const driver = did ? findDriverAsset(did) : null;
         if (driver) {
             const team = TEAMS[driver.constructor] || { color: '#666' };
             html += `<div class="my-team-slot filled" style="--team-color:${team.color}" data-slot="driver" data-index="${i}">
@@ -5633,7 +5663,13 @@ function runTransferAdvisor() {
 
     // Scenario-aware view (see runOptimizerSync for rationale).
     const view = getScenarioView();
-    const allDrivers = view.drivers.filter(d => !excludedDrivers.has(d.driver_id));
+    const heldCurrentDrivers = currentDriverIds
+        .map(id => findDriverAsset(id, view.drivers))
+        .filter(driver => driver?.held_only && !excludedDrivers.has(driver.driver_id));
+    const allDrivers = [
+        ...view.drivers.filter(d => !excludedDrivers.has(d.driver_id)),
+        ...heldCurrentDrivers,
+    ];
     const allConstructors = view.constructors.filter(c => !excludedConstructors.has(c.constructor_id));
 
     const numDriverSlots = 5;
@@ -5654,8 +5690,7 @@ function runTransferAdvisor() {
     // includes every current pick and stays comparable with scenario-adjusted
     // transfer candidates.
     const currentDriverObjs = currentDriverIds
-        .map(id => view.drivers.find(d => d.driver_id === id)
-            || data.drivers.find(d => d.driver_id === id))
+        .map(id => findDriverAsset(id, view.drivers))
         .filter(Boolean);
     const currentConstructorObjs = currentConstructorIds
         .map(id => view.constructors.find(c => c.constructor_id === id)
@@ -6045,8 +6080,8 @@ function renderTransferCard(lineup, index, chip) {
         // top-impact swap is shown first. The raw filter order is arbitrary,
         // which made multi-swap rows show nonsensical pairings.
         const sortByBasis = (a, b) => displayPoints(b) - displayPoints(a);
-        const outDrivers = driversOut.map(id => data.drivers.find(d => d.driver_id === id)).filter(Boolean).sort(sortByBasis);
-        const inDrivers  = driversIn.map(id => data.drivers.find(d => d.driver_id === id)).filter(Boolean).sort(sortByBasis);
+        const outDrivers = driversOut.map(id => findDriverAsset(id)).filter(Boolean).sort(sortByBasis);
+        const inDrivers  = driversIn.map(id => findDriverAsset(id)).filter(Boolean).sort(sortByBasis);
         const outCons = consOut.map(id => data.constructors.find(c => c.constructor_id === id)).filter(Boolean).sort(sortByBasis);
         const inCons  = consIn.map(id => data.constructors.find(c => c.constructor_id === id)).filter(Boolean).sort(sortByBasis);
 
@@ -6416,6 +6451,10 @@ function generateTransferCandidates(teamDrivers, teamConstructors, projDriverSco
     const driverPrices = {};
     const conPrices = {};
     for (const d of data.drivers) driverPrices[d.driver_id] = d.current_price;
+    for (const did of teamDrivers) {
+        const held = findDriverAsset(did);
+        if (held) driverPrices[did] = held.current_price;
+    }
     for (const c of data.constructors) conPrices[c.constructor_id] = c.current_price;
 
     const teamDriverSet = new Set(teamDrivers.filter(Boolean));
@@ -6735,7 +6774,7 @@ async function runMultiWeekPlanner() {
     // ordinary appreciation is not mistaken for an advantage created by its
     // transfers.
     const holdDriverObjects = teamDrivers
-        .map(id => data.drivers.find(d => d.driver_id === id))
+        .map(id => findDriverAsset(id))
         .filter(Boolean);
     const holdConstructorObjects = teamCons
         .map(id => data.constructors.find(c => c.constructor_id === id))
@@ -6768,7 +6807,7 @@ async function runMultiWeekPlanner() {
     let feasibilityInfo = null;
     if (useTargetTeam) {
         const targetDriverObjs = targetTeamDrivers.filter(Boolean)
-            .map(id => data.drivers.find(d => d.driver_id === id))
+            .map(id => findDriverAsset(id))
             .filter(Boolean);
         const targetConObjs = targetTeamConstructors.filter(Boolean)
             .map(id => data.constructors.find(c => c.constructor_id === id))
@@ -6777,7 +6816,7 @@ async function runMultiWeekPlanner() {
         const targetCost = targetPicks.reduce((s, p) => s + (p.current_price || 0), 0);
 
         const currentDriverObjs = teamDrivers
-            .map(id => data.drivers.find(d => d.driver_id === id))
+            .map(id => findDriverAsset(id))
             .filter(Boolean);
         const currentConObjs = teamCons
             .map(id => data.constructors.find(c => c.constructor_id === id))
@@ -7037,7 +7076,7 @@ async function runMultiWeekPlanner() {
                     // Mix points + value. P10: weights from MW_TUNABLES.
                     let totalPrice = 0;
                     for (const did of strategyDrivers) {
-                        const d = data.drivers.find(x => x.driver_id === did);
+                        const d = findDriverAsset(did);
                         if (d) totalPrice += d.current_price;
                     }
                     for (const cid of strategyCons) {
@@ -7107,7 +7146,7 @@ async function runMultiWeekPlanner() {
                 // dream team's appreciation (which the user never owned).
                 let roundAppreciation = 0;
                 for (const did of persistedDrivers) {
-                    const d = data.drivers.find(x => x.driver_id === did);
+                    const d = findDriverAsset(did);
                     if (d) {
                         const projPts = proj.drivers[did] || 0;
                         const pc = predictPriceChange(d, projPts);
@@ -7403,10 +7442,10 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
             if (hasSwaps) {
                 for (const swap of action.swaps) {
                     const outName = swap.type === 'driver'
-                        ? (data.drivers.find(d => d.driver_id === swap.out)?.name?.split(' ').pop() || swap.out)
+                        ? (findDriverAsset(swap.out)?.name?.split(' ').pop() || swap.out)
                         : (data.constructors.find(c => c.constructor_id === swap.out)?.name || swap.out).toUpperCase();
                     const inName = swap.type === 'driver'
-                        ? (data.drivers.find(d => d.driver_id === swap.in)?.name?.split(' ').pop() || swap.in)
+                        ? (findDriverAsset(swap.in)?.name?.split(' ').pop() || swap.in)
                         : (data.constructors.find(c => c.constructor_id === swap.in)?.name || swap.in).toUpperCase();
                     html += `<span style="color:var(--red, #ef4444)">${outName}</span> → <span style="color:var(--green)">${inName}</span><br>`;
                 }
@@ -7496,7 +7535,7 @@ function displayMultiWeekResults(plans, roundProjections, currentRound, feasibil
             html += `<div class="mw-team-round-header">R${action.round} — ${action.circuit || action.name}</div>`;
             html += `<div class="mw-team-round-roster">`;
             for (const did of currDrivers) {
-                const d = data.drivers.find(x => x.driver_id === did);
+                const d = findDriverAsset(did);
                 if (!d) continue;
                 const isNew = !prevDrivers.includes(did);
                 const team = TEAMS[d.constructor] || { color: '#666' };

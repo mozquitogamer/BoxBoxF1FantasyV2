@@ -40,9 +40,22 @@ function officialTeamForRecommendation(snapshot, predictions, fallback) {
         [normalizedName(item.full_name), String(item.constructor_id)],
         [normalizedName(item.constructor_id), String(item.constructor_id)],
     ]));
+    const r14OwnershipIds = {
+        11032: 'HAD',
+        116: 'LAW_RED_BULL',
+        114: 'LAW',
+        130: 'TSU_RACING_BULLS',
+    };
     const assets = snapshot.assets.map(item => {
         const lookup = item.asset_type === 'constructor' ? constructors : drivers;
-        const assetId = lookup.get(normalizedName(item.name)) || lookup.get(normalizedName(item.asset_id));
+        const ownershipId = item.asset_type === 'driver'
+            && Number(predictions.round) === 14
+            && predictions.driver_assets?.override_active === true
+            ? r14OwnershipIds[String(item.asset_id)]
+            : null;
+        const assetId = ownershipId
+            || lookup.get(normalizedName(item.name))
+            || lookup.get(normalizedName(item.asset_id));
         return assetId ? { ...item, asset_id: assetId } : null;
     }).filter(Boolean);
     const driverCount = assets.filter(item => item.asset_type === 'driver').length;

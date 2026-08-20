@@ -15,9 +15,33 @@ function assetScore(asset, phase = 'post_fp') {
     return (projected + simulated) / 2;
 }
 
+function heldDriverAssets(predictions) {
+    if (Number(predictions.round) !== 14 || predictions.driver_assets?.override_active !== true) return [];
+    const drivers = predictions.drivers || [];
+    const definitions = [
+        ['HAD', 'Isack Hadjar', 'red_bull', 'LAW_RED_BULL'],
+        ['LAW', 'Liam Lawson', 'racing_bulls', 'TSU_RACING_BULLS'],
+    ];
+    return definitions.map(([driverId, name, constructor, priceSourceId]) => {
+        const source = drivers.find(item => String(item.driver_id) === priceSourceId);
+        if (!source) return null;
+        return {
+            ...source,
+            driver_id: driverId,
+            name,
+            constructor,
+            projected_points: 0,
+            expected_points: 0,
+            projected_points_race: 0,
+            held_only: true,
+        };
+    }).filter(Boolean);
+}
+
 function indexAssets(predictions) {
+    const drivers = [...(predictions.drivers || []), ...heldDriverAssets(predictions)];
     return {
-        drivers: new Map((predictions.drivers || []).map(item => [String(item.driver_id), item])),
+        drivers: new Map(drivers.map(item => [String(item.driver_id), item])),
         constructors: new Map((predictions.constructors || []).map(item => [String(item.constructor_id), item])),
     };
 }
@@ -129,4 +153,4 @@ function buildRecommendation(predictions, team) {
     };
 }
 
-module.exports = { assetScore, bestSingleSwap, buildRecommendation };
+module.exports = { assetScore, bestSingleSwap, buildRecommendation, heldDriverAssets };
