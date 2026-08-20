@@ -236,7 +236,7 @@
 
         panel.innerHTML = `<div class="pit-wall-signed-in"><strong>✓ Signed in to Pit Wall</strong><span>Your saved team and personalized suggestions are connected to this account.</span></div>
         <div class="pit-wall-heading">
-            <div><span>Pit Wall account</span><h4>${escapeHtml(dashboard.email)}</h4></div>
+            <div><span>Pit Wall account</span><h4 aria-label="Email address hidden for privacy"><span class="pit-wall-account-email" aria-hidden="true">••••••••••••••••</span></h4></div>
             <span class="pit-wall-badge ${active ? 'active' : 'inactive'}">${active ? `Active${ending ? ` to ${ending}` : ''}` : 'Membership inactive'}</span>
         </div>
         ${active ? `<p>Your Transfer Advisor edits save automatically. The latest official sync stays separate, so you can always reset back to it.</p>
