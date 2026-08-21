@@ -7,6 +7,7 @@ const {
     getConfig,
     isBeatV13RegistrationOpen,
     isAllowedRequestOrigin,
+    isResendEmailCancellationSettled,
     isValidEmail,
     normalizeEmail,
     resendRequest,
@@ -49,7 +50,7 @@ async function cancelScheduledReminder(providerMessageId, config) {
         // A duplicate confirmation or a retry can encounter a reminder that
         // Resend has already cancelled or delivered. In either case there is
         // no remaining scheduled message to cancel.
-        if (![404, 409].includes(error.status)) throw error;
+        if (!isResendEmailCancellationSettled(error)) throw error;
     }
 }
 
@@ -57,10 +58,13 @@ async function sendConfirmation(entry, email, config, now) {
     const token = createSubscriptionToken(email, config.signingSecret, config.ttlHours, now);
     const confirmationUrl = `${config.siteOrigin}/api/email/confirm?token=${encodeURIComponent(token)}`;
     const cancelUrl = `${config.siteOrigin}/api/email/confirm?action=cancel&token=${encodeURIComponent(token)}`;
-    const emailKey = crypto.createHash('sha256').update(email).digest('hex').slice(0, 32);
+    // The encrypted token contains a fresh IV, so the email body changes on
+    // every retry. Resend requires an idempotency key to identify that exact
+    // request body; an email-only key makes a new token look like a conflict.
+    const confirmationKey = crypto.createHash('sha256').update(token).digest('hex').slice(0, 32);
     const result = await resendRequest('/emails', config.apiKey, {
         method: 'POST',
-        headers: { 'Idempotency-Key': `beat-v13-confirm-${emailKey}` },
+        headers: { 'Idempotency-Key': `beat-v13-confirm-${confirmationKey}` },
         body: {
             from: config.from,
             to: [email],
@@ -120,12 +124,13 @@ async function scheduleReminder(entry, email, config, now) {
     const token = createSubscriptionToken(email, config.signingSecret, config.ttlHours, now);
     const confirmationUrl = `${config.siteOrigin}/api/email/confirm?token=${encodeURIComponent(token)}`;
     const cancelUrl = `${config.siteOrigin}/api/email/confirm?action=cancel&token=${encodeURIComponent(token)}`;
+    const reminderKey = crypto.createHash('sha256').update(`${entry.id}\n${scheduledAt}\n${token}`).digest('hex').slice(0, 32);
 
     let scheduledProviderId = '';
     try {
         const result = await resendRequest('/emails', config.apiKey, {
             method: 'POST',
-            headers: { 'Idempotency-Key': `beat-v13-reminder-${entry.id}` },
+            headers: { 'Idempotency-Key': `beat-v13-reminder-${reminderKey}` },
             body: {
                 from: config.from,
                 to: [email],

@@ -5,6 +5,7 @@ const {
     htmlPage,
     isBeatV13RegistrationOpen,
     beatV13BrowserCookie,
+    isResendEmailCancellationSettled,
     resendRequest,
     verifySubscriptionToken,
 } = require('../../lib/email-subscriptions');
@@ -36,7 +37,7 @@ async function cancelScheduledReminder(providerMessageId, config) {
     } catch (error) {
         // A retry can arrive after Resend has already cancelled or delivered
         // the scheduled message. Neither state leaves a scheduled reminder.
-        if (![404, 409].includes(error.status)) throw error;
+        if (!isResendEmailCancellationSettled(error)) throw error;
     }
 }
 

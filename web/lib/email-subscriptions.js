@@ -139,6 +139,12 @@ async function resendRequest(path, apiKey, options = {}) {
     return data;
 }
 
+function isResendEmailCancellationSettled(error) {
+    const status = Number(error?.status);
+    const message = String(error?.message || error?.details?.message || '');
+    return [404, 409].includes(status) || /\bnot scheduled\b/i.test(message);
+}
+
 function allowedSiteOrigins(siteOrigin) {
     const allowed = new Set([String(siteOrigin || '').replace(/\/$/, '')].filter(Boolean));
     try {
@@ -188,6 +194,7 @@ module.exports = {
     isBeatV13RegistrationOpen,
     isAllowedRequestOrigin,
     isValidEmail,
+    isResendEmailCancellationSettled,
     normalizeEmail,
     parseBeatV13Session,
     resendRequest,

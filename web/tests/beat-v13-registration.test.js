@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 const fs = require('node:fs');
 const test = require('node:test');
 
@@ -31,11 +32,13 @@ function clone(value) {
     return JSON.parse(JSON.stringify(value));
 }
 
-function makeFakeProvider(initialEntry = null) {
+function makeFakeProvider(initialEntry = null, cancellation = {}) {
     const entries = new Map();
     if (initialEntry) entries.set(initialEntry.email_normalized, clone(initialEntry));
     const resendCalls = [];
     const cancellations = [];
+    const cancellationStatus = Number(cancellation.status || 200);
+    const cancellationMessage = cancellation.message || 'Email is not scheduled';
     let nextId = 1;
 
     function response(value, status = 200) {
@@ -110,6 +113,7 @@ function makeFakeProvider(initialEntry = null) {
             if (parsed.pathname.includes('/segments/')) return response({ id: 'segment_test' });
             if (parsed.pathname.endsWith('/cancel')) {
                 cancellations.push(parsed.pathname.split('/').at(-2));
+                if (cancellationStatus !== 200) return response({ message: cancellationMessage }, cancellationStatus);
                 return response({ id: parsed.pathname.split('/').at(-2) });
             }
             if (parsed.pathname === '/emails') {
@@ -191,6 +195,9 @@ test('registration status is pending until confirmation, then confirms and cance
         assert.match(reminder.headers['Idempotency-Key'], /^beat-v13-reminder-/);
 
         const token = tokenFromCall(provider);
+        const confirmation = provider.resendCalls.find(call => call.url.endsWith('/emails') && !call.body.scheduled_at);
+        const expectedConfirmationKey = `beat-v13-confirm-${crypto.createHash('sha256').update(token).digest('hex').slice(0, 32)}`;
+        assert.equal(confirmation.headers['Idempotency-Key'], expectedConfirmationKey);
         const confirmationResponse = mockResponse();
         await confirm({ method: 'GET', headers: {}, query: { token } }, confirmationResponse);
         assert.equal(confirmationResponse.statusCode, 303);
@@ -216,6 +223,27 @@ test('registration status is pending until confirmation, then confirms and cance
         assert.match(accessEmail.headers['Idempotency-Key'], /^beat-v13-access-/);
         assert.match(accessEmail.body.text, /connect one official F1 Fantasy team/i);
         assert.equal(provider.resendCalls.filter(call => call.body.scheduled_at).length, 1);
+    } finally {
+        global.fetch = originalFetch;
+        restore();
+    }
+});
+
+test('confirmation succeeds when Resend reports the reminder is no longer scheduled', async () => {
+    const restore = withEnv();
+    const originalFetch = global.fetch;
+    const provider = makeFakeProvider(null, { status: 400, message: 'Email is not scheduled' });
+    global.fetch = provider.fetchMock;
+    try {
+        const registration = mockResponse();
+        await subscribe(request('already-processed@example.com', '127.0.0.16'), registration);
+        const token = tokenFromCall(provider);
+        const confirmation = mockResponse();
+        await confirm({ method: 'GET', headers: {}, query: { token } }, confirmation);
+
+        assert.equal(confirmation.statusCode, 303);
+        assert.equal(provider.entry.status, 'confirmed');
+        assert.equal(provider.cancellations.length, 1);
     } finally {
         global.fetch = originalFetch;
         restore();
