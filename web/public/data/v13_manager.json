@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-20T13:15:04.322394+02:00",
+  "generated_at": "2026-08-21T17:53:04.737211+02:00",
   "manager": {
     "id": "v13",
     "name": "V13",
@@ -1028,7 +1028,69 @@
       "transfer_penalty": 10,
       "transfers": 3
     },
-    "post_fp_final": null
+    "post_fp_final": {
+      "schema_version": 1,
+      "manager": "v13",
+      "round": 14,
+      "race": "Dutch Grand Prix",
+      "phase": "post_fp",
+      "status": "frozen_before_lock",
+      "published_at": "2026-08-21T15:52:22.437515+00:00",
+      "source_generated_at": "2026-08-21T14:54:16.934088+00:00",
+      "lock_deadline": "2026-08-22T10:00:00Z",
+      "archive": "web/public/data/predictions_round14_post_fp.json",
+      "archive_sha256": "2822e3c8c0dfcdfa606f55ee033175101fbe9fdb661b2c5bff798bf3b34c076c",
+      "previous_decision": "data/v13/decisions/round14_pre_fp_revision6.json",
+      "previous_decision_sha256": "cf8b1386017bbac65ed74d1556c0044577e170a776d6e9828a64c9357ddfa5f2",
+      "price_snapshot_after_round": 13,
+      "drivers": [
+        "LEC",
+        "HAM",
+        "LIN",
+        "BOR",
+        "HUL"
+      ],
+      "constructors": [
+        "mclaren",
+        "ferrari"
+      ],
+      "captain": "HAM",
+      "second_boost": null,
+      "chip": null,
+      "projected_points": 221.6,
+      "projected_price_gain": 1.6,
+      "downside_risk": 58.0,
+      "team_cost": 125.2,
+      "transfers": 3,
+      "transfer_penalty": 10,
+      "changes": {
+        "drivers_out": [
+          "HAD",
+          "LAW",
+          "NOR"
+        ],
+        "drivers_in": [
+          "HAM",
+          "HUL",
+          "LEC"
+        ],
+        "constructors_out": [],
+        "constructors_in": []
+      },
+      "chip_decision": {
+        "result": "save",
+        "current_selected_team_extra_points": 53.0,
+        "largest_remaining_priors_top_two": 92.6,
+        "largest_remaining_priors_round": 18,
+        "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast."
+      },
+      "policy": {
+        "strategy": "budget_builder",
+        "risk_profile": "medium_tolerance",
+        "price_gain_weight": 20.0,
+        "negative_p5_weight": 0.75
+      }
+    }
   },
   "labels": {
     "drivers": {
