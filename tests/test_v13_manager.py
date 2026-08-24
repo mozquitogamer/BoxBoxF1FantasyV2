@@ -51,7 +51,11 @@ def test_v13_uses_only_qualifying_locked_data_for_final_fix() -> None:
     assert live["score_delta_vs_projection"] == 24.4
     assert live["cumulative_points"] == 2840.0
     assert state["early_thoughts"]["race"] == "Italian Grand Prix"
-    assert state["early_thoughts"]["drivers"] == ["ANT", "LEC", "HUL", "LIN", "ALO"]
+    assert state["early_thoughts"]["drivers"] == ["ANT", "HAM", "HUL", "LIN", "BOT"]
+    assert state["early_thoughts"]["constructors"] == ["mercedes", "ferrari"]
+    assert state["early_thoughts"]["policy"]["policy_version"] == (
+        "horizon_budget_value_v2"
+    )
 
 
 def test_r14_early_thoughts_are_frozen_from_a_pre_lock_archive() -> None:
@@ -84,3 +88,35 @@ def test_publishing_an_existing_decision_is_idempotent() -> None:
 
     assert path.read_bytes() == before
     assert decision["archive_sha256"] == v13._sha256(v13.ROOT / decision["archive"])
+
+
+def test_live_price_gain_value_is_horizon_aware_and_calibrated() -> None:
+    assert 4.4 < v13.live_price_gain_value(15) < 4.7
+    assert v13.live_price_gain_value(24) == 0.0
+    assert v13.live_price_gain_value(20) > v13.live_price_gain_value(23)
+
+
+def test_live_monza_policy_no_longer_overvalues_price_growth() -> None:
+    public = v13.build_payload()
+    round_data = publish._round_input(15, "pre_fp")
+    candidate = publish.season.choose_lineup(
+        round_data=round_data,
+        combos=publish.season.build_combo_matrices(round_data),
+        state=publish._state(public),
+        strategy=v13.V13_STRATEGY,
+        chip=None,
+        risk_profile=v13.V13_RISK_PROFILE,
+        price_gain_value=v13.live_price_gain_value(15),
+    )
+
+    assert candidate.constructors == ("mercedes", "ferrari")
+    assert candidate.projected_points == 210.2
+    assert candidate.transfer_penalty == 10
+
+
+def test_public_manager_distinguishes_live_policy_from_replay_policy() -> None:
+    payload = v13.build_payload()
+
+    assert payload["manager"]["policy_version"] == "2026.3"
+    assert payload["manager"]["policy"]["price_gain_weight"] == 4.611
+    assert payload["manager"]["policy"]["research_replay_price_gain_weight"] == 20.0

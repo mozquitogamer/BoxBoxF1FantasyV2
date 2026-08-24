@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import sys
 from dataclasses import replace
 from datetime import datetime
@@ -44,6 +45,14 @@ DECISION_DIR = ROOT / "data" / "v13" / "decisions"
 V13_STRATEGY = "budget_builder"
 V13_RISK_PROFILE = "medium_tolerance"
 FINAL_FIX_MIN_PROJECTED_GAIN = 0.1
+V13_LIVE_POLICY_VERSION = "horizon_budget_value_v2"
+# Calibrated from data/experiments/budget_point_value_2026.json. A forecast
+# price rise is discounted once for price realisation and once for how often
+# extra budget actually converts into future points.
+V13_BUDGET_VALUE_CEILING = 8.567
+V13_BUDGET_VALUE_TAU = 1.8
+V13_PRICE_REALISATION_DISCOUNT = 0.867
+V13_POINTS_REALISATION_DISCOUNT = 0.625
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -91,6 +100,35 @@ def _phase_archive_path(round_num: int, phase: str) -> Path:
         if corrected.exists():
             return corrected
     return archive
+
+
+def live_price_gain_value(round_num: int) -> float:
+    """Decision-grade point value of a forecast $1M rise after this round."""
+    races = _load_json(SEED_DIR / "races.json")["races"]
+    usable_future_rounds = sum(
+        int(row["round"]) > int(round_num) and not row.get("cancelled", False)
+        for row in races
+    )
+    secured_value = V13_BUDGET_VALUE_CEILING * (
+        1.0 - math.exp(-usable_future_rounds / V13_BUDGET_VALUE_TAU)
+    )
+    return round(
+        secured_value
+        * V13_PRICE_REALISATION_DISCOUNT
+        * V13_POINTS_REALISATION_DISCOUNT,
+        3,
+    )
+
+
+def live_policy(round_num: int) -> dict[str, Any]:
+    return {
+        "policy_version": V13_LIVE_POLICY_VERSION,
+        "strategy": V13_STRATEGY,
+        "risk_profile": V13_RISK_PROFILE,
+        "price_gain_weight": live_price_gain_value(round_num),
+        "negative_p5_weight": season.RISK_PROFILE_WEIGHTS[V13_RISK_PROFILE],
+        "price_value_method": "horizon curve × price reliability × points realisation",
+    }
 
 
 def _official_driver_points(
@@ -236,6 +274,7 @@ def _candidate_payload(
         "transfers": candidate.transfers,
         "transfer_penalty": candidate.transfer_penalty,
         "team_cost": candidate.cost,
+        "policy": live_policy(phase_row.round_num),
     }
     if state is not None:
         payload["changes"] = {
@@ -396,6 +435,7 @@ def _auto_early_thoughts(
         strategy=V13_STRATEGY,
         chip=None,
         risk_profile=V13_RISK_PROFILE,
+        price_gain_value=live_price_gain_value(round_num),
     )
     return _candidate_payload(candidate, phase_row, state=state)
 
@@ -835,11 +875,20 @@ def build_payload() -> dict[str, Any]:
             "tagline": "Budget-aware. Medium-risk. Transparent at every decision.",
             "strategy": V13_STRATEGY,
             "risk_profile": V13_RISK_PROFILE,
-            "policy_version": "2026.2",
+            "policy_version": "2026.3",
             "policy": {
                 "team_selection_phase": "post_fp",
                 "early_thoughts_phase": "pre_fp",
-                "price_gain_weight": season.BUDGET_BUILDER_PRICE_GAIN_VALUE,
+                "price_gain_weight": (
+                    live_price_gain_value(next_round) if next_round is not None else 0.0
+                ),
+                "price_gain_method": (
+                    "Horizon-aware budget curve discounted for forecast reliability "
+                    "and realised conversion into future points."
+                ),
+                "research_replay_price_gain_weight": (
+                    season.BUDGET_BUILDER_PRICE_GAIN_VALUE
+                ),
                 "negative_p5_weight": season.RISK_PROFILE_WEIGHTS[V13_RISK_PROFILE],
                 "free_transfers_per_round": season.BASE_FREE_TRANSFERS,
                 "max_free_transfers_after_rollover": season.MAX_BANKED_TRANSFERS,

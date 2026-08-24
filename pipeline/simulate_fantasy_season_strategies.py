@@ -74,6 +74,7 @@ def strategy_price_gain_value(
     strategy: str,
     *,
     chip: str | None = None,
+    override: float | None = None,
 ) -> float:
     values = {
         "max_points": 0.0,
@@ -82,7 +83,9 @@ def strategy_price_gain_value(
     }
     if strategy not in values:
         raise ValueError(f"Unknown manager strategy: {strategy}")
-    return 0.0 if chip == "limitless" else values[strategy]
+    if chip == "limitless":
+        return 0.0
+    return float(values[strategy] if override is None else override)
 
 
 @dataclass
@@ -422,6 +425,7 @@ def choose_lineup(
     strategy: str,
     chip: str | None,
     risk_profile: str = "maximum_tolerance",
+    price_gain_value: float | None = None,
 ) -> Candidate:
     """Return the best legal lineup for one round and manager policy."""
     cost = combos.driver_cost[:, None] + combos.constructor_cost[None, :]
@@ -490,7 +494,11 @@ def choose_lineup(
         legal &= transfers <= free_transfers + MAX_PAID_TRANSFERS_PER_ROUND
 
     points_after_penalty = selection_projected - penalty
-    price_gain_value = strategy_price_gain_value(strategy, chip=chip)
+    price_gain_value = strategy_price_gain_value(
+        strategy,
+        chip=chip,
+        override=price_gain_value,
+    )
     strategy_objective = (
         points_after_penalty + price_gain_value * projected_gain
     )

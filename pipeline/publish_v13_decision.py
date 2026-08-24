@@ -318,6 +318,7 @@ def _decision(
         strategy=v13.V13_STRATEGY,
         chip=None,
         risk_profile=v13.V13_RISK_PROFILE,
+        price_gain_value=v13.live_price_gain_value(round_num),
     )
     chip, chip_decision = _three_x_decision(
         round_num=round_num,
@@ -335,6 +336,7 @@ def _decision(
             strategy=v13.V13_STRATEGY,
             chip=chip,
             risk_profile=v13.V13_RISK_PROFILE,
+            price_gain_value=v13.live_price_gain_value(round_num),
         )
 
     archive = ROOT / round_data.archive_path
@@ -378,12 +380,7 @@ def _decision(
             "constructors_in": incoming_constructors,
         },
         "chip_decision": chip_decision,
-        "policy": {
-            "strategy": v13.V13_STRATEGY,
-            "risk_profile": v13.V13_RISK_PROFILE,
-            "price_gain_weight": season.BUDGET_BUILDER_PRICE_GAIN_VALUE,
-            "negative_p5_weight": season.RISK_PROFILE_WEIGHTS[v13.V13_RISK_PROFILE],
-        },
+        "policy": v13.live_policy(round_num),
     }
 
 
