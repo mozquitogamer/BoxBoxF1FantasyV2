@@ -8,7 +8,6 @@ Environment variables:
     RESEND_API_KEY
     RESEND_FROM
     RESEND_SIM_UPDATES_SEGMENT_ID
-    EMAIL_POSTAL_ADDRESS (required for --draft or --send)
     SITE_ORIGIN (optional; defaults to https://boxboxf1fantasy.com)
 """
 
@@ -52,7 +51,6 @@ def _phase_label(phase: str) -> str:
 def build_broadcast(
     predictions: dict[str, Any],
     site_origin: str,
-    postal_address: str = "[Add sender postal address before sending]",
 ) -> dict[str, str]:
     race = str(predictions.get("race") or "the next Grand Prix")
     round_number = int(predictions.get("round") or 0)
@@ -98,7 +96,7 @@ def build_broadcast(
       <p style="margin:0"><a href="{predictions_url}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 17px;border-radius:7px;font-weight:700">Open the updated predictions</a></p>
     </div>
   </div>
-  <p style="font-size:12px;line-height:1.5;color:#667085;text-align:center">You confirmed that you want BoxBox simulation-update alerts. <a href="{UNSUBSCRIBE_TAG}" style="color:#667085">Unsubscribe</a>.<br>BoxBoxF1Fantasy · {html.escape(postal_address)}</p>
+  <p style="font-size:12px;line-height:1.5;color:#667085;text-align:center">You confirmed that you want BoxBox simulation-update alerts. <a href="{UNSUBSCRIBE_TAG}" style="color:#667085">Unsubscribe</a>.</p>
 </div></body></html>"""
 
     driver_text = "\n".join(
@@ -120,7 +118,6 @@ Top constructors
 
 Open the updated predictions: {predictions_url}
 Unsubscribe: {UNSUBSCRIBE_TAG}
-Sender: BoxBoxF1Fantasy, {postal_address}
 """
 
     return {
@@ -139,7 +136,6 @@ def _required_env(name: str) -> str:
 
 
 def create_resend_broadcast(content: dict[str, str], send: bool) -> dict[str, Any]:
-    _required_env("EMAIL_POSTAL_ADDRESS")
     payload: dict[str, Any] = {
         "segment_id": _required_env("RESEND_SIM_UPDATES_SEGMENT_ID"),
         "from": _required_env("RESEND_FROM"),
@@ -180,8 +176,7 @@ def main() -> None:
     args = parse_args()
     predictions = json.loads(args.predictions.read_text(encoding="utf-8"))
     site_origin = os.environ.get("SITE_ORIGIN", "https://boxboxf1fantasy.com")
-    postal_address = os.environ.get("EMAIL_POSTAL_ADDRESS", "[Add sender postal address before sending]")
-    content = build_broadcast(predictions, site_origin, postal_address)
+    content = build_broadcast(predictions, site_origin)
 
     print(f"Subject: {content['subject']}")
     print(f"Internal name: {content['name']}")

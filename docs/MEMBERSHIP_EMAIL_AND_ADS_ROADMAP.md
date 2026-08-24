@@ -35,7 +35,7 @@ Do this after the race:
 1. Create a Resend account and verify `boxboxf1fantasy.com` with SPF/DKIM. Use a sender such as `BoxBoxF1Fantasy Updates <updates@boxboxf1fantasy.com>`.
 2. Create a Resend segment named `Simulation updates`.
 3. Add the values listed in `web/.env.example` to the Vercel project's Production and Preview environments. Generate `SUBSCRIPTION_SIGNING_SECRET` with a cryptographically random value of at least 32 bytes.
-   Configure `EMAIL_POSTAL_ADDRESS` in the local pipeline environment before creating a draft or send; the broadcaster refuses network delivery without sender-address footer data.
+   Broadcasts use Resend's unsubscribe URL handling; preview and review every draft before sending.
 4. Deploy and call the subscribe/confirm endpoints directly with a test address. The public panel preflights `/api/email/status` and remains hidden until all delivery values are present, even though the feature flag is enabled.
 5. Complete a real browser sign-up, confirmation, and unsubscribe check before promoting the list.
 6. After a simulation update is live on Vercel, preview and then create a draft:

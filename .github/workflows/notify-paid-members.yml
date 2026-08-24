@@ -1,4 +1,4 @@
-name: Notify paid members after a fresh simulation
+name: Notify members after a fresh simulation
 
 on:
   # Deliberately manual. Weather, video, content and code deployments must never
@@ -22,3 +22,14 @@ jobs:
             --header "Content-Type: application/json" \
             --data '{"source":"manual_fresh_simulation"}' \
             https://boxboxf1fantasy.com/api/members/notify/
+
+      - name: Trigger idempotent V13 simulation broadcast
+        env:
+          MEMBER_NOTIFICATION_SECRET: ${{ secrets.MEMBER_NOTIFICATION_SECRET }}
+        run: |
+          curl --fail-with-body --retry 3 --retry-all-errors \
+            --request POST \
+            --header "Authorization: Bearer ${MEMBER_NOTIFICATION_SECRET}" \
+            --header "Content-Type: application/json" \
+            --data '{"source":"manual_fresh_simulation"}' \
+            https://boxboxf1fantasy.com/api/email/broadcast/

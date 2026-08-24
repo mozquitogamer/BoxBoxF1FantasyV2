@@ -64,7 +64,7 @@ To expose the free sign-up form, configure these private values in Vercel:
 
 The website checks `/api/email/status` before showing the form, so missing configuration produces no broken sign-up experience.
 
-For broadcasts, set `EMAIL_POSTAL_ADDRESS` in the private environment used by `pipeline/notify_subscribers.py`. Preview first, create a draft, review it, then send only after the corresponding public simulation deployment is live.
+For broadcasts, use Resend's unsubscribe footer/URL handling. Preview first, create a draft, review it, then send only after the corresponding public simulation deployment is live.
 
 ## Monthly operations
 
