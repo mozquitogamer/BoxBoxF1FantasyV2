@@ -171,14 +171,24 @@ function buildLeaderboard(teams, v13Record) {
     }));
 }
 
+function v13RecordFromData(data) {
+    const livePoints = firstValue(data?.live_status, ['total_points', 'points']);
+    const liveRound = integerOrNull(firstValue(data?.live_status, [
+        'through_round', 'as_of_round',
+    ]));
+    const replayPoints = numberOrZero(data?.research_replay?.total_points);
+    const replayRound = integerOrNull(data?.research_replay?.end_round) || 0;
+    return {
+        points: livePoints === null ? replayPoints : numberOrZero(livePoints),
+        through_round: liveRound || replayRound || Number(data?.current_state?.as_of_round || 0),
+        updated_at: data?.generated_at || null,
+    };
+}
+
 function loadV13Record() {
     const filePath = path.join(__dirname, '..', 'public', 'data', 'v13_manager.json');
     const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    return {
-        points: numberOrZero(data?.research_replay?.total_points),
-        through_round: Number(data?.research_replay?.end_round || data?.current_state?.as_of_round || 0),
-        updated_at: data?.generated_at || null,
-    };
+    return v13RecordFromData(data);
 }
 
 module.exports = {
@@ -191,4 +201,5 @@ module.exports = {
     normalizeEntrant,
     normalizeFeedTeam,
     teamReference,
+    v13RecordFromData,
 };

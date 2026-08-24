@@ -8,6 +8,7 @@ const {
     cleanTeamName,
     loadV13Record,
     teamReference,
+    v13RecordFromData,
 } = require('../lib/beat-v13-leaderboard');
 
 test('only confirmed entrants with a live linked team become public rows', () => {
@@ -82,6 +83,31 @@ test('team names are normalized and bounded', () => {
 
 test('loads the published V13 full-season record', () => {
     const record = loadV13Record();
-    assert.ok(record.points > 0);
-    assert.ok(record.through_round >= 1);
+    assert.equal(record.points, 2840);
+    assert.equal(record.through_round, 14);
+});
+
+test('V13 leaderboard prefers scored live history over the research replay', () => {
+    const record = v13RecordFromData({
+        generated_at: '2026-08-24T12:00:00Z',
+        research_replay: { total_points: 2594, end_round: 13 },
+        live_status: { status: 'live', total_points: 2840, through_round: 14 },
+        current_state: { as_of_round: 14 },
+    });
+
+    assert.deepEqual(record, {
+        points: 2840,
+        through_round: 14,
+        updated_at: '2026-08-24T12:00:00Z',
+    });
+});
+
+test('V13 leaderboard falls back to replay data before live scoring starts', () => {
+    const record = v13RecordFromData({
+        research_replay: { total_points: 2594, end_round: 13 },
+        current_state: { as_of_round: 13 },
+    });
+
+    assert.equal(record.points, 2594);
+    assert.equal(record.through_round, 13);
 });
