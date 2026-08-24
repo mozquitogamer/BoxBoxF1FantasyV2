@@ -128,7 +128,28 @@ def resolve_round_fantasy_price_data(
     if round_num is None:
         return resolved
 
-    override = (resolved.get("round_overrides") or {}).get(str(int(round_num)))
+    overrides = resolved.get("round_overrides") or {}
+    override = overrides.get(str(int(round_num)))
+    if override is None:
+        # A roster/price overlay may deliberately persist from an earlier round
+        # (for example a permanent mid-season driver swap). Apply the newest
+        # matching range without altering earlier price-history snapshots.
+        candidates: list[tuple[int, dict[str, Any]]] = []
+        for key, candidate in overrides.items():
+            if not isinstance(candidate, dict):
+                continue
+            try:
+                key_round = int(key)
+            except (TypeError, ValueError):
+                continue
+            availability = candidate.get("availability") or {}
+            start = int(availability.get("from_round", key_round))
+            end = availability.get("to_round")
+            end = int(end) if end is not None else None
+            if start <= int(round_num) and (end is None or int(round_num) <= end):
+                candidates.append((start, candidate))
+        if candidates:
+            override = max(candidates, key=lambda item: item[0])[1]
     if not isinstance(override, dict):
         return resolved
 

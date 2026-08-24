@@ -7,12 +7,11 @@ the same person/seat identity ambiguous.  This module keeps the historical
 seed roster unchanged and resolves a target round into the active fantasy
 assets that should be shown and scored.
 
-R14 is deliberately represented with internal seat IDs because the public F1
-Fantasy page/feeds did not expose a stable R14 replacement roster when this
-correction was made.  The IDs are deterministic and round-scoped through the
-``availability`` fields below; they are not aliases for the historical ``LAW``
-asset.  A future official-feed refresh can replace the IDs without rewriting
-R1-R13 archives.
+The post-R14 roster is deliberately represented with internal seat IDs because
+the public F1 Fantasy page/feed did not expose stable replacement asset IDs
+when this correction was made. The IDs are deterministic and are not aliases
+for the historical ``LAW`` asset. A future official-feed refresh can replace
+them without rewriting R1-R13 archives.
 """
 
 from __future__ import annotations
@@ -43,9 +42,9 @@ OFFICIAL_ROSTER_SOURCE = {
 
 
 # Deliberately not added to data/seed/drivers.json: that file is the canonical
-# season/history roster and changing it would contaminate R1-R13 joins.  These
-# are *seat assets* with a personal model identity underneath.
-R14_SUBSTITUTION_ASSETS: tuple[dict[str, Any], ...] = (
+# season/history roster and changing it would contaminate R1-R13 joins. These
+# are the active post-R14 seat assets with a personal model identity underneath.
+POST_R14_SUBSTITUTION_ASSETS: tuple[dict[str, Any], ...] = (
     {
         "asset_id": "LAW_RED_BULL",
         "driver_abbrev": "LAW_RED_BULL",
@@ -54,9 +53,9 @@ R14_SUBSTITUTION_ASSETS: tuple[dict[str, Any], ...] = (
         "first_name": "Liam",
         "last_name": "Lawson",
         "number": 30,
-        "price": 14.5,
-        "starting_price": 14.5,
-        "availability": {"from_round": 14, "to_round": 14},
+        "price": 14.3,
+        "starting_price": 14.3,
+        "availability": {"from_round": 14, "to_round": None},
         "legacy_asset_ids": ["LAW"],
         # Applying a constructor change to a driver's model prior is useful,
         # but the seat has no same-weekend evidence before FP1.  These fields
@@ -73,9 +72,9 @@ R14_SUBSTITUTION_ASSETS: tuple[dict[str, Any], ...] = (
         "first_name": "Yuki",
         "last_name": "Tsunoda",
         "number": 22,
-        "price": 10.3,
-        "starting_price": 10.3,
-        "availability": {"from_round": 14, "to_round": 14},
+        "price": 9.7,
+        "starting_price": 9.7,
+        "availability": {"from_round": 14, "to_round": None},
         "legacy_asset_ids": ["TSU"],
         "confidence_multiplier": 0.68,
         "mc_noise_multiplier": 1.35,
@@ -130,19 +129,17 @@ def active_driver_assets(
 ) -> list[dict[str, Any]]:
     """Return the active fantasy driver assets for ``round_num``.
 
-    The default is a copy of the historical 22-driver seed roster.  R14 is a
-    seat-only overlay: Hadjar and the old Racing Bulls Lawson asset are absent;
-    Lawson's personal prior is re-seated at Red Bull and Tsunoda's prior is
-    introduced at Racing Bulls.  R15+ automatically revert to the canonical
-    seed roster unless another explicit overlay is added.
+    The default is a copy of the historical 22-driver seed roster. From R14,
+    the active roster replaces Hadjar and the old Racing Bulls Lawson asset:
+    Lawson is re-seated at Red Bull and Tsunoda is introduced at Racing Bulls.
     """
     assets = _base_assets()
-    if year != 2026 or int(round_num) != 14:
+    if year != 2026 or int(round_num) < 14:
         return assets
 
     inactive = {"HAD", "LAW"}
     assets = [row for row in assets if row["asset_id"] not in inactive]
-    assets.extend(copy.deepcopy(row) for row in R14_SUBSTITUTION_ASSETS)
+    assets.extend(copy.deepcopy(row) for row in POST_R14_SUBSTITUTION_ASSETS)
     if len(assets) != 22:
         raise ValueError(f"R{round_num} active driver roster must contain 22 assets, got {len(assets)}")
     if len({row["asset_id"] for row in assets}) != len(assets):
@@ -226,7 +223,7 @@ def active_price_overrides(
     year: int = CURRENT_SEASON,
 ) -> dict[str, dict[str, Any]]:
     """Return round-scoped driver price entries keyed by active asset ID."""
-    if year != 2026 or int(round_num) != 14:
+    if year != 2026 or int(round_num) < 14:
         return {}
     return {
         asset["asset_id"]: {
@@ -236,13 +233,13 @@ def active_price_overrides(
             "availability": copy.deepcopy(asset["availability"]),
             "legacy_asset_ids": list(asset.get("legacy_asset_ids", [])),
         }
-        for asset in R14_SUBSTITUTION_ASSETS
+        for asset in POST_R14_SUBSTITUTION_ASSETS
     }
 
 
 def roster_provenance(round_num: int, year: int = CURRENT_SEASON) -> dict[str, Any]:
     """Metadata suitable for prediction/website sidecars and audit logs."""
-    is_override = year == 2026 and int(round_num) == 14
+    is_override = year == 2026 and int(round_num) >= 14
     return {
         "round": int(round_num),
         "year": int(year),

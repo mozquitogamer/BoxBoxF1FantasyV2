@@ -62,6 +62,7 @@ from config.fantasy_scoring import (
     CONSTRUCTOR_RACE_DSQ_PENALTY,
 )
 from config.fantasy_prices import load_fantasy_price_maps
+from config.driver_assets import active_driver_assets
 
 # Telemetry-detected overtakes over-count (pit-cycle swaps, SC reshuffles, blue-flag
 # passes), so they're capped to a realistic ceiling. Official counts from
@@ -161,9 +162,9 @@ def load_constructors_info() -> dict:
     return {c["constructor_id"]: c for c in data["constructors"]}
 
 
-def load_fantasy_prices() -> tuple[dict, dict]:
+def load_fantasy_prices(round_num: int | None = None) -> tuple[dict, dict]:
     """Load current fantasy prices."""
-    return load_fantasy_price_maps()
+    return load_fantasy_price_maps(round_num=round_num)
 
 
 def load_jolpica_json(year: int, round_num: int, filename: str) -> Optional[dict]:
@@ -520,7 +521,11 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
     jolpica_to_abbrev, id_data, jolpica_constructor_map = load_id_maps()
     drivers_info = load_drivers_info()
     constructors_info = load_constructors_info()
-    driver_prices, constructor_prices = load_fantasy_prices()
+    driver_prices, constructor_prices = load_fantasy_prices(round_num)
+    active_asset_by_model_id = {
+        str(asset["model_driver_id"]): str(asset["asset_id"])
+        for asset in active_driver_assets(round_num, year)
+    }
     dotd_winner = load_dotd_winner(round_num)
     if dotd_winner:
         print(f"  Driver of the Day: {dotd_winner} (+{RACE_DRIVER_OF_THE_DAY_BONUS} pts)")
@@ -628,6 +633,7 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
     # -- Calculate driver fantasy points --
     driver_outputs = []
     driver_points_by_abbrev = {}  # for constructor calculation
+    actual_constructor_by_abbrev = {}
 
     for r in race_results:
         jol_id = r["jolpica_driver_id"]
@@ -797,7 +803,8 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
         # but we calculated race_pts without it above. Add it now.
         race_pts_with_dotd = race_pts + dotd_pts
         total_pts = quali_pts + race_pts_with_dotd + sprint_pts
-        price = driver_prices.get(abbrev, 0.0)
+        active_asset_id = active_asset_by_model_id.get(jol_id)
+        price = driver_prices.get(abbrev, driver_prices.get(active_asset_id, 0.0))
         ppm = round(total_pts / price, 2) if price > 0 else 0.0
 
         driver_entry = {
@@ -844,6 +851,9 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
 
         driver_outputs.append(driver_entry)
         driver_points_by_abbrev[abbrev] = driver_entry
+        # Constructors must follow the roster that started this race, rather
+        # than the season-start driver seed (which can be stale after a swap).
+        actual_constructor_by_abbrev[abbrev] = constructor_id
 
     # Sort drivers by total points descending
     driver_outputs.sort(key=lambda x: x["total_points"], reverse=True)
@@ -851,11 +861,10 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
     # -- Calculate constructor fantasy points --
     constructor_outputs = []
 
-    # Map constructor -> driver abbreviations from seed data
+    # Map constructor -> driver abbreviations from the actual race roster.
     constructor_drivers: dict[str, list[str]] = {}
-    for d in drivers_info.values():
-        cid = d["constructor_id"]
-        constructor_drivers.setdefault(cid, []).append(d["driver_id"])
+    for abbrev, cid in actual_constructor_by_abbrev.items():
+        constructor_drivers.setdefault(cid, []).append(abbrev)
 
     for cid, cinfo in constructors_info.items():
         c_drivers = constructor_drivers.get(cid, [])
