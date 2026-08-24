@@ -844,7 +844,7 @@ function renderV13() {
         </section>
 
         <section class="v13-section v13-state-section">
-            <div class="v13-section-heading"><div><span>Manager state</span><h2>What V13 owns after R${current.as_of_round}</h2></div><em>Policy v${v13Escape(v13Data.manager.policy_version)}</em></div>
+            <div class="v13-section-heading"><div><span>Manager state</span><h2>Held team entering R${current.next_round}</h2></div><em>After R${current.as_of_round} · before provisional transfers</em></div>
             <div class="v13-state-grid">
                 <div class="v13-owned-team">
                     <h3>Drivers</h3><div class="v13-asset-row">${v13Pills(current.drivers, 'driver')}</div>
@@ -856,7 +856,7 @@ function renderV13() {
                     <span><small>Chip remaining</small><strong>${v13Escape(v13ChipLabel(current.chips_remaining?.[0]))}</strong></span>
                 </div>
             </div>
-            <p class="v13-rules-note">Transfer rule: V13 receives two free transfers every round. One unused transfer can roll over, so the next round can have three, but the bank can never drop below two or rise above three.</p>
+            <p class="v13-rules-note">This is V13's carried team. The Early Thoughts lineup above is provisional; this state changes only when the post-FP final team freezes. Transfer rule: V13 receives two free transfers every round. One unused transfer can roll over, so the next round can have three, but the bank can never drop below two or rise above three. Policy v${v13Escape(v13Data.manager.policy_version)}.</p>
             <div class="v13-chip-ledger">${usedChips}</div>
         </section>
 
