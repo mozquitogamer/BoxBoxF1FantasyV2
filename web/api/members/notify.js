@@ -9,7 +9,7 @@ const {
 } = require('../../lib/member-system');
 const { buildRecommendation } = require('../../lib/personalized-recommendations');
 const { resendRequest } = require('../../lib/email-subscriptions');
-const { ensurePitWallSegment } = require('../../lib/resend-segments');
+const { activeSegmentContacts, ensurePitWallSegment } = require('../../lib/resend-segments');
 const { auditResendSegments, sendV13Broadcast } = require('../../lib/simulation-broadcast');
 const { syncOfficialLink } = require('./team');
 
@@ -109,6 +109,76 @@ function emailBody(profile, recommendation, origin) {
     return { html, text, url };
 }
 
+function genericPitWallEmail(predictions, origin) {
+    const phase = phaseLabel(predictions.phase);
+    const race = String(predictions.race || 'the next Grand Prix');
+    const url = `${origin}/?utm_source=pit_wall_email&utm_medium=simulation_alert&utm_campaign=round_${Number(predictions.round)}_${encodeURIComponent(predictions.phase)}#drivers`;
+    const html = `<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#151922">
+        <div style="background:#0a0d12;color:#fff;border-radius:12px 12px 0 0;padding:22px 26px;border-bottom:3px solid #e10600">
+            <div style="font-size:13px;color:#aab4c3">BoxBox<span style="color:#e10600">F1</span>Fantasy · Pit Wall · R${Number(predictions.round)}</div>
+            <h1 style="margin:7px 0 4px;font-size:25px">Fresh simulations are live</h1>
+            <p style="margin:0;color:#c7d0dc">${htmlEscape(race)} · ${htmlEscape(phase)}</p>
+        </div>
+        <div style="border:1px solid #e4e7ec;border-top:0;border-radius:0 0 12px 12px;padding:22px 26px">
+            <p>The latest projections are ready. Open the Pit Wall to review the updated driver and constructor outlook.</p>
+            <p><a href="${url}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 17px;border-radius:7px;font-weight:700">Open the updated predictions</a></p>
+            <p style="color:#667085;font-size:12px;line-height:1.5">You receive this because your address is on the active Pit Wall member list.</p>
+        </div>
+    </div>`;
+    const text = `BoxBoxF1Fantasy Pit Wall — ${race}\n\nFresh ${phase} simulations are live.\n\nOpen the updated predictions: ${url}\n`;
+    return { subject: `${race}: ${phase} simulations are live`, html, text };
+}
+
+async function sendMissingPitWallContacts(event, predictions, origin) {
+    const segmentId = await ensurePitWallSegment();
+    const contacts = await activeSegmentContacts(segmentId);
+    const alreadyRecorded = new Set(event.payload?.pit_wall_segment_contact_ids || []);
+    const delivered = await restRequest(
+        `member_recommendations?event_id=eq.${encodeURIComponent(event.id)}&delivery_status=eq.sent&select=user_id`,
+        { service: true },
+    ).catch(() => []);
+    const deliveredUserIds = [...new Set((delivered || []).map(item => item.user_id).filter(Boolean))];
+    const deliveredProfiles = deliveredUserIds.length
+        ? await restRequest(`member_profiles?user_id=${inFilter(deliveredUserIds)}&select=email`, { service: true }).catch(() => [])
+        : [];
+    const deliveredEmails = new Set((deliveredProfiles || []).map(profile => String(profile.email || '').trim().toLowerCase()));
+    const content = genericPitWallEmail(predictions, origin);
+    const sentIds = [];
+    let failed = 0;
+
+    for (const contact of contacts) {
+        const email = String(contact.email || '').trim().toLowerCase();
+        if (!email || deliveredEmails.has(email) || alreadyRecorded.has(contact.id)) continue;
+        try {
+            await resendRequest('/emails', process.env.RESEND_API_KEY, {
+                method: 'POST',
+                headers: { 'Idempotency-Key': `pit-wall-segment-${event.id}-${contact.id}` },
+                body: {
+                    from: process.env.RESEND_FROM,
+                    to: [email],
+                    ...content,
+                },
+            });
+            sentIds.push(contact.id);
+        } catch (error) {
+            failed += 1;
+            console.error('Pit Wall segment fallback email failed:', error.message);
+        }
+    }
+
+    if (sentIds.length) {
+        const recordedIds = [...new Set([...alreadyRecorded, ...sentIds])];
+        event.payload = { ...(event.payload || {}), pit_wall_segment_contact_ids: recordedIds };
+        await restRequest(`notification_events?id=eq.${encodeURIComponent(event.id)}`, {
+            service: true,
+            method: 'PATCH',
+            prefer: 'return=minimal',
+            body: { payload: event.payload },
+        });
+    }
+    return { recipients: contacts.length, sent: sentIds.length, failed };
+}
+
 async function getOrCreateEvent(predictions) {
     const generatedAt = predictions.generated_at || predictions.exported_at;
     if (!generatedAt) throw new Error('Predictions do not include generated_at');
@@ -116,7 +186,7 @@ async function getOrCreateEvent(predictions) {
     // refresh, content deploy or code deploy must not create another email.
     const eventKey = notificationEventKey(predictions);
     const existing = await restRequest(
-        `notification_events?season=eq.${Number(predictions.season)}&round=eq.${Number(predictions.round)}&phase=eq.${encodeURIComponent(predictions.phase)}&select=id,event_key,status,created_at&order=created_at.asc`,
+        `notification_events?season=eq.${Number(predictions.season)}&round=eq.${Number(predictions.round)}&phase=eq.${encodeURIComponent(predictions.phase)}&select=id,event_key,status,created_at,payload&order=created_at.asc`,
         { service: true },
     );
     if (existing?.length) {
@@ -141,7 +211,7 @@ async function getOrCreateEvent(predictions) {
     } catch (error) {
         // A simultaneous worker may have won the unique event-key insert.
         const raced = await restRequest(
-            `notification_events?event_key=eq.${encodeURIComponent(eventKey)}&select=id,event_key,status,created_at&limit=1`,
+            `notification_events?event_key=eq.${encodeURIComponent(eventKey)}&select=id,event_key,status,created_at,payload&limit=1`,
             { service: true },
         );
         if (raced?.[0]) return raced[0];
@@ -201,7 +271,16 @@ module.exports = async function notify(req, res) {
 
         event = await getOrCreateEvent(predictions);
         if (!event) throw new Error('Could not create notification event');
-        if (event.status === 'sent') return res.status(200).json({ ok: true, duplicate: true });
+        if (event.status === 'sent') {
+            const supplemental = await sendMissingPitWallContacts(event, predictions, config.siteOrigin);
+            return res.status(supplemental.failed ? 502 : 200).json({
+                ok: supplemental.failed === 0,
+                duplicate: true,
+                segment_recipients: supplemental.recipients,
+                supplemental_sent: supplemental.sent,
+                failed: supplemental.failed,
+            });
+        }
         if (!(await claimEvent(event))) {
             return res.status(200).json({ ok: true, duplicate: true, processing: event.status === 'processing' });
         }
@@ -214,8 +293,15 @@ module.exports = async function notify(req, res) {
             .filter(item => isEntitlementActive(item))
             .map(item => item.user_id))];
         if (!activeUserIds.length) {
-            await setEventStatus(event.id, 'sent');
-            return res.status(200).json({ ok: true, sent: 0, skipped: 0 });
+            const supplemental = await sendMissingPitWallContacts(event, predictions, config.siteOrigin);
+            await setEventStatus(event.id, supplemental.failed ? 'failed' : 'sent');
+            return res.status(supplemental.failed ? 502 : 200).json({
+                ok: supplemental.failed === 0,
+                sent: supplemental.sent,
+                skipped: 0,
+                failed: supplemental.failed,
+                segment_recipients: supplemental.recipients,
+            });
         }
 
         const usersFilter = inFilter(activeUserIds);
@@ -321,8 +407,18 @@ module.exports = async function notify(req, res) {
             }
         }
 
+        const supplemental = await sendMissingPitWallContacts(event, predictions, config.siteOrigin);
+        sent += supplemental.sent;
+        failed += supplemental.failed;
         await setEventStatus(event.id, failed ? 'failed' : 'sent');
-        return res.status(failed ? 502 : 200).json({ ok: failed === 0, sent, skipped, failed });
+        return res.status(failed ? 502 : 200).json({
+            ok: failed === 0,
+            sent,
+            skipped,
+            failed,
+            segment_recipients: supplemental.recipients,
+            supplemental_sent: supplemental.sent,
+        });
     } catch (error) {
         console.error('Member notification worker failed:', error.message);
         if (event?.id) await setEventStatus(event.id, 'failed').catch(() => null);
@@ -331,6 +427,7 @@ module.exports = async function notify(req, res) {
 };
 
 module.exports.emailBody = emailBody;
+module.exports.genericPitWallEmail = genericPitWallEmail;
 module.exports.inFilter = inFilter;
 module.exports.officialTeamForRecommendation = officialTeamForRecommendation;
 module.exports.claimEvent = claimEvent;

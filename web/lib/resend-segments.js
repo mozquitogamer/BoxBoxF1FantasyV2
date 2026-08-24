@@ -49,6 +49,16 @@ async function ensureBeatV13Segment() {
     return ensureSegment(BEAT_V13_SEGMENT_NAME, process.env.RESEND_SIM_UPDATES_SEGMENT_ID);
 }
 
+async function activeSegmentContacts(segmentId) {
+    const apiKey = String(process.env.RESEND_API_KEY || '').trim();
+    if (!apiKey) throw new Error('RESEND_API_KEY is not configured');
+    const contacts = await resendRequest(
+        `/segments/${encodeURIComponent(segmentId)}/contacts?limit=100`,
+        apiKey,
+    );
+    return (contacts?.data || []).filter(contact => contact.unsubscribed !== true && contact.email);
+}
+
 async function addPitWallContact(email) {
     const apiKey = String(process.env.RESEND_API_KEY || '').trim();
     const segmentId = await ensurePitWallSegment();
@@ -71,6 +81,7 @@ async function addPitWallContact(email) {
 module.exports = {
     BEAT_V13_SEGMENT_NAME,
     PIT_WALL_SEGMENT_NAME,
+    activeSegmentContacts,
     ensureSegment,
     addPitWallContact,
     ensureBeatV13Segment,

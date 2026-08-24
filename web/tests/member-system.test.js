@@ -5,7 +5,12 @@ const test = require('node:test');
 
 const { buildRecommendation } = require('../lib/personalized-recommendations');
 const { isAllowedOrigin, safeEqual } = require('../lib/member-system');
-const { inFilter, notificationEventKey, officialTeamForRecommendation } = require('../api/members/notify');
+const {
+    genericPitWallEmail,
+    inFilter,
+    notificationEventKey,
+    officialTeamForRecommendation,
+} = require('../api/members/notify');
 const { paidUntil, parseKofiPayload, sanitizedKofiPayload } = require('../api/webhooks/kofi');
 const { consumeRateLimit } = require('../lib/rate-limit');
 const { applySyncedOfficialSnapshot, preferredMemberTeam, snapshotFingerprint } = require('../public/members');
@@ -204,4 +209,12 @@ test('deduplicates member alerts across regenerated timestamps and deployments',
     const regenerated = { ...first, generated_at: '2026-09-01T12:30:00Z' };
     assert.equal(notificationEventKey(first), '2026:15:post_fp');
     assert.equal(notificationEventKey(regenerated), notificationEventKey(first));
+});
+
+test('builds a generic simulation alert for Pit Wall segment-only contacts', () => {
+    const content = genericPitWallEmail(predictions(), 'https://boxboxf1fantasy.com');
+    assert.equal(content.subject, 'Test Grand Prix: Post-FP simulations are live');
+    assert.match(content.html, /Fresh simulations are live/);
+    assert.match(content.text, /round_15_post_fp/);
+    assert.doesNotMatch(content.html, /RESEND_UNSUBSCRIBE_URL/);
 });
