@@ -3,7 +3,13 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const { activeContactCount, broadcastName, buildBroadcast, phaseLabel } = require('../lib/simulation-broadcast');
+const {
+    activeContactCount,
+    auditResendSegments,
+    broadcastName,
+    buildBroadcast,
+    phaseLabel,
+} = require('../lib/simulation-broadcast');
 
 function predictions() {
     return {
@@ -60,5 +66,38 @@ test('counts only active contacts in the configured V13 segment', async () => {
         assert.equal(await activeContactCount('re_test', 'segment_v13'), 6);
     } finally {
         global.fetch = originalFetch;
+    }
+});
+
+test('audits Resend segment names and counts without exposing contacts', async () => {
+    const originalFetch = global.fetch;
+    const previousEnv = { ...process.env };
+    process.env.RESEND_API_KEY = 're_test';
+    process.env.RESEND_FROM = 'Updates <updates@example.com>';
+    process.env.RESEND_SIM_UPDATES_SEGMENT_ID = 'segment_v13';
+    process.env.SUBSCRIPTION_SIGNING_SECRET = 'test_secret';
+    global.fetch = async url => {
+        if (url === 'https://api.resend.com/segments?limit=100') {
+            return { ok: true, json: async () => ({ data: [{ id: 'default', name: 'Default' }] }) };
+        }
+        assert.equal(url, 'https://api.resend.com/segments/default/contacts?limit=100');
+        return { ok: true, json: async () => ({ data: Array.from({ length: 6 }, (_, index) => ({ id: `contact_${index}` })) }) };
+    };
+    const response = {
+        statusCode: null,
+        payload: null,
+        status(code) { this.statusCode = code; return this; },
+        json(payload) { this.payload = payload; return this; },
+    };
+    try {
+        await auditResendSegments(response);
+        assert.equal(response.statusCode, 200);
+        assert.deepEqual(response.payload, {
+            ok: true,
+            segments: [{ name: 'Default', active_contacts: 6 }],
+        });
+    } finally {
+        global.fetch = originalFetch;
+        process.env = previousEnv;
     }
 });

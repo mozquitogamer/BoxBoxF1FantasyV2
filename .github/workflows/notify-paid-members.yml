@@ -4,6 +4,12 @@ on:
   # Deliberately manual. Weather, video, content and code deployments must never
   # email members. Run this only after publishing a new simulation phase.
   workflow_dispatch:
+    inputs:
+      audit_only:
+        description: Inspect Resend segment counts without sending
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -13,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger idempotent personalized simulation emails
+        if: ${{ !inputs.audit_only }}
         env:
           MEMBER_NOTIFICATION_SECRET: ${{ secrets.MEMBER_NOTIFICATION_SECRET }}
         run: |
@@ -24,6 +31,7 @@ jobs:
             https://boxboxf1fantasy.com/api/members/notify/
 
       - name: Trigger idempotent V13 simulation broadcast
+        if: ${{ !inputs.audit_only }}
         env:
           MEMBER_NOTIFICATION_SECRET: ${{ secrets.MEMBER_NOTIFICATION_SECRET }}
         run: |
@@ -32,4 +40,16 @@ jobs:
             --header "Authorization: Bearer ${MEMBER_NOTIFICATION_SECRET}" \
             --header "Content-Type: application/json" \
             --data '{"source":"manual_fresh_simulation","audience":"v13"}' \
+            https://boxboxf1fantasy.com/api/members/notify/
+
+      - name: Inspect Resend segment counts
+        if: ${{ inputs.audit_only }}
+        env:
+          MEMBER_NOTIFICATION_SECRET: ${{ secrets.MEMBER_NOTIFICATION_SECRET }}
+        run: |
+          curl --fail-with-body --retry 3 --retry-all-errors \
+            --request POST \
+            --header "Authorization: Bearer ${MEMBER_NOTIFICATION_SECRET}" \
+            --header "Content-Type: application/json" \
+            --data '{"audience":"resend_audit"}' \
             https://boxboxf1fantasy.com/api/members/notify/

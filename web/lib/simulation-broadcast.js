@@ -89,6 +89,21 @@ async function activeContactCount(apiKey, segmentId) {
     return (contacts?.data || []).filter(contact => contact.unsubscribed !== true).length;
 }
 
+async function auditResendSegments(res) {
+    try {
+        const config = getConfig();
+        const listed = await resendRequest('/segments?limit=100', config.apiKey);
+        const segments = await Promise.all((listed?.data || []).map(async segment => ({
+            name: segment.name,
+            active_contacts: await activeContactCount(config.apiKey, segment.id),
+        })));
+        return res.status(200).json({ ok: true, segments });
+    } catch (error) {
+        console.error('Resend segment audit failed:', error.message);
+        return res.status(500).json({ ok: false, message: 'Resend segment audit failed.' });
+    }
+}
+
 async function sendV13Broadcast(res) {
     try {
         const config = getConfig();
@@ -136,6 +151,7 @@ async function sendV13Broadcast(res) {
 
 module.exports = {
     activeContactCount,
+    auditResendSegments,
     broadcastName,
     buildBroadcast,
     existingBroadcast,
