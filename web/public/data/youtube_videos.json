@@ -1,7 +1,21 @@
 {
-  "updated": "2026-08-21T10:50:18Z",
+  "updated": "2026-08-23T10:43:44Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "vS34ZioWR2U",
+      "title": "F1 Fantasy Q & A Stream - Dutch Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
+      "published": "2026-08-22",
+      "thumbnail": "https://i.ytimg.com/vi/vS34ZioWR2U/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=vS34ZioWR2U"
+    },
+    {
+      "id": "oTKy-073tFk",
+      "title": "4A Activated! Dutch Grand Prix Final Thoughts for F1 Fantasy - 2026 F1 Fantasy Tips, Tricks & Lineup",
+      "published": "2026-08-21",
+      "thumbnail": "https://i.ytimg.com/vi/oTKy-073tFk/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=oTKy-073tFk"
+    },
     {
       "id": "LwQ64OrHRfE",
       "title": "THE PROPHECY!!! Early Thoughts for the Dutch Grand Prix - 2026 F1 Fantasy",
@@ -15,20 +29,6 @@
       "published": "2026-07-25",
       "thumbnail": "https://i.ytimg.com/vi/ylokDpKFVGI/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=ylokDpKFVGI"
-    },
-    {
-      "id": "al6hZXiyd8g",
-      "title": "F1 Fantasy Q & A Stream - Hungarian Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
-      "published": "2026-07-25",
-      "thumbnail": "https://i.ytimg.com/vi/al6hZXiyd8g/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=al6hZXiyd8g"
-    },
-    {
-      "id": "u7AMcBRr4tQ",
-      "title": "Time for 4A Teams? Early Thoughts for Hungarian Grand Prix - 2026 F1 Fantasy",
-      "published": "2026-07-21",
-      "thumbnail": "https://i.ytimg.com/vi/u7AMcBRr4tQ/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=u7AMcBRr4tQ"
     }
   ]
 }
