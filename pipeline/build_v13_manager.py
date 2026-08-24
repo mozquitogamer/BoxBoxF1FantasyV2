@@ -32,6 +32,7 @@ if str(ROOT) not in sys.path:
 
 from config.settings import SEED_DIR, WEB_DATA_DIR
 from config.driver_assets import active_driver_assets
+from config.fantasy_prices import load_fantasy_price_data
 from pipeline import simulate_fantasy_season_strategies as season
 
 
@@ -100,7 +101,7 @@ def _official_driver_points(
     if asset_id in rows:
         return float(rows[asset_id])
     for asset in active_driver_assets(14):
-        if asset["asset_id"] != asset_id:
+        if asset["asset_id"] != asset_id and asset_id not in asset.get("legacy_asset_ids", []):
             continue
         candidates = [asset.get("model_driver_id"), *asset.get("legacy_asset_ids", [])]
         for candidate in candidates:
@@ -111,6 +112,12 @@ def _official_driver_points(
         # A zero history is explicit and keeps R1-R13 records untouched.
         if asset.get("asset_context", "").startswith("substitute"):
             return 0.0
+    # A historical asset can disappear from the active roster after a seat
+    # substitution (Hadjar is absent from the R14 official field, for
+    # example). It has no points for that round; do not let the missing seat
+    # prevent the next-round forecast from being built.
+    if int(round_num) >= 14:
+        return 0.0
     raise KeyError(asset_id)
 
 
@@ -205,9 +212,15 @@ def _phase_projection(
     )
 
 
-def _candidate_payload(candidate: season.Candidate, phase_row: season.RoundInputs) -> dict[str, Any]:
+def _candidate_payload(
+    candidate: season.Candidate,
+    phase_row: season.RoundInputs,
+    state: season.TeamState | None = None,
+) -> dict[str, Any]:
     archive = ROOT / phase_row.archive_path
-    return {
+    payload: dict[str, Any] = {
+        "round": phase_row.round_num,
+        "race": phase_row.race_name,
         "status": "provisional",
         "phase": "pre_fp",
         "archive": phase_row.archive_path,
@@ -224,6 +237,18 @@ def _candidate_payload(candidate: season.Candidate, phase_row: season.RoundInput
         "transfer_penalty": candidate.transfer_penalty,
         "team_cost": candidate.cost,
     }
+    if state is not None:
+        payload["changes"] = {
+            "drivers_out": sorted(set(state.drivers) - set(candidate.drivers)),
+            "drivers_in": sorted(set(candidate.drivers) - set(state.drivers)),
+            "constructors_out": sorted(
+                set(state.constructors) - set(candidate.constructors)
+            ),
+            "constructors_in": sorted(
+                set(candidate.constructors) - set(state.constructors)
+            ),
+        }
+    return payload
 
 
 def _early_thoughts(
@@ -265,6 +290,299 @@ def _early_thoughts(
             free_transfers=int(final_row["free_transfers_next"]),
         )
     return output
+
+
+def _future_phase_projection(
+    round_num: int,
+    phase: str,
+    official: dict[str, Any],
+) -> season.RoundInputs | None:
+    """Build a projection row for a future round before official results exist."""
+    archive = _phase_archive_path(round_num, phase)
+    if not archive.exists():
+        return None
+    payload = _load_json(archive)
+    if payload.get("phase") != phase:
+        return None
+
+    archive_drivers = {row["driver_id"]: row for row in payload["drivers"]}
+    archive_constructors = {
+        row["constructor_id"]: row for row in payload["constructors"]
+    }
+    drivers = tuple(archive_drivers)
+    constructors = tuple(archive_constructors)
+    prices = load_fantasy_price_data(round_num=round_num)
+    driver_price_map = prices.get("drivers", {})
+    constructor_price_map = prices.get("constructors", {})
+
+    def price(group: dict[str, Any], asset_id: str, fallback: float) -> float:
+        entry = group.get(asset_id) or {}
+        value = entry.get("current_price")
+        return float(value if value is not None else fallback)
+
+    driver_prices = np.array(
+        [
+            price(
+                driver_price_map,
+                key,
+                float(archive_drivers[key].get("current_price", archive_drivers[key].get("price", 0.0))),
+            )
+            for key in drivers
+        ],
+        dtype=float,
+    )
+    constructor_prices = np.array(
+        [
+            price(
+                constructor_price_map,
+                key,
+                float(archive_constructors[key].get("current_price", archive_constructors[key].get("price", 0.0))),
+            )
+            for key in constructors
+        ],
+        dtype=float,
+    )
+    track_data = _load_json(WEB_DATA_DIR / "track_data.json")
+    race_name = payload.get("race") or f"Round {round_num}"
+    circuit_id = track_data["race_circuit_map"].get(race_name, "unknown")
+    features = track_data["track_features"].get(circuit_id, {})
+    base = season.RoundInputs(
+        round_num=round_num,
+        race_name=race_name,
+        reconstructed=bool(payload.get("reconstructed", False)),
+        archive_path=str(archive.relative_to(ROOT)).replace("\\", "/"),
+        drivers=drivers,
+        constructors=constructors,
+        driver_projection=np.zeros(len(drivers)),
+        constructor_projection=np.zeros(len(constructors)),
+        driver_p5=np.zeros(len(drivers)),
+        constructor_p5=np.zeros(len(constructors)),
+        driver_std=np.zeros(len(drivers)),
+        driver_prices=driver_prices,
+        constructor_prices=constructor_prices,
+        driver_close_prices=driver_prices.copy(),
+        constructor_close_prices=constructor_prices.copy(),
+        driver_actual=np.zeros(len(drivers)),
+        constructor_actual=np.zeros(len(constructors)),
+        driver_projected_gain=np.zeros(len(drivers)),
+        constructor_projected_gain=np.zeros(len(constructors)),
+        circuit_id=circuit_id,
+        overtaking_difficulty=int(features.get("overtaking_difficulty", 5)),
+        turn1_incident_risk=int(features.get("turn1_incident_risk", 5)),
+        safety_car_probability=int(features.get("safety_car_probability", 5)),
+    )
+    completed = sorted(int(value) for value in official if int(value) < round_num)
+    return _phase_projection(
+        base,
+        phase=phase,
+        official=official,
+        completed_rounds=completed,
+    )
+
+
+def _auto_early_thoughts(
+    round_num: int,
+    state: season.TeamState,
+    official: dict[str, Any],
+) -> dict[str, Any] | None:
+    """Create a provisional next-round decision when its pre-FP archive exists."""
+    phase_row = _future_phase_projection(round_num, "pre_fp", official)
+    if phase_row is None:
+        return None
+    candidate = season.choose_lineup(
+        round_data=phase_row,
+        combos=season.build_combo_matrices(phase_row),
+        state=state,
+        strategy=V13_STRATEGY,
+        chip=None,
+        risk_profile=V13_RISK_PROFILE,
+    )
+    return _candidate_payload(candidate, phase_row, state=state)
+
+
+def _next_scheduled_round(after_round: int) -> int | None:
+    races = _load_json(SEED_DIR / "races.json")["races"]
+    upcoming = [
+        int(row["round"])
+        for row in races
+        if int(row["round"]) > int(after_round) and not row.get("cancelled", False)
+    ]
+    return min(upcoming) if upcoming else None
+
+
+def _actual_driver_points(
+    official_round: dict[str, Any], round_num: int, asset_id: str
+) -> float:
+    rows = official_round["drivers"]
+    if asset_id in rows:
+        return float(rows[asset_id])
+    for asset in active_driver_assets(round_num):
+        if asset["asset_id"] != asset_id and asset_id not in asset.get("legacy_asset_ids", []):
+            continue
+        for candidate in [asset.get("model_driver_id"), *asset.get("legacy_asset_ids", [])]:
+            if candidate in rows:
+                return float(rows[candidate])
+        return 0.0
+    raise KeyError(f"R{round_num} official points are missing {asset_id}")
+
+
+def _live_actual_score(
+    decision: dict[str, Any],
+    official_round: dict[str, Any],
+    round_num: int,
+) -> tuple[float, str, str | None]:
+    driver_scores = {
+        key: _actual_driver_points(official_round, round_num, key)
+        for key in decision["drivers"]
+    }
+    constructor_scores = {
+        key: float(official_round["constructors"][key])
+        for key in decision["constructors"]
+    }
+    chip = decision.get("chip")
+    if chip == "no_negative":
+        driver_scores = {key: max(0.0, value) for key, value in driver_scores.items()}
+        constructor_scores = {
+            key: max(0.0, value) for key, value in constructor_scores.items()
+        }
+    captain = decision.get("captain")
+    second = decision.get("second_boost")
+    if chip == "autopilot":
+        captain = max(driver_scores, key=driver_scores.get)
+        second = None
+    captain_bonus = float(driver_scores[captain]) if captain else 0.0
+    if chip == "3x_boost":
+        captain_bonus += float(driver_scores[captain])
+        if second:
+            captain_bonus += float(driver_scores[second])
+    gross = sum(driver_scores.values()) + sum(constructor_scores.values()) + captain_bonus
+    return (
+        round(gross - float(decision.get("transfer_penalty", 0)), 1),
+        str(captain),
+        str(second) if second else None,
+    )
+
+
+def _price_after_round(round_num: int) -> dict[str, Any]:
+    return load_fantasy_price_data(round_num=round_num)
+
+
+def _live_rounds_and_state(
+    manager: dict[str, Any],
+    final_fix: dict[str, Any] | None,
+    official: dict[str, Any],
+) -> tuple[list[dict[str, Any]], dict[str, Any], dict[str, int]]:
+    """Roll the published V13 team through completed post-replay rounds."""
+    final_drivers = list(manager["summary"]["final_drivers"])
+    final_bank = float(manager["summary"]["final_bank"])
+    if final_fix:
+        final_drivers[final_drivers.index(final_fix["outgoing"])] = final_fix["incoming"]
+        final_bank = float(final_fix["bank_after"])
+
+    chips_used: dict[str, int] = {
+        chip: int(round_num)
+        for round_num, chip in manager.get("chip_schedule", {}).items()
+    }
+    if final_fix:
+        chips_used["final_fix"] = int(final_fix["round"])
+    state: dict[str, Any] = {
+        "drivers": final_drivers,
+        "constructors": list(manager["summary"]["final_constructors"]),
+        "budget": float(manager["summary"]["final_budget"]),
+        "bank": final_bank,
+        "free_transfers": int(manager["rounds"][-1]["free_transfers_next"]),
+    }
+    cumulative = float(manager["summary"]["season_points"]) + (
+        float(final_fix["actual_gain"]) if final_fix else 0.0
+    )
+    live_rounds: list[dict[str, Any]] = []
+    replay_end = int(manager["rounds"][-1]["round"])
+
+    for round_num in sorted(int(value) for value in official if int(value) > replay_end):
+        early = _live_decision(round_num, "pre_fp")
+        final = _live_decision(round_num, "post_fp") or early
+        if final is None:
+            break
+        official_round = official[str(round_num)]
+        actual_points, actual_captain, actual_second = _live_actual_score(
+            final, official_round, round_num
+        )
+        chip = final.get("chip")
+        previous_state = season.TeamState(
+            drivers=tuple(state["drivers"]),
+            constructors=tuple(state["constructors"]),
+            bank=float(state["bank"]),
+            budget=float(state["budget"]),
+            free_transfers=int(state["free_transfers"]),
+        )
+        if chip == "limitless":
+            persistent_drivers = list(previous_state.drivers)
+            persistent_constructors = list(previous_state.constructors)
+            bank_after = previous_state.bank
+        else:
+            persistent_drivers = list(final["drivers"])
+            persistent_constructors = list(final["constructors"])
+            bank_after = round(
+                previous_state.budget - float(final.get("team_cost", 0.0)), 1
+            )
+        free_next = season.next_free_transfers(
+            previous_state.free_transfers,
+            int(final.get("transfers", 0)),
+            chip,
+        )
+
+        prices = _price_after_round(round_num)
+        driver_prices = prices.get("drivers", {})
+        constructor_prices = prices.get("constructors", {})
+
+        def close_price(group: dict[str, Any], asset_id: str) -> float:
+            entry = group.get(asset_id) or {}
+            if isinstance(entry, dict):
+                value = entry.get("current_price")
+            else:
+                value = entry
+            return float(value if value is not None else 0.0)
+
+        budget_after = round(
+            bank_after
+            + sum(close_price(driver_prices, key) for key in persistent_drivers)
+            + sum(close_price(constructor_prices, key) for key in persistent_constructors),
+            1,
+        )
+        cumulative += actual_points
+        final_snapshot = dict(final)
+        final_snapshot.setdefault("reasons", _reason_lines(final))
+        live_rounds.append(
+            {
+                "round": round_num,
+                "race": official_round.get("race") or final.get("race") or f"Round {round_num}",
+                "provenance": "live",
+                "early_thoughts": early,
+                "post_fp_final": final_snapshot,
+                "final_fix": _live_decision(round_num, "post_quali"),
+                "actual_points": round(actual_points, 1),
+                "projected_points": round(float(final.get("projected_points", 0.0)), 1),
+                "score_delta_vs_projection": round(
+                    actual_points - float(final.get("projected_points", 0.0)), 1
+                ),
+                "cumulative_points": round(cumulative, 1),
+                "budget_after": budget_after,
+                "free_transfers_next": free_next,
+                "actual_captain": actual_captain,
+                "actual_second_boost": actual_second,
+            }
+        )
+        state = {
+            "drivers": persistent_drivers,
+            "constructors": persistent_constructors,
+            "budget": budget_after,
+            "bank": round(bank_after, 1),
+            "free_transfers": free_next,
+        }
+        if chip in season.CHIPS:
+            chips_used[chip] = round_num
+
+    return live_rounds, state, chips_used
 
 
 def _valid_post_quali_archive(round_num: int) -> Path | None:
@@ -406,8 +724,9 @@ def build_payload() -> dict[str, Any]:
     experiment = _load_json(EXPERIMENT_PATH)
     manager = _v13_manager(experiment)
     driver_names, constructor_names = _names()
-    base_rounds = season.load_rounds()
+    official = _load_json(SEED_DIR / "official_fantasy_points.json")["rounds"]
     final_rows = manager["rounds"]
+    base_rounds = season.load_rounds(through_round=int(final_rows[-1]["round"]))
     early = _early_thoughts(final_rows, base_rounds)
 
     final_fix = None
@@ -471,11 +790,41 @@ def build_payload() -> dict[str, Any]:
             }
         )
 
-    final_drivers = list(manager["summary"]["final_drivers"])
-    final_bank = float(manager["summary"]["final_bank"])
+    replay_final_bank = float(manager["summary"]["final_bank"])
     if final_fix:
-        final_drivers[final_drivers.index(final_fix["outgoing"])] = final_fix["incoming"]
-        final_bank = float(final_fix["bank_after"])
+        replay_final_bank = float(final_fix["bank_after"])
+    live_rounds, live_state, chips_used = _live_rounds_and_state(
+        manager,
+        final_fix,
+        official,
+    )
+    completed_rounds = sorted(int(value) for value in official)
+    as_of_round = live_rounds[-1]["round"] if live_rounds else int(final_rows[-1]["round"])
+    next_round = _next_scheduled_round(as_of_round)
+    state_for_optimizer = season.TeamState(
+        drivers=tuple(live_state["drivers"]),
+        constructors=tuple(live_state["constructors"]),
+        bank=float(live_state["bank"]),
+        budget=float(live_state["budget"]),
+        free_transfers=int(live_state["free_transfers"]),
+    )
+    next_early = None
+    next_post_fp = None
+    if next_round is not None:
+        next_early = _live_decision(next_round, "pre_fp") or _auto_early_thoughts(
+            next_round,
+            state_for_optimizer,
+            official,
+        )
+        next_post_fp = _live_decision(next_round, "post_fp")
+    latest_live = live_rounds[-1] if live_rounds else None
+    live_total = round(
+        latest_live["cumulative_points"]
+        if latest_live
+        else float(manager["summary"]["season_points"])
+        + (float(final_fix["actual_gain"]) if final_fix else 0.0),
+        1,
+    )
 
     return {
         "schema_version": 1,
@@ -528,30 +877,38 @@ def build_payload() -> dict[str, Any]:
                 float(manager["summary"]["season_points"]) + score_adjustment, 1
             ),
             "final_budget": manager["summary"]["final_budget"],
-            "final_bank": round(final_bank, 1),
+            "final_bank": round(replay_final_bank, 1),
             "genuine_archive_points_before_final_fix": manager["summary"][
                 "genuine_archive_points"
             ],
             "rounds": rounds,
         },
+        "live_history": live_rounds,
+        "live_status": {
+            "status": "live" if latest_live else "replay_only",
+            "through_round": as_of_round,
+            "race": latest_live["race"] if latest_live else None,
+            "round_points": latest_live["actual_points"] if latest_live else None,
+            "projected_points": latest_live["projected_points"] if latest_live else None,
+            "score_delta_vs_projection": (
+                latest_live["score_delta_vs_projection"] if latest_live else None
+            ),
+            "total_points": live_total,
+            "budget": round(float(live_state["budget"]), 1),
+            "bank": round(float(live_state["bank"]), 1),
+        },
         "current_state": {
-            "as_of_round": 13,
-            "drivers": final_drivers,
-            "constructors": manager["summary"]["final_constructors"],
-            "budget": manager["summary"]["final_budget"],
-            "bank": round(final_bank, 1),
-            "free_transfers": final_rows[-1]["free_transfers_next"],
-            "chips_remaining": ["3x_boost"],
-            "chips_used": {
-                **{
-                    chip: int(round_num)
-                    for round_num, chip in manager.get("chip_schedule", {}).items()
-                },
-                "final_fix": final_fix["round"] if final_fix else None,
-            },
-            "next_round": 14,
-            "early_thoughts": _live_decision(14, "pre_fp"),
-            "post_fp_final": _live_decision(14, "post_fp"),
+            "as_of_round": as_of_round,
+            "drivers": live_state["drivers"],
+            "constructors": live_state["constructors"],
+            "budget": round(float(live_state["budget"]), 1),
+            "bank": round(float(live_state["bank"]), 1),
+            "free_transfers": int(live_state["free_transfers"]),
+            "chips_remaining": [chip for chip in season.CHIPS if chip not in chips_used],
+            "chips_used": chips_used,
+            "next_round": next_round,
+            "early_thoughts": next_early,
+            "post_fp_final": next_post_fp,
         },
         "labels": {
             "drivers": driver_names,
@@ -560,6 +917,8 @@ def build_payload() -> dict[str, Any]:
         "source": {
             "experiment": str(EXPERIMENT_PATH.relative_to(ROOT)).replace("\\", "/"),
             "experiment_sha256": _sha256(EXPERIMENT_PATH),
+            "official_points_rounds": completed_rounds,
+            "live_decisions": [row["round"] for row in live_rounds],
         },
     }
 

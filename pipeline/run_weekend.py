@@ -120,6 +120,11 @@ PHASES = {
             # updated current-round predictions. Non-fatal if it fails — the
             # planner falls back to the affinity heuristic.
             ("predict_horizon.py", ["--current-round", "{round}", "--horizon", "5"], {"non_fatal": True}),
+            # Freeze the Beat V13 early-thoughts decision from the freshly
+            # exported pre-FP archive. The publisher rebuilds the public live
+            # state first. Keep this non-fatal so a page-only issue cannot stop
+            # the core prediction/export weekend flow.
+            ("publish_v13_decision.py", ["--round", "{round}", "--phase", "pre_fp"], {"non_fatal": True}),
             # SEO: regenerate the static /picks/ race landing pages from the
             # freshly exported JSON. Non-fatal — a failure won't abort the weekend.
             ("14_build_seo_pages.py", [], {"non_fatal": True}),
@@ -137,6 +142,7 @@ PHASES = {
             ("10_fp_analysis.py", ["--round", "{round}"]),
             ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_fp"]),
             ("predict_horizon.py", ["--current-round", "{round}", "--horizon", "5"], {"non_fatal": True}),
+            ("publish_v13_decision.py", ["--round", "{round}", "--phase", "post_fp"], {"non_fatal": True}),
             ("14_build_seo_pages.py", [], {"non_fatal": True}),
         ],
     },
@@ -177,6 +183,9 @@ PHASES = {
             # This avoids a second run producing different totals from the first.
             ("11_actual_fantasy_points.py", ["--round", "{round}"]),
             ("08_export_website_json.py", ["--round", "{round}"]),
+            # Official points and prices now exist, so roll V13's live score,
+            # budget and next-round state forward automatically.
+            ("build_v13_manager.py", [], {"non_fatal": True}),
             ("14_build_seo_pages.py", [], {"non_fatal": True}),
         ],
     },

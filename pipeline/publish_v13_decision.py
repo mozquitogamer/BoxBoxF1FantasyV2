@@ -28,7 +28,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from config.settings import SEED_DIR, WEB_DATA_DIR
-from config.driver_assets import active_driver_assets
 from config.fantasy_prices import load_fantasy_price_data
 from pipeline import build_v13_manager as v13
 from pipeline import simulate_fantasy_season_strategies as season
@@ -111,22 +110,45 @@ def _round_input(round_num: int, phase: str) -> season.RoundInputs:
             f"after the {lock} lock"
         )
 
-    constructor_roster = v13._load_json(SEED_DIR / "constructors.json")["constructors"]
-    # Resolve the active Fantasy asset set for this round.  The model's
-    # historical identities remain underneath the archived prediction, while
-    # V13 decisions use the seat-scoped IDs for the live lineup.
-    driver_roster = active_driver_assets(round_num)
-    drivers = tuple(row["asset_id"] for row in driver_roster)
-    constructors = tuple(row["constructor_id"] for row in constructor_roster)
+    # Use the roster actually frozen into the phase archive. This keeps the
+    # V13 decision aligned with a pre-FP export even when a seat correction is
+    # introduced between phases or an older archive still carries its legacy
+    # asset IDs.
+    archive_drivers = {row["driver_id"]: row for row in payload["drivers"]}
+    archive_constructors = {
+        row["constructor_id"]: row for row in payload["constructors"]
+    }
+    drivers = tuple(archive_drivers)
+    constructors = tuple(archive_constructors)
     prices = load_fantasy_price_data(round_num=round_num)
-    driver_prices = np.array([
-        float((prices.get("drivers", {}).get(key) or {}).get("current_price", 0.0))
-        for key in drivers
-    ])
-    constructor_prices = np.array([
-        float((prices.get("constructors", {}).get(key) or {}).get("current_price", 0.0))
-        for key in constructors
-    ])
+    driver_price_map = prices.get("drivers", {})
+    constructor_price_map = prices.get("constructors", {})
+
+    def price(group: dict[str, Any], key: str, fallback: float) -> float:
+        entry = group.get(key) or {}
+        value = entry.get("current_price") if isinstance(entry, dict) else entry
+        return float(value if value is not None else fallback)
+
+    driver_prices = np.array(
+        [
+            price(
+                driver_price_map,
+                key,
+                float(archive_drivers[key].get("current_price", 0.0)),
+            )
+            for key in drivers
+        ]
+    )
+    constructor_prices = np.array(
+        [
+            price(
+                constructor_price_map,
+                key,
+                float(archive_constructors[key].get("current_price", 0.0)),
+            )
+            for key in constructors
+        ]
+    )
 
     official = v13._load_json(SEED_DIR / "official_fantasy_points.json")["rounds"]
     completed = sorted(int(value) for value in official if int(value) < round_num)
@@ -381,12 +403,12 @@ def _sync_public(public: dict[str, Any], decision: dict[str, Any]) -> None:
 def publish(round_num: int, phase: str) -> dict[str, Any]:
     if phase not in PHASE_ORDER:
         raise ValueError(f"Unsupported V13 phase: {phase}")
-    if not PUBLIC_PATH.exists():
-        v13.main()
+    # Rebuild the public record first so an official post-race update rolls
+    # V13's held team and budget into the next round before a new decision is
+    # frozen. This is what keeps the Beat V13 page moving with the weekend
+    # pipeline instead of relying on a manual refresh.
+    v13.main()
     public = v13._load_json(PUBLIC_PATH)
-    expected_round = int(public["current_state"]["next_round"])
-    if round_num != expected_round:
-        raise ValueError(f"V13 currently expects R{expected_round}, not R{round_num}")
 
     path = DECISION_DIR / f"round{round_num}_{phase}.json"
     if path.exists():
@@ -401,8 +423,16 @@ def publish(round_num: int, phase: str) -> dict[str, Any]:
             key=lambda item: int(item.stem.rsplit("revision", 1)[1]),
         )
         active = v13._load_json(revisions[-1]) if revisions else existing
-        _sync_public(public, active)
+        # Older frozen decisions remain valid audit records after the public
+        # state has advanced to a later round. They must stay idempotent and
+        # must not rewind the live page.
+        if int(public["current_state"]["next_round"]) == round_num:
+            _sync_public(public, active)
         return active
+
+    expected_round = int(public["current_state"]["next_round"])
+    if round_num != expected_round:
+        raise ValueError(f"V13 currently expects R{expected_round}, not R{round_num}")
 
     if phase == "post_fp" and not (DECISION_DIR / f"round{round_num}_pre_fp.json").exists():
         raise RuntimeError("Publish the pre-FP early-thoughts record first")

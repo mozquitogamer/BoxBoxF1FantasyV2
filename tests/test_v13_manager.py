@@ -34,12 +34,24 @@ def test_v13_uses_only_qualifying_locked_data_for_final_fix() -> None:
     assert round_13["cumulative_points"] == 2594.0
 
     state = payload["current_state"]
-    assert "NOR" in state["drivers"]
-    assert "HAM" not in state["drivers"]
-    assert state["bank"] == 1.3
+    assert state["as_of_round"] == 14
+    assert state["next_round"] == 15
+    assert state["drivers"] == ["LEC", "HAM", "LIN", "BOR", "HUL"]
+    assert state["constructors"] == ["mclaren", "ferrari"]
+    assert state["budget"] == 127.0
+    assert state["bank"] == 0.1
     assert state["free_transfers"] == 2
     assert state["chips_used"]["wild_card"] == 7
     assert state["chips_remaining"] == ["3x_boost"]
+
+    live = payload["live_history"][-1]
+    assert live["round"] == 14
+    assert live["actual_points"] == 246.0
+    assert live["projected_points"] == 221.6
+    assert live["score_delta_vs_projection"] == 24.4
+    assert live["cumulative_points"] == 2840.0
+    assert state["early_thoughts"]["race"] == "Italian Grand Prix"
+    assert state["early_thoughts"]["drivers"] == ["ANT", "LEC", "HUL", "LIN", "ALO"]
 
 
 def test_r14_early_thoughts_are_frozen_from_a_pre_lock_archive() -> None:

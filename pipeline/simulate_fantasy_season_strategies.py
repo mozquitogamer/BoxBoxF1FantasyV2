@@ -195,7 +195,7 @@ def _expected_price_change(
     return change
 
 
-def load_rounds() -> list[RoundInputs]:
+def load_rounds(through_round: int | None = None) -> list[RoundInputs]:
     official = _load_json(SEED_DIR / "official_fantasy_points.json")["rounds"]
     prices = _load_json(SEED_DIR / "fantasy_prices.json")["price_history"]
     track_data = _load_json(WEB_DATA_DIR / "track_data.json")
@@ -203,7 +203,11 @@ def load_rounds() -> list[RoundInputs]:
     constructor_roster = _load_json(SEED_DIR / "constructors.json")["constructors"]
     driver_ids = tuple(row["driver_id"] for row in driver_roster)
     constructor_ids = tuple(row["constructor_id"] for row in constructor_roster)
-    completed_rounds = sorted(int(value) for value in official)
+    completed_rounds = sorted(
+        int(value)
+        for value in official
+        if through_round is None or int(value) <= int(through_round)
+    )
     output: list[RoundInputs] = []
 
     driver_history: dict[str, list[float]] = {key: [] for key in driver_ids}

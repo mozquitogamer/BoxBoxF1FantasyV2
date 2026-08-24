@@ -558,10 +558,18 @@ function v13SnapshotCard(title, snapshot, emptyText) {
 }
 
 function v13RoundHistory(round, isLatest) {
-    const final = round.post_fp_final;
+    const final = round.post_fp_final || round.early_thoughts || {};
     const early = round.early_thoughts;
-    const provenance = round.provenance === 'reconstructed' ? 'Reconstructed' : 'Archived live forecast';
-    const provenanceClass = round.provenance === 'reconstructed' ? 'reconstructed' : 'genuine';
+    const provenance = round.provenance === 'reconstructed'
+        ? 'Reconstructed'
+        : round.provenance === 'live'
+            ? 'Live challenge record'
+            : 'Archived live forecast';
+    const provenanceClass = round.provenance === 'reconstructed'
+        ? 'reconstructed'
+        : round.provenance === 'live'
+            ? 'live'
+            : 'genuine';
     const chip = final.chip ? v13ChipLabel(final.chip) : 'No chip';
     const fix = round.final_fix;
     return `<details class="v13-round"${isLatest ? ' open' : ''}>
@@ -586,6 +594,7 @@ function v13RoundHistory(round, isLatest) {
                 <h4>Why V13 chose it</h4>
                 <ul>${(final.reasons || []).map(reason => `<li>${v13Escape(reason)}</li>`).join('')}</ul>
             </div>
+            ${round.provenance === 'live' ? `<div class="v13-live-round-note"><strong>Official result:</strong> ${Number(round.actual_points || 0).toFixed(0)} points${Number(round.score_delta_vs_projection || 0) >= 0 ? ` · ${Number(round.score_delta_vs_projection).toFixed(1)} above forecast` : ` · ${Number(Math.abs(round.score_delta_vs_projection || 0)).toFixed(1)} below forecast`}</div>` : ''}
             <div class="v13-audit-line">
                 <span>Budget after: <strong>$${Number(round.budget_after).toFixed(1)}M</strong></span>
                 <span>Next-round transfers: <strong>${Number(round.free_transfers_next)}</strong></span>
@@ -593,6 +602,36 @@ function v13RoundHistory(round, isLatest) {
             </div>
         </div>
     </details>`;
+}
+
+function v13LiveResultCard(round) {
+    if (!round) return '';
+    const final = round.post_fp_final || round.early_thoughts || {};
+    const actual = Number(round.actual_points || 0);
+    const projected = Number(round.projected_points ?? final.projected_points ?? 0);
+    const delta = Number(round.score_delta_vs_projection ?? (actual - projected));
+    const budget = Number(round.budget_after || 0);
+    const deltaText = delta >= 0 ? `+${delta.toFixed(1)}` : `−${Math.abs(delta).toFixed(1)}`;
+    return `<section class="v13-section v13-live-result" aria-labelledby="v13LiveResultTitle">
+        <div class="v13-section-heading">
+            <div><span>Latest live result</span><h2 id="v13LiveResultTitle">R${Number(round.round)}: ${v13Escape(round.race)}</h2></div>
+            <em>Official score recorded</em>
+        </div>
+        <div class="v13-live-result-grid">
+            ${v13SnapshotCard('What V13 went with', final, 'The final team snapshot is unavailable.')}
+            <div class="v13-live-result-score">
+                <div class="v13-live-result-metrics">
+                    <span><small>Bot score</small><strong>${actual.toFixed(0)}</strong></span>
+                    <span><small>Forecast</small><strong>${projected.toFixed(1)}</strong></span>
+                    <span class="${delta >= 0 ? 'positive' : 'negative'}"><small>Vs forecast</small><strong>${deltaText}</strong></span>
+                    <span><small>Season total</small><strong>${Number(round.cumulative_points || 0).toLocaleString()}</strong></span>
+                    <span><small>Team value</small><strong>$${budget.toFixed(1)}M</strong></span>
+                    <span><small>Next transfers</small><strong>${Number(round.free_transfers_next || 0)}</strong></span>
+                </div>
+                <p>V13 scored the five drivers and two constructors shown at left, then applied the captain multiplier and transfer penalty exactly as locked.</p>
+            </div>
+        </div>
+    </section>`;
 }
 
 function v13StoredTeamRef() {
@@ -732,7 +771,12 @@ function renderV13() {
     const competition = v13Data.competition;
     const registrationOpen = Date.now() < Date.parse(competition.registration_deadline_at || '2026-11-21T04:00:00Z');
     const rounds = replay.rounds || [];
-    const latest = rounds[rounds.length - 1];
+    const liveRounds = Array.isArray(v13Data.live_history) ? v13Data.live_history : [];
+    const latestLive = liveRounds[liveRounds.length - 1] || null;
+    const liveStatus = v13Data.live_status || {};
+    const displayedScore = Number(liveStatus.total_points ?? replay.total_points);
+    const displayedBudget = Number(liveStatus.budget ?? replay.final_budget);
+    const allRounds = [...rounds, ...liveRounds];
     const usedChips = Object.entries(current.chips_used || {})
         .filter(([, round]) => round != null)
         .map(([chip, round]) => `<span>${v13Escape(v13ChipLabel(chip))}<b>R${round}</b></span>`)
@@ -749,8 +793,8 @@ function renderV13() {
                 </div>
             </div>
             <div class="v13-scoreboard">
-                <div><small>Full-season score</small><strong>${Number(replay.total_points).toLocaleString()}</strong><span>through R${replay.end_round}</span></div>
-                <div><small>Team value</small><strong>$${Number(replay.final_budget).toFixed(1)}M</strong><span>+$${(Number(replay.final_budget) - 100).toFixed(1)}M built</span></div>
+                <div><small>Full-season score</small><strong>${displayedScore.toLocaleString()}</strong><span>${liveStatus.status === 'live' ? `through R${Number(liveStatus.through_round)}` : `through R${replay.end_round}`}</span></div>
+                <div><small>Team value</small><strong>$${displayedBudget.toFixed(1)}M</strong><span>+$${(displayedBudget - 100).toFixed(1)}M built</span></div>
                 <div><small>Prize pool</small><strong>$${competition.prizes_usd.reduce((a, b) => a + b, 0)}</strong><span>$100 · $50 · $30</span></div>
             </div>
             <div class="v13-hero-actions">
@@ -774,9 +818,11 @@ function renderV13() {
         </section>
 
         <div class="v13-replay-warning">
-            <strong>Research replay, not a prospective claim.</strong>
-            <span>${v13Escape(replay.disclaimer)}</span>
+            <strong>${latestLive ? `Live challenge record through R${Number(liveStatus.through_round)}` : 'Research replay, not a prospective claim.'}</strong>
+            <span>${latestLive ? `R1–R${replay.end_round} remains the research replay; R${Number(liveStatus.through_round)} is now scored from the locked V13 team and official results.` : v13Escape(replay.disclaimer)}</span>
         </div>
+
+        ${latestLive ? v13LiveResultCard(latestLive) : ''}
 
         <section class="v13-section v13-dashboard" id="v13Dashboard" aria-labelledby="v13DashboardTitle">
             <div class="v13-section-heading">
@@ -829,8 +875,8 @@ function renderV13() {
         </section>
 
         <section class="v13-section" id="v13History">
-            <div class="v13-section-heading"><div><span>Transparent record</span><h2>The complete R1–R${replay.end_round} replay</h2></div><em>FP for teams · Qualifying for Final Fix</em></div>
-            <div class="v13-history">${rounds.map((round, index) => v13RoundHistory(round, index === rounds.length - 1)).join('')}</div>
+            <div class="v13-section-heading"><div><span>Transparent record</span><h2>${latestLive ? `The replay plus live record through R${Number(liveStatus.through_round)}` : `The complete R1–R${replay.end_round} replay`}</h2></div><em>FP for teams · Qualifying for Final Fix</em></div>
+            <div class="v13-history">${allRounds.map((round, index) => v13RoundHistory(round, index === allRounds.length - 1)).join('')}</div>
         </section>
 
         <section class="v13-rules-card" id="v13Registration">
