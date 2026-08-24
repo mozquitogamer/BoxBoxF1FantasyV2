@@ -126,6 +126,20 @@
       "date_modified": "2026-08-24T00:00:00+00:00"
     },
     {
+      "id": "https://boxboxf1fantasy.com/articles/",
+      "url": "https://boxboxf1fantasy.com/articles/",
+      "title": "F1 Fantasy Articles 2026",
+      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
+      "date_modified": "2026-08-24T00:00:00+00:00"
+    },
+    {
+      "id": "https://boxboxf1fantasy.com/articles/2026-08-24-dutch-gp-model-review/",
+      "url": "https://boxboxf1fantasy.com/articles/2026-08-24-dutch-gp-model-review/",
+      "title": "Dutch GP 2026 Model Review: Pace, Predictions & the Race That Changed the Order",
+      "summary": "The Dutch Grand Prix was a useful test of the difference between predicting pace and predicting the exact final classification. The model's post-practice qualifying read was excellent. The final race result was much...",
+      "date_modified": "2026-08-24T00:00:00+00:00"
+    },
+    {
       "id": "https://boxboxf1fantasy.com/data/",
       "url": "https://boxboxf1fantasy.com/data/",
       "title": "BoxBoxF1Fantasy Public Data 2026",
@@ -143,7 +157,7 @@
       "id": "https://boxboxf1fantasy.com/accuracy/",
       "url": "https://boxboxf1fantasy.com/accuracy/",
       "title": "F1 Fantasy Prediction Accuracy 2026",
-      "summary": "Public BoxBoxF1Fantasy track record across 12 completed rounds: driver points MAE 11.6, constructor points MAE 18.3, and 90% CI coverage 81%.",
+      "summary": "Public BoxBoxF1Fantasy track record across 12 completed rounds: driver points MAE 11.5, constructor points MAE 18.1, and 90% CI coverage 81%.",
       "date_modified": "2026-08-23T00:00:00+00:00"
     },
     {
@@ -159,13 +173,6 @@
       "title": "BoxBoxF1Fantasy Changelog 2026",
       "summary": "Public release notes for BoxBoxF1Fantasy model updates, scoring fixes, data-quality improvements and feature releases. Latest: Pit Wall saved teams and personalized simulation updates.",
       "date_modified": "2026-08-11T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/articles/",
-      "url": "https://boxboxf1fantasy.com/articles/",
-      "title": "F1 Fantasy Articles 2026",
-      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
-      "date_modified": "2026-07-29T00:00:00+00:00"
     },
     {
       "id": "https://boxboxf1fantasy.com/articles/2026-07-29-f1-fantasy-risk-tolerance-experiment/",
@@ -347,13 +354,6 @@
       "url": "https://boxboxf1fantasy.com/articles/2026-07-13-f1-fantasy-mid-season-report/",
       "title": "F1 Fantasy 2026 Mid-Season Report: Points, Prices & Form",
       "summary": "After nine completed races, Kimi Antonelli leads the 2026 F1 Fantasy driver table, Mercedes leads the constructors, and Racing Bulls has delivered the strongest constructor value. This is a dated mid-season review...",
-      "date_modified": "2026-07-22T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/articles/2026-04-28-round3-japanese-gp-recap/",
-      "url": "https://boxboxf1fantasy.com/articles/2026-04-28-round3-japanese-gp-recap/",
-      "title": "Round 3 — Japanese GP Recap & Miami Preview",
-      "summary": "Japan Delivered the Goods Who’d have thought that McLaren would be on the podium after a dismal first two races of the season? And we have a new championship leader. Kimi Antonelli leads over George Russell by 9...",
       "date_modified": "2026-07-22T00:00:00+00:00"
     }
   ]
