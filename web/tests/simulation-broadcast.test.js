@@ -3,7 +3,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const { broadcastName, buildBroadcast, phaseLabel } = require('../lib/simulation-broadcast');
+const { activeContactCount, broadcastName, buildBroadcast, phaseLabel } = require('../lib/simulation-broadcast');
 
 function predictions() {
     return {
@@ -40,4 +40,25 @@ test('builds the live Monza V13 broadcast with Resend unsubscribe handling', () 
 test('uses a deterministic name for idempotent provider lookup', () => {
     assert.equal(broadcastName(predictions()), 'R15 Pre-practice simulation alert');
     assert.equal(phaseLabel('post_fp'), 'Post-practice');
+});
+
+test('counts only active contacts in the configured V13 segment', async () => {
+    const originalFetch = global.fetch;
+    global.fetch = async url => {
+        assert.equal(url, 'https://api.resend.com/segments/segment_v13/contacts?limit=100');
+        return {
+            ok: true,
+            json: async () => ({
+                data: [
+                    ...Array.from({ length: 6 }, (_, index) => ({ id: `active_${index}`, unsubscribed: false })),
+                    { id: 'unsubscribed', unsubscribed: true },
+                ],
+            }),
+        };
+    };
+    try {
+        assert.equal(await activeContactCount('re_test', 'segment_v13'), 6);
+    } finally {
+        global.fetch = originalFetch;
+    }
 });

@@ -85,7 +85,7 @@ async function existingBroadcast(apiKey, name) {
 }
 
 async function activeContactCount(apiKey, segmentId) {
-    const contacts = await resendRequest(`/contacts?segment_id=${encodeURIComponent(segmentId)}&limit=100`, apiKey);
+    const contacts = await resendRequest(`/segments/${encodeURIComponent(segmentId)}/contacts?limit=100`, apiKey);
     return (contacts?.data || []).filter(contact => contact.unsubscribed !== true).length;
 }
 
