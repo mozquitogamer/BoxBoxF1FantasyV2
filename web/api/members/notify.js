@@ -10,6 +10,7 @@ const {
 const { buildRecommendation } = require('../../lib/personalized-recommendations');
 const { resendRequest } = require('../../lib/email-subscriptions');
 const { ensurePitWallSegment } = require('../../lib/resend-segments');
+const { sendV13Broadcast } = require('../../lib/simulation-broadcast');
 const { syncOfficialLink } = require('./team');
 
 function inFilter(values) {
@@ -178,6 +179,7 @@ module.exports = async function notify(req, res) {
     const expectedSecret = String(process.env.MEMBER_NOTIFICATION_SECRET || '').trim();
     const suppliedSecret = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
     if (!expectedSecret || !safeEqual(suppliedSecret, expectedSecret)) return res.status(401).json({ ok: false });
+    if (req.body?.audience === 'v13') return sendV13Broadcast(res);
 
     let event;
     try {

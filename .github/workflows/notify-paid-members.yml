@@ -31,5 +31,5 @@ jobs:
             --request POST \
             --header "Authorization: Bearer ${MEMBER_NOTIFICATION_SECRET}" \
             --header "Content-Type: application/json" \
-            --data '{"source":"manual_fresh_simulation"}' \
-            https://boxboxf1fantasy.com/api/email/broadcast/
+            --data '{"source":"manual_fresh_simulation","audience":"v13"}' \
+            https://boxboxf1fantasy.com/api/members/notify/

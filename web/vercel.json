@@ -6,7 +6,6 @@
   "trailingSlash": true,
   "functions": {
     "api/members/notify.js": { "maxDuration": 60 },
-    "api/email/broadcast.js": { "maxDuration": 60 },
     "api/email/status.js": { "maxDuration": 30 }
   },
   "headers": [

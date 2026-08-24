@@ -3,7 +3,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const { broadcastName, buildBroadcast, phaseLabel } = require('../api/email/broadcast');
+const { broadcastName, buildBroadcast, phaseLabel } = require('../lib/simulation-broadcast');
 
 function predictions() {
     return {

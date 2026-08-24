@@ -1,8 +1,8 @@
 'use strict';
 
-const { htmlEscape, safeEqual } = require('../../lib/member-system');
-const { getConfig, resendRequest } = require('../../lib/email-subscriptions');
-const { ensureBeatV13Segment } = require('../../lib/resend-segments');
+const { htmlEscape } = require('./member-system');
+const { getConfig, resendRequest } = require('./email-subscriptions');
+const { ensureBeatV13Segment } = require('./resend-segments');
 
 const UNSUBSCRIBE_URL = '{{{RESEND_UNSUBSCRIBE_URL}}}';
 const ACTIONABLE_PHASES = new Set(['pre_fp', 'post_fp', 'post_quali']);
@@ -89,14 +89,7 @@ async function activeContactCount(apiKey, segmentId) {
     return (contacts?.data || []).filter(contact => contact.unsubscribed !== true).length;
 }
 
-module.exports = async function broadcast(req, res) {
-    res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('Allow', 'POST');
-    if (req.method !== 'POST') return res.status(405).json({ ok: false });
-    const expectedSecret = String(process.env.MEMBER_NOTIFICATION_SECRET || '').trim();
-    const suppliedSecret = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
-    if (!expectedSecret || !safeEqual(suppliedSecret, expectedSecret)) return res.status(401).json({ ok: false });
-
+async function sendV13Broadcast(res) {
     try {
         const config = getConfig();
         const segmentId = await ensureBeatV13Segment();
@@ -139,10 +132,13 @@ module.exports = async function broadcast(req, res) {
         console.error('V13 broadcast failed:', error.message);
         return res.status(500).json({ ok: false, message: 'V13 broadcast failed.' });
     }
-};
+}
 
-module.exports.activeContactCount = activeContactCount;
-module.exports.broadcastName = broadcastName;
-module.exports.buildBroadcast = buildBroadcast;
-module.exports.existingBroadcast = existingBroadcast;
-module.exports.phaseLabel = phaseLabel;
+module.exports = {
+    activeContactCount,
+    broadcastName,
+    buildBroadcast,
+    existingBroadcast,
+    phaseLabel,
+    sendV13Broadcast,
+};
