@@ -275,7 +275,7 @@
                 <div class="pit-wall-team-card-head"><div><span class="pit-wall-team-kicker">Team ${team.slot}${team.is_primary ? ' · Primary' : ''}</span><h5>${teamLabel(team)}</h5></div><span class="pit-wall-team-state">${complete ? '7/7 saved' : 'Set up'}</span></div>
                 <p class="pit-wall-team-meta">${team.squad_value_millions != null ? `Squad $${Number(team.squad_value_millions).toFixed(1)}m` : 'Squad value not set'}${team.bank_millions != null ? ` · Bank $${Number(team.bank_millions).toFixed(1)}m` : ''}${team.free_transfers != null ? ` · ${Number(team.free_transfers)} FT` : ''}</p>
                 <p class="pit-wall-team-chips">${chips.length ? `Chips left: ${chips.map(escapeHtml).join(', ')}` : 'Chip status not confirmed'}</p>
-                <details class="pit-wall-team-chips-editor"><summary>Update chip status</summary><div>${chipKeys.map(key => { const remaining = store?.chipRemaining(team, key); return `<label><input type="checkbox" data-team-chip="${team.slot}:${escapeHtml(key)}"${remaining === true ? ' checked' : ''}${active ? '' : ' disabled'}> ${escapeHtml(chipLabel(key))}</label>`; }).join('')}</div></details>
+                <details class="pit-wall-team-chips-editor"><summary>Update chip status</summary><div>${chipKeys.map(key => { const chip = store?.chipState?.(team, key) || { status: 'unknown' }; return `<label>${escapeHtml(chipLabel(key))}<select data-team-chip="${team.slot}:${escapeHtml(key)}" aria-label="${escapeHtml(chipLabel(key))} status"${active ? '' : ' disabled'}><option value="unknown"${chip.status === 'unknown' ? ' selected' : ''}>Not confirmed</option><option value="available"${chip.status === 'available' ? ' selected' : ''}>Available</option><option value="used"${chip.status === 'used' ? ' selected' : ''}>Used</option></select></label>`; }).join('')}</div></details>
                 <div class="pit-wall-team-card-actions"><button type="button" class="pit-wall-secondary" data-team-select="${team.slot}">${selected ? 'Working here' : 'Work on this team'}</button>${team.is_primary ? '' : `<button type="button" class="pit-wall-text-button" data-team-primary="${team.slot}"${active ? '' : ' disabled'}>Make primary</button>`}</div>
                 <div class="pit-wall-team-tools"><input type="text" maxlength="60" value="${escapeHtml(team.name)}" aria-label="Team ${team.slot} name" data-team-name="${team.slot}"${active ? '' : ' disabled'}><button type="button" class="pit-wall-text-button" data-team-rename="${team.slot}"${active ? '' : ' disabled'}>Rename</button>${f1 ? `<span class="pit-wall-team-link">F1 linked · T${escapeHtml(f1.team_slot || team.slot)}</span>${officialReady ? `<button type="button" class="pit-wall-text-button" data-team-reset="${team.slot}"${active ? '' : ' disabled'}>Apply official</button>` : ''}` : '<span class="pit-wall-team-link">Manual team</span>'}</div>
             </article>`;
@@ -301,8 +301,9 @@
         panel.querySelectorAll('[data-team-chip]').forEach(input => input.addEventListener('change', async () => {
             const [slotText, key] = String(input.dataset.teamChip || '').split(':');
             const slot = Number(slotText); input.disabled = true;
-            try { store?.setChip(slot, key, input.checked); await store?.save(slot, { force: true }); status(`Chip status saved for Team ${slot}.`, 'success'); }
-            catch (error) { input.checked = !input.checked; status(error.message, 'error'); } finally { input.disabled = false; }
+            const previous = store?.chipState?.(store.getTeam(slot), key)?.status || 'unknown';
+            try { store?.setChip(slot, key, input.value, { autosave: false }); await store?.save(slot, { force: true }); status(`Chip status saved for Team ${slot}.`, 'success'); }
+            catch (error) { store?.setChip(slot, key, previous, { autosave: false }); input.value = previous; status(error.message, 'error'); } finally { input.disabled = false; }
         }));
         panel.querySelectorAll('[data-team-rename]').forEach(button => button.addEventListener('click', async () => {
             const slot = Number(button.dataset.teamRename);

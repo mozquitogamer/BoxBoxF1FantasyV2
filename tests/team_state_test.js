@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('node:assert/strict');
-const { createStore, getStore, resetStore, normalizeTeam, normalizeDashboard, canonicalSnapshot, hasCompleteTeam, chipRemaining, CHIP_KEYS } = require('../web/public/team-state.js');
+const { createStore, getStore, resetStore, normalizeTeam, normalizeDashboard, canonicalSnapshot, hasCompleteTeam, chipState, chipRemaining, CHIP_KEYS } = require('../web/public/team-state.js');
 
 function team(slot, name, complete = true) {
     return {
@@ -48,6 +48,7 @@ assert.equal(chipRemaining({ chips: mappedChips }, 'limitless'), true);
 assert.equal(chipRemaining({ chips: mappedChips }, '3x_boost'), true);
 assert.equal(chipRemaining({ chips: mappedChips }, 'wild_card'), false);
 assert.equal(chipRemaining({ chips: mappedChips }, 'final_fix'), null);
+assert.deepEqual(chipState({ chips: mappedChips }, 'final_fix'), { status: 'unknown', remaining: null });
 const primaryDashboard = normalizeDashboard({ teams: [
     { ...team(2, 'Primary T2'), team_slot: 2, is_primary: true, is_default: true },
     { ...team(3, 'Other T3'), team_slot: 3, is_primary: false },
@@ -79,6 +80,12 @@ store.save(3, { force: true }).then(() => {
     assert.equal(requests[0].body.round, null);
     assert.equal(canonicalSnapshot(store.getTeam(3)).team_slot, 3);
     assert.equal(store.pullFromMemory(3, { getSnapshot: () => { throw new Error('incomplete lineup'); } }), null);
+    const teamOneChipBefore = store.chipState(store.getTeam(1), 'final_fix');
+    store.setChip(3, 'final_fix', 'available', { autosave: false });
+    assert.equal(store.chipState(store.getTeam(3), 'final_fix').status, 'available');
+    assert.deepEqual(store.chipState(store.getTeam(1), 'final_fix'), teamOneChipBefore);
+    store.setChip(3, 'final_fix', 'unknown', { autosave: false });
+    assert.equal(store.chipRemaining(store.getTeam(3), 'final_fix'), null);
 
     const autosaveRequests = [];
     const autosaveStore = createStore({ request: async (path, options) => {

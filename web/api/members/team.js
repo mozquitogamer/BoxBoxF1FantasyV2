@@ -129,6 +129,14 @@ function normalizeRound(value) {
     return Number.isInteger(round) && round >= 1 && round <= 24 ? round : null;
 }
 
+function normalizeOptionalRound(value) {
+    // The original Team 1 client used round 0 as “no weekly history yet”.
+    // Keep that legacy sentinel out of saved_team_history, while still
+    // rejecting other invalid explicit rounds.
+    if (value == null || value === '' || value === 0 || value === '0') return null;
+    return normalizeRound(value);
+}
+
 function teamLinkSecret() {
     const secret = String(process.env.SUBSCRIPTION_SIGNING_SECRET || '').trim();
     if (!secret) throw new Error('Official-team linking is not configured yet.');
@@ -139,6 +147,28 @@ function teamLinkSignature(payload, secret) {
     return crypto.createHmac('sha256', secret)
         .update(`boxbox-f1-team-link:v1:${payload}`)
         .digest('base64url');
+}
+
+function officialTeamLinkConflict(message) {
+    const error = new Error(message);
+    error.code = 'F1_TEAM_LINK_CONFLICT';
+    error.status = 409;
+    return error;
+}
+
+async function assertOfficialTeamSlotAvailable(userId, selected) {
+    const leagueId = Number(process.env.F1_FANTASY_LEAGUE_ID || 160604);
+    const officialId = encodeURIComponent(String(selected?.id || ''));
+    const slot = Number(selected?.slot);
+    if (!officialId || !Number.isInteger(slot)) return;
+    const rows = await restRequest(
+        `f1_team_links?league_id=eq.${leagueId}&official_team_id=eq.${officialId}&team_slot=eq.${slot}&select=user_id,team_slot`,
+        { service: true },
+    );
+    const claimedByAnotherMember = (rows || []).some(row => String(row.user_id) !== String(userId));
+    if (claimedByAnotherMember) {
+        throw officialTeamLinkConflict(`That official team is already linked to another Pit Wall member for Team ${slot}. Choose a different official team.`);
+    }
 }
 
 function createTeamLinkToken(team, userId, now = Date.now()) {
@@ -398,6 +428,7 @@ module.exports = async function team(req, res) {
             if (hasTeamSlot && slotRequest.slot !== selected.slot) {
                 return res.status(400).json({ ok: false, message: `That signed selection belongs to Team ${selected.slot}. Search again for the requested slot.` });
             }
+            await assertOfficialTeamSlotAvailable(memberSession.user.id, selected);
             await restRequest('f1_team_links?on_conflict=user_id,team_slot', {
                 service: true,
                 method: 'POST',
@@ -444,7 +475,7 @@ module.exports = async function team(req, res) {
         const chipInput = body.chips ?? body.chip_status ?? body.chip_ledger;
         const chips = chipInput === undefined ? null : normalizeChips(chipInput);
         const season = Number(body.season || 2026);
-        const round = body.round == null || body.round === '' ? null : normalizeRound(body.round);
+        const round = normalizeOptionalRound(body.round);
         if (!Number.isInteger(season) || season < 2020 || season > 2026) {
             return res.status(400).json({ ok: false, message: 'The requested season is not supported.' });
         }
@@ -454,7 +485,7 @@ module.exports = async function team(req, res) {
             || !Number.isInteger(freeTransfers)) {
             return res.status(400).json({ ok: false, message: 'Enter valid squad value, bank balance and free transfers.' });
         }
-        if (body.round != null && body.round !== '' && !round) {
+        if (body.round != null && body.round !== '' && body.round !== 0 && body.round !== '0' && !round) {
             return res.status(400).json({ ok: false, message: 'The current round could not be determined.' });
         }
         await restRequest('rpc/save_member_team_v2', {
@@ -483,6 +514,10 @@ module.exports = async function team(req, res) {
             ? 400
             : /active Pit Wall membership/i.test(error.message)
                 ? 403
+            : error.code === 'F1_TEAM_LINK_CONFLICT'
+                ? 409
+            : /duplicate key|unique constraint|already linked/i.test(String(error?.message || ''))
+                ? 409
             : error.code === 'F1_SESSION_EXPIRED'
                 ? 503
                 : error.code === 'F1_INCOMPLETE_LINEUP'
@@ -490,7 +525,7 @@ module.exports = async function team(req, res) {
                     : error.code === 'F1_TEAM_NOT_IN_LEAGUE'
                         ? 409
                     : 500;
-        const message = status === 400 || status === 403 || error.code === 'F1_SESSION_EXPIRED' || error.code === 'F1_INCOMPLETE_LINEUP' || error.code === 'F1_TEAM_NOT_IN_LEAGUE'
+        const message = status === 400 || status === 403 || status === 409 || error.code === 'F1_SESSION_EXPIRED' || error.code === 'F1_INCOMPLETE_LINEUP' || error.code === 'F1_TEAM_NOT_IN_LEAGUE'
             ? error.message
             : 'We could not save your team. Please try again.';
         return res.status(status).json({ ok: false, message });
@@ -500,6 +535,7 @@ module.exports = async function team(req, res) {
 module.exports.syncOfficialLink = syncOfficialLink;
 module.exports.normalizeAssets = normalizeAssets;
 module.exports.normalizeRound = normalizeRound;
+module.exports.normalizeOptionalRound = normalizeOptionalRound;
 module.exports.normalizeTeamSlot = normalizeTeamSlot;
 module.exports.shouldMarkPrimary = shouldMarkPrimary;
 module.exports.requestedTeamSlot = requestedTeamSlot;

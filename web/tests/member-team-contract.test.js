@@ -6,7 +6,7 @@ const path = require('node:path');
 const test = require('node:test');
 
 const { normalizeAssets } = require('../api/members/team');
-const { normalizeChips, normalizeTeamSlot, requestedTeamSlot, shouldMarkPrimary } = require('../api/members/team');
+const { createTeamLinkToken, normalizeChips, normalizeOptionalRound, normalizeTeamSlot, requestedTeamSlot, shouldMarkPrimary } = require('../api/members/team');
 const teamHandler = require('../api/members/team');
 
 function mockResponse(body, status = 200) {
@@ -31,7 +31,7 @@ function memberJwt() {
 }
 
 function configureMemberEnv() {
-    const names = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SITE_ORIGIN', 'VERCEL_ENV'];
+    const names = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SITE_ORIGIN', 'VERCEL_ENV', 'SUBSCRIPTION_SIGNING_SECRET'];
     const previous = Object.fromEntries(names.map(name => [name, process.env[name]]));
     Object.assign(process.env, {
         NEXT_PUBLIC_SUPABASE_URL: 'https://project.supabase.test',
@@ -39,6 +39,7 @@ function configureMemberEnv() {
         SUPABASE_SERVICE_ROLE_KEY: 'service-test-key',
         SITE_ORIGIN: 'https://boxboxf1fantasy.com',
         VERCEL_ENV: 'production',
+        SUBSCRIPTION_SIGNING_SECRET: 'test-signing-secret',
     });
     return () => names.forEach(name => previous[name] === undefined ? delete process.env[name] : process.env[name] = previous[name]);
 }
@@ -84,6 +85,13 @@ test('explicit invalid slots are rejected while missing slot remains legacy Team
     assert.throws(() => requestedTeamSlot({ slot: 'three' }), /Team slot must be 1, 2 or 3/);
 });
 
+test('legacy primary Team 1 accepts round zero while explicit Team 2/3 rounds stay scoped', () => {
+    assert.equal(normalizeOptionalRound(0), null);
+    assert.equal(normalizeOptionalRound('0'), null);
+    assert.equal(normalizeOptionalRound(14), 14);
+    assert.equal(normalizeOptionalRound(25), null);
+});
+
 test('migration preserves unknown legacy finances and secures weekly history writes', () => {
     const migration = fs.readFileSync(path.join(__dirname, '..', '..', 'infrastructure', 'supabase', '005_pit_wall_three_team_workspace.sql'), 'utf8');
     assert.match(migration, /spending_power_millions = coalesce\(spending_power_millions, budget_millions\)/);
@@ -116,6 +124,102 @@ test('keeps old seven-asset save payloads compatible', () => {
     assert.equal(assets.length, 7);
     assert.equal(assets.filter(asset => asset.asset_type === 'driver').length, 5);
     assert.equal(assets.filter(asset => asset.asset_type === 'constructor').length, 2);
+});
+
+test('save keeps legacy primary Team 1 distinct from explicit Team 2 and Team 3 saves', async () => {
+    const restoreEnv = configureMemberEnv();
+    const originalFetch = global.fetch;
+    const rpcBodies = [];
+    global.fetch = async (url, options = {}) => {
+        const target = String(url);
+        if (target.endsWith('/auth/v1/user')) return mockResponse({ id: 'member-1', email: 'member@example.com' });
+        if (target.includes('/rest/v1/rpc/save_member_team_v2')) {
+            rpcBodies.push(JSON.parse(options.body));
+            return mockResponse('saved-team');
+        }
+        throw new Error(`Unexpected request: ${target}`);
+    };
+    const assets = [
+        ...['d1', 'd2', 'd3', 'd4', 'd5'].map((asset_id, index) => ({ asset_type: 'driver', asset_id, slot: index + 1 })),
+        ...['c1', 'c2'].map((asset_id, index) => ({ asset_type: 'constructor', asset_id, slot: index + 1 })),
+    ];
+    const request = body => ({
+        method: 'POST',
+        body,
+        headers: { origin: 'https://boxboxf1fantasy.com', cookie: `__Host-boxbox_member_access=${memberJwt()}` },
+        query: {},
+        url: '/api/members/team/',
+    });
+    try {
+        const team1Res = mockServerResponse();
+        await teamHandler(request({ name: 'Primary', budget_millions: 100, free_transfers: 2, assets, round: 0 }), team1Res);
+        const team2Res = mockServerResponse();
+        await teamHandler(request({ team_slot: 2, name: 'Second', spending_power_millions: 100, free_transfers: 2, assets, round: 14 }), team2Res);
+        const team3Res = mockServerResponse();
+        await teamHandler(request({ team_slot: 3, name: 'Third', spending_power_millions: 100, free_transfers: 2, assets, round: 14 }), team3Res);
+        assert.equal(team1Res.statusCode, 200);
+        assert.equal(team2Res.statusCode, 200);
+        assert.equal(team3Res.statusCode, 200);
+        assert.deepEqual(rpcBodies.map(body => ({ slot: body.p_team_slot, round: body.p_round, primary: body.p_is_primary })), [
+            { slot: 1, round: null, primary: true },
+            { slot: 2, round: 14, primary: false },
+            { slot: 3, round: 14, primary: false },
+        ]);
+    } finally {
+        global.fetch = originalFetch;
+        restoreEnv();
+    }
+});
+
+test('official Team 1 link collision returns a scoped conflict instead of a generic save failure', async () => {
+    const restoreEnv = configureMemberEnv();
+    const originalFetch = global.fetch;
+    const linkToken = createTeamLinkToken({ id: 'official-1', name: 'Primary', manager: 'Owner', slot: 1, rank: 1 }, 'member-1');
+    const calls = [];
+    let collisionMode = 'preflight';
+    global.fetch = async (url, options = {}) => {
+        const target = String(url);
+        calls.push({ target, options });
+        if (target.endsWith('/auth/v1/user')) return mockResponse({ id: 'member-1', email: 'member@example.com' });
+        if (target.includes('/rest/v1/member_entitlements?')) return mockResponse([{ status: 'active', current_period_end: '2099-01-01T00:00:00Z' }]);
+        if (target.includes('/rest/v1/f1_team_links?league_id=eq.160604')) {
+            return mockResponse(collisionMode === 'preflight' ? [{ user_id: 'another-member', team_slot: 1 }] : []);
+        }
+        if (target.includes('/rest/v1/f1_team_links?on_conflict=')) {
+            if (collisionMode === 'preflight') throw new Error('The colliding link must be rejected before upsert.');
+            throw new Error('duplicate key value violates unique constraint "f1_team_links_league_id_official_team_id_team_slot_key"');
+        }
+        throw new Error(`Unexpected request: ${target}`);
+    };
+    try {
+        const response = mockServerResponse();
+        await teamHandler({
+            method: 'POST',
+            body: { action: 'f1-link', link_token: linkToken },
+            headers: { origin: 'https://boxboxf1fantasy.com', cookie: `__Host-boxbox_member_access=${memberJwt()}` },
+            query: { action: 'f1-link' },
+            url: '/api/members/team/?action=f1-link',
+        }, response);
+        assert.equal(response.statusCode, 409);
+        assert.match(response.body.message, /already linked to another Pit Wall member/);
+        assert.equal(calls.some(call => call.target.includes('/rest/v1/f1_team_links?on_conflict=')), false);
+
+        collisionMode = 'race';
+        calls.length = 0;
+        const raceResponse = mockServerResponse();
+        await teamHandler({
+            method: 'POST',
+            body: { action: 'f1-link', link_token: linkToken },
+            headers: { origin: 'https://boxboxf1fantasy.com', cookie: `__Host-boxbox_member_access=${memberJwt()}` },
+            query: { action: 'f1-link' },
+            url: '/api/members/team/?action=f1-link',
+        }, raceResponse);
+        assert.equal(raceResponse.statusCode, 409);
+        assert.match(raceResponse.body.message, /duplicate key value violates unique constraint/);
+    } finally {
+        global.fetch = originalFetch;
+        restoreEnv();
+    }
 });
 
 test('rename and set-primary actions are slot-scoped and do not require assets', async () => {

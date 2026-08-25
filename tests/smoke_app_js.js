@@ -302,7 +302,10 @@ try {
   if (!index.includes('id="tabMoreMenu"') || !index.includes('data-tab="season"')) fail('More navigation menu is missing deep links');
   if ((index.match(/class="email-updates-form"/g) || []).length !== 1) fail('Beat V13 registration form is not unique');
   if (index.includes('id="optimizerRegistrationEmail"') || index.includes('id="emailUpdatesForm"')) fail('obsolete registration form remains');
-  if (!/styles\.css\?v=\d+/.test(index) || !/engagement\.css\?v=\d+/.test(index) || !/app\.js\?v=\d+/.test(index) || !/members\.js\?v=\d+/.test(index) || !/engagement\.js\?v=\d+/.test(index)) fail('changed static asset cache versions are missing');
+  if (!/styles\.css\?v=\d+/.test(index) || !/engagement\.css\?v=\d+/.test(index) || !/team-state\.js\?v=\d+/.test(index) || !/app\.js\?v=\d+/.test(index) || !/members\.js\?v=\d+/.test(index) || !/engagement\.js\?v=\d+/.test(index)) fail('changed static asset cache versions are missing');
+  if (!/team-state\.js\?v=\d+[\s\S]*app\.js\?v=\d+[\s\S]*members\.js\?v=\d+/.test(index)) fail('team-state must load before app and members');
+  const members = fs.readFileSync(path.join(__dirname, '..', 'web', 'public', 'members.js'), 'utf8');
+  if (!members.includes('data-team-chip') || !members.includes('value="available"') || !members.includes('value="used"')) fail('Pit Wall chip status controls are missing explicit states');
   const styles = fs.readFileSync(path.join(__dirname, '..', 'web', 'public', 'styles.css'), 'utf8');
   if (!styles.includes('overflow-x: clip') || !styles.includes('.optimizer-mode-toggle') || !styles.includes('max-width: 100%')) fail('mobile overflow containment contract is missing');
   if (!S.hasOpenPitWall || !S.hasOpenTeamCompare || !sandbox.BoxBoxTeamCompare?.open) fail('Pit Wall/Compare open APIs are missing');

@@ -358,7 +358,8 @@
 .pit-wall-team-chips-editor { margin-top: 6px; color: var(--muted, #9aa4b2); font-size: .68rem; }
 .pit-wall-team-chips-editor summary { cursor: pointer; color: var(--text-secondary, #c8d0da); }
 .pit-wall-team-chips-editor > div { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 7px; }
-.pit-wall-team-chips-editor label { white-space: nowrap; }
+.pit-wall-team-chips-editor label { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-width: 0; }
+.pit-wall-team-chips-editor select { min-width: 0; max-width: 105px; padding: 3px 4px; border: 1px solid var(--border, #26303d); border-radius: 5px; background: var(--bg, #0d131a); color: inherit; font: inherit; font-size: .64rem; }
 .pit-wall-team-card-actions { flex-wrap: wrap; margin-top: 8px; }
 .pit-wall-team-tools { margin-top: 10px; flex-wrap: wrap; }
 .pit-wall-team-tools input { min-width: 0; flex: 1 1 100px; padding: 6px 8px; border: 1px solid var(--border, #26303d); border-radius: 6px; background: var(--bg, #0d131a); color: inherit; font: inherit; font-size: .72rem; }

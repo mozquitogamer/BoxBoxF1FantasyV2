@@ -213,22 +213,16 @@
         return drivers.length === 5 && constructors.length === 2;
     }
 
-    function chipRemaining(team, key) {
+    function chipState(team, key) {
         const chips = team?.chips || {};
         const canonicalKey = canonicalChipKey(key);
         const rawKey = Object.keys(chips).find(candidate => canonicalChipKey(candidate) === canonicalKey);
         const value = chips[canonicalKey] ?? chips[key] ?? chips[String(canonicalKey).replace(/_/g, '')] ?? (rawKey ? chips[rawKey] : undefined);
-        if (typeof value === 'boolean') return value;
-        if (value && typeof value === 'object') {
-            if (value.remaining === true || value.available === true || value.used === false) return true;
-            if (value.remaining === false || value.available === false || value.used === true) return false;
-            if ('status' in value) {
-                const status = String(value.status).toLowerCase();
-                if (['available', 'unused', 'remaining', 'left', 'ready'].includes(status)) return true;
-                if (['used', 'spent', 'unavailable', 'disabled'].includes(status)) return false;
-            }
-        }
-        return value === undefined ? null : null;
+        return parseChipState(value);
+    }
+
+    function chipRemaining(team, key) {
+        return chipState(team, key).remaining;
     }
 
     function createStore(options = {}) {
@@ -455,7 +449,7 @@
             assertWritable();
             const team = getTeam(slot);
             if (!team) return null;
-            const chips = { ...(team.chips || {}), [canonicalChipKey(key)]: clone(value) };
+            const chips = { ...(team.chips || {}), [canonicalChipKey(key)]: parseChipState(value) };
             delete chips.boost;
             return update(slot, { chips }, { autosave: options.autosave !== false });
         }
@@ -486,7 +480,7 @@
             subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); },
             hydrate, normalizeDashboard, normalizeTeam, select, update, replaceTeam,
             save, scheduleAutosave, rename, setPrimary, linkOfficial, syncOfficial, applyOfficialToMemory,
-            setChip, chipRemaining, recordWeek, applyToMemory, pullFromMemory,
+            setChip, chipState, chipRemaining, recordWeek, applyToMemory, pullFromMemory,
             snapshotForTeam, canonicalSnapshot, hasCompleteTeam, clearError: () => setState({ error: null }),
             chipKeys: CHIP_KEYS.slice(),
         };
@@ -498,7 +492,7 @@
         return singleton;
     };
     const api = { SLOT_COUNT, CHIP_KEYS: CHIP_KEYS.slice(), normalizeTeam, normalizeTeams, normalizeDashboard,
-        snapshotForTeam, canonicalSnapshot, hasCompleteTeam, chipRemaining, canonicalChipKey, createStore, getStore,
+        snapshotForTeam, canonicalSnapshot, hasCompleteTeam, chipState, chipRemaining, canonicalChipKey, createStore, getStore,
         resetStore: () => { singleton = null; return getStore(); } };
     if (root && !root.BoxBoxTeamState) root.BoxBoxTeamState = api;
     return api;
