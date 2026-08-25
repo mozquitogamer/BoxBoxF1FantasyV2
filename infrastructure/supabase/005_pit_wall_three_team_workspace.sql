@@ -298,7 +298,20 @@ language sql
 security invoker
 set search_path = ''
 as $$
-    select public.save_member_team_v2(1, p_name, 'manual', null, null, p_budget_millions, p_free_transfers, p_assets, null, 2026, null, true);
+    select public.save_member_team_v2(
+        1::smallint,
+        p_name::text,
+        'manual'::text,
+        null::numeric,
+        null::numeric,
+        p_budget_millions::numeric,
+        p_free_transfers::smallint,
+        p_assets::jsonb,
+        null::jsonb,
+        2026::smallint,
+        null::smallint,
+        true::boolean
+    );
 $$;
 
 create or replace function public.rename_member_team(p_team_slot smallint, p_name text)
