@@ -95,6 +95,13 @@ test('migration preserves unknown legacy finances and secures weekly history wri
     assert.match(migration, /drop policy if exists "paid members update own team history"/);
     assert.match(migration, /not exists \(\s*select 1 from public\.saved_teams existing[\s\S]*existing\.is_default/);
     assert.match(migration, /save_member_team_v2\(\s*1::smallint,[\s\S]*null::numeric,[\s\S]*p_free_transfers::smallint,[\s\S]*null::jsonb,[\s\S]*2026::smallint,[\s\S]*null::smallint,[\s\S]*true::boolean/);
+    assert.match(migration, /count\(distinct item ->> 'chip_code'\) from jsonb_array_elements\(p_chips\) item/);
+    assert.doesNotMatch(migration, /count\(distinct item ->> 'chip_code'\) from jsonb_array_elements\(p_chips\)\)/);
+    const repair = fs.readFileSync(path.join(__dirname, '..', '..', 'infrastructure', 'supabase', '006_repair_chip_json_alias.sql'), 'utf8');
+    assert.match(repair, /pg_get_functiondef/);
+    assert.match(repair, /regexp_replace/);
+    assert.match(repair, /jsonb_array_elements\\\(p_chips\\\)\\\)\$patch\$/);
+    assert.match(repair, /jsonb_array_elements\(p_chips\) item\)\$patch\$/);
     const teamApi = fs.readFileSync(path.join(__dirname, '..', 'api', 'members', 'team.js'), 'utf8');
     assert.match(teamApi, /budget_millions: null/);
     const notifyApi = fs.readFileSync(path.join(__dirname, '..', 'api', 'members', 'notify.js'), 'utf8');

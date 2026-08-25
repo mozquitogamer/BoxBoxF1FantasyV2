@@ -246,7 +246,7 @@ begin
     -- state explicitly until a member confirms what remains.
     if p_chips is not null then
       if exists (select 1 from jsonb_array_elements(p_chips) item where item ->> 'chip_code' not in ('limitless','3x_boost','wild_card','no_negative','autopilot','final_fix'))
-         or (select count(*) from jsonb_array_elements(p_chips)) <> (select count(distinct item ->> 'chip_code') from jsonb_array_elements(p_chips)) then
+         or (select count(*) from jsonb_array_elements(p_chips)) <> (select count(distinct item ->> 'chip_code') from jsonb_array_elements(p_chips) item) then
           raise exception 'Chip code is invalid.';
       end if;
       if exists (select 1 from jsonb_array_elements(p_chips) item where coalesce(item ->> 'status', '') not in ('unknown', 'available', 'used')) then
