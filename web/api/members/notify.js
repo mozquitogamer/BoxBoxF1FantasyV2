@@ -65,6 +65,9 @@ function officialTeamForRecommendation(snapshot, predictions, fallback) {
     return {
         ...fallback,
         budget_millions: snapshot.budget_millions ?? fallback.budget_millions,
+        squad_value_millions: snapshot.squad_value_millions ?? fallback.squad_value_millions,
+        bank_millions: snapshot.bank_millions ?? fallback.bank_millions,
+        spending_power_millions: snapshot.spending_power_millions ?? snapshot.budget_millions ?? fallback.spending_power_millions,
         free_transfers: snapshot.free_transfers ?? fallback.free_transfers,
         assets,
     };
@@ -311,18 +314,21 @@ module.exports = async function notify(req, res) {
         }
         const [profiles, teams] = await Promise.all([
             restRequest(`member_profiles?user_id=${usersFilter}&email_simulation_updates=eq.true&select=user_id,email,display_name`, { service: true }),
-            restRequest(`saved_teams?user_id=${usersFilter}&is_default=eq.true&select=id,user_id,name,budget_millions,free_transfers`, { service: true }),
+            restRequest(`saved_teams?user_id=${usersFilter}&is_default=eq.true&select=id,user_id,team_slot,name,budget_millions,squad_value_millions,bank_millions,spending_power_millions,free_transfers`, { service: true }),
         ]);
         const teamIds = (teams || []).map(team => team.id);
         const assets = teamIds.length
             ? await restRequest(`saved_team_assets?team_id=${inFilter(teamIds)}&select=team_id,asset_type,asset_id,slot,is_boosted`, { service: true })
             : [];
         const officialSnapshots = await restRequest(
-            `f1_team_snapshots?user_id=${usersFilter}&season=eq.${Number(predictions.season || 2026)}&round=eq.${Number(predictions.round)}&select=user_id,budget_millions,free_transfers,assets,captured_at`,
+            `f1_team_snapshots?user_id=${usersFilter}&season=eq.${Number(predictions.season || 2026)}&round=eq.${Number(predictions.round)}&select=user_id,team_slot,budget_millions,squad_value_millions,bank_millions,spending_power_millions,free_transfers,assets,captured_at`,
             { service: true },
         ).catch(() => []);
         const profilesByUser = new Map((profiles || []).map(profile => [profile.user_id, profile]));
-        const officialByUser = new Map((officialSnapshots || []).map(snapshot => [snapshot.user_id, snapshot]));
+        const officialByUserSlot = new Map((officialSnapshots || []).map(snapshot => [
+            `${snapshot.user_id}:${Number(snapshot.team_slot) || 1}`,
+            snapshot,
+        ]));
         const assetsByTeam = new Map();
         for (const asset of assets || []) {
             if (!assetsByTeam.has(asset.team_id)) assetsByTeam.set(asset.team_id, []);
@@ -350,7 +356,7 @@ module.exports = async function notify(req, res) {
             }
 
             const recommendationTeam = officialTeamForRecommendation(
-                officialByUser.get(team.user_id),
+                officialByUserSlot.get(`${team.user_id}:${Number(team.team_slot) || 1}`),
                 predictions,
                 { ...team, assets: teamAssets },
             );

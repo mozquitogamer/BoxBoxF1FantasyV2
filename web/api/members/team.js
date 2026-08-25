@@ -39,6 +39,87 @@ function normalizeAssets(items) {
     }));
 }
 
+const CHIP_CODES = Object.freeze(['limitless', '3x_boost', 'wild_card', 'no_negative', 'autopilot', 'final_fix']);
+
+function normalizeTeamSlot(value, fallback = 1) {
+    const slot = Number(value);
+    return Number.isInteger(slot) && slot >= 1 && slot <= 3 ? slot : fallback;
+}
+
+function shouldMarkPrimary(body) {
+    return body?.is_primary === true || body?.primary === true
+        || (body?.team_slot === undefined && body?.slot === undefined);
+}
+
+function requestedTeamSlot(body) {
+    const hasSlot = body && (Object.prototype.hasOwnProperty.call(body, 'team_slot') || Object.prototype.hasOwnProperty.call(body, 'slot'));
+    if (!hasSlot) return { slot: 1, legacy: true };
+    const raw = body.team_slot ?? body.slot;
+    const slot = Number(raw);
+    if (!Number.isInteger(slot) || slot < 1 || slot > 3) {
+        const error = new Error('Team slot must be 1, 2 or 3.');
+        error.code = 'INVALID_TEAM_SLOT';
+        throw error;
+    }
+    return { slot, legacy: false };
+}
+
+function normalizeChips(items) {
+    let entries;
+    if (Array.isArray(items)) {
+        entries = items;
+    } else if (items && typeof items === 'object') {
+        entries = Object.entries(items).map(([chip_code, value]) => ({
+            ...(value && typeof value === 'object' ? value : typeof value === 'boolean' ? { available: value } : { status: value }),
+            chip_code,
+        }));
+    } else if (items == null) {
+        return null;
+    } else {
+        const error = new Error('Chip state must be an array or object map.');
+        error.code = 'INVALID_CHIP_STATE';
+        throw error;
+    }
+    const seen = new Set();
+    return entries.map(item => {
+        const chipCode = String(item?.chip_code || item?.code || '').trim().toLowerCase();
+        const status = String(item?.status || (item?.available === true ? 'available' : item?.available === false ? 'used' : 'unknown')).toLowerCase();
+        if (!CHIP_CODES.includes(chipCode)) {
+            const error = new Error(`Unknown chip code: ${chipCode || 'empty'}.`);
+            error.code = 'INVALID_CHIP_STATE';
+            throw error;
+        }
+        if (seen.has(chipCode)) {
+            const error = new Error(`Chip ${chipCode} was supplied more than once.`);
+            error.code = 'INVALID_CHIP_STATE';
+            throw error;
+        }
+        seen.add(chipCode);
+        if (!['unknown', 'available', 'used'].includes(status)) {
+            const error = new Error(`Invalid status for chip ${chipCode}.`);
+            error.code = 'INVALID_CHIP_STATE';
+            throw error;
+        }
+        const usedRound = item?.used_round == null || item.used_round === '' ? null : normalizeRound(item.used_round);
+        if (item?.used_round != null && item.used_round !== '' && usedRound === null) {
+            const error = new Error(`Invalid used round for chip ${chipCode}.`);
+            error.code = 'INVALID_CHIP_STATE';
+            throw error;
+        }
+        if (status !== 'used' && usedRound !== null) {
+            const error = new Error(`Only used chips may have a used round (${chipCode}).`);
+            error.code = 'INVALID_CHIP_STATE';
+            throw error;
+        }
+        return {
+            chip_code: chipCode,
+            status,
+            available: status === 'available' ? true : status === 'used' ? false : null,
+            used_round: usedRound,
+        };
+    });
+}
+
 function queryParam(req, name) {
     return String(req.query?.[name] || new URL(req.url || '/', 'https://boxboxf1fantasy.com').searchParams.get(name) || '').trim();
 }
@@ -117,13 +198,24 @@ async function syncOfficialLink(link, round) {
             }
         }
         const snapshot = snapshotResult.snapshot;
-        await restRequest('f1_team_snapshots?on_conflict=user_id,season,round', {
+        const storedSnapshot = {
+            ...snapshot,
+            // `teambal` is cash remaining, not total spending power. Keep the
+            // legacy extractor field out of the new budget aliases so a
+            // sync cannot make a £3.4m bank look like a £3.4m team budget.
+            budget_millions: null,
+            // The official feed's `teambal` field is the current cash balance.
+            bank_millions: snapshot.bank_millions ?? snapshot.budget_millions ?? null,
+            spending_power_millions: snapshot.spending_power_millions ?? null,
+            squad_value_millions: snapshot.squad_value_millions ?? null,
+        };
+        await restRequest('f1_team_snapshots?on_conflict=user_id,season,round,team_slot', {
             service: true,
             method: 'POST',
             prefer: 'resolution=merge-duplicates,return=representation',
-            body: snapshot,
+            body: storedSnapshot,
         });
-        await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(link.user_id)}`, {
+        await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(link.user_id)}&team_slot=eq.${Number(link.team_slot)}`, {
             service: true,
             method: 'PATCH',
             body: {
@@ -132,9 +224,9 @@ async function syncOfficialLink(link, round) {
                 last_error: null,
             },
         });
-        return { snapshot, requestedRound: round, syncedRound: round, usedPreviousRound: false, source: snapshotResult.source };
+        return { snapshot: storedSnapshot, requestedRound: round, syncedRound: round, usedPreviousRound: false, source: snapshotResult.source };
     } catch (error) {
-        await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(link.user_id)}`, {
+        await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(link.user_id)}&team_slot=eq.${Number(link.team_slot)}`, {
             service: true,
             method: 'PATCH',
             body: { last_error: String(error.message || error).slice(0, 500) },
@@ -265,15 +357,48 @@ module.exports = async function team(req, res) {
         if (req.method === 'GET') return res.status(200).json(await getMemberDashboard(memberSession));
 
         const body = parseBody(req);
+        const slotRequest = requestedTeamSlot(body);
+        const hasTeamSlot = !slotRequest.legacy;
+        if (body.action === 'rename') {
+            if (!await requirePaidMember(memberSession)) return res.status(403).json({ ok: false, message: 'An active Pit Wall membership is required to rename teams.' });
+            const slot = slotRequest.slot;
+            const name = String(body.name || body.team_name || '').replace(/\s+/g, ' ').trim();
+            if (!name || name.length > 60) return res.status(400).json({ ok: false, message: 'Enter a team name between 1 and 60 characters.' });
+            await restRequest('rpc/rename_member_team', {
+                accessToken: memberSession.accessToken,
+                method: 'POST',
+                prefer: 'return=representation',
+                body: { p_team_slot: slot, p_name: name },
+            });
+            const dashboard = await getMemberDashboard(memberSession);
+            return res.status(200).json({ ok: true, team_slot: slot, team: dashboard.teams?.find(team => team.team_slot === slot) || null, teams: dashboard.teams || [], message: `Team ${slot} renamed.` });
+        }
+        if (body.action === 'set-primary' || body.action === 'set_primary') {
+            if (!await requirePaidMember(memberSession)) return res.status(403).json({ ok: false, message: 'An active Pit Wall membership is required to change the primary team.' });
+            const slot = slotRequest.slot;
+            await restRequest('rpc/set_member_team_primary', {
+                accessToken: memberSession.accessToken,
+                method: 'POST',
+                prefer: 'return=representation',
+                body: { p_team_slot: slot },
+            });
+            const dashboard = await getMemberDashboard(memberSession);
+            return res.status(200).json({ ok: true, team_slot: slot, team: dashboard.teams?.find(team => team.team_slot === slot) || null, teams: dashboard.teams || [], message: `Team ${slot} is now your primary team.` });
+        }
         if (body.action === 'f1-unlink') {
-            await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(memberSession.user.id)}`, { service: true, method: 'DELETE' });
-            return res.status(200).json({ ok: true, message: 'Official-team sync disconnected. Your manually saved team is unchanged.' });
+            if (!await requirePaidMember(memberSession)) return res.status(403).json({ ok: false, message: 'An active Pit Wall membership is required to change official links.' });
+            const slot = slotRequest.slot;
+            await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(memberSession.user.id)}&team_slot=eq.${slot}`, { service: true, method: 'DELETE' });
+            return res.status(200).json({ ok: true, team_slot: slot, message: 'Official-team sync disconnected. Your manually saved team is unchanged.' });
         }
         if (body.action === 'f1-link') {
             if (!await requirePaidMember(memberSession)) return res.status(403).json({ ok: false, message: 'An active Pit Wall membership is required.' });
             const selected = verifyTeamLinkToken(body.link_token, memberSession.user.id);
             if (!selected) return res.status(400).json({ ok: false, message: 'That team selection expired or could not be verified. Search again.' });
-            await restRequest('f1_team_links?on_conflict=user_id', {
+            if (hasTeamSlot && slotRequest.slot !== selected.slot) {
+                return res.status(400).json({ ok: false, message: `That signed selection belongs to Team ${selected.slot}. Search again for the requested slot.` });
+            }
+            await restRequest('f1_team_links?on_conflict=user_id,team_slot', {
                 service: true,
                 method: 'POST',
                 prefer: 'resolution=merge-duplicates,return=representation',
@@ -289,13 +414,15 @@ module.exports = async function team(req, res) {
                     last_error: null,
                 },
             });
-            return res.status(200).json({ ok: true, message: `${selected.name} is connected. Official league updates can now refresh your Transfer Advisor.`, team: selected });
+            return res.status(200).json({ ok: true, message: `${selected.name} is connected. Official league updates can now refresh your Transfer Advisor.`, f1_link: selected, team_slot: selected.slot });
         }
         if (body.action === 'f1-sync') {
+            if (!await requirePaidMember(memberSession)) return res.status(403).json({ ok: false, message: 'An active Pit Wall membership is required to refresh official links.' });
             const round = normalizeRound(body.round);
             if (!round) return res.status(400).json({ ok: false, message: 'The current round could not be determined.' });
-            const links = await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(memberSession.user.id)}&status=eq.active&select=*`, { service: true });
-            if (!links?.[0]) return res.status(404).json({ ok: false, message: 'Link an official team first.' });
+            const slot = slotRequest.slot;
+            const links = await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(memberSession.user.id)}&team_slot=eq.${slot}&status=eq.active&select=*`, { service: true });
+            if (!links?.[0]) return res.status(404).json({ ok: false, message: `Link an official Team ${slot} first.` });
             const result = await syncOfficialLink(links[0], round);
             const message = `Your latest locked official lineup has been refreshed for Round ${round}.`;
             return res.status(200).json({ ok: true, message, ...result });
@@ -304,24 +431,58 @@ module.exports = async function team(req, res) {
         if (assets.length !== 7 || assets.some(item => !item.asset_id || !Number.isInteger(item.slot))) {
             return res.status(400).json({ ok: false, message: 'Select all 5 drivers and both constructors before saving.' });
         }
-        const budget = Number(body.budget_millions);
+        const teamSlot = slotRequest.slot;
+        const squadInput = body.squad_value_millions ?? body.squad_value;
+        const bankInput = body.bank_millions ?? body.bank;
+        const squadValue = squadInput === undefined || squadInput === null || squadInput === '' ? null : Number(squadInput);
+        const bank = bankInput === undefined || bankInput === null || bankInput === '' ? null : Number(bankInput);
+        const spendingInput = body.spending_power_millions ?? body.spending_power ?? body.budget_millions;
+        const spendingPower = spendingInput === undefined || spendingInput === null || spendingInput === ''
+            ? (Number.isFinite(squadValue) && Number.isFinite(bank) ? squadValue + bank : null)
+            : Number(spendingInput);
         const freeTransfers = Number(body.free_transfers);
-        await restRequest('rpc/save_member_team', {
+        const chipInput = body.chips ?? body.chip_status ?? body.chip_ledger;
+        const chips = chipInput === undefined ? null : normalizeChips(chipInput);
+        const season = Number(body.season || 2026);
+        const round = body.round == null || body.round === '' ? null : normalizeRound(body.round);
+        if (!Number.isInteger(season) || season < 2020 || season > 2026) {
+            return res.status(400).json({ ok: false, message: 'The requested season is not supported.' });
+        }
+        if ((squadValue !== null && !Number.isFinite(squadValue))
+            || (bank !== null && !Number.isFinite(bank))
+            || !Number.isFinite(spendingPower)
+            || !Number.isInteger(freeTransfers)) {
+            return res.status(400).json({ ok: false, message: 'Enter valid squad value, bank balance and free transfers.' });
+        }
+        if (body.round != null && body.round !== '' && !round) {
+            return res.status(400).json({ ok: false, message: 'The current round could not be determined.' });
+        }
+        await restRequest('rpc/save_member_team_v2', {
             accessToken: memberSession.accessToken,
             method: 'POST',
             prefer: 'return=representation',
             body: {
-                p_name: 'My Team',
-                p_budget_millions: budget,
+                p_team_slot: teamSlot,
+                p_name: String(body.name || body.team_name || (teamSlot === 1 ? 'My Team' : `Team ${teamSlot}`)).trim().slice(0, 60),
+                p_source_type: (body.source_type ?? body.source) === 'official' ? 'official' : 'manual',
+                p_squad_value_millions: squadValue,
+                p_bank_millions: bank,
+                p_spending_power_millions: spendingPower,
                 p_free_transfers: freeTransfers,
                 p_assets: assets,
+                p_chips: chips,
+                p_season: Number.isInteger(season) ? season : 2026,
+                p_round: round,
+                p_is_primary: shouldMarkPrimary(body),
             },
         });
-        return res.status(200).json({ ok: true, message: 'Team saved. Future simulation emails will use this lineup.' });
+        return res.status(200).json({ ok: true, team_slot: teamSlot, message: `Team ${teamSlot} saved. Future simulation emails will use your primary lineup.` });
     } catch (error) {
         console.error('Could not complete Pit Wall team request:', error.message);
-        const status = /active Pit Wall membership/i.test(error.message)
-            ? 403
+        const status = error.code === 'INVALID_CHIP_STATE' || error.code === 'INVALID_TEAM_SLOT'
+            ? 400
+            : /active Pit Wall membership/i.test(error.message)
+                ? 403
             : error.code === 'F1_SESSION_EXPIRED'
                 ? 503
                 : error.code === 'F1_INCOMPLETE_LINEUP'
@@ -329,7 +490,7 @@ module.exports = async function team(req, res) {
                     : error.code === 'F1_TEAM_NOT_IN_LEAGUE'
                         ? 409
                     : 500;
-        const message = status === 403 || error.code === 'F1_SESSION_EXPIRED' || error.code === 'F1_INCOMPLETE_LINEUP' || error.code === 'F1_TEAM_NOT_IN_LEAGUE'
+        const message = status === 400 || status === 403 || error.code === 'F1_SESSION_EXPIRED' || error.code === 'F1_INCOMPLETE_LINEUP' || error.code === 'F1_TEAM_NOT_IN_LEAGUE'
             ? error.message
             : 'We could not save your team. Please try again.';
         return res.status(status).json({ ok: false, message });
@@ -337,6 +498,11 @@ module.exports = async function team(req, res) {
 };
 
 module.exports.syncOfficialLink = syncOfficialLink;
+module.exports.normalizeAssets = normalizeAssets;
 module.exports.normalizeRound = normalizeRound;
+module.exports.normalizeTeamSlot = normalizeTeamSlot;
+module.exports.shouldMarkPrimary = shouldMarkPrimary;
+module.exports.requestedTeamSlot = requestedTeamSlot;
+module.exports.normalizeChips = normalizeChips;
 module.exports.createTeamLinkToken = createTeamLinkToken;
 module.exports.verifyTeamLinkToken = verifyTeamLinkToken;

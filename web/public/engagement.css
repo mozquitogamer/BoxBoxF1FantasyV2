@@ -162,18 +162,6 @@
     outline: 3px solid rgba(55, 230, 208, .45);
     outline-offset: 3px;
 }
-.optimizer-registration-panel {
-    grid-template-columns: minmax(250px, 1fr) minmax(390px, 1.35fr);
-    gap: 18px;
-    margin: 15px 0 20px;
-    padding: 14px 16px;
-    border-left: 3px solid var(--accent, #e10600);
-}
-.optimizer-registration-panel .email-updates-copy h2 { margin:3px 0 4px; font-size:.98rem; }
-.optimizer-registration-panel .email-updates-copy p { font-size:.75rem; line-height:1.4; }
-.optimizer-registration-panel .email-updates-consent { margin-top:5px; font-size:.68rem; }
-.optimizer-registration-panel .email-updates-privacy { margin-top:2px; font-size:.65rem; }
-.optimizer-registration-panel .email-updates-status { margin-top:3px; min-height:0; }
 .v13-hero .v13-hero-registration {
     position:relative;
     z-index:1;
@@ -224,8 +212,6 @@
 .access-hub-card.pit-wall-access-card.is-active { border-color:rgba(34,197,94,.34); }
 .access-hub-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
 .access-hub-card h3 { margin:5px 0 0; font-size:1.03rem; }
-.pit-wall-access-card .access-hub-card-head h3 { font-size: 0; }
-.pit-wall-access-card .access-hub-card-head h3::after { color: var(--text-primary); content: '••••••••••••••••'; font-size: 1.03rem; letter-spacing: .12em; }
 .access-hub-card p { margin:11px 0; font-size:.8rem; color:#b4bdca; }
 .access-hub-card ul { display:grid; gap:7px; margin:12px 0 16px; padding:0; list-style:none; }
 .access-hub-card li { position:relative; padding-left:18px; color:#b4bdca; font-size:.76rem; line-height:1.4; }
@@ -337,7 +323,6 @@
     .access-hub-grid { grid-template-columns:1fr; }
     .access-status-strip { gap:5px; }
     .access-hub-card-head { align-items:flex-start; flex-direction:column; }
-    .optimizer-registration-panel { grid-template-columns:1fr; gap:10px; }
 }
 @media (max-width: 520px) {
     .email-updates-fields { flex-direction: column; }
@@ -347,3 +332,44 @@
     .adsense-bottom-unit { min-height: 60px; }
     .pit-wall-account-button { padding:7px 10px; font-size:.7rem; }
 }
+
+/* Pit Wall three-team workspace. Kept in the optional engagement layer so
+   public optimizer styling remains untouched. */
+.pit-wall-team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 14px 0;
+}
+.pit-wall-team-card {
+    min-width: 0;
+    padding: 13px;
+    border: 1px solid var(--border, #26303d);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--card, #111820) 88%, #fff 12%);
+}
+.pit-wall-team-card.selected { border-color: var(--accent, #ef4444); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent, #ef4444) 42%, transparent); }
+.pit-wall-team-card-head, .pit-wall-team-card-actions, .pit-wall-team-tools { display: flex; align-items: center; gap: 8px; }
+.pit-wall-team-card-head { justify-content: space-between; gap: 8px; }
+.pit-wall-team-card h5 { margin: 2px 0 0; font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pit-wall-team-kicker, .pit-wall-team-state, .pit-wall-team-meta, .pit-wall-team-chips, .pit-wall-team-link { color: var(--muted, #9aa4b2); font-size: .68rem; }
+.pit-wall-team-state { color: var(--success, #7ee2b8); white-space: nowrap; }
+.pit-wall-team-meta, .pit-wall-team-chips { min-height: 2.4em; line-height: 1.4; }
+.pit-wall-team-chips-editor { margin-top: 6px; color: var(--muted, #9aa4b2); font-size: .68rem; }
+.pit-wall-team-chips-editor summary { cursor: pointer; color: var(--text-secondary, #c8d0da); }
+.pit-wall-team-chips-editor > div { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 7px; }
+.pit-wall-team-chips-editor label { white-space: nowrap; }
+.pit-wall-team-card-actions { flex-wrap: wrap; margin-top: 8px; }
+.pit-wall-team-tools { margin-top: 10px; flex-wrap: wrap; }
+.pit-wall-team-tools input { min-width: 0; flex: 1 1 100px; padding: 6px 8px; border: 1px solid var(--border, #26303d); border-radius: 6px; background: var(--bg, #0d131a); color: inherit; font: inherit; font-size: .72rem; }
+.pit-wall-team-link { flex-basis: 100%; }
+.pit-wall-official { margin-top: 12px; }
+.pit-wall-team-summaries { display: grid; gap: 7px; margin: 13px 0; }
+.pit-wall-team-summary { padding: 10px 11px; border: 1px solid var(--border, #26303d); border-radius: 8px; background: rgba(255,255,255,.02); }
+.pit-wall-team-summary > div:first-child { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.pit-wall-team-summary > div:first-child span, .pit-wall-team-summary small { color: var(--muted, #9aa4b2); font-size: .68rem; }
+.pit-wall-team-summary strong { font-size: .82rem; }
+.pit-wall-team-summary-actions { display: flex; gap: 10px; margin-top: 7px; }
+.pit-wall-team-summary-actions a { color: var(--accent, #ef4444); font-size: .72rem; font-weight: 700; }
+.pit-wall-team-summary-empty { margin: 13px 0; padding: 11px; border: 1px dashed var(--border, #26303d); border-radius: 8px; color: var(--muted, #9aa4b2); font-size: .76rem; }
+@media (max-width: 760px) { .pit-wall-team-grid { grid-template-columns: 1fr; } }

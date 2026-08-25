@@ -328,55 +328,137 @@ async function getMemberDashboard(session) {
     ]);
     const entitlement = (entitlements || []).find(item => isEntitlementActive(item)) || entitlements?.[0] || null;
     const active = isEntitlementActive(entitlement);
-    let team = null;
-    let recommendation = null;
-    let f1Link = null;
-    let f1Snapshot = null;
+    let teams = [];
+    let f1Links = [];
+    let f1Snapshots = [];
 
-    if (active) {
-        try {
-            const links = await restRequest(
-                `f1_team_links?user_id=eq.${encodedUserId}&select=league_id,league_type,team_slot,official_team_id,official_team_name,manager_name,status,last_synced_at,last_error&limit=1`,
-                { accessToken: session.accessToken },
-            );
-            f1Link = links?.[0] || null;
-            if (f1Link) {
-                const snapshots = await restRequest(
-                    `f1_team_snapshots?user_id=eq.${encodedUserId}&select=season,round,official_team_name,fantasy_points,overall_points,league_rank,overall_rank,budget_millions,free_transfers,chip_code,assets,captured_at&order=season.desc,round.desc&limit=1`,
-                    { accessToken: session.accessToken },
-                );
-                f1Snapshot = snapshots?.[0] || null;
-            }
-        } catch (error) {
-            if (!isMissingTable(error)) throw error;
-        }
-        const teams = await restRequest(
-            `saved_teams?user_id=eq.${encodedUserId}&is_default=eq.true&select=id,name,budget_millions,free_transfers,updated_at&limit=1`,
+    // Links and retained saved teams are intentionally readable for an
+    // authenticated former member. Writes remain entitlement-gated by RLS and
+    // the save RPC, so an expired member can inspect what they owned without
+    // changing it.
+    try {
+        f1Links = await restRequest(
+            `f1_team_links?user_id=eq.${encodedUserId}&select=league_id,league_type,team_slot,official_team_id,official_team_name,manager_name,status,last_synced_at,last_error&order=team_slot.asc`,
             { accessToken: session.accessToken },
         );
-        if (teams?.[0]) {
-            team = teams[0];
-            team.assets = await restRequest(
-                `saved_team_assets?team_id=eq.${encodeURIComponent(team.id)}&select=asset_type,asset_id,slot,is_boosted&order=asset_type.asc,slot.asc`,
+    } catch (error) {
+        if (!isMissingTable(error)) throw error;
+    }
+    try {
+        f1Snapshots = await restRequest(
+            `f1_team_snapshots?user_id=eq.${encodedUserId}&select=season,round,team_slot,official_team_id,official_team_name,fantasy_points,overall_points,league_rank,overall_rank,budget_millions,squad_value_millions,bank_millions,spending_power_millions,free_transfers,chip_code,assets,captured_at&order=season.desc,round.desc`,
+            { accessToken: session.accessToken },
+        );
+    } catch (error) {
+        if (isMissingTable(error)) {
+            f1Snapshots = [];
+        } else if (!/column .* does not exist|schema cache/i.test(String(error?.message || ''))) {
+            throw error;
+        } else {
+            f1Snapshots = await restRequest(
+                `f1_team_snapshots?user_id=eq.${encodedUserId}&select=season,round,team_slot,official_team_id,official_team_name,fantasy_points,overall_points,league_rank,overall_rank,budget_millions,free_transfers,chip_code,assets,captured_at&order=season.desc,round.desc`,
                 { accessToken: session.accessToken },
             );
-            const recommendations = await restRequest(
-                `member_recommendations?team_id=eq.${encodeURIComponent(team.id)}&select=recommendation,delivery_status,created_at&order=created_at.desc&limit=1`,
-                { accessToken: session.accessToken },
-            );
-            recommendation = recommendations?.[0] || null;
         }
     }
+
+    try {
+        teams = await restRequest(
+            `saved_teams?user_id=eq.${encodedUserId}&select=id,team_slot,name,source_type,is_default,budget_millions,squad_value_millions,bank_millions,spending_power_millions,free_transfers,updated_at&order=team_slot.asc`,
+            { accessToken: session.accessToken },
+        );
+    } catch (error) {
+        // A rolling deployment may briefly serve the old schema. Keep the
+        // legacy response usable until migration 005 is visible to PostgREST.
+        if (!isMissingTable(error) && !/column .* does not exist|schema cache/i.test(String(error?.message || ''))) throw error;
+        teams = await restRequest(
+            `saved_teams?user_id=eq.${encodedUserId}&select=id,name,budget_millions,free_transfers,updated_at,is_default&order=created_at.asc`,
+            { accessToken: session.accessToken },
+        );
+    }
+
+    const snapshotsBySlot = new Map();
+    for (const snapshot of f1Snapshots || []) {
+        const slot = Number(snapshot.team_slot) || 1;
+        if (!snapshotsBySlot.has(slot)) snapshotsBySlot.set(slot, snapshot);
+    }
+    const linksBySlot = new Map((f1Links || []).map(link => [Number(link.team_slot) || 1, link]));
+    const enrichedTeams = await Promise.all((teams || []).map(async rawTeam => {
+        const team = {
+            ...rawTeam,
+            team_slot: Number(rawTeam.team_slot) || (rawTeam.is_default ? 1 : null),
+            source_type: rawTeam.source_type || 'manual',
+            squad_value_millions: rawTeam.squad_value_millions == null ? null : Number(rawTeam.squad_value_millions),
+            bank_millions: rawTeam.bank_millions == null ? null : Number(rawTeam.bank_millions),
+            spending_power_millions: rawTeam.spending_power_millions == null
+                ? (rawTeam.budget_millions == null ? null : Number(rawTeam.budget_millions))
+                : Number(rawTeam.spending_power_millions),
+        };
+        // budget_millions remains the compatibility name consumed by the
+        // existing recommendation/optimizer code; semantically it is now
+        // total spending power (squad value + bank).
+        if (team.budget_millions == null) team.budget_millions = team.spending_power_millions;
+        team.assets = await restRequest(
+            `saved_team_assets?team_id=eq.${encodeURIComponent(team.id)}&select=asset_type,asset_id,slot,is_boosted&order=asset_type.asc,slot.asc`,
+            { accessToken: session.accessToken },
+        ).catch(error => (isMissingTable(error) ? [] : Promise.reject(error)));
+        try {
+            // The workspace currently targets the 2026 season. Filtering here
+            // prevents an older season's duplicate chip code from masking the
+            // current ledger in clients that index by chip_code.
+            team.chips = await restRequest(
+                `member_chips?team_id=eq.${encodeURIComponent(team.id)}&season=eq.2026&select=season,chip_code,status,available,used_round,updated_at&order=chip_code.asc`,
+                { accessToken: session.accessToken },
+            );
+        } catch (error) {
+            if (isMissingTable(error)) team.chips = [];
+            else if (/column .* does not exist|schema cache/i.test(String(error?.message || ''))) {
+                const legacyChips = await restRequest(
+                    `member_chips?team_id=eq.${encodeURIComponent(team.id)}&select=chip_code,available,used_round,updated_at&order=chip_code.asc`,
+                    { accessToken: session.accessToken },
+                );
+                team.chips = (legacyChips || []).map(chip => ({
+                    ...chip,
+                    season: 2026,
+                    status: chip.available === true ? 'available' : chip.available === false ? 'used' : 'unknown',
+                }));
+            } else throw error;
+        }
+        team.history = await restRequest(
+            `saved_team_history?team_id=eq.${encodeURIComponent(team.id)}&select=season,round,squad_value_millions,bank_millions,spending_power_millions,budget_millions,free_transfers,chips,assets,source_type,recorded_at&order=season.desc,round.desc`,
+            { accessToken: session.accessToken },
+        ).catch(error => (isMissingTable(error) ? [] : Promise.reject(error)));
+        team.f1_link = linksBySlot.get(team.team_slot) || null;
+        team.f1_snapshot = snapshotsBySlot.get(team.team_slot) || null;
+        return team;
+    }));
+
+    const primaryTeam = enrichedTeams.find(item => item.is_default)
+        || enrichedTeams.find(item => item.team_slot === 1)
+        || null;
+    const recommendation = active && primaryTeam
+        ? (await restRequest(
+            `member_recommendations?team_id=eq.${encodeURIComponent(primaryTeam.id)}&select=recommendation,delivery_status,created_at&order=created_at.desc&limit=1`,
+            { accessToken: session.accessToken },
+        ).catch(error => (isMissingTable(error) ? [] : Promise.reject(error))))?.[0] || null
+        : null;
+    const f1Link = primaryTeam?.f1_link || linksBySlot.get(1) || null;
+    const f1Snapshot = primaryTeam?.f1_snapshot || snapshotsBySlot.get(1) || null;
 
     return {
         authenticated: true,
         email: session.user.email || profiles?.[0]?.email || '',
         profile: profiles?.[0] || null,
         entitlement: entitlement ? { ...entitlement, active } : { active: false },
-        team,
+        // `team` and the F1 aliases are retained for existing clients. New
+        // clients should consume teams[] and choose by team_slot.
+        team: primaryTeam,
+        teams: enrichedTeams,
         recommendation,
         f1_link: f1Link,
         f1_snapshot: f1Snapshot,
+        f1_links: f1Links,
+        f1_snapshots: f1Snapshots,
     };
 }
 

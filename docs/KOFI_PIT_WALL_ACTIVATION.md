@@ -16,10 +16,10 @@ Pit Wall is the $5/month BoxBoxF1Fantasy convenience membership. It supports the
 
 **Features rolling out next:**
 
-- save one fantasy team, exact budget, free transfers, and remaining chips;
+- save up to three named fantasy teams, each with its own lineup, finances, transfers, history, and remaining chips;
 - receive personalized early-thoughts and post-FP alerts;
 - receive a short "what changed" transfer/chip note;
-- compare the saved team with V13 without re-entering it.
+- compare any saved-team combination with V13 without re-entering it.
 
 The paid tier is for faster delivery, saved state, and personalization. It must not receive hidden contest data, a stronger private forecast, or an earlier team lock than the public V13 record.
 
@@ -49,6 +49,40 @@ When the member dashboard is connected:
 7. keep an append-only payment event record for support and refunds.
 
 Until the private database and magic-link accounts are live, Ko-fi itself is the source of truth for the member briefing. Website-only personalized tools should remain marked as rolling out.
+
+## Pit Wall three-team workspace
+
+Migration `005_pit_wall_three_team_workspace.sql` extends the existing membership schema after migrations `001_memberships.sql`, `002_f1_team_sync.sql`, `003_security_hardening.sql`, and `004_beat_v13_entries.sql`. It is additive: existing members keep their current default team as stable Team 1, and legacy save calls remain compatible.
+
+Each member has three stable slots:
+
+- Team 1, Team 2, and Team 3 can each have an independent name, lineup, source, finances, chip ledger, and weekly history.
+- The first saved team becomes primary when no primary exists. A member can explicitly change the primary team; ordinary saves to another slot do not reclaim it.
+- Personalized simulation emails are primary-team-only. Saving or linking Team 2 or Team 3 never creates additional personalized email recipients.
+
+Financial fields must not be conflated:
+
+- `squad_value_millions` is the current value of the selected drivers and constructors;
+- `bank_millions` is the member's actual cash remaining;
+- `spending_power_millions` is the usable total (`squad value + bank`) and is exposed as legacy `budget_millions` for existing recommendation code.
+
+If a legacy record only has its old budget value, retain it as spending power and leave squad value and bank unknown until the member confirms them. An official F1 `teambal` sync represents bank only; it must not be treated as total spending power.
+
+Team history is idempotent per team, season, and round. Re-saving a round updates that round's snapshot rather than creating a duplicate. Chip state is season-aware for the six supported chips (`limitless`, `3x_boost`, `wild_card`, `no_negative`, `autopilot`, and `final_fix`) and uses `unknown`, `available`, or `used`, with an optional `used_round` when known.
+
+Official F1 links are independent per Team 1/2/3 slot. Refreshing a link is non-destructive: it stores the latest official lineup, bank, transfers, chips, and ranks as a slot-specific snapshot without overwriting the member's saved manual team. The member must use the explicit **Apply official** action to replace a saved lineup with that snapshot.
+
+Expired members retain read-only access to their saved teams, snapshots, history, and chip state. Saves, renames, primary-team changes, official refreshes, and personalized recommendations remain entitlement-gated.
+
+### Rollout, rollback, and verification
+
+1. Apply migrations `001` through `005` in filename order in a staging Supabase project. Confirm the migration completes before deploying the API or frontend that sends slot-aware payloads.
+2. Verify one legacy member has their former team as Team 1, retains legacy spending power, and has unknown squad/bank rather than fabricated values. Verify a member with no primary receives exactly one repaired primary (the lowest stable slot).
+3. Save Team 2 and Team 3 independently, rename one, set the other primary, and confirm a normal Team 1 save does not change primary status. Record the current round twice and confirm one history row per team/season/round.
+4. Link and refresh official Team 1/2/3 records. Confirm snapshots are slot-specific and that saved lineups remain unchanged until **Apply official**. Confirm personalized notification data selects only the primary slot.
+5. Run `node web/tests/member-team-contract.test.js` and `node web/tests/f1-fantasy.test.js`, then perform a signed-in mobile smoke test covering save, rename, primary selection, chip edits, compare selection, official refresh, and inactive read-only behavior.
+
+The migration is additive and has no destructive down migration. If rollout must be paused, first roll back the API/frontend deployment to the legacy-compatible contract, leave migration `005` in place, and investigate without deleting the new columns or history. Restore from the Supabase backup only if a database rollback is explicitly required and has been reviewed.
 
 ## Free Beat V13 registration and alerts
 

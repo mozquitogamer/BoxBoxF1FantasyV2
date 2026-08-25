@@ -98,13 +98,23 @@ const LINEUPS_PER_PAGE = 10;
 // My Team state (for Transfer Advisor + Multi-Week Planner)
 let myTeamDrivers = [null, null, null, null, null];   // 5 driver_id slots
 let myTeamConstructors = [null, null];                  // 2 constructor_id slots
+let myTeamBank = null;                                  // explicit cash in bank ($M)
+let memberBankTouched = false;
+let myTeamBankUnknown = false;                           // saved member state may omit bank
 let transferBudgetTouched = false;
 let mwBudgetTouched = false;
 let compareTeams = [
-    { name: 'Team A', drivers: [null, null, null, null, null], constructors: [null, null] },
-    { name: 'Team B', drivers: [null, null, null, null, null], constructors: [null, null] },
-    { name: 'Team C', drivers: [null, null, null, null, null], constructors: [null, null] },
+    { id: 'manual-1', source: 'manual', name: 'Team A', drivers: [null, null, null, null, null], constructors: [null, null], budget: 100, bank: null, chips: [] },
+    { id: 'manual-2', source: 'manual', name: 'Team B', drivers: [null, null, null, null, null], constructors: [null, null], budget: 100, bank: null, chips: [] },
+    { id: 'manual-3', source: 'manual', name: 'Team C', drivers: [null, null, null, null, null], constructors: [null, null], budget: 100, bank: null, chips: [] },
 ];
+// Team Compare source state. Members receive three saved sources through the
+// member-data event/API; anonymous visitors retain the original manual path.
+let compareAvailableSources = [];
+let compareSelectedSourceIds = [];
+let compareMemberState = { status: 'anonymous', teams: [] };
+let compareManualTeam = { id: 'manual', source: 'manual', name: 'Manual team', drivers: [null, null, null, null, null], constructors: [null, null], budget: 100, bank: null, chips: [] };
+const COMPARE_CHIP_CODES = ['limitless', '3x_boost', 'wild_card', 'no_negative', 'autopilot', 'final_fix'];
 // Multi-week planner data
 let trackData = null;
 let driverHistory = null;
@@ -1050,6 +1060,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     startCountdown();
     setupTabs();
     setupControls();
+    setupCompareSources(readCompareMemberApi());
+    renderTeamCompareGrid();
     setupV13Popup();
 
     // The Pit Wall account entry point can load before the optimizer controls
@@ -1636,6 +1648,16 @@ async function handleV13TeamSearch(event) {
     }
 }
 
+const MORE_TAB_NAMES = new Set(['season', 'h2h', 'accuracy', 'deepdive', 'videos', 'articles', 'changelog', 'about']);
+
+function updateMoreTabState(tabName) {
+    const toggle = document.getElementById('tabMoreToggle');
+    if (!toggle) return;
+    const isMore = MORE_TAB_NAMES.has(tabName);
+    toggle.classList.toggle('active', isMore);
+    toggle.setAttribute('aria-current', isMore ? 'page' : 'false');
+}
+
 function switchTab(tabName) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1643,6 +1665,7 @@ function switchTab(tabName) {
     const panel = document.getElementById(`tab-${tabName}`);
     if (btn) btn.classList.add('active');
     if (panel) panel.classList.add('active');
+    updateMoreTabState(tabName);
 
     // Lazy render the tab content on first visit
     renderTabIfNeeded(tabName);
@@ -1667,15 +1690,15 @@ async function loadV13Leaderboard() {
     renderV13Leaderboard();
 }
 
-function openPitWallTransferAdvisor(options = {}) {
+function openOptimizerMode(mode, options = {}) {
     const { scroll = true, updateHistory = true } = options;
     switchTab('optimizer');
-    const transfersButton = document.querySelector('.mode-btn[data-mode="transfers"]');
-    const transfersPanel = document.getElementById('mode-transfers');
-    if (!transfersButton || !transfersPanel) return false;
+    const modeButton = document.querySelector(`.mode-btn[data-mode="${mode}"]`);
+    const modePanel = document.getElementById(`mode-${mode}`);
+    if (!modeButton || !modePanel) return false;
 
-    transfersButton.click();
-    const opened = !transfersPanel.classList.contains('hidden');
+    modeButton.click();
+    const opened = !modePanel.classList.contains('hidden');
     if (!opened) return false;
 
     if (updateHistory) {
@@ -1683,16 +1706,63 @@ function openPitWallTransferAdvisor(options = {}) {
     }
     if (scroll) {
         window.setTimeout(() => {
-            document.getElementById('pitWallMemberPanel')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            modePanel.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
         }, 120);
     }
     return true;
 }
 
-window.BoxBoxOpenPitWall = openPitWallTransferAdvisor;
+function openPitWall(options = {}) {
+    return openOptimizerMode('pitwall', options);
+}
+
+function openPitWallTransferAdvisor(options = {}) {
+    return openOptimizerMode('transfers', options);
+}
+
+function openTeamCompare(options = {}) {
+    const { scroll = true, updateHistory = true, slot = null } = options || {};
+    const opened = openOptimizerMode('compare', { scroll: false, updateHistory });
+    if (!opened) return false;
+    if (slot !== null && slot !== undefined) {
+        const requestedSlot = Number(slot);
+        const requested = compareAvailableSources.find(source => Number(source.slot) === requestedSlot && source.source === 'saved');
+        if (requested) {
+            const selected = compareSelectedSourceIds.filter(id => id !== requested.id);
+            selected.unshift(requested.id);
+            const alternatives = compareAvailableSources.filter(source => source.source === 'saved' && source.id !== requested.id).map(source => source.id);
+            selectCompareSources([...selected, ...alternatives].slice(0, Math.max(2, Math.min(3, compareAvailableSources.filter(source => source.source === 'saved').length))));
+        }
+    }
+    renderTeamCompareGrid();
+    if (scroll) window.setTimeout(() => document.getElementById('mode-compare')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }), 120);
+    return true;
+}
+
+window.BoxBoxOpenPitWall = openPitWall;
+window.BoxBoxOpenPitWallTransferAdvisor = openPitWallTransferAdvisor;
 
 function setupTabs() {
-    document.querySelectorAll('.tab').forEach(tab => {
+    window.addEventListener('boxbox:team-compare-requested', event => openTeamCompare(event.detail || {}));
+    const moreToggle = document.getElementById('tabMoreToggle');
+    const moreMenu = document.getElementById('tabMoreMenu');
+    const closeMore = () => {
+        if (!moreMenu || !moreToggle) return;
+        moreMenu.hidden = true;
+        moreToggle.setAttribute('aria-expanded', 'false');
+    };
+    moreToggle?.addEventListener('click', event => {
+        event.stopPropagation();
+        const open = moreMenu?.hidden === true;
+        if (moreMenu) moreMenu.hidden = !open;
+        moreToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    moreMenu?.querySelectorAll('.tab-more-item').forEach(item => item.addEventListener('click', () => closeMore()));
+    document.addEventListener('click', event => {
+        if (moreMenu && !moreMenu.hidden && !event.target.closest('#tabMore')) closeMore();
+    });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMore(); });
+    document.querySelectorAll('.tab[data-tab]').forEach(tab => {
         tab.addEventListener('click', () => {
             switchTab(tab.dataset.tab);
             history.replaceState(null, '', `#${tab.dataset.tab}`);
@@ -1722,6 +1792,7 @@ function setupTabs() {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         document.querySelector(`.tab[data-tab="${hash}"]`)?.classList.add('active');
         document.getElementById(`tab-${hash}`)?.classList.add('active');
+        updateMoreTabState(hash);
     }
 
     // Fire the initial GA4 virtual page view for the landing tab (default
@@ -1786,13 +1857,35 @@ function setupControls() {
         });
     });
 
+    document.getElementById('pitWallEditTeam')?.addEventListener('click', () => openPitWallTransferAdvisor());
+    document.getElementById('pitWallCompareWorkspace')?.addEventListener('click', () => openTeamCompare());
+
     // Transfer advisor
     document.getElementById('runTransferAdvisor').addEventListener('click', runTransferAdvisor);
     const transferBudgetEl = document.getElementById('transferBudget');
     if (transferBudgetEl) {
         transferBudgetEl.addEventListener('input', () => {
             transferBudgetTouched = true;
+            if (!memberBankTouched) syncTeamFinanceInputs(getMyTeamCost());
             notifyMyTeamChanged('budget');
+        });
+    }
+    const transferBankEl = document.getElementById('transferBank');
+    if (transferBankEl) {
+        transferBankEl.addEventListener('input', () => {
+            const rawValue = String(transferBankEl.value ?? '').trim();
+            if (!rawValue) {
+                memberBankTouched = false;
+                myTeamBankUnknown = true;
+                myTeamBank = null;
+            } else {
+                memberBankTouched = true;
+                myTeamBankUnknown = false;
+                const value = Number(rawValue);
+                myTeamBank = Number.isFinite(value) && value >= 0 ? value : null;
+            }
+            syncTeamFinanceInputs(getMyTeamCost());
+            notifyMyTeamChanged('bank');
         });
     }
     document.getElementById('freeTransfers')?.addEventListener('input', () => notifyMyTeamChanged('free-transfers'));
@@ -1818,7 +1911,13 @@ function setupControls() {
     if (runTeamCompareBtn) runTeamCompareBtn.addEventListener('click', runTeamCompare);
     const compareBudgetEl = document.getElementById('compareBudget');
     if (compareBudgetEl) {
-        compareBudgetEl.addEventListener('input', () => renderTeamCompareGrid());
+        compareBudgetEl.addEventListener('input', () => {
+            compareManualTeam.budget = parseFloat(compareBudgetEl.value) || 100;
+            compareAvailableSources.forEach(source => {
+                if (source.source === 'manual' || source.source === 'fallback') source.budget = compareManualTeam.budget;
+            });
+            renderTeamCompareGrid();
+        });
     }
     const compareChipEl = document.getElementById('compareChip');
     if (compareChipEl) {
@@ -1828,14 +1927,26 @@ function setupControls() {
     if (compareBasisEl) {
         compareBasisEl.addEventListener('change', () => renderTeamCompareGrid());
     }
+    const compareSourcesEl = document.getElementById('teamCompareGrid');
+    if (compareSourcesEl) {
+        compareSourcesEl.addEventListener('change', event => {
+            const input = event.target.closest('[data-compare-source]');
+            if (!input) return;
+            const id = String(input.dataset.compareSource);
+            if (input.checked) {
+                if (!compareSelectedSourceIds.includes(id) && compareSelectedSourceIds.length < 4) compareSelectedSourceIds.push(id);
+            } else {
+                compareSelectedSourceIds = compareSelectedSourceIds.filter(sourceId => sourceId !== id);
+            }
+            selectCompareSources(compareSelectedSourceIds);
+        });
+    }
     const clearTeamCompareBtn = document.getElementById('clearTeamCompare');
     if (clearTeamCompareBtn) {
         clearTeamCompareBtn.addEventListener('click', () => {
-            compareTeams = compareTeams.map((t, i) => ({
-                name: `Team ${String.fromCharCode(65 + i)}`,
-                drivers: [null, null, null, null, null],
-                constructors: [null, null],
-            }));
+            compareManualTeam = normalizeCompareSource({ ...compareManualTeam, drivers: [null, null, null, null, null], constructors: [null, null] }, 0, 'manual');
+            compareAvailableSources = compareAvailableSources.map(source => source.source === 'manual' ? { ...compareManualTeam } : source);
+            compareTeams = compareTeams.map(team => team.source === 'manual' ? { ...compareManualTeam } : team);
             renderTeamCompareGrid();
             const resultEl = document.getElementById('teamCompareResult');
             if (resultEl) resultEl.classList.add('hidden');
@@ -4973,7 +5084,7 @@ function renderMyTeamGrid() {
     // Seed budget inputs from team cost until the user edits them. After that,
     // slot changes must not erase bank/unspent budget that was typed manually.
     const totalCost = getMyTeamCost();
-    syncBudgetInputsFromTeamCost(totalCost);
+    syncTeamFinanceInputs(totalCost);
 
     // Click handlers for this grid
     function attachGridHandlers(gridEl) {
@@ -5041,13 +5152,23 @@ function getMemberTeamSnapshot() {
         throw new Error('Select all 5 drivers and both constructors before saving.');
     }
     const budget = Number(document.getElementById('transferBudget')?.value);
+    const squadValue = getMyTeamCost();
+    const rawBank = document.getElementById('transferBank')?.value;
+    const bankInput = rawBank === '' || rawBank === null || rawBank === undefined ? NaN : Number(rawBank);
+    const bank = Number.isFinite(bankInput) && bankInput >= 0
+        ? bankInput
+        : (myTeamBankUnknown ? null : (Number.isFinite(myTeamBank) ? myTeamBank : Math.max(0, budget - squadValue)));
     const freeTransfers = Number(document.getElementById('freeTransfers')?.value);
     if (!Number.isFinite(budget) || budget < 0) throw new Error('Enter a valid available budget.');
+    if (bank !== null && (!Number.isFinite(bank) || bank < 0)) throw new Error('Enter a valid cash-in-bank amount.');
     if (!Number.isInteger(freeTransfers) || freeTransfers < 2 || freeTransfers > 3) {
         throw new Error('Free transfers must be 2, or 3 when one was rolled over.');
     }
     return {
         budget_millions: budget,
+        spending_power_millions: budget,
+        squad_value_millions: squadValue,
+        bank_millions: bank,
         free_transfers: freeTransfers,
         assets: [
             ...drivers.map((assetId, index) => ({ asset_type: 'driver', asset_id: assetId, slot: index + 1, is_boosted: false })),
@@ -5074,11 +5195,20 @@ function applySavedMemberTeam(team) {
     constructors.slice(0, 2).forEach((item, index) => { myTeamConstructors[index] = item.asset_id; });
     const budget = document.getElementById('transferBudget');
     const freeTransfers = document.getElementById('freeTransfers');
+    const savedSpendingPower = compareNumeric(team.spending_power_millions, team.budget_millions);
+    const rawSavedBank = team.bank_millions;
+    const savedBank = rawSavedBank === null || rawSavedBank === undefined || rawSavedBank === '' ? NaN : Number(rawSavedBank);
+    myTeamBank = Number.isFinite(savedBank) && savedBank >= 0 ? savedBank : null;
+    myTeamBankUnknown = !Number.isFinite(savedBank) || savedBank < 0;
+    memberBankTouched = !myTeamBankUnknown;
     if (budget) {
-        budget.value = Number(team.budget_millions || 100).toFixed(1);
+        budget.value = (Number.isFinite(savedSpendingPower) && savedSpendingPower > 0 ? savedSpendingPower : 100).toFixed(1);
         transferBudgetTouched = true;
     }
-    if (freeTransfers) freeTransfers.value = String(Number(team.free_transfers || 0));
+    if (freeTransfers) {
+        const savedTransfers = Number(team.free_transfers);
+        if ([2, 3].includes(savedTransfers)) freeTransfers.value = String(savedTransfers);
+    }
     renderMyTeamGrid();
     return drivers.length === 5 && constructors.length === 2;
 }
@@ -5136,6 +5266,9 @@ function applyOfficialMemberTeam(snapshot) {
     const applied = applySavedMemberTeam({
         assets: converted,
         budget_millions: hasSyncedBudget ? syncedBudget : 100,
+        spending_power_millions: hasSyncedBudget ? syncedBudget : null,
+        squad_value_millions: snapshot.squad_value_millions,
+        bank_millions: snapshot.bank_millions,
         free_transfers: [2, 3].includes(syncedTransfers) ? syncedTransfers : fallbackTransfers,
     });
     // The public league feed exposes the seven picks but not team value or
@@ -5156,7 +5289,275 @@ window.BoxBoxTeamMemory = {
     currentRound: () => Number(data?.round || 0),
 };
 
-function getCompareBudget() {
+function compareNumeric(...values) {
+    for (const value of values) {
+        if (value === null || value === undefined || value === '') continue;
+        const n = Number(value);
+        if (Number.isFinite(n)) return n;
+    }
+    return null;
+}
+
+function syncTeamFinanceInputs(totalCost = getMyTeamCost()) {
+    if (totalCost <= 0) return;
+    const transferBudgetEl = document.getElementById('transferBudget');
+    const transferBankEl = document.getElementById('transferBank');
+    const squadValueEl = document.getElementById('transferSquadValue');
+    if (squadValueEl) squadValueEl.value = totalCost.toFixed(1);
+    const spendingPower = Number(transferBudgetEl?.value);
+    if (myTeamBankUnknown) {
+        if (transferBankEl) transferBankEl.value = '';
+        return;
+    }
+    if (memberBankTouched) {
+        const bank = Number.isFinite(myTeamBank) && myTeamBank >= 0 ? myTeamBank : Math.max(0, spendingPower - totalCost);
+        myTeamBank = bank;
+        if (transferBankEl) transferBankEl.value = bank.toFixed(1);
+        if (transferBudgetEl) {
+            transferBudgetEl.value = (totalCost + bank).toFixed(1);
+            transferBudgetTouched = true;
+        }
+        return;
+    }
+    if (Number.isFinite(spendingPower) && spendingPower >= 0) {
+        myTeamBank = Math.max(0, spendingPower - totalCost);
+        if (transferBankEl) transferBankEl.value = myTeamBank.toFixed(1);
+        return;
+    }
+    syncBudgetInputsFromTeamCost(totalCost);
+    const nextSpendingPower = Number(transferBudgetEl?.value);
+    if (Number.isFinite(nextSpendingPower)) {
+        myTeamBank = Math.max(0, nextSpendingPower - totalCost);
+        if (transferBankEl) transferBankEl.value = myTeamBank.toFixed(1);
+    }
+}
+
+function compareEscapeHtml(value) {
+    return String(value ?? '').replace(/[&<>\"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#39;' }[char]));
+}
+
+function compareAssetIds(values, type) {
+    if (!Array.isArray(values)) return [null, null, null, null, null].slice(0, type === 'driver' ? 5 : 2);
+    return values.map(value => {
+        if (!value) return null;
+        if (typeof value === 'string' || typeof value === 'number') return String(value);
+        return String(type === 'driver'
+            ? (value.driver_id ?? value.id ?? value.asset_id ?? '')
+            : (value.constructor_id ?? value.id ?? value.asset_id ?? '')) || null;
+    });
+}
+
+function compareChipCode(value) {
+    const code = String(value || '').trim().toLowerCase();
+    return COMPARE_CHIP_CODES.includes(code) ? code : null;
+}
+
+function compareChipIsAvailable(value) {
+    if (typeof value === 'boolean') return value;
+    if (!value || typeof value !== 'object') return false;
+    const status = String(value.status || '').trim().toLowerCase();
+    if (status) return status === 'available';
+    if (typeof value.available === 'boolean') return value.available;
+    if (typeof value.remaining === 'boolean') return value.remaining;
+    if (typeof value.used === 'boolean') return value.used === false;
+    return false;
+}
+
+function normalizeCompareChips(rawChips) {
+    const candidates = [];
+    const add = (code, value, implicit = false, season = 0) => {
+        const canonical = compareChipCode(code);
+        if (!canonical) return;
+        candidates.push({ code: canonical, value, implicit, season: Number(season) || 0 });
+    };
+    if (Array.isArray(rawChips)) {
+        rawChips.forEach(item => {
+            if (typeof item === 'string') add(item, true, true);
+            else if (item && typeof item === 'object') add(item.chip_code || item.code || item.id || item.key, item, false, item.season || item.year);
+        });
+    } else if (rawChips && typeof rawChips === 'object') {
+        Object.entries(rawChips).forEach(([code, value]) => {
+            const seasonEntries = value && typeof value === 'object'
+                ? Object.entries(value).filter(([key, nested]) => /^20\d{2}$/.test(key) && nested && typeof nested === 'object')
+                : [];
+            if (seasonEntries.length) seasonEntries.forEach(([season, nested]) => add(code, nested, false, season));
+            else add(code, value);
+        });
+    }
+    const currentSeason = Number(data?.season || 2026);
+    candidates.sort((left, right) => {
+        const leftCurrent = left.season === currentSeason ? 1 : 0;
+        const rightCurrent = right.season === currentSeason ? 1 : 0;
+        return rightCurrent - leftCurrent || right.season - left.season;
+    });
+    const seen = new Set();
+    return candidates.filter(candidate => {
+        if (seen.has(candidate.code)) return false;
+        seen.add(candidate.code);
+        return candidate.implicit ? true : compareChipIsAvailable(candidate.value);
+    }).map(candidate => candidate.code);
+}
+
+function normalizeCompareSource(team, index = 0, source = 'saved') {
+    if (!team) return null;
+    const drivers = compareAssetIds(team.drivers || team.driver_ids || team.driverIds || team.lineup?.drivers || team.assets?.filter(a => a.asset_type === 'driver'), 'driver').slice(0, 5);
+    const constructors = compareAssetIds(team.constructors || team.constructor_ids || team.constructorIds || team.lineup?.constructors || team.assets?.filter(a => a.asset_type === 'constructor'), 'constructor').slice(0, 2);
+    while (drivers.length < 5) drivers.push(null);
+    while (constructors.length < 2) constructors.push(null);
+    const squadValue = compareNumeric(team.squad_value_millions, team.squadValue, team.squad_value);
+    // `budget_millions` is the legacy total spending-power field. It must
+    // never be treated as cash in the bank; only explicit cash/bank fields
+    // can populate the bank display.
+    const bank = compareNumeric(team.bank_millions, team.cash_millions, team.cash_balance, team.cash, team.bank);
+    const spendingPower = compareNumeric(team.spending_power_millions, team.spendingPower, team.total_budget_millions, team.totalBudget, source === 'manual' ? team.budget : null, team.budget_millions, squadValue !== null && bank !== null ? squadValue + bank : null);
+    const budget = spendingPower !== null ? spendingPower : 100;
+    const rawChips = team.chips || team.chips_remaining || team.chipsRemaining || [];
+    const chips = normalizeCompareChips(rawChips);
+    const slot = Number(team.slot ?? team.team_slot ?? index + 1);
+    return {
+        ...team,
+        id: String(team.id || team.team_id || team.slug || `${source}-${slot}`),
+        source,
+        slot,
+        name: String(team.name || team.team_name || (source === 'saved' ? `Team ${slot}` : 'Manual team')).slice(0, 60),
+        drivers,
+        constructors,
+        budget,
+        bank,
+        squadValue,
+        spendingPower,
+        chips,
+        primary: !!(team.primary || team.is_primary || team.primary_team),
+        readonly: source === 'saved' && (team.readonly === true || team.editable === false),
+        expired: !!(team.expired || team.membership_expired),
+    };
+}
+
+function compareSourceStatus(payload = {}) {
+    const status = String(payload.status || payload.membership_status || payload.membership?.status || '').toLowerCase();
+    if (payload.signed_in === false || payload.signedIn === false || payload.authenticated === false || ['signed_out', 'signed-out', 'logged_out', 'anonymous'].includes(status)) return 'signed-out';
+    if (payload.entitlement?.active === false) return 'inactive';
+    if (payload.entitlement?.active === true && payload.authenticated === true) return 'active';
+    if (payload.expired === true || ['expired', 'inactive', 'lapsed'].includes(status)) return 'expired';
+    if (payload.active === false) return 'signed-out';
+    return status || 'active';
+}
+
+function getMemberTeamsPayload(payload) {
+    return payload?.teams || payload?.member?.teams || payload?.memberState?.teams || payload?.data?.teams || [];
+}
+
+function setupCompareSources(payload = null) {
+    const teams = getMemberTeamsPayload(payload);
+    const resolvedStatus = payload ? compareSourceStatus(payload) : 'anonymous';
+    const hasMemberTeams = Array.isArray(teams) && teams.length > 0 && resolvedStatus !== 'signed-out' && payload?.authenticated !== false;
+    compareMemberState = {
+        ...(payload || {}),
+        status: resolvedStatus,
+        teams: hasMemberTeams ? teams.map((team, index) => normalizeCompareSource(team, index, 'saved')).filter(Boolean).slice(0, 3) : [],
+    };
+    if (hasMemberTeams) {
+        compareAvailableSources = [...compareMemberState.teams, normalizeCompareSource(compareManualTeam, 0, 'manual')];
+        const primary = compareMemberState.teams.find(team => team.primary) || compareMemberState.teams[0];
+        compareSelectedSourceIds = compareSelectedSourceIds.filter(id => compareAvailableSources.some(source => source.id === id));
+        if (compareSelectedSourceIds.length < 2) {
+            compareSelectedSourceIds = compareMemberState.teams.slice(0, 2).map(team => team.id);
+        }
+        compareTeams = compareSelectedSourceIds.map(id => compareAvailableSources.find(source => source.id === id)).filter(Boolean);
+        if (!compareTeams.length && primary) compareTeams = [primary];
+    } else {
+        // Keep the old anonymous/manual experience available. The current
+        // Transfer Advisor team is a useful first source when present.
+        const current = normalizeCompareSource({ id: 'current', name: 'My Team', drivers: myTeamDrivers, constructors: myTeamConstructors, budget: getCompareBudget?.() || 100 }, 0, 'fallback');
+        compareAvailableSources = [
+            current,
+            compareTeams[1] || normalizeCompareSource({ id: 'manual-2', name: 'Team B' }, 1, 'manual'),
+            compareTeams[2] || normalizeCompareSource({ id: 'manual-3', name: 'Team C' }, 2, 'manual'),
+        ];
+        compareSelectedSourceIds = compareAvailableSources.map(source => source.id);
+        compareTeams = compareAvailableSources.map(source => ({ ...source, drivers: [...source.drivers], constructors: [...source.constructors] }));
+    }
+    return compareAvailableSources;
+}
+
+function compareMemberDataChanged(payload) {
+    setupCompareSources(payload || {});
+    const grid = typeof document !== 'undefined' ? document.getElementById('teamCompareGrid') : null;
+    if (grid && typeof grid.querySelectorAll === 'function' && typeof renderTeamCompareGrid === 'function') renderTeamCompareGrid();
+}
+
+function selectCompareSources(ids) {
+    const allowed = new Set(compareAvailableSources.map(source => source.id));
+    compareSelectedSourceIds = [...new Set((Array.isArray(ids) ? ids : []).map(String))]
+        .filter(id => allowed.has(id)).slice(0, 4);
+    compareTeams = compareSelectedSourceIds
+        .map(sourceId => compareAvailableSources.find(source => source.id === sourceId))
+        .filter(Boolean);
+    const grid = typeof document !== 'undefined' ? document.getElementById('teamCompareGrid') : null;
+    if (grid && typeof grid.querySelectorAll === 'function' && typeof renderTeamCompareGrid === 'function') renderTeamCompareGrid();
+    return compareTeams.map(team => team.id);
+}
+
+// The member subsystem can publish whichever event name it already owns. Keep
+// this hook deliberately small so Team Compare remains usable without login.
+if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('boxbox:member-data', event => compareMemberDataChanged(event.detail || {}));
+    window.addEventListener('boxbox:member-state', event => compareMemberDataChanged(event.detail || {}));
+    window.addEventListener('boxbox:pitwall-loaded', event => compareMemberDataChanged(event.detail || readCompareMemberApi() || {}));
+    window.addEventListener('boxbox:pitwall-saved', event => compareMemberDataChanged(event.detail || readCompareMemberApi() || {}));
+    window.addEventListener('boxbox:pitwall-selected', event => compareMemberDataChanged(event.detail || readCompareMemberApi() || {}));
+    window.addEventListener('boxbox:team-changed', () => {
+        if (compareMemberState.status !== 'anonymous' && compareMemberState.status !== 'signed-out') return;
+        const current = compareAvailableSources.find(source => source.source === 'fallback');
+        if (!current) return;
+        current.drivers = [...myTeamDrivers];
+        current.constructors = [...myTeamConstructors];
+        current.budget = getCompareBudget();
+        const selectedCurrent = compareTeams.find(source => source.id === current.id);
+        if (selectedCurrent) {
+            selectedCurrent.drivers = [...current.drivers];
+            selectedCurrent.constructors = [...current.constructors];
+            selectedCurrent.budget = current.budget;
+        }
+        if (typeof renderTeamCompareGrid === 'function') renderTeamCompareGrid();
+    });
+}
+
+function readCompareMemberApi() {
+    if (typeof window === 'undefined') return null;
+    try {
+        const store = window.BoxBoxTeamState?.getStore?.();
+        const state = store?.getState?.();
+        if (state && (Array.isArray(state.teams) || state.entitlement || state.authenticated !== undefined)) return state;
+    } catch (_) { /* optional shared store */ }
+    const providers = [window.BoxBoxPitWall, window.BoxBoxMemberState, window.BoxBoxMembership];
+    for (const provider of providers) {
+        if (!provider) continue;
+        try {
+            const state = typeof provider.getState === 'function' ? provider.getState() : provider.state;
+            if (state && (Array.isArray(state.teams) || state.membership || state.status)) return state;
+        } catch (_) { /* provider is optional */ }
+    }
+    return null;
+}
+
+if (typeof window !== 'undefined') {
+    window.BoxBoxTeamCompare = {
+        open: openTeamCompare,
+        setMemberState: compareMemberDataChanged,
+        selectSources: selectCompareSources,
+        getSources: () => compareAvailableSources.map(source => ({
+            id: source.id, name: source.name, source: source.source, slot: source.slot,
+            drivers: [...source.drivers], constructors: [...source.constructors],
+            budget: source.budget, bank: source.bank, spendingPower: source.spendingPower,
+            chips: [...(source.chips || [])],
+        })),
+    };
+}
+
+function getCompareBudget(teamState = null) {
+    const sourceBudget = compareNumeric(teamState?.spendingPower, teamState?.budget);
+    if (sourceBudget !== null) return sourceBudget;
     const value = parseFloat(document.getElementById('compareBudget')?.value || '100');
     return Number.isFinite(value) ? value : 100;
 }
@@ -5179,13 +5580,24 @@ function compareTeamCost(teamState, omit = {}) {
 
 function compareTeamBudgetSummary(teamState, budget = getCompareBudget()) {
     const cost = compareTeamCost(teamState);
-    const bank = budget - cost;
+    const sourceBank = compareNumeric(teamState?.bank);
+    const bank = sourceBank !== null ? sourceBank : (teamState?.source === 'saved' ? null : budget - cost);
+    const spendingPower = compareNumeric(teamState?.spendingPower, teamState?.budget, budget);
     const picked = teamState.drivers.filter(Boolean).length + teamState.constructors.filter(Boolean).length;
-    return { cost, bank, picked, overBudget: bank < -0.0001 };
+    return { cost, bank, spendingPower, picked, overBudget: sourceBank !== null ? sourceBank < -0.0001 : teamState?.source === 'saved' ? false : bank < -0.0001 };
 }
 
 function comparePointsBasis() {
     return document.getElementById('pointsBasisCompare')?.value || 'balanced';
+}
+
+function compareChipForTeam(teamState, requestedChip = null) {
+    const requested = requestedChip ?? document.getElementById('compareChip')?.value ?? 'none';
+    if (requested === 'none' || requested === 'saved') return 'none';
+    // A global comparison scenario cannot spend a saved chip that this team
+    // has already used. Manual teams may use the selected global scenario.
+    if (teamState?.source === 'saved' && !teamState.chips?.includes(requested)) return 'none';
+    return requested;
 }
 
 function compareBasisLabel(basis = comparePointsBasis()) {
@@ -5241,20 +5653,56 @@ function compareResultPickRow(item, type, score, chip) {
     </div>`;
 }
 
+function renderCompareSourcePicker() {
+    const status = compareMemberState.status || 'anonymous';
+    const memberMode = compareAvailableSources.some(source => source.source === 'saved');
+    const selected = new Set(compareSelectedSourceIds);
+    const notice = status === 'expired' || status === 'inactive'
+        ? '<p class="team-compare-state-note warning" role="status">Your Pit Wall membership is inactive. Saved teams are shown read-only; renew to edit or sync them.</p>'
+        : status === 'signed-out'
+            ? '<p class="team-compare-state-note" role="status">You are signed out. Sign in to load your three saved Pit Wall teams. Manual comparison remains available.</p>'
+            : '';
+    const help = memberMode
+        ? 'Choose any two or all three saved teams, with one optional manual team.'
+        : 'Build up to three manual teams for free. Sign in to compare saved Pit Wall teams.';
+    const sourceOptions = compareAvailableSources.map(source => {
+        const isSaved = source.source === 'saved';
+        const disabled = selected.size >= 4 && !selected.has(source.id) ? ' disabled' : '';
+        const checked = selected.has(source.id) ? ' checked' : '';
+        const meta = isSaved
+            ? (source.primary ? 'Primary' : `Saved Team ${source.slot || ''}`)
+            : source.source === 'fallback' ? 'Current Transfer Advisor team' : 'Enter manually';
+        return `<label class="team-compare-source-option${isSaved ? ' saved' : ''}${source.expired ? ' expired' : ''}">
+            <input type="checkbox" data-compare-source="${compareEscapeHtml(source.id)}"${checked}${disabled}>
+            <span><strong>${compareEscapeHtml(source.name)}</strong><small>${compareEscapeHtml(meta)}</small></span>
+        </label>`;
+    }).join('');
+    return `<div class="team-compare-source-panel" id="compareSourcePanel">
+        <div><strong>Compare sources</strong><p>${help}</p></div>
+        <div class="team-compare-source-options" id="compareSources">${sourceOptions}</div>
+        ${notice}
+    </div>`;
+}
+
 function renderTeamCompareGrid() {
     if (!data) return;
     const grid = document.getElementById('teamCompareGrid');
     if (!grid) return;
-    const budget = getCompareBudget();
+    if (!compareAvailableSources.length) setupCompareSources(readCompareMemberApi());
     const chip = document.getElementById('compareChip')?.value || 'none';
     const basis = comparePointsBasis();
 
-    grid.innerHTML = compareTeams.map((teamState, teamIdx) => {
+    const sourcePicker = renderCompareSourcePicker();
+    const editors = compareTeams.map((teamState, teamIdx) => {
+        const budget = getCompareBudget(teamState);
         const budgetSummary = compareTeamBudgetSummary(teamState, budget);
+        const sourceLocked = teamState.source === 'saved' || teamState.readonly || teamState.expired;
         const budgetClass = budgetSummary.overBudget && chip !== 'limitless' ? ' over-budget' : '';
-        const budgetText = budgetSummary.bank >= 0
-            ? `$${budgetSummary.bank.toFixed(1)}M left`
-            : `$${Math.abs(budgetSummary.bank).toFixed(1)}M over`;
+        const budgetText = budgetSummary.bank === null
+            ? 'Bank not recorded'
+            : budgetSummary.bank >= 0
+                ? `$${budgetSummary.bank.toFixed(1)}M left`
+                : `$${Math.abs(budgetSummary.bank).toFixed(1)}M over`;
         const chipNote = chip === 'limitless' ? '<span>Limitless ignores cap</span>' : '';
         let slots = '';
         for (let i = 0; i < 5; i++) {
@@ -5262,18 +5710,17 @@ function renderTeamCompareGrid() {
             const driver = did ? findDriverAsset(did) : null;
             if (driver) {
                 const team = TEAMS[driver.constructor] || { color: '#666' };
-                slots += `<div class="my-team-slot filled compare-slot" style="--team-color:${team.color}" data-team="${teamIdx}" data-slot="driver" data-index="${i}">
+                slots += `<div class="team-compare-slot-shell"><div class="my-team-slot filled compare-slot" role="button" tabindex="0" style="--team-color:${team.color}" data-team="${teamIdx}" data-slot="driver" data-index="${i}" aria-label="Change ${teamState.name} driver ${i + 1}">
                     <div class="slot-label">Driver ${i + 1}</div>
                     <div class="slot-name">${driver.name.split(' ').pop()}</div>
                     <div class="slot-price">$${driver.current_price.toFixed(1)}M</div>
                     ${comparePickPointsHtml(driver, 'driver', basis)}
-                    <span class="slot-remove" data-team="${teamIdx}" data-slot="driver" data-index="${i}">&times;</span>
-                </div>`;
+                </div><button type="button" class="slot-remove compare-slot-remove" data-team="${teamIdx}" data-slot="driver" data-index="${i}" aria-label="Remove ${teamState.name} driver ${i + 1}">&times;</button></div>`;
             } else {
-                slots += `<div class="my-team-slot compare-slot" data-team="${teamIdx}" data-slot="driver" data-index="${i}">
+                slots += `<div class="team-compare-slot-shell"><div class="my-team-slot compare-slot" role="button" tabindex="0" data-team="${teamIdx}" data-slot="driver" data-index="${i}" aria-label="Select ${teamState.name} driver ${i + 1}">
                     <div class="slot-label">Driver ${i + 1}</div>
                     <div class="slot-name" style="color:var(--text-secondary)">+ Select</div>
-                </div>`;
+                </div></div>`;
             }
         }
         for (let i = 0; i < 2; i++) {
@@ -5281,52 +5728,79 @@ function renderTeamCompareGrid() {
             const con = cid ? data.constructors.find(c => c.constructor_id === cid) : null;
             if (con) {
                 const team = TEAMS[con.constructor_id] || { color: '#666' };
-                slots += `<div class="my-team-slot filled compare-slot" style="--team-color:${team.color}" data-team="${teamIdx}" data-slot="constructor" data-index="${i}">
+                slots += `<div class="team-compare-slot-shell"><div class="my-team-slot filled compare-slot" role="button" tabindex="0" style="--team-color:${team.color}" data-team="${teamIdx}" data-slot="constructor" data-index="${i}" aria-label="Change ${teamState.name} constructor ${i + 1}">
                     <div class="slot-label">Constructor ${i + 1}</div>
                     <div class="slot-name">${(con.name || con.constructor_id).toUpperCase()}</div>
                     <div class="slot-price">$${con.current_price.toFixed(1)}M</div>
                     ${comparePickPointsHtml(con, 'constructor', basis)}
-                    <span class="slot-remove" data-team="${teamIdx}" data-slot="constructor" data-index="${i}">&times;</span>
-                </div>`;
+                </div><button type="button" class="slot-remove compare-slot-remove" data-team="${teamIdx}" data-slot="constructor" data-index="${i}" aria-label="Remove ${teamState.name} constructor ${i + 1}">&times;</button></div>`;
             } else {
-                slots += `<div class="my-team-slot compare-slot" data-team="${teamIdx}" data-slot="constructor" data-index="${i}">
+                slots += `<div class="team-compare-slot-shell"><div class="my-team-slot compare-slot" role="button" tabindex="0" data-team="${teamIdx}" data-slot="constructor" data-index="${i}" aria-label="Select ${teamState.name} constructor ${i + 1}">
                     <div class="slot-label">Constructor ${i + 1}</div>
                     <div class="slot-name" style="color:var(--text-secondary)">+ Select</div>
-                </div>`;
+                </div></div>`;
             }
         }
         return `<div class="team-compare-editor">
             <div class="team-compare-editor-header">
                 <h4>${teamState.name}</h4>
-                <div class="team-compare-copy-help">
+                ${!(teamState.source === 'saved' || teamState.readonly || teamState.expired) ? `<div class="team-compare-copy-help">
                     <button type="button" class="team-compare-mini-btn" data-copy-current="${teamIdx}" title="Copy the lineup already entered in My Team / Transfer Advisor into this comparison slot." aria-describedby="copyCurrentHint-${teamIdx}" aria-label="Use the current Transfer Advisor team for ${teamState.name}">Use Current <span aria-hidden="true" class="team-compare-hint-dot">?</span></button>
                     <span class="team-compare-tooltip" id="copyCurrentHint-${teamIdx}" role="tooltip">Copies your current My Team / Transfer Advisor picks into this slot: 5 drivers and 2 constructors. It does not optimize, change budget, or affect the other compare teams.</span>
-                </div>
+                </div>` : '<span class="team-compare-source-lock">Saved team</span>'}
             </div>
             <div class="team-compare-budget${budgetClass}">
                 <span>${budgetSummary.picked}/7 picked</span>
                 <strong>$${budgetSummary.cost.toFixed(1)}M spent</strong>
                 <em>${budgetText}</em>
+                ${budgetSummary.spendingPower !== null ? `<small>Spending power $${budgetSummary.spendingPower.toFixed(1)}M</small>` : ''}
+                ${teamState.chips?.length ? `<span class="team-compare-chip-state">Chips: ${compareEscapeHtml(teamState.chips.join(', '))}</span>` : '<span class="team-compare-chip-state">Chips: none recorded</span>'}
                 ${chipNote}
             </div>
             <div class="team-compare-slots">${slots}</div>
         </div>`;
     }).join('');
+    grid.innerHTML = `${sourcePicker}<div class="team-compare-editors">${editors || '<p class="hint">Choose at least two sources above.</p>'}</div>`;
+    compareTeams.forEach((teamState, teamIdx) => {
+        if (!(teamState.source === 'saved' || teamState.readonly || teamState.expired)) return;
+        grid.querySelectorAll(`.compare-slot[data-team="${teamIdx}"]`).forEach(slot => {
+            slot.classList.add('compare-slot-locked');
+            slot.removeAttribute('tabindex');
+            slot.setAttribute('aria-disabled', 'true');
+        });
+        grid.querySelectorAll(`.compare-slot-remove[data-team="${teamIdx}"]`).forEach(button => {
+            button.disabled = true;
+            button.setAttribute('aria-disabled', 'true');
+        });
+    });
 
     grid.querySelectorAll('.compare-slot').forEach(slot => {
-        slot.addEventListener('click', (e) => {
+        const openPicker = (e) => {
+            const activeTeam = compareTeams[parseInt(slot.dataset.team)];
+            if (activeTeam?.source === 'saved' || activeTeam?.readonly || activeTeam?.expired) return;
+            if (e.type === 'keydown' && !['Enter', ' '].includes(e.key)) return;
+            if (e.type === 'keydown') e.preventDefault();
             const teamIdx = parseInt(slot.dataset.team);
             const type = slot.dataset.slot;
             const idx = parseInt(slot.dataset.index);
-            if (e.target.classList.contains('slot-remove')) {
-                if (type === 'driver') compareTeams[teamIdx].drivers[idx] = null;
-                else compareTeams[teamIdx].constructors[idx] = null;
-                renderTeamCompareGrid();
-                return;
-            }
             slotPickerTarget = 'compareTeam';
             slotPickerCompareIndex = teamIdx;
             showSlotPicker(type, idx);
+        };
+        slot.addEventListener('click', openPicker);
+        slot.addEventListener('keydown', openPicker);
+    });
+
+    grid.querySelectorAll('.compare-slot-remove').forEach(button => {
+        button.addEventListener('click', event => {
+            const teamIdx = parseInt(event.currentTarget.dataset.team);
+            const activeTeam = compareTeams[teamIdx];
+            if (activeTeam?.source === 'saved' || activeTeam?.readonly || activeTeam?.expired) return;
+            const type = event.currentTarget.dataset.slot;
+            const idx = parseInt(event.currentTarget.dataset.index);
+            if (type === 'driver') activeTeam.drivers[idx] = null;
+            else activeTeam.constructors[idx] = null;
+            renderTeamCompareGrid();
         });
     });
 
@@ -5360,6 +5834,7 @@ function analyzeCompareTeam(teamState, view, budget, chip) {
             filled: drivers.length + constructorsList.length,
             drivers,
             constructors: constructorsList,
+            chip,
         };
     }
 
@@ -5377,15 +5852,20 @@ function analyzeCompareTeam(teamState, view, budget, chip) {
         (intervalPoints(a, 'mean', chip) - intervalPoints(a, 'p5', chip)))[0];
     const boosted = drivers.find(d => d.driver_id === score.boostedDriverId);
     const secondBoosted = score.secondBoostedDriverId ? drivers.find(d => d.driver_id === score.secondBoostedDriverId) : null;
+    const savedBank = compareNumeric(teamState.bank);
 
     return {
         name: teamState.name,
+        sourceId: teamState.id,
+        source: teamState.source,
+        chip,
         complete: true,
         drivers,
         constructors: constructorsList,
         cost,
-        bank: budget - cost,
-        overBudget: chip !== 'limitless' && cost > budget,
+        bank: savedBank !== null ? savedBank : (teamState.source === 'saved' ? null : budget - cost),
+        spendingPower: compareNumeric(teamState.spendingPower, teamState.budget, budget),
+        overBudget: chip !== 'limitless' && (savedBank !== null ? savedBank < 0 : cost > budget),
         expected: score.expected,
         floor: score.floor,
         ceiling: score.ceiling,
@@ -5407,16 +5887,15 @@ function runTeamCompare() {
     if (!data) return;
     optimizeBasis = document.getElementById('pointsBasisCompare')?.value || 'balanced';
     const chip = document.getElementById('compareChip')?.value || 'none';
-    const budget = parseFloat(document.getElementById('compareBudget')?.value || '100');
     const view = getScenarioView();
-    const results = compareTeams.map(t => analyzeCompareTeam(t, view, budget, chip));
+    const results = compareTeams.map(t => analyzeCompareTeam(t, view, getCompareBudget(t), compareChipForTeam(t, chip)));
     const complete = results.filter(r => r.complete);
     const resultEl = document.getElementById('teamCompareResult');
     if (!resultEl) return;
 
     resultEl.classList.remove('hidden');
-    if (complete.length === 0) {
-        resultEl.innerHTML = `${scenarioBannerHtml()}<div class="optimizer-warning">Select at least one complete team to compare.</div>`;
+    if (complete.length < 2) {
+        resultEl.innerHTML = `${scenarioBannerHtml()}<div class="optimizer-warning">Select at least two complete teams to compare. Incomplete sources stay out of the results.</div>`;
         return;
     }
 
@@ -5425,13 +5904,19 @@ function runTeamCompare() {
     const bestGain = Math.max(...complete.map(r => r.expGain));
     const lowestVol = Math.min(...complete.map(r => r.volatility));
 
-    const cards = results.map(r => {
-        if (!r.complete) {
-            return `<div class="team-compare-card incomplete">
-                <div class="team-compare-card-head"><h4>${r.name}</h4><span>${r.filled}/7 picked</span></div>
-                <p class="hint">Complete all 5 drivers and 2 constructors to score this team.</p>
-            </div>`;
-        }
+    const included = complete;
+    const baseline = included[0];
+    const summaryRows = included.map(r => {
+        const delta = r.expected - baseline.expected;
+        const deltaClass = delta > 0.05 ? 'positive' : delta < -0.05 ? 'negative' : '';
+        return `<tr><th scope="row">${compareEscapeHtml(r.name)}</th><td>${r.expected.toFixed(1)}</td><td class="${deltaClass}">${delta >= 0 ? '+' : ''}${delta.toFixed(1)}</td><td>${r.floor.toFixed(1)}–${r.ceiling.toFixed(1)}</td><td>$${r.cost.toFixed(1)}M</td><td>${r.bank === null ? '—' : r.bank >= 0 ? `$${r.bank.toFixed(1)}M` : `-$${Math.abs(r.bank).toFixed(1)}M`}</td></tr>`;
+    }).join('');
+    const summary = `<div class="team-compare-summary" aria-label="Team comparison summary">
+        <div class="team-compare-summary-title"><strong>Quick comparison</strong><span>Delta is versus ${compareEscapeHtml(baseline.name)}</span></div>
+        <div class="team-compare-summary-table-wrap"><table class="team-compare-summary-table"><thead><tr><th scope="col">Team</th><th scope="col">Expected</th><th scope="col">Delta</th><th scope="col">90% range</th><th scope="col">Squad</th><th scope="col">Bank</th></tr></thead><tbody>${summaryRows}</tbody></table></div>
+    </div>`;
+
+    const cards = included.map(r => {
         const gainColor = r.expGain >= 0 ? 'var(--green)' : 'var(--red, #ef4444)';
         const bankColor = r.overBudget ? 'var(--red, #ef4444)' : 'var(--text)';
         const badges = [
@@ -5447,8 +5932,8 @@ function runTeamCompare() {
             ? `${r.biggestDownside.name.split(' ').pop()} widest driver downside`
             : 'No downside signal';
         const pickRows = [
-            ...r.drivers.map(d => compareResultPickRow(d, 'driver', r, chip)),
-            ...r.constructors.map(c => compareResultPickRow(c, 'constructor', r, chip)),
+            ...r.drivers.map(d => compareResultPickRow(d, 'driver', r, r.chip)),
+            ...r.constructors.map(c => compareResultPickRow(c, 'constructor', r, r.chip)),
         ].join('');
         return `<div class="team-compare-card ${r.overBudget ? 'over-budget' : ''}">
             <div class="team-compare-card-head">
@@ -5462,7 +5947,7 @@ function runTeamCompare() {
                 </div>
                 <div>
                     <div class="compare-big muted">$${r.cost.toFixed(1)}M</div>
-                    <div class="compare-label" style="color:${bankColor}">${r.bank >= 0 ? `$${r.bank.toFixed(1)}M left` : `$${Math.abs(r.bank).toFixed(1)}M over`}</div>
+                    <div class="compare-label" style="color:${bankColor}">${r.bank === null ? 'Bank not recorded' : r.bank >= 0 ? `$${r.bank.toFixed(1)}M left` : `$${Math.abs(r.bank).toFixed(1)}M over`}</div>
                 </div>
             </div>
             <div class="team-compare-metrics">
@@ -5485,7 +5970,9 @@ function runTeamCompare() {
         </div>`;
     }).join('');
 
-    resultEl.innerHTML = `${scenarioBannerHtml()}<div class="team-compare-cards">${cards}</div>`;
+    const omitted = results.filter(r => !r.complete).length;
+    const omittedNote = omitted ? `<p class="team-compare-state-note">${omitted} selected source${omitted === 1 ? '' : 's'} is incomplete and was left out of the results until it has 5 drivers and 2 constructors.</p>` : '';
+    resultEl.innerHTML = `${scenarioBannerHtml()}${summary}${omittedNote}<div class="team-compare-cards">${cards}</div>`;
     resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -5502,7 +5989,7 @@ function showSlotPicker(type, index) {
 
     const items = type === 'driver' ? data.drivers : data.constructors;
     const compareBaseCost = isCompare ? compareTeamCost(compareState, { type, index }) : 0;
-    const compareBudget = getCompareBudget();
+    const compareBudget = isCompare ? getCompareBudget(compareState) : getCompareBudget();
 
     const overlay = document.createElement('div');
     overlay.className = 'slot-picker-overlay';

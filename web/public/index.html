@@ -40,8 +40,8 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="manifest" href="/site.webmanifest">
-    <link rel="stylesheet" href="styles.css?v=37">
-    <link rel="stylesheet" href="engagement.css?v=9">
+    <link rel="stylesheet" href="styles.css?v=39">
+    <link rel="stylesheet" href="engagement.css?v=10">
     <link rel="stylesheet" href="scenarios.css?v=3">
     <link rel="stylesheet" href="weather.css?v=2">
     <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -367,14 +367,19 @@
                 <button class="tab" data-tab="optimizer">Lineup Optimizer</button>
                 <button class="tab tab-v13" data-tab="beatbot">Beat V13 <span>NEW</span></button>
                 <button class="tab" data-tab="analysis">Analysis</button>
-                <button class="tab" data-tab="season">Season</button>
-                <button class="tab" data-tab="h2h">H2H</button>
-                <button class="tab" data-tab="accuracy">Accuracy</button>
-                <button class="tab" data-tab="deepdive">Race Deep Dive</button>
-                <button class="tab" data-tab="videos">Videos</button>
-                <button class="tab" data-tab="articles">Articles</button>
-                <button class="tab" data-tab="changelog">Changelog</button>
-                <button class="tab" data-tab="about">About</button>
+                <div class="tab-more" id="tabMore">
+                    <button class="tab tab-more-toggle" id="tabMoreToggle" type="button" aria-haspopup="true" aria-expanded="false">More <span aria-hidden="true">⌄</span></button>
+                    <div class="tab-more-menu" id="tabMoreMenu" role="menu" hidden>
+                        <button class="tab tab-more-item" role="menuitem" data-tab="season">Season</button>
+                        <button class="tab tab-more-item" role="menuitem" data-tab="h2h">H2H</button>
+                        <button class="tab tab-more-item" role="menuitem" data-tab="accuracy">Accuracy</button>
+                        <button class="tab tab-more-item" role="menuitem" data-tab="deepdive">Race Deep Dive</button>
+                        <button class="tab tab-more-item" role="menuitem" data-tab="videos">Videos</button>
+                        <button class="tab tab-more-item" role="menuitem" data-tab="articles">Articles</button>
+                        <button class="tab tab-more-item" role="menuitem" data-tab="changelog">Changelog</button>
+                        <button class="tab tab-more-item" role="menuitem" data-tab="about">About</button>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -529,19 +534,31 @@
                     <p>Find the best F1 Fantasy lineups within your budget, or get transfer recommendations for your current team.</p>
                 </div>
 
-                <section class="email-updates-panel optimizer-registration-panel" data-email-updates data-registration-location="optimizer" aria-labelledby="optimizerRegistrationTitle" hidden>
-                    <div class="email-updates-copy"><span class="email-updates-eyebrow">Beat V13 &middot; Free challenge</span><h2 id="optimizerRegistrationTitle">Think your lineup can beat the bot?</h2><p>Enter free before the Round 22 lock. The optimizer stays fully available without registering.</p></div>
-                    <form class="email-updates-form" novalidate><div class="email-updates-fields"><label class="sr-only" for="optimizerRegistrationEmail">Email address</label><input id="optimizerRegistrationEmail" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required><button type="submit">Enter free</button></div><div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div><label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Register me for Beat V13 and send me competition and simulation updates. I can unsubscribe at any time.</span></label><p class="email-updates-privacy"><a href="/privacy/">Privacy</a></p><p class="email-updates-status" role="status" aria-live="polite"></p></form>
-                </section>
+                <aside class="optimizer-registration-cta" aria-label="Beat V13 invitation">
+                    <div><span>Beat V13 · Free challenge</span><strong>Think your lineup can beat the bot?</strong></div>
+                    <button type="button" class="optimizer-registration-link" data-open-tab="beatbot">Enter or access Beat V13</button>
+                </aside>
 
                 <!-- Mode toggle -->
                 <div class="optimizer-mode-toggle">
                     <button class="mode-btn active" data-mode="fresh">Build Fresh Lineup</button>
+                    <button class="mode-btn" data-mode="pitwall">Pit Wall</button>
                     <button class="mode-btn" data-mode="transfers">Transfer Advisor</button>
                     <button class="mode-btn" data-mode="budgetvalue">Points vs Budget</button>
                     <button class="mode-btn" data-mode="multiweek">Multi-Week Planner</button>
                     <button class="mode-btn" data-mode="finalfix">Final Fix</button>
                     <button class="mode-btn" data-mode="compare">Team Compare</button>
+                </div>
+
+                <!-- Pit Wall member workspace -->
+                <div class="optimizer-mode hidden" id="mode-pitwall">
+                    <div class="pit-wall-workspace-header">
+                        <div><span class="pit-wall-workspace-kicker">Pit Wall workspace</span><h3>Saved teams, budgets and chips</h3><p>Choose a saved team to review it, compare it with the others, or edit it in Transfer Advisor.</p></div>
+                        <div class="pit-wall-workspace-actions"><button type="button" class="btn-primary" id="pitWallEditTeam">Edit selected team in Transfer Advisor</button><button type="button" class="share-team-btn" id="pitWallCompareWorkspace">Compare teams</button></div>
+                    </div>
+                    <aside class="pit-wall-panel pit-wall-workspace-panel" id="pitWallMemberPanel" aria-label="Pit Wall saved team">
+                        <p class="pit-wall-loading">Checking Pit Wall sign-in…</p>
+                    </aside>
                 </div>
 
                 <!-- Fresh lineup mode controls -->
@@ -609,9 +626,6 @@
                         </details>
                     </div>
                     <div class="my-team-section">
-                        <aside class="pit-wall-panel" id="pitWallMemberPanel" aria-label="Pit Wall saved team">
-                            <p class="pit-wall-loading">Checking Pit Wall sign-in…</p>
-                        </aside>
                         <h3>My Current Team</h3>
                         <p class="hint">Select your current 5 drivers and 2 constructors. Click a slot to change it.</p>
                         <div class="my-team-grid" id="myTeamGrid"></div>
@@ -619,6 +633,17 @@
                             <div class="control-group">
                                 <label>Available Budget ($M)</label>
                                 <input type="number" id="transferBudget" value="100.0" step="0.1" min="0">
+                                <small class="finance-control-note">Total spending power</small>
+                            </div>
+                            <div class="control-group">
+                                <label for="transferSquadValue">Squad Value ($M)</label>
+                                <input type="number" id="transferSquadValue" value="0.0" step="0.1" min="0" readonly aria-readonly="true">
+                                <small class="finance-control-note">Current seven-pick value</small>
+                            </div>
+                            <div class="control-group">
+                                <label for="transferBank">Cash in Bank ($M)</label>
+                                <input type="number" id="transferBank" value="0.0" step="0.1" min="0">
+                                <small class="finance-control-note">Spending power − squad value</small>
                             </div>
                             <div class="control-group">
                                 <label title="Free transfers available (extra transfers cost -10 pts each)">Free Transfers</label>
@@ -903,15 +928,15 @@
                     <div class="tool-explainer">
                         <details>
                             <summary>How does Team Compare work?</summary>
-                            <p>Enter up to three complete teams and compare expected score, budget, projected price movement, and the 90% confidence floor/ceiling for this race.</p>
+                            <p>Choose any two or all three saved Pit Wall teams, then add one manual alternative if you want. Each complete team is compared using its own spending power, bank and chip state.</p>
                         </details>
                     </div>
                     <div class="my-team-section">
                         <h3>Team Score Compare</h3>
-                        <p class="hint">Compare up to 3 candidate teams using the current round predictions.</p>
+                        <p class="hint">Compare 2–3 saved Pit Wall teams, with one optional manual team (up to 4 total).</p>
                         <div class="my-team-controls compare-controls">
                             <div class="control-group">
-                                <label>Budget ($M)</label>
+                                <label>Manual budget ($M)</label>
                                 <input type="number" id="compareBudget" value="100.0" step="0.1" min="0">
                             </div>
                             <div class="control-group">
@@ -923,9 +948,9 @@
                                 </select>
                             </div>
                             <div class="control-group">
-                                <label>Chip</label>
+                                <label>Chip treatment</label>
                                 <select id="compareChip">
-                                    <option value="none">No Chip</option>
+                                    <option value="none" selected>No chip</option>
                                     <option value="limitless">Limitless</option>
                                     <option value="3x_boost">3x Boost</option>
                                     <option value="no_negative">No Negative</option>
@@ -1282,30 +1307,10 @@
                 </div>
             </aside>
 
-            <!-- Enabled only when the server confirms that email delivery is configured. -->
-            <section class="email-updates-panel" id="emailUpdatesPanel" aria-labelledby="emailUpdatesTitle" hidden>
-                <div class="email-updates-copy">
-                    <span class="email-updates-eyebrow">Beat V13 &middot; Free email entry</span>
-                    <h2 id="emailUpdatesTitle">Take your shot at the bot</h2>
-                    <p>Confirm your email to enter the challenge and receive general updates. No password or payment is required; Pit Wall remains a separate optional membership.</p>
-                </div>
-                <form class="email-updates-form" id="emailUpdatesForm" novalidate>
-                    <div class="email-updates-fields">
-                        <label class="sr-only" for="emailUpdatesAddress">Email address</label>
-                        <input id="emailUpdatesAddress" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
-                        <button type="submit">Register free</button>
-                    </div>
-                    <div class="email-updates-honeypot" aria-hidden="true">
-                        <label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label>
-                    </div>
-                    <label class="email-updates-consent">
-                        <input name="consent" type="checkbox" required>
-                        <span>Register me for Beat V13 and email me V13, simulation and competition updates. I understand I must confirm my address before the deadline and can unsubscribe at any time.</span>
-                    </label>
-                    <p class="email-updates-privacy">Handled according to the <a href="/privacy/">privacy policy</a>.</p>
-                    <p class="email-updates-status" id="emailUpdatesStatus" role="status" aria-live="polite"></p>
-                </form>
-            </section>
+            <aside class="beat-v13-footer-cta" aria-label="Beat V13 registration">
+                <span>Beat V13 · Free challenge entry</span>
+                <a href="#beatbot" data-open-tab="beatbot">Open the single Beat V13 registration form</a>
+            </aside>
 
             <!-- Responsive AdSense inventory; hidden until account and slot IDs are configured. -->
             <aside class="adsense-banner" id="adsenseBanner" aria-label="Advertisement" hidden>
@@ -1372,8 +1377,9 @@
     </footer>
 
     <script src="scenarios.js?v=3"></script>
-    <script src="app.js?v=138"></script>
-    <script src="members.js?v=22"></script>
-    <script src="engagement.js?v=14"></script>
+    <script src="team-state.js?v=1"></script>
+    <script src="app.js?v=141"></script>
+    <script src="members.js?v=23"></script>
+    <script src="engagement.js?v=15"></script>
 </body>
 </html>

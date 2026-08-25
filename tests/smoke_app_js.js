@@ -21,6 +21,7 @@ let src = fs.readFileSync(APP, 'utf8');
 
 // ---- Mock the browser surface app.js touches at load time ----
 const noop = () => {};
+const windowEventNames = [];
 const elStub = new Proxy({}, { get: () => (() => elStub), set: () => true });
 const sandbox = {
   console,
@@ -39,6 +40,8 @@ const sandbox = {
   setTimeout: noop, setInterval: noop, requestAnimationFrame: noop,
 };
 sandbox.window = sandbox;
+sandbox.addEventListener = (name, listener) => { windowEventNames.push(name); };
+sandbox.windowEventNames = windowEventNames;
 sandbox.globalThis = sandbox;
 vm.createContext(sandbox);
 
@@ -61,6 +64,8 @@ src += `
     hasOfficialRoundCoverageCheck: typeof officialRoundHasCompleteScores === 'function',
     hasBudgetFuturePointValue: typeof budgetFuturePointValue === 'function',
     hasOpenPitWallTransferAdvisor: typeof openPitWallTransferAdvisor === 'function',
+    hasOpenPitWall: typeof openPitWall === 'function',
+    hasOpenTeamCompare: typeof openTeamCompare === 'function',
     hasLoadV13Session: typeof loadV13Session === 'function',
     hasHandleV13TeamSearch: typeof handleV13TeamSearch === 'function',
     budgetFuturePointValue: typeof budgetFuturePointValue === 'function' ? budgetFuturePointValue : null,
@@ -71,6 +76,15 @@ src += `
     officialRoundHasCompleteScores: typeof officialRoundHasCompleteScores === 'function' ? officialRoundHasCompleteScores : null,
     normalizeOfficialAssetId: typeof normalizeOfficialAssetId === 'function' ? normalizeOfficialAssetId : null,
     normalizeSavedDriverAssetId: typeof normalizeSavedDriverAssetId === 'function' ? normalizeSavedDriverAssetId : null,
+    normalizeCompareSource: typeof normalizeCompareSource === 'function' ? normalizeCompareSource : null,
+    normalizeCompareChips: typeof normalizeCompareChips === 'function' ? normalizeCompareChips : null,
+    compareSourceStatus: typeof compareSourceStatus === 'function' ? compareSourceStatus : null,
+    setupCompareSources: typeof setupCompareSources === 'function' ? setupCompareSources : null,
+    getCompareSelection: () => compareTeams.map(team => ({ id: team.id, source: team.source })),
+    readCompareMemberApi: typeof readCompareMemberApi === 'function' ? readCompareMemberApi : null,
+    getMemberTeamSnapshot: typeof getMemberTeamSnapshot === 'function' ? getMemberTeamSnapshot : null,
+    windowEventNames,
+    compareTeamBudgetSummary: typeof compareTeamBudgetSummary === 'function' ? compareTeamBudgetSummary : null,
     findDriverAsset: typeof findDriverAsset === 'function' ? findDriverAsset : null,
     setTransferRenderState(basis, nextData, driverIds, constructorIds) {
       optimizeBasis = basis;
@@ -206,6 +220,94 @@ try {
   if (lastRaceForecast !== 0) fail(`last-race forecast should be worthless: ${lastRaceForecast}`);
 } catch (e) {
   fail('budgetFuturePointValue threw: ' + e.message);
+}
+
+// 4b) Team Compare sources keep saved-team financial state separate from the
+// manual budget and expose an incomplete roster without inventing picks.
+try {
+  const saved = S.normalizeCompareSource({
+    slot: 2, name: 'Race Day', drivers: ['A', 'B'], constructors: ['C'],
+    bank_millions: 4.2, squad_value_millions: 95.8,
+    chips_remaining: { limitless: true, '3x_boost': false },
+  }, 1, 'saved');
+  if (!saved || saved.source !== 'saved' || saved.drivers.filter(Boolean).length !== 2 || saved.constructors.filter(Boolean).length !== 1) {
+    fail('saved compare source did not preserve incomplete roster');
+  }
+  if (saved.spendingPower !== 100 || saved.bank !== 4.2 || saved.chips.length !== 1) {
+    fail(`saved compare source did not preserve bank/spending power/chips: ${JSON.stringify(saved)}`);
+  }
+} catch (e) {
+  fail('Team Compare source normalization threw: ' + e.message);
+}
+
+// 4c) Pit Wall store/events, finance separation, entitlement state, and the
+// exact chip ledger contract remain safe at the Team Compare boundary.
+try {
+  for (const eventName of ['boxbox:pitwall-loaded', 'boxbox:pitwall-saved', 'boxbox:pitwall-selected']) {
+    if (!S.windowEventNames.includes(eventName)) fail(`Team Compare did not subscribe to ${eventName}`);
+  }
+  const storeState = {
+    authenticated: true,
+    entitlement: { active: true },
+    selectedSlot: 2,
+    teams: [
+      { slot: 1, name: 'T1', assets: [], budget_millions: 120, squad_value_millions: 98, bank_millions: null, chips: [] },
+        { slot: 2, name: 'T2', assets: [], budget_millions: 115, squad_value_millions: 94, bank_millions: 21, chips: [
+        { chip_code: 'limitless', season: 2025, status: 'available' },
+        { chip_code: 'limitless', season: 2026, status: 'used' },
+        { chip_code: '3x_boost', status: 'used' },
+        { chip_code: 'autopilot', season: 2026, status: 'available' },
+        { chip_code: 'final_fix', status: 'pending' },
+        { chip_code: 'unknown', status: 'available' },
+      ] },
+      { slot: 3, name: 'T3', assets: [], budget_millions: 110, chips: { wild_card: { status: 'available' }, no_negative: { status: 'used' }, autopilot: true, final_fix: false } },
+    ],
+  };
+  sandbox.BoxBoxTeamState = { getStore: () => ({ getState: () => storeState }) };
+  const readState = S.readCompareMemberApi();
+  if (readState !== storeState) fail('Team Compare did not read the shared BoxBoxTeamState store');
+  const finance = S.normalizeCompareSource(storeState.teams[0], 0, 'saved');
+  if (finance.bank !== null || finance.spendingPower !== 120) fail('legacy budget was incorrectly treated as bank');
+  const chips = S.normalizeCompareChips(storeState.teams[1].chips);
+  if (chips.length !== 1 || chips[0] !== 'autopilot') fail(`chip array normalization mismatch: ${JSON.stringify(chips)}`);
+  const objectChips = S.normalizeCompareChips(storeState.teams[2].chips);
+  if (objectChips.length !== 2 || !objectChips.includes('wild_card') || !objectChips.includes('autopilot')) fail(`chip object normalization mismatch: ${JSON.stringify(objectChips)}`);
+  if (S.compareSourceStatus({ authenticated: true, entitlement: { active: false } }) !== 'inactive') fail('inactive entitlement defaulted to active');
+  if (S.compareSourceStatus({ authenticated: false, entitlement: { active: false } }) !== 'signed-out') fail('signed-out state was incorrectly treated as inactive');
+  S.setupCompareSources(storeState);
+  const selection = S.getCompareSelection();
+  if (selection.length !== 2 || selection.some(item => item.source !== 'saved')) fail(`saved source default selection mismatch: ${JSON.stringify(selection)}`);
+  const sources = sandbox.BoxBoxTeamCompare?.getSources?.() || [];
+  if (sources.length !== 4) fail(`expected three saved sources plus manual source, got ${sources.length}`);
+  if ((sandbox.BoxBoxTeamCompare?.selectSources?.(sources.map(source => source.id)) || []).length !== 4) fail('compare source selection did not allow all three saved teams plus manual');
+  S.setTransferRenderState('projected', {
+    drivers: ['A', 'B', 'C', 'D', 'E'].map((id, index) => ({ driver_id: id, name: id, current_price: 10 + index })),
+    constructors: [{ constructor_id: 'X', name: 'X', current_price: 12 }, { constructor_id: 'Y', name: 'Y', current_price: 13 }],
+  }, ['A', 'B', 'C', 'D', 'E'], ['X', 'Y']);
+  sandbox.document.getElementById = id => ({ value: id === 'transferBudget' ? '100' : id === 'transferBank' ? '5' : id === 'freeTransfers' ? '2' : '', addEventListener: noop });
+  const snapshot = S.getMemberTeamSnapshot();
+  if (snapshot.squad_value_millions !== 85 || snapshot.bank_millions !== 5 || snapshot.spending_power_millions !== 100 || snapshot.budget_millions !== 100) {
+    fail(`member financial snapshot mismatch: ${JSON.stringify(snapshot)}`);
+  }
+} catch (e) {
+  fail('Pit Wall Team Compare integration regression test threw: ' + e.message);
+}
+
+// 4d) Static shell contracts: the workspace/menu are present and Beat V13
+// has exactly one actual email registration form.
+try {
+  const index = fs.readFileSync(path.join(__dirname, '..', 'web', 'public', 'index.html'), 'utf8');
+  if (!index.includes('id="mode-pitwall"') || !index.includes('id="pitWallMemberPanel"')) fail('Pit Wall workspace shell is missing');
+  if ((index.match(/id="pitWallMemberPanel"/g) || []).length !== 1) fail('Pit Wall member panel is duplicated');
+  if (!index.includes('id="tabMoreMenu"') || !index.includes('data-tab="season"')) fail('More navigation menu is missing deep links');
+  if ((index.match(/class="email-updates-form"/g) || []).length !== 1) fail('Beat V13 registration form is not unique');
+  if (index.includes('id="optimizerRegistrationEmail"') || index.includes('id="emailUpdatesForm"')) fail('obsolete registration form remains');
+  if (!/styles\.css\?v=\d+/.test(index) || !/engagement\.css\?v=\d+/.test(index) || !/app\.js\?v=\d+/.test(index) || !/members\.js\?v=\d+/.test(index) || !/engagement\.js\?v=\d+/.test(index)) fail('changed static asset cache versions are missing');
+  const styles = fs.readFileSync(path.join(__dirname, '..', 'web', 'public', 'styles.css'), 'utf8');
+  if (!styles.includes('overflow-x: clip') || !styles.includes('.optimizer-mode-toggle') || !styles.includes('max-width: 100%')) fail('mobile overflow containment contract is missing');
+  if (!S.hasOpenPitWall || !S.hasOpenTeamCompare || !sandbox.BoxBoxTeamCompare?.open) fail('Pit Wall/Compare open APIs are missing');
+} catch (e) {
+  fail('frontend shell contract regression test threw: ' + e.message);
 }
 
 // 4) renderSwapRow actually runs and produces the swap-delta markup.

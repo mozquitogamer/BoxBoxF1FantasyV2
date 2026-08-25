@@ -130,9 +130,9 @@ window.BoxBoxFreeAccess = Object.freeze({
     }
 
     async function initEmailUpdates(config) {
-        const panel = document.getElementById('emailUpdatesPanel');
-        const form = document.getElementById('emailUpdatesForm');
-        const status = document.getElementById('emailUpdatesStatus');
+        const panel = document.querySelector('[data-registration-location="beat_v13"]');
+        const form = panel?.querySelector('.email-updates-form');
+        const status = panel?.querySelector('.email-updates-status');
         const submit = form?.querySelector('button[type="submit"]');
 
         if (!config?.enabled || !panel || !form || !status || !submit) return;
@@ -204,7 +204,7 @@ window.BoxBoxFreeAccess = Object.freeze({
                 } else {
                     window.BoxBoxFreeAccess.showRegistrationPending(result.message, form);
                 }
-                track('beat_v13_registration_started', { location: 'site_footer' });
+                track('beat_v13_registration_started', { location: 'beat_v13' });
             } catch (error) {
                 setStatus(
                     status,
@@ -268,7 +268,7 @@ window.BoxBoxFreeAccess = Object.freeze({
             if (params.get('v13') !== 'confirmed') return;
             window.BoxBoxFreeAccess.showRegistrationConfirmed(
                 "You're officially entered. Your email address is confirmed, and the non-sensitive confirmation state is saved in this browser.",
-                document.querySelector('[data-email-updates] form'),
+                document.querySelector('[data-registration-location="beat_v13"] form'),
             );
         } catch (_) {
             // Older static previews may not provide URLSearchParams. The
@@ -324,90 +324,6 @@ window.BoxBoxFreeAccess = Object.freeze({
     }
 })();
 
-/* Registration forms placed at the top of high-intent tabs. */
-(function () {
-    'use strict';
-    const deadline = Date.parse('2026-11-21T04:00:00Z');
-
-    async function initInlineRegistrations() {
-        const panels = [...document.querySelectorAll('[data-email-updates]')];
-        if (!panels.length) return;
-        let config;
-        try {
-            const configResponse = await fetch('/data/site_features.json', { cache: 'no-store' });
-            config = (await configResponse.json()).email_updates;
-            if (!config?.enabled) return;
-        } catch (_) { return; }
-
-        try {
-            const statusResponse = await fetch(config.status_endpoint || '/api/email/status', { cache: 'no-store' });
-            const availability = await statusResponse.json().catch(() => ({}));
-            if (statusResponse.ok && availability.available === false) return;
-        } catch (_) {
-            // Static previews do not run the serverless API. Keep the configured
-            // form visible so its layout can still be reviewed locally.
-        }
-
-        panels.forEach(panel => {
-            const form = panel.querySelector('.email-updates-form');
-            const status = panel.querySelector('.email-updates-status');
-            const submit = form?.querySelector('button[type="submit"]');
-            if (!form || !status || !submit) return;
-            const submitLabel = submit.textContent;
-            panel.hidden = false;
-            if (window.BoxBoxFreeAccess.renderConfirmedPanel(panel)) return;
-            if (Date.now() >= deadline) {
-                form.hidden = true;
-                panel.querySelector('.email-updates-eyebrow').textContent = 'Beat V13 registration · Closed';
-                panel.querySelector('.email-updates-copy h2').textContent = 'The grid is locked';
-                panel.querySelector('.email-updates-copy p').textContent = 'Registered entrants will receive the final submission instructions after the season.';
-                return;
-            }
-            form.addEventListener('submit', async event => {
-                event.preventDefault();
-                const email = form.elements.email.value.trim();
-                const consent = form.elements.consent.checked;
-                if (!email || !consent) {
-                    status.textContent = 'Enter your email and confirm your free Beat V13 registration.';
-                    status.dataset.state = 'error';
-                    return;
-                }
-                submit.disabled = true;
-                submit.textContent = 'Sending…';
-                status.textContent = '';
-                try {
-                    const response = await fetch(config.endpoint || '/api/email/subscribe', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, consent, website: form.elements.website.value }),
-                    });
-                    const result = await response.json().catch(() => ({}));
-                    if (!response.ok) throw new Error(result.message || 'Sign-up could not be started.');
-                    form.reset();
-                    status.textContent = result.message || 'Check your inbox and confirm your registration.';
-                    status.dataset.state = 'success';
-                    if (result.entry_status === 'confirmed') {
-                        window.BoxBoxFreeAccess.showRegistrationConfirmed(result.message, form);
-                    } else {
-                        window.BoxBoxFreeAccess.showRegistrationPending(result.message, form);
-                    }
-                    if (typeof window.gtag === 'function') window.gtag('event', 'beat_v13_registration_started', { location: panel.dataset.registrationLocation });
-                } catch (error) {
-                    status.textContent = error.message || 'Something went wrong. Please try again.';
-                    status.dataset.state = 'error';
-                    window.BoxBoxFreeAccess.showRegistrationError(error.message || 'Something went wrong. Please try again.', form);
-                } finally {
-                    submit.disabled = false;
-                    submit.textContent = submitLabel;
-                }
-            });
-        });
-    }
-
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initInlineRegistrations, { once: true });
-    else initInlineRegistrations();
-})();
-
 /* Site-wide access hub. Free entry and paid Pit Wall remain separate systems. */
 (function () {
     'use strict';
@@ -438,7 +354,7 @@ window.BoxBoxFreeAccess = Object.freeze({
         button.id = 'pitWallAccountButton';
         button.className = 'pit-wall-account-button';
         button.type = 'button';
-        button.textContent = 'My access';
+        button.textContent = 'Account & Pit Wall';
         button.setAttribute('aria-haspopup', 'dialog');
         const host = document.querySelector('.header-right') || document.querySelector('.topbar .wrap');
         if (host) host.appendChild(button);
@@ -475,6 +391,37 @@ window.BoxBoxFreeAccess = Object.freeze({
             return `<ul class="pit-wall-benefit-list"><li>Your official F1 team remembered and synced</li><li>Personalized transfer suggestions for your lineup</li><li>Early-thoughts and post-FP updates delivered automatically</li></ul>`;
         }
 
+        function memberTeams(session) {
+            const normalized = window.BoxBoxTeamState?.normalizeTeams?.(session);
+            if (Array.isArray(normalized) && normalized.length === 3) return normalized;
+            if (Array.isArray(session?.teams) && session.teams.length) return session.teams;
+            const single = session?.team ? [{ ...session.team, team_slot: session.team.team_slot || session.team.slot || 1 }] : [];
+            return Array.from({ length: 3 }, (_, index) => single.find(team => Number(team.team_slot || team.slot) === index + 1)
+                || { team_slot: index + 1, slot: index + 1, name: `Team ${index + 1}`, is_primary: index === 0, chips: {} });
+        }
+
+        function chipCount(team) {
+            const chips = team?.chips && typeof team.chips === 'object' ? team.chips : {};
+            const keys = window.BoxBoxTeamState?.CHIP_KEYS || ['limitless', '3x_boost', 'wild_card', 'no_negative', 'autopilot', 'final_fix'];
+            return keys.filter(key => window.BoxBoxTeamState?.chipRemaining?.(team, key) === true
+                || chips[key] === true
+                || chips[key]?.remaining === true
+                || chips[key]?.available === true
+                || chips[key]?.used === false).length;
+        }
+
+        function memberTeamSummaries(session, active) {
+            const teams = memberTeams(session);
+            return `<div class="pit-wall-team-summaries" aria-label="Saved Pit Wall teams">${teams.map((team, index) => {
+                const slot = Number(team.team_slot || team.slot || index + 1);
+                const name = escapeHtml(team.name || `Team ${slot}`);
+                const bank = Number.isFinite(Number(team.bank_millions)) ? ` · Bank $${Number(team.bank_millions).toFixed(1)}m` : '';
+                const squad = Number.isFinite(Number(team.squad_value_millions)) ? `Squad $${Number(team.squad_value_millions).toFixed(1)}m` : 'Squad value pending';
+                const chips = chipCount(team);
+                return `<article class="pit-wall-team-summary"><div><span>Team ${slot}${team.is_primary || team.is_default ? ' · Primary' : ''}</span><strong>${name}</strong></div><small>${squad}${bank} · ${chips} chips left</small><div class="pit-wall-team-summary-actions"><a href="/?pitwall=1#optimizer" data-team-slot="${slot}">${active ? 'Open team' : 'View team'}</a>${active ? `<a href="/?pitwall=1#optimizer" data-team-compare="${slot}">Compare</a>` : ''}</div></article>`;
+            }).join('')}</div>`;
+        }
+
         function accessHeader(pitState) {
             const confirmed = beatConfirmed();
             return `<span class="pit-wall-login-eyebrow">Your BoxBox access</span><h2 id="pitWallLoginTitle">Free tools first. Pit Wall when you want convenience.</h2><p class="access-hub-intro">Beat V13 registration is a free email entry. Pit Wall is the separate $5/month account with a password and personalized member tools.</p><div class="access-status-strip"><span><small>Public tools</small><strong>Active</strong></span><span><small>Beat V13</small><strong>${confirmed ? 'Registered' : 'Status not saved here'}</strong></span><span><small>Pit Wall</small><strong>${pitState}</strong></span></div>`;
@@ -483,11 +430,11 @@ window.BoxBoxFreeAccess = Object.freeze({
         function updateHeaderButton(session) {
             const active = session?.authenticated && session.entitlement?.active === true;
             button.classList.toggle('active', active);
-            if (active) button.textContent = 'Pit Wall active';
+            if (active) button.textContent = `Pit Wall · ${Math.max(memberTeams(session).length, 3)} teams`;
             else if (session?.authenticated) button.textContent = 'Pit Wall · Signed in';
             else if (beatSession?.authenticated) button.textContent = 'Beat V13 · Signed in';
-            else if (beatConfirmed()) button.textContent = 'Beat V13 ✓ · My access';
-            else button.textContent = 'My access';
+            else if (beatConfirmed()) button.textContent = 'Beat V13 ✓ · Account';
+            else button.textContent = 'Account & Pit Wall';
             button.setAttribute('aria-label', `${button.textContent}. Open access details.`);
         }
 
@@ -537,8 +484,23 @@ window.BoxBoxFreeAccess = Object.freeze({
             const active = session.entitlement?.active === true;
             updateHeaderButton(session);
             const pitState = active ? 'Active member' : 'Signed in · inactive';
-            content.innerHTML = `${accessHeader(pitState)}<div class="access-hub-grid">${freeAccessCard()}<section class="access-hub-card pit-wall-access-card ${active ? 'is-active' : ''}"><div class="access-hub-card-head"><div><span class="access-tier-label paid">Pit Wall account</span><h3 aria-label="Email address hidden for privacy"><span class="access-hub-account-email" aria-hidden="true">••••••••••••••••</span></h3></div><strong class="access-state ${active ? 'active' : ''}">${active ? '✓ Active' : 'Membership inactive'}</strong></div><p>${active ? 'Your paid convenience tools are unlocked and connected to this account.' : 'Your login works, but the Ko-fi membership linked to it is not currently active.'}</p>${pitWallBenefits()}<div class="pit-wall-login-actions">${active ? '<a href="/?pitwall=1#optimizer">Open Transfer Advisor</a>' : '<a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Renew on Ko-fi</a>'}<button type="button" id="sitePitWallSignOut">Sign out of BoxBox</button></div></section></div>`;
+            const teams = memberTeams(session);
+            content.innerHTML = `${accessHeader(pitState)}<div class="access-hub-grid">${freeAccessCard()}<section class="access-hub-card pit-wall-access-card ${active ? 'is-active' : ''}"><div class="access-hub-card-head"><div><span class="access-tier-label paid">Pit Wall account</span><h3>Pit Wall workspace</h3></div><strong class="access-state ${active ? 'active' : ''}">${active ? '✓ Active' : 'Membership inactive'}</strong></div><p>${active ? 'Your three saved teams live here. Pick a working team, compare lineups, and keep each budget and chip ledger separate.' : 'Your login works, but the Ko-fi membership linked to it is not currently active. Saved teams remain visible and read-only.'}</p>${memberTeamSummaries(session, active)}<div class="pit-wall-login-actions">${active ? '<a href="/?pitwall=1#optimizer">Open Pit Wall</a>' : '<a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Renew on Ko-fi</a>'}<button type="button" id="sitePitWallSignOut">Sign out of BoxBox</button></div></section></div>`;
             content.querySelector('#sitePitWallSignOut')?.addEventListener('click', signOutEverywhere);
+            content.querySelectorAll('[data-team-slot]').forEach(link => link.addEventListener('click', event => {
+                event.preventDefault();
+                window.BoxBoxTeamState?.getStore?.().select(Number(link.dataset.teamSlot), { applyMemory: false });
+                close();
+                window.BoxBoxOpenPitWall?.();
+                window.location.hash = 'optimizer';
+            }));
+            content.querySelectorAll('[data-team-compare]').forEach(link => link.addEventListener('click', event => {
+                event.preventDefault();
+                window.BoxBoxTeamState?.getStore?.().select(Number(link.dataset.teamCompare), { applyMemory: false });
+                close();
+                window.BoxBoxTeamCompare?.open?.({ slot: Number(link.dataset.teamCompare), source: 'access-hub' });
+                window.location.hash = 'optimizer';
+            }));
         }
 
         async function signOutEverywhere() {
