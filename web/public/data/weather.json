@@ -77,7 +77,7 @@
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 2.7,
-          "windgusts": 4.7,
+          "windgusts": 2.5,
           "weather_code": 1
         },
         {
@@ -87,7 +87,7 @@
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 1.7,
-          "windgusts": 6.1,
+          "windgusts": 2.2,
           "weather_code": 1
         },
         {
@@ -97,7 +97,7 @@
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 1.0,
-          "windgusts": 6.5,
+          "windgusts": 2.2,
           "weather_code": 2
         },
         {
@@ -107,7 +107,7 @@
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 1.1,
-          "windgusts": 6.5,
+          "windgusts": 2.2,
           "weather_code": 2
         }
       ]
@@ -132,7 +132,7 @@
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 1.3,
-          "windgusts": 6.1,
+          "windgusts": 2.2,
           "weather_code": 2
         },
         {
@@ -142,7 +142,7 @@
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 1.2,
-          "windgusts": 6.1,
+          "windgusts": 2.2,
           "weather_code": 2
         },
         {
@@ -152,7 +152,7 @@
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 0.7,
-          "windgusts": 5.8,
+          "windgusts": 2.2,
           "weather_code": 2
         },
         {
@@ -162,7 +162,7 @@
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 1.1,
-          "windgusts": 5.4,
+          "windgusts": 2.2,
           "weather_code": 1
         }
       ]
@@ -187,7 +187,7 @@
           "precip_prob": 1,
           "precip_mm": 0.0,
           "windspeed": 1.0,
-          "windgusts": 2.2,
+          "windgusts": 5.4,
           "weather_code": 0
         },
         {
@@ -197,7 +197,7 @@
           "precip_prob": 1,
           "precip_mm": 0.0,
           "windspeed": 0.6,
-          "windgusts": 2.5,
+          "windgusts": 6.1,
           "weather_code": 0
         },
         {
@@ -207,7 +207,7 @@
           "precip_prob": 1,
           "precip_mm": 0.0,
           "windspeed": 2.0,
-          "windgusts": 3.2,
+          "windgusts": 7.6,
           "weather_code": 0
         },
         {
@@ -217,7 +217,7 @@
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 2.9,
-          "windgusts": 4.3,
+          "windgusts": 9.4,
           "weather_code": 0
         }
       ]
@@ -242,7 +242,7 @@
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 3.3,
-          "windgusts": 5.4,
+          "windgusts": 10.8,
           "weather_code": 0
         },
         {
@@ -252,7 +252,7 @@
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 2.9,
-          "windgusts": 7.2,
+          "windgusts": 11.2,
           "weather_code": 0
         },
         {
@@ -262,7 +262,7 @@
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 1.9,
-          "windgusts": 9.0,
+          "windgusts": 10.8,
           "weather_code": 0
         },
         {
@@ -272,7 +272,7 @@
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 0.6,
-          "windgusts": 10.1,
+          "windgusts": 10.8,
           "weather_code": 0
         }
       ]
@@ -297,7 +297,7 @@
           "precip_prob": 4,
           "precip_mm": 0.0,
           "windspeed": 2.6,
-          "windgusts": 5.4,
+          "windgusts": 3.6,
           "weather_code": 2
         },
         {
@@ -307,7 +307,7 @@
           "precip_prob": 4,
           "precip_mm": 0.0,
           "windspeed": 3.1,
-          "windgusts": 7.2,
+          "windgusts": 4.3,
           "weather_code": 2
         },
         {
@@ -317,7 +317,7 @@
           "precip_prob": 4,
           "precip_mm": 0.0,
           "windspeed": 3.0,
-          "windgusts": 7.2,
+          "windgusts": 4.7,
           "weather_code": 2
         },
         {
@@ -327,16 +327,16 @@
           "precip_prob": 4,
           "precip_mm": 0.0,
           "windspeed": 2.7,
-          "windgusts": 6.8,
+          "windgusts": 4.7,
           "weather_code": 2
         }
       ]
     }
   ],
-  "last_updated": "2026-08-26T00:43:36Z",
-  "next_update": "2026-08-26T06:43:36Z",
+  "last_updated": "2026-08-26T06:31:40Z",
+  "next_update": "2026-08-26T12:31:40Z",
   "data_source": "Open-Meteo (open-meteo.com)",
-  "forecast_snapshot_id": "2026-08-26T00-43-36.613237Z",
-  "forecast_retrieved_at": "2026-08-26T00:43:36.613237+00:00",
-  "forecast_archive_path": "data/forecasts/weather/year2026/round15/2026-08-26T00-43-36.613237Z_open_meteo.json"
+  "forecast_snapshot_id": "2026-08-26T06-31-40.535266Z",
+  "forecast_retrieved_at": "2026-08-26T06:31:40.535266+00:00",
+  "forecast_archive_path": "data/forecasts/weather/year2026/round15/2026-08-26T06-31-40.535266Z_open_meteo.json"
 }
