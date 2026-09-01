@@ -46,9 +46,9 @@
       "date": "2026-09-06",
       "temp_max": 31.9,
       "temp_min": 21.8,
-      "precip_probability_max": 3,
+      "precip_probability_max": 2,
       "precip_sum_mm": 0.0,
-      "wind_max_kmh": 7.1,
+      "wind_max_kmh": 6.6,
       "weather_description": "Partly cloudy",
       "weather_category": "cloudy",
       "weather_icon": "\u26c5",
@@ -284,7 +284,7 @@
       "rain_probability": 0,
       "rain_risk": "NONE",
       "avg_temp": 31.1,
-      "avg_wind": 6.5,
+      "avg_wind": 4.5,
       "total_precip_mm": 0.0,
       "weather_description": "Clear sky",
       "weather_category": "clear",
@@ -296,7 +296,7 @@
           "humidity": 45,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 6.8,
+          "windspeed": 5.2,
           "windgusts": 17.6,
           "weather_code": 1
         },
@@ -306,7 +306,7 @@
           "humidity": 44,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 7.1,
+          "windspeed": 5.0,
           "windgusts": 19.8,
           "weather_code": 1
         },
@@ -316,7 +316,7 @@
           "humidity": 42,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 6.6,
+          "windspeed": 4.3,
           "windgusts": 18.7,
           "weather_code": 0
         },
@@ -326,17 +326,17 @@
           "humidity": 40,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 5.5,
+          "windspeed": 3.7,
           "windgusts": 15.8,
           "weather_code": 0
         }
       ]
     }
   ],
-  "last_updated": "2026-09-01T10:48:24Z",
-  "next_update": "2026-09-01T16:48:24Z",
+  "last_updated": "2026-09-01T15:46:47Z",
+  "next_update": "2026-09-01T21:46:47Z",
   "data_source": "Open-Meteo (open-meteo.com)",
-  "forecast_snapshot_id": "2026-09-01T10-48-24.744592Z",
-  "forecast_retrieved_at": "2026-09-01T10:48:24.744592+00:00",
-  "forecast_archive_path": "data/forecasts/weather/year2026/round15/2026-09-01T10-48-24.744592Z_open_meteo.json"
+  "forecast_snapshot_id": "2026-09-01T15-46-47.673049Z",
+  "forecast_retrieved_at": "2026-09-01T15:46:47.673049+00:00",
+  "forecast_archive_path": "data/forecasts/weather/year2026/round15/2026-09-01T15-46-47.673049Z_open_meteo.json"
 }
