@@ -51,6 +51,22 @@ def test_round13_equal_three_place_penalties_match_confirmed_top_seven():
     }
 
 
+def test_round15_antonelli_starts_at_back_regardless_of_predicted_quali():
+    rules = load_grid_penalties(15)
+    assert rules == {"ANT": {"back_of_grid": True}}
+
+    for ant_quali in (1, 7, 22):
+        positions = np.arange(1, 23)
+        ant_idx = QUALIFYING_ORDER.index("ANT")
+        other_idx = ant_quali - 1
+        positions[ant_idx], positions[other_idx] = positions[other_idx], positions[ant_idx]
+
+        grid = apply_grid_penalties(positions, QUALIFYING_ORDER, rules)
+
+        assert sorted(grid.tolist()) == list(range(1, 23))
+        assert grid[ant_idx] == 22
+
+
 def test_no_penalties_is_identity_and_place_drop_caps_at_field_tail():
     positions = np.array([3, 1, 2])
     drivers = ["A", "B", "C"]
@@ -97,7 +113,7 @@ def test_driver_fantasy_keeps_quali_points_but_uses_penalized_grid(monkeypatch):
         "confidence": 80,
     }])
     monkeypatch.setattr(fantasy, "load_id_maps", lambda: ({"norris": "NOR"}, {"NOR": "norris"}))
-    monkeypatch.setattr(fantasy, "load_fantasy_prices", lambda: ({"NOR": 25.0}, {}))
+    monkeypatch.setattr(fantasy, "load_fantasy_prices", lambda *_: ({"NOR": 25.0}, {}))
     monkeypatch.setattr(fantasy, "calculate_risk_ratings", lambda _: {"norris": 0.0})
     monkeypatch.setattr(fantasy, "load_recent_fantasy_points", lambda *_: 0.0)
     monkeypatch.setattr(fantasy, "load_dotd_overrides", lambda *_: {})
@@ -128,7 +144,7 @@ def test_post_quali_scoring_uses_actual_classification_and_penalized_grid(monkey
         "confidence": 90,
     }])
     monkeypatch.setattr(fantasy, "load_id_maps", lambda: ({"antonelli": "ANT"}, {"ANT": "antonelli"}))
-    monkeypatch.setattr(fantasy, "load_fantasy_prices", lambda: ({"ANT": 25.6}, {}))
+    monkeypatch.setattr(fantasy, "load_fantasy_prices", lambda *_: ({"ANT": 25.6}, {}))
     monkeypatch.setattr(fantasy, "calculate_risk_ratings", lambda _: {"antonelli": 0.0})
     monkeypatch.setattr(fantasy, "load_recent_fantasy_points", lambda *_: 0.0)
     monkeypatch.setattr(fantasy, "load_dotd_overrides", lambda *_: {})

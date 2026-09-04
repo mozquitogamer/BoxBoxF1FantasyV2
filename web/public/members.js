@@ -69,6 +69,22 @@
         node.className = `pit-wall-status${kind ? ` ${kind}` : ''}`;
     }
 
+    // Recovery callbacks arrive with an authenticated session, but the
+    // password remains unchanged until this form is submitted. app.js opens
+    // the Pit Wall mode for ?member=password; this helper is shared so either
+    // script can win the DOMContentLoaded/network race and still focus the
+    // first new-password field once it exists.
+    function focusPasswordSetup() {
+        const input = panel?.querySelector('#pitWallNewPassword');
+        const mode = document.getElementById('mode-pitwall');
+        if (!input || mode?.classList.contains('hidden')) return false;
+        mode?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+        input.focus();
+        return true;
+    }
+
+    if (typeof window !== 'undefined') window.BoxBoxFocusPasswordSetup = focusPasswordSetup;
+
     function canonicalTeamSnapshot(team) {
         if (!team || !Array.isArray(team.assets)) return null;
         const optionalNumber = value => value === null || value === undefined || value === '' ? null : (Number.isFinite(Number(value)) ? Number(value) : null);
@@ -241,6 +257,7 @@
 
     function renderPasswordSetup() {
         panel.innerHTML = `<div class="pit-wall-heading"><div><span>Pit Wall account</span><h4>Create your password</h4></div><span class="pit-wall-badge active">Secure setup</span></div><p>Choose a password for future Pit Wall sign-ins. Use at least 10 characters; a password manager is recommended.</p><form class="pit-wall-signin" id="pitWallPasswordForm"><div class="pit-wall-fields"><label for="pitWallNewPassword">New password</label><input id="pitWallNewPassword" name="password" type="password" autocomplete="new-password" minlength="10" maxlength="128" required><label for="pitWallConfirmPassword">Confirm password</label><input id="pitWallConfirmPassword" name="confirmation" type="password" autocomplete="new-password" minlength="10" maxlength="128" required><button type="submit">Save password</button></div></form><p class="pit-wall-status" id="pitWallStatus" role="status" aria-live="polite"></p>`;
+        window.setTimeout(() => window.BoxBoxFocusPasswordSetup?.(), 0);
         panel.querySelector('#pitWallPasswordForm')?.addEventListener('submit', async event => {
             event.preventDefault();
             const form = event.currentTarget;

@@ -822,6 +822,16 @@ def write_homepage_prediction_snapshot(current: dict) -> None:
             '<div class="stat-label">90% range</div></div>'
             if p5 is not None and p95 is not None else ""
         )
+        if bool(d.get("grid_back_of_grid", False)):
+            penalty_label = "Back-of-grid penalty"
+        else:
+            penalty_places = int(d.get("grid_penalty_places", 0) or 0)
+            penalty_label = f"{penalty_places}-place grid penalty" if penalty_places > 0 else ""
+        penalty_html = (
+            f'<div class="grid-penalty-notice">⚠ {esc(penalty_label)} · '
+            f'starts P{esc(d.get("predicted_grid", d.get("predicted_quali", "-")))}</div>'
+            if penalty_label else ""
+        )
         cards.append(
             f'<article class="driver-card" data-driver-id="{esc(d.get("driver_id", ""))}" style="--i:{i}">'
             '<div class="card-header"><div class="driver-info">'
@@ -829,6 +839,7 @@ def write_homepage_prediction_snapshot(current: dict) -> None:
             f'<div class="driver-team"><a href="/constructors/{plain_slug(constructor_name)}/">{esc(constructor_name)}</a> &middot; {esc(short_race(race))}</div>'
             f'<div class="card-cost">${price:.1f}M</div></div>'
             f'<div class="driver-number">{esc(d.get("number", ""))}</div></div>'
+            f'{penalty_html}'
             f'<div class="points-badge">{projected:.1f}<span class="points-label">projected</span>'
             f'<span class="points-adj"><span class="points-adj-val">{expected:.1f}</span><span class="points-adj-label">risk-adjusted</span></span></div>'
             '<div class="card-stats">'

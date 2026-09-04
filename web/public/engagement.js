@@ -378,12 +378,24 @@ window.BoxBoxFreeAccess = Object.freeze({
 
         function freeAccessCard() {
             const confirmed = beatConfirmed();
+            const linked = beatSession?.authenticated === true && beatSession?.linked === true;
+            const beatStatus = linked
+                ? '✓ Official team linked for live scoring'
+                : confirmed
+                    ? '✓ Confirmed · link your official team'
+                    : 'Not entered · free confirmation required';
+            const challengeHref = confirmed ? '/?v13=dashboard#beatbot' : '/#beatbot';
+            const challengeAction = linked
+                ? 'Open my Beat V13 dashboard'
+                : confirmed
+                    ? 'Open dashboard & link team'
+                    : 'Register / confirm Beat V13';
             return `<section class="access-hub-card free-access-card">
                 <div class="access-hub-card-head"><div><span class="access-tier-label free">Always free</span><h3>Free BoxBox access</h3></div><strong class="access-state active">Active</strong></div>
-                <p>No password or payment is needed for predictions, simulations, V13’s score, the optimizer, Transfer Advisor, planners or the accuracy record.</p>
+                <p>No password or payment is needed for predictions, simulations, V13’s score, the optimizer, Transfer Advisor, planners or the accuracy record. Pit Wall membership does not enter Beat V13 or link an official team automatically.</p>
                 <ul><li>Use every public fantasy tool</li><li>Follow every V13 decision and score</li><li>Enter Beat V13 and receive general updates by email</li></ul>
-                <div class="access-entry-state ${confirmed ? 'confirmed' : ''}"><span>Beat V13 entry</span><strong>${beatSession?.authenticated ? '✓ Confirmed account signed in' : confirmed ? '✓ Confirmed on this browser' : 'Free email confirmation'}</strong></div>
-                <a class="access-hub-action secondary" href="/?v13=dashboard#beatbot">${confirmed ? 'Open my challenge dashboard' : 'View challenge &amp; standings'}</a>
+                <div class="access-entry-state ${confirmed ? 'confirmed' : ''}"><span>Beat V13 status</span><strong>${beatStatus}</strong></div>
+                <a class="access-hub-action secondary" href="${challengeHref}">${challengeAction}</a>
             </section>`;
         }
 
@@ -424,7 +436,7 @@ window.BoxBoxFreeAccess = Object.freeze({
 
         function accessHeader(pitState) {
             const confirmed = beatConfirmed();
-            return `<span class="pit-wall-login-eyebrow">Your BoxBox access</span><h2 id="pitWallLoginTitle">Free tools first. Pit Wall when you want convenience.</h2><p class="access-hub-intro">Beat V13 registration is a free email entry. Pit Wall is the separate $5/month account with a password and personalized member tools.</p><div class="access-status-strip"><span><small>Public tools</small><strong>Active</strong></span><span><small>Beat V13</small><strong>${confirmed ? 'Registered' : 'Status not saved here'}</strong></span><span><small>Pit Wall</small><strong>${pitState}</strong></span></div>`;
+            return `<span class="pit-wall-login-eyebrow">Your BoxBox access</span><h2 id="pitWallLoginTitle">Free tools first. Pit Wall when you want convenience.</h2><p class="access-hub-intro">Beat V13 registration is a free email entry. Pit Wall is the separate $5/month account with a password and personalized member tools.</p><div class="access-status-strip"><span><small>Public tools</small><strong>Active</strong></span><span><small>Beat V13</small><strong>${confirmed ? 'Registered' : 'Needs free confirmation'}</strong></span><span><small>Pit Wall</small><strong>${pitState}</strong></span></div>`;
         }
 
         function updateHeaderButton(session) {
@@ -485,7 +497,7 @@ window.BoxBoxFreeAccess = Object.freeze({
             updateHeaderButton(session);
             const pitState = active ? 'Active member' : 'Signed in · inactive';
             const teams = memberTeams(session);
-            content.innerHTML = `${accessHeader(pitState)}<div class="access-hub-grid">${freeAccessCard()}<section class="access-hub-card pit-wall-access-card ${active ? 'is-active' : ''}"><div class="access-hub-card-head"><div><span class="access-tier-label paid">Pit Wall account</span><h3>Pit Wall workspace</h3></div><strong class="access-state ${active ? 'active' : ''}">${active ? '✓ Active' : 'Membership inactive'}</strong></div><p>${active ? 'Your three saved teams live here. Pick a working team, compare lineups, and keep each budget and chip ledger separate.' : 'Your login works, but the Ko-fi membership linked to it is not currently active. Saved teams remain visible and read-only.'}</p>${memberTeamSummaries(session, active)}<div class="pit-wall-login-actions">${active ? '<a href="/?pitwall=1#optimizer">Open Pit Wall</a>' : '<a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Renew on Ko-fi</a>'}<button type="button" id="sitePitWallSignOut">Sign out of BoxBox</button></div></section></div>`;
+            content.innerHTML = `${accessHeader(pitState)}<div class="access-hub-grid">${freeAccessCard()}<section class="access-hub-card pit-wall-access-card ${active ? 'is-active' : ''}"><div class="access-hub-card-head"><div><span class="access-tier-label paid">Pit Wall account</span><h3>Pit Wall workspace</h3></div><strong class="access-state ${active ? 'active' : ''}">${active ? '✓ Active' : 'Membership inactive'}</strong></div><p>${active ? 'Your three saved teams live here. Pick a working team, compare lineups, and keep each budget and chip ledger separate.' : 'Your login works, but the Ko-fi membership linked to it is not currently active. Saved teams remain visible and read-only.'}</p><p class="access-hub-separation-note"><strong>Beat V13 is separate.</strong> Your Pit Wall account does not enroll you in the free challenge or connect its official team. Use the Beat V13 card to confirm entry, then link the exact official team from its dashboard.</p>${memberTeamSummaries(session, active)}<div class="pit-wall-login-actions">${active ? '<a href="/?pitwall=1#optimizer">Open Pit Wall</a>' : '<a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">Renew on Ko-fi</a>'}<button type="button" id="sitePitWallSignOut">Sign out of BoxBox</button></div></section></div>`;
             content.querySelector('#sitePitWallSignOut')?.addEventListener('click', signOutEverywhere);
             content.querySelectorAll('[data-team-slot]').forEach(link => link.addEventListener('click', event => {
                 event.preventDefault();

@@ -61,8 +61,10 @@ src += `
     hasFinalFixRacePoints: typeof calculateFinalFixRacePoints === 'function',
     finalFixQualifyingPoints: typeof ffQualifyingPoints === 'function' ? ffQualifyingPoints : null,
     finalFixProjectedRacePoints: typeof ffProjectedRacePoints === 'function' ? ffProjectedRacePoints : null,
+    gridPenaltyText: typeof gridPenaltyText === 'function' ? gridPenaltyText : null,
     hasOfficialRoundCoverageCheck: typeof officialRoundHasCompleteScores === 'function',
     hasBudgetFuturePointValue: typeof budgetFuturePointValue === 'function',
+    basisPointsFor: typeof basisPointsFor === 'function' ? basisPointsFor : null,
     hasOpenPitWallTransferAdvisor: typeof openPitWallTransferAdvisor === 'function',
     hasOpenPitWall: typeof openPitWall === 'function',
     hasOpenTeamCompare: typeof openTeamCompare === 'function',
@@ -306,6 +308,10 @@ try {
   if (!/team-state\.js\?v=\d+[\s\S]*app\.js\?v=\d+[\s\S]*members\.js\?v=\d+/.test(index)) fail('team-state must load before app and members');
   const members = fs.readFileSync(path.join(__dirname, '..', 'web', 'public', 'members.js'), 'utf8');
   if (!members.includes('data-team-chip') || !members.includes('value="available"') || !members.includes('value="used"')) fail('Pit Wall chip status controls are missing explicit states');
+  const engagement = fs.readFileSync(path.join(__dirname, '..', 'web', 'public', 'engagement.js'), 'utf8');
+  if (!engagement.includes('Pit Wall membership does not enter Beat V13') || !engagement.includes('Register / confirm Beat V13') || !engagement.includes('Open dashboard & link team')) fail('Pit Wall/Beat V13 separation guidance is missing');
+  if (!members.includes('BoxBoxFocusPasswordSetup') || !members.includes('pitWallNewPassword')) fail('recovery password setup focus hook is missing');
+  if (!src.includes("memberQuery === 'password'") || !src.includes('openPitWall({ scroll: false, updateHistory: false })')) fail('recovery deep link does not open the Pit Wall password workspace');
   const styles = fs.readFileSync(path.join(__dirname, '..', 'web', 'public', 'styles.css'), 'utf8');
   if (!styles.includes('overflow-x: clip') || !styles.includes('.optimizer-mode-toggle') || !styles.includes('max-width: 100%')) fail('mobile overflow containment contract is missing');
   if (!S.hasOpenPitWall || !S.hasOpenTeamCompare || !sandbox.BoxBoxTeamCompare?.open) fail('Pit Wall/Compare open APIs are missing');
@@ -390,6 +396,41 @@ try {
   fail('Transfer Advisor points-basis display regression test threw: ' + e.message);
 }
 
+// 4b) Current-round manual upgrade overlays must flow into optimizer bases,
+// while assets without an overlay retain their historical basis values.
+try {
+  const upgraded = {
+    expected_points: 10,
+    expected_points_adjusted: 12,
+    projected_points: 20,
+    points_delta: 2,
+  };
+  if (S.basisPointsFor(upgraded, 'risk_adjusted') !== 12) {
+    fail('risk-adjusted basis ignored expected_points_adjusted');
+  }
+  if (S.basisPointsFor(upgraded, 'projected') !== 22) {
+    fail('projected basis ignored deterministic points_delta');
+  }
+  if (S.basisPointsFor(upgraded, 'balanced') !== 17) {
+    fail('balanced basis did not average adjusted projected/risk points');
+  }
+
+  const baseline = { expected_points: 10, projected_points: 20 };
+  if (S.basisPointsFor(baseline, 'risk_adjusted') !== 10
+      || S.basisPointsFor(baseline, 'projected') !== 20
+      || S.basisPointsFor(baseline, 'balanced') !== 15) {
+    fail('assets without upgrade overlays changed optimizer basis behavior');
+  }
+
+  const deltaOnly = { expected_points: 10, projected_points: 20, points_delta: 2 };
+  if (S.basisPointsFor(deltaOnly, 'risk_adjusted') !== 12
+      || S.basisPointsFor(deltaOnly, 'projected') !== 22) {
+    fail('points_delta fallback was not applied consistently');
+  }
+} catch (e) {
+  fail('upgrade overlay points-basis regression test threw: ' + e.message);
+}
+
 // 5) Team Compare scoring helper includes normal 2x / 3x boost and CI totals.
 try {
   const drivers = [
@@ -450,7 +491,20 @@ try {
   fail('Final Fix scoring helper threw: ' + e.message);
 }
 
-// 7) Landing-page price history skips full actual files only when official
+// 7) Known grid penalties remain distinct from qualifying results.
+try {
+  if (S.gridPenaltyText({ grid_back_of_grid: true }) !== 'Back-of-grid penalty') {
+    fail('back-of-grid penalty label missing');
+  }
+  if (S.gridPenaltyText({ grid_penalty_places: 10 }) !== '10-place grid penalty') {
+    fail('place-drop penalty label missing');
+  }
+  if (S.gridPenaltyText({}) !== '') fail('unpenalized driver received a penalty label');
+} catch (e) {
+  fail('grid penalty label helper threw: ' + e.message);
+}
+
+// 8) Landing-page price history skips full actual files only when official
 // scores cover every current driver and constructor.
 try {
   const current = {

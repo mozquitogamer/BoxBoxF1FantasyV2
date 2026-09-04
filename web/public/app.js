@@ -207,9 +207,31 @@ const TA_TUNABLES = {
 //   'balanced'      -> mean of projected + risk-adjusted (DEFAULT; best expected-value proxy)
 //   'risk_adjusted' -> raw MC mean (expected_points; legacy behavior)
 let optimizeBasis = 'balanced';
+// Server-side manual upgrade overlays are exported alongside the baseline
+// forecast. Optimizer decisions should see the same current-round signal as
+// the driver/constructor cards, while historical price and form calculations
+// continue to use their untouched baseline fields.
+function adjustmentDelta(item) {
+    const delta = Number(item?.points_delta);
+    return Number.isFinite(delta) ? delta : 0;
+}
+
+function adjustedRiskPoints(item) {
+    const adjusted = Number(item?.expected_points_adjusted);
+    if (Number.isFinite(adjusted)) return adjusted;
+    const baseline = Number(item?.expected_points);
+    return Number.isFinite(baseline) ? baseline + adjustmentDelta(item) : 0;
+}
+
+function adjustedProjectedPoints(item) {
+    const baseline = Number(item?.projected_points);
+    if (Number.isFinite(baseline)) return baseline + adjustmentDelta(item);
+    return adjustedRiskPoints(item);
+}
+
 function basisPointsFor(item, basis = optimizeBasis) {
-    const risk = (typeof item.expected_points === 'number') ? item.expected_points : 0;
-    const proj = (typeof item.projected_points === 'number') ? item.projected_points : risk;
+    const risk = adjustedRiskPoints(item);
+    const proj = adjustedProjectedPoints(item);
     if (basis === 'projected') return proj;
     if (basis === 'risk_adjusted') return risk;
     return (proj + risk) / 2; // balanced
@@ -1065,11 +1087,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupV13Popup();
 
     // The Pit Wall account entry point can load before the optimizer controls
-    // have attached their click handlers. Resolve the deep link here, after
-    // setupControls(), so members reliably land on Transfer Advisor instead of
-    // the default fresh-lineup mode.
+    // have attached their click handlers. Resolve the deep links here, after
+    // setupControls(), so members reliably land on the requested workspace.
     try {
-        if (new URLSearchParams(location.search).get('pitwall') === '1') {
+        const memberQuery = new URLSearchParams(location.search).get('member');
+        if (memberQuery === 'password') {
+            // A recovery callback creates a short-lived authenticated session,
+            // but the password is not changed until the member submits the
+            // form in members.js. Keep that form visible and preserve the
+            // query string until the update succeeds.
+            openPitWall({ scroll: false, updateHistory: false });
+            window.setTimeout(() => {
+                window.BoxBoxFocusPasswordSetup?.();
+                document.getElementById('mode-pitwall')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+            }, 0);
+        } else if (new URLSearchParams(location.search).get('pitwall') === '1') {
             openPitWallTransferAdvisor();
         }
     } catch (e) {}
@@ -2433,6 +2465,12 @@ function renderDrivers() {
     updateSortIndicators();
 }
 
+function gridPenaltyText(driver) {
+    if (driver?.grid_back_of_grid) return "Back-of-grid penalty";
+    const places = Number(driver?.grid_penalty_places || 0);
+    return places > 0 ? `${places}-place grid penalty` : "";
+}
+
 function driverCard(d, i) {
     const team = TEAMS[d.constructor] || { name: d.constructor, color: '#666' };
     const totalPts = d.expected_points;
@@ -2460,6 +2498,7 @@ function driverCard(d, i) {
     const scenBtnLabel = scenBtnActive
         ? `${driverOnlyBump > 0 ? '+' : ''}${driverOnlyBump.toFixed(1)}`
         : '±';
+    const gridPenalty = gridPenaltyText(d);
 
     return `
     <div class="driver-card" data-driver-id="${d.driver_id}" style="--team-color:${team.color};--i:${i}">
@@ -2476,6 +2515,7 @@ function driverCard(d, i) {
             <div class="driver-number">${d.number}</div>
         </div>
         ${renderWeatherBadges()}
+        ${gridPenalty ? `<div class="grid-penalty-notice" title="Known race-start penalty; qualifying fantasy points still use the qualifying result.">⚠ ${gridPenalty} · starts P${d.predicted_grid ?? 22}</div>` : ""}
 
         <div class="points-badge" title="Projected = points if the predicted finishing order holds (the 'if it goes to plan' score). Risk-adj = the Monte-Carlo average over 10,000 sims — it factors in DNFs, chaos and position swings, so it sits lower. The likely outcome is between the two; the P5–P95 range is shown below.">
             ${(typeof d.projected_points === 'number' ? d.projected_points : d.expected_points).toFixed(1)}
@@ -4223,15 +4263,15 @@ function ffSetScenarioDriver(side, resetInputs = true) {
     const isOutgoing = side === 'out';
     const quali = Number(driver.predicted_quali);
     const grid = Number(driver.predicted_grid ?? quali);
-    const penalty = Number(driver.grid_penalty_places || 0);
+    const gridPenalty = gridPenaltyText(driver);
     const qPoints = ffQualifyingPoints(quali);
     const projectedRace = ffProjectedRacePoints(driver);
 
     document.getElementById(`${prefix}Name`).textContent = driver.name;
     document.getElementById(`${prefix}Price`).textContent = `$${Number(driver.current_price || 0).toFixed(1)}M`;
     const qLabel = isOutgoing ? `${qPoints} pts banked` : 'not counted after switch';
-    const gridText = penalty > 0
-        ? `P${grid} after ${penalty}-place penalty`
+    const gridText = gridPenalty
+        ? `P${grid} · ${gridPenalty}`
         : `P${grid}`;
     document.getElementById(`${prefix}Facts`).innerHTML = `
         <div><span>Qualifying</span><strong>P${quali} · ${qLabel}</strong></div>

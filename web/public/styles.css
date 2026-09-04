@@ -441,6 +441,18 @@ select:focus, input:focus {
     line-height: 1;
 }
 
+.grid-penalty-notice {
+    margin: -2px 0 10px;
+    padding: 7px 10px;
+    border: 1px solid rgba(245, 158, 11, 0.45);
+    border-radius: 8px;
+    background: rgba(245, 158, 11, 0.12);
+    color: #fbbf24;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: center;
+}
+
 .points-badge {
     display: flex;
     align-items: center;

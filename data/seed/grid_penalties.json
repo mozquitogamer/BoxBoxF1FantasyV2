@@ -20,5 +20,11 @@
     "ANT": {
       "places": 3
     }
+  },
+  "15": {
+    "_note": "Italian GP confirmed pre-qualifying penalty: ANT starts from the back of the grid regardless of qualifying position.",
+    "ANT": {
+      "back_of_grid": true
+    }
   }
 }
