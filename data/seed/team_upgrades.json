@@ -4,8 +4,8 @@
   "scope": "race_only",
   "modifiers": {
     "aston_martin": {
-      "pace_bump": 1.8,
-      "note": "Manual R15 race-only uplift, building on the R13-R14 recovery: target Alonso around P10-P13 and move Stroll materially higher while leaving qualifying unchanged."
+      "pace_bump": 1.9,
+      "note": "Manual R15 race-only uplift, building on the R13-R14 recovery: FP2-calibrated to keep Alonso around P10-P13 and move Stroll materially higher while leaving qualifying unchanged."
     }
   },
   "driver_modifiers": {}

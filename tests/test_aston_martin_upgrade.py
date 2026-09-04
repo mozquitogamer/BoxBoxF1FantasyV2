@@ -14,7 +14,7 @@ def test_round15_aston_modifier_is_race_only_and_team_scoped():
     team_bumps, driver_bumps, scope = upgrades._load_upgrades(15)
 
     assert scope == "race_only"
-    assert team_bumps == {"aston_martin": 1.8}
+    assert team_bumps == {"aston_martin": 1.9}
     assert driver_bumps == {}
 
     config = json.loads(
@@ -28,7 +28,7 @@ def test_round15_aston_bump_leaves_quali_order_unchanged():
     # deliberately applied only to the race scores: qualifying remains the
     # evidence-backed model order while both Aston cars gain one race slot.
     raw = pd.Series([0.35, 0.25, 0.20, 0.10], index=["OTH1", "OTH2", "ALO", "STR"])
-    bumps = pd.Series([0.0, 0.0, 1.8, 1.8], index=raw.index)
+    bumps = pd.Series([0.0, 0.0, 1.9, 1.9], index=raw.index)
     zero = pd.Series(0.0, index=raw.index)
 
     quali = upgrades._rerank(raw, zero)
@@ -45,7 +45,7 @@ def test_round15_public_export_contains_aston_overlay_effects():
     )
 
     assert payload["upgrade_adjustments"] == {
-        "modifiers": {"aston_martin": 1.8},
+        "modifiers": {"aston_martin": 1.9},
         "driver_modifiers": {},
         "scope": "race_only",
     }
@@ -53,14 +53,14 @@ def test_round15_public_export_contains_aston_overlay_effects():
         d["driver_id"]: d for d in payload["drivers"] if d["constructor"] == "aston_martin"
     }
     assert drivers["ALO"]["predicted_finish"] == 19
-    assert drivers["ALO"]["predicted_finish_adjusted"] == 11
-    assert drivers["ALO"]["points_delta"] == 8.0
-    assert drivers["STR"]["predicted_finish"] == 21
+    assert drivers["ALO"]["predicted_finish_adjusted"] == 12
+    assert drivers["ALO"]["points_delta"] == 7.0
+    assert drivers["STR"]["predicted_finish"] == 20
     assert drivers["STR"]["predicted_finish_adjusted"] == 16
-    assert drivers["STR"]["points_delta"] == 5.0
+    assert drivers["STR"]["points_delta"] == 4.0
 
     constructor = next(
         c for c in payload["constructors"] if c["constructor_id"] == "aston_martin"
     )
-    assert constructor["expected_points_adjusted"] == constructor["expected_points"] + 13.0
-    assert constructor["points_delta"] == 13.0
+    assert constructor["expected_points_adjusted"] == constructor["expected_points"] + 11.0
+    assert constructor["points_delta"] == 11.0
