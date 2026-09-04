@@ -20,11 +20,12 @@ function top(items, limit = 3) {
     return [...(items || [])].sort((left, right) => points(right) - points(left)).slice(0, limit);
 }
 
-function broadcastName(predictions) {
-    return `R${Number(predictions.round)} ${phaseLabel(predictions.phase)} simulation alert`;
+function broadcastName(predictions, resendToken = null) {
+    const base = `R${Number(predictions.round)} ${phaseLabel(predictions.phase)} simulation alert`;
+    return resendToken ? `${base} · resend ${resendToken}` : base;
 }
 
-function buildBroadcast(predictions, siteOrigin) {
+function buildBroadcast(predictions, siteOrigin, resendToken = null) {
     const race = String(predictions.race || 'the next Grand Prix');
     const round = Number(predictions.round || 0);
     const phase = String(predictions.phase || 'updated');
@@ -66,7 +67,7 @@ function buildBroadcast(predictions, siteOrigin) {
     )).join('\n');
     const text = `BoxBoxF1Fantasy — ${race}\n${phaseName} simulations are live.\n\nTop driver projections\n${driverText}\n\nTop constructors\n${constructorText}\n\nOpen the updated predictions: ${url}\nUnsubscribe: ${UNSUBSCRIBE_URL}\n`;
     return {
-        name: broadcastName(predictions),
+        name: broadcastName(predictions, resendToken),
         subject: `${race} simulations updated — ${phaseName}`,
         html,
         text,
@@ -104,7 +105,7 @@ async function auditResendSegments(res) {
     }
 }
 
-async function sendV13Broadcast(res) {
+async function sendV13Broadcast(res, { resendToken = null } = {}) {
     try {
         const config = getConfig();
         const segmentId = await ensureBeatV13Segment();
@@ -119,7 +120,7 @@ async function sendV13Broadcast(res) {
             return res.status(200).json({ ok: true, skipped: 'stale_simulation' });
         }
 
-        const content = buildBroadcast(predictions, config.siteOrigin);
+        const content = buildBroadcast(predictions, config.siteOrigin, resendToken);
         const duplicate = await existingBroadcast(config.apiKey, content.name);
         const recipients = await activeContactCount(config.apiKey, segmentId);
         if (duplicate?.status === 'sent' || duplicate?.status === 'scheduled') {
@@ -130,7 +131,7 @@ async function sendV13Broadcast(res) {
                 method: 'POST',
                 body: {},
             });
-            return res.status(200).json({ ok: true, sent: recipients, broadcast_id: duplicate.id });
+            return res.status(200).json({ ok: true, sent: recipients, forced_resend: Boolean(resendToken), broadcast_id: duplicate.id });
         }
 
         const created = await resendRequest('/broadcasts', config.apiKey, {
@@ -142,7 +143,7 @@ async function sendV13Broadcast(res) {
                 send: true,
             },
         });
-        return res.status(200).json({ ok: true, sent: recipients, broadcast_id: created.id || null });
+        return res.status(200).json({ ok: true, sent: recipients, forced_resend: Boolean(resendToken), broadcast_id: created.id || null });
     } catch (error) {
         console.error('V13 broadcast failed:', error.message);
         return res.status(500).json({ ok: false, message: 'V13 broadcast failed.' });

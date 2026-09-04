@@ -15,6 +15,11 @@ on:
         required: false
         default: false
         type: boolean
+      force_resend:
+        description: Explicitly resend the current simulation to both audiences
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -50,24 +55,36 @@ jobs:
         if: ${{ github.event_name == 'push' || !inputs.audit_only }}
         env:
           MEMBER_NOTIFICATION_SECRET: ${{ secrets.MEMBER_NOTIFICATION_SECRET }}
+          FORCE_RESEND: ${{ inputs.force_resend || false }}
+          RESEND_TOKEN: ${{ github.run_id }}
         run: |
+          payload='{"source":"published_simulation"}'
+          if [ "${FORCE_RESEND}" = "true" ]; then
+            payload="{\"source\":\"manual_force_resend\",\"force_resend\":true,\"resend_token\":\"${RESEND_TOKEN}\"}"
+          fi
           curl --fail-with-body --retry 3 --retry-all-errors \
             --request POST \
             --header "Authorization: Bearer ${MEMBER_NOTIFICATION_SECRET}" \
             --header "Content-Type: application/json" \
-            --data '{"source":"published_simulation"}' \
+            --data "${payload}" \
             https://boxboxf1fantasy.com/api/members/notify/
 
       - name: Trigger idempotent V13 simulation broadcast
         if: ${{ github.event_name == 'push' || !inputs.audit_only }}
         env:
           MEMBER_NOTIFICATION_SECRET: ${{ secrets.MEMBER_NOTIFICATION_SECRET }}
+          FORCE_RESEND: ${{ inputs.force_resend || false }}
+          RESEND_TOKEN: ${{ github.run_id }}
         run: |
+          payload='{"source":"published_simulation","audience":"v13"}'
+          if [ "${FORCE_RESEND}" = "true" ]; then
+            payload="{\"source\":\"manual_force_resend\",\"audience\":\"v13\",\"force_resend\":true,\"resend_token\":\"${RESEND_TOKEN}\"}"
+          fi
           curl --fail-with-body --retry 3 --retry-all-errors \
             --request POST \
             --header "Authorization: Bearer ${MEMBER_NOTIFICATION_SECRET}" \
             --header "Content-Type: application/json" \
-            --data '{"source":"published_simulation","audience":"v13"}' \
+            --data "${payload}" \
             https://boxboxf1fantasy.com/api/members/notify/
 
       - name: Inspect Resend segment counts

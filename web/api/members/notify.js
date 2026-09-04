@@ -132,7 +132,7 @@ function genericPitWallEmail(predictions, origin) {
     return { subject: `${race}: ${phase} simulations are live`, html, text };
 }
 
-async function sendMissingPitWallContacts(event, predictions, origin) {
+async function sendMissingPitWallContacts(event, predictions, origin, resendToken = null) {
     const segmentId = await ensurePitWallSegment();
     const contacts = await activeSegmentContacts(segmentId);
     const alreadyRecorded = new Set(event.payload?.pit_wall_segment_contact_ids || []);
@@ -151,11 +151,13 @@ async function sendMissingPitWallContacts(event, predictions, origin) {
 
     for (const contact of contacts) {
         const email = String(contact.email || '').trim().toLowerCase();
-        if (!email || deliveredEmails.has(email) || alreadyRecorded.has(contact.id)) continue;
+        if (!email || deliveredEmails.has(email) || (!resendToken && alreadyRecorded.has(contact.id))) continue;
         try {
             await resendRequest('/emails', process.env.RESEND_API_KEY, {
                 method: 'POST',
-                headers: { 'Idempotency-Key': `pit-wall-segment-${event.id}-${contact.id}` },
+                headers: {
+                    'Idempotency-Key': `pit-wall-segment-${event.id}-${contact.id}${resendToken ? `-resend-${resendToken}` : ''}`,
+                },
                 body: {
                     from: process.env.RESEND_FROM,
                     to: [email],
@@ -169,7 +171,7 @@ async function sendMissingPitWallContacts(event, predictions, origin) {
         }
     }
 
-    if (sentIds.length) {
+    if (sentIds.length && !resendToken) {
         const recordedIds = [...new Set([...alreadyRecorded, ...sentIds])];
         event.payload = { ...(event.payload || {}), pit_wall_segment_contact_ids: recordedIds };
         await restRequest(`notification_events?id=eq.${encodeURIComponent(event.id)}`, {
@@ -252,8 +254,13 @@ module.exports = async function notify(req, res) {
     const expectedSecret = String(process.env.MEMBER_NOTIFICATION_SECRET || '').trim();
     const suppliedSecret = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
     if (!expectedSecret || !safeEqual(suppliedSecret, expectedSecret)) return res.status(401).json({ ok: false });
+    const forceResend = req.body?.force_resend === true;
+    const resendToken = forceResend ? String(req.body?.resend_token || '').trim() : null;
+    if (forceResend && !/^[a-zA-Z0-9_-]{3,80}$/.test(resendToken)) {
+        return res.status(400).json({ ok: false, message: 'A valid resend_token is required.' });
+    }
     if (req.body?.audience === 'resend_audit') return auditResendSegments(res);
-    if (req.body?.audience === 'v13') return sendV13Broadcast(res);
+    if (req.body?.audience === 'v13') return sendV13Broadcast(res, { resendToken });
 
     let event;
     try {
@@ -274,7 +281,7 @@ module.exports = async function notify(req, res) {
 
         event = await getOrCreateEvent(predictions);
         if (!event) throw new Error('Could not create notification event');
-        if (event.status === 'sent') {
+        if (event.status === 'sent' && !forceResend) {
             const supplemental = await sendMissingPitWallContacts(event, predictions, config.siteOrigin);
             return res.status(supplemental.failed ? 502 : 200).json({
                 ok: supplemental.failed === 0,
@@ -284,7 +291,7 @@ module.exports = async function notify(req, res) {
                 failed: supplemental.failed,
             });
         }
-        if (!(await claimEvent(event))) {
+        if (!forceResend && !(await claimEvent(event))) {
             return res.status(200).json({ ok: true, duplicate: true, processing: event.status === 'processing' });
         }
 
@@ -296,13 +303,14 @@ module.exports = async function notify(req, res) {
             .filter(item => isEntitlementActive(item))
             .map(item => item.user_id))];
         if (!activeUserIds.length) {
-            const supplemental = await sendMissingPitWallContacts(event, predictions, config.siteOrigin);
-            await setEventStatus(event.id, supplemental.failed ? 'failed' : 'sent');
+            const supplemental = await sendMissingPitWallContacts(event, predictions, config.siteOrigin, resendToken);
+            if (!forceResend) await setEventStatus(event.id, supplemental.failed ? 'failed' : 'sent');
             return res.status(supplemental.failed ? 502 : 200).json({
                 ok: supplemental.failed === 0,
                 sent: supplemental.sent,
                 skipped: 0,
                 failed: supplemental.failed,
+                forced_resend: forceResend,
                 segment_recipients: supplemental.recipients,
             });
         }
@@ -350,7 +358,7 @@ module.exports = async function notify(req, res) {
                 `member_recommendations?event_id=eq.${encodeURIComponent(event.id)}&team_id=eq.${encodeURIComponent(team.id)}&select=id,delivery_status&limit=1`,
                 { service: true },
             );
-            if (existing?.[0]?.delivery_status === 'sent') {
+            if (existing?.[0]?.delivery_status === 'sent' && !forceResend) {
                 skipped += 1;
                 continue;
             }
@@ -381,7 +389,9 @@ module.exports = async function notify(req, res) {
                 const content = emailBody(profile, recommendation, config.siteOrigin);
                 const delivery = await resendRequest('/emails', process.env.RESEND_API_KEY, {
                     method: 'POST',
-                    headers: { 'Idempotency-Key': `pit-wall-${event.id}-${team.id}` },
+                    headers: {
+                        'Idempotency-Key': `pit-wall-${event.id}-${team.id}${resendToken ? `-resend-${resendToken}` : ''}`,
+                    },
                     body: {
                         from: process.env.RESEND_FROM,
                         to: [profile.email],
@@ -413,21 +423,22 @@ module.exports = async function notify(req, res) {
             }
         }
 
-        const supplemental = await sendMissingPitWallContacts(event, predictions, config.siteOrigin);
+        const supplemental = await sendMissingPitWallContacts(event, predictions, config.siteOrigin, resendToken);
         sent += supplemental.sent;
         failed += supplemental.failed;
-        await setEventStatus(event.id, failed ? 'failed' : 'sent');
+        if (!forceResend) await setEventStatus(event.id, failed ? 'failed' : 'sent');
         return res.status(failed ? 502 : 200).json({
             ok: failed === 0,
             sent,
             skipped,
             failed,
+            forced_resend: forceResend,
             segment_recipients: supplemental.recipients,
             supplemental_sent: supplemental.sent,
         });
     } catch (error) {
         console.error('Member notification worker failed:', error.message);
-        if (event?.id) await setEventStatus(event.id, 'failed').catch(() => null);
+        if (event?.id && !forceResend) await setEventStatus(event.id, 'failed').catch(() => null);
         return res.status(500).json({ ok: false, message: 'Member notification worker failed.' });
     }
 };

@@ -47,6 +47,7 @@ test('builds the live Monza V13 broadcast with Resend unsubscribe handling', () 
 
 test('uses a deterministic name for idempotent provider lookup', () => {
     assert.equal(broadcastName(predictions()), 'R15 Pre-practice simulation alert');
+    assert.equal(broadcastName(predictions(), 'run_123'), 'R15 Pre-practice simulation alert · resend run_123');
     assert.equal(phaseLabel('post_fp'), 'Post-practice');
 });
 
@@ -117,4 +118,6 @@ test('automatically emails only when master publishes new simulation data', () =
     assert.match(workflow, /published_simulation/);
     assert.match(workflow, /workflow_dispatch:/);
     assert.match(workflow, /audit_only:/);
+    assert.match(workflow, /force_resend:/);
+    assert.match(workflow, /resend_token/);
 });
