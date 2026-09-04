@@ -47,6 +47,33 @@
         return Number.isFinite(number) ? number : fallback;
     }
 
+    function firstFinite(...values) {
+        for (const value of values) {
+            if (value === null || value === undefined || value === '') continue;
+            const number = Number(value);
+            if (Number.isFinite(number)) return number;
+        }
+        return null;
+    }
+
+    function resolveOfficialTeamFinance(snapshot, currentSquadValue) {
+        const squadValue = firstFinite(currentSquadValue, snapshot?.squad_value_millions);
+        let bank = firstFinite(snapshot?.bank_millions, snapshot?.cash_millions, snapshot?.cash_balance);
+        let spendingPower = firstFinite(snapshot?.spending_power_millions, snapshot?.total_budget_millions);
+        const legacyBudget = firstFinite(snapshot?.budget_millions);
+
+        // Older official snapshots stored F1's `teambal` cash field under the
+        // legacy budget name. A value below the seven-pick squad value is cash,
+        // not total spending power. New snapshots carry bank_millions explicitly.
+        if (bank === null && spendingPower === null && legacyBudget !== null) {
+            if (squadValue !== null && legacyBudget < squadValue) bank = legacyBudget;
+            else spendingPower = legacyBudget;
+        }
+        if (spendingPower === null && squadValue !== null) spendingPower = squadValue + (bank ?? 0);
+        if (bank === null && spendingPower !== null && squadValue !== null) bank = Math.max(0, spendingPower - squadValue);
+        return { squadValue, bank, spendingPower };
+    }
+
     function clone(value) {
         if (value === undefined) return undefined;
         if (typeof structuredClone === 'function') {
@@ -436,6 +463,16 @@
             return result;
         }
 
+        async function synchronizeOfficial(slot, round, memory = root?.BoxBoxTeamMemory) {
+            const target = slotOf({ slot }, state.selectedSlot);
+            const result = await syncOfficial(target, round);
+            if (!applyOfficialToMemory(target, memory)) {
+                throw new Error('The official lineup could not be matched to the current race roster. Your saved team was not changed.');
+            }
+            const saved = await save(target, { force: true, round });
+            return { ...result, saved, team: getTeam(target) };
+        }
+
         function applyOfficialToMemory(slot = state.selectedSlot, memory = root?.BoxBoxTeamMemory) {
             assertWritable();
             const team = getTeam(slot);
@@ -479,7 +516,7 @@
             getState, getTeam, getSelectedTeam: selectedTeam, getTeams: () => state.teams.map(clone),
             subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); },
             hydrate, normalizeDashboard, normalizeTeam, select, update, replaceTeam,
-            save, scheduleAutosave, rename, setPrimary, linkOfficial, syncOfficial, applyOfficialToMemory,
+            save, scheduleAutosave, rename, setPrimary, linkOfficial, syncOfficial, synchronizeOfficial, applyOfficialToMemory,
             setChip, chipState, chipRemaining, recordWeek, applyToMemory, pullFromMemory,
             snapshotForTeam, canonicalSnapshot, hasCompleteTeam, clearError: () => setState({ error: null }),
             chipKeys: CHIP_KEYS.slice(),
@@ -492,7 +529,8 @@
         return singleton;
     };
     const api = { SLOT_COUNT, CHIP_KEYS: CHIP_KEYS.slice(), normalizeTeam, normalizeTeams, normalizeDashboard,
-        snapshotForTeam, canonicalSnapshot, hasCompleteTeam, chipState, chipRemaining, canonicalChipKey, createStore, getStore,
+        snapshotForTeam, canonicalSnapshot, hasCompleteTeam, chipState, chipRemaining, canonicalChipKey,
+        resolveOfficialTeamFinance, createStore, getStore,
         resetStore: () => { singleton = null; return getStore(); } };
     if (root && !root.BoxBoxTeamState) root.BoxBoxTeamState = api;
     return api;

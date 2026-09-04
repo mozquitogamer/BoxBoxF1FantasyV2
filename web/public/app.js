@@ -5258,28 +5258,22 @@ function applyOfficialMemberTeam(snapshot) {
     const drivers = converted.filter(asset => asset.asset_type === 'driver');
     const constructors = converted.filter(asset => asset.asset_type === 'constructor');
     if (drivers.length !== 5 || constructors.length !== 2) return false;
-    const syncedBudget = Number(snapshot.budget_millions);
-    const hasSyncedBudget = Number.isFinite(syncedBudget) && syncedBudget > 0;
+    const currentSquadValue = converted.reduce((total, asset) => {
+        if (asset.asset_type === 'driver') return total + (findDriverAsset(asset.asset_id)?.current_price || 0);
+        return total + (data?.constructors?.find(item => item.constructor_id === asset.asset_id)?.current_price || 0);
+    }, 0);
+    const finance = window.BoxBoxTeamState.resolveOfficialTeamFinance(snapshot, currentSquadValue || null);
     const syncedTransfers = Number(snapshot.free_transfers);
     const currentTransfers = Number(document.getElementById('freeTransfers')?.value);
     const fallbackTransfers = [2, 3].includes(currentTransfers) ? currentTransfers : 2;
-    const applied = applySavedMemberTeam({
+    return applySavedMemberTeam({
         assets: converted,
-        budget_millions: hasSyncedBudget ? syncedBudget : 100,
-        spending_power_millions: hasSyncedBudget ? syncedBudget : null,
-        squad_value_millions: snapshot.squad_value_millions,
-        bank_millions: snapshot.bank_millions,
+        budget_millions: finance.spendingPower,
+        spending_power_millions: finance.spendingPower,
+        squad_value_millions: finance.squadValue,
+        bank_millions: finance.bank,
         free_transfers: [2, 3].includes(syncedTransfers) ? syncedTransfers : fallbackTransfers,
     });
-    // The public league feed exposes the seven picks but not team value or
-    // free-transfer balance. Use the current lineup cost as the safe spending
-    // floor and leave the editable free-transfer control at its existing/default
-    // value instead of poisoning the saved team with zero.
-    if (applied && !hasSyncedBudget) {
-        transferBudgetTouched = false;
-        syncBudgetInputsFromTeamCost(getMyTeamCost());
-    }
-    return applied;
 }
 
 window.BoxBoxTeamMemory = {

@@ -1,8 +1,13 @@
 name: Notify members after a fresh simulation
 
 on:
-  # Deliberately manual. Weather, video, content and code deployments must never
-  # email members. Run this only after publishing a new simulation phase.
+  # A prediction-data commit is the publish event. Other site/content deploys do
+  # not match this path, so they cannot email members accidentally.
+  push:
+    branches:
+      - master
+    paths:
+      - web/public/data/predictions.json
   workflow_dispatch:
     inputs:
       audit_only:
@@ -18,8 +23,31 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out the published simulation
+        if: ${{ github.event_name == 'push' }}
+        uses: actions/checkout@v4
+
+      - name: Wait for the exact simulation to reach production
+        if: ${{ github.event_name == 'push' }}
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          expected="$(node -e "const p=require('./web/public/data/predictions.json'); process.stdout.write([p.season,p.round,p.phase,p.generated_at].join('|'))")"
+          for attempt in $(seq 1 40); do
+            live_json="$(curl --silent --show-error --fail "https://boxboxf1fantasy.com/data/predictions.json?deploy=${COMMIT_SHA}-${attempt}" || true)"
+            live="$(printf '%s' "${live_json}" | node -e "let s=''; process.stdin.on('data',d=>s+=d).on('end',()=>{ try { const p=JSON.parse(s); process.stdout.write([p.season,p.round,p.phase,p.generated_at].join('|')); } catch (_) {} })")"
+            if [ "${live}" = "${expected}" ]; then
+              echo "Production is serving ${expected}."
+              exit 0
+            fi
+            echo "Production has not reached ${expected} yet (attempt ${attempt}/40)."
+            sleep 15
+          done
+          echo "Timed out waiting for the published simulation; no email was sent."
+          exit 1
+
       - name: Trigger idempotent personalized simulation emails
-        if: ${{ !inputs.audit_only }}
+        if: ${{ github.event_name == 'push' || !inputs.audit_only }}
         env:
           MEMBER_NOTIFICATION_SECRET: ${{ secrets.MEMBER_NOTIFICATION_SECRET }}
         run: |
@@ -27,11 +55,11 @@ jobs:
             --request POST \
             --header "Authorization: Bearer ${MEMBER_NOTIFICATION_SECRET}" \
             --header "Content-Type: application/json" \
-            --data '{"source":"manual_fresh_simulation"}' \
+            --data '{"source":"published_simulation"}' \
             https://boxboxf1fantasy.com/api/members/notify/
 
       - name: Trigger idempotent V13 simulation broadcast
-        if: ${{ !inputs.audit_only }}
+        if: ${{ github.event_name == 'push' || !inputs.audit_only }}
         env:
           MEMBER_NOTIFICATION_SECRET: ${{ secrets.MEMBER_NOTIFICATION_SECRET }}
         run: |
@@ -39,11 +67,11 @@ jobs:
             --request POST \
             --header "Authorization: Bearer ${MEMBER_NOTIFICATION_SECRET}" \
             --header "Content-Type: application/json" \
-            --data '{"source":"manual_fresh_simulation","audience":"v13"}' \
+            --data '{"source":"published_simulation","audience":"v13"}' \
             https://boxboxf1fantasy.com/api/members/notify/
 
       - name: Inspect Resend segment counts
-        if: ${{ inputs.audit_only }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.audit_only }}
         env:
           MEMBER_NOTIFICATION_SECRET: ${{ secrets.MEMBER_NOTIFICATION_SECRET }}
         run: |

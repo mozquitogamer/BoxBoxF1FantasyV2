@@ -1,7 +1,9 @@
 'use strict';
 
 const assert = require('node:assert/strict');
-const { createStore, getStore, resetStore, normalizeTeam, normalizeDashboard, canonicalSnapshot, hasCompleteTeam, chipState, chipRemaining, CHIP_KEYS } = require('../web/public/team-state.js');
+const fs = require('node:fs');
+const path = require('node:path');
+const { createStore, getStore, resetStore, normalizeTeam, normalizeDashboard, canonicalSnapshot, hasCompleteTeam, chipState, chipRemaining, resolveOfficialTeamFinance, CHIP_KEYS } = require('../web/public/team-state.js');
 
 function team(slot, name, complete = true) {
     return {
@@ -61,6 +63,18 @@ const sharedB = getStore();
 assert.equal(sharedA, sharedB);
 assert.equal(sharedA.getState().selectedSlot, 1);
 
+const currentFinance = resolveOfficialTeamFinance({ bank_millions: 3.4, budget_millions: null }, 96.2);
+assert.equal(currentFinance.squadValue, 96.2);
+assert.equal(currentFinance.bank, 3.4);
+assert.ok(Math.abs(currentFinance.spendingPower - 99.6) < 1e-9);
+const legacyFinance = resolveOfficialTeamFinance({ budget_millions: 3.4 }, 96.2);
+assert.equal(legacyFinance.bank, 3.4);
+assert.ok(Math.abs(legacyFinance.spendingPower - 99.6) < 1e-9);
+const membersSource = fs.readFileSync(path.join(__dirname, '..', 'web', 'public', 'members.js'), 'utf8');
+assert.match(membersSource, /Synchronize Team/);
+assert.match(membersSource, /latest locked F1 Fantasy lineup/);
+assert.doesNotMatch(membersSource, /Refresh official team/);
+
 const requests = [];
 const store = createStore({ request: async (path, options) => {
     requests.push({ path, body: typeof options.body === 'string' ? JSON.parse(options.body) : options.body });
@@ -71,7 +85,7 @@ store.select(3, { applyMemory: false });
 assert.equal(store.getState().selectedSlot, 3);
 assert.equal(store.getSelectedTeam().name, 'Rain Plan');
 store.update(3, { bank_millions: 7.5 });
-store.save(3, { force: true }).then(() => {
+store.save(3, { force: true }).then(async () => {
     assert.equal(requests.length, 1);
     assert.equal(requests[0].body.team_slot, 3);
     assert.equal(requests[0].body.slot, 3);
@@ -86,6 +100,25 @@ store.save(3, { force: true }).then(() => {
     assert.deepEqual(store.chipState(store.getTeam(1), 'final_fix'), teamOneChipBefore);
     store.setChip(3, 'final_fix', 'unknown', { autosave: false });
     assert.equal(store.chipRemaining(store.getTeam(3), 'final_fix'), null);
+
+    const officialRequests = [];
+    const officialSnapshot = { ...team(2, 'Official T2'), bank_millions: 3.4, spending_power_millions: 99.6 };
+    const officialStore = createStore({ request: async (path, options) => {
+        officialRequests.push(options.body);
+        if (options.body.action === 'f1-sync') return { ok: true, snapshot: officialSnapshot };
+        return { ok: true };
+    } });
+    const officialMemory = {
+        snapshot: null,
+        applyOfficial(snapshot) { this.snapshot = snapshot; return true; },
+        getSnapshot() { return this.snapshot; },
+    };
+    officialStore.hydrate(dashboard);
+    await officialStore.synchronizeOfficial(2, 15, officialMemory);
+    assert.deepEqual(officialRequests.map(body => body.action), ['f1-sync', 'save']);
+    assert.equal(officialRequests[1].team_slot, 2);
+    assert.equal(officialRequests[1].bank_millions, 3.4);
+    assert.equal(officialRequests[1].spending_power_millions, 99.6);
 
     const autosaveRequests = [];
     const autosaveStore = createStore({ request: async (path, options) => {
@@ -105,6 +138,7 @@ store.save(3, { force: true }).then(() => {
     assert.rejects(() => inactive.setPrimary(1), /read-only/);
     assert.rejects(() => inactive.linkOfficial(1, { link_token: 'token' }), /read-only/);
     assert.rejects(() => inactive.syncOfficial(1, 10), /read-only/);
+    assert.rejects(() => inactive.synchronizeOfficial(1, 10), /read-only/);
     return new Promise(resolve => setTimeout(() => {
         assert.equal(autosaveRequests.length, 2);
         assert.deepEqual(autosaveRequests.map(body => body.team_slot).sort(), [1, 3]);

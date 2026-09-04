@@ -445,17 +445,17 @@ module.exports = async function team(req, res) {
                     last_error: null,
                 },
             });
-            return res.status(200).json({ ok: true, message: `${selected.name} is connected. Official league updates can now refresh your Transfer Advisor.`, f1_link: selected, team_slot: selected.slot });
+            return res.status(200).json({ ok: true, message: `${selected.name} is connected. You can now synchronize its latest locked lineup into Team ${selected.slot}.`, f1_link: selected, team_slot: selected.slot });
         }
         if (body.action === 'f1-sync') {
-            if (!await requirePaidMember(memberSession)) return res.status(403).json({ ok: false, message: 'An active Pit Wall membership is required to refresh official links.' });
+            if (!await requirePaidMember(memberSession)) return res.status(403).json({ ok: false, message: 'An active Pit Wall membership is required to synchronize official teams.' });
             const round = normalizeRound(body.round);
             if (!round) return res.status(400).json({ ok: false, message: 'The current round could not be determined.' });
             const slot = slotRequest.slot;
             const links = await restRequest(`f1_team_links?user_id=eq.${encodeURIComponent(memberSession.user.id)}&team_slot=eq.${slot}&status=eq.active&select=*`, { service: true });
             if (!links?.[0]) return res.status(404).json({ ok: false, message: `Link an official Team ${slot} first.` });
             const result = await syncOfficialLink(links[0], round);
-            const message = `Your latest locked official lineup has been refreshed for Round ${round}.`;
+            const message = `Your latest locked official lineup is ready to synchronize into Round ${round}.`;
             return res.status(200).json({ ok: true, message, ...result });
         }
         const assets = normalizeAssets(body.assets);

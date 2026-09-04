@@ -1,6 +1,8 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const test = require('node:test');
 
 const {
@@ -100,4 +102,19 @@ test('audits Resend segment names and counts without exposing contacts', async (
         global.fetch = originalFetch;
         process.env = previousEnv;
     }
+});
+
+test('automatically emails only when master publishes new simulation data', () => {
+    const workflow = fs.readFileSync(
+        path.join(__dirname, '..', '..', '.github', 'workflows', 'notify-paid-members.yml'),
+        'utf8',
+    );
+    assert.match(workflow, /push:\s*[\s\S]*branches:\s*[\s\S]*- master/);
+    assert.match(workflow, /paths:\s*[\s\S]*- web\/public\/data\/predictions\.json/);
+    assert.match(workflow, /Wait for the exact simulation to reach production/);
+    assert.match(workflow, /p\.season,p\.round,p\.phase,p\.generated_at/);
+    assert.match(workflow, /Timed out waiting for the published simulation; no email was sent/);
+    assert.match(workflow, /published_simulation/);
+    assert.match(workflow, /workflow_dispatch:/);
+    assert.match(workflow, /audit_only:/);
 });

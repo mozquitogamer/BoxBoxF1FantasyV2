@@ -486,7 +486,7 @@ async function getPublicLeagueSnapshot(link, round = 1) {
     const team = teams.find(item => item.id === officialId && item.slot === slot)
         || teams.find(item => item.slot === slot && item.name.toLowerCase() === normalizedLinkedName);
     if (!team) {
-        const error = new Error('Your team is not visible in the Box Box league yet. Join with code P1JZAGNMP04, then refresh your official team here.');
+        const error = new Error('Your team is not visible in the Box Box league yet. Join with code P1JZAGNMP04, then synchronize your official team here.');
         error.code = 'F1_TEAM_NOT_IN_LEAGUE';
         throw error;
     }
