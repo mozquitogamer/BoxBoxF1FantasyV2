@@ -1,7 +1,21 @@
 {
-  "updated": "2026-09-04T14:23:54Z",
+  "updated": "2026-09-05T13:27:59Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "kvst71-57nA",
+      "title": "Italian GP F1 Fantasy Q & A Stream -  Strategy, Tips, and Top Picks!",
+      "published": "2026-09-05",
+      "thumbnail": "https://i.ytimg.com/vi/kvst71-57nA/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=kvst71-57nA"
+    },
+    {
+      "id": "dSPcjpghfbs",
+      "title": "3X Chip Activated! Italain Grand Prix Final Thoughts F1 Fantasy - 2026 F1 Fantasy Tips & Tricks",
+      "published": "2026-09-05",
+      "thumbnail": "https://i.ytimg.com/vi/dSPcjpghfbs/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=dSPcjpghfbs"
+    },
     {
       "id": "MxCa6ZxMphU",
       "title": "PotpanmanF1 Guest Interview about F1 and F1 Fantasy! - 2026 F1 Fantasy Tips, Tricks & Lineups",
@@ -15,20 +29,6 @@
       "published": "2026-09-03",
       "thumbnail": "https://i.ytimg.com/vi/lx2neePNiEc/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=lx2neePNiEc"
-    },
-    {
-      "id": "Qamd-kUVk_c",
-      "title": "ZachGP is in the house! F1 Fantasy Chat - 2026 F1 Fantasy Tips, Tricks & Lineup",
-      "published": "2026-08-31",
-      "thumbnail": "https://i.ytimg.com/vi/Qamd-kUVk_c/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=Qamd-kUVk_c"
-    },
-    {
-      "id": "vS34ZioWR2U",
-      "title": "F1 Fantasy Q & A Stream - Dutch Grand Prix - Q&A Livestream | Strategy, Tips, and Top Picks!",
-      "published": "2026-08-22",
-      "thumbnail": "https://i.ytimg.com/vi/vS34ZioWR2U/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=vS34ZioWR2U"
     }
   ]
 }
