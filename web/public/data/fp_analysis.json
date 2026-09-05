@@ -6,185 +6,185 @@
   "qualifying_pace": {
     "ALB": {
       "best_lap": 83.853,
-      "best_3_avg": 84.663,
-      "best_5_avg": 85.027,
-      "total_laps": 16,
-      "gap_to_fastest": 1.294
+      "best_3_avg": 84.404,
+      "best_5_avg": 84.67,
+      "total_laps": 34,
+      "gap_to_fastest": 1.634
     },
     "ALO": {
-      "best_lap": 85.027,
-      "best_3_avg": 85.289,
-      "best_5_avg": 85.546,
-      "total_laps": 12,
-      "gap_to_fastest": 2.468
+      "best_lap": 84.919,
+      "best_3_avg": 85.002,
+      "best_5_avg": 85.106,
+      "total_laps": 22,
+      "gap_to_fastest": 2.7
     },
     "ANT": {
-      "best_lap": 82.7,
-      "best_3_avg": 83.254,
-      "best_5_avg": 83.983,
-      "total_laps": 34,
-      "gap_to_fastest": 0.141
+      "best_lap": 82.58,
+      "best_3_avg": 82.659,
+      "best_5_avg": 82.885,
+      "total_laps": 38,
+      "gap_to_fastest": 0.361
     },
     "ARO": {
       "best_lap": 84.177,
       "best_3_avg": 84.474,
       "best_5_avg": 84.659,
       "total_laps": 6,
-      "gap_to_fastest": 1.618
+      "gap_to_fastest": 1.958
     },
     "BEA": {
       "best_lap": 83.37,
-      "best_3_avg": 83.902,
-      "best_5_avg": 84.328,
-      "total_laps": 20,
-      "gap_to_fastest": 0.811
+      "best_3_avg": 83.548,
+      "best_5_avg": 83.708,
+      "total_laps": 27,
+      "gap_to_fastest": 1.151
     },
     "BOR": {
-      "best_lap": 83.776,
-      "best_3_avg": 83.947,
-      "best_5_avg": 84.108,
-      "total_laps": 17,
-      "gap_to_fastest": 1.217
+      "best_lap": 83.298,
+      "best_3_avg": 83.393,
+      "best_5_avg": 83.569,
+      "total_laps": 22,
+      "gap_to_fastest": 1.079
     },
     "BOT": {
-      "best_lap": 85.149,
-      "best_3_avg": 85.45,
-      "best_5_avg": 85.683,
-      "total_laps": 28,
-      "gap_to_fastest": 2.59
+      "best_lap": 85.004,
+      "best_3_avg": 85.065,
+      "best_5_avg": 85.111,
+      "total_laps": 34,
+      "gap_to_fastest": 2.785
     },
     "BRO": {
       "best_lap": 84.74,
       "best_3_avg": 84.872,
       "best_5_avg": 85.115,
       "total_laps": 11,
-      "gap_to_fastest": 2.181
+      "gap_to_fastest": 2.521
     },
     "COL": {
-      "best_lap": 83.619,
-      "best_3_avg": 83.965,
-      "best_5_avg": 84.194,
-      "total_laps": 27,
-      "gap_to_fastest": 1.06
+      "best_lap": 83.101,
+      "best_3_avg": 83.482,
+      "best_5_avg": 83.648,
+      "total_laps": 39,
+      "gap_to_fastest": 0.882
     },
     "GAS": {
-      "best_lap": 83.773,
-      "best_3_avg": 83.963,
-      "best_5_avg": 84.162,
-      "total_laps": 14,
-      "gap_to_fastest": 1.214
+      "best_lap": 82.898,
+      "best_3_avg": 83.137,
+      "best_5_avg": 83.397,
+      "total_laps": 26,
+      "gap_to_fastest": 0.679
     },
     "HAM": {
-      "best_lap": 83.016,
-      "best_3_avg": 83.253,
-      "best_5_avg": 83.496,
-      "total_laps": 22,
-      "gap_to_fastest": 0.457
+      "best_lap": 82.445,
+      "best_3_avg": 82.834,
+      "best_5_avg": 82.959,
+      "total_laps": 27,
+      "gap_to_fastest": 0.226
     },
     "HER": {
       "best_lap": 89.922,
       "best_3_avg": 89.922,
       "best_5_avg": 89.922,
       "total_laps": 1,
-      "gap_to_fastest": 7.363
+      "gap_to_fastest": 7.703
     },
     "HUL": {
-      "best_lap": 83.732,
-      "best_3_avg": 84.134,
-      "best_5_avg": 84.436,
-      "total_laps": 25,
-      "gap_to_fastest": 1.173
+      "best_lap": 83.126,
+      "best_3_avg": 83.562,
+      "best_5_avg": 83.782,
+      "total_laps": 31,
+      "gap_to_fastest": 0.907
     },
     "IWA": {
       "best_lap": 84.873,
       "best_3_avg": 84.999,
       "best_5_avg": 85.75,
       "total_laps": 9,
-      "gap_to_fastest": 2.314
+      "gap_to_fastest": 2.654
     },
     "LAW": {
-      "best_lap": 83.433,
-      "best_3_avg": 83.602,
-      "best_5_avg": 83.741,
-      "total_laps": 35,
-      "gap_to_fastest": 0.874
+      "best_lap": 83.203,
+      "best_3_avg": 83.432,
+      "best_5_avg": 83.544,
+      "total_laps": 44,
+      "gap_to_fastest": 0.984
     },
     "LEC": {
       "best_lap": 82.679,
-      "best_3_avg": 83.053,
-      "best_5_avg": 83.357,
-      "total_laps": 27,
-      "gap_to_fastest": 0.12
+      "best_3_avg": 82.767,
+      "best_5_avg": 82.856,
+      "total_laps": 33,
+      "gap_to_fastest": 0.46
     },
     "LIN": {
-      "best_lap": 83.349,
-      "best_3_avg": 83.427,
-      "best_5_avg": 83.578,
-      "total_laps": 28,
-      "gap_to_fastest": 0.79
+      "best_lap": 82.724,
+      "best_3_avg": 83.052,
+      "best_5_avg": 83.218,
+      "total_laps": 36,
+      "gap_to_fastest": 0.505
     },
     "NOR": {
-      "best_lap": 82.943,
-      "best_3_avg": 83.217,
-      "best_5_avg": 83.494,
-      "total_laps": 24,
-      "gap_to_fastest": 0.384
+      "best_lap": 82.625,
+      "best_3_avg": 82.754,
+      "best_5_avg": 82.839,
+      "total_laps": 30,
+      "gap_to_fastest": 0.406
     },
     "OCO": {
-      "best_lap": 84.407,
-      "best_3_avg": 84.896,
-      "best_5_avg": 85.261,
-      "total_laps": 24,
-      "gap_to_fastest": 1.848
+      "best_lap": 84.02,
+      "best_3_avg": 84.186,
+      "best_5_avg": 84.457,
+      "total_laps": 30,
+      "gap_to_fastest": 1.801
     },
     "PER": {
-      "best_lap": 85.082,
-      "best_3_avg": 85.254,
-      "best_5_avg": 85.626,
-      "total_laps": 15,
-      "gap_to_fastest": 2.523
+      "best_lap": 85.031,
+      "best_3_avg": 85.104,
+      "best_5_avg": 85.25,
+      "total_laps": 19,
+      "gap_to_fastest": 2.812
     },
     "PIA": {
-      "best_lap": 83.028,
-      "best_3_avg": 83.367,
-      "best_5_avg": 83.669,
-      "total_laps": 22,
-      "gap_to_fastest": 0.469
+      "best_lap": 82.773,
+      "best_3_avg": 82.941,
+      "best_5_avg": 83.077,
+      "total_laps": 27,
+      "gap_to_fastest": 0.554
     },
     "RUS": {
-      "best_lap": 82.559,
-      "best_3_avg": 82.816,
-      "best_5_avg": 83.039,
-      "total_laps": 28,
+      "best_lap": 82.219,
+      "best_3_avg": 82.414,
+      "best_5_avg": 82.523,
+      "total_laps": 32,
       "gap_to_fastest": 0.0
     },
     "SAI": {
-      "best_lap": 83.9,
-      "best_3_avg": 84.171,
-      "best_5_avg": 84.449,
-      "total_laps": 25,
-      "gap_to_fastest": 1.341
+      "best_lap": 83.875,
+      "best_3_avg": 83.908,
+      "best_5_avg": 84.046,
+      "total_laps": 35,
+      "gap_to_fastest": 1.656
     },
     "STR": {
       "best_lap": 85.253,
-      "best_3_avg": 85.788,
-      "best_5_avg": 85.936,
-      "total_laps": 21,
-      "gap_to_fastest": 2.694
+      "best_3_avg": 85.496,
+      "best_5_avg": 85.66,
+      "total_laps": 27,
+      "gap_to_fastest": 3.034
     },
     "TSU": {
       "best_lap": 83.455,
-      "best_3_avg": 83.9,
-      "best_5_avg": 84.152,
-      "total_laps": 25,
-      "gap_to_fastest": 0.896
+      "best_3_avg": 83.731,
+      "best_5_avg": 83.903,
+      "total_laps": 30,
+      "gap_to_fastest": 1.236
     },
     "VER": {
-      "best_lap": 83.377,
-      "best_3_avg": 83.538,
-      "best_5_avg": 83.856,
-      "total_laps": 14,
-      "gap_to_fastest": 0.818
+      "best_lap": 82.569,
+      "best_3_avg": 82.82,
+      "best_5_avg": 83.058,
+      "total_laps": 20,
+      "gap_to_fastest": 0.35
     }
   },
   "long_run_pace": {
@@ -467,12 +467,31 @@
             142.42,
             147.439
           ]
+        },
+        {
+          "session": "FP3",
+          "stint": 2,
+          "compound": "MEDIUM",
+          "laps": 7,
+          "avg_pace": 85.381,
+          "best_pace": 84.492,
+          "consistency": 0.577,
+          "kept_laps": [
+            86.521,
+            85.492,
+            85.536,
+            85.483,
+            84.492,
+            85.083,
+            85.061
+          ],
+          "excluded_laps": []
         }
       ],
       "avg_long_run_pace": 84.659,
       "headline_session": "FP2",
       "headline_laps": 4,
-      "total_long_run_laps": 17,
+      "total_long_run_laps": 24,
       "gap_to_fastest": 0.0
     },
     "GAS": {
@@ -519,12 +538,33 @@
             113.252,
             143.779
           ]
+        },
+        {
+          "session": "FP3",
+          "stint": 2,
+          "compound": "MEDIUM",
+          "laps": 7,
+          "avg_pace": 84.678,
+          "best_pace": 83.416,
+          "consistency": 0.546,
+          "kept_laps": [
+            83.416,
+            85.143,
+            85.056,
+            84.991,
+            84.843,
+            84.716,
+            84.581
+          ],
+          "excluded_laps": [
+            99.713
+          ]
         }
       ],
       "avg_long_run_pace": 86.315,
       "headline_session": "FP2",
       "headline_laps": 12,
-      "total_long_run_laps": 12,
+      "total_long_run_laps": 19,
       "gap_to_fastest": 1.656
     },
     "HAM": {
@@ -630,12 +670,30 @@
           "excluded_laps": [
             141.366
           ]
+        },
+        {
+          "session": "FP3",
+          "stint": 2,
+          "compound": "MEDIUM",
+          "laps": 4,
+          "avg_pace": 86.997,
+          "best_pace": 86.362,
+          "consistency": 0.502,
+          "kept_laps": [
+            87.4,
+            87.569,
+            86.362,
+            86.658
+          ],
+          "excluded_laps": [
+            90.803
+          ]
         }
       ],
       "avg_long_run_pace": 86.064,
       "headline_session": "FP2",
       "headline_laps": 12,
-      "total_long_run_laps": 12,
+      "total_long_run_laps": 16,
       "gap_to_fastest": 1.405
     },
     "LEC": {
@@ -1118,11 +1176,32 @@
             "laps": 2,
             "deg_rate": null,
             "avg_pace": 87.622
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 84.437
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 7,
+            "deg_rate": 0.054,
+            "avg_pace": 85.887
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 8,
+            "deg_rate": -0.19,
+            "avg_pace": 85.479
           }
         ],
-        "avg_degradation": null,
-        "deg_laps": 0,
-        "deg_stints": 0
+        "avg_degradation": -0.076,
+        "deg_laps": 15,
+        "deg_stints": 2
       }
     },
     "ALO": {
@@ -1190,6 +1269,27 @@
             "laps": 3,
             "deg_rate": null,
             "avg_pace": 86.796
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 85.306
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 84.919
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 118.18
           }
         ],
         "avg_degradation": null,
@@ -1248,6 +1348,41 @@
             "laps": 1,
             "deg_rate": null,
             "avg_pace": 130.172
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.032
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.565
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 82.696
+          },
+          {
+            "stint": 5,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 82.58
+          },
+          {
+            "stint": 6,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 117.81
           }
         ],
         "avg_degradation": null,
@@ -1385,6 +1520,27 @@
             "laps": 2,
             "deg_rate": null,
             "avg_pace": 83.37
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.947
+          },
+          {
+            "stint": 5,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.95
+          },
+          {
+            "stint": 6,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 83.585
           }
         ],
         "avg_degradation": null,
@@ -1420,6 +1576,27 @@
             "laps": 7,
             "deg_rate": -0.431,
             "avg_pace": 86.827
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 84.784
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 85.29
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 84.663
           }
         ],
         "avg_degradation": -0.431,
@@ -1443,6 +1620,27 @@
             "laps": 3,
             "deg_rate": null,
             "avg_pace": 84.599
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 84.309
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.893
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.561
           }
         ],
         "avg_degradation": null,
@@ -1464,6 +1662,27 @@
             "laps": 2,
             "deg_rate": null,
             "avg_pace": 84.059
+          },
+          {
+            "stint": 6,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.319
+          },
+          {
+            "stint": 7,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.298
+          },
+          {
+            "stint": 8,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 123.939
           }
         ],
         "avg_degradation": -0.258,
@@ -1571,6 +1790,41 @@
             "laps": 9,
             "deg_rate": 0.079,
             "avg_pace": 88.081
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 87.019
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 86.091
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 85.004
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 85.093
+          },
+          {
+            "stint": 5,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 85.099
           }
         ],
         "avg_degradation": 0.079,
@@ -1631,11 +1885,25 @@
             "laps": 9,
             "deg_rate": -0.158,
             "avg_pace": 86.449
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 83.766
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 7,
+            "deg_rate": -0.188,
+            "avg_pace": 84.492
           }
         ],
-        "avg_degradation": -0.158,
-        "deg_laps": 9,
-        "deg_stints": 1
+        "avg_degradation": -0.171,
+        "deg_laps": 16,
+        "deg_stints": 2
       },
       "SOFT": {
         "stints": [
@@ -1659,6 +1927,20 @@
             "laps": 7,
             "deg_rate": 0.339,
             "avg_pace": 86.632
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.101
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 83.726
           }
         ],
         "avg_degradation": 0.339,
@@ -1717,11 +1999,46 @@
             "laps": 4,
             "deg_rate": null,
             "avg_pace": 83.773
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.096
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 82.898
           }
         ],
         "avg_degradation": null,
         "deg_laps": 0,
         "deg_stints": 0
+      },
+      "MEDIUM": {
+        "stints": [
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 83.875
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 7,
+            "deg_rate": 0.141,
+            "avg_pace": 83.416
+          }
+        ],
+        "avg_degradation": 0.141,
+        "deg_laps": 7,
+        "deg_stints": 1
       }
     },
     "HAM": {
@@ -1803,6 +2120,27 @@
             "laps": 9,
             "deg_rate": -0.025,
             "avg_pace": 85.756
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 83.683
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 83.04
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 82.445
           }
         ],
         "avg_degradation": -0.025,
@@ -1891,6 +2229,27 @@
             "laps": 8,
             "deg_rate": -0.01,
             "avg_pace": 87.129
+          },
+          {
+            "stint": 6,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.126
+          },
+          {
+            "stint": 7,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.827
+          },
+          {
+            "stint": 8,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 115.169
           }
         ],
         "avg_degradation": -0.01,
@@ -1905,6 +2264,34 @@
             "laps": 3,
             "deg_rate": null,
             "avg_pace": 85.016
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 84.683
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 84.388
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 84.745
+          },
+          {
+            "stint": 5,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 84.181
           }
         ],
         "avg_degradation": null,
@@ -2007,6 +2394,20 @@
             "laps": 9,
             "deg_rate": -0.082,
             "avg_pace": 86.361
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 83.203
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 96.828
           }
         ],
         "avg_degradation": -0.082,
@@ -2025,6 +2426,27 @@
         ],
         "avg_degradation": 0.064,
         "deg_laps": 12,
+        "deg_stints": 1
+      },
+      "MEDIUM": {
+        "stints": [
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 83.769
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 5,
+            "deg_rate": -0.557,
+            "avg_pace": 86.362
+          }
+        ],
+        "avg_degradation": -0.557,
+        "deg_laps": 5,
         "deg_stints": 1
       }
     },
@@ -2100,6 +2522,41 @@
             "laps": 8,
             "deg_rate": -0.047,
             "avg_pace": 85.708
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.25
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 83.271
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 82.913
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 82.708
+          },
+          {
+            "stint": 5,
+            "session": "FP3",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 82.972
           }
         ],
         "avg_degradation": -0.047,
@@ -2179,6 +2636,41 @@
             "laps": 1,
             "deg_rate": null,
             "avg_pace": 83.349
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 84.307
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.641
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 84.632
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 82.724
+          },
+          {
+            "stint": 5,
+            "session": "FP3",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 83.083
           }
         ],
         "avg_degradation": null,
@@ -2202,6 +2694,20 @@
             "laps": 7,
             "deg_rate": 0.042,
             "avg_pace": 86.21
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.652
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 83.431
           }
         ],
         "avg_degradation": 0.042,
@@ -2237,6 +2743,13 @@
             "laps": 1,
             "deg_rate": null,
             "avg_pace": 107.037
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 82.625
           }
         ],
         "avg_degradation": null,
@@ -2337,6 +2850,27 @@
             "laps": 7,
             "deg_rate": 0.105,
             "avg_pace": 87.403
+          },
+          {
+            "stint": 6,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 84.13
+          },
+          {
+            "stint": 7,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 84.02
+          },
+          {
+            "stint": 8,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 105.649
           }
         ],
         "avg_degradation": 0.105,
@@ -2365,6 +2899,41 @@
             "laps": 1,
             "deg_rate": null,
             "avg_pace": 85.764
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 86.547
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 85.908
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 85.478
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 95.203
+          },
+          {
+            "stint": 5,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 85.091
           }
         ],
         "avg_degradation": null,
@@ -2402,6 +2971,48 @@
             "laps": 9,
             "deg_rate": 0.208,
             "avg_pace": 87.892
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 86.381
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 86.102
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 85.031
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 98.908
+          },
+          {
+            "stint": 5,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 85.454
+          },
+          {
+            "stint": 6,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 108.495
           }
         ],
         "avg_degradation": 0.208,
@@ -2425,6 +3036,27 @@
             "laps": 7,
             "deg_rate": 0.067,
             "avg_pace": 86.329
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 83.878
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 83.672
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.342
           }
         ],
         "avg_degradation": 0.067,
@@ -2460,6 +3092,13 @@
             "laps": 3,
             "deg_rate": null,
             "avg_pace": 86.406
+          },
+          {
+            "stint": 5,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 82.773
           }
         ],
         "avg_degradation": null,
@@ -2546,6 +3185,34 @@
             "laps": 1,
             "deg_rate": null,
             "avg_pace": 122.936
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.508
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 82.687
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 82.463
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 82.219
           }
         ],
         "avg_degradation": null,
@@ -2653,11 +3320,46 @@
             "laps": 7,
             "deg_rate": 0.031,
             "avg_pace": 87.293
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 84.642
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 5,
+            "deg_rate": -0.004,
+            "avg_pace": 85.433
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.948
+          },
+          {
+            "stint": 5,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.875
+          },
+          {
+            "stint": 6,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 84.481
           }
         ],
-        "avg_degradation": 0.031,
-        "deg_laps": 7,
-        "deg_stints": 1
+        "avg_degradation": 0.016,
+        "deg_laps": 12,
+        "deg_stints": 2
       }
     },
     "STR": {
@@ -2725,6 +3427,34 @@
             "laps": 7,
             "deg_rate": 0.14,
             "avg_pace": 89.504
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 87.31
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 86.506
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 2,
+            "deg_rate": null,
+            "avg_pace": 85.68
+          },
+          {
+            "stint": 5,
+            "session": "FP3",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 85.555
           }
         ],
         "avg_degradation": 0.14,
@@ -2797,6 +3527,27 @@
             "laps": 4,
             "deg_rate": null,
             "avg_pace": 83.455
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 84.31
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 4,
+            "deg_rate": null,
+            "avg_pace": 83.817
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 84.013
           }
         ],
         "avg_degradation": null,
@@ -2834,6 +3585,20 @@
             "laps": 4,
             "deg_rate": null,
             "avg_pace": 85.841
+          },
+          {
+            "stint": 1,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 83.467
+          },
+          {
+            "stint": 2,
+            "session": "FP3",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 83.1
           }
         ],
         "avg_degradation": -0.029,
@@ -2848,6 +3613,20 @@
             "laps": 3,
             "deg_rate": null,
             "avg_pace": 83.377
+          },
+          {
+            "stint": 3,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 82.79
+          },
+          {
+            "stint": 4,
+            "session": "FP3",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 82.569
           }
         ],
         "avg_degradation": null,
@@ -2860,56 +3639,56 @@
     "ALB": {
       "sector_1": {
         "best": 27.254,
-        "avg": 31.292,
-        "median": 28.669
+        "avg": 30.472,
+        "median": 28.36
       },
       "sector_2": {
         "best": 28.489,
-        "avg": 33.98,
-        "median": 29.927
+        "avg": 32.939,
+        "median": 29.642
       },
       "sector_3": {
         "best": 28.11,
-        "avg": 31.61,
-        "median": 29.124
+        "avg": 31.099,
+        "median": 29.027
       },
       "theoretical_best": 83.853
     },
     "ALO": {
       "sector_1": {
-        "best": 27.877,
-        "avg": 33.377,
-        "median": 28.683
+        "best": 27.833,
+        "avg": 34.419,
+        "median": 29.004
       },
       "sector_2": {
-        "best": 28.783,
-        "avg": 34.68,
-        "median": 30.355
+        "best": 28.649,
+        "avg": 35.262,
+        "median": 34.872
       },
       "sector_3": {
         "best": 28.312,
-        "avg": 32.808,
-        "median": 29.602
+        "avg": 33.773,
+        "median": 31.674
       },
-      "theoretical_best": 84.972
+      "theoretical_best": 84.794
     },
     "ANT": {
       "sector_1": {
-        "best": 27.262,
-        "avg": 29.588,
-        "median": 28.398
+        "best": 27.147,
+        "avg": 29.727,
+        "median": 28.377
       },
       "sector_2": {
         "best": 27.784,
-        "avg": 31.223,
-        "median": 29.423
+        "avg": 31.314,
+        "median": 29.394
       },
       "sector_3": {
-        "best": 27.619,
-        "avg": 29.952,
+        "best": 27.498,
+        "avg": 30.29,
         "median": 28.445
       },
-      "theoretical_best": 82.665
+      "theoretical_best": 82.429
     },
     "ARO": {
       "sector_1": {
@@ -2932,56 +3711,56 @@
     "BEA": {
       "sector_1": {
         "best": 27.244,
-        "avg": 31.193,
-        "median": 28.672
+        "avg": 31.361,
+        "median": 28.501
       },
       "sector_2": {
         "best": 28.301,
-        "avg": 33.721,
-        "median": 29.655
+        "avg": 33.961,
+        "median": 29.614
       },
       "sector_3": {
-        "best": 27.825,
-        "avg": 31.93,
-        "median": 28.915
+        "best": 27.677,
+        "avg": 32.176,
+        "median": 28.912
       },
-      "theoretical_best": 83.37
+      "theoretical_best": 83.222
     },
     "BOR": {
       "sector_1": {
-        "best": 27.447,
-        "avg": 30.953,
-        "median": 28.107
+        "best": 27.401,
+        "avg": 30.552,
+        "median": 27.982
       },
       "sector_2": {
-        "best": 28.219,
-        "avg": 33.951,
-        "median": 29.182
+        "best": 28.208,
+        "avg": 33.077,
+        "median": 29.049
       },
       "sector_3": {
-        "best": 27.785,
-        "avg": 31.591,
-        "median": 28.571
+        "best": 27.634,
+        "avg": 31.602,
+        "median": 28.438
       },
-      "theoretical_best": 83.451
+      "theoretical_best": 83.243
     },
     "BOT": {
       "sector_1": {
-        "best": 27.554,
-        "avg": 31.799,
-        "median": 28.856
+        "best": 27.291,
+        "avg": 31.771,
+        "median": 28.809
       },
       "sector_2": {
-        "best": 28.765,
-        "avg": 33.511,
-        "median": 30.34
+        "best": 28.648,
+        "avg": 33.234,
+        "median": 30.264
       },
       "sector_3": {
         "best": 28.635,
-        "avg": 33.143,
-        "median": 29.402
+        "avg": 33.346,
+        "median": 29.382
       },
-      "theoretical_best": 84.954
+      "theoretical_best": 84.574
     },
     "BRO": {
       "sector_1": {
@@ -3004,56 +3783,56 @@
     "COL": {
       "sector_1": {
         "best": 27.088,
-        "avg": 32.7,
-        "median": 28.59
+        "avg": 32.306,
+        "median": 28.474
       },
       "sector_2": {
-        "best": 28.204,
-        "avg": 34.047,
-        "median": 29.707
+        "best": 28.174,
+        "avg": 33.465,
+        "median": 29.47
       },
       "sector_3": {
-        "best": 28.17,
-        "avg": 31.658,
-        "median": 28.888
+        "best": 27.829,
+        "avg": 31.403,
+        "median": 28.821
       },
-      "theoretical_best": 83.462
+      "theoretical_best": 83.091
     },
     "GAS": {
       "sector_1": {
         "best": 27.039,
-        "avg": 33.924,
-        "median": 28.491
+        "avg": 32.538,
+        "median": 28.324
       },
       "sector_2": {
-        "best": 28.282,
-        "avg": 33.631,
-        "median": 29.646
+        "best": 28.028,
+        "avg": 32.988,
+        "median": 29.416
       },
       "sector_3": {
-        "best": 28.341,
-        "avg": 31.864,
-        "median": 28.969
+        "best": 27.634,
+        "avg": 31.185,
+        "median": 28.749
       },
-      "theoretical_best": 83.662
+      "theoretical_best": 82.701
     },
     "HAM": {
       "sector_1": {
-        "best": 27.174,
-        "avg": 32.162,
-        "median": 28.541
+        "best": 27.046,
+        "avg": 32.978,
+        "median": 28.494
       },
       "sector_2": {
-        "best": 28.145,
-        "avg": 34.351,
-        "median": 29.694
+        "best": 27.896,
+        "avg": 35.762,
+        "median": 29.829
       },
       "sector_3": {
-        "best": 27.591,
-        "avg": 31.431,
-        "median": 28.435
+        "best": 27.436,
+        "avg": 32.726,
+        "median": 28.647
       },
-      "theoretical_best": 82.91
+      "theoretical_best": 82.378
     },
     "HER": {
       "sector_1": {
@@ -3075,21 +3854,21 @@
     },
     "HUL": {
       "sector_1": {
-        "best": 27.55,
-        "avg": 31.382,
-        "median": 28.839
+        "best": 27.214,
+        "avg": 30.85,
+        "median": 28.663
       },
       "sector_2": {
-        "best": 28.373,
-        "avg": 32.579,
-        "median": 29.791
+        "best": 28.253,
+        "avg": 32.075,
+        "median": 29.706
       },
       "sector_3": {
-        "best": 27.772,
-        "avg": 32.023,
-        "median": 28.942
+        "best": 27.659,
+        "avg": 31.827,
+        "median": 28.867
       },
-      "theoretical_best": 83.695
+      "theoretical_best": 83.126
     },
     "IWA": {
       "sector_1": {
@@ -3111,245 +3890,245 @@
     },
     "LAW": {
       "sector_1": {
-        "best": 27.49,
-        "avg": 31.376,
-        "median": 28.459
+        "best": 27.372,
+        "avg": 31.619,
+        "median": 28.465
       },
       "sector_2": {
-        "best": 28.222,
-        "avg": 33.092,
-        "median": 29.658
+        "best": 28.179,
+        "avg": 33.186,
+        "median": 29.662
       },
       "sector_3": {
-        "best": 27.668,
-        "avg": 31.452,
-        "median": 28.463
+        "best": 27.574,
+        "avg": 31.654,
+        "median": 28.543
       },
-      "theoretical_best": 83.38
+      "theoretical_best": 83.125
     },
     "LEC": {
       "sector_1": {
-        "best": 27.224,
-        "avg": 29.751,
-        "median": 28.399
+        "best": 27.215,
+        "avg": 30.194,
+        "median": 28.391
       },
       "sector_2": {
         "best": 27.874,
-        "avg": 32.781,
-        "median": 29.471
+        "avg": 32.526,
+        "median": 29.439
       },
       "sector_3": {
-        "best": 27.546,
-        "avg": 31.738,
-        "median": 28.51
+        "best": 27.385,
+        "avg": 31.943,
+        "median": 28.506
       },
-      "theoretical_best": 82.644
+      "theoretical_best": 82.474
     },
     "LIN": {
       "sector_1": {
-        "best": 27.504,
-        "avg": 31.36,
-        "median": 28.734
+        "best": 27.232,
+        "avg": 31.136,
+        "median": 28.659
       },
       "sector_2": {
-        "best": 28.199,
-        "avg": 33.6,
-        "median": 29.809
+        "best": 28.108,
+        "avg": 33.301,
+        "median": 29.76
       },
       "sector_3": {
-        "best": 27.636,
-        "avg": 31.005,
-        "median": 28.64
+        "best": 27.3,
+        "avg": 31.137,
+        "median": 28.583
       },
-      "theoretical_best": 83.339
+      "theoretical_best": 82.64
     },
     "NOR": {
       "sector_1": {
-        "best": 27.179,
-        "avg": 31.097,
-        "median": 28.343
+        "best": 27.164,
+        "avg": 31.735,
+        "median": 28.256
       },
       "sector_2": {
-        "best": 27.859,
-        "avg": 34.162,
-        "median": 29.476
+        "best": 27.704,
+        "avg": 34.232,
+        "median": 29.468
       },
       "sector_3": {
-        "best": 27.866,
-        "avg": 31.364,
-        "median": 28.671
+        "best": 27.603,
+        "avg": 31.67,
+        "median": 28.649
       },
-      "theoretical_best": 82.904
+      "theoretical_best": 82.471
     },
     "OCO": {
       "sector_1": {
         "best": 27.393,
-        "avg": 30.53,
-        "median": 28.604
+        "avg": 30.228,
+        "median": 28.503
       },
       "sector_2": {
-        "best": 28.715,
-        "avg": 32.166,
-        "median": 29.841
+        "best": 28.644,
+        "avg": 32.04,
+        "median": 29.834
       },
       "sector_3": {
-        "best": 28.19,
-        "avg": 31.597,
-        "median": 28.989
+        "best": 27.915,
+        "avg": 31.677,
+        "median": 28.949
       },
-      "theoretical_best": 84.298
+      "theoretical_best": 83.952
     },
     "PER": {
       "sector_1": {
-        "best": 27.636,
-        "avg": 32.722,
-        "median": 28.954
+        "best": 27.569,
+        "avg": 32.904,
+        "median": 28.906
       },
       "sector_2": {
-        "best": 28.955,
-        "avg": 33.418,
+        "best": 28.804,
+        "avg": 34.0,
         "median": 30.638
       },
       "sector_3": {
         "best": 28.41,
-        "avg": 31.665,
-        "median": 29.151
+        "avg": 32.824,
+        "median": 29.191
       },
-      "theoretical_best": 85.001
+      "theoretical_best": 84.783
     },
     "PIA": {
       "sector_1": {
-        "best": 27.348,
-        "avg": 32.068,
-        "median": 28.484
+        "best": 26.981,
+        "avg": 32.35,
+        "median": 28.456
       },
       "sector_2": {
-        "best": 27.945,
-        "avg": 34.862,
-        "median": 29.64
+        "best": 27.86,
+        "avg": 35.045,
+        "median": 29.645
       },
       "sector_3": {
         "best": 27.735,
-        "avg": 33.415,
-        "median": 28.721
+        "avg": 33.977,
+        "median": 28.736
       },
-      "theoretical_best": 83.028
+      "theoretical_best": 82.576
     },
     "RUS": {
       "sector_1": {
         "best": 27.044,
-        "avg": 31.896,
-        "median": 28.507
+        "avg": 31.532,
+        "median": 28.375
       },
       "sector_2": {
-        "best": 27.794,
-        "avg": 33.253,
-        "median": 29.32
+        "best": 27.709,
+        "avg": 33.093,
+        "median": 29.311
       },
       "sector_3": {
-        "best": 27.721,
-        "avg": 31.229,
-        "median": 28.447
+        "best": 27.339,
+        "avg": 30.912,
+        "median": 28.375
       },
-      "theoretical_best": 82.559
+      "theoretical_best": 82.092
     },
     "SAI": {
       "sector_1": {
         "best": 27.07,
-        "avg": 33.097,
-        "median": 28.448
+        "avg": 33.088,
+        "median": 28.398
       },
       "sector_2": {
-        "best": 28.596,
-        "avg": 34.946,
-        "median": 29.899
+        "best": 28.492,
+        "avg": 34.318,
+        "median": 29.841
       },
       "sector_3": {
-        "best": 28.184,
-        "avg": 32.587,
-        "median": 29.133
+        "best": 28.047,
+        "avg": 32.648,
+        "median": 29.127
       },
-      "theoretical_best": 83.85
+      "theoretical_best": 83.609
     },
     "STR": {
       "sector_1": {
         "best": 27.94,
-        "avg": 32.81,
-        "median": 29.802
+        "avg": 33.433,
+        "median": 29.792
       },
       "sector_2": {
         "best": 28.88,
-        "avg": 35.323,
-        "median": 30.578
+        "avg": 35.592,
+        "median": 30.513
       },
       "sector_3": {
         "best": 28.433,
-        "avg": 34.254,
-        "median": 30.357
+        "avg": 33.905,
+        "median": 30.148
       },
       "theoretical_best": 85.253
     },
     "TSU": {
       "sector_1": {
         "best": 27.47,
-        "avg": 34.063,
-        "median": 28.853
+        "avg": 33.649,
+        "median": 28.747
       },
       "sector_2": {
-        "best": 28.349,
-        "avg": 36.073,
-        "median": 30.044
+        "best": 28.333,
+        "avg": 35.724,
+        "median": 29.979
       },
       "sector_3": {
         "best": 27.636,
-        "avg": 34.255,
-        "median": 28.799
+        "avg": 33.475,
+        "median": 28.798
       },
-      "theoretical_best": 83.455
+      "theoretical_best": 83.439
     },
     "VER": {
       "sector_1": {
-        "best": 27.371,
-        "avg": 31.77,
-        "median": 28.375
+        "best": 27.26,
+        "avg": 33.045,
+        "median": 28.354
       },
       "sector_2": {
-        "best": 28.245,
-        "avg": 33.33,
-        "median": 29.615
+        "best": 28.027,
+        "avg": 34.399,
+        "median": 29.668
       },
       "sector_3": {
-        "best": 27.627,
-        "avg": 31.896,
-        "median": 28.324
+        "best": 27.282,
+        "avg": 33.439,
+        "median": 28.349
       },
-      "theoretical_best": 83.243
+      "theoretical_best": 82.569
     }
   },
   "consistency": {
     "ALB": {
-      "cv": 0.1853,
-      "std": 17.956,
-      "median_lap": 87.703,
+      "cv": 0.1652,
+      "std": 15.617,
+      "median_lap": 87.58,
       "best_lap": 83.853,
-      "laps_within_102pct": 18.2,
-      "total_laps": 22
+      "laps_within_102pct": 15.6,
+      "total_laps": 45
     },
     "ALO": {
-      "cv": 0.1602,
-      "std": 16.161,
-      "median_lap": 88.728,
-      "best_lap": 85.027,
-      "laps_within_102pct": 39.1,
-      "total_laps": 23
+      "cv": 0.1571,
+      "std": 16.255,
+      "median_lap": 108.541,
+      "best_lap": 84.919,
+      "laps_within_102pct": 35.1,
+      "total_laps": 37
     },
     "ANT": {
-      "cv": 0.1446,
-      "std": 13.123,
-      "median_lap": 86.291,
-      "best_lap": 82.7,
-      "laps_within_102pct": 7.7,
-      "total_laps": 39
+      "cv": 0.151,
+      "std": 13.792,
+      "median_lap": 86.21,
+      "best_lap": 82.58,
+      "laps_within_102pct": 15.6,
+      "total_laps": 45
     },
     "ARO": {
       "cv": 0.2259,
@@ -3360,28 +4139,28 @@
       "total_laps": 11
     },
     "BEA": {
-      "cv": 0.1788,
-      "std": 17.318,
-      "median_lap": 87.409,
+      "cv": 0.1905,
+      "std": 18.575,
+      "median_lap": 87.323,
       "best_lap": 83.37,
-      "laps_within_102pct": 15.6,
-      "total_laps": 32
+      "laps_within_102pct": 25.6,
+      "total_laps": 43
     },
     "BOR": {
-      "cv": 0.2142,
-      "std": 20.666,
-      "median_lap": 86.307,
-      "best_lap": 83.776,
-      "laps_within_102pct": 43.5,
-      "total_laps": 23
+      "cv": 0.2078,
+      "std": 19.785,
+      "median_lap": 85.38,
+      "best_lap": 83.298,
+      "laps_within_102pct": 41.4,
+      "total_laps": 29
     },
     "BOT": {
-      "cv": 0.1701,
-      "std": 16.742,
-      "median_lap": 88.758,
-      "best_lap": 85.149,
-      "laps_within_102pct": 22.0,
-      "total_laps": 41
+      "cv": 0.1725,
+      "std": 16.961,
+      "median_lap": 88.72,
+      "best_lap": 85.004,
+      "laps_within_102pct": 28.0,
+      "total_laps": 50
     },
     "BRO": {
       "cv": 0.1287,
@@ -3392,36 +4171,36 @@
       "total_laps": 17
     },
     "COL": {
-      "cv": 0.2175,
-      "std": 21.402,
-      "median_lap": 87.136,
-      "best_lap": 83.619,
-      "laps_within_102pct": 19.4,
-      "total_laps": 36
+      "cv": 0.2131,
+      "std": 20.711,
+      "median_lap": 86.73,
+      "best_lap": 83.101,
+      "laps_within_102pct": 19.6,
+      "total_laps": 51
     },
     "GAS": {
-      "cv": 0.1999,
-      "std": 19.869,
-      "median_lap": 87.116,
-      "best_lap": 83.773,
-      "laps_within_102pct": 23.8,
-      "total_laps": 21
+      "cv": 0.1936,
+      "std": 18.719,
+      "median_lap": 86.662,
+      "best_lap": 82.898,
+      "laps_within_102pct": 24.3,
+      "total_laps": 37
     },
     "HAM": {
-      "cv": 0.188,
-      "std": 18.414,
-      "median_lap": 86.697,
-      "best_lap": 83.016,
-      "laps_within_102pct": 20.6,
-      "total_laps": 34
+      "cv": 0.203,
+      "std": 20.594,
+      "median_lap": 87.337,
+      "best_lap": 82.445,
+      "laps_within_102pct": 20.8,
+      "total_laps": 48
     },
     "HUL": {
-      "cv": 0.1693,
-      "std": 16.252,
-      "median_lap": 87.66,
-      "best_lap": 83.732,
-      "laps_within_102pct": 22.9,
-      "total_laps": 35
+      "cv": 0.166,
+      "std": 15.728,
+      "median_lap": 87.381,
+      "best_lap": 83.126,
+      "laps_within_102pct": 21.4,
+      "total_laps": 42
     },
     "IWA": {
       "cv": 0.1805,
@@ -3432,115 +4211,115 @@
       "total_laps": 16
     },
     "LAW": {
-      "cv": 0.2005,
-      "std": 19.23,
-      "median_lap": 86.594,
-      "best_lap": 83.433,
-      "laps_within_102pct": 19.6,
-      "total_laps": 46
+      "cv": 0.1936,
+      "std": 18.671,
+      "median_lap": 86.658,
+      "best_lap": 83.203,
+      "laps_within_102pct": 21.3,
+      "total_laps": 61
     },
     "LEC": {
-      "cv": 0.1679,
-      "std": 15.823,
-      "median_lap": 86.427,
+      "cv": 0.1705,
+      "std": 16.139,
+      "median_lap": 86.425,
       "best_lap": 82.679,
-      "laps_within_102pct": 15.8,
-      "total_laps": 38
+      "laps_within_102pct": 24.5,
+      "total_laps": 49
     },
     "LIN": {
-      "cv": 0.1802,
-      "std": 17.291,
-      "median_lap": 87.162,
-      "best_lap": 83.349,
-      "laps_within_102pct": 23.7,
-      "total_laps": 38
+      "cv": 0.1797,
+      "std": 17.172,
+      "median_lap": 87.072,
+      "best_lap": 82.724,
+      "laps_within_102pct": 22.4,
+      "total_laps": 49
     },
     "NOR": {
-      "cv": 0.2006,
-      "std": 19.382,
-      "median_lap": 86.517,
-      "best_lap": 82.943,
-      "laps_within_102pct": 27.3,
-      "total_laps": 33
+      "cv": 0.2058,
+      "std": 20.096,
+      "median_lap": 86.439,
+      "best_lap": 82.625,
+      "laps_within_102pct": 31.8,
+      "total_laps": 44
     },
     "OCO": {
-      "cv": 0.1662,
-      "std": 15.675,
-      "median_lap": 87.53,
-      "best_lap": 84.407,
-      "laps_within_102pct": 20.0,
-      "total_laps": 30
-    },
-    "PER": {
-      "cv": 0.1682,
-      "std": 16.449,
-      "median_lap": 88.677,
-      "best_lap": 85.082,
-      "laps_within_102pct": 23.8,
-      "total_laps": 21
-    },
-    "PIA": {
-      "cv": 0.2035,
-      "std": 20.416,
-      "median_lap": 86.713,
-      "best_lap": 83.028,
-      "laps_within_102pct": 25.7,
-      "total_laps": 35
-    },
-    "RUS": {
-      "cv": 0.2235,
-      "std": 21.541,
-      "median_lap": 86.263,
-      "best_lap": 82.559,
-      "laps_within_102pct": 22.2,
-      "total_laps": 36
-    },
-    "SAI": {
-      "cv": 0.1969,
-      "std": 19.818,
-      "median_lap": 87.363,
-      "best_lap": 83.9,
-      "laps_within_102pct": 23.1,
+      "cv": 0.1601,
+      "std": 15.039,
+      "median_lap": 87.506,
+      "best_lap": 84.02,
+      "laps_within_102pct": 17.9,
       "total_laps": 39
     },
-    "STR": {
-      "cv": 0.1726,
-      "std": 17.669,
-      "median_lap": 90.916,
-      "best_lap": 85.253,
-      "laps_within_102pct": 25.0,
-      "total_laps": 36
+    "PER": {
+      "cv": 0.1911,
+      "std": 19.056,
+      "median_lap": 88.677,
+      "best_lap": 85.031,
+      "laps_within_102pct": 31.0,
+      "total_laps": 29
     },
-    "TSU": {
-      "cv": 0.2335,
-      "std": 24.375,
-      "median_lap": 87.729,
-      "best_lap": 83.455,
-      "laps_within_102pct": 19.5,
+    "PIA": {
+      "cv": 0.2048,
+      "std": 20.765,
+      "median_lap": 86.789,
+      "best_lap": 82.773,
+      "laps_within_102pct": 26.1,
+      "total_laps": 46
+    },
+    "RUS": {
+      "cv": 0.2183,
+      "std": 20.854,
+      "median_lap": 86.158,
+      "best_lap": 82.219,
+      "laps_within_102pct": 29.3,
       "total_laps": 41
     },
+    "SAI": {
+      "cv": 0.1914,
+      "std": 19.153,
+      "median_lap": 87.339,
+      "best_lap": 83.875,
+      "laps_within_102pct": 28.6,
+      "total_laps": 56
+    },
+    "STR": {
+      "cv": 0.1789,
+      "std": 18.411,
+      "median_lap": 90.514,
+      "best_lap": 85.253,
+      "laps_within_102pct": 27.7,
+      "total_laps": 47
+    },
+    "TSU": {
+      "cv": 0.2268,
+      "std": 23.324,
+      "median_lap": 87.616,
+      "best_lap": 83.455,
+      "laps_within_102pct": 24.5,
+      "total_laps": 49
+    },
     "VER": {
-      "cv": 0.2049,
-      "std": 19.879,
-      "median_lap": 86.45,
-      "best_lap": 83.377,
-      "laps_within_102pct": 26.3,
-      "total_laps": 19
+      "cv": 0.2125,
+      "std": 21.433,
+      "median_lap": 86.546,
+      "best_lap": 82.569,
+      "laps_within_102pct": 29.4,
+      "total_laps": 34
     }
   },
   "temperature": {
     "ALB": {
-      "correlation": 0.0,
-      "temp_type": "track_temperature",
-      "interpretation": "neutral"
-    },
-    "ALO": {
-      "correlation": 0.141,
+      "correlation": 0.149,
       "temp_type": "track_temperature",
       "interpretation": "slower in heat"
     },
+    "ALO": {
+      "correlation": -0.009,
+      "temp_type": "track_temperature",
+      "interpretation": "neutral"
+    },
     "ANT": {
-      "correlation": -0.043,
+      "correlation": -0.072,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
@@ -3550,254 +4329,317 @@
       "interpretation": "neutral"
     },
     "BEA": {
-      "correlation": -0.168,
+      "correlation": -0.148,
       "temp_type": "track_temperature",
       "interpretation": "faster in heat"
     },
     "BOR": {
-      "correlation": -0.067,
+      "correlation": -0.016,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "BOT": {
-      "correlation": 0.009,
+      "correlation": 0.012,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "COL": {
-      "correlation": 0.069,
+      "correlation": 0.095,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "GAS": {
-      "correlation": -0.0,
+      "correlation": 0.166,
       "temp_type": "track_temperature",
-      "interpretation": "neutral"
+      "interpretation": "slower in heat"
     },
     "HAM": {
-      "correlation": -0.102,
+      "correlation": -0.187,
       "temp_type": "track_temperature",
       "interpretation": "faster in heat"
     },
     "HUL": {
-      "correlation": 0.073,
+      "correlation": 0.13,
       "temp_type": "track_temperature",
-      "interpretation": "neutral"
+      "interpretation": "slower in heat"
     },
     "LAW": {
-      "correlation": -0.182,
+      "correlation": -0.164,
       "temp_type": "track_temperature",
       "interpretation": "faster in heat"
     },
     "LEC": {
-      "correlation": -0.275,
+      "correlation": -0.239,
       "temp_type": "track_temperature",
       "interpretation": "faster in heat"
     },
     "LIN": {
-      "correlation": -0.223,
+      "correlation": -0.166,
       "temp_type": "track_temperature",
       "interpretation": "faster in heat"
     },
     "NOR": {
-      "correlation": 0.022,
+      "correlation": -0.019,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "OCO": {
-      "correlation": 0.017,
+      "correlation": 0.033,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "PER": {
-      "correlation": 0.0,
+      "correlation": -0.163,
+      "temp_type": "track_temperature",
+      "interpretation": "faster in heat"
+    },
+    "PIA": {
+      "correlation": 0.057,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
-    "PIA": {
-      "correlation": 0.118,
-      "temp_type": "track_temperature",
-      "interpretation": "slower in heat"
-    },
     "RUS": {
-      "correlation": -0.026,
+      "correlation": 0.011,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "SAI": {
-      "correlation": -0.065,
+      "correlation": -0.026,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "STR": {
-      "correlation": 0.015,
+      "correlation": -0.011,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "TSU": {
-      "correlation": -0.098,
+      "correlation": -0.031,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "VER": {
-      "correlation": -0.0,
+      "correlation": -0.204,
       "temp_type": "track_temperature",
-      "interpretation": "neutral"
+      "interpretation": "faster in heat"
     }
   },
   "session_evolution": {
+    "ALB": {
+      "sessions": {
+        "FP2": 83.853,
+        "FP3": 84.437
+      },
+      "improvement": -0.584,
+      "improved": false
+    },
     "ALO": {
       "sessions": {
         "FP1": 85.78,
-        "FP2": 85.027
+        "FP2": 85.027,
+        "FP3": 84.919
       },
-      "improvement": 0.753,
+      "improvement": 0.861,
       "improved": true
     },
     "ANT": {
       "sessions": {
         "FP1": 83.644,
-        "FP2": 82.7
+        "FP2": 82.7,
+        "FP3": 82.58
       },
-      "improvement": 0.944,
+      "improvement": 1.064,
       "improved": true
     },
     "BEA": {
       "sessions": {
         "FP1": 84.646,
-        "FP2": 83.37
+        "FP2": 83.37,
+        "FP3": 83.585
       },
-      "improvement": 1.276,
+      "improvement": 1.061,
       "improved": true
     },
     "BOR": {
       "sessions": {
         "FP1": 84.006,
-        "FP2": 83.776
+        "FP2": 83.776,
+        "FP3": 83.298
       },
-      "improvement": 0.23,
+      "improvement": 0.708,
       "improved": true
     },
     "BOT": {
       "sessions": {
         "FP1": 85.984,
-        "FP2": 85.149
+        "FP2": 85.149,
+        "FP3": 85.004
       },
-      "improvement": 0.835,
+      "improvement": 0.98,
       "improved": true
     },
     "COL": {
       "sessions": {
         "FP1": 84.028,
-        "FP2": 83.619
+        "FP2": 83.619,
+        "FP3": 83.101
       },
-      "improvement": 0.409,
+      "improvement": 0.927,
+      "improved": true
+    },
+    "GAS": {
+      "sessions": {
+        "FP2": 83.773,
+        "FP3": 82.898
+      },
+      "improvement": 0.875,
       "improved": true
     },
     "HAM": {
       "sessions": {
         "FP1": 83.181,
-        "FP2": 83.016
+        "FP2": 83.016,
+        "FP3": 82.445
       },
-      "improvement": 0.165,
+      "improvement": 0.736,
       "improved": true
     },
     "HUL": {
       "sessions": {
         "FP1": 84.626,
-        "FP2": 83.732
+        "FP2": 83.732,
+        "FP3": 83.126
       },
-      "improvement": 0.894,
+      "improvement": 1.5,
       "improved": true
     },
     "LAW": {
       "sessions": {
         "FP1": 83.433,
-        "FP2": 83.66
+        "FP2": 83.66,
+        "FP3": 83.203
       },
-      "improvement": -0.227,
-      "improved": false
+      "improvement": 0.23,
+      "improved": true
     },
     "LEC": {
       "sessions": {
         "FP1": 83.008,
-        "FP2": 82.679
+        "FP2": 82.679,
+        "FP3": 82.708
       },
-      "improvement": 0.329,
+      "improvement": 0.3,
       "improved": true
     },
     "LIN": {
       "sessions": {
         "FP1": 83.802,
-        "FP2": 83.349
+        "FP2": 83.349,
+        "FP3": 82.724
       },
-      "improvement": 0.453,
+      "improvement": 1.078,
       "improved": true
     },
     "NOR": {
       "sessions": {
         "FP1": 83.719,
-        "FP2": 82.943
+        "FP2": 82.943,
+        "FP3": 82.625
       },
-      "improvement": 0.776,
+      "improvement": 1.094,
       "improved": true
     },
     "OCO": {
       "sessions": {
         "FP1": 85.852,
-        "FP2": 84.407
+        "FP2": 84.407,
+        "FP3": 84.02
       },
-      "improvement": 1.445,
+      "improvement": 1.832,
+      "improved": true
+    },
+    "PER": {
+      "sessions": {
+        "FP2": 85.082,
+        "FP3": 85.031
+      },
+      "improvement": 0.051,
       "improved": true
     },
     "PIA": {
       "sessions": {
         "FP1": 84.184,
-        "FP2": 83.028
+        "FP2": 83.028,
+        "FP3": 82.773
       },
-      "improvement": 1.156,
+      "improvement": 1.411,
       "improved": true
     },
     "RUS": {
       "sessions": {
         "FP1": 83.312,
-        "FP2": 82.559
+        "FP2": 82.559,
+        "FP3": 82.219
       },
-      "improvement": 0.753,
+      "improvement": 1.093,
       "improved": true
     },
     "SAI": {
       "sessions": {
         "FP1": 84.827,
-        "FP2": 83.9
+        "FP2": 83.9,
+        "FP3": 83.875
       },
-      "improvement": 0.927,
+      "improvement": 0.952,
       "improved": true
     },
     "STR": {
       "sessions": {
         "FP1": 86.066,
-        "FP2": 85.253
+        "FP2": 85.253,
+        "FP3": 85.555
       },
-      "improvement": 0.813,
+      "improvement": 0.511,
       "improved": true
     },
     "TSU": {
       "sessions": {
         "FP1": 84.571,
-        "FP2": 83.455
+        "FP2": 83.455,
+        "FP3": 83.817
       },
-      "improvement": 1.116,
+      "improvement": 0.754,
+      "improved": true
+    },
+    "VER": {
+      "sessions": {
+        "FP2": 83.377,
+        "FP3": 82.569
+      },
+      "improvement": 0.808,
       "improved": true
     }
   },
   "temperature_pace": {
+    "ALB": {
+      "temp_type": "track_temperature",
+      "pace_by_temp_range": {
+        "51-53": {
+          "avg_pace": 86.064,
+          "laps": 18
+        },
+        "53-55": {
+          "avg_pace": 86.881,
+          "laps": 16
+        }
+      }
+    },
     "ALO": {
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 86.728,
-          "laps": 6
+          "avg_pace": 94.226,
+          "laps": 16
         },
         "53-55": {
           "avg_pace": 85.858,
@@ -3809,8 +4651,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 86.108,
-          "laps": 15
+          "avg_pace": 85.447,
+          "laps": 19
         },
         "53-55": {
           "avg_pace": 85.83,
@@ -3822,8 +4664,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 86.481,
-          "laps": 9
+          "avg_pace": 85.592,
+          "laps": 16
         },
         "53-55": {
           "avg_pace": 86.128,
@@ -3835,8 +4677,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 85.523,
-          "laps": 9
+          "avg_pace": 84.864,
+          "laps": 14
         },
         "53-55": {
           "avg_pace": 85.472,
@@ -3848,8 +4690,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 87.974,
-          "laps": 14
+          "avg_pace": 87.258,
+          "laps": 20
         },
         "53-55": {
           "avg_pace": 87.494,
@@ -3861,8 +4703,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 86.632,
-          "laps": 14
+          "avg_pace": 85.862,
+          "laps": 26
         },
         "53-55": {
           "avg_pace": 86.411,
@@ -3870,12 +4712,25 @@
         }
       }
     },
+    "GAS": {
+      "temp_type": "track_temperature",
+      "pace_by_temp_range": {
+        "51-53": {
+          "avg_pace": 84.32,
+          "laps": 12
+        },
+        "53-55": {
+          "avg_pace": 85.954,
+          "laps": 14
+        }
+      }
+    },
     "HAM": {
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 85.881,
-          "laps": 10
+          "avg_pace": 87.375,
+          "laps": 17
         },
         "53-55": {
           "avg_pace": 85.586,
@@ -3887,8 +4742,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 86.563,
-          "laps": 12
+          "avg_pace": 85.762,
+          "laps": 18
         },
         "53-55": {
           "avg_pace": 86.497,
@@ -3900,8 +4755,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 85.108,
-          "laps": 10
+          "avg_pace": 85.516,
+          "laps": 19
         },
         "53-55": {
           "avg_pace": 86.173,
@@ -3913,8 +4768,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 85.946,
-          "laps": 14
+          "avg_pace": 85.071,
+          "laps": 20
         },
         "53-55": {
           "avg_pace": 85.514,
@@ -3926,8 +4781,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 86.352,
-          "laps": 13
+          "avg_pace": 85.582,
+          "laps": 21
         },
         "53-55": {
           "avg_pace": 85.839,
@@ -3939,8 +4794,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 85.76,
-          "laps": 13
+          "avg_pace": 84.957,
+          "laps": 19
         },
         "53-55": {
           "avg_pace": 85.451,
@@ -3952,8 +4807,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 87.225,
-          "laps": 10
+          "avg_pace": 86.464,
+          "laps": 16
         },
         "53-55": {
           "avg_pace": 87.048,
@@ -3961,12 +4816,25 @@
         }
       }
     },
+    "PER": {
+      "temp_type": "track_temperature",
+      "pace_by_temp_range": {
+        "51-53": {
+          "avg_pace": 85.742,
+          "laps": 4
+        },
+        "53-55": {
+          "avg_pace": 87.742,
+          "laps": 15
+        }
+      }
+    },
     "PIA": {
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 85.868,
-          "laps": 12
+          "avg_pace": 85.124,
+          "laps": 17
         },
         "53-55": {
           "avg_pace": 85.187,
@@ -3978,8 +4846,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 85.578,
-          "laps": 13
+          "avg_pace": 84.905,
+          "laps": 17
         },
         "53-55": {
           "avg_pace": 85.173,
@@ -3991,8 +4859,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 85.882,
-          "laps": 10
+          "avg_pace": 85.503,
+          "laps": 20
         },
         "53-55": {
           "avg_pace": 86.572,
@@ -4004,8 +4872,8 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 86.985,
-          "laps": 9
+          "avg_pace": 86.75,
+          "laps": 15
         },
         "53-55": {
           "avg_pace": 89.77,
@@ -4017,12 +4885,25 @@
       "temp_type": "track_temperature",
       "pace_by_temp_range": {
         "51-53": {
-          "avg_pace": 87.08,
-          "laps": 11
+          "avg_pace": 85.873,
+          "laps": 15
         },
         "53-55": {
           "avg_pace": 86.356,
           "laps": 15
+        }
+      }
+    },
+    "VER": {
+      "temp_type": "track_temperature",
+      "pace_by_temp_range": {
+        "51-53": {
+          "avg_pace": 87.693,
+          "laps": 8
+        },
+        "53-55": {
+          "avg_pace": 85.395,
+          "laps": 14
         }
       }
     }
@@ -4053,10 +4934,46 @@
           "avg_pace": 87.706,
           "best_pace": 87.58,
           "degradation_rate": 0.007
+        },
+        {
+          "stint": 1,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 5,
+          "deg_laps": 2,
+          "first_lap_pace": 108.807,
+          "last_lap_pace": 84.437,
+          "avg_pace": 84.679,
+          "best_pace": 84.437,
+          "degradation_rate": null
+        },
+        {
+          "stint": 2,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 8,
+          "deg_laps": 7,
+          "first_lap_pace": 86.049,
+          "last_lap_pace": 86.007,
+          "avg_pace": 86.261,
+          "best_pace": 85.887,
+          "degradation_rate": 0.054
+        },
+        {
+          "stint": 3,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 10,
+          "deg_laps": 8,
+          "first_lap_pace": 88.309,
+          "last_lap_pace": 114.388,
+          "avg_pace": 85.945,
+          "best_pace": 85.479,
+          "degradation_rate": -0.19
         }
       ],
-      "total_stints": 2,
-      "avg_degradation": 0.007
+      "total_stints": 5,
+      "avg_degradation": -0.043
     },
     "ALO": {
       "stints": [
@@ -4119,9 +5036,33 @@
           "avg_pace": 86.796,
           "best_pace": 86.796,
           "degradation_rate": null
+        },
+        {
+          "stint": 1,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 6,
+          "deg_laps": 2,
+          "first_lap_pace": 86.288,
+          "last_lap_pace": 85.306,
+          "avg_pace": 85.306,
+          "best_pace": 85.306,
+          "degradation_rate": null
+        },
+        {
+          "stint": 2,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 7,
+          "deg_laps": 2,
+          "first_lap_pace": 120.342,
+          "last_lap_pace": 84.919,
+          "avg_pace": 85.067,
+          "best_pace": 84.919,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 5,
+      "total_stints": 7,
       "avg_degradation": null
     },
     "ANT": {
@@ -4233,9 +5174,21 @@
           "avg_pace": 87.506,
           "best_pace": 86.827,
           "degradation_rate": -0.431
+        },
+        {
+          "stint": 1,
+          "session": "FP3",
+          "compound": "MEDIUM",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 84.922,
+          "last_lap_pace": 84.784,
+          "avg_pace": 84.784,
+          "best_pace": 84.784,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 3,
+      "total_stints": 4,
       "avg_degradation": -0.557
     },
     "BOR": {
@@ -4365,9 +5318,21 @@
           "avg_pace": 88.473,
           "best_pace": 88.081,
           "degradation_rate": 0.079
+        },
+        {
+          "stint": 3,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 85.004,
+          "last_lap_pace": 85.209,
+          "avg_pace": 85.209,
+          "best_pace": 85.209,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 6,
+      "total_stints": 7,
       "avg_degradation": 0.121
     },
     "BRO": {
@@ -4485,10 +5450,34 @@
           "avg_pace": 124.107,
           "best_pace": 124.107,
           "degradation_rate": null
+        },
+        {
+          "stint": 1,
+          "session": "FP3",
+          "compound": "MEDIUM",
+          "total_laps": 5,
+          "deg_laps": 3,
+          "first_lap_pace": 86.561,
+          "last_lap_pace": 83.766,
+          "avg_pace": 84.25,
+          "best_pace": 83.766,
+          "degradation_rate": null
+        },
+        {
+          "stint": 2,
+          "session": "FP3",
+          "compound": "MEDIUM",
+          "total_laps": 7,
+          "deg_laps": 7,
+          "first_lap_pace": 86.521,
+          "last_lap_pace": 85.061,
+          "avg_pace": 85.191,
+          "best_pace": 84.492,
+          "degradation_rate": -0.188
         }
       ],
-      "total_stints": 6,
-      "avg_degradation": 0.059
+      "total_stints": 8,
+      "avg_degradation": -0.016
     },
     "GAS": {
       "stints": [
@@ -4527,10 +5516,34 @@
           "avg_pace": 87.088,
           "best_pace": 86.662,
           "degradation_rate": -0.056
+        },
+        {
+          "stint": 1,
+          "session": "FP3",
+          "compound": "MEDIUM",
+          "total_laps": 5,
+          "deg_laps": 3,
+          "first_lap_pace": 85.349,
+          "last_lap_pace": 83.875,
+          "avg_pace": 83.876,
+          "best_pace": 83.875,
+          "degradation_rate": null
+        },
+        {
+          "stint": 2,
+          "session": "FP3",
+          "compound": "MEDIUM",
+          "total_laps": 8,
+          "deg_laps": 7,
+          "first_lap_pace": 83.416,
+          "last_lap_pace": 84.581,
+          "avg_pace": 84.888,
+          "best_pace": 84.581,
+          "degradation_rate": 0.141
         }
       ],
-      "total_stints": 3,
-      "avg_degradation": -0.056
+      "total_stints": 5,
+      "avg_degradation": 0.036
     },
     "HAM": {
       "stints": [
@@ -4605,9 +5618,45 @@
           "avg_pace": 86.216,
           "best_pace": 85.756,
           "degradation_rate": -0.025
+        },
+        {
+          "stint": 1,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 84.912,
+          "last_lap_pace": 83.683,
+          "avg_pace": 83.683,
+          "best_pace": 83.683,
+          "degradation_rate": null
+        },
+        {
+          "stint": 2,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 116.84,
+          "last_lap_pace": 83.04,
+          "avg_pace": 83.076,
+          "best_pace": 83.04,
+          "degradation_rate": null
+        },
+        {
+          "stint": 3,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 7,
+          "deg_laps": 1,
+          "first_lap_pace": 111.326,
+          "last_lap_pace": 126.402,
+          "avg_pace": 82.445,
+          "best_pace": 82.445,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 6,
+      "total_stints": 9,
       "avg_degradation": -0.025
     },
     "HUL": {
@@ -4779,10 +5828,46 @@
           "avg_pace": 86.046,
           "best_pace": 85.582,
           "degradation_rate": 0.064
+        },
+        {
+          "stint": 1,
+          "session": "FP3",
+          "compound": "MEDIUM",
+          "total_laps": 5,
+          "deg_laps": 2,
+          "first_lap_pace": 84.24,
+          "last_lap_pace": 108.357,
+          "avg_pace": 83.769,
+          "best_pace": 83.769,
+          "degradation_rate": null
+        },
+        {
+          "stint": 2,
+          "session": "FP3",
+          "compound": "MEDIUM",
+          "total_laps": 5,
+          "deg_laps": 5,
+          "first_lap_pace": 87.4,
+          "last_lap_pace": 86.658,
+          "avg_pace": 87.848,
+          "best_pace": 86.362,
+          "degradation_rate": -0.557
+        },
+        {
+          "stint": 3,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 83.714,
+          "last_lap_pace": 83.203,
+          "avg_pace": 83.203,
+          "best_pace": 83.203,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 7,
-      "avg_degradation": 0.001
+      "total_stints": 10,
+      "avg_degradation": -0.106
     },
     "LEC": {
       "stints": [
@@ -4833,9 +5918,33 @@
           "avg_pace": 86.352,
           "best_pace": 85.708,
           "degradation_rate": -0.047
+        },
+        {
+          "stint": 3,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 83.065,
+          "last_lap_pace": 82.913,
+          "avg_pace": 82.913,
+          "best_pace": 82.913,
+          "degradation_rate": null
+        },
+        {
+          "stint": 5,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 106.577,
+          "last_lap_pace": 139.21,
+          "avg_pace": 82.972,
+          "best_pace": 82.972,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 4,
+      "total_stints": 6,
       "avg_degradation": -0.049
     },
     "LIN": {
@@ -4911,9 +6020,33 @@
           "avg_pace": 86.872,
           "best_pace": 86.27,
           "degradation_rate": -0.045
+        },
+        {
+          "stint": 3,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 85.84,
+          "last_lap_pace": 84.632,
+          "avg_pace": 85.015,
+          "best_pace": 84.632,
+          "degradation_rate": null
+        },
+        {
+          "stint": 5,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 83.083,
+          "last_lap_pace": 124.92,
+          "avg_pace": 109.627,
+          "best_pace": 109.627,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 6,
+      "total_stints": 8,
       "avg_degradation": -0.087
     },
     "NOR": {
@@ -4989,9 +6122,33 @@
           "avg_pace": 87.131,
           "best_pace": 86.28,
           "degradation_rate": 0.374
+        },
+        {
+          "stint": 2,
+          "session": "FP3",
+          "compound": "MEDIUM",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 101.571,
+          "last_lap_pace": 83.431,
+          "avg_pace": 83.695,
+          "best_pace": 83.431,
+          "degradation_rate": null
+        },
+        {
+          "stint": 3,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 6,
+          "deg_laps": 3,
+          "first_lap_pace": 82.774,
+          "last_lap_pace": 129.507,
+          "avg_pace": 82.744,
+          "best_pace": 82.625,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 6,
+      "total_stints": 8,
       "avg_degradation": 0.195
     },
     "OCO": {
@@ -5085,9 +6242,21 @@
           "avg_pace": 88.95,
           "best_pace": 87.892,
           "degradation_rate": 0.208
+        },
+        {
+          "stint": 3,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 85.031,
+          "last_lap_pace": 145.552,
+          "avg_pace": 143.916,
+          "best_pace": 142.279,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 3,
+      "total_stints": 4,
       "avg_degradation": 0.208
     },
     "PIA": {
@@ -5163,9 +6332,21 @@
           "avg_pace": 102.672,
           "best_pace": 102.672,
           "degradation_rate": null
+        },
+        {
+          "stint": 5,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 6,
+          "deg_laps": 2,
+          "first_lap_pace": 100.606,
+          "last_lap_pace": 134.045,
+          "avg_pace": 82.898,
+          "best_pace": 82.773,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 6,
+      "total_stints": 7,
       "avg_degradation": 0.067
     },
     "RUS": {
@@ -5307,10 +6488,34 @@
           "avg_pace": 87.637,
           "best_pace": 87.293,
           "degradation_rate": 0.031
+        },
+        {
+          "stint": 1,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 8,
+          "deg_laps": 2,
+          "first_lap_pace": 85.482,
+          "last_lap_pace": 107.836,
+          "avg_pace": 84.642,
+          "best_pace": 84.642,
+          "degradation_rate": null
+        },
+        {
+          "stint": 2,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 5,
+          "deg_laps": 5,
+          "first_lap_pace": 86.215,
+          "last_lap_pace": 85.902,
+          "avg_pace": 85.65,
+          "best_pace": 85.433,
+          "degradation_rate": -0.004
         }
       ],
-      "total_stints": 6,
-      "avg_degradation": 0.031
+      "total_stints": 8,
+      "avg_degradation": 0.016
     },
     "STR": {
       "stints": [
@@ -5373,9 +6578,33 @@
           "avg_pace": 90.178,
           "best_pace": 89.504,
           "degradation_rate": 0.14
+        },
+        {
+          "stint": 2,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 87.571,
+          "last_lap_pace": 86.506,
+          "avg_pace": 86.506,
+          "best_pace": 86.506,
+          "degradation_rate": null
+        },
+        {
+          "stint": 5,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 85.765,
+          "last_lap_pace": 85.555,
+          "avg_pace": 85.555,
+          "best_pace": 85.555,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 5,
+      "total_stints": 7,
       "avg_degradation": 0.14
     },
     "TSU": {
@@ -5451,9 +6680,33 @@
           "avg_pace": 87.278,
           "best_pace": 86.519,
           "degradation_rate": -0.05
+        },
+        {
+          "stint": 2,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 83.817,
+          "last_lap_pace": 85.435,
+          "avg_pace": 85.276,
+          "best_pace": 85.118,
+          "degradation_rate": null
+        },
+        {
+          "stint": 4,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 122.0,
+          "last_lap_pace": 84.013,
+          "avg_pace": 84.013,
+          "best_pace": 84.013,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 6,
+      "total_stints": 8,
       "avg_degradation": -0.05
     },
     "VER": {
@@ -5517,485 +6770,509 @@
           "avg_pace": 85.957,
           "best_pace": 85.841,
           "degradation_rate": null
+        },
+        {
+          "stint": 2,
+          "session": "FP3",
+          "compound": "MEDIUM",
+          "total_laps": 5,
+          "deg_laps": 3,
+          "first_lap_pace": 83.692,
+          "last_lap_pace": 83.1,
+          "avg_pace": 83.278,
+          "best_pace": 83.1,
+          "degradation_rate": null
+        },
+        {
+          "stint": 4,
+          "session": "FP3",
+          "compound": "SOFT",
+          "total_laps": 8,
+          "deg_laps": 1,
+          "first_lap_pace": 101.181,
+          "last_lap_pace": 125.519,
+          "avg_pace": 82.569,
+          "best_pace": 82.569,
+          "degradation_rate": null
         }
       ],
-      "total_stints": 5,
+      "total_stints": 7,
       "avg_degradation": -0.029
     }
   },
   "sector_rankings": {
     "sector_1": [
       {
+        "driver_id": "PIA",
+        "best": 26.981,
+        "avg_best_3": 27.091,
+        "gap": 0.0
+      },
+      {
         "driver_id": "GAS",
         "best": 27.039,
         "avg_best_3": 27.134,
-        "gap": 0.0
+        "gap": 0.058
       },
       {
         "driver_id": "RUS",
         "best": 27.044,
-        "avg_best_3": 27.12,
-        "gap": 0.005
+        "avg_best_3": 27.074,
+        "gap": 0.063
+      },
+      {
+        "driver_id": "HAM",
+        "best": 27.046,
+        "avg_best_3": 27.094,
+        "gap": 0.065
       },
       {
         "driver_id": "SAI",
         "best": 27.07,
-        "avg_best_3": 27.187,
-        "gap": 0.031
+        "avg_best_3": 27.148,
+        "gap": 0.089
       },
       {
         "driver_id": "COL",
         "best": 27.088,
-        "avg_best_3": 27.174,
-        "gap": 0.049
+        "avg_best_3": 27.12,
+        "gap": 0.107
       },
       {
-        "driver_id": "HAM",
-        "best": 27.174,
-        "avg_best_3": 27.293,
-        "gap": 0.135
+        "driver_id": "ANT",
+        "best": 27.147,
+        "avg_best_3": 27.222,
+        "gap": 0.166
       },
       {
         "driver_id": "NOR",
-        "best": 27.179,
-        "avg_best_3": 27.262,
-        "gap": 0.14
+        "best": 27.164,
+        "avg_best_3": 27.187,
+        "gap": 0.183
+      },
+      {
+        "driver_id": "HUL",
+        "best": 27.214,
+        "avg_best_3": 27.434,
+        "gap": 0.233
       },
       {
         "driver_id": "LEC",
-        "best": 27.224,
-        "avg_best_3": 27.293,
-        "gap": 0.185
+        "best": 27.215,
+        "avg_best_3": 27.226,
+        "gap": 0.234
+      },
+      {
+        "driver_id": "LIN",
+        "best": 27.232,
+        "avg_best_3": 27.392,
+        "gap": 0.251
       },
       {
         "driver_id": "BRO",
         "best": 27.234,
         "avg_best_3": 27.305,
-        "gap": 0.195
+        "gap": 0.253
       },
       {
         "driver_id": "BEA",
         "best": 27.244,
-        "avg_best_3": 27.456,
-        "gap": 0.205
+        "avg_best_3": 27.379,
+        "gap": 0.263
       },
       {
         "driver_id": "ALB",
         "best": 27.254,
-        "avg_best_3": 27.492,
-        "gap": 0.215
+        "avg_best_3": 27.378,
+        "gap": 0.273
       },
       {
-        "driver_id": "ANT",
-        "best": 27.262,
-        "avg_best_3": 27.279,
-        "gap": 0.223
+        "driver_id": "VER",
+        "best": 27.26,
+        "avg_best_3": 27.291,
+        "gap": 0.279
       },
       {
         "driver_id": "ARO",
         "best": 27.272,
         "avg_best_3": 27.317,
-        "gap": 0.233
+        "gap": 0.291
       },
       {
-        "driver_id": "PIA",
-        "best": 27.348,
-        "avg_best_3": 27.377,
-        "gap": 0.309
+        "driver_id": "BOT",
+        "best": 27.291,
+        "avg_best_3": 27.477,
+        "gap": 0.31
       },
       {
-        "driver_id": "VER",
-        "best": 27.371,
-        "avg_best_3": 27.446,
-        "gap": 0.332
+        "driver_id": "LAW",
+        "best": 27.372,
+        "avg_best_3": 27.437,
+        "gap": 0.391
       },
       {
         "driver_id": "OCO",
         "best": 27.393,
-        "avg_best_3": 27.665,
-        "gap": 0.354
+        "avg_best_3": 27.419,
+        "gap": 0.412
       },
       {
         "driver_id": "BOR",
-        "best": 27.447,
-        "avg_best_3": 27.503,
-        "gap": 0.408
+        "best": 27.401,
+        "avg_best_3": 27.42,
+        "gap": 0.42
       },
       {
         "driver_id": "TSU",
         "best": 27.47,
-        "avg_best_3": 27.615,
-        "gap": 0.431
-      },
-      {
-        "driver_id": "LAW",
-        "best": 27.49,
-        "avg_best_3": 27.525,
-        "gap": 0.451
-      },
-      {
-        "driver_id": "LIN",
-        "best": 27.504,
-        "avg_best_3": 27.542,
-        "gap": 0.465
-      },
-      {
-        "driver_id": "HUL",
-        "best": 27.55,
-        "avg_best_3": 27.626,
-        "gap": 0.511
-      },
-      {
-        "driver_id": "BOT",
-        "best": 27.554,
-        "avg_best_3": 27.697,
-        "gap": 0.515
+        "avg_best_3": 27.606,
+        "gap": 0.489
       },
       {
         "driver_id": "PER",
-        "best": 27.636,
-        "avg_best_3": 27.716,
-        "gap": 0.597
+        "best": 27.569,
+        "avg_best_3": 27.604,
+        "gap": 0.588
       },
       {
         "driver_id": "IWA",
         "best": 27.649,
         "avg_best_3": 27.754,
-        "gap": 0.61
+        "gap": 0.668
       },
       {
         "driver_id": "ALO",
-        "best": 27.877,
-        "avg_best_3": 27.933,
-        "gap": 0.838
+        "best": 27.833,
+        "avg_best_3": 27.872,
+        "gap": 0.852
       },
       {
         "driver_id": "STR",
         "best": 27.94,
-        "avg_best_3": 28.037,
-        "gap": 0.901
+        "avg_best_3": 27.975,
+        "gap": 0.959
       },
       {
         "driver_id": "HER",
         "best": 28.655,
         "avg_best_3": 28.655,
-        "gap": 1.616
+        "gap": 1.674
       }
     ],
     "sector_2": [
       {
-        "driver_id": "ANT",
-        "best": 27.784,
-        "avg_best_3": 28.077,
+        "driver_id": "NOR",
+        "best": 27.704,
+        "avg_best_3": 27.79,
         "gap": 0.0
       },
       {
         "driver_id": "RUS",
-        "best": 27.794,
-        "avg_best_3": 27.875,
-        "gap": 0.01
+        "best": 27.709,
+        "avg_best_3": 27.757,
+        "gap": 0.005
       },
       {
-        "driver_id": "NOR",
-        "best": 27.859,
-        "avg_best_3": 27.955,
-        "gap": 0.075
+        "driver_id": "ANT",
+        "best": 27.784,
+        "avg_best_3": 27.826,
+        "gap": 0.08
+      },
+      {
+        "driver_id": "PIA",
+        "best": 27.86,
+        "avg_best_3": 27.896,
+        "gap": 0.156
       },
       {
         "driver_id": "LEC",
         "best": 27.874,
-        "avg_best_3": 28.064,
-        "gap": 0.09
-      },
-      {
-        "driver_id": "PIA",
-        "best": 27.945,
-        "avg_best_3": 28.057,
-        "gap": 0.161
+        "avg_best_3": 27.998,
+        "gap": 0.17
       },
       {
         "driver_id": "HAM",
-        "best": 28.145,
-        "avg_best_3": 28.26,
-        "gap": 0.361
-      },
-      {
-        "driver_id": "LIN",
-        "best": 28.199,
-        "avg_best_3": 28.222,
-        "gap": 0.415
-      },
-      {
-        "driver_id": "COL",
-        "best": 28.204,
-        "avg_best_3": 28.325,
-        "gap": 0.42
-      },
-      {
-        "driver_id": "BOR",
-        "best": 28.219,
-        "avg_best_3": 28.362,
-        "gap": 0.435
-      },
-      {
-        "driver_id": "LAW",
-        "best": 28.222,
-        "avg_best_3": 28.302,
-        "gap": 0.438
+        "best": 27.896,
+        "avg_best_3": 28.062,
+        "gap": 0.192
       },
       {
         "driver_id": "VER",
-        "best": 28.245,
-        "avg_best_3": 28.394,
-        "gap": 0.461
+        "best": 28.027,
+        "avg_best_3": 28.099,
+        "gap": 0.323
       },
       {
         "driver_id": "GAS",
-        "best": 28.282,
-        "avg_best_3": 28.406,
-        "gap": 0.498
+        "best": 28.028,
+        "avg_best_3": 28.094,
+        "gap": 0.324
+      },
+      {
+        "driver_id": "LIN",
+        "best": 28.108,
+        "avg_best_3": 28.166,
+        "gap": 0.404
+      },
+      {
+        "driver_id": "COL",
+        "best": 28.174,
+        "avg_best_3": 28.2,
+        "gap": 0.47
+      },
+      {
+        "driver_id": "LAW",
+        "best": 28.179,
+        "avg_best_3": 28.23,
+        "gap": 0.475
+      },
+      {
+        "driver_id": "BOR",
+        "best": 28.208,
+        "avg_best_3": 28.233,
+        "gap": 0.504
+      },
+      {
+        "driver_id": "HUL",
+        "best": 28.253,
+        "avg_best_3": 28.326,
+        "gap": 0.549
       },
       {
         "driver_id": "BEA",
         "best": 28.301,
-        "avg_best_3": 28.387,
-        "gap": 0.517
+        "avg_best_3": 28.356,
+        "gap": 0.597
       },
       {
         "driver_id": "TSU",
-        "best": 28.349,
-        "avg_best_3": 28.457,
-        "gap": 0.565
-      },
-      {
-        "driver_id": "HUL",
-        "best": 28.373,
-        "avg_best_3": 28.46,
-        "gap": 0.589
+        "best": 28.333,
+        "avg_best_3": 28.364,
+        "gap": 0.629
       },
       {
         "driver_id": "ARO",
         "best": 28.432,
         "avg_best_3": 28.581,
-        "gap": 0.648
+        "gap": 0.728
       },
       {
         "driver_id": "ALB",
         "best": 28.489,
-        "avg_best_3": 28.697,
-        "gap": 0.705
+        "avg_best_3": 28.653,
+        "gap": 0.785
       },
       {
         "driver_id": "SAI",
-        "best": 28.596,
-        "avg_best_3": 28.657,
-        "gap": 0.812
+        "best": 28.492,
+        "avg_best_3": 28.573,
+        "gap": 0.788
       },
       {
         "driver_id": "OCO",
-        "best": 28.715,
-        "avg_best_3": 28.792,
-        "gap": 0.931
+        "best": 28.644,
+        "avg_best_3": 28.701,
+        "gap": 0.94
       },
       {
         "driver_id": "BOT",
-        "best": 28.765,
-        "avg_best_3": 28.911,
-        "gap": 0.981
+        "best": 28.648,
+        "avg_best_3": 28.731,
+        "gap": 0.944
+      },
+      {
+        "driver_id": "ALO",
+        "best": 28.649,
+        "avg_best_3": 28.739,
+        "gap": 0.945
       },
       {
         "driver_id": "BRO",
         "best": 28.77,
         "avg_best_3": 28.887,
-        "gap": 0.986
-      },
-      {
-        "driver_id": "ALO",
-        "best": 28.783,
-        "avg_best_3": 28.899,
-        "gap": 0.999
+        "gap": 1.066
       },
       {
         "driver_id": "IWA",
         "best": 28.786,
         "avg_best_3": 28.812,
-        "gap": 1.002
+        "gap": 1.082
+      },
+      {
+        "driver_id": "PER",
+        "best": 28.804,
+        "avg_best_3": 28.89,
+        "gap": 1.1
       },
       {
         "driver_id": "STR",
         "best": 28.88,
-        "avg_best_3": 28.971,
-        "gap": 1.096
-      },
-      {
-        "driver_id": "PER",
-        "best": 28.955,
-        "avg_best_3": 29.034,
-        "gap": 1.171
+        "avg_best_3": 28.916,
+        "gap": 1.176
       },
       {
         "driver_id": "HER",
         "best": 30.791,
         "avg_best_3": 30.791,
-        "gap": 3.007
+        "gap": 3.087
       }
     ],
     "sector_3": [
       {
-        "driver_id": "LEC",
-        "best": 27.546,
-        "avg_best_3": 27.666,
+        "driver_id": "VER",
+        "best": 27.282,
+        "avg_best_3": 27.355,
         "gap": 0.0
       },
       {
+        "driver_id": "LIN",
+        "best": 27.3,
+        "avg_best_3": 27.49,
+        "gap": 0.018
+      },
+      {
+        "driver_id": "RUS",
+        "best": 27.339,
+        "avg_best_3": 27.501,
+        "gap": 0.057
+      },
+      {
+        "driver_id": "LEC",
+        "best": 27.385,
+        "avg_best_3": 27.464,
+        "gap": 0.103
+      },
+      {
         "driver_id": "HAM",
-        "best": 27.591,
-        "avg_best_3": 27.688,
-        "gap": 0.045
+        "best": 27.436,
+        "avg_best_3": 27.51,
+        "gap": 0.154
       },
       {
         "driver_id": "ANT",
-        "best": 27.619,
-        "avg_best_3": 27.873,
-        "gap": 0.073
+        "best": 27.498,
+        "avg_best_3": 27.529,
+        "gap": 0.216
       },
       {
-        "driver_id": "VER",
-        "best": 27.627,
-        "avg_best_3": 27.698,
-        "gap": 0.081
+        "driver_id": "LAW",
+        "best": 27.574,
+        "avg_best_3": 27.655,
+        "gap": 0.292
       },
       {
-        "driver_id": "LIN",
-        "best": 27.636,
-        "avg_best_3": 27.657,
-        "gap": 0.09
+        "driver_id": "NOR",
+        "best": 27.603,
+        "avg_best_3": 27.718,
+        "gap": 0.321
+      },
+      {
+        "driver_id": "BOR",
+        "best": 27.634,
+        "avg_best_3": 27.682,
+        "gap": 0.352
+      },
+      {
+        "driver_id": "GAS",
+        "best": 27.634,
+        "avg_best_3": 27.754,
+        "gap": 0.352
       },
       {
         "driver_id": "TSU",
         "best": 27.636,
-        "avg_best_3": 27.788,
-        "gap": 0.09
+        "avg_best_3": 27.745,
+        "gap": 0.354
       },
       {
-        "driver_id": "LAW",
-        "best": 27.668,
-        "avg_best_3": 27.733,
-        "gap": 0.122
+        "driver_id": "HUL",
+        "best": 27.659,
+        "avg_best_3": 27.739,
+        "gap": 0.377
       },
       {
-        "driver_id": "RUS",
-        "best": 27.721,
-        "avg_best_3": 27.805,
-        "gap": 0.175
+        "driver_id": "BEA",
+        "best": 27.677,
+        "avg_best_3": 27.797,
+        "gap": 0.395
       },
       {
         "driver_id": "PIA",
         "best": 27.735,
-        "avg_best_3": 27.926,
-        "gap": 0.189
+        "avg_best_3": 27.766,
+        "gap": 0.453
       },
       {
-        "driver_id": "HUL",
-        "best": 27.772,
-        "avg_best_3": 27.929,
-        "gap": 0.226
+        "driver_id": "COL",
+        "best": 27.829,
+        "avg_best_3": 27.886,
+        "gap": 0.547
       },
       {
-        "driver_id": "BOR",
-        "best": 27.785,
-        "avg_best_3": 27.873,
-        "gap": 0.239
+        "driver_id": "OCO",
+        "best": 27.915,
+        "avg_best_3": 28.029,
+        "gap": 0.633
       },
       {
-        "driver_id": "BEA",
-        "best": 27.825,
-        "avg_best_3": 28.052,
-        "gap": 0.279
-      },
-      {
-        "driver_id": "NOR",
-        "best": 27.866,
-        "avg_best_3": 27.895,
-        "gap": 0.32
+        "driver_id": "SAI",
+        "best": 28.047,
+        "avg_best_3": 28.098,
+        "gap": 0.765
       },
       {
         "driver_id": "ALB",
         "best": 28.11,
-        "avg_best_3": 28.443,
-        "gap": 0.564
-      },
-      {
-        "driver_id": "COL",
-        "best": 28.17,
-        "avg_best_3": 28.309,
-        "gap": 0.624
-      },
-      {
-        "driver_id": "SAI",
-        "best": 28.184,
-        "avg_best_3": 28.302,
-        "gap": 0.638
-      },
-      {
-        "driver_id": "OCO",
-        "best": 28.19,
-        "avg_best_3": 28.312,
-        "gap": 0.644
+        "avg_best_3": 28.209,
+        "gap": 0.828
       },
       {
         "driver_id": "IWA",
         "best": 28.209,
         "avg_best_3": 28.36,
-        "gap": 0.663
+        "gap": 0.927
       },
       {
         "driver_id": "ALO",
         "best": 28.312,
-        "avg_best_3": 28.414,
-        "gap": 0.766
-      },
-      {
-        "driver_id": "GAS",
-        "best": 28.341,
-        "avg_best_3": 28.368,
-        "gap": 0.795
+        "avg_best_3": 28.35,
+        "gap": 1.03
       },
       {
         "driver_id": "PER",
         "best": 28.41,
-        "avg_best_3": 28.505,
-        "gap": 0.864
+        "avg_best_3": 28.484,
+        "gap": 1.128
       },
       {
         "driver_id": "STR",
         "best": 28.433,
-        "avg_best_3": 28.525,
-        "gap": 0.887
+        "avg_best_3": 28.492,
+        "gap": 1.151
       },
       {
         "driver_id": "ARO",
         "best": 28.468,
         "avg_best_3": 28.5,
-        "gap": 0.922
+        "gap": 1.186
       },
       {
         "driver_id": "BRO",
         "best": 28.552,
         "avg_best_3": 28.643,
-        "gap": 1.006
+        "gap": 1.27
       },
       {
         "driver_id": "BOT",
         "best": 28.635,
-        "avg_best_3": 28.799,
-        "gap": 1.089
+        "avg_best_3": 28.681,
+        "gap": 1.353
       },
       {
         "driver_id": "HER",
         "best": 30.476,
         "avg_best_3": 30.476,
-        "gap": 2.93
+        "gap": 3.194
       }
     ]
   },
@@ -6169,10 +7446,16 @@
           "last_run_avg": 125.742,
           "improvement": -40.572,
           "improved": false
+        },
+        "FP3": {
+          "first_run_avg": 92.097,
+          "last_run_avg": 85.683,
+          "improvement": 6.414,
+          "improved": true
         }
       },
-      "total_improvement": -40.572,
-      "avg_improvement_per_session": -40.572
+      "total_improvement": -34.158,
+      "avg_improvement_per_session": -17.079
     },
     "ALO": {
       "sessions": {
@@ -6187,10 +7470,16 @@
           "last_run_avg": 105.978,
           "improvement": -8.652,
           "improved": false
+        },
+        "FP3": {
+          "first_run_avg": 97.61,
+          "last_run_avg": 118.18,
+          "improvement": -20.57,
+          "improved": false
         }
       },
-      "total_improvement": -16.339,
-      "avg_improvement_per_session": -8.169
+      "total_improvement": -36.909,
+      "avg_improvement_per_session": -12.303
     },
     "ANT": {
       "sessions": {
@@ -6205,10 +7494,16 @@
           "last_run_avg": 130.172,
           "improvement": 3.947,
           "improved": true
+        },
+        "FP3": {
+          "first_run_avg": 83.032,
+          "last_run_avg": 117.81,
+          "improvement": -34.778,
+          "improved": false
         }
       },
-      "total_improvement": -6.919,
-      "avg_improvement_per_session": -3.459
+      "total_improvement": -41.697,
+      "avg_improvement_per_session": -13.899
     },
     "ARO": {
       "sessions": {
@@ -6235,10 +7530,16 @@
           "last_run_avg": 87.005,
           "improvement": -1.767,
           "improved": false
+        },
+        "FP3": {
+          "first_run_avg": 114.099,
+          "last_run_avg": 126.404,
+          "improvement": -12.305,
+          "improved": false
         }
       },
-      "total_improvement": 3.786,
-      "avg_improvement_per_session": 1.893
+      "total_improvement": -8.519,
+      "avg_improvement_per_session": -2.84
     },
     "BOR": {
       "sessions": {
@@ -6253,10 +7554,16 @@
           "last_run_avg": 87.586,
           "improvement": 27.781,
           "improved": true
+        },
+        "FP3": {
+          "first_run_avg": 84.309,
+          "last_run_avg": 123.939,
+          "improvement": -39.63,
+          "improved": false
         }
       },
-      "total_improvement": 74.51,
-      "avg_improvement_per_session": 37.255
+      "total_improvement": 34.88,
+      "avg_improvement_per_session": 11.627
     },
     "BOT": {
       "sessions": {
@@ -6271,10 +7578,16 @@
           "last_run_avg": 88.114,
           "improvement": 17.335,
           "improved": true
+        },
+        "FP3": {
+          "first_run_avg": 87.019,
+          "last_run_avg": 132.905,
+          "improvement": -45.886,
+          "improved": false
         }
       },
-      "total_improvement": 15.549,
-      "avg_improvement_per_session": 7.775
+      "total_improvement": -30.337,
+      "avg_improvement_per_session": -10.112
     },
     "BRO": {
       "sessions": {
@@ -6301,10 +7614,16 @@
           "last_run_avg": 136.632,
           "improvement": -52.145,
           "improved": false
+        },
+        "FP3": {
+          "first_run_avg": 99.302,
+          "last_run_avg": 127.538,
+          "improvement": -28.236,
+          "improved": false
         }
       },
-      "total_improvement": -54.098,
-      "avg_improvement_per_session": -27.049
+      "total_improvement": -82.334,
+      "avg_improvement_per_session": -27.445
     },
     "GAS": {
       "sessions": {
@@ -6313,10 +7632,16 @@
           "last_run_avg": 86.74,
           "improvement": -2.329,
           "improved": false
+        },
+        "FP3": {
+          "first_run_avg": 98.12,
+          "last_run_avg": 122.25,
+          "improvement": -24.13,
+          "improved": false
         }
       },
-      "total_improvement": -2.329,
-      "avg_improvement_per_session": -2.329
+      "total_improvement": -26.459,
+      "avg_improvement_per_session": -13.229
     },
     "HAM": {
       "sessions": {
@@ -6331,10 +7656,16 @@
           "last_run_avg": 85.927,
           "improvement": -2.096,
           "improved": false
+        },
+        "FP3": {
+          "first_run_avg": 111.722,
+          "last_run_avg": 99.419,
+          "improvement": 12.303,
+          "improved": true
         }
       },
-      "total_improvement": -5.322,
-      "avg_improvement_per_session": -2.661
+      "total_improvement": 6.981,
+      "avg_improvement_per_session": 2.327
     },
     "HUL": {
       "sessions": {
@@ -6349,10 +7680,16 @@
           "last_run_avg": 87.328,
           "improvement": 0.826,
           "improved": true
+        },
+        "FP3": {
+          "first_run_avg": 84.683,
+          "last_run_avg": 115.169,
+          "improvement": -30.486,
+          "improved": false
         }
       },
-      "total_improvement": 26.057,
-      "avg_improvement_per_session": 13.029
+      "total_improvement": -4.429,
+      "avg_improvement_per_session": -1.476
     },
     "IWA": {
       "sessions": {
@@ -6379,10 +7716,16 @@
           "last_run_avg": 85.735,
           "improvement": 6.87,
           "improved": true
+        },
+        "FP3": {
+          "first_run_avg": 105.873,
+          "last_run_avg": 111.748,
+          "improvement": -5.875,
+          "improved": false
         }
       },
-      "total_improvement": 11.833,
-      "avg_improvement_per_session": 5.917
+      "total_improvement": 5.958,
+      "avg_improvement_per_session": 1.986
     },
     "LEC": {
       "sessions": {
@@ -6397,10 +7740,16 @@
           "last_run_avg": 85.925,
           "improvement": -2.453,
           "improved": false
+        },
+        "FP3": {
+          "first_run_avg": 83.25,
+          "last_run_avg": 109.183,
+          "improvement": -25.933,
+          "improved": false
         }
       },
-      "total_improvement": -1.106,
-      "avg_improvement_per_session": -0.553
+      "total_improvement": -27.039,
+      "avg_improvement_per_session": -9.013
     },
     "LIN": {
       "sessions": {
@@ -6415,10 +7764,16 @@
           "last_run_avg": 86.525,
           "improvement": 6.868,
           "improved": true
+        },
+        "FP3": {
+          "first_run_avg": 84.307,
+          "last_run_avg": 120.592,
+          "improvement": -36.285,
+          "improved": false
         }
       },
-      "total_improvement": -11.675,
-      "avg_improvement_per_session": -5.837
+      "total_improvement": -47.96,
+      "avg_improvement_per_session": -15.987
     },
     "NOR": {
       "sessions": {
@@ -6433,10 +7788,16 @@
           "last_run_avg": 107.037,
           "improvement": -7.69,
           "improved": false
+        },
+        "FP3": {
+          "first_run_avg": 83.652,
+          "last_run_avg": 91.641,
+          "improvement": -7.989,
+          "improved": false
         }
       },
-      "total_improvement": -38.318,
-      "avg_improvement_per_session": -19.159
+      "total_improvement": -46.307,
+      "avg_improvement_per_session": -15.436
     },
     "OCO": {
       "sessions": {
@@ -6451,10 +7812,16 @@
           "last_run_avg": 87.573,
           "improvement": -0.2,
           "improved": false
+        },
+        "FP3": {
+          "first_run_avg": 86.547,
+          "last_run_avg": 122.987,
+          "improvement": -36.44,
+          "improved": false
         }
       },
-      "total_improvement": 2.911,
-      "avg_improvement_per_session": 1.456
+      "total_improvement": -33.529,
+      "avg_improvement_per_session": -11.176
     },
     "PER": {
       "sessions": {
@@ -6463,10 +7830,16 @@
           "last_run_avg": 88.132,
           "improvement": -2.183,
           "improved": false
+        },
+        "FP3": {
+          "first_run_avg": 86.381,
+          "last_run_avg": 108.495,
+          "improvement": -22.114,
+          "improved": false
         }
       },
-      "total_improvement": -2.183,
-      "avg_improvement_per_session": -2.183
+      "total_improvement": -24.297,
+      "avg_improvement_per_session": -12.149
     },
     "PIA": {
       "sessions": {
@@ -6481,10 +7854,16 @@
           "last_run_avg": 124.128,
           "improvement": -23.707,
           "improved": false
+        },
+        "FP3": {
+          "first_run_avg": 119.519,
+          "last_run_avg": 93.253,
+          "improvement": 26.266,
+          "improved": true
         }
       },
-      "total_improvement": -25.541,
-      "avg_improvement_per_session": -12.771
+      "total_improvement": 0.725,
+      "avg_improvement_per_session": 0.242
     },
     "RUS": {
       "sessions": {
@@ -6499,10 +7878,16 @@
           "last_run_avg": 122.936,
           "improvement": -6.456,
           "improved": false
+        },
+        "FP3": {
+          "first_run_avg": 83.508,
+          "last_run_avg": 82.219,
+          "improvement": 1.289,
+          "improved": true
         }
       },
-      "total_improvement": -54.454,
-      "avg_improvement_per_session": -27.227
+      "total_improvement": -53.165,
+      "avg_improvement_per_session": -17.722
     },
     "SAI": {
       "sessions": {
@@ -6517,10 +7902,16 @@
           "last_run_avg": 87.321,
           "improvement": 15.128,
           "improved": true
+        },
+        "FP3": {
+          "first_run_avg": 97.264,
+          "last_run_avg": 126.253,
+          "improvement": -28.989,
+          "improved": false
         }
       },
-      "total_improvement": 42.257,
-      "avg_improvement_per_session": 21.129
+      "total_improvement": 13.268,
+      "avg_improvement_per_session": 4.423
     },
     "STR": {
       "sessions": {
@@ -6535,10 +7926,16 @@
           "last_run_avg": 89.618,
           "improvement": 6.016,
           "improved": true
+        },
+        "FP3": {
+          "first_run_avg": 87.31,
+          "last_run_avg": 113.312,
+          "improvement": -26.002,
+          "improved": false
         }
       },
-      "total_improvement": -11.451,
-      "avg_improvement_per_session": -5.725
+      "total_improvement": -37.453,
+      "avg_improvement_per_session": -12.484
     },
     "TSU": {
       "sessions": {
@@ -6553,10 +7950,16 @@
           "last_run_avg": 86.762,
           "improvement": 9.346,
           "improved": true
+        },
+        "FP3": {
+          "first_run_avg": 84.31,
+          "last_run_avg": 91.98,
+          "improvement": -7.669,
+          "improved": false
         }
       },
-      "total_improvement": -39.181,
-      "avg_improvement_per_session": -19.59
+      "total_improvement": -46.85,
+      "avg_improvement_per_session": -15.617
     },
     "VER": {
       "sessions": {
@@ -6565,10 +7968,16 @@
           "last_run_avg": 102.202,
           "improvement": 11.686,
           "improved": true
+        },
+        "FP3": {
+          "first_run_avg": 83.467,
+          "last_run_avg": 97.299,
+          "improvement": -13.832,
+          "improved": false
         }
       },
-      "total_improvement": 11.686,
-      "avg_improvement_per_session": 11.686
+      "total_improvement": -2.146,
+      "avg_improvement_per_session": -1.073
     }
   }
 }
