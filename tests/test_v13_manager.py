@@ -51,7 +51,7 @@ def test_v13_uses_only_qualifying_locked_data_for_final_fix() -> None:
     assert live["score_delta_vs_projection"] == 24.4
     assert live["cumulative_points"] == 2840.0
     assert state["early_thoughts"]["race"] == "Italian Grand Prix"
-    assert state["early_thoughts"]["drivers"] == ["ANT", "HAM", "HUL", "LIN", "BOT"]
+    assert state["early_thoughts"]["drivers"] == ["ANT", "HAM", "HUL", "LIN", "STR"]
     assert state["early_thoughts"]["constructors"] == ["mercedes", "ferrari"]
     assert state["early_thoughts"]["policy"]["policy_version"] == (
         "horizon_budget_value_v2"
