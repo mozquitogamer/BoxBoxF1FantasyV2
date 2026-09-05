@@ -22,8 +22,11 @@
     }
   },
   "15": {
-    "_note": "Italian GP confirmed pre-qualifying penalty: ANT starts from the back of the grid regardless of qualifying position.",
+    "_note": "Italian GP confirmed pre-qualifying penalties: ANT and ALB start from the back of the grid regardless of qualifying position.",
     "ANT": {
+      "back_of_grid": true
+    },
+    "ALB": {
       "back_of_grid": true
     }
   }

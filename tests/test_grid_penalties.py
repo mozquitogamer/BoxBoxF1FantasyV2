@@ -51,20 +51,20 @@ def test_round13_equal_three_place_penalties_match_confirmed_top_seven():
     }
 
 
-def test_round15_antonelli_starts_at_back_regardless_of_predicted_quali():
+def test_round15_antonelli_and_albon_start_at_back_in_qualifying_order():
     rules = load_grid_penalties(15)
-    assert rules == {"ANT": {"back_of_grid": True}}
+    assert rules == {
+        "ANT": {"back_of_grid": True},
+        "ALB": {"back_of_grid": True},
+    }
 
-    for ant_quali in (1, 7, 22):
-        positions = np.arange(1, 23)
-        ant_idx = QUALIFYING_ORDER.index("ANT")
-        other_idx = ant_quali - 1
-        positions[ant_idx], positions[other_idx] = positions[other_idx], positions[ant_idx]
+    positions = np.arange(1, 23)
+    grid = apply_grid_penalties(positions, QUALIFYING_ORDER, rules)
+    by_driver = dict(zip(QUALIFYING_ORDER, grid))
 
-        grid = apply_grid_penalties(positions, QUALIFYING_ORDER, rules)
-
-        assert sorted(grid.tolist()) == list(range(1, 23))
-        assert grid[ant_idx] == 22
+    assert sorted(grid.tolist()) == list(range(1, 23))
+    assert by_driver["ANT"] == 21
+    assert by_driver["ALB"] == 22
 
 
 def test_no_penalties_is_identity_and_place_drop_caps_at_field_tail():

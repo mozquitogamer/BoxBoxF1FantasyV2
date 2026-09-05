@@ -49,7 +49,9 @@ def apply_grid_penalties(
         idx for idx in order
         if bool(normalized_rules.get(abbrevs[idx], {}).get("back_of_grid", False))
     ]
-    for idx in back_indices:
+    # Fill from the last slot upward in reverse qualifying order so the better
+    # qualifier remains ahead when multiple drivers must start at the back.
+    for idx in reversed(back_indices):
         slot = next(pos for pos in range(n_drivers, 0, -1) if slots[pos] is None)
         slots[slot] = idx
         placed.add(idx)
