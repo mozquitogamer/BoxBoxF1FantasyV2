@@ -79,6 +79,9 @@ async function existingBroadcast(apiKey, name) {
     for (const item of listed?.data || []) {
         if (item.name === name) return item;
         if (!item.id) continue;
+        // Resend's list response omits broadcast names, so details are fetched
+        // serially and paced below the provider's per-team request limit.
+        await new Promise(resolve => setTimeout(resolve, 225));
         const detail = await resendRequest(`/broadcasts/${encodeURIComponent(item.id)}`, apiKey);
         if (detail?.name === name) return detail;
     }

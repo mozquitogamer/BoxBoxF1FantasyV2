@@ -120,23 +120,34 @@ function getConfig() {
 }
 
 async function resendRequest(path, apiKey, options = {}) {
-    const response = await fetch(`${RESEND_API}${path}`, {
-        method: options.method || 'GET',
-        headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-            ...(options.headers || {}),
-        },
-        body: options.body ? JSON.stringify(options.body) : undefined,
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-        const error = new Error(data.message || `Resend request failed with ${response.status}`);
-        error.status = response.status;
-        error.details = data;
-        throw error;
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+        const response = await fetch(`${RESEND_API}${path}`, {
+            method: options.method || 'GET',
+            headers: {
+                Authorization: `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                ...(options.headers || {}),
+            },
+            body: options.body ? JSON.stringify(options.body) : undefined,
+        });
+        const data = await response.json().catch(() => ({}));
+        if (response.status === 429 && attempt < 3) {
+            const retryAfter = Number(response.headers?.get?.('retry-after'));
+            const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
+                ? Math.min(5000, Math.max(250, retryAfter * 1000))
+                : 1000 * (attempt + 1);
+            await new Promise(resolve => setTimeout(resolve, waitMs));
+            continue;
+        }
+        if (!response.ok) {
+            const error = new Error(data.message || `Resend request failed with ${response.status}`);
+            error.status = response.status;
+            error.details = data;
+            throw error;
+        }
+        return data;
     }
-    return data;
+    throw new Error('Resend request exhausted its retry budget');
 }
 
 function isResendEmailCancellationSettled(error) {
