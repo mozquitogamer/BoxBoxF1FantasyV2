@@ -7626,7 +7626,7 @@ async function runMultiWeekPlanner() {
                 }
 
                 const netPts = pts - penalty;
-                const freeTransfersNext = (activeChip === 'wildcard' || activeChip === 'limitless')
+                const freeTransfersNext = (usedChip === 'wild_card' || usedChip === 'limitless')
                     ? MW_TUNABLES.baseFreeTransfers
                     : Math.min(
                         MW_TUNABLES.maxBankedTransfers,

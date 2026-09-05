@@ -132,6 +132,13 @@ if ('budgetGainWeight' in S.MW_TUNABLES) {
   fail('legacy cumulative MW_TUNABLES.budgetGainWeight is still present');
 }
 
+if (/const freeTransfersNext = \(activeChip ===/.test(src)) {
+  fail('multi-week planner still references out-of-scope activeChip');
+}
+if (!/const freeTransfersNext = \(usedChip === 'wild_card' \|\| usedChip === 'limitless'\)/.test(src)) {
+  fail('multi-week planner chip transfer reset is not keyed to usedChip');
+}
+
 // 2) Key functions must exist.
 for (const [k, label] of [
   ['hasRenderSwapRow', 'renderSwapRow'],
