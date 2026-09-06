@@ -44,11 +44,11 @@
     },
     {
       "date": "2026-09-06",
-      "temp_max": 32.2,
+      "temp_max": 32.3,
       "temp_min": 22.1,
       "precip_probability_max": 0,
       "precip_sum_mm": 0.0,
-      "wind_max_kmh": 9.0,
+      "wind_max_kmh": 9.4,
       "weather_description": "Partly cloudy",
       "weather_category": "cloudy",
       "weather_icon": "\u26c5",
@@ -333,10 +333,10 @@
       ]
     }
   ],
-  "last_updated": "2026-09-06T14:39:10Z",
-  "next_update": "2026-09-06T20:39:10Z",
+  "last_updated": "2026-09-06T19:47:00Z",
+  "next_update": "2026-09-07T01:47:00Z",
   "data_source": "Open-Meteo (open-meteo.com)",
-  "forecast_snapshot_id": "2026-09-06T14-39-10.739718Z",
-  "forecast_retrieved_at": "2026-09-06T14:39:10.739718+00:00",
-  "forecast_archive_path": "data/forecasts/weather/year2026/round15/2026-09-06T14-39-10.739718Z_open_meteo.json"
+  "forecast_snapshot_id": "2026-09-06T19-47-00.539827Z",
+  "forecast_retrieved_at": "2026-09-06T19:47:00.539827+00:00",
+  "forecast_archive_path": "data/forecasts/weather/year2026/round15/2026-09-06T19-47-00.539827Z_open_meteo.json"
 }
