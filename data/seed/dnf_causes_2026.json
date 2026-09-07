@@ -12,7 +12,8 @@
     "10": "Austrian Grand Prix",
     "11": "British Grand Prix",
     "12": "Belgian Grand Prix",
-    "13": "Hungarian Grand Prix"
+    "13": "Hungarian Grand Prix",
+    "15": "Italian Grand Prix"
   },
   "_driver_names": {
     "ALB": "Alex Albon",
@@ -99,7 +100,12 @@
       "PIA": "mechanical",
       "PER": "mechanical",
       "BOT": "mechanical"
+    },
+    "15": {
+      "LEC": "driver_error",
+      "ALO": "driver_error",
+      "STR": "mechanical"
     }
   },
-  "_source": "Causes researched from race reports and official team/FIA/F1 reports through 2026-07-27. mechanical=car/PU failure; collision=contact; driver_error=solo crash; other=external/freak."
+  "_source": "Causes researched from race reports and official team/FIA/F1 reports through 2026-07-27. mechanical=car/PU failure; collision=contact; driver_error=solo crash; other=external/freak. R15: https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-italy-2026.43DzkIlg5jfZZOc1IBjSv3 (2026-09-07)."
 }

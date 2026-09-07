@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-05T14:49:48.511345+02:00",
+  "generated_at": "2026-09-07T14:27:27.076670+02:00",
   "manager": {
     "id": "v13",
     "name": "V13",
@@ -11,7 +11,7 @@
     "policy": {
       "team_selection_phase": "post_fp",
       "early_thoughts_phase": "pre_fp",
-      "price_gain_weight": 4.611,
+      "price_gain_weight": 4.588,
       "price_gain_method": "Horizon-aware budget curve discounted for forecast reliability and realised conversion into future points.",
       "research_replay_price_gain_weight": 20.0,
       "negative_p5_weight": 0.75,
@@ -1181,38 +1181,196 @@
       "projected_points": 221.6,
       "score_delta_vs_projection": 24.4,
       "cumulative_points": 2840.0,
-      "budget_after": 127.0,
+      "budget_after": 129.0,
       "free_transfers_next": 2,
       "actual_captain": "HAM",
+      "actual_second_boost": null
+    },
+    {
+      "round": 15,
+      "race": "Italian Grand Prix",
+      "provenance": "live",
+      "early_thoughts": {
+        "archive": "web/public/data/predictions_round15_pre_fp.json",
+        "archive_sha256": "f994b78ef700d056924e165bc88bb9390fe27d586bc3b923597f9095a7d81fe4",
+        "captain": "ANT",
+        "changes": {
+          "constructors_in": [
+            "mercedes"
+          ],
+          "constructors_out": [
+            "mclaren"
+          ],
+          "drivers_in": [
+            "ANT",
+            "STR"
+          ],
+          "drivers_out": [
+            "BOR",
+            "LEC"
+          ]
+        },
+        "chip": null,
+        "chip_decision": {
+          "reason": "Only post-FP finals can play 3x.",
+          "result": "not_evaluated"
+        },
+        "constructors": [
+          "mercedes",
+          "ferrari"
+        ],
+        "correction_reason": "Refreshed Monza pre-FP forecast after rerunning the early-simulation pipeline on 2026-08-24.",
+        "downside_risk": 64.3,
+        "drivers": [
+          "ANT",
+          "HAM",
+          "HUL",
+          "LIN",
+          "STR"
+        ],
+        "lock_deadline": "2026-09-05T14:00:00Z",
+        "manager": "v13",
+        "phase": "pre_fp",
+        "policy": {
+          "negative_p5_weight": 0.75,
+          "policy_version": "horizon_budget_value_v2",
+          "price_gain_weight": 4.611,
+          "price_value_method": "horizon curve × price reliability × points realisation",
+          "risk_profile": "medium_tolerance",
+          "strategy": "budget_builder"
+        },
+        "previous_decision": "data/v13/decisions/round15_pre_fp_revision2.json",
+        "previous_decision_sha256": "78d707e54611c6a39a00e1dac0a734f759992bbc2ab3d0339037f06a8abe7eb3",
+        "price_snapshot_after_round": 14,
+        "projected_points": 210.2,
+        "projected_price_gain": 1.4,
+        "published_at": "2026-08-24T09:19:09.221606+00:00",
+        "race": "Italian Grand Prix",
+        "revision": 3,
+        "round": 15,
+        "schema_version": 1,
+        "second_boost": null,
+        "source_generated_at": "2026-08-24T09:18:56.694738+00:00",
+        "status": "corrected_provisional",
+        "supersedes": "data/v13/decisions/round15_pre_fp_revision2.json",
+        "supersedes_sha256": "78d707e54611c6a39a00e1dac0a734f759992bbc2ab3d0339037f06a8abe7eb3",
+        "team_cost": 125.3,
+        "transfer_penalty": 10,
+        "transfers": 3
+      },
+      "post_fp_final": {
+        "archive": "web/public/data/predictions_round15_post_fp.json",
+        "archive_sha256": "9634176542be13dfb1378401cbc560ad1f043c6d5223227b246cc0143f1f0822",
+        "captain": "ANT",
+        "changes": {
+          "constructors_in": [
+            "mercedes"
+          ],
+          "constructors_out": [
+            "mclaren"
+          ],
+          "drivers_in": [
+            "ALB",
+            "ANT"
+          ],
+          "drivers_out": [
+            "BOR",
+            "HAM"
+          ]
+        },
+        "chip": null,
+        "chip_decision": {
+          "current_selected_team_extra_points": 68.8,
+          "largest_remaining_priors_round": 18,
+          "largest_remaining_priors_top_two": 96.5,
+          "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast.",
+          "result": "save"
+        },
+        "constructors": [
+          "mercedes",
+          "ferrari"
+        ],
+        "correction_reason": "Replace premature FP2 freeze with verified FP3 lock-time forecast; include confirmed Antonelli and Albon back-of-grid penalties.",
+        "downside_risk": 67.2,
+        "drivers": [
+          "ANT",
+          "LEC",
+          "ALB",
+          "LIN",
+          "HUL"
+        ],
+        "lock_deadline": "2026-09-05T14:00:00Z",
+        "manager": "v13",
+        "phase": "post_fp",
+        "policy": {
+          "negative_p5_weight": 0.75,
+          "policy_version": "horizon_budget_value_v2",
+          "price_gain_weight": 4.611,
+          "price_value_method": "horizon curve × price reliability × points realisation",
+          "risk_profile": "medium_tolerance",
+          "strategy": "budget_builder"
+        },
+        "previous_decision": "data/v13/decisions/round15_post_fp.json",
+        "previous_decision_sha256": "6e47419a6951f0b18487e788c348ce8be192ec3e90706d08989c379afc701ebe",
+        "price_snapshot_after_round": 14,
+        "projected_points": 273.0,
+        "projected_price_gain": 1.4,
+        "published_at": "2026-09-05T12:46:46.233246+00:00",
+        "race": "Italian Grand Prix",
+        "revision": 2,
+        "round": 15,
+        "schema_version": 1,
+        "second_boost": null,
+        "source_generated_at": "2026-09-05T12:46:28.389522+00:00",
+        "status": "corrected_before_lock",
+        "supersedes": "data/v13/decisions/round15_post_fp.json",
+        "supersedes_sha256": "6e47419a6951f0b18487e788c348ce8be192ec3e90706d08989c379afc701ebe",
+        "team_cost": 126.6,
+        "transfer_penalty": 10,
+        "transfers": 3,
+        "reasons": [
+          "The post-FP lineup projected 273.0 points after a 10-point transfer penalty.",
+          "It carried $1.4M of forecast price movement into the budget-first objective.",
+          "Its combined negative-P5 exposure was 67.2 under V13's medium-risk rule."
+        ]
+      },
+      "final_fix": null,
+      "actual_points": 358.0,
+      "projected_points": 273.0,
+      "score_delta_vs_projection": 85.0,
+      "cumulative_points": 3198.0,
+      "budget_after": 131.2,
+      "free_transfers_next": 2,
+      "actual_captain": "ANT",
       "actual_second_boost": null
     }
   ],
   "live_status": {
     "status": "live",
-    "through_round": 14,
-    "race": "Dutch Grand Prix",
-    "round_points": 246.0,
-    "projected_points": 221.6,
-    "score_delta_vs_projection": 24.4,
-    "total_points": 2840.0,
-    "budget": 127.0,
-    "bank": 0.1
+    "through_round": 15,
+    "race": "Italian Grand Prix",
+    "round_points": 358.0,
+    "projected_points": 273.0,
+    "score_delta_vs_projection": 85.0,
+    "total_points": 3198.0,
+    "budget": 131.2,
+    "bank": 2.4
   },
   "current_state": {
-    "as_of_round": 14,
+    "as_of_round": 15,
     "drivers": [
+      "ANT",
       "LEC",
-      "HAM",
+      "ALB",
       "LIN",
-      "BOR",
       "HUL"
     ],
     "constructors": [
-      "mclaren",
+      "mercedes",
       "ferrari"
     ],
-    "budget": 127.0,
-    "bank": 0.1,
+    "budget": 131.2,
+    "bank": 2.4,
     "free_transfers": 2,
     "chips_remaining": [
       "3x_boost"
@@ -1224,146 +1382,66 @@
       "autopilot": 12,
       "final_fix": 13
     },
-    "next_round": 15,
+    "next_round": 16,
     "early_thoughts": {
-      "archive": "web/public/data/predictions_round15_pre_fp.json",
-      "archive_sha256": "f994b78ef700d056924e165bc88bb9390fe27d586bc3b923597f9095a7d81fe4",
-      "captain": "ANT",
-      "changes": {
-        "constructors_in": [
-          "mercedes"
-        ],
-        "constructors_out": [
-          "mclaren"
-        ],
-        "drivers_in": [
-          "ANT",
-          "STR"
-        ],
-        "drivers_out": [
-          "BOR",
-          "LEC"
-        ]
-      },
-      "chip": null,
-      "chip_decision": {
-        "reason": "Only post-FP finals can play 3x.",
-        "result": "not_evaluated"
-      },
-      "constructors": [
-        "mercedes",
-        "ferrari"
-      ],
-      "correction_reason": "Refreshed Monza pre-FP forecast after rerunning the early-simulation pipeline on 2026-08-24.",
-      "downside_risk": 64.3,
+      "schema_version": 1,
+      "manager": "v13",
+      "round": 16,
+      "race": "Spanish Grand Prix (Madrid)",
+      "phase": "pre_fp",
+      "status": "provisional",
+      "published_at": "2026-09-07T12:27:27.068670+00:00",
+      "source_generated_at": "2026-09-07T12:26:49.064519+00:00",
+      "lock_deadline": "2026-09-12T14:00:00Z",
+      "archive": "web/public/data/predictions_round16_pre_fp.json",
+      "archive_sha256": "f6b9f13f4229804f4c7ffde60f260855fc747e2d2b616b824b16fdd77c084f40",
+      "previous_decision": "data/v13/decisions/round15_post_fp_revision2.json",
+      "previous_decision_sha256": "f32e1c0cd9533e3b564eb5063056e9b49c7330f2efe9024c16c405de57626db6",
+      "price_snapshot_after_round": 15,
       "drivers": [
         "ANT",
         "HAM",
-        "HUL",
         "LIN",
-        "STR"
+        "HUL",
+        "ALB"
       ],
-      "lock_deadline": "2026-09-05T14:00:00Z",
-      "manager": "v13",
-      "phase": "pre_fp",
-      "policy": {
-        "negative_p5_weight": 0.75,
-        "policy_version": "horizon_budget_value_v2",
-        "price_gain_weight": 4.611,
-        "price_value_method": "horizon curve × price reliability × points realisation",
-        "risk_profile": "medium_tolerance",
-        "strategy": "budget_builder"
-      },
-      "previous_decision": "data/v13/decisions/round15_pre_fp_revision2.json",
-      "previous_decision_sha256": "78d707e54611c6a39a00e1dac0a734f759992bbc2ab3d0339037f06a8abe7eb3",
-      "price_snapshot_after_round": 14,
-      "projected_points": 210.2,
-      "projected_price_gain": 1.4,
-      "published_at": "2026-08-24T09:19:09.221606+00:00",
-      "race": "Italian Grand Prix",
-      "revision": 3,
-      "round": 15,
-      "schema_version": 1,
-      "second_boost": null,
-      "source_generated_at": "2026-08-24T09:18:56.694738+00:00",
-      "status": "corrected_provisional",
-      "supersedes": "data/v13/decisions/round15_pre_fp_revision2.json",
-      "supersedes_sha256": "78d707e54611c6a39a00e1dac0a734f759992bbc2ab3d0339037f06a8abe7eb3",
-      "team_cost": 125.3,
-      "transfer_penalty": 10,
-      "transfers": 3
-    },
-    "post_fp_final": {
-      "archive": "web/public/data/predictions_round15_post_fp.json",
-      "archive_sha256": "9634176542be13dfb1378401cbc560ad1f043c6d5223227b246cc0143f1f0822",
-      "captain": "ANT",
-      "changes": {
-        "constructors_in": [
-          "mercedes"
-        ],
-        "constructors_out": [
-          "mclaren"
-        ],
-        "drivers_in": [
-          "ALB",
-          "ANT"
-        ],
-        "drivers_out": [
-          "BOR",
-          "HAM"
-        ]
-      },
-      "chip": null,
-      "chip_decision": {
-        "current_selected_team_extra_points": 68.8,
-        "largest_remaining_priors_round": 18,
-        "largest_remaining_priors_top_two": 96.5,
-        "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast.",
-        "result": "save"
-      },
       "constructors": [
         "mercedes",
         "ferrari"
       ],
-      "correction_reason": "Replace premature FP2 freeze with verified FP3 lock-time forecast; include confirmed Antonelli and Albon back-of-grid penalties.",
-      "downside_risk": 67.2,
-      "drivers": [
-        "ANT",
-        "LEC",
-        "ALB",
-        "LIN",
-        "HUL"
-      ],
-      "lock_deadline": "2026-09-05T14:00:00Z",
-      "manager": "v13",
-      "phase": "post_fp",
-      "policy": {
-        "negative_p5_weight": 0.75,
-        "policy_version": "horizon_budget_value_v2",
-        "price_gain_weight": 4.611,
-        "price_value_method": "horizon curve × price reliability × points realisation",
-        "risk_profile": "medium_tolerance",
-        "strategy": "budget_builder"
-      },
-      "previous_decision": "data/v13/decisions/round15_post_fp.json",
-      "previous_decision_sha256": "6e47419a6951f0b18487e788c348ce8be192ec3e90706d08989c379afc701ebe",
-      "price_snapshot_after_round": 14,
-      "projected_points": 273.0,
-      "projected_price_gain": 1.4,
-      "published_at": "2026-09-05T12:46:46.233246+00:00",
-      "race": "Italian Grand Prix",
-      "revision": 2,
-      "round": 15,
-      "schema_version": 1,
+      "captain": "ANT",
       "second_boost": null,
-      "source_generated_at": "2026-09-05T12:46:28.389522+00:00",
-      "status": "corrected_before_lock",
-      "supersedes": "data/v13/decisions/round15_post_fp.json",
-      "supersedes_sha256": "6e47419a6951f0b18487e788c348ce8be192ec3e90706d08989c379afc701ebe",
-      "team_cost": 126.6,
-      "transfer_penalty": 10,
-      "transfers": 3
-    }
+      "chip": null,
+      "projected_points": 213.5,
+      "projected_price_gain": 2.4,
+      "downside_risk": 59.9,
+      "team_cost": 129.9,
+      "transfers": 1,
+      "transfer_penalty": 0,
+      "changes": {
+        "drivers_out": [
+          "LEC"
+        ],
+        "drivers_in": [
+          "HAM"
+        ],
+        "constructors_out": [],
+        "constructors_in": []
+      },
+      "chip_decision": {
+        "result": "not_evaluated",
+        "reason": "Only post-FP finals can play 3x."
+      },
+      "policy": {
+        "policy_version": "horizon_budget_value_v2",
+        "strategy": "budget_builder",
+        "risk_profile": "medium_tolerance",
+        "price_gain_weight": 4.588,
+        "negative_p5_weight": 0.75,
+        "price_value_method": "horizon curve × price reliability × points realisation"
+      }
+    },
+    "post_fp_final": null
   },
   "labels": {
     "drivers": {
@@ -1419,10 +1497,12 @@
       11,
       12,
       13,
-      14
+      14,
+      15
     ],
     "live_decisions": [
-      14
+      14,
+      15
     ]
   }
 }

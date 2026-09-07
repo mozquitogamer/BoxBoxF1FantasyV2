@@ -74,6 +74,12 @@
           "circuit_id": "zandvoort",
           "points": -13,
           "is_dnf": true
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 37,
+          "is_dnf": false
         }
       ]
     },
@@ -149,6 +155,12 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 32,
+          "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 33,
           "is_dnf": false
         }
       ]
@@ -226,6 +238,12 @@
           "circuit_id": "zandvoort",
           "points": 37,
           "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 93,
+          "is_dnf": false
         }
       ]
     },
@@ -302,6 +320,12 @@
           "circuit_id": "zandvoort",
           "points": 39,
           "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": -12,
+          "is_dnf": true
         }
       ]
     },
@@ -377,6 +401,12 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 23,
+          "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 26,
           "is_dnf": false
         }
       ]
@@ -454,6 +484,12 @@
           "circuit_id": "zandvoort",
           "points": 57,
           "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 32,
+          "is_dnf": false
         }
       ]
     },
@@ -530,6 +566,12 @@
           "circuit_id": "zandvoort",
           "points": -13,
           "is_dnf": true
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 4,
+          "is_dnf": false
         }
       ]
     },
@@ -605,6 +647,12 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 7,
+          "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 11,
           "is_dnf": false
         }
       ]
@@ -682,6 +730,12 @@
           "circuit_id": "zandvoort",
           "points": 5,
           "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 14,
+          "is_dnf": false
         }
       ]
     },
@@ -757,6 +811,12 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 8,
+          "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 14,
           "is_dnf": false
         }
       ]
@@ -834,6 +894,12 @@
           "circuit_id": "zandvoort",
           "points": -10,
           "is_dnf": true
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 10,
+          "is_dnf": false
         }
       ]
     },
@@ -909,6 +975,12 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 7,
+          "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 14,
           "is_dnf": false
         }
       ]
@@ -986,6 +1058,12 @@
           "circuit_id": "zandvoort",
           "points": 2,
           "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 17,
+          "is_dnf": false
         }
       ]
     },
@@ -1061,6 +1139,12 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 6,
+          "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 14,
           "is_dnf": false
         }
       ]
@@ -1138,6 +1222,12 @@
           "circuit_id": "zandvoort",
           "points": 12,
           "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 25,
+          "is_dnf": false
         }
       ]
     },
@@ -1213,6 +1303,12 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 8,
+          "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 13,
           "is_dnf": false
         }
       ]
@@ -1360,6 +1456,12 @@
           "circuit_id": "zandvoort",
           "points": 24,
           "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": -10,
+          "is_dnf": true
         }
       ]
     },
@@ -1435,6 +1537,12 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 21,
+          "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 35,
           "is_dnf": false
         }
       ]
@@ -1512,6 +1620,12 @@
           "circuit_id": "zandvoort",
           "points": -18,
           "is_dnf": true
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 4,
+          "is_dnf": false
         }
       ]
     },
@@ -1587,6 +1701,12 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 5,
+          "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 14,
           "is_dnf": false
         }
       ]
@@ -1664,6 +1784,12 @@
           "circuit_id": "zandvoort",
           "points": -10,
           "is_dnf": true
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": -10,
+          "is_dnf": true
         }
       ]
     },
@@ -1673,6 +1799,12 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 5,
+          "is_dnf": false
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 17,
           "is_dnf": false
         }
       ]
@@ -1740,6 +1872,11 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 84
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 128
         }
       ]
     },
@@ -1804,6 +1941,11 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 74
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 24
         }
       ]
     },
@@ -1868,6 +2010,11 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 11
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 69
         }
       ]
     },
@@ -1932,6 +2079,11 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 22
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 33
         }
       ]
     },
@@ -1996,6 +2148,11 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": -20
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 17
         }
       ]
     },
@@ -2060,6 +2217,11 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 19
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 38
         }
       ]
     },
@@ -2124,6 +2286,11 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 15
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 34
         }
       ]
     },
@@ -2188,6 +2355,11 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 80
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 77
         }
       ]
     },
@@ -2252,6 +2424,11 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 25
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 41
         }
       ]
     },
@@ -2316,6 +2493,11 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": -9
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": 16
         }
       ]
     },
@@ -2380,6 +2562,11 @@
           "round": 14,
           "circuit_id": "zandvoort",
           "points": 18
+        },
+        {
+          "round": 15,
+          "circuit_id": "monza",
+          "points": -21
         }
       ]
     }
