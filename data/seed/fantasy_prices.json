@@ -658,6 +658,10 @@
         "racing_bulls": 13.5,
         "audi": 7.4,
         "cadillac": 3.0
+      },
+      "driver_asset_prices": {
+        "LAW_RED_BULL": 14.3,
+        "TSU_RACING_BULLS": 9.7
       }
     },
     "15": {
@@ -698,6 +702,10 @@
         "audi": 8.0,
         "aston_martin": 6.9,
         "cadillac": 3.0
+      },
+      "driver_asset_prices": {
+        "LAW_RED_BULL": 14.9,
+        "TSU_RACING_BULLS": 9.9
       }
     }
   },

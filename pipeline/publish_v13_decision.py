@@ -339,6 +339,9 @@ def _decision(
             price_gain_value=v13.live_price_gain_value(round_num),
         )
 
+    if chip != "limitless" and candidate.cost > state.budget + 1e-6:
+        raise ValueError(f"Refusing over-budget V13 R{round_num} decision")
+
     archive = ROOT / round_data.archive_path
     archive_payload = v13._load_json(archive)
     previous_path, previous_hash = _previous_record()

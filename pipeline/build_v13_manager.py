@@ -504,7 +504,20 @@ def _live_actual_score(
 
 
 def _price_after_round(round_num: int) -> dict[str, Any]:
-    return load_fantasy_price_data(round_num=round_num)
+    # The live loader deliberately selects the latest prices. Settlement must
+    # instead use this exact closing snapshot, or later price moves are counted
+    # again as cash when replaying the next round's transfers.
+    data = _load_json(SEED_DIR / "fantasy_prices.json")
+    snapshot = data.get("price_history", {}).get(str(round_num))
+    if snapshot is None:
+        raise ValueError(f"Missing closing price snapshot for V13 R{round_num}")
+    return {
+        "drivers": {
+            **snapshot["drivers"],
+            **snapshot.get("driver_asset_prices", {}),
+        },
+        "constructors": dict(snapshot["constructors"]),
+    }
 
 
 def _live_rounds_and_state(
@@ -565,6 +578,8 @@ def _live_rounds_and_state(
             bank_after = round(
                 previous_state.budget - float(final.get("team_cost", 0.0)), 1
             )
+            if bank_after < 0:
+                raise ValueError(f"V13 R{round_num} locked team exceeds its budget")
         free_next = season.next_free_transfers(
             previous_state.free_transfers,
             int(final.get("transfers", 0)),
@@ -576,12 +591,16 @@ def _live_rounds_and_state(
         constructor_prices = prices.get("constructors", {})
 
         def close_price(group: dict[str, Any], asset_id: str) -> float:
-            entry = group.get(asset_id) or {}
+            entry = group.get(asset_id)
             if isinstance(entry, dict):
                 value = entry.get("current_price")
             else:
                 value = entry
-            return float(value if value is not None else 0.0)
+            if value is None:
+                raise ValueError(
+                    f"Missing V13 R{round_num} closing price for {asset_id}"
+                )
+            return float(value)
 
         budget_after = round(
             bank_after

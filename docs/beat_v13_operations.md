@@ -118,6 +118,16 @@ The settlement command is the remaining operations item before R14 finishes;
 it cannot be meaningfully exercised until R14 official scores and closing
 prices exist. Do not update V13's score manually in the public JSON.
 
+Settlement must read the exact `price_history[N]` closing snapshot for round N,
+never the latest live-price loader. Seat-specific closing values belong in that
+snapshot's `driver_asset_prices` map. Missing snapshots or held-asset prices
+must stop settlement rather than defaulting to zero or a newer round's prices.
+
+The 7 September 2026 correction fixes double-counted price movement: R14 closed
+at $127.0M, Monza's locked team cost $126.6M, and the remaining $0.4M bank plus
+$128.8M closing team value gives $129.2M for Madrid. The original $131.2M-based
+Madrid provisional remains immutable; revision 2 records its replacement.
+
 ## Recommended entry proof
 
 Do not ask people to submit a lineup every week. Use one registration and one

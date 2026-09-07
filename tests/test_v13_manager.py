@@ -33,29 +33,13 @@ def test_v13_uses_only_qualifying_locked_data_for_final_fix() -> None:
     assert round_13["actual_points"] == 223.0
     assert round_13["cumulative_points"] == 2594.0
 
-    state = payload["current_state"]
-    assert state["as_of_round"] == 14
-    assert state["next_round"] == 15
-    assert state["drivers"] == ["LEC", "HAM", "LIN", "BOR", "HUL"]
-    assert state["constructors"] == ["mclaren", "ferrari"]
-    assert state["budget"] == 127.0
-    assert state["bank"] == 0.1
-    assert state["free_transfers"] == 2
-    assert state["chips_used"]["wild_card"] == 7
-    assert state["chips_remaining"] == ["3x_boost"]
-
-    live = payload["live_history"][-1]
-    assert live["round"] == 14
+    # Historical assertions stay tied to R14 as the live season advances.
+    live = next(row for row in payload["live_history"] if row["round"] == 14)
+    assert live["budget_after"] == 127.0
     assert live["actual_points"] == 246.0
     assert live["projected_points"] == 221.6
     assert live["score_delta_vs_projection"] == 24.4
     assert live["cumulative_points"] == 2840.0
-    assert state["early_thoughts"]["race"] == "Italian Grand Prix"
-    assert state["early_thoughts"]["drivers"] == ["ANT", "HAM", "HUL", "LIN", "STR"]
-    assert state["early_thoughts"]["constructors"] == ["mercedes", "ferrari"]
-    assert state["early_thoughts"]["policy"]["policy_version"] == (
-        "horizon_budget_value_v2"
-    )
 
 
 def test_r14_early_thoughts_are_frozen_from_a_pre_lock_archive() -> None:
@@ -96,9 +80,9 @@ def test_live_price_gain_value_is_horizon_aware_and_calibrated() -> None:
     assert v13.live_price_gain_value(20) > v13.live_price_gain_value(23)
 
 
-def test_live_monza_policy_no_longer_overvalues_price_growth() -> None:
+def test_live_madrid_policy_respects_corrected_budget() -> None:
     public = v13.build_payload()
-    round_data = publish._round_input(15, "pre_fp")
+    round_data = publish._round_input(16, "pre_fp")
     candidate = publish.season.choose_lineup(
         round_data=round_data,
         combos=publish.season.build_combo_matrices(round_data),
@@ -106,17 +90,21 @@ def test_live_monza_policy_no_longer_overvalues_price_growth() -> None:
         strategy=v13.V13_STRATEGY,
         chip=None,
         risk_profile=v13.V13_RISK_PROFILE,
-        price_gain_value=v13.live_price_gain_value(15),
+        price_gain_value=v13.live_price_gain_value(16),
     )
 
     assert candidate.constructors == ("mercedes", "ferrari")
-    assert candidate.projected_points == 210.2
-    assert candidate.transfer_penalty == 10
+    assert candidate.projected_points == 209.4
+    assert candidate.cost == 127.1
+    assert candidate.cost <= public["current_state"]["budget"]
+    assert candidate.transfer_penalty == 0
 
 
 def test_public_manager_distinguishes_live_policy_from_replay_policy() -> None:
     payload = v13.build_payload()
 
     assert payload["manager"]["policy_version"] == "2026.3"
-    assert payload["manager"]["policy"]["price_gain_weight"] == 4.611
+    assert payload["manager"]["policy"]["price_gain_weight"] == round(
+        v13.live_price_gain_value(payload["current_state"]["next_round"]), 3
+    )
     assert payload["manager"]["policy"]["research_replay_price_gain_weight"] == 20.0

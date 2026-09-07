@@ -1,6 +1,17 @@
 {
   "entries": [
     {
+      "date": "2026-09-07",
+      "title": "V13 budget correction before Madrid",
+      "tags": [
+        "fix"
+      ],
+      "body": [
+        "V13’s correct post-Monza spending budget is $129.2M: $128.8M in held drivers and constructors plus $0.4M in the bank. The previous $131.2M figure incorrectly reused current prices when settling an earlier round. Settlement now uses each round’s own closing prices.",
+        "Madrid’s provisional team has been recalculated within the corrected budget. The original decision remains in the audit history with an explicit correction. Monza’s 358 points and V13’s 3,198 season points are unchanged."
+      ]
+    },
+    {
       "date": "2026-08-11",
       "title": "Pit Wall saved teams and personalized simulation updates",
       "tags": [
@@ -109,7 +120,10 @@
     {
       "date": "2026-06-30",
       "title": "Pit-stop points now use the official F1 Fantasy figures",
-      "tags": ["fix", "model"],
+      "tags": [
+        "fix",
+        "model"
+      ],
       "body": [
         "We used to estimate each constructor's pit-stop points from public timing data, but that data is too unreliable for this: stops under a safety car often have no recorded time, and the timing is rounded too coarsely to tell who was actually quickest. Checked against the official numbers, our estimate was frequently wrong, sometimes badly (we missed a 15-point haul one weekend, and computed zero for everyone at another).",
         "Pit-stop points are now taken from the official F1 Fantasy figures, recorded by hand from the game. These feed the actual constructor scores behind the Season standings, Head-to-Head and Accuracy tabs, and they are also the basis for predicting each team's pit points in upcoming races, instead of the noisy timing estimate. Each team's season pit-points total is shown in the Pit Stop panel.",
@@ -119,7 +133,9 @@
     {
       "date": "2026-06-29",
       "title": "Race-finish predictions upgraded to a stronger model",
-      "tags": ["model"],
+      "tags": [
+        "model"
+      ],
       "body": [
         "Predicting where cars finish is the hardest part of what we do and the area with the most room to improve. We tested an alternative model type (CatBoost) head-to-head against our current one across every round of 2022 to 2026, using a strict no-peeking back-test where each race is predicted only from earlier data.",
         "It predicts race finishing positions measurably better: about 5 percent less error on the post-qualifying model, and a smaller but real gain on the post-practice model that actually drives your team-lock decisions, improving in almost every season and most in 2026. Qualifying and sprint showed no gain, so those keep the existing model. We also folded the latest three rounds (Monaco, Spain, Austria) back into the training data now that there are enough races to balance Monaco's unusually high retirement count.",
@@ -129,7 +145,9 @@
     {
       "date": "2026-06-28",
       "title": "DNF risk estimates retuned for a high-attrition season",
-      "tags": ["model"],
+      "tags": [
+        "model"
+      ],
       "body": [
         "Each driver carries a DNF (did-not-finish) risk that feeds their projected points and the width of their confidence range. The old method leaned almost entirely on a driver's own retirement count this season and then floored anyone who had not yet retired at 2 percent. In a season running close to 20 percent field retirements, that 2 percent was far too low, so the most reliable front-runners were being shown as almost bullet-proof and their points were nudged up accordingly.",
         "We replaced that with a smoother estimate that starts every driver from the season's actual retirement rate and then adjusts up or down based on their own record, rather than swinging to extremes on a small sample. In a head-to-head test across the season this predicts retirements measurably better. The practical effect: drivers who have not retired yet now show a realistic single-digit risk instead of near zero, a couple of drivers who had unlucky early retirements come back off the ceiling, and genuinely fragile cars stay high.",
@@ -139,7 +157,9 @@
     {
       "date": "2026-06-28",
       "title": "Overtake predictions retuned on a full season of data",
-      "tags": ["model"],
+      "tags": [
+        "model"
+      ],
       "body": [
         "Our overtake estimate feeds each driver's overtake points (one point per on-track pass) and, through them, their projected total. The old version was calibrated on just the first two races and assumed passes climb steadily toward the back of the grid, handing a back-row starter around 14 baseline overtakes a race.",
         "With seven rounds of real F1 Fantasy overtake data in hand, that turned out to be well wide of the mark. On-track passing in 2026 is roughly flat across the grid, about five per driver, and even front-runners pick up a fair number through DRS trains, recoveries and lapped traffic. The old model projected roughly 260 passes a race when the real figure is closer to 110. We recalibrated the per-grid bases against the actual data so the totals line up, and folded the race and sprint estimates onto one consistent formula.",
@@ -149,7 +169,9 @@
     {
       "date": "2026-06-27",
       "title": "Smarter long-run (race pace) analysis on the Analysis tab",
-      "tags": ["feature"],
+      "tags": [
+        "feature"
+      ],
       "body": [
         "The Long Run Pace table estimates each driver's race-day pace from their practice long runs, but the old method was crude: it averaged in the slow in and out laps from the pits, kept the odd traffic or lock-up lap that a human would ignore, and sometimes picked the wrong stint entirely. On a busy Friday that could throw a driver's race-pace number off by a second or more.",
         "It now reads a long run the way an analyst does off a timing screen: it strips out the in and out laps, then drops a one-off traffic or lock-up lap while keeping the genuine tyre-degradation laps that belong in the run. It also takes the headline from the session that actually shows race running, usually FP2, instead of blending in a green-track FP1 run. A new <strong>Long Run Detail</strong> panel shows the work: the laps kept in green and the ones thrown out struck through in red, so you can see exactly what each average is built on.",
@@ -159,7 +181,9 @@
     {
       "date": "2026-06-22",
       "title": "Pit Stop Performance on the Analysis tab now shows wheels-up times",
-      "tags": ["fix"],
+      "tags": [
+        "fix"
+      ],
       "body": [
         "The Pit Stop Performance table on the Analysis tab was showing each team's full pit-lane time, roughly 20 seconds from pit entry to pit exit, rather than the wheels-up stationary time that actually measures pit-crew speed. The two are worlds apart: a good stop is about 2 to 3 seconds stationary, so the old numbers told you nothing useful.",
         "It now uses the same wheels-up (stationary) data as the Constructors tab and the fantasy scoring, broken out per round, with any stop that has no measured stationary time flagged as n/a rather than guessed. For very recent races, where the public timing feed hasn't published wheels-up times yet (it can lag a day or two), the table holds off and says so instead of showing the misleading pit-lane figure."
@@ -168,7 +192,9 @@
     {
       "date": "2026-06-15",
       "title": "Sharper qualifying predictions from four years of practice data",
-      "tags": ["model"],
+      "tags": [
+        "model"
+      ],
       "body": [
         "Until now the prediction model only had <strong>this season's</strong> Friday and Saturday practice telemetry to learn from, roughly 3% of its training history. We found four full seasons of practice data (2022&ndash;2025) sitting unused on disk and wired it in. The model now trains on practice pace across <strong>~56% of its history</strong> instead of 3%.",
         "Why it matters: with only a sliver of practice data, the model couldn't really learn how practice pace translates into results, so we leaned on a hand-tuned blend to compensate. Now it works that relationship out for itself. On a rigorous back-test across every round of 2022&ndash;2026, <strong>qualifying prediction error dropped about 4% and improved in all five seasons</strong>. That kind of across-the-board gain is the bar we hold to before shipping.",
@@ -178,7 +204,10 @@
     {
       "date": "2026-06-15",
       "title": "Honest confidence ranges and crash-aware reliability for a high-DNF season",
-      "tags": ["model", "fix"],
+      "tags": [
+        "model",
+        "fix"
+      ],
       "body": [
         "2026 has been brutal for retirements: about <strong>21% of cars per race</strong> haven't finished, well above the historical 12% or so. Our confidence ranges hadn't caught up. When a driver actually retired, the result landed <em>outside</em> the predicted 90% range 58% of the time, so the intervals were quietly too optimistic about reliability.",
         "Two fixes went in. Each driver's retirement risk now <strong>tracks the season's actual attrition</strong> instead of assuming cars get more reliable as the year goes on, and a simulated retirement now costs a realistic points hit, with proper spread, rather than a fixed, soft estimate. The result: a retiring driver now lands inside the 90% range <strong>90% of the time</strong>, up from 42%, and a systematic over-optimism in the numbers is gone.",
@@ -189,7 +218,9 @@
     {
       "date": "2026-06-15",
       "title": "Tyre degradation fixed: the Analysis numbers now mean what they say",
-      "tags": ["fix"],
+      "tags": [
+        "fix"
+      ],
       "body": [
         "The <strong>Tyre Degradation</strong> table on the Analysis tab was badly broken, so we've rebuilt it from the ground up. The old version published nonsense. It showed drivers as the <em>best</em> tyre-savers, marked green, when the raw maths had them \"improving\" by 15+ seconds a lap (physically impossible). It never corrected for fuel burn, fitted noisy 3-lap quali sims, and accidentally merged runs from different practice sessions.",
         "<strong>What changed:</strong> degradation is now the fuel-corrected pace lost per lap of <em>tyre age</em>, fitted only on genuine long runs of 5+ clean laps with proper outlier handling. It's the same method the race Deep Dive already used. Quali sims and short runs are no longer dressed up as low-degradation; they read <strong>\"short runs only\"</strong>. And a run where the car actually got faster, as the track rubbers in and the fuel burns off, now reads <strong>\"track evolving\"</strong> rather than a fake green number.",
@@ -200,7 +231,9 @@
     {
       "date": "2026-06-09",
       "title": "Prices on every card, plus a budget-builder view of who's about to rise or fall",
-      "tags": ["feature"],
+      "tags": [
+        "feature"
+      ],
       "body": [
         "Every driver and constructor card now shows its <strong>current price</strong> as a pill right under the name, so you can weigh cost against predicted points without hunting for it.",
         "The Drivers <strong>table view</strong> (the ☰ toggle, top-right of the Drivers tab) gains four budget-builder columns showing <strong>how many points a driver needs this weekend to hit each price-change tier</strong>: <strong>Big rise</strong>, <strong>Sm rise</strong>, <strong>Sm drop</strong> and <strong>Big drop</strong>. Each cell is the points range that lands them in that bracket (e.g. \"44+\" for the biggest rise, \"<26\" for the biggest drop).",
@@ -210,7 +243,10 @@
     {
       "date": "2026-06-05",
       "title": "Predictions now lean on practice pace, fixing drivers shown out of position",
-      "tags": ["model", "fix"],
+      "tags": [
+        "model",
+        "fix"
+      ],
       "body": [
         "Because the F1 Fantasy deadline falls <strong>before qualifying</strong>, free practice is the only data this site has when it matters, so the post-practice prediction has to be as sharp as possible. It wasn't: the model was under-using practice pace and leaning too hard on season-long form, which left genuinely fast cars predicted out of position. Monaco was the obvious tell, with Ferrari topping practice but predicted behind both Mercedes.",
         "<strong>What changed (qualifying):</strong> I checked it properly. Across the completed 2026 rounds, simply ranking drivers by their fastest practice lap predicted the actual qualifying order <em>better</em> than the full model did, so the predicted qualifying now blends strongly toward practice pace. On the same back-test it cut the qualifying error by about 15%, and it was validated on normal tracks (Australia, Japan, Miami, Canada), so it helps everywhere, not just Monaco. On one-lap circuits where qualifying decides the weekend (Monaco especially, also Singapore and Hungary), it leans even harder on practice pace, since season-long race form matters less when you can't overtake.",
@@ -222,7 +258,10 @@
     {
       "date": "2026-06-05",
       "title": "Track-aware overtakes: Monaco no longer overcounts passing",
-      "tags": ["model", "fix"],
+      "tags": [
+        "model",
+        "fix"
+      ],
       "body": [
         "Predictions now scale overtakes and position movement to how hard a circuit is to overtake at. Monaco is the headline case: the old track-agnostic model projected <strong>~138 overtakes across the grid</strong> (even back-markers getting 7-11), which is wildly unrealistic for a track where on-track passing barely happens.",
         "<strong>What changed:</strong> each circuit's overtaking difficulty (which we already track) now damps both the overtake estimate and the Monte Carlo's position shuffling. At Monaco the field now projects <strong>~15-20 total overtakes</strong>, front-runners ~0, and the confidence ranges are tighter. Easy-overtaking tracks (Monza, Spa, Baku) are unaffected; only genuinely hard ones (Monaco, Singapore) are damped.",
@@ -234,7 +273,9 @@
     {
       "date": "2026-06-02",
       "title": "Share your team with a link",
-      "tags": ["feature"],
+      "tags": [
+        "feature"
+      ],
       "body": [
         "You can now share a team. Every lineup the optimizer suggests has a <strong>🔗 Share</strong> button, and the Transfer Advisor's \"My Current Team\" has a <strong>Share team</strong> button.",
         "Tap it and, on a phone, your share sheet opens (WhatsApp, Messages, X) with a short blurb and the link; on desktop the link is copied straight to your clipboard. The whole team is encoded in the link itself, so there's no sign-up and nothing saved on a server.",
@@ -245,7 +286,10 @@
     {
       "date": "2026-06-01",
       "title": "Reverted the bias correction: it was suppressing every prediction",
-      "tags": ["fix", "model"],
+      "tags": [
+        "fix",
+        "model"
+      ],
       "body": [
         "Last week I added a 'bias correction' that subtracted points from predictions to account for the model historically over-predicting. <strong>It was a mistake and it's now removed.</strong>",
         "<strong>The problem:</strong> the bias amounts (−6.6 pts for front-runners, etc.) were measured against the <em>old</em> model. Then the model was retrained, but the correction kept subtracting the old model's bias from the new model's output. The net effect was knocking ~6.6 points off every predicted front-runner for no valid reason. The predicted Monaco winner was showing 25.5 when the raw model said 32, and real 2026 race winners have been scoring 50-68.",
@@ -256,7 +300,9 @@
     {
       "date": "2026-05-31",
       "title": "Transfer Advisor: clearer swaps, smarter candidate pool",
-      "tags": ["feature"],
+      "tags": [
+        "feature"
+      ],
       "body": [
         "Several upgrades to the Transfer Advisor based on a full audit of how it works:",
         "<ul><li><strong>Per-swap net cost + points delta</strong>: each recommended swap now shows exactly what it does to your wallet and your score (e.g. <em>+4.2pts −$1.5M</em>), the two numbers you actually weigh when deciding. Green when a swap frees budget, red when it costs.</li><li><strong>Efficiency line</strong>: every option shows its net-points gain versus simply keeping your current team, plus the gain per transfer used. Makes it obvious whether taking an extra −10 transfer hit is actually worth it.</li><li><strong>Smarter candidate pool</strong>: the search now considers cheap high-value 'enabler' picks (a budget driver you'd bring in purely to afford a star elsewhere), not just the top names by raw points. Previously these could be invisible to the search under the Max Points strategy.</li></ul>",
@@ -266,7 +312,10 @@
     {
       "date": "2026-05-27",
       "title": "Wired up the Monte Carlo bias correction (later reverted, see 2026-06-01)",
-      "tags": ["fix", "model"],
+      "tags": [
+        "fix",
+        "model"
+      ],
       "body": [
         "<strong>Superseded:</strong> this change was reverted on 2026-06-01. The bias amounts were measured on the pre-retrain model, and applying them to the retrained model just suppressed every prediction. See the 2026-06-01 entry. Kept here for an honest record of what happened.",
         "What it did at the time: <code>pipeline/calibrate_confidence.py</code> measures both a noise multiplier (CI band width) and a bias correction (systematic over/under-prediction). The noise multiplier was being applied; the bias correction was being loaded but ignored. This change started applying the per-tier bias, which turned out to be the wrong call once the model had been retrained underneath it."
@@ -275,7 +324,9 @@
     {
       "date": "2026-05-27",
       "title": "Model retuning attempt, reverted after multi-year validation exposed the gains as small-sample artifacts",
-      "tags": ["model"],
+      "tags": [
+        "model"
+      ],
       "body": [
         "<strong>Earlier today I shipped a tuning change to the race and quali models, claiming an 8% race MAE reduction and a 4% quali MAE reduction with statistically significant confidence intervals. Both changes have now been reverted. The original claims were based on too few folds and didn't hold up at proper sample size.</strong>",
         "<strong>What I did first (and what was misleading):</strong> Ran walk-forward cross-validation over the 5 completed 2026 rounds. Race depth lowered from 5 to 2 showed −0.390 MAE (95% CI [−0.61, −0.17]); quali learning rate lowered from 0.025 to 0.015 showed −0.127 MAE (CI [−0.22, −0.05]). Both passed the &quot;CI excludes zero&quot; gate. Shipped.",
@@ -289,7 +340,9 @@
     {
       "date": "2026-05-25",
       "title": "What-If Scenarios Phase 2 + 3: overlay reaches the optimizer, save/compare/MC band/hint",
-      "tags": ["feature"],
+      "tags": [
+        "feature"
+      ],
       "body": [
         "Phase 2: the Lineup Optimizer, Transfer Advisor, and Multi-Week Planner now consult your active What-If bumps when scoring picks. A purple banner appears on the results when scoring includes your overlay so you can't mistake it for the baseline model view. Bumps still don't affect future rounds in the Multi-Week Planner (they're round-scoped by design, since pace bumps don't transfer between Canada and Monaco).",
         "Phase 3 also lands as one bundle:",
@@ -300,7 +353,10 @@
     {
       "date": "2026-05-25",
       "title": "DNF-by-weather classifier: built but not shipped (honest)",
-      "tags": ["model", "infra"],
+      "tags": [
+        "model",
+        "infra"
+      ],
       "body": [
         "Built and tested a dedicated logistic-regression model to predict per-driver DNF probability conditional on weather, temperature, and rolling reliability. <strong>The gate failed honestly.</strong>",
         "Brier-score improvement over the baseline (just predicting the average DNF rate) was only 0.57% (gate was 1%), AUC was 0.585 (gate was 0.60), and the wet-vs-dry signal (+0.010 absolute probability) was much weaker than the MC weather widener's 2.6× DNF multiplier on HIGH rain risk already provides.",
@@ -310,7 +366,10 @@
     {
       "date": "2026-05-25",
       "title": "Weather-conditioned predictions: the model now learns rain and temperature",
-      "tags": ["model", "feature"],
+      "tags": [
+        "model",
+        "feature"
+      ],
       "body": [
         "Predictions used to assume every weekend was dry. They aren't anymore. The qualifying, race, and sprint models have been retrained with historical session-level weather labels (wet/dry, track and air temperature, humidity) backfilled from 2020-2026 race data. <strong>17 wet races and 4 wet sprints</strong> across the training set finally have the conditional label they always needed.",
         "<strong>What changes on the site:</strong>",
@@ -322,7 +381,9 @@
     {
       "date": "2026-05-25",
       "title": "What-If Scenarios: dial your own pace bumps",
-      "tags": ["feature"],
+      "tags": [
+        "feature"
+      ],
       "body": [
         "Every driver and constructor card now has a small <strong>±</strong> button at the top-left. Click it to dial a pace bump in 'positions gained'. For example, +2 means 'I think this pick will finish 2 spots better than the model says'. Cards update instantly with an adjusted points number alongside the base ML prediction.",
         "Bumps are stored in your browser only (this device) and reset automatically when the race round changes. The floating purple pill at the top of the page summarises active bumps; click <em>Manage</em> for a full overview, per-team master sliders, share-via-URL, and reset.",
@@ -332,7 +393,9 @@
     {
       "date": "2026-05-25",
       "title": "Pre-race weather forecast widget",
-      "tags": ["feature"],
+      "tags": [
+        "feature"
+      ],
       "body": [
         "The Drivers tab now shows a per-session weather forecast (FP, qualifying, sprint, race) with rain risk, temperature, and wind sourced from Open-Meteo. The forecast updates every few hours through the weekend.",
         "Worth noting: the ML model does <strong>not</strong> currently condition predictions on weather (we're working on it, see roadmap). The widget is informational. For now, dial pace bumps via the What-If Scenarios overlay if a forecast suggests a particular team will benefit or suffer."
@@ -341,7 +404,9 @@
     {
       "date": "2026-05-24",
       "title": "Race Deep Dive: full post-race telemetry",
-      "tags": ["feature"],
+      "tags": [
+        "feature"
+      ],
       "body": [
         "New <strong>Race Deep Dive</strong> tab analyses every finished race lap-by-lap. Fuel-corrected pace, sector-by-sector breakdowns, tyre stint analysis, real wheels-up pit-stop times (when public feeds publish them), and per-driver overtake counts. Designed for the people who like to look at the data themselves rather than trust a single number."
       ]
@@ -349,7 +414,10 @@
     {
       "date": "2026-05-22",
       "title": "Multi-Week Transfer Planner: 14 improvements",
-      "tags": ["feature", "model"],
+      "tags": [
+        "feature",
+        "model"
+      ],
       "body": [
         "Major rework of the Multi-Week Transfer Planner. Highlights:",
         "<ul><li><strong>Target-team mode</strong> with intensity dial (Loose / Balanced / Strict) that lets the planner chase a specific dream team across upcoming rounds, trading some raw points for convergence toward your target.</li><li><strong>Beam search</strong> (width 60) explores 0/1/2-swap candidates per round, including constructor+constructor double-swaps.</li><li><strong>Budget propagation</strong> across rounds: projected price changes feed forward into the next round's spending ceiling.</li><li><strong>Future-round scoring</strong> uses real ML projections (priors-only) where available, falling back to a confidence-weighted track-affinity heuristic for cold-start picks.</li><li><strong>PPM-aware candidate pool</strong> surfaces high-value budget picks that pure score-ranked search misses.</li><li><strong>Heatmap</strong> flags low-confidence projections; per-round 'vs hold' lines show the trade-off of each move.</li></ul>",
@@ -359,7 +427,10 @@
     {
       "date": "2026-05-22",
       "title": "Phase archives + accuracy dashboard",
-      "tags": ["model", "infra"],
+      "tags": [
+        "model",
+        "infra"
+      ],
       "body": [
         "Predictions are now archived per <strong>phase</strong> (pre-FP, post-FP, post-quali) for every round. The Accuracy tab can show how the forecast tightened as data arrived during the weekend: pre-FP runs on priors only (~65% confidence), post-FP adds telemetry (~90%), post-quali locks in the grid.",
         "Each prediction phase writes a <code>prediction_metadata.json</code> sidecar recording the phase, model SHA-256 hashes, and inference flags, the authoritative source for accuracy attribution."
@@ -368,7 +439,9 @@
     {
       "date": "2026-05-22",
       "title": "Append-only audit log + recovery system",
-      "tags": ["infra"],
+      "tags": [
+        "infra"
+      ],
       "body": [
         "Every public JSON export now appends to an append-only audit log and writes an immutable timestamped snapshot under <code>data/audit/snapshots/</code>. If the live JSON ever gets corrupted or accidentally overwritten by a backfill run, we can recover any historical prediction exactly as it was at any past phase.",
         "Race-completed guards in the pipeline prevent the model from 'predicting' a round it's already been trained on (which would silently poison the accuracy archive). Pass <code>--force</code> only if you know what you're doing."
@@ -377,7 +450,10 @@
     {
       "date": "2026-05-15",
       "title": "Pit-stop scoring uses real wheels-up times",
-      "tags": ["model", "fix"],
+      "tags": [
+        "model",
+        "fix"
+      ],
       "body": [
         "Constructor pit-stop fantasy points now use real <strong>stationary</strong> (wheels-up) times from public timing feeds, not lane time (which includes the slow approach). When stationary time is unavailable (safety-car stops, sensor dropouts) the stop is counted but excluded from scoring and shown as 'n/a'.",
         "OpenF1's stop_duration field can lag 24-48h after a race. If pit-stop points look low immediately after the race, check back the next day, since the numbers refresh automatically when the data lands."
@@ -386,7 +462,9 @@
     {
       "date": "2026-05-10",
       "title": "Monte Carlo calibration from actual results",
-      "tags": ["model"],
+      "tags": [
+        "model"
+      ],
       "body": [
         "Confidence intervals on driver cards are now calibrated from observed prediction error vs actuals. After each race, <code>calibrate_confidence.py</code> compares the MC's 90% CI coverage to reality and writes a noise multiplier that the next round's MC picks up automatically. The 90% CI on driver cards genuinely contains the realised outcome ~90% of the time."
       ]
@@ -394,7 +472,9 @@
     {
       "date": "2026-04-25",
       "title": "Phase-aware race model (post-FP vs post-quali)",
-      "tags": ["model"],
+      "tags": [
+        "model"
+      ],
       "body": [
         "Two distinct race models now live in the pipeline:",
         "<ul><li><strong>race_model</strong>: used when actual qualifying has happened. Trained on real quali positions.</li><li><strong>race_model_fp</strong>: used post-FP when quali hasn't run yet. Trained on walk-forward <em>predicted</em> quali (each season's quali predicted by a model trained on earlier seasons).</li></ul>",
@@ -404,7 +484,9 @@
     {
       "date": "2026-04-12",
       "title": "Two-layer feature system: Jolpica priors + FP telemetry",
-      "tags": ["model"],
+      "tags": [
+        "model"
+      ],
       "body": [
         "The model now consumes two feature layers merged at training and inference: <strong>91 Jolpica prior features</strong> (rolling averages, circuit experience, constructor trends, teammate deltas, DNF rates, form trends, skill ratings, all always available) and <strong>40+ FP telemetry features</strong> (lap times, sectors, tyre degradation, compound-specific pace, sparse and only populated when free practice runs).",
         "XGBoost's native NaN handling means: when FP data exists, the model uses it to refine; when missing, it relies on priors. No imputation needed, no separate model. This is what lets pre-FP predictions still be ~65% confident: priors carry real signal."
