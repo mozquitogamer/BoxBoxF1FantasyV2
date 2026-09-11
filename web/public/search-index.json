@@ -2,7 +2,7 @@
   "site": "https://boxboxf1fantasy.com",
   "name": "BoxBoxF1Fantasy",
   "description": "Free F1 Fantasy 2026 predictions, race picks, lineup optimizer, transfer tools, strategy guides, public data and accuracy tracking.",
-  "generated_at": "2026-09-07T20:03:13.821817+00:00",
+  "generated_at": "2026-09-11T13:17:56.263755+00:00",
   "language": "en",
   "current_round": 16,
   "current_race": "Spanish Grand Prix (Madrid)",
@@ -237,47 +237,47 @@
       "url": "https://boxboxf1fantasy.com/drivers/kimi-antonelli/",
       "path": "/drivers/kimi-antonelli/",
       "title": "Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Kimi Antonelli F1 Fantasy 2026 projection: 27.5 expected points for the Spanish GP (Madrid), $26.3M price, value rating and confidence range.",
+      "description": "Kimi Antonelli F1 Fantasy 2026 projection: 26.3 expected points for the Spanish GP (Madrid), $26.3M price, value rating and confidence range.",
       "h1": "Kimi Antonelli F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/george-russell/",
-      "path": "/drivers/george-russell/",
-      "title": "George Russell F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "George Russell F1 Fantasy 2026 projection: 25.1 expected points for the Spanish GP (Madrid), $27.7M price, value rating and confidence range.",
-      "h1": "George Russell F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/lewis-hamilton/",
       "path": "/drivers/lewis-hamilton/",
       "title": "Lewis Hamilton F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Lewis Hamilton F1 Fantasy 2026 projection: 22.6 expected points for the Spanish GP (Madrid), $25.2M price, value rating and confidence range.",
+      "description": "Lewis Hamilton F1 Fantasy 2026 projection: 23.3 expected points for the Spanish GP (Madrid), $25.2M price, value rating and confidence range.",
       "h1": "Lewis Hamilton F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/lando-norris/",
-      "path": "/drivers/lando-norris/",
-      "title": "Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Lando Norris F1 Fantasy 2026 projection: 20.8 expected points for the Spanish GP (Madrid), $26.7M price, value rating and confidence range.",
-      "h1": "Lando Norris F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/george-russell/",
+      "path": "/drivers/george-russell/",
+      "title": "George Russell F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "George Russell F1 Fantasy 2026 projection: 23.1 expected points for the Spanish GP (Madrid), $27.7M price, value rating and confidence range.",
+      "h1": "George Russell F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/charles-leclerc/",
       "path": "/drivers/charles-leclerc/",
       "title": "Charles Leclerc F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Charles Leclerc F1 Fantasy 2026 projection: 18.3 expected points for the Spanish GP (Madrid), $24.1M price, value rating and confidence range.",
+      "description": "Charles Leclerc F1 Fantasy 2026 projection: 21.2 expected points for the Spanish GP (Madrid), $24.1M price, value rating and confidence range.",
       "h1": "Charles Leclerc F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/lando-norris/",
+      "path": "/drivers/lando-norris/",
+      "title": "Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Lando Norris F1 Fantasy 2026 projection: 18.7 expected points for the Spanish GP (Madrid), $26.7M price, value rating and confidence range.",
+      "h1": "Lando Norris F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/oscar-piastri/",
       "path": "/drivers/oscar-piastri/",
       "title": "Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Oscar Piastri F1 Fantasy 2026 projection: 17.5 expected points for the Spanish GP (Madrid), $24.0M price, value rating and confidence range.",
+      "description": "Oscar Piastri F1 Fantasy 2026 projection: 18.1 expected points for the Spanish GP (Madrid), $24.0M price, value rating and confidence range.",
       "h1": "Oscar Piastri F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -285,7 +285,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/max-verstappen/",
       "path": "/drivers/max-verstappen/",
       "title": "Max Verstappen F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Max Verstappen F1 Fantasy 2026 projection: 16.7 expected points for the Spanish GP (Madrid), $27.4M price, value rating and confidence range.",
+      "description": "Max Verstappen F1 Fantasy 2026 projection: 16.8 expected points for the Spanish GP (Madrid), $27.4M price, value rating and confidence range.",
       "h1": "Max Verstappen F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -293,7 +293,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/liam-lawson/",
       "path": "/drivers/liam-lawson/",
       "title": "Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Liam Lawson F1 Fantasy 2026 projection: 10.2 expected points for the Spanish GP (Madrid), $14.9M price, value rating and confidence range.",
+      "description": "Liam Lawson F1 Fantasy 2026 projection: 11.5 expected points for the Spanish GP (Madrid), $14.9M price, value rating and confidence range.",
       "h1": "Liam Lawson F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -301,23 +301,15 @@
       "url": "https://boxboxf1fantasy.com/drivers/yuki-tsunoda/",
       "path": "/drivers/yuki-tsunoda/",
       "title": "Yuki Tsunoda F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Yuki Tsunoda F1 Fantasy 2026 projection: 7.7 expected points for the Spanish GP (Madrid), $9.9M price, value rating and confidence range.",
+      "description": "Yuki Tsunoda F1 Fantasy 2026 projection: 9.5 expected points for the Spanish GP (Madrid), $9.9M price, value rating and confidence range.",
       "h1": "Yuki Tsunoda F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/franco-colapinto/",
-      "path": "/drivers/franco-colapinto/",
-      "title": "Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Franco Colapinto F1 Fantasy 2026 projection: 7.4 expected points for the Spanish GP (Madrid), $10.4M price, value rating and confidence range.",
-      "h1": "Franco Colapinto F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/arvid-lindblad/",
       "path": "/drivers/arvid-lindblad/",
       "title": "Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Arvid Lindblad F1 Fantasy 2026 projection: 6.6 expected points for the Spanish GP (Madrid), $8.0M price, value rating and confidence range.",
+      "description": "Arvid Lindblad F1 Fantasy 2026 projection: 7.4 expected points for the Spanish GP (Madrid), $8.0M price, value rating and confidence range.",
       "h1": "Arvid Lindblad F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -325,47 +317,55 @@
       "url": "https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/",
       "path": "/drivers/gabriel-bortoleto/",
       "title": "Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Gabriel Bortoleto F1 Fantasy 2026 projection: 6.5 expected points for the Spanish GP (Madrid), $8.6M price, value rating and confidence range.",
+      "description": "Gabriel Bortoleto F1 Fantasy 2026 projection: 7.3 expected points for the Spanish GP (Madrid), $8.6M price, value rating and confidence range.",
       "h1": "Gabriel Bortoleto F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/pierre-gasly/",
-      "path": "/drivers/pierre-gasly/",
-      "title": "Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Pierre Gasly F1 Fantasy 2026 projection: 5.2 expected points for the Spanish GP (Madrid), $12.2M price, value rating and confidence range.",
-      "h1": "Pierre Gasly F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/franco-colapinto/",
+      "path": "/drivers/franco-colapinto/",
+      "title": "Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Franco Colapinto F1 Fantasy 2026 projection: 6.9 expected points for the Spanish GP (Madrid), $10.4M price, value rating and confidence range.",
+      "h1": "Franco Colapinto F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/nico-hulkenberg/",
       "path": "/drivers/nico-hulkenberg/",
       "title": "Nico Hulkenberg F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Nico Hulkenberg F1 Fantasy 2026 projection: 3.9 expected points for the Spanish GP (Madrid), $4.2M price, value rating and confidence range.",
+      "description": "Nico Hulkenberg F1 Fantasy 2026 projection: 6.8 expected points for the Spanish GP (Madrid), $4.2M price, value rating and confidence range.",
       "h1": "Nico Hulkenberg F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/esteban-ocon/",
-      "path": "/drivers/esteban-ocon/",
-      "title": "Esteban Ocon F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Esteban Ocon F1 Fantasy 2026 projection: 3.7 expected points for the Spanish GP (Madrid), $9.5M price, value rating and confidence range.",
-      "h1": "Esteban Ocon F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/pierre-gasly/",
+      "path": "/drivers/pierre-gasly/",
+      "title": "Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Pierre Gasly F1 Fantasy 2026 projection: 4.5 expected points for the Spanish GP (Madrid), $12.2M price, value rating and confidence range.",
+      "h1": "Pierre Gasly F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/carlos-sainz/",
       "path": "/drivers/carlos-sainz/",
       "title": "Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Carlos Sainz F1 Fantasy 2026 projection: 3.2 expected points for the Spanish GP (Madrid), $9.6M price, value rating and confidence range.",
+      "description": "Carlos Sainz F1 Fantasy 2026 projection: 2.9 expected points for the Spanish GP (Madrid), $9.6M price, value rating and confidence range.",
       "h1": "Carlos Sainz F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/esteban-ocon/",
+      "path": "/drivers/esteban-ocon/",
+      "title": "Esteban Ocon F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Esteban Ocon F1 Fantasy 2026 projection: 2.4 expected points for the Spanish GP (Madrid), $9.5M price, value rating and confidence range.",
+      "h1": "Esteban Ocon F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/alex-albon/",
       "path": "/drivers/alex-albon/",
       "title": "Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Alex Albon F1 Fantasy 2026 projection: 2.8 expected points for the Spanish GP (Madrid), $5.8M price, value rating and confidence range.",
+      "description": "Alex Albon F1 Fantasy 2026 projection: 0.3 expected points for the Spanish GP (Madrid), $5.8M price, value rating and confidence range.",
       "h1": "Alex Albon F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -373,7 +373,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/oliver-bearman/",
       "path": "/drivers/oliver-bearman/",
       "title": "Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Oliver Bearman F1 Fantasy 2026 projection: 1.3 expected points for the Spanish GP (Madrid), $6.4M price, value rating and confidence range.",
+      "description": "Oliver Bearman F1 Fantasy 2026 projection: -0.2 expected points for the Spanish GP (Madrid), $6.4M price, value rating and confidence range.",
       "h1": "Oliver Bearman F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -381,7 +381,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/sergio-perez/",
       "path": "/drivers/sergio-perez/",
       "title": "Sergio Perez F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Sergio Perez F1 Fantasy 2026 projection: -1.3 expected points for the Spanish GP (Madrid), $3.0M price, value rating and confidence range.",
+      "description": "Sergio Perez F1 Fantasy 2026 projection: -1.7 expected points for the Spanish GP (Madrid), $3.0M price, value rating and confidence range.",
       "h1": "Sergio Perez F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -389,7 +389,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/valtteri-bottas/",
       "path": "/drivers/valtteri-bottas/",
       "title": "Valtteri Bottas F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Valtteri Bottas F1 Fantasy 2026 projection: -1.8 expected points for the Spanish GP (Madrid), $3.0M price, value rating and confidence range.",
+      "description": "Valtteri Bottas F1 Fantasy 2026 projection: -2.2 expected points for the Spanish GP (Madrid), $3.0M price, value rating and confidence range.",
       "h1": "Valtteri Bottas F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -397,7 +397,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/fernando-alonso/",
       "path": "/drivers/fernando-alonso/",
       "title": "Fernando Alonso F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Fernando Alonso F1 Fantasy 2026 projection: -2.6 expected points for the Spanish GP (Madrid), $7.0M price, value rating and confidence range.",
+      "description": "Fernando Alonso F1 Fantasy 2026 projection: -3.0 expected points for the Spanish GP (Madrid), $7.0M price, value rating and confidence range.",
       "h1": "Fernando Alonso F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -405,7 +405,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/lance-stroll/",
       "path": "/drivers/lance-stroll/",
       "title": "Lance Stroll F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Lance Stroll F1 Fantasy 2026 projection: -3.0 expected points for the Spanish GP (Madrid), $3.0M price, value rating and confidence range.",
+      "description": "Lance Stroll F1 Fantasy 2026 projection: -4.1 expected points for the Spanish GP (Madrid), $3.0M price, value rating and confidence range.",
       "h1": "Lance Stroll F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -421,7 +421,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/mercedes/",
       "path": "/constructors/mercedes/",
       "title": "Mercedes F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Mercedes F1 Fantasy 2026 constructor projection: 68.3 expected points for the Spanish GP (Madrid), $33.2M price, pit-stop points and value rating.",
+      "description": "Mercedes F1 Fantasy 2026 constructor projection: 65.0 expected points for the Spanish GP (Madrid), $33.2M price, pit-stop points and value rating.",
       "h1": "Mercedes F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -429,7 +429,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/ferrari/",
       "path": "/constructors/ferrari/",
       "title": "Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Ferrari F1 Fantasy 2026 constructor projection: 54.3 expected points for the Spanish GP (Madrid), $27.2M price, pit-stop points and value rating.",
+      "description": "Ferrari F1 Fantasy 2026 constructor projection: 58.3 expected points for the Spanish GP (Madrid), $27.2M price, pit-stop points and value rating.",
       "h1": "Ferrari F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -437,7 +437,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/mclaren/",
       "path": "/constructors/mclaren/",
       "title": "McLaren F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "McLaren F1 Fantasy 2026 constructor projection: 50.6 expected points for the Spanish GP (Madrid), $31.6M price, pit-stop points and value rating.",
+      "description": "McLaren F1 Fantasy 2026 constructor projection: 48.3 expected points for the Spanish GP (Madrid), $31.6M price, pit-stop points and value rating.",
       "h1": "McLaren F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -445,7 +445,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/red-bull/",
       "path": "/constructors/red-bull/",
       "title": "Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Red Bull F1 Fantasy 2026 constructor projection: 36.8 expected points for the Spanish GP (Madrid), $31.5M price, pit-stop points and value rating.",
+      "description": "Red Bull F1 Fantasy 2026 constructor projection: 37.3 expected points for the Spanish GP (Madrid), $31.5M price, pit-stop points and value rating.",
       "h1": "Red Bull F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -453,7 +453,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/racing-bulls/",
       "path": "/constructors/racing-bulls/",
       "title": "Racing Bulls F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Racing Bulls F1 Fantasy 2026 constructor projection: 25.8 expected points for the Spanish GP (Madrid), $14.1M price, pit-stop points and value rating.",
+      "description": "Racing Bulls F1 Fantasy 2026 constructor projection: 28.0 expected points for the Spanish GP (Madrid), $14.1M price, pit-stop points and value rating.",
       "h1": "Racing Bulls F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -461,7 +461,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/audi/",
       "path": "/constructors/audi/",
       "title": "Audi F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Audi F1 Fantasy 2026 constructor projection: 18.4 expected points for the Spanish GP (Madrid), $8.0M price, pit-stop points and value rating.",
+      "description": "Audi F1 Fantasy 2026 constructor projection: 23.9 expected points for the Spanish GP (Madrid), $8.0M price, pit-stop points and value rating.",
       "h1": "Audi F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -469,7 +469,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/alpine/",
       "path": "/constructors/alpine/",
       "title": "Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Alpine F1 Fantasy 2026 constructor projection: 17.5 expected points for the Spanish GP (Madrid), $19.2M price, pit-stop points and value rating.",
+      "description": "Alpine F1 Fantasy 2026 constructor projection: 16.2 expected points for the Spanish GP (Madrid), $19.2M price, pit-stop points and value rating.",
       "h1": "Alpine F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -477,7 +477,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/williams/",
       "path": "/constructors/williams/",
       "title": "Williams F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Williams F1 Fantasy 2026 constructor projection: 10.2 expected points for the Spanish GP (Madrid), $13.8M price, pit-stop points and value rating.",
+      "description": "Williams F1 Fantasy 2026 constructor projection: 6.2 expected points for the Spanish GP (Madrid), $13.8M price, pit-stop points and value rating.",
       "h1": "Williams F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -485,7 +485,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/haas/",
       "path": "/constructors/haas/",
       "title": "Haas F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Haas F1 Fantasy 2026 constructor projection: 7.7 expected points for the Spanish GP (Madrid), $10.8M price, pit-stop points and value rating.",
+      "description": "Haas F1 Fantasy 2026 constructor projection: 5.4 expected points for the Spanish GP (Madrid), $10.8M price, pit-stop points and value rating.",
       "h1": "Haas F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -493,7 +493,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/cadillac/",
       "path": "/constructors/cadillac/",
       "title": "Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Cadillac F1 Fantasy 2026 constructor projection: -3.5 expected points for the Spanish GP (Madrid), $3.0M price, pit-stop points and value rating.",
+      "description": "Cadillac F1 Fantasy 2026 constructor projection: -4.5 expected points for the Spanish GP (Madrid), $3.0M price, pit-stop points and value rating.",
       "h1": "Cadillac F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -501,7 +501,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/aston-martin/",
       "path": "/constructors/aston-martin/",
       "title": "Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Aston Martin F1 Fantasy 2026 constructor projection: -3.7 expected points for the Spanish GP (Madrid), $6.9M price, pit-stop points and value rating.",
+      "description": "Aston Martin F1 Fantasy 2026 constructor projection: -4.6 expected points for the Spanish GP (Madrid), $6.9M price, pit-stop points and value rating.",
       "h1": "Aston Martin F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
