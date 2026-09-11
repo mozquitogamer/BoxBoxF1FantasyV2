@@ -18,7 +18,7 @@
   "daily": [
     {
       "date": "2026-09-11",
-      "temp_max": 30.2,
+      "temp_max": 30.4,
       "temp_min": 14.0,
       "precip_probability_max": 0,
       "precip_sum_mm": 0.0,
@@ -32,27 +32,27 @@
     {
       "date": "2026-09-12",
       "temp_max": 31.3,
-      "temp_min": 15.5,
+      "temp_min": 15.6,
       "precip_probability_max": 0,
       "precip_sum_mm": 0.0,
       "wind_max_kmh": 7.6,
-      "weather_description": "Clear sky",
+      "weather_description": "Mainly clear",
       "weather_category": "clear",
       "weather_icon": "\u2600\ufe0f",
-      "weather_code": 0,
+      "weather_code": 1,
       "rain_risk": "NONE"
     },
     {
       "date": "2026-09-13",
-      "temp_max": 32.2,
-      "temp_min": 16.6,
+      "temp_max": 32.3,
+      "temp_min": 16.9,
       "precip_probability_max": 0,
       "precip_sum_mm": 0.0,
-      "wind_max_kmh": 6.6,
-      "weather_description": "Clear sky",
+      "wind_max_kmh": 6.9,
+      "weather_description": "Mainly clear",
       "weather_category": "clear",
       "weather_icon": "\u2600\ufe0f",
-      "weather_code": 0,
+      "weather_code": 1,
       "rain_risk": "NONE"
     }
   ],
@@ -118,51 +118,51 @@
       "date": "2026-09-11",
       "rain_probability": 0,
       "rain_risk": "NONE",
-      "avg_temp": 29.2,
-      "avg_wind": 4.8,
+      "avg_temp": 29.3,
+      "avg_wind": 5.0,
       "total_precip_mm": 0.0,
-      "weather_description": "Mainly clear",
+      "weather_description": "Clear sky",
       "weather_category": "clear",
       "weather_icon": "\u2600\ufe0f",
       "hourly": [
         {
           "hour": 14,
           "temp": 27.9,
-          "humidity": 14,
+          "humidity": 15,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 3.6,
+          "windspeed": 3.3,
           "windgusts": 11.9,
           "weather_code": 0
         },
         {
           "hour": 15,
-          "temp": 29.1,
+          "temp": 29.2,
           "humidity": 13,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 5.5,
-          "windgusts": 15.8,
+          "windspeed": 5.8,
+          "windgusts": 16.6,
           "weather_code": 1
         },
         {
           "hour": 16,
-          "temp": 29.8,
+          "temp": 29.9,
           "humidity": 12,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 5.6,
-          "windgusts": 16.2,
-          "weather_code": 1
+          "windspeed": 5.9,
+          "windgusts": 17.3,
+          "weather_code": 0
         },
         {
           "hour": 17,
-          "temp": 30.2,
+          "temp": 30.4,
           "humidity": 11,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 4.3,
-          "windgusts": 15.8,
+          "windspeed": 4.8,
+          "windgusts": 16.9,
           "weather_code": 1
         }
       ]
@@ -173,8 +173,8 @@
       "date": "2026-09-12",
       "rain_probability": 0,
       "rain_risk": "NONE",
-      "avg_temp": 22.3,
-      "avg_wind": 4.5,
+      "avg_temp": 22.4,
+      "avg_wind": 4.9,
       "total_precip_mm": 0.0,
       "weather_description": "Clear sky",
       "weather_category": "clear",
@@ -182,8 +182,8 @@
       "hourly": [
         {
           "hour": 10,
-          "temp": 18.6,
-          "humidity": 42,
+          "temp": 18.7,
+          "humidity": 43,
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 3.7,
@@ -192,32 +192,32 @@
         },
         {
           "hour": 11,
-          "temp": 21.3,
-          "humidity": 44,
+          "temp": 21.5,
+          "humidity": 39,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 5.4,
-          "windgusts": 15.8,
+          "windspeed": 5.7,
+          "windgusts": 15.5,
           "weather_code": 0
         },
         {
           "hour": 12,
-          "temp": 23.5,
-          "humidity": 48,
+          "temp": 23.6,
+          "humidity": 45,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 5.0,
-          "windgusts": 16.2,
+          "windspeed": 5.8,
+          "windgusts": 16.6,
           "weather_code": 0
         },
         {
           "hour": 13,
           "temp": 25.7,
-          "humidity": 44,
+          "humidity": 43,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 3.7,
-          "windgusts": 14.8,
+          "windspeed": 4.3,
+          "windgusts": 15.8,
           "weather_code": 0
         }
       ]
@@ -229,7 +229,7 @@
       "rain_probability": 0,
       "rain_risk": "NONE",
       "avg_temp": 29.8,
-      "avg_wind": 3.9,
+      "avg_wind": 4.0,
       "total_precip_mm": 0.0,
       "weather_description": "Clear sky",
       "weather_category": "clear",
@@ -238,11 +238,11 @@
         {
           "hour": 14,
           "temp": 27.7,
-          "humidity": 39,
+          "humidity": 38,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 3.3,
-          "windgusts": 12.2,
+          "windspeed": 3.6,
+          "windgusts": 13.3,
           "weather_code": 0
         },
         {
@@ -251,28 +251,28 @@
           "humidity": 30,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 3.9,
+          "windspeed": 4.0,
           "windgusts": 13.3,
           "weather_code": 0
         },
         {
           "hour": 16,
-          "temp": 30.7,
-          "humidity": 23,
+          "temp": 30.8,
+          "humidity": 22,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 4.3,
-          "windgusts": 13.7,
+          "windspeed": 4.7,
+          "windgusts": 14.0,
           "weather_code": 0
         },
         {
           "hour": 17,
           "temp": 31.3,
-          "humidity": 18,
+          "humidity": 19,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 4.0,
-          "windgusts": 13.7,
+          "windspeed": 3.7,
+          "windgusts": 14.0,
           "weather_code": 0
         }
       ]
@@ -283,8 +283,8 @@
       "date": "2026-09-13",
       "rain_probability": 0,
       "rain_risk": "NONE",
-      "avg_temp": 29.6,
-      "avg_wind": 5.5,
+      "avg_temp": 29.7,
+      "avg_wind": 5.7,
       "total_precip_mm": 0.0,
       "weather_description": "Clear sky",
       "weather_category": "clear",
@@ -292,51 +292,51 @@
       "hourly": [
         {
           "hour": 13,
-          "temp": 26.8,
-          "humidity": 40,
+          "temp": 27.0,
+          "humidity": 42,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 4.5,
+          "windspeed": 4.6,
           "windgusts": 15.1,
           "weather_code": 0
         },
         {
           "hour": 14,
-          "temp": 29.0,
-          "humidity": 33,
+          "temp": 29.1,
+          "humidity": 34,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 4.6,
-          "windgusts": 14.0,
+          "windspeed": 5.1,
+          "windgusts": 14.8,
           "weather_code": 0
         },
         {
           "hour": 15,
           "temp": 30.8,
-          "humidity": 25,
+          "humidity": 27,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 6.6,
-          "windgusts": 18.4,
+          "windspeed": 6.2,
+          "windgusts": 17.3,
           "weather_code": 0
         },
         {
           "hour": 16,
           "temp": 31.8,
-          "humidity": 22,
+          "humidity": 23,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 6.5,
-          "windgusts": 19.1,
+          "windspeed": 6.9,
+          "windgusts": 18.7,
           "weather_code": 0
         }
       ]
     }
   ],
-  "last_updated": "2026-09-11T15:33:11Z",
-  "next_update": "2026-09-11T21:33:11Z",
+  "last_updated": "2026-09-11T16:57:25Z",
+  "next_update": "2026-09-11T22:57:25Z",
   "data_source": "Open-Meteo (open-meteo.com)",
-  "forecast_snapshot_id": "2026-09-11T15-33-11.858538Z",
-  "forecast_retrieved_at": "2026-09-11T15:33:11.858538+00:00",
-  "forecast_archive_path": "data/forecasts/weather/year2026/round16/2026-09-11T15-33-11.858538Z_open_meteo.json"
+  "forecast_snapshot_id": "2026-09-11T16-57-25.581405Z",
+  "forecast_retrieved_at": "2026-09-11T16:57:25.581405+00:00",
+  "forecast_archive_path": "data/forecasts/weather/year2026/round16/2026-09-11T16-57-25.581405Z_open_meteo.json"
 }

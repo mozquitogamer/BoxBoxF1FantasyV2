@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-11T15:12:48.665699+02:00",
+  "generated_at": "2026-09-11T19:00:24.568291+02:00",
   "manager": {
     "id": "v13",
     "name": "V13",
@@ -1448,20 +1448,34 @@
       "transfers": 2
     },
     "post_fp_final": {
-      "schema_version": 1,
-      "manager": "v13",
-      "round": 16,
-      "race": "Spanish Grand Prix (Madrid)",
-      "phase": "post_fp",
-      "status": "frozen_before_lock",
-      "published_at": "2026-09-11T13:12:48.645525+00:00",
-      "source_generated_at": "2026-09-11T13:11:27.403222+00:00",
-      "lock_deadline": "2026-09-12T14:00:00Z",
       "archive": "web/public/data/predictions_round16_post_fp.json",
       "archive_sha256": "6a8b68c00ce41be8d923d8f0dcb0a278a7bac01ab69250db5b0f2e76e385ba83",
-      "previous_decision": "data/v13/decisions/round16_pre_fp_revision2.json",
-      "previous_decision_sha256": "7ca3fdc8b802b9af6c5d11807e3f7b3655fbf571c52e28b7124cc12699d78c69",
-      "price_snapshot_after_round": 15,
+      "captain": "ANT",
+      "changes": {
+        "constructors_in": [],
+        "constructors_out": [],
+        "drivers_in": [
+          "HAM",
+          "PER"
+        ],
+        "drivers_out": [
+          "ALB",
+          "LEC"
+        ]
+      },
+      "chip": null,
+      "chip_decision": {
+        "current_selected_team_extra_points": 49.6,
+        "largest_remaining_priors_round": 18,
+        "largest_remaining_priors_top_two": 95.6,
+        "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast.",
+        "result": "save"
+      },
+      "constructors": [
+        "mercedes",
+        "ferrari"
+      ],
+      "downside_risk": 59.4,
       "drivers": [
         "ANT",
         "HAM",
@@ -1469,46 +1483,32 @@
         "LIN",
         "PER"
       ],
-      "constructors": [
-        "mercedes",
-        "ferrari"
-      ],
-      "captain": "ANT",
-      "second_boost": null,
-      "chip": null,
+      "lock_deadline": "2026-09-12T14:00:00Z",
+      "manager": "v13",
+      "phase": "post_fp",
+      "policy": {
+        "negative_p5_weight": 0.75,
+        "policy_version": "horizon_budget_value_v2",
+        "price_gain_weight": 4.588,
+        "price_value_method": "horizon curve × price reliability × points realisation",
+        "risk_profile": "medium_tolerance",
+        "strategy": "budget_builder"
+      },
+      "previous_decision": "data/v13/decisions/round16_pre_fp_revision2.json",
+      "previous_decision_sha256": "7ca3fdc8b802b9af6c5d11807e3f7b3655fbf571c52e28b7124cc12699d78c69",
+      "price_snapshot_after_round": 15,
       "projected_points": 211.7,
       "projected_price_gain": 2.4,
-      "downside_risk": 59.4,
+      "published_at": "2026-09-11T13:12:48.645525+00:00",
+      "race": "Spanish Grand Prix (Madrid)",
+      "round": 16,
+      "schema_version": 1,
+      "second_boost": null,
+      "source_generated_at": "2026-09-11T13:11:27.403222+00:00",
+      "status": "frozen_before_lock",
       "team_cost": 127.1,
-      "transfers": 2,
       "transfer_penalty": 0,
-      "changes": {
-        "drivers_out": [
-          "ALB",
-          "LEC"
-        ],
-        "drivers_in": [
-          "HAM",
-          "PER"
-        ],
-        "constructors_out": [],
-        "constructors_in": []
-      },
-      "chip_decision": {
-        "result": "save",
-        "current_selected_team_extra_points": 49.6,
-        "largest_remaining_priors_top_two": 95.6,
-        "largest_remaining_priors_round": 18,
-        "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast."
-      },
-      "policy": {
-        "policy_version": "horizon_budget_value_v2",
-        "strategy": "budget_builder",
-        "risk_profile": "medium_tolerance",
-        "price_gain_weight": 4.588,
-        "negative_p5_weight": 0.75,
-        "price_value_method": "horizon curve × price reliability × points realisation"
-      }
+      "transfers": 2
     }
   },
   "labels": {
