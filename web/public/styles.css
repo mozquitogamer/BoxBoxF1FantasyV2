@@ -2855,7 +2855,7 @@ table.sortable th.sort-desc::after {
 /* Long Run Detail — kept vs X'd laps behind each driver's race-pace number */
 .lr-detail-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
     gap: 12px;
 }
 .lr-card {
@@ -2903,6 +2903,52 @@ table.sortable th.sort-desc::after {
     font-variant-numeric: tabular-nums;
 }
 .lr-ctx { font-size: 11px; font-weight: 500; color: var(--text-muted); }
+
+/* Interactive long-run comparison */
+#fpLongRunExplorer [hidden] { display: none !important; }
+.lr-controls { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
+.lr-controls label { display: grid; gap: 5px; font-size: 12px; color: var(--text-secondary); }
+.lr-controls select, .lr-reset {
+    font: inherit;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+    min-height: 36px;
+}
+.lr-reset { cursor: pointer; font-size: 12px; }
+.lr-reset:disabled { cursor: default; opacity: 0.45; }
+.lr-status, .lr-card-summary, .lr-edit-summary { font-size: 12px; color: var(--text-secondary); }
+.lr-status { padding: 8px 0; }
+.lr-card-summary { margin-bottom: 8px; }
+.lr-edit-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.lr-edited { display: inline-block; margin-left: 6px; font-size: 10px; color: var(--purple, #a78bfa); }
+.lr-run-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; width: 100%; }
+.lr-comparison-run { border-left: 2px solid var(--green); padding-left: 8px; }
+#fpLongRunExplorer .lr-run { margin: 12px 0; }
+#fpLongRunExplorer button.lr-lap {
+    border: 1px solid transparent;
+    min-height: 36px;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-family: inherit;
+    touch-action: manipulation;
+}
+#fpLongRunExplorer button.lr-lap:hover { border-color: currentColor; }
+#fpLongRunExplorer button.lr-modified { border: 1px dashed var(--purple, #a78bfa); }
+#fpLongRunExplorer button:focus-visible, #fpLongRunExplorer select:focus-visible {
+    outline: 2px solid var(--accent, #a78bfa);
+    outline-offset: 3px;
+}
+.lr-table-wrap { overflow-x: auto; }
+#fpLongRunTable th button { background: none; border: 0; padding: 4px 0; color: inherit; font: inherit; cursor: pointer; white-space: nowrap; }
+#fpLongRunTable td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 600px) {
+    #fpLongRunExplorer button.lr-lap, .lr-controls select, .lr-reset { min-height: 44px; }
+    .lr-controls label { max-width: 100%; }
+    .lr-controls select { max-width: 100%; }
+}
 
 /* Management score */
 .mgmt-score {

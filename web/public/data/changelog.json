@@ -2,6 +2,15 @@
   "entries": [
     {
       "date": "2026-09-12",
+      "title": "Choose the laps in your long-run comparison",
+      "tags": ["feature"],
+      "body": [
+        "Click any lap in Long Run Detail to include or exclude it. Run averages, driver averages, gaps and pace order update immediately, including when you restore a lap excluded by the model.",
+        "Compare a specific practice session, reset one driver or reset every lap. Personal selections stay while switching tabs and reset on reload or new practice data. Published predictions and fuel-corrected model pace keep their original lap selections."
+      ]
+    },
+    {
+      "date": "2026-09-12",
       "title": "Soft-tyre race simulations included in long-run pace",
       "tags": [
         "fix",
