@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-09-12T05:53:54.997862+00:00",
+  "generated_at": "2026-09-12T12:31:39.757600+00:00",
   "rounds": [
     {
       "round": 1,
@@ -167,7 +167,7 @@
     {
       "round": 21,
       "name": "Brazilian Grand Prix",
-      "circuit": "S\u00e3o Paulo",
+      "circuit": "S\u00c3\u00a3o Paulo",
       "date": "2026-11-08",
       "has_predictions": false,
       "has_post_race": false,

@@ -2,7 +2,7 @@
   "year": 2026,
   "current_round": 16,
   "horizon": 5,
-  "generated_at": "2026-09-12T05:53:58.141998+00:00",
+  "generated_at": "2026-09-12T12:31:42.533929+00:00",
   "rounds": {
     "17": {
       "round": 17,
@@ -1587,7 +1587,7 @@
     "21": {
       "round": 21,
       "name": "Brazilian Grand Prix",
-      "circuit": "S\u00e3o Paulo",
+      "circuit": "S\u00c3\u00a3o Paulo",
       "is_sprint": false,
       "drivers": {
         "ALB": {
