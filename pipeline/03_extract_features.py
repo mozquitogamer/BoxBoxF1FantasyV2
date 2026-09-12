@@ -187,12 +187,15 @@ def compound_features(
     """
     Extract tyre-compound-aware features.
 
-    Separates soft (qualifying sim) from medium/hard (race sim) pace.
+    Keeps soft best/average pace alongside clean long-run pace and degradation
+    for each slick compound, including soft race simulations.
     Compound column may be 'compound' or 'Compound'.
     """
     features = {
         "soft_best_lap": np.nan,
         "soft_avg_lap": np.nan,
+        "soft_long_run_avg": np.nan,
+        "soft_degradation": np.nan,
         "medium_long_run_avg": np.nan,
         "hard_long_run_avg": np.nan,
         "medium_degradation": np.nan,
@@ -210,7 +213,7 @@ def compound_features(
 
     compounds = group[compound_col].str.upper()
 
-    # Soft tyre: qualifying sims
+    # One-lap soft pace remains available separately from long-run evidence.
     soft_mask = compounds.isin(["SOFT", "S"])
     soft_laps = group.loc[soft_mask, "lap_time"].dropna()
     if not soft_laps.empty:
@@ -219,6 +222,7 @@ def compound_features(
 
     runs = extract_representative_long_runs(group, min_raw=min_long_run_laps)
     for compound, avg_key, deg_key in [
+        ("SOFT", "soft_long_run_avg", "soft_degradation"),
         ("MEDIUM", "medium_long_run_avg", "medium_degradation"),
         ("HARD", "hard_long_run_avg", "hard_degradation"),
     ]:

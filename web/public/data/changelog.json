@@ -1,6 +1,18 @@
 {
   "entries": [
     {
+      "date": "2026-09-12",
+      "title": "Soft-tyre race simulations included in long-run pace",
+      "tags": [
+        "fix",
+        "model"
+      ],
+      "body": [
+        "Long-run pace now includes soft tyres alongside medium, hard, intermediate and wet tyres. Runs still need at least five valid laps and four clean laps after filtering, so short qualifying runs do not count.",
+        "The same soft-tyre runs feed the practice analysis, fuel-corrected pace and prediction features. Separate soft long-run pace and degradation features keep the tyre evidence visible to the model. Historical features and models are rebuilt with the updated definition."
+      ]
+    },
+    {
       "date": "2026-09-07",
       "title": "V13 budget correction before Madrid",
       "tags": [

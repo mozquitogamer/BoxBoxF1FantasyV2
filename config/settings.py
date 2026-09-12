@@ -99,6 +99,8 @@ FEATURE_COLUMNS: list[str] = [
     # Compound-specific evidence
     "soft_best_lap",
     "soft_avg_lap",
+    "soft_long_run_avg",
+    "soft_degradation",
     "medium_long_run_avg",
     "hard_long_run_avg",
     "medium_degradation",

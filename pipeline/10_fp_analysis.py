@@ -158,7 +158,7 @@ def analyze_long_run_pace(df: pd.DataFrame, min_clean_laps: int = LONG_RUN_MIN_C
     """
     Detect each driver's representative race long runs and their pace.
 
-    A long run is a race-compound stint (MEDIUM/HARD/INTERMEDIATE/WET) of at
+    A long run is a race-compound stint (SOFT/MEDIUM/HARD/INTERMEDIATE/WET) of at
     least LONG_RUN_MIN_RAW laps. For each one we keep only the laps that form a
     clean, representative run via config.tyre_deg.representative_stint_laps:
     drop in/out/cool laps (slower than 1.10x the stint best) and single traffic/

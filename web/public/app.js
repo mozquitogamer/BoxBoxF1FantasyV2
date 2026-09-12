@@ -8381,12 +8381,12 @@ function renderFPAnalysis() {
         const tbl = sortableTable('fpLongRunTable', [
             { key: '_rank', label: '#', cls: 'num', fmt: (r, i) => i + 1 },
             { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
-            { key: 'avg_pace', label: 'Race Pace', cls: 'num', title: 'Average of the representative long-run laps from the latest session that produced one (FP2 on a normal weekend). In/out laps, traffic and lock-ups are filtered out. Lower = faster race pace.', fmt: r => fmtTime(r.avg_pace) },
+            { key: 'avg_pace', label: 'Race Pace', cls: 'num', title: 'Average of representative long-run laps, including soft tyres, from one session (FP2 preferred, then FP1, then FP3). In/out laps, traffic and lock-ups are filtered out. Lower = faster race pace.', fmt: r => fmtTime(r.avg_pace) },
             { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to the fastest driver', fmt: r => r.gap <= 0 ? '<span class="text-green">Leader</span>' : '+' + r.gap.toFixed(3) },
             { key: 'sess', label: 'Session', cls: 'num', title: 'Session the headline pace is taken from' },
             { key: 'laps', label: 'Laps', cls: 'num', title: 'Clean laps behind the headline pace' }
         ], rows, 'avg_pace', true);
-        html += `<div class="analysis-block"><h3>Long Run Pace (Predicted Race Pace)</h3><p class="analysis-note">Representative race-sim pace: only the clean long-run laps count &mdash; in/out laps, traffic and lock-ups are filtered out the way a human reads them off a timing screen. Headline is the latest session that produced a long run (usually FP2). Click headers to sort.</p>${tbl.getHtml()}</div>`;
+        html += `<div class="analysis-block"><h3>Long Run Pace (Predicted Race Pace)</h3><p class="analysis-note">Race-sim pace includes soft, medium, hard and wet-weather tyres. Runs need at least five laps before filtering and four clean laps after removing in/out laps, traffic and lock-ups. The headline prefers FP2, then FP1, then FP3. Click headers to sort.</p>${tbl.getHtml()}</div>`;
         postRenderFns.push(tbl.renderTable);
 
         // Long Run Detail — the laps behind each average (kept vs X'd outliers).

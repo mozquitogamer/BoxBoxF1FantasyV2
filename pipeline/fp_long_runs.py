@@ -17,11 +17,11 @@ import pandas as pd
 from config.tyre_deg import representative_stint_laps
 
 
-RACE_COMPOUNDS = frozenset({"MEDIUM", "HARD", "INTERMEDIATE", "WET"})
+RACE_COMPOUNDS = frozenset({"SOFT", "MEDIUM", "HARD", "INTERMEDIATE", "WET"})
 LONG_RUN_MIN_RAW = 5
 LONG_RUN_MIN_CLEAN = 4
 SESSION_PRIORITY = {"FP2": 3, "FP1": 2, "FP3": 1}
-FP_STINT_SEMANTICS_VERSION = 2
+FP_STINT_SEMANTICS_VERSION = 3
 
 _COMPOUND_ALIASES = {
     "M": "MEDIUM",
@@ -83,6 +83,8 @@ def extract_representative_long_runs(
 ) -> list[dict]:
     """Return clean race-compound runs from one driver's FP laps.
 
+    Soft tyres qualify on the same evidence rules as every other race compound;
+    tyre colour alone does not distinguish a qualifying run from a race run.
     Each candidate is isolated by session, stint number and compound; must have
     ``min_raw`` valid laps; and is trimmed with the shared robust tyre-life-aware
     selector. Kept/excluded laps remain in chronological order so downstream

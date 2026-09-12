@@ -261,7 +261,7 @@ FP_SIGNAL_FEATURES = [
     "avg_pace_delta_to_median", "race_pace_delta_to_median",
     # Compound features (Tier 2.2)
     "soft_best_lap", "soft_avg_lap",
-    "medium_long_run_avg", "hard_long_run_avg",
+    "soft_long_run_avg", "medium_long_run_avg", "hard_long_run_avg",
 ]
 
 
@@ -1605,7 +1605,7 @@ def main() -> None:
         "fp_coverage": f"{fp_rows}/{len(df)} ({fp_rows/len(df):.1%})",
         "fp_stint_semantics_version": FP_STINT_SEMANTICS_VERSION,
         "fp_stint_semantics": (
-            "session+stint+compound; clean race compounds; FP2>FP1>FP3 headline"
+            "session+stint+compound; clean race compounds including SOFT; FP2>FP1>FP3 headline"
         ),
         "qualifying_model": {
             "algorithm": "XGBRanker (rank:pairwise)",

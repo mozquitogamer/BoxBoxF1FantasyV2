@@ -582,7 +582,7 @@ def main() -> None:
     training_metadata_path.write_text(json.dumps({
         "fp_stint_semantics_version": FP_STINT_SEMANTICS_VERSION,
         "fp_stint_semantics": (
-            "session+stint+compound; clean race compounds; FP2>FP1>FP3 headline"
+            "session+stint+compound; clean race compounds including SOFT; FP2>FP1>FP3 headline"
         ),
     }, indent=2))
 
