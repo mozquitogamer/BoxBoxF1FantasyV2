@@ -333,10 +333,10 @@
       ]
     }
   ],
-  "last_updated": "2026-09-13T20:00:59Z",
-  "next_update": "2026-09-14T02:00:59Z",
+  "last_updated": "2026-09-14T02:29:54Z",
+  "next_update": "2026-09-14T08:29:54Z",
   "data_source": "Open-Meteo (open-meteo.com)",
-  "forecast_snapshot_id": "2026-09-13T20-00-59.846104Z",
-  "forecast_retrieved_at": "2026-09-13T20:00:59.846104+00:00",
-  "forecast_archive_path": "data/forecasts/weather/year2026/round16/2026-09-13T20-00-59.846104Z_open_meteo.json"
+  "forecast_snapshot_id": "2026-09-14T02-29-54.355292Z",
+  "forecast_retrieved_at": "2026-09-14T02:29:54.355292+00:00",
+  "forecast_archive_path": "data/forecasts/weather/year2026/round16/2026-09-14T02-29-54.355292Z_open_meteo.json"
 }
