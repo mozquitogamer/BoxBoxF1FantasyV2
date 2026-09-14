@@ -84,7 +84,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 41,
+          "points": 38,
           "is_dnf": false
         }
       ]
@@ -172,7 +172,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 28,
+          "points": 27,
           "is_dnf": false
         }
       ]
@@ -260,7 +260,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 39,
+          "points": 35,
           "is_dnf": false
         }
       ]
@@ -348,7 +348,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 20,
+          "points": 19,
           "is_dnf": false
         }
       ]
@@ -436,7 +436,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": -11,
+          "points": -13,
           "is_dnf": true
         }
       ]
@@ -524,7 +524,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 27,
+          "points": 23,
           "is_dnf": false
         }
       ]
@@ -612,7 +612,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 6,
+          "points": 3,
           "is_dnf": false
         }
       ]
@@ -700,7 +700,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 9,
+          "points": 5,
           "is_dnf": false
         }
       ]
@@ -788,7 +788,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 1,
+          "points": 0,
           "is_dnf": false
         }
       ]
@@ -876,7 +876,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 5,
+          "points": 4,
           "is_dnf": false
         }
       ]
@@ -964,7 +964,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 6,
+          "points": 5,
           "is_dnf": false
         }
       ]
@@ -1052,7 +1052,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": -16,
+          "points": -18,
           "is_dnf": true
         }
       ]
@@ -1140,7 +1140,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 6,
+          "points": 4,
           "is_dnf": false
         }
       ]
@@ -1228,7 +1228,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 15,
+          "points": 13,
           "is_dnf": false
         }
       ]
@@ -1316,7 +1316,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 17,
+          "points": 16,
           "is_dnf": false
         }
       ]
@@ -1404,7 +1404,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": -14,
+          "points": -18,
           "is_dnf": true
         }
       ]
@@ -1562,7 +1562,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 5,
+          "points": 4,
           "is_dnf": false
         }
       ]
@@ -1650,7 +1650,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 12,
+          "points": 9,
           "is_dnf": false
         }
       ]
@@ -1738,7 +1738,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 4,
+          "points": 1,
           "is_dnf": false
         }
       ]
@@ -1826,7 +1826,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 5,
+          "points": 2,
           "is_dnf": false
         }
       ]
@@ -1914,7 +1914,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": -21,
+          "points": -22,
           "is_dnf": true
         }
       ]
@@ -1936,7 +1936,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 4,
+          "points": 1,
           "is_dnf": false
         }
       ]
@@ -2087,7 +2087,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 19
+          "points": 18
         }
       ]
     },
@@ -2161,7 +2161,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 58
+          "points": 59
         }
       ]
     },
@@ -2235,7 +2235,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 18
+          "points": 13
         }
       ]
     },
@@ -2309,7 +2309,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 13
+          "points": 11
         }
       ]
     },
@@ -2383,7 +2383,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 25
+          "points": 24
         }
       ]
     },
@@ -2457,7 +2457,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": -9
+          "points": -11
         }
       ]
     },
@@ -2531,7 +2531,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 49
+          "points": 44
         }
       ]
     },
@@ -2605,7 +2605,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": 9
+          "points": 10
         }
       ]
     },
@@ -2679,7 +2679,7 @@
         {
           "round": 16,
           "circuit_id": "madrid",
-          "points": -11
+          "points": -16
         }
       ]
     },

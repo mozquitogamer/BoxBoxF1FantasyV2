@@ -143,7 +143,14 @@
       "id": "https://boxboxf1fantasy.com/accuracy/",
       "url": "https://boxboxf1fantasy.com/accuracy/",
       "title": "F1 Fantasy Prediction Accuracy 2026",
-      "summary": "Public BoxBoxF1Fantasy track record across 14 completed rounds: driver points MAE 11.5, constructor points MAE 18.3, and 90% CI coverage 81%.",
+      "summary": "Public BoxBoxF1Fantasy track record across 14 completed rounds: driver points MAE 11.5, constructor points MAE 18.4, and 90% CI coverage 80%.",
+      "date_modified": "2026-09-13T00:00:00+00:00"
+    },
+    {
+      "id": "https://boxboxf1fantasy.com/videos/",
+      "url": "https://boxboxf1fantasy.com/videos/",
+      "title": "F1 Fantasy Videos 2026",
+      "summary": "Latest BoxBoxF1Fantasy YouTube videos for F1 Fantasy race-week drafts, deadline strategy, top picks and data-backed team decisions. Latest: USE NO NEGATIVE!! Spanish GP F1 Fantasy Q & A Stream -  Strategy, Tips, and Top Picks!.",
       "date_modified": "2026-09-13T00:00:00+00:00"
     },
     {
@@ -152,13 +159,6 @@
       "title": "BoxBoxF1Fantasy Changelog 2026",
       "summary": "Public release notes for BoxBoxF1Fantasy model updates, scoring fixes, data-quality improvements and feature releases. Latest: Choose the laps in your long-run comparison.",
       "date_modified": "2026-09-12T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/videos/",
-      "url": "https://boxboxf1fantasy.com/videos/",
-      "title": "F1 Fantasy Videos 2026",
-      "summary": "Latest BoxBoxF1Fantasy YouTube videos for F1 Fantasy race-week drafts, deadline strategy, top picks and data-backed team decisions. Latest: Bring in Perez - Madness in the Madring - Spanish Grand Prix Early Thoughts for F1 Fantasy.",
-      "date_modified": "2026-09-10T00:00:00+00:00"
     },
     {
       "id": "https://boxboxf1fantasy.com/picks/italian-gp-2026/",

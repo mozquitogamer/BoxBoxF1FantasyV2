@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "last_updated": "2026-09-07",
+  "last_updated": "2026-09-14",
   "description": "Official F1 Fantasy points per round. These override pipeline-calculated actuals for price change predictions.",
   "rounds": {
     "1": {
@@ -521,6 +521,46 @@
         "audi": 41,
         "aston_martin": -21,
         "cadillac": 16
+      }
+    },
+    "16": {
+      "race": "Spanish Grand Prix (Madrid)",
+      "drivers": {
+        "ANT": 35,
+        "HAM": -13,
+        "RUS": 27,
+        "NOR": 23,
+        "VER": 38,
+        "LEC": 19,
+        "PIA": 9,
+        "GAS": 4,
+        "COL": 13,
+        "OCO": 5,
+        "LIN": 5,
+        "SAI": -18,
+        "BOR": 0,
+        "BEA": 3,
+        "LAW": 16,
+        "ALB": 4,
+        "TSU": 1,
+        "ALO": 4,
+        "PER": -18,
+        "HUL": 2,
+        "BOT": 1,
+        "STR": -22
+      },
+      "constructors": {
+        "mercedes": 87,
+        "ferrari": 18,
+        "mclaren": 44,
+        "red_bull": 59,
+        "racing_bulls": 13,
+        "alpine": 24,
+        "haas": 11,
+        "audi": 10,
+        "williams": -11,
+        "cadillac": -16,
+        "aston_martin": -17
       }
     }
   }
