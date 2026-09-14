@@ -54,6 +54,7 @@ src += `
     MW_TUNABLES: typeof MW_TUNABLES !== 'undefined' ? MW_TUNABLES : undefined,
     hasRenderSwapRow: typeof renderSwapRow === 'function',
     hasRunTransferAdvisor: typeof runTransferAdvisor === 'function',
+    teamContainsExcludedPick: typeof teamContainsExcludedPick === 'function' ? teamContainsExcludedPick : null,
     hasPredictPriceChange: typeof predictPriceChange === 'function',
     hasRenderTransferCard: typeof renderTransferCard === 'function',
     hasRunTeamCompare: typeof runTeamCompare === 'function',
@@ -134,6 +135,28 @@ if ('budgetGainWeight' in S.MW_TUNABLES) {
 
 if (/const freeTransfersNext = \(activeChip ===/.test(src)) {
   fail('multi-week planner still references out-of-scope activeChip');
+}
+
+// Transfer Advisor may use the current team as a points baseline, but an
+// excluded current pick must make "Keep Current Team" ineligible.
+try {
+  const excludedDrivers = new Set(['NOR']);
+  const excludedConstructors = new Set(['mclaren']);
+  if (!S.teamContainsExcludedPick(['NOR', 'LEC'], ['ferrari'], excludedDrivers, new Set())) {
+    fail('Transfer Advisor did not detect an excluded current driver');
+  }
+  if (!S.teamContainsExcludedPick(['LEC'], ['mclaren'], new Set(), excludedConstructors)) {
+    fail('Transfer Advisor did not detect an excluded current constructor');
+  }
+  if (S.teamContainsExcludedPick(['LEC'], ['ferrari'], excludedDrivers, excludedConstructors)) {
+    fail('Transfer Advisor rejected a current team with no excluded picks');
+  }
+  if (!/if \(l\.transfersNeeded === 0\) return currentTeamIsEligible;/.test(src)
+      || !/if \(currentTeamIsEligible && keepCurrentResult/.test(src)) {
+    fail('Transfer Advisor can still display an excluded hold baseline');
+  }
+} catch (e) {
+  fail('Transfer Advisor exclusion regression test threw: ' + e.message);
 }
 if (!/const freeTransfersNext = \(usedChip === 'wild_card' \|\| usedChip === 'limitless'\)/.test(src)) {
   fail('multi-week planner chip transfer reset is not keyed to usedChip');

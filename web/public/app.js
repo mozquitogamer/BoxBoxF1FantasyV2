@@ -6146,6 +6146,11 @@ function attachTargetGridHandlers(gridEl) {
 // Transfer Advisor
 // ============================================================
 
+function teamContainsExcludedPick(driverIds, constructorIds, driverExclusions, constructorExclusions) {
+    return driverIds.some(id => driverExclusions.has(id))
+        || constructorIds.some(id => constructorExclusions.has(id));
+}
+
 function runTransferAdvisor() {
     if (!data) return;
 
@@ -6263,6 +6268,12 @@ function runTransferAdvisor() {
         .map(id => view.constructors.find(c => c.constructor_id === id)
             || data.constructors.find(c => c.constructor_id === id))
         .filter(Boolean);
+    const currentTeamIsEligible = !teamContainsExcludedPick(
+        currentDriverIds,
+        currentConstructorIds,
+        excludedDrivers,
+        excludedConstructors,
+    );
     if (currentDriverObjs.length === currentDriverIds.length &&
         currentConstructorObjs.length === currentConstructorIds.length) {
         const currentSorted = [...currentDriverObjs].sort((a, b) => basisPoints(b) - basisPoints(a));
@@ -6464,7 +6475,9 @@ function runTransferAdvisor() {
     // budget value. The deliberately aggressive Budget Builder follows its own
     // price-heavy score instead of being contradicted by the old raw-points gate.
     const filtered = unique.filter(l => {
-        if (l.transfersNeeded === 0) return true;
+        // The hold lineup remains available above as the scoring baseline, but
+        // it is not a legal recommendation when one of its picks is excluded.
+        if (l.transfersNeeded === 0) return currentTeamIsEligible;
         if (strategy === 'season_value') return l.seasonValueDelta > 0;
         if (strategy === 'budget_gain' && keepCurrentResult) {
             return l.totalScore > keepCurrentResult.totalScore;
@@ -6474,12 +6487,12 @@ function runTransferAdvisor() {
 
     // Take top results
     allLineups = filtered.slice(0, MAX_RESULTS);
-    if (keepCurrentResult && !allLineups.includes(keepCurrentResult)) {
+    if (currentTeamIsEligible && keepCurrentResult && !allLineups.includes(keepCurrentResult)) {
         allLineups.push(keepCurrentResult);
     }
 
     // Label the hold baseline wherever it ranks.
-    if (keepCurrentResult) keepCurrentResult._isKeepCurrent = true;
+    if (currentTeamIsEligible && keepCurrentResult) keepCurrentResult._isKeepCurrent = true;
 
     if (allLineups.length === 0) {
         const resultEl = document.getElementById('optimizerResult');
