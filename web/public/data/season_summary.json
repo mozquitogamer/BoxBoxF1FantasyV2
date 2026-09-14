@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-09-12T12:31:39.757600+00:00",
+  "generated_at": "2026-09-14T08:48:23.529068+00:00",
   "rounds": [
     {
       "round": 1,
@@ -125,15 +125,15 @@
       "circuit": "Madrid",
       "date": "2026-09-13",
       "has_predictions": true,
-      "has_post_race": false,
-      "has_actual": false
+      "has_post_race": true,
+      "has_actual": true
     },
     {
       "round": 17,
       "name": "Azerbaijan Grand Prix",
       "circuit": "Baku",
       "date": "2026-09-26",
-      "has_predictions": false,
+      "has_predictions": true,
       "has_post_race": false,
       "has_actual": false
     },

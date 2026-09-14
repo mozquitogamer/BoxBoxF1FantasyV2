@@ -1,6 +1,6 @@
 # BoxBoxF1Fantasy - Full Site Summary for LLMs and Agents
 
-Last updated: 2026-09-12
+Last updated: 2026-09-14
 Canonical site: https://boxboxf1fantasy.com/
 Primary language: English
 Season covered: 2026 F1 Fantasy
@@ -43,9 +43,9 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Key discovery files for crawlers: /sitemap.xml, /llms.txt, /llms-full.txt, /search-index.json, /openapi.json, /.well-known/openapi.json.
 
 ## Current round context
-- Current round: 16
-- Race: Spanish Grand Prix (Madrid)
-- Prediction file generated: 2026-09-12
+- Current round: 17
+- Race: Azerbaijan Grand Prix
+- Prediction file generated: 2026-09-14
 - Compact AI answer summary: https://boxboxf1fantasy.com/data/ai-summary.json
 - Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json
 - Predictions JSON Schema: https://boxboxf1fantasy.com/data/predictions.schema.json
@@ -66,26 +66,26 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Weather JSON: https://boxboxf1fantasy.com/data/weather.json
 
 ## Current top projected drivers
-- Kimi Antonelli: 26.3 expected points, $26.3M, PPM 1.00
-- Lando Norris: 26.2 expected points, $26.7M, PPM 0.98
-- George Russell: 22.2 expected points, $27.7M, PPM 0.80
-- Charles Leclerc: 21.6 expected points, $24.1M, PPM 0.90
-- Oscar Piastri: 19.4 expected points, $24.0M, PPM 0.81
-- Lewis Hamilton: 19.1 expected points, $25.2M, PPM 0.76
-- Max Verstappen: 17.0 expected points, $27.4M, PPM 0.62
-- Liam Lawson: 11.3 expected points, $14.9M, PPM 0.76
-- Yuki Tsunoda: 8.9 expected points, $9.9M, PPM 0.90
-- Arvid Lindblad: 7.9 expected points, $8.0M, PPM 0.99
+- Kimi Antonelli: 24.1 expected points, $26.3M, PPM 0.92
+- Max Verstappen: 20.4 expected points, $27.4M, PPM 0.74
+- George Russell: 19.3 expected points, $27.7M, PPM 0.70
+- Charles Leclerc: 17.9 expected points, $24.1M, PPM 0.74
+- Lewis Hamilton: 16.9 expected points, $25.2M, PPM 0.67
+- Lando Norris: 16.2 expected points, $26.7M, PPM 0.61
+- Oscar Piastri: 15.8 expected points, $24.0M, PPM 0.66
+- Liam Lawson: 13.2 expected points, $14.9M, PPM 0.89
+- Yuki Tsunoda: 11.7 expected points, $9.9M, PPM 1.18
+- Gabriel Bortoleto: 7.8 expected points, $8.6M, PPM 0.91
 
 ## Current top projected constructors
-- Mercedes: 64.1 expected points, $33.2M, PPM 1.93
-- McLaren: 58.0 expected points, $31.6M, PPM 1.84
-- Ferrari: 54.2 expected points, $27.2M, PPM 1.99
-- Red Bull: 38.4 expected points, $31.5M, PPM 1.22
-- Racing Bulls: 28.2 expected points, $14.1M, PPM 2.00
-- Audi: 19.5 expected points, $8.0M, PPM 2.44
-- Alpine: 13.8 expected points, $19.2M, PPM 0.72
-- Haas: 7.3 expected points, $10.8M, PPM 0.68
+- Mercedes: 58.9 expected points, $33.2M, PPM 1.77
+- Ferrari: 47.6 expected points, $27.2M, PPM 1.75
+- Red Bull: 43.4 expected points, $31.5M, PPM 1.38
+- McLaren: 43.2 expected points, $31.6M, PPM 1.37
+- Racing Bulls: 30.1 expected points, $14.1M, PPM 2.13
+- Audi: 19.9 expected points, $8.0M, PPM 2.49
+- Alpine: 19.3 expected points, $19.2M, PPM 1.01
+- Haas: 11.1 expected points, $10.8M, PPM 1.03
 
 ## Tools and what they do
 - F1 Fantasy predictions: current driver and constructor projections with confidence ranges and price/value signals.
@@ -117,13 +117,13 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - F1 Fantasy Picks by Race - 2026 Season | BoxBox: https://boxboxf1fantasy.com/picks/ - Free F1 Fantasy picks, tips and predictions for every 2026 Grand Prix - top drivers, best value picks and constructors for each race.
 - F1 Fantasy Abu Dhabi GP 2026: Strategy Watchlist | BoxBox: https://boxboxf1fantasy.com/picks/abu-dhabi-gp-2026/ - Early F1 Fantasy strategy watchlist for the Abu Dhabi GP 2026: race date, sprint status, circuit traits and what to monitor before projections are published.
 - F1 Fantasy Qatar GP 2026: Strategy Watchlist | BoxBox: https://boxboxf1fantasy.com/picks/qatar-gp-2026/ - Early F1 Fantasy strategy watchlist for the Qatar GP 2026: race date, sprint status, circuit traits and what to monitor before projections are published.
-- F1 Fantasy Las Vegas GP 2026: Strategy Watchlist | BoxBox: https://boxboxf1fantasy.com/picks/las-vegas-gp-2026/ - Early F1 Fantasy strategy watchlist for the Las Vegas GP 2026: race date, sprint status, circuit traits and what to monitor before projections are published.
+- F1 Fantasy Las Vegas GP 2026: Early Picks | BoxBox: https://boxboxf1fantasy.com/picks/las-vegas-gp-2026/ - Early F1 Fantasy outlook for Las Vegas Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.
 - F1 Fantasy Brazilian GP 2026: Early Picks | BoxBox: https://boxboxf1fantasy.com/picks/brazilian-gp-2026/ - Early F1 Fantasy outlook for Brazilian Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.
 - F1 Fantasy Mexican GP 2026: Early Picks | BoxBox: https://boxboxf1fantasy.com/picks/mexican-gp-2026/ - Early F1 Fantasy outlook for Mexican Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.
 - F1 Fantasy United States GP 2026: Early Picks | BoxBox: https://boxboxf1fantasy.com/picks/united-states-gp-2026/ - Early F1 Fantasy outlook for United States Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.
 - F1 Fantasy Singapore GP 2026: Early Picks | BoxBox: https://boxboxf1fantasy.com/picks/singapore-gp-2026/ - Early F1 Fantasy outlook for Singapore Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.
-- F1 Fantasy Azerbaijan GP 2026: Early Picks | BoxBox: https://boxboxf1fantasy.com/picks/azerbaijan-gp-2026/ - Early F1 Fantasy outlook for Azerbaijan Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.
-- F1 Fantasy Spanish GP (Madrid) 2026: Picks, Captain & Tips | BoxBox: https://boxboxf1fantasy.com/picks/spanish-gp-madrid-2026/ - F1 Fantasy Spanish GP (Madrid) 2026 picks: driver and constructor projections, best values, boost choice, optimized lineup, weather forecast and risk outlook.
+- F1 Fantasy Azerbaijan GP 2026: Picks, Captain & Tips | BoxBox: https://boxboxf1fantasy.com/picks/azerbaijan-gp-2026/ - F1 Fantasy Azerbaijan GP 2026 picks: driver and constructor projections, best values, boost choice, optimized lineup, weather forecast and risk outlook.
+- F1 Fantasy Spanish GP (Madrid) 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/spanish-gp-madrid-2026/ - F1 Fantasy Spanish GP (Madrid) 2026 results: Max Verstappen led drivers with 41 points. See every driver and constructor score plus the archived forecast review.
 - F1 Fantasy Italian GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/italian-gp-2026/ - F1 Fantasy Italian GP 2026 results: Kimi Antonelli led drivers with 93 points. See every driver and constructor score plus the archived forecast review.
 - F1 Fantasy Dutch GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/dutch-gp-2026/ - F1 Fantasy Dutch GP 2026 results: Lando Norris led drivers with 57 points. See every driver and constructor score plus the archived forecast review.
 - F1 Fantasy Hungarian GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/hungarian-gp-2026/ - F1 Fantasy Hungarian GP 2026 results: Max Verstappen led drivers with 39 points. See every driver and constructor score plus the archived forecast review.
@@ -138,40 +138,40 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - F1 Fantasy Chinese GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/chinese-gp-2026/ - F1 Fantasy Chinese GP 2026 results: Kimi Antonelli led drivers with 68 points. See every driver and constructor score plus the archived forecast review.
 - F1 Fantasy Australian GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/australian-gp-2026/ - F1 Fantasy Australian GP 2026 results: Max Verstappen led drivers with 50 points. See every driver and constructor score plus the archived forecast review.
 - F1 Fantasy Drivers 2026: Points, Prices & Value | BoxBox: https://boxboxf1fantasy.com/drivers/ - Current F1 Fantasy 2026 driver projections: expected points, prices, value ratings, predicted qualifying and race finish for every driver.
-- Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/kimi-antonelli/ - Kimi Antonelli F1 Fantasy 2026 projection: 26.3 expected points for the Spanish GP (Madrid), $26.3M price, value rating and confidence range.
-- Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lando-norris/ - Lando Norris F1 Fantasy 2026 projection: 26.2 expected points for the Spanish GP (Madrid), $26.7M price, value rating and confidence range.
-- George Russell F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/george-russell/ - George Russell F1 Fantasy 2026 projection: 22.2 expected points for the Spanish GP (Madrid), $27.7M price, value rating and confidence range.
-- Charles Leclerc F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/charles-leclerc/ - Charles Leclerc F1 Fantasy 2026 projection: 21.6 expected points for the Spanish GP (Madrid), $24.1M price, value rating and confidence range.
-- Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oscar-piastri/ - Oscar Piastri F1 Fantasy 2026 projection: 19.4 expected points for the Spanish GP (Madrid), $24.0M price, value rating and confidence range.
-- Lewis Hamilton F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lewis-hamilton/ - Lewis Hamilton F1 Fantasy 2026 projection: 19.1 expected points for the Spanish GP (Madrid), $25.2M price, value rating and confidence range.
-- Max Verstappen F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/max-verstappen/ - Max Verstappen F1 Fantasy 2026 projection: 17.0 expected points for the Spanish GP (Madrid), $27.4M price, value rating and confidence range.
-- Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/liam-lawson/ - Liam Lawson F1 Fantasy 2026 projection: 11.3 expected points for the Spanish GP (Madrid), $14.9M price, value rating and confidence range.
-- Yuki Tsunoda F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/yuki-tsunoda/ - Yuki Tsunoda F1 Fantasy 2026 projection: 8.9 expected points for the Spanish GP (Madrid), $9.9M price, value rating and confidence range.
-- Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/arvid-lindblad/ - Arvid Lindblad F1 Fantasy 2026 projection: 7.9 expected points for the Spanish GP (Madrid), $8.0M price, value rating and confidence range.
-- Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/ - Gabriel Bortoleto F1 Fantasy 2026 projection: 6.6 expected points for the Spanish GP (Madrid), $8.6M price, value rating and confidence range.
-- Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/franco-colapinto/ - Franco Colapinto F1 Fantasy 2026 projection: 6.1 expected points for the Spanish GP (Madrid), $10.4M price, value rating and confidence range.
-- Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/pierre-gasly/ - Pierre Gasly F1 Fantasy 2026 projection: 3.5 expected points for the Spanish GP (Madrid), $12.2M price, value rating and confidence range.
-- Nico Hulkenberg F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/nico-hulkenberg/ - Nico Hulkenberg F1 Fantasy 2026 projection: 3.5 expected points for the Spanish GP (Madrid), $4.2M price, value rating and confidence range.
-- Esteban Ocon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/esteban-ocon/ - Esteban Ocon F1 Fantasy 2026 projection: 3.4 expected points for the Spanish GP (Madrid), $9.5M price, value rating and confidence range.
-- Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/carlos-sainz/ - Carlos Sainz F1 Fantasy 2026 projection: 1.8 expected points for the Spanish GP (Madrid), $9.6M price, value rating and confidence range.
-- Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/alex-albon/ - Alex Albon F1 Fantasy 2026 projection: 0.6 expected points for the Spanish GP (Madrid), $5.8M price, value rating and confidence range.
-- Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oliver-bearman/ - Oliver Bearman F1 Fantasy 2026 projection: 0.5 expected points for the Spanish GP (Madrid), $6.4M price, value rating and confidence range.
-- Sergio Perez F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/sergio-perez/ - Sergio Perez F1 Fantasy 2026 projection: -2.3 expected points for the Spanish GP (Madrid), $3.0M price, value rating and confidence range.
-- Fernando Alonso F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/fernando-alonso/ - Fernando Alonso F1 Fantasy 2026 projection: -3.1 expected points for the Spanish GP (Madrid), $7.0M price, value rating and confidence range.
-- Valtteri Bottas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/valtteri-bottas/ - Valtteri Bottas F1 Fantasy 2026 projection: -3.3 expected points for the Spanish GP (Madrid), $3.0M price, value rating and confidence range.
-- Lance Stroll F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lance-stroll/ - Lance Stroll F1 Fantasy 2026 projection: -3.4 expected points for the Spanish GP (Madrid), $3.0M price, value rating and confidence range.
+- Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/kimi-antonelli/ - Kimi Antonelli F1 Fantasy 2026 projection: 24.1 expected points for the Azerbaijan GP, $26.3M price, value rating and confidence range.
+- Max Verstappen F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/max-verstappen/ - Max Verstappen F1 Fantasy 2026 projection: 20.4 expected points for the Azerbaijan GP, $27.4M price, value rating and confidence range.
+- George Russell F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/george-russell/ - George Russell F1 Fantasy 2026 projection: 19.3 expected points for the Azerbaijan GP, $27.7M price, value rating and confidence range.
+- Charles Leclerc F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/charles-leclerc/ - Charles Leclerc F1 Fantasy 2026 projection: 17.9 expected points for the Azerbaijan GP, $24.1M price, value rating and confidence range.
+- Lewis Hamilton F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lewis-hamilton/ - Lewis Hamilton F1 Fantasy 2026 projection: 16.9 expected points for the Azerbaijan GP, $25.2M price, value rating and confidence range.
+- Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lando-norris/ - Lando Norris F1 Fantasy 2026 projection: 16.2 expected points for the Azerbaijan GP, $26.7M price, value rating and confidence range.
+- Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oscar-piastri/ - Oscar Piastri F1 Fantasy 2026 projection: 15.8 expected points for the Azerbaijan GP, $24.0M price, value rating and confidence range.
+- Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/liam-lawson/ - Liam Lawson F1 Fantasy 2026 projection: 13.2 expected points for the Azerbaijan GP, $14.9M price, value rating and confidence range.
+- Yuki Tsunoda F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/yuki-tsunoda/ - Yuki Tsunoda F1 Fantasy 2026 projection: 11.7 expected points for the Azerbaijan GP, $9.9M price, value rating and confidence range.
+- Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/ - Gabriel Bortoleto F1 Fantasy 2026 projection: 7.8 expected points for the Azerbaijan GP, $8.6M price, value rating and confidence range.
+- Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/franco-colapinto/ - Franco Colapinto F1 Fantasy 2026 projection: 7.5 expected points for the Azerbaijan GP, $10.4M price, value rating and confidence range.
+- Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/arvid-lindblad/ - Arvid Lindblad F1 Fantasy 2026 projection: 7.2 expected points for the Azerbaijan GP, $8.0M price, value rating and confidence range.
+- Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/pierre-gasly/ - Pierre Gasly F1 Fantasy 2026 projection: 6.1 expected points for the Azerbaijan GP, $12.2M price, value rating and confidence range.
+- Esteban Ocon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/esteban-ocon/ - Esteban Ocon F1 Fantasy 2026 projection: 5.3 expected points for the Azerbaijan GP, $9.5M price, value rating and confidence range.
+- Nico Hulkenberg F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/nico-hulkenberg/ - Nico Hulkenberg F1 Fantasy 2026 projection: 4.0 expected points for the Azerbaijan GP, $4.2M price, value rating and confidence range.
+- Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oliver-bearman/ - Oliver Bearman F1 Fantasy 2026 projection: 3.1 expected points for the Azerbaijan GP, $6.4M price, value rating and confidence range.
+- Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/carlos-sainz/ - Carlos Sainz F1 Fantasy 2026 projection: 2.6 expected points for the Azerbaijan GP, $9.6M price, value rating and confidence range.
+- Fernando Alonso F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/fernando-alonso/ - Fernando Alonso F1 Fantasy 2026 projection: 1.8 expected points for the Azerbaijan GP, $7.0M price, value rating and confidence range.
+- Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/alex-albon/ - Alex Albon F1 Fantasy 2026 projection: 0.4 expected points for the Azerbaijan GP, $5.8M price, value rating and confidence range.
+- Lance Stroll F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lance-stroll/ - Lance Stroll F1 Fantasy 2026 projection: 0.3 expected points for the Azerbaijan GP, $3.0M price, value rating and confidence range.
+- Sergio Perez F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/sergio-perez/ - Sergio Perez F1 Fantasy 2026 projection: -0.0 expected points for the Azerbaijan GP, $3.0M price, value rating and confidence range.
+- Valtteri Bottas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/valtteri-bottas/ - Valtteri Bottas F1 Fantasy 2026 projection: -2.2 expected points for the Azerbaijan GP, $3.0M price, value rating and confidence range.
 - F1 Fantasy Constructors 2026: Points & Value | BoxBox: https://boxboxf1fantasy.com/constructors/ - Current F1 Fantasy 2026 constructor projections: expected points, prices, pit-stop points, value ratings and risk for every constructor.
-- Mercedes F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mercedes/ - Mercedes F1 Fantasy 2026 constructor projection: 64.1 expected points for the Spanish GP (Madrid), $33.2M price, pit-stop points and value rating.
-- McLaren F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mclaren/ - McLaren F1 Fantasy 2026 constructor projection: 58.0 expected points for the Spanish GP (Madrid), $31.6M price, pit-stop points and value rating.
-- Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/ferrari/ - Ferrari F1 Fantasy 2026 constructor projection: 54.2 expected points for the Spanish GP (Madrid), $27.2M price, pit-stop points and value rating.
-- Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/red-bull/ - Red Bull F1 Fantasy 2026 constructor projection: 38.4 expected points for the Spanish GP (Madrid), $31.5M price, pit-stop points and value rating.
-- Racing Bulls F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/racing-bulls/ - Racing Bulls F1 Fantasy 2026 constructor projection: 28.2 expected points for the Spanish GP (Madrid), $14.1M price, pit-stop points and value rating.
-- Audi F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/audi/ - Audi F1 Fantasy 2026 constructor projection: 19.5 expected points for the Spanish GP (Madrid), $8.0M price, pit-stop points and value rating.
-- Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/alpine/ - Alpine F1 Fantasy 2026 constructor projection: 13.8 expected points for the Spanish GP (Madrid), $19.2M price, pit-stop points and value rating.
-- Haas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/haas/ - Haas F1 Fantasy 2026 constructor projection: 7.3 expected points for the Spanish GP (Madrid), $10.8M price, pit-stop points and value rating.
-- Williams F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/williams/ - Williams F1 Fantasy 2026 constructor projection: 4.7 expected points for the Spanish GP (Madrid), $13.8M price, pit-stop points and value rating.
-- Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/aston-martin/ - Aston Martin F1 Fantasy 2026 constructor projection: -4.5 expected points for the Spanish GP (Madrid), $6.9M price, pit-stop points and value rating.
-- Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/cadillac/ - Cadillac F1 Fantasy 2026 constructor projection: -6.1 expected points for the Spanish GP (Madrid), $3.0M price, pit-stop points and value rating.
+- Mercedes F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mercedes/ - Mercedes F1 Fantasy 2026 constructor projection: 58.9 expected points for the Azerbaijan GP, $33.2M price, pit-stop points and value rating.
+- Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/ferrari/ - Ferrari F1 Fantasy 2026 constructor projection: 47.6 expected points for the Azerbaijan GP, $27.2M price, pit-stop points and value rating.
+- Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/red-bull/ - Red Bull F1 Fantasy 2026 constructor projection: 43.4 expected points for the Azerbaijan GP, $31.5M price, pit-stop points and value rating.
+- McLaren F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mclaren/ - McLaren F1 Fantasy 2026 constructor projection: 43.2 expected points for the Azerbaijan GP, $31.6M price, pit-stop points and value rating.
+- Racing Bulls F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/racing-bulls/ - Racing Bulls F1 Fantasy 2026 constructor projection: 30.1 expected points for the Azerbaijan GP, $14.1M price, pit-stop points and value rating.
+- Audi F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/audi/ - Audi F1 Fantasy 2026 constructor projection: 19.9 expected points for the Azerbaijan GP, $8.0M price, pit-stop points and value rating.
+- Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/alpine/ - Alpine F1 Fantasy 2026 constructor projection: 19.3 expected points for the Azerbaijan GP, $19.2M price, pit-stop points and value rating.
+- Haas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/haas/ - Haas F1 Fantasy 2026 constructor projection: 11.1 expected points for the Azerbaijan GP, $10.8M price, pit-stop points and value rating.
+- Williams F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/williams/ - Williams F1 Fantasy 2026 constructor projection: 8.0 expected points for the Azerbaijan GP, $13.8M price, pit-stop points and value rating.
+- Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/aston-martin/ - Aston Martin F1 Fantasy 2026 constructor projection: 4.0 expected points for the Azerbaijan GP, $6.9M price, pit-stop points and value rating.
+- Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/cadillac/ - Cadillac F1 Fantasy 2026 constructor projection: -2.5 expected points for the Azerbaijan GP, $3.0M price, pit-stop points and value rating.
 - F1 Fantasy Points & Price Tracker 2026 | BoxBox: https://boxboxf1fantasy.com/stats/ - F1 Fantasy 2026 driver and constructor points, current prices, season changes, points per race and last-three form, updated after each Grand Prix.
 - F1 Fantasy Guides 2026: Scoring, Strategy & Chips | BoxBox: https://boxboxf1fantasy.com/guides/ - Free F1 Fantasy 2026 guides: how scoring works, how to win, chips explained, drivers vs constructors, and a beginner's how-to-play walkthrough.
 - How F1 Fantasy Scoring Works (2026) | BoxBox: https://boxboxf1fantasy.com/guides/how-f1-fantasy-scoring-works/ - F1 Fantasy 2026 scoring explained: qualifying, race and sprint points, overtakes, bonuses, DNF penalties, constructors and pit stops.

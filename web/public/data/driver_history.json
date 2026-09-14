@@ -80,6 +80,12 @@
           "circuit_id": "monza",
           "points": 37,
           "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 41,
+          "is_dnf": false
         }
       ]
     },
@@ -161,6 +167,12 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 33,
+          "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 28,
           "is_dnf": false
         }
       ]
@@ -244,6 +256,12 @@
           "circuit_id": "monza",
           "points": 93,
           "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 39,
+          "is_dnf": false
         }
       ]
     },
@@ -326,6 +344,12 @@
           "circuit_id": "monza",
           "points": -12,
           "is_dnf": true
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 20,
+          "is_dnf": false
         }
       ]
     },
@@ -408,6 +432,12 @@
           "circuit_id": "monza",
           "points": 26,
           "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": -11,
+          "is_dnf": true
         }
       ]
     },
@@ -489,6 +519,12 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 32,
+          "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 27,
           "is_dnf": false
         }
       ]
@@ -572,6 +608,12 @@
           "circuit_id": "monza",
           "points": 4,
           "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 6,
+          "is_dnf": false
         }
       ]
     },
@@ -653,6 +695,12 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 11,
+          "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 9,
           "is_dnf": false
         }
       ]
@@ -736,6 +784,12 @@
           "circuit_id": "monza",
           "points": 14,
           "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 1,
+          "is_dnf": false
         }
       ]
     },
@@ -817,6 +871,12 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 14,
+          "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 5,
           "is_dnf": false
         }
       ]
@@ -900,6 +960,12 @@
           "circuit_id": "monza",
           "points": 10,
           "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 6,
+          "is_dnf": false
         }
       ]
     },
@@ -982,6 +1048,12 @@
           "circuit_id": "monza",
           "points": 14,
           "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": -16,
+          "is_dnf": true
         }
       ]
     },
@@ -1063,6 +1135,12 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 17,
+          "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 6,
           "is_dnf": false
         }
       ]
@@ -1146,6 +1224,12 @@
           "circuit_id": "monza",
           "points": 14,
           "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 15,
+          "is_dnf": false
         }
       ]
     },
@@ -1227,6 +1311,12 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 25,
+          "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 17,
           "is_dnf": false
         }
       ]
@@ -1310,6 +1400,12 @@
           "circuit_id": "monza",
           "points": 13,
           "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": -14,
+          "is_dnf": true
         }
       ]
     },
@@ -1462,6 +1558,12 @@
           "circuit_id": "monza",
           "points": -10,
           "is_dnf": true
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 5,
+          "is_dnf": false
         }
       ]
     },
@@ -1544,6 +1646,12 @@
           "circuit_id": "monza",
           "points": 35,
           "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 12,
+          "is_dnf": false
         }
       ]
     },
@@ -1624,6 +1732,12 @@
         {
           "round": 15,
           "circuit_id": "monza",
+          "points": 4,
+          "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
           "points": 4,
           "is_dnf": false
         }
@@ -1708,6 +1822,12 @@
           "circuit_id": "monza",
           "points": 14,
           "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 5,
+          "is_dnf": false
         }
       ]
     },
@@ -1790,6 +1910,12 @@
           "circuit_id": "monza",
           "points": -10,
           "is_dnf": true
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": -21,
+          "is_dnf": true
         }
       ]
     },
@@ -1805,6 +1931,12 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 17,
+          "is_dnf": false
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 4,
           "is_dnf": false
         }
       ]
@@ -1877,6 +2009,11 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 128
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 87
         }
       ]
     },
@@ -1946,6 +2083,11 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 24
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 19
         }
       ]
     },
@@ -2015,6 +2157,11 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 69
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 58
         }
       ]
     },
@@ -2084,6 +2231,11 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 33
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 18
         }
       ]
     },
@@ -2153,6 +2305,11 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 17
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 13
         }
       ]
     },
@@ -2222,6 +2379,11 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 38
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 25
         }
       ]
     },
@@ -2291,6 +2453,11 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 34
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": -9
         }
       ]
     },
@@ -2360,6 +2527,11 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 77
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 49
         }
       ]
     },
@@ -2429,6 +2601,11 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 41
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": 9
         }
       ]
     },
@@ -2498,6 +2675,11 @@
           "round": 15,
           "circuit_id": "monza",
           "points": 16
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": -11
         }
       ]
     },
@@ -2567,6 +2749,11 @@
           "round": 15,
           "circuit_id": "monza",
           "points": -21
+        },
+        {
+          "round": 16,
+          "circuit_id": "madrid",
+          "points": -17
         }
       ]
     }

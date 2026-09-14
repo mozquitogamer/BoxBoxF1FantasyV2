@@ -1,404 +1,9 @@
 {
   "year": 2026,
-  "current_round": 16,
+  "current_round": 17,
   "horizon": 5,
-  "generated_at": "2026-09-12T12:31:42.533929+00:00",
+  "generated_at": "2026-09-14T08:46:25.380666+00:00",
   "rounds": {
-    "17": {
-      "round": 17,
-      "name": "Azerbaijan Grand Prix",
-      "circuit": "Baku",
-      "is_sprint": false,
-      "drivers": {
-        "ALB": {
-          "predicted_quali": 18,
-          "predicted_race": 17,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 1.3,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": 1.3,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 1.3
-          }
-        },
-        "ALO": {
-          "predicted_quali": 19,
-          "predicted_race": 19,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": -0.5,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": -0.5,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": -0.5
-          }
-        },
-        "ANT": {
-          "predicted_quali": 1,
-          "predicted_race": 2,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 27.6,
-          "breakdown": {
-            "quali_pts": 10,
-            "race_pts": 17.6,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 27.6
-          }
-        },
-        "LIN": {
-          "predicted_quali": 9,
-          "predicted_race": 9,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 3.6,
-          "breakdown": {
-            "quali_pts": 2,
-            "race_pts": 1.6,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 3.6
-          }
-        },
-        "BEA": {
-          "predicted_quali": 17,
-          "predicted_race": 15,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 3.2,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": 3.2,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 3.2
-          }
-        },
-        "BOR": {
-          "predicted_quali": 11,
-          "predicted_race": 10,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 2.5,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": 2.5,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 2.5
-          }
-        },
-        "BOT": {
-          "predicted_quali": 21,
-          "predicted_race": 21,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": -0.5,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": -0.5,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": -0.5
-          }
-        },
-        "COL": {
-          "predicted_quali": 14,
-          "predicted_race": 13,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 1.3,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": 1.3,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 1.3
-          }
-        },
-        "GAS": {
-          "predicted_quali": 10,
-          "predicted_race": 14,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": -3.2,
-          "breakdown": {
-            "quali_pts": 1,
-            "race_pts": -4.2,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": -3.2
-          }
-        },
-        "HAM": {
-          "predicted_quali": 4,
-          "predicted_race": 5,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 16.0,
-          "breakdown": {
-            "quali_pts": 7,
-            "race_pts": 9.0,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 16.0
-          }
-        },
-        "HUL": {
-          "predicted_quali": 13,
-          "predicted_race": 12,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 1.3,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": 1.3,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 1.3
-          }
-        },
-        "LAW_RED_BULL": {
-          "predicted_quali": 8,
-          "predicted_race": 8,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 6.5,
-          "breakdown": {
-            "quali_pts": 3,
-            "race_pts": 3.5,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 6.5
-          }
-        },
-        "LEC": {
-          "predicted_quali": 3,
-          "predicted_race": 6,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 13.3,
-          "breakdown": {
-            "quali_pts": 8,
-            "race_pts": 5.3,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 13.3
-          }
-        },
-        "VER": {
-          "predicted_quali": 5,
-          "predicted_race": 4,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 19.6,
-          "breakdown": {
-            "quali_pts": 6,
-            "race_pts": 13.6,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 19.6
-          }
-        },
-        "NOR": {
-          "predicted_quali": 6,
-          "predicted_race": 3,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 26.3,
-          "breakdown": {
-            "quali_pts": 5,
-            "race_pts": 21.3,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 26.3
-          }
-        },
-        "OCO": {
-          "predicted_quali": 16,
-          "predicted_race": 16,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": -0.5,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": -0.5,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": -0.5
-          }
-        },
-        "PER": {
-          "predicted_quali": 22,
-          "predicted_race": 22,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": -0.5,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": -0.5,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": -0.5
-          }
-        },
-        "PIA": {
-          "predicted_quali": 7,
-          "predicted_race": 7,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 9.3,
-          "breakdown": {
-            "quali_pts": 4,
-            "race_pts": 5.3,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 9.3
-          }
-        },
-        "RUS": {
-          "predicted_quali": 2,
-          "predicted_race": 1,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 35.8,
-          "breakdown": {
-            "quali_pts": 9,
-            "race_pts": 26.8,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 35.8
-          }
-        },
-        "SAI": {
-          "predicted_quali": 15,
-          "predicted_race": 18,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": -3.3,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": -3.3,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": -3.3
-          }
-        },
-        "STR": {
-          "predicted_quali": 20,
-          "predicted_race": 20,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": -0.5,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": -0.5,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": -0.5
-          }
-        },
-        "TSU_RACING_BULLS": {
-          "predicted_quali": 12,
-          "predicted_race": 11,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 1.3,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": 1.3,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 1.3
-          }
-        }
-      },
-      "constructors": {
-        "williams": {
-          "expected_points": -2.6,
-          "drivers": [
-            "ALB",
-            "SAI"
-          ]
-        },
-        "aston_martin": {
-          "expected_points": -1.6,
-          "drivers": [
-            "ALO",
-            "STR"
-          ]
-        },
-        "mercedes": {
-          "expected_points": 61.0,
-          "drivers": [
-            "ANT",
-            "RUS"
-          ]
-        },
-        "racing_bulls": {
-          "expected_points": 4.3,
-          "drivers": [
-            "LIN",
-            "TSU_RACING_BULLS"
-          ]
-        },
-        "haas": {
-          "expected_points": 2.1,
-          "drivers": [
-            "BEA",
-            "OCO"
-          ]
-        },
-        "audi": {
-          "expected_points": 3.2,
-          "drivers": [
-            "BOR",
-            "HUL"
-          ]
-        },
-        "cadillac": {
-          "expected_points": -1.6,
-          "drivers": [
-            "BOT",
-            "PER"
-          ]
-        },
-        "alpine": {
-          "expected_points": -2.5,
-          "drivers": [
-            "COL",
-            "GAS"
-          ]
-        },
-        "ferrari": {
-          "expected_points": 27.7,
-          "drivers": [
-            "HAM",
-            "LEC"
-          ]
-        },
-        "red_bull": {
-          "expected_points": 25.0,
-          "drivers": [
-            "LAW_RED_BULL",
-            "VER"
-          ]
-        },
-        "mclaren": {
-          "expected_points": 34.1,
-          "drivers": [
-            "NOR",
-            "PIA"
-          ]
-        }
-      }
-    },
     "18": {
       "round": 18,
       "name": "Singapore Grand Prix",
@@ -407,114 +12,114 @@
       "drivers": {
         "ALB": {
           "predicted_quali": 18,
-          "predicted_race": 17,
+          "predicted_race": 20,
           "predicted_sprint_quali": 18,
           "predicted_sprint": 18,
-          "expected_points": 0.6,
+          "expected_points": -3.1,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": 1.3,
+            "race_pts": -2.3,
             "sprint_quali_pts": 0.0,
             "sprint_race_pts": -0.8,
-            "total": 0.6
+            "total": -3.1
           }
         },
         "ALO": {
           "predicted_quali": 19,
-          "predicted_race": 19,
+          "predicted_race": 18,
           "predicted_sprint_quali": 19,
           "predicted_sprint": 22,
-          "expected_points": -4.0,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": -0.5,
-            "sprint_quali_pts": 0.0,
-            "sprint_race_pts": -3.5,
-            "total": -4.0
-          }
-        },
-        "ANT": {
-          "predicted_quali": 1,
-          "predicted_race": 2,
-          "predicted_sprint_quali": 1,
-          "predicted_sprint": 2,
-          "expected_points": 43.3,
-          "breakdown": {
-            "quali_pts": 10,
-            "race_pts": 17.6,
-            "sprint_quali_pts": 10.0,
-            "sprint_race_pts": 5.6,
-            "total": 43.3
-          }
-        },
-        "LIN": {
-          "predicted_quali": 9,
-          "predicted_race": 9,
-          "predicted_sprint_quali": 9,
-          "predicted_sprint": 9,
-          "expected_points": 5.0,
-          "breakdown": {
-            "quali_pts": 2,
-            "race_pts": 1.6,
-            "sprint_quali_pts": 2.0,
-            "sprint_race_pts": -0.7,
-            "total": 5.0
-          }
-        },
-        "BEA": {
-          "predicted_quali": 16,
-          "predicted_race": 15,
-          "predicted_sprint_quali": 16,
-          "predicted_sprint": 15,
-          "expected_points": 2.4,
+          "expected_points": -2.2,
           "breakdown": {
             "quali_pts": 0,
             "race_pts": 1.3,
             "sprint_quali_pts": 0.0,
-            "sprint_race_pts": 1.1,
-            "total": 2.4
+            "sprint_race_pts": -3.5,
+            "total": -2.2
+          }
+        },
+        "ANT": {
+          "predicted_quali": 1,
+          "predicted_race": 1,
+          "predicted_sprint_quali": 1,
+          "predicted_sprint": 2,
+          "expected_points": 50.6,
+          "breakdown": {
+            "quali_pts": 10,
+            "race_pts": 25.0,
+            "sprint_quali_pts": 10.0,
+            "sprint_race_pts": 5.6,
+            "total": 50.6
+          }
+        },
+        "LIN": {
+          "predicted_quali": 9,
+          "predicted_race": 13,
+          "predicted_sprint_quali": 9,
+          "predicted_sprint": 9,
+          "expected_points": -0.8,
+          "breakdown": {
+            "quali_pts": 2,
+            "race_pts": -4.2,
+            "sprint_quali_pts": 2.0,
+            "sprint_race_pts": -0.7,
+            "total": -0.8
+          }
+        },
+        "BEA": {
+          "predicted_quali": 17,
+          "predicted_race": 16,
+          "predicted_sprint_quali": 17,
+          "predicted_sprint": 15,
+          "expected_points": 4.3,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": 1.3,
+            "sprint_quali_pts": 0.0,
+            "sprint_race_pts": 2.9,
+            "total": 4.3
           }
         },
         "BOR": {
           "predicted_quali": 12,
-          "predicted_race": 12,
+          "predicted_race": 9,
           "predicted_sprint_quali": 12,
-          "predicted_sprint": 13,
-          "expected_points": -2.2,
+          "predicted_sprint": 12,
+          "expected_points": 6.4,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": -0.5,
+            "race_pts": 7.1,
             "sprint_quali_pts": 0.0,
-            "sprint_race_pts": -1.7,
-            "total": -2.2
+            "sprint_race_pts": -0.8,
+            "total": 6.4
           }
         },
         "BOT": {
           "predicted_quali": 21,
-          "predicted_race": 21,
+          "predicted_race": 22,
           "predicted_sprint_quali": 21,
           "predicted_sprint": 20,
-          "expected_points": 0.6,
+          "expected_points": -0.3,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": -0.5,
+            "race_pts": -1.4,
             "sprint_quali_pts": 0.0,
             "sprint_race_pts": 1.1,
-            "total": 0.6
+            "total": -0.3
           }
         },
         "COL": {
-          "predicted_quali": 14,
-          "predicted_race": 10,
-          "predicted_sprint_quali": 14,
-          "predicted_sprint": 14,
-          "expected_points": 7.3,
+          "predicted_quali": 13,
+          "predicted_race": 12,
+          "predicted_sprint_quali": 13,
+          "predicted_sprint": 11,
+          "expected_points": 4.3,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": 8.1,
+            "race_pts": 1.3,
             "sprint_quali_pts": 0.0,
-            "sprint_race_pts": -0.8,
-            "total": 7.3
+            "sprint_race_pts": 2.9,
+            "total": 4.3
           }
         },
         "GAS": {
@@ -533,30 +138,30 @@
         },
         "HAM": {
           "predicted_quali": 4,
-          "predicted_race": 4,
+          "predicted_race": 6,
           "predicted_sprint_quali": 4,
           "predicted_sprint": 5,
-          "expected_points": 28.2,
+          "expected_points": 22.6,
           "breakdown": {
             "quali_pts": 7,
-            "race_pts": 11.7,
+            "race_pts": 6.2,
             "sprint_quali_pts": 7.0,
             "sprint_race_pts": 2.4,
-            "total": 28.2
+            "total": 22.6
           }
         },
         "HUL": {
-          "predicted_quali": 13,
-          "predicted_race": 13,
-          "predicted_sprint_quali": 13,
-          "predicted_sprint": 11,
-          "expected_points": 2.4,
+          "predicted_quali": 14,
+          "predicted_race": 14,
+          "predicted_sprint_quali": 14,
+          "predicted_sprint": 14,
+          "expected_points": -1.3,
           "breakdown": {
             "quali_pts": 0,
             "race_pts": -0.5,
             "sprint_quali_pts": 0.0,
-            "sprint_race_pts": 2.9,
-            "total": 2.4
+            "sprint_race_pts": -0.8,
+            "total": -1.3
           }
         },
         "LAW_RED_BULL": {
@@ -577,119 +182,49 @@
           "predicted_quali": 5,
           "predicted_race": 5,
           "predicted_sprint_quali": 5,
-          "predicted_sprint": 3,
-          "expected_points": 31.2,
+          "predicted_sprint": 4,
+          "expected_points": 28.0,
           "breakdown": {
             "quali_pts": 6,
             "race_pts": 9.9,
             "sprint_quali_pts": 6.0,
-            "sprint_race_pts": 9.3,
-            "total": 31.2
+            "sprint_race_pts": 6.1,
+            "total": 28.0
           }
         },
         "VER": {
-          "predicted_quali": 7,
-          "predicted_race": 6,
-          "predicted_sprint_quali": 7,
-          "predicted_sprint": 7,
-          "expected_points": 19.1,
+          "predicted_quali": 6,
+          "predicted_race": 4,
+          "predicted_sprint_quali": 6,
+          "predicted_sprint": 6,
+          "expected_points": 27.8,
           "breakdown": {
-            "quali_pts": 4,
-            "race_pts": 9.9,
-            "sprint_quali_pts": 4.0,
-            "sprint_race_pts": 1.2,
-            "total": 19.1
+            "quali_pts": 5,
+            "race_pts": 15.4,
+            "sprint_quali_pts": 5.0,
+            "sprint_race_pts": 2.4,
+            "total": 27.8
           }
         },
         "NOR": {
           "predicted_quali": 3,
           "predicted_race": 3,
           "predicted_sprint_quali": 3,
-          "predicted_sprint": 4,
-          "expected_points": 35.1,
+          "predicted_sprint": 3,
+          "expected_points": 37.4,
           "breakdown": {
             "quali_pts": 8,
             "race_pts": 15.8,
             "sprint_quali_pts": 8.0,
-            "sprint_race_pts": 3.3,
-            "total": 35.1
+            "sprint_race_pts": 5.6,
+            "total": 37.4
           }
         },
         "OCO": {
           "predicted_quali": 15,
-          "predicted_race": 16,
+          "predicted_race": 15,
           "predicted_sprint_quali": 15,
-          "predicted_sprint": 17,
-          "expected_points": -4.0,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": -1.4,
-            "sprint_quali_pts": 0.0,
-            "sprint_race_pts": -2.6,
-            "total": -4.0
-          }
-        },
-        "PER": {
-          "predicted_quali": 22,
-          "predicted_race": 22,
-          "predicted_sprint_quali": 22,
-          "predicted_sprint": 19,
-          "expected_points": 4.3,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": -0.5,
-            "sprint_quali_pts": 0.0,
-            "sprint_race_pts": 4.8,
-            "total": 4.3
-          }
-        },
-        "PIA": {
-          "predicted_quali": 6,
-          "predicted_race": 7,
-          "predicted_sprint_quali": 6,
-          "predicted_sprint": 6,
-          "expected_points": 16.8,
-          "breakdown": {
-            "quali_pts": 5,
-            "race_pts": 4.4,
-            "sprint_quali_pts": 5.0,
-            "sprint_race_pts": 2.4,
-            "total": 16.8
-          }
-        },
-        "RUS": {
-          "predicted_quali": 2,
-          "predicted_race": 1,
-          "predicted_sprint_quali": 2,
-          "predicted_sprint": 1,
-          "expected_points": 54.1,
-          "breakdown": {
-            "quali_pts": 9,
-            "race_pts": 26.8,
-            "sprint_quali_pts": 9.0,
-            "sprint_race_pts": 9.3,
-            "total": 54.1
-          }
-        },
-        "SAI": {
-          "predicted_quali": 17,
-          "predicted_race": 18,
-          "predicted_sprint_quali": 17,
           "predicted_sprint": 16,
-          "expected_points": -0.3,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": -1.4,
-            "sprint_quali_pts": 0.0,
-            "sprint_race_pts": 1.1,
-            "total": -0.3
-          }
-        },
-        "STR": {
-          "predicted_quali": 20,
-          "predicted_race": 20,
-          "predicted_sprint_quali": 20,
-          "predicted_sprint": 21,
           "expected_points": -2.2,
           "breakdown": {
             "quali_pts": 0,
@@ -699,87 +234,157 @@
             "total": -2.2
           }
         },
-        "TSU_RACING_BULLS": {
-          "predicted_quali": 11,
-          "predicted_race": 14,
-          "predicted_sprint_quali": 11,
-          "predicted_sprint": 12,
-          "expected_points": -4.9,
+        "PER": {
+          "predicted_quali": 22,
+          "predicted_race": 21,
+          "predicted_sprint_quali": 22,
+          "predicted_sprint": 21,
+          "expected_points": 2.4,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": -3.3,
+            "race_pts": 1.3,
+            "sprint_quali_pts": 0.0,
+            "sprint_race_pts": 1.1,
+            "total": 2.4
+          }
+        },
+        "PIA": {
+          "predicted_quali": 7,
+          "predicted_race": 7,
+          "predicted_sprint_quali": 7,
+          "predicted_sprint": 7,
+          "expected_points": 14.5,
+          "breakdown": {
+            "quali_pts": 4,
+            "race_pts": 5.3,
+            "sprint_quali_pts": 4.0,
+            "sprint_race_pts": 1.2,
+            "total": 14.5
+          }
+        },
+        "RUS": {
+          "predicted_quali": 2,
+          "predicted_race": 2,
+          "predicted_sprint_quali": 2,
+          "predicted_sprint": 1,
+          "expected_points": 45.9,
+          "breakdown": {
+            "quali_pts": 9,
+            "race_pts": 18.5,
+            "sprint_quali_pts": 9.0,
+            "sprint_race_pts": 9.3,
+            "total": 45.9
+          }
+        },
+        "SAI": {
+          "predicted_quali": 16,
+          "predicted_race": 17,
+          "predicted_sprint_quali": 16,
+          "predicted_sprint": 17,
+          "expected_points": -3.1,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": -1.4,
             "sprint_quali_pts": 0.0,
             "sprint_race_pts": -1.7,
-            "total": -4.9
+            "total": -3.1
+          }
+        },
+        "STR": {
+          "predicted_quali": 20,
+          "predicted_race": 19,
+          "predicted_sprint_quali": 20,
+          "predicted_sprint": 19,
+          "expected_points": 2.4,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": 1.3,
+            "sprint_quali_pts": 0.0,
+            "sprint_race_pts": 1.1,
+            "total": 2.4
+          }
+        },
+        "TSU_RACING_BULLS": {
+          "predicted_quali": 11,
+          "predicted_race": 10,
+          "predicted_sprint_quali": 11,
+          "predicted_sprint": 13,
+          "expected_points": -0.1,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": 2.5,
+            "sprint_quali_pts": 0.0,
+            "sprint_race_pts": -2.6,
+            "total": -0.1
           }
         }
       },
       "constructors": {
         "williams": {
-          "expected_points": -0.3,
+          "expected_points": -6.8,
           "drivers": [
             "ALB",
             "SAI"
           ]
         },
         "aston_martin": {
-          "expected_points": -6.8,
+          "expected_points": -0.4,
           "drivers": [
             "ALO",
             "STR"
           ]
         },
         "mercedes": {
-          "expected_points": 95.0,
+          "expected_points": 94.1,
           "drivers": [
             "ANT",
             "RUS"
           ]
         },
         "racing_bulls": {
-          "expected_points": -0.5,
+          "expected_points": -1.5,
           "drivers": [
             "LIN",
             "TSU_RACING_BULLS"
           ]
         },
         "haas": {
-          "expected_points": -2.2,
+          "expected_points": 1.5,
           "drivers": [
             "BEA",
             "OCO"
           ]
         },
         "audi": {
-          "expected_points": -0.4,
+          "expected_points": 4.5,
           "drivers": [
             "BOR",
             "HUL"
           ]
         },
         "cadillac": {
-          "expected_points": 4.3,
+          "expected_points": 1.5,
           "drivers": [
             "BOT",
             "PER"
           ]
         },
         "alpine": {
-          "expected_points": 6.6,
+          "expected_points": 3.6,
           "drivers": [
             "COL",
             "GAS"
           ]
         },
         "ferrari": {
-          "expected_points": 57.8,
+          "expected_points": 49.0,
           "drivers": [
             "HAM",
             "LEC"
           ]
         },
         "red_bull": {
-          "expected_points": 27.7,
+          "expected_points": 36.4,
           "drivers": [
             "LAW_RED_BULL",
             "VER"
@@ -802,58 +407,58 @@
       "drivers": {
         "ALB": {
           "predicted_quali": 18,
-          "predicted_race": 17,
+          "predicted_race": 19,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 1.3,
+          "expected_points": -1.4,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": 1.3,
+            "race_pts": -1.4,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 1.3
+            "total": -1.4
           }
         },
         "ALO": {
           "predicted_quali": 19,
-          "predicted_race": 19,
+          "predicted_race": 17,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": -0.5,
+          "expected_points": 3.2,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": -0.5,
+            "race_pts": 3.2,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": -0.5
+            "total": 3.2
           }
         },
         "ANT": {
           "predicted_quali": 1,
-          "predicted_race": 2,
+          "predicted_race": 1,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 27.6,
+          "expected_points": 35.0,
           "breakdown": {
             "quali_pts": 10,
-            "race_pts": 17.6,
+            "race_pts": 25.0,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 27.6
+            "total": 35.0
           }
         },
         "LIN": {
           "predicted_quali": 9,
-          "predicted_race": 9,
+          "predicted_race": 11,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 3.6,
+          "expected_points": -0.3,
           "breakdown": {
             "quali_pts": 2,
-            "race_pts": 1.6,
+            "race_pts": -2.3,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 3.6
+            "total": -0.3
           }
         },
         "BEA": {
@@ -871,31 +476,31 @@
           }
         },
         "BOR": {
-          "predicted_quali": 11,
-          "predicted_race": 10,
+          "predicted_quali": 12,
+          "predicted_race": 9,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 2.5,
+          "expected_points": 7.1,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": 2.5,
+            "race_pts": 7.1,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 2.5
+            "total": 7.1
           }
         },
         "BOT": {
           "predicted_quali": 21,
-          "predicted_race": 21,
+          "predicted_race": 22,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": -0.5,
+          "expected_points": -1.4,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": -0.5,
+            "race_pts": -1.4,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": -0.5
+            "total": -1.4
           }
         },
         "COL": {
@@ -913,45 +518,45 @@
           }
         },
         "GAS": {
-          "predicted_quali": 10,
-          "predicted_race": 14,
+          "predicted_quali": 11,
+          "predicted_race": 10,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": -3.2,
+          "expected_points": 2.5,
           "breakdown": {
-            "quali_pts": 1,
-            "race_pts": -4.2,
+            "quali_pts": 0,
+            "race_pts": 2.5,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": -3.2
+            "total": 2.5
           }
         },
         "HAM": {
           "predicted_quali": 5,
-          "predicted_race": 4,
+          "predicted_race": 6,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 19.6,
+          "expected_points": 13.1,
           "breakdown": {
             "quali_pts": 6,
-            "race_pts": 13.6,
+            "race_pts": 7.1,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 19.6
+            "total": 13.1
           }
         },
         "HUL": {
           "predicted_quali": 13,
-          "predicted_race": 11,
+          "predicted_race": 13,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 3.2,
+          "expected_points": -0.5,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": 3.2,
+            "race_pts": -0.5,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 3.2
+            "total": -0.5
           }
         },
         "LAW_RED_BULL": {
@@ -984,30 +589,30 @@
         },
         "VER": {
           "predicted_quali": 6,
-          "predicted_race": 6,
+          "predicted_race": 4,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 13.1,
+          "expected_points": 20.4,
           "breakdown": {
             "quali_pts": 5,
-            "race_pts": 8.1,
+            "race_pts": 15.4,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 13.1
+            "total": 20.4
           }
         },
         "NOR": {
-          "predicted_quali": 3,
-          "predicted_race": 3,
+          "predicted_quali": 2,
+          "predicted_race": 2,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 23.8,
+          "expected_points": 27.5,
           "breakdown": {
-            "quali_pts": 8,
-            "race_pts": 15.8,
+            "quali_pts": 9,
+            "race_pts": 18.5,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 23.8
+            "total": 27.5
           }
         },
         "OCO": {
@@ -1026,16 +631,16 @@
         },
         "PER": {
           "predicted_quali": 22,
-          "predicted_race": 22,
+          "predicted_race": 21,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": -0.5,
+          "expected_points": 1.3,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": -0.5,
+            "race_pts": 1.3,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": -0.5
+            "total": 1.3
           }
         },
         "PIA": {
@@ -1053,17 +658,17 @@
           }
         },
         "RUS": {
-          "predicted_quali": 2,
-          "predicted_race": 1,
+          "predicted_quali": 3,
+          "predicted_race": 3,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 35.8,
+          "expected_points": 23.8,
           "breakdown": {
-            "quali_pts": 9,
-            "race_pts": 26.8,
+            "quali_pts": 8,
+            "race_pts": 15.8,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 35.8
+            "total": 23.8
           }
         },
         "SAI": {
@@ -1095,44 +700,44 @@
           }
         },
         "TSU_RACING_BULLS": {
-          "predicted_quali": 12,
-          "predicted_race": 13,
+          "predicted_quali": 10,
+          "predicted_race": 14,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": -1.4,
+          "expected_points": -3.2,
           "breakdown": {
-            "quali_pts": 0,
-            "race_pts": -1.4,
+            "quali_pts": 1,
+            "race_pts": -4.2,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": -1.4
+            "total": -3.2
           }
         }
       },
       "constructors": {
         "williams": {
-          "expected_points": -0.7,
+          "expected_points": -3.4,
           "drivers": [
             "ALB",
             "SAI"
           ]
         },
         "aston_martin": {
-          "expected_points": -1.6,
+          "expected_points": 2.1,
           "drivers": [
             "ALO",
             "STR"
           ]
         },
         "mercedes": {
-          "expected_points": 61.0,
+          "expected_points": 56.4,
           "drivers": [
             "ANT",
             "RUS"
           ]
         },
         "racing_bulls": {
-          "expected_points": 1.6,
+          "expected_points": -4.1,
           "drivers": [
             "LIN",
             "TSU_RACING_BULLS"
@@ -1146,42 +751,42 @@
           ]
         },
         "audi": {
-          "expected_points": 5.1,
+          "expected_points": 6.0,
           "drivers": [
             "BOR",
             "HUL"
           ]
         },
         "cadillac": {
-          "expected_points": -1.6,
+          "expected_points": -0.7,
           "drivers": [
             "BOT",
             "PER"
           ]
         },
         "alpine": {
-          "expected_points": -0.6,
+          "expected_points": 5.1,
           "drivers": [
             "COL",
             "GAS"
           ]
         },
         "ferrari": {
-          "expected_points": 34.0,
+          "expected_points": 27.5,
           "drivers": [
             "HAM",
             "LEC"
           ]
         },
         "red_bull": {
-          "expected_points": 18.5,
+          "expected_points": 25.8,
           "drivers": [
             "LAW_RED_BULL",
             "VER"
           ]
         },
         "mclaren": {
-          "expected_points": 31.6,
+          "expected_points": 35.3,
           "drivers": [
             "NOR",
             "PIA"
@@ -1197,44 +802,44 @@
       "drivers": {
         "ALB": {
           "predicted_quali": 18,
-          "predicted_race": 15,
+          "predicted_race": 20,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 5.0,
+          "expected_points": -2.3,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": 5.0,
+            "race_pts": -2.3,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 5.0
+            "total": -2.3
           }
         },
         "ALO": {
           "predicted_quali": 19,
-          "predicted_race": 20,
+          "predicted_race": 17,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": -1.4,
+          "expected_points": 3.2,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": -1.4,
+            "race_pts": 3.2,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": -1.4
+            "total": 3.2
           }
         },
         "ANT": {
           "predicted_quali": 1,
-          "predicted_race": 2,
+          "predicted_race": 1,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 27.6,
+          "expected_points": 35.0,
           "breakdown": {
             "quali_pts": 10,
-            "race_pts": 17.6,
+            "race_pts": 25.0,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 27.6
+            "total": 35.0
           }
         },
         "LIN": {
@@ -1266,22 +871,50 @@
           }
         },
         "BOR": {
-          "predicted_quali": 11,
+          "predicted_quali": 12,
           "predicted_race": 10,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 2.5,
+          "expected_points": 4.4,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": 2.5,
+            "race_pts": 4.4,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 2.5
+            "total": 4.4
           }
         },
         "BOT": {
           "predicted_quali": 21,
-          "predicted_race": 21,
+          "predicted_race": 22,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": -1.4,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": -1.4,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": -1.4
+          }
+        },
+        "COL": {
+          "predicted_quali": 14,
+          "predicted_race": 13,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 1.3,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": 1.3,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 1.3
+          }
+        },
+        "GAS": {
+          "predicted_quali": 11,
+          "predicted_race": 11,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
           "expected_points": -0.5,
@@ -1293,60 +926,32 @@
             "total": -0.5
           }
         },
-        "COL": {
-          "predicted_quali": 14,
-          "predicted_race": 12,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 3.2,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": 3.2,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 3.2
-          }
-        },
-        "GAS": {
-          "predicted_quali": 10,
-          "predicted_race": 14,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": -3.2,
-          "breakdown": {
-            "quali_pts": 1,
-            "race_pts": -4.2,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": -3.2
-          }
-        },
         "HAM": {
-          "predicted_quali": 4,
-          "predicted_race": 4,
+          "predicted_quali": 3,
+          "predicted_race": 6,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 18.7,
+          "expected_points": 13.3,
           "breakdown": {
-            "quali_pts": 7,
-            "race_pts": 11.7,
+            "quali_pts": 8,
+            "race_pts": 5.3,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 18.7
+            "total": 13.3
           }
         },
         "HUL": {
-          "predicted_quali": 12,
-          "predicted_race": 11,
+          "predicted_quali": 13,
+          "predicted_race": 14,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 1.3,
+          "expected_points": -1.4,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": 1.3,
+            "race_pts": -1.4,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 1.3
+            "total": -1.4
           }
         },
         "LAW_RED_BULL": {
@@ -1364,64 +969,50 @@
           }
         },
         "LEC": {
-          "predicted_quali": 3,
-          "predicted_race": 5,
+          "predicted_quali": 4,
+          "predicted_race": 4,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 16.1,
+          "expected_points": 18.7,
           "breakdown": {
-            "quali_pts": 8,
-            "race_pts": 8.1,
+            "quali_pts": 7,
+            "race_pts": 11.7,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 16.1
+            "total": 18.7
           }
         },
         "VER": {
           "predicted_quali": 6,
-          "predicted_race": 6,
+          "predicted_race": 3,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 13.1,
+          "expected_points": 26.3,
           "breakdown": {
             "quali_pts": 5,
-            "race_pts": 8.1,
+            "race_pts": 21.3,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 13.1
+            "total": 26.3
           }
         },
         "NOR": {
           "predicted_quali": 5,
-          "predicted_race": 3,
+          "predicted_race": 5,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 25.5,
+          "expected_points": 15.9,
           "breakdown": {
             "quali_pts": 6,
-            "race_pts": 19.5,
+            "race_pts": 9.9,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 25.5
+            "total": 15.9
           }
         },
         "OCO": {
           "predicted_quali": 15,
-          "predicted_race": 17,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": -2.3,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": -2.3,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": -2.3
-          }
-        },
-        "PER": {
-          "predicted_quali": 22,
-          "predicted_race": 22,
+          "predicted_race": 15,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
           "expected_points": -0.5,
@@ -1431,6 +1022,20 @@
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
             "total": -0.5
+          }
+        },
+        "PER": {
+          "predicted_quali": 22,
+          "predicted_race": 21,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 1.3,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": 1.3,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 1.3
           }
         },
         "PIA": {
@@ -1449,134 +1054,134 @@
         },
         "RUS": {
           "predicted_quali": 2,
-          "predicted_race": 1,
+          "predicted_race": 2,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 35.8,
+          "expected_points": 27.5,
           "breakdown": {
             "quali_pts": 9,
-            "race_pts": 26.8,
+            "race_pts": 18.5,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 35.8
+            "total": 27.5
           }
         },
         "SAI": {
           "predicted_quali": 16,
-          "predicted_race": 18,
+          "predicted_race": 19,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": -2.3,
+          "expected_points": -3.3,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": -2.3,
+            "race_pts": -3.3,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": -2.3
+            "total": -3.3
           }
         },
         "STR": {
           "predicted_quali": 20,
-          "predicted_race": 19,
+          "predicted_race": 18,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 1.3,
+          "expected_points": 3.2,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": 1.3,
+            "race_pts": 3.2,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 1.3
+            "total": 3.2
           }
         },
         "TSU_RACING_BULLS": {
-          "predicted_quali": 13,
-          "predicted_race": 13,
+          "predicted_quali": 10,
+          "predicted_race": 12,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": -0.5,
+          "expected_points": -1.3,
           "breakdown": {
-            "quali_pts": 0,
-            "race_pts": -0.5,
+            "quali_pts": 1,
+            "race_pts": -2.3,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": -0.5
+            "total": -1.3
           }
         }
       },
       "constructors": {
         "williams": {
-          "expected_points": 2.1,
+          "expected_points": -6.2,
           "drivers": [
             "ALB",
             "SAI"
           ]
         },
         "aston_martin": {
-          "expected_points": -0.7,
+          "expected_points": 5.8,
           "drivers": [
             "ALO",
             "STR"
           ]
         },
         "mercedes": {
-          "expected_points": 61.0,
+          "expected_points": 60.1,
           "drivers": [
             "ANT",
             "RUS"
           ]
         },
         "racing_bulls": {
-          "expected_points": 2.5,
+          "expected_points": 1.7,
           "drivers": [
             "LIN",
             "TSU_RACING_BULLS"
           ]
         },
         "haas": {
-          "expected_points": -1.6,
+          "expected_points": 0.2,
           "drivers": [
             "BEA",
             "OCO"
           ]
         },
         "audi": {
-          "expected_points": 3.2,
+          "expected_points": 2.4,
           "drivers": [
             "BOR",
             "HUL"
           ]
         },
         "cadillac": {
-          "expected_points": -1.6,
+          "expected_points": -0.7,
           "drivers": [
             "BOT",
             "PER"
           ]
         },
         "alpine": {
-          "expected_points": -0.6,
+          "expected_points": 0.2,
           "drivers": [
             "COL",
             "GAS"
           ]
         },
         "ferrari": {
-          "expected_points": 33.2,
+          "expected_points": 30.4,
           "drivers": [
             "HAM",
             "LEC"
           ]
         },
         "red_bull": {
-          "expected_points": 18.5,
+          "expected_points": 31.3,
           "drivers": [
             "LAW_RED_BULL",
             "VER"
           ]
         },
         "mclaren": {
-          "expected_points": 33.3,
+          "expected_points": 24.1,
           "drivers": [
             "NOR",
             "PIA"
@@ -1592,44 +1197,44 @@
       "drivers": {
         "ALB": {
           "predicted_quali": 18,
-          "predicted_race": 17,
+          "predicted_race": 20,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 1.3,
+          "expected_points": -2.3,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": 1.3,
+            "race_pts": -2.3,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 1.3
+            "total": -2.3
           }
         },
         "ALO": {
           "predicted_quali": 19,
-          "predicted_race": 20,
+          "predicted_race": 17,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": -1.4,
+          "expected_points": 3.2,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": -1.4,
+            "race_pts": 3.2,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": -1.4
+            "total": 3.2
           }
         },
         "ANT": {
           "predicted_quali": 1,
-          "predicted_race": 2,
+          "predicted_race": 1,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 27.6,
+          "expected_points": 35.0,
           "breakdown": {
             "quali_pts": 10,
-            "race_pts": 17.6,
+            "race_pts": 25.0,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 27.6
+            "total": 35.0
           }
         },
         "LIN": {
@@ -1647,8 +1252,22 @@
           }
         },
         "BEA": {
-          "predicted_quali": 16,
+          "predicted_quali": 17,
           "predicted_race": 16,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 1.3,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": 1.3,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 1.3
+          }
+        },
+        "BOR": {
+          "predicted_quali": 12,
+          "predicted_race": 12,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
           "expected_points": -0.5,
@@ -1658,25 +1277,25 @@
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
             "total": -0.5
-          }
-        },
-        "BOR": {
-          "predicted_quali": 11,
-          "predicted_race": 10,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": 2.5,
-          "breakdown": {
-            "quali_pts": 0,
-            "race_pts": 2.5,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": 2.5
           }
         },
         "BOT": {
           "predicted_quali": 21,
-          "predicted_race": 21,
+          "predicted_race": 22,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": -1.4,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": -1.4,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": -1.4
+          }
+        },
+        "COL": {
+          "predicted_quali": 14,
+          "predicted_race": 14,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
           "expected_points": -0.5,
@@ -1688,60 +1307,46 @@
             "total": -0.5
           }
         },
-        "COL": {
-          "predicted_quali": 14,
-          "predicted_race": 12,
+        "GAS": {
+          "predicted_quali": 11,
+          "predicted_race": 11,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 3.2,
+          "expected_points": -0.5,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": 3.2,
+            "race_pts": -0.5,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 3.2
-          }
-        },
-        "GAS": {
-          "predicted_quali": 10,
-          "predicted_race": 14,
-          "predicted_sprint_quali": null,
-          "predicted_sprint": null,
-          "expected_points": -3.2,
-          "breakdown": {
-            "quali_pts": 1,
-            "race_pts": -4.2,
-            "sprint_quali_pts": 0,
-            "sprint_race_pts": 0,
-            "total": -3.2
+            "total": -0.5
           }
         },
         "HAM": {
           "predicted_quali": 5,
-          "predicted_race": 4,
+          "predicted_race": 6,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 19.6,
+          "expected_points": 13.1,
           "breakdown": {
             "quali_pts": 6,
-            "race_pts": 13.6,
+            "race_pts": 7.1,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 19.6
+            "total": 13.1
           }
         },
         "HUL": {
           "predicted_quali": 13,
-          "predicted_race": 11,
+          "predicted_race": 13,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 3.2,
+          "expected_points": -0.5,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": 3.2,
+            "race_pts": -0.5,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 3.2
+            "total": -0.5
           }
         },
         "LAW_RED_BULL": {
@@ -1774,30 +1379,30 @@
         },
         "VER": {
           "predicted_quali": 7,
-          "predicted_race": 6,
+          "predicted_race": 4,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 13.9,
+          "expected_points": 21.3,
           "breakdown": {
             "quali_pts": 4,
-            "race_pts": 9.9,
+            "race_pts": 17.3,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 13.9
+            "total": 21.3
           }
         },
         "NOR": {
-          "predicted_quali": 3,
-          "predicted_race": 3,
+          "predicted_quali": 2,
+          "predicted_race": 2,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 23.8,
+          "expected_points": 27.5,
           "breakdown": {
-            "quali_pts": 8,
-            "race_pts": 15.8,
+            "quali_pts": 9,
+            "race_pts": 18.5,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 23.8
+            "total": 27.5
           }
         },
         "OCO": {
@@ -1816,16 +1421,16 @@
         },
         "PER": {
           "predicted_quali": 22,
-          "predicted_race": 22,
+          "predicted_race": 21,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": -0.5,
+          "expected_points": 1.3,
           "breakdown": {
             "quali_pts": 0,
-            "race_pts": -0.5,
+            "race_pts": 1.3,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": -0.5
+            "total": 1.3
           }
         },
         "PIA": {
@@ -1843,22 +1448,151 @@
           }
         },
         "RUS": {
-          "predicted_quali": 2,
-          "predicted_race": 1,
+          "predicted_quali": 3,
+          "predicted_race": 3,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
-          "expected_points": 35.8,
+          "expected_points": 23.8,
           "breakdown": {
-            "quali_pts": 9,
-            "race_pts": 26.8,
+            "quali_pts": 8,
+            "race_pts": 15.8,
             "sprint_quali_pts": 0,
             "sprint_race_pts": 0,
-            "total": 35.8
+            "total": 23.8
           }
         },
         "SAI": {
-          "predicted_quali": 17,
+          "predicted_quali": 16,
+          "predicted_race": 19,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": -3.3,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": -3.3,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": -3.3
+          }
+        },
+        "STR": {
+          "predicted_quali": 20,
           "predicted_race": 18,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 3.2,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": 3.2,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 3.2
+          }
+        },
+        "TSU_RACING_BULLS": {
+          "predicted_quali": 10,
+          "predicted_race": 10,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 1.7,
+          "breakdown": {
+            "quali_pts": 1,
+            "race_pts": 0.7,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 1.7
+          }
+        }
+      },
+      "constructors": {
+        "williams": {
+          "expected_points": -6.2,
+          "drivers": [
+            "ALB",
+            "SAI"
+          ]
+        },
+        "aston_martin": {
+          "expected_points": 5.8,
+          "drivers": [
+            "ALO",
+            "STR"
+          ]
+        },
+        "mercedes": {
+          "expected_points": 56.4,
+          "drivers": [
+            "ANT",
+            "RUS"
+          ]
+        },
+        "racing_bulls": {
+          "expected_points": 4.7,
+          "drivers": [
+            "LIN",
+            "TSU_RACING_BULLS"
+          ]
+        },
+        "haas": {
+          "expected_points": 0.2,
+          "drivers": [
+            "BEA",
+            "OCO"
+          ]
+        },
+        "audi": {
+          "expected_points": -1.6,
+          "drivers": [
+            "BOR",
+            "HUL"
+          ]
+        },
+        "cadillac": {
+          "expected_points": -0.7,
+          "drivers": [
+            "BOT",
+            "PER"
+          ]
+        },
+        "alpine": {
+          "expected_points": -1.6,
+          "drivers": [
+            "COL",
+            "GAS"
+          ]
+        },
+        "ferrari": {
+          "expected_points": 27.5,
+          "drivers": [
+            "HAM",
+            "LEC"
+          ]
+        },
+        "red_bull": {
+          "expected_points": 26.7,
+          "drivers": [
+            "LAW_RED_BULL",
+            "VER"
+          ]
+        },
+        "mclaren": {
+          "expected_points": 35.4,
+          "drivers": [
+            "NOR",
+            "PIA"
+          ]
+        }
+      }
+    },
+    "22": {
+      "round": 22,
+      "name": "Las Vegas Grand Prix",
+      "circuit": "Las Vegas",
+      "is_sprint": false,
+      "drivers": {
+        "ALB": {
+          "predicted_quali": 18,
+          "predicted_race": 19,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
           "expected_points": -1.4,
@@ -1870,9 +1604,9 @@
             "total": -1.4
           }
         },
-        "STR": {
-          "predicted_quali": 20,
-          "predicted_race": 19,
+        "ALO": {
+          "predicted_quali": 19,
+          "predicted_race": 18,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
           "expected_points": 1.3,
@@ -1884,9 +1618,65 @@
             "total": 1.3
           }
         },
-        "TSU_RACING_BULLS": {
+        "ANT": {
+          "predicted_quali": 1,
+          "predicted_race": 1,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 35.0,
+          "breakdown": {
+            "quali_pts": 10,
+            "race_pts": 25.0,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 35.0
+          }
+        },
+        "LIN": {
+          "predicted_quali": 9,
+          "predicted_race": 9,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 3.6,
+          "breakdown": {
+            "quali_pts": 2,
+            "race_pts": 1.6,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 3.6
+          }
+        },
+        "BEA": {
+          "predicted_quali": 16,
+          "predicted_race": 16,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": -0.5,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": -0.5,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": -0.5
+          }
+        },
+        "BOR": {
           "predicted_quali": 12,
-          "predicted_race": 13,
+          "predicted_race": 10,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 4.4,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": 4.4,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 4.4
+          }
+        },
+        "BOT": {
+          "predicted_quali": 21,
+          "predicted_race": 22,
           "predicted_sprint_quali": null,
           "predicted_sprint": null,
           "expected_points": -1.4,
@@ -1897,32 +1687,242 @@
             "sprint_race_pts": 0,
             "total": -1.4
           }
+        },
+        "COL": {
+          "predicted_quali": 13,
+          "predicted_race": 11,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 3.2,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": 3.2,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 3.2
+          }
+        },
+        "GAS": {
+          "predicted_quali": 11,
+          "predicted_race": 12,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": -1.4,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": -1.4,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": -1.4
+          }
+        },
+        "HAM": {
+          "predicted_quali": 5,
+          "predicted_race": 6,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 13.1,
+          "breakdown": {
+            "quali_pts": 6,
+            "race_pts": 7.1,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 13.1
+          }
+        },
+        "HUL": {
+          "predicted_quali": 14,
+          "predicted_race": 13,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 1.3,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": 1.3,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 1.3
+          }
+        },
+        "LAW_RED_BULL": {
+          "predicted_quali": 8,
+          "predicted_race": 8,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 6.5,
+          "breakdown": {
+            "quali_pts": 3,
+            "race_pts": 3.5,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 6.5
+          }
+        },
+        "LEC": {
+          "predicted_quali": 4,
+          "predicted_race": 5,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 16.0,
+          "breakdown": {
+            "quali_pts": 7,
+            "race_pts": 9.0,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 16.0
+          }
+        },
+        "VER": {
+          "predicted_quali": 6,
+          "predicted_race": 3,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 26.3,
+          "breakdown": {
+            "quali_pts": 5,
+            "race_pts": 21.3,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 26.3
+          }
+        },
+        "NOR": {
+          "predicted_quali": 3,
+          "predicted_race": 4,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 18.8,
+          "breakdown": {
+            "quali_pts": 8,
+            "race_pts": 10.8,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 18.8
+          }
+        },
+        "OCO": {
+          "predicted_quali": 15,
+          "predicted_race": 15,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": -0.5,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": -0.5,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": -0.5
+          }
+        },
+        "PER": {
+          "predicted_quali": 22,
+          "predicted_race": 21,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 1.3,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": 1.3,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 1.3
+          }
+        },
+        "PIA": {
+          "predicted_quali": 7,
+          "predicted_race": 7,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 9.3,
+          "breakdown": {
+            "quali_pts": 4,
+            "race_pts": 5.3,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 9.3
+          }
+        },
+        "RUS": {
+          "predicted_quali": 2,
+          "predicted_race": 2,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": 27.5,
+          "breakdown": {
+            "quali_pts": 9,
+            "race_pts": 18.5,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": 27.5
+          }
+        },
+        "SAI": {
+          "predicted_quali": 17,
+          "predicted_race": 17,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": -0.5,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": -0.5,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": -0.5
+          }
+        },
+        "STR": {
+          "predicted_quali": 20,
+          "predicted_race": 20,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": -0.5,
+          "breakdown": {
+            "quali_pts": 0,
+            "race_pts": -0.5,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": -0.5
+          }
+        },
+        "TSU_RACING_BULLS": {
+          "predicted_quali": 10,
+          "predicted_race": 14,
+          "predicted_sprint_quali": null,
+          "predicted_sprint": null,
+          "expected_points": -3.2,
+          "breakdown": {
+            "quali_pts": 1,
+            "race_pts": -4.2,
+            "sprint_quali_pts": 0,
+            "sprint_race_pts": 0,
+            "total": -3.2
+          }
         }
       },
       "constructors": {
         "williams": {
-          "expected_points": -0.7,
+          "expected_points": -2.5,
           "drivers": [
             "ALB",
             "SAI"
           ]
         },
         "aston_martin": {
-          "expected_points": -0.7,
+          "expected_points": 0.2,
           "drivers": [
             "ALO",
             "STR"
           ]
         },
         "mercedes": {
-          "expected_points": 61.0,
+          "expected_points": 60.1,
           "drivers": [
             "ANT",
             "RUS"
           ]
         },
         "racing_bulls": {
-          "expected_points": 1.6,
+          "expected_points": -0.2,
           "drivers": [
             "LIN",
             "TSU_RACING_BULLS"
@@ -1943,35 +1943,35 @@
           ]
         },
         "cadillac": {
-          "expected_points": -1.6,
+          "expected_points": -0.7,
           "drivers": [
             "BOT",
             "PER"
           ]
         },
         "alpine": {
-          "expected_points": -0.6,
+          "expected_points": 1.2,
           "drivers": [
             "COL",
             "GAS"
           ]
         },
         "ferrari": {
-          "expected_points": 34.0,
+          "expected_points": 27.5,
           "drivers": [
             "HAM",
             "LEC"
           ]
         },
         "red_bull": {
-          "expected_points": 19.3,
+          "expected_points": 31.3,
           "drivers": [
             "LAW_RED_BULL",
             "VER"
           ]
         },
         "mclaren": {
-          "expected_points": 31.7,
+          "expected_points": 27.0,
           "drivers": [
             "NOR",
             "PIA"
