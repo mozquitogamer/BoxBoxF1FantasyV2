@@ -1,7 +1,14 @@
 {
-  "updated": "2026-09-13T14:27:11Z",
+  "updated": "2026-09-23T15:04:21Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "yj4WOxl1r9I",
+      "title": "F1 Fantasy Is Broken. And So Is F1.",
+      "published": "2026-09-16",
+      "thumbnail": "https://i.ytimg.com/vi/yj4WOxl1r9I/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=yj4WOxl1r9I"
+    },
     {
       "id": "9l4pRCbkwGE",
       "title": "USE NO NEGATIVE!! Spanish GP F1 Fantasy Q & A Stream -  Strategy, Tips, and Top Picks!",
@@ -22,13 +29,6 @@
       "published": "2026-09-10",
       "thumbnail": "https://i.ytimg.com/vi/rrvZC19JY1U/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=rrvZC19JY1U"
-    },
-    {
-      "id": "kvst71-57nA",
-      "title": "Italian GP F1 Fantasy Q & A Stream -  Strategy, Tips, and Top Picks!",
-      "published": "2026-09-06",
-      "thumbnail": "https://i.ytimg.com/vi/kvst71-57nA/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=kvst71-57nA"
     }
   ]
 }
