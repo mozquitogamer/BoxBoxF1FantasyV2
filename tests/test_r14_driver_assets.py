@@ -85,8 +85,8 @@ def test_r17_return_restores_seats_without_erasing_tsunoda_history():
     assert active_constructor_driver_assets(17)["racing_bulls"] == ["LIN", "LAW"]
 
     r17_prices, _ = load_fantasy_price_maps(round_num=17)
-    assert r17_prices["HAD"] == 14.5
-    assert r17_prices["LAW"] == 15.1
+    assert r17_prices["HAD"] == 14.5  # Confirmed live Fantasy price
+    assert r17_prices["LAW"] == 9.7  # R16 Racing Bulls seat price
     assert "TSU_RACING_BULLS" not in r17_prices
     assert "LAW_RED_BULL" not in r17_prices
     historical = json.loads((SEED_DIR / "fantasy_prices.json").read_text(encoding="utf-8"))

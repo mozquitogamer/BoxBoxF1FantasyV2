@@ -50,7 +50,7 @@ try {
     price_change_assumption: { round: 17, driver_ids: ['HAD', 'LAW'], previous_two_scores: [0, 0] },
     drivers: [
       { driver_id: 'HAD', name: 'Isack Hadjar', constructor: 'red_bull', current_price: 14.5 },
-      { driver_id: 'LAW', name: 'Liam Lawson', constructor: 'racing_bulls', current_price: 15.1 },
+      { driver_id: 'LAW', name: 'Liam Lawson', constructor: 'racing_bulls', current_price: 9.7 },
       { driver_id: 'LIN', name: 'Arvid Lindblad', constructor: 'racing_bulls', current_price: 8.2 },
     ],
     constructors: [],

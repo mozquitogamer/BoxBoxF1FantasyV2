@@ -5728,7 +5728,10 @@ def main() -> None:
         for c in (load_seed_json("constructors.json") or {}).get("constructors", [])
         if c.get("constructor_id")
     }
-    prices = load_fantasy_price_data()
+    # Future outlook pages start from the active round's seat prices. A driver
+    # returning to a different seat can have a different Fantasy price even
+    # while the completed-round price history retains the prior asset.
+    prices = load_fantasy_price_data(round_num=current.get("round"))
     PICKS.mkdir(parents=True, exist_ok=True)
     current_lastmod = source_date(current.get("exported_at"), current.get("generated_at"), season.get("generated_at"))
     lastmods: dict[str, str] = {}

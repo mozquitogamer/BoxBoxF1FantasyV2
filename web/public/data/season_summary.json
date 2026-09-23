@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-09-23T17:02:28.047290+00:00",
+  "generated_at": "2026-09-23T20:45:39.673776+00:00",
   "rounds": [
     {
       "round": 1,
@@ -333,10 +333,10 @@
     "LAW": {
       "name": "Liam Lawson",
       "constructor": "racing_bulls",
-      "current_price": 15.1,
-      "starting_price": 7.0,
-      "price_change": 8.1,
-      "price_trend": "up"
+      "current_price": 9.7,
+      "starting_price": 9.7,
+      "price_change": 0.0,
+      "price_trend": "stable"
     },
     "STR": {
       "name": "Lance Stroll",

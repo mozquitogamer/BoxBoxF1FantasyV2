@@ -74,7 +74,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Lando Norris: 15.9 expected points, $27.0M, PPM 0.59
 - Oscar Piastri: 15.6 expected points, $24.1M, PPM 0.65
 - Isack Hadjar: 15.0 expected points, $14.5M, PPM 1.03
-- Liam Lawson: 10.1 expected points, $15.1M, PPM 0.67
+- Liam Lawson: 10.1 expected points, $9.7M, PPM 1.04
 - Gabriel Bortoleto: 7.5 expected points, $8.4M, PPM 0.89
 
 ## Current top projected constructors
@@ -146,7 +146,7 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lando-norris/ - Lando Norris F1 Fantasy 2026 projection: 15.9 expected points for the Azerbaijan GP, $27.0M price, value rating and confidence range.
 - Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oscar-piastri/ - Oscar Piastri F1 Fantasy 2026 projection: 15.6 expected points for the Azerbaijan GP, $24.1M price, value rating and confidence range.
 - Isack Hadjar F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/isack-hadjar/ - Isack Hadjar F1 Fantasy 2026 projection: 15.0 expected points for the Azerbaijan GP, $14.5M price, value rating and confidence range.
-- Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/liam-lawson/ - Liam Lawson F1 Fantasy 2026 projection: 10.1 expected points for the Azerbaijan GP, $15.1M price, value rating and confidence range.
+- Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/liam-lawson/ - Liam Lawson F1 Fantasy 2026 projection: 10.1 expected points for the Azerbaijan GP, $9.7M price, value rating and confidence range.
 - Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/ - Gabriel Bortoleto F1 Fantasy 2026 projection: 7.5 expected points for the Azerbaijan GP, $8.4M price, value rating and confidence range.
 - Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/franco-colapinto/ - Franco Colapinto F1 Fantasy 2026 projection: 7.2 expected points for the Azerbaijan GP, $10.6M price, value rating and confidence range.
 - Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/arvid-lindblad/ - Arvid Lindblad F1 Fantasy 2026 projection: 6.5 expected points for the Azerbaijan GP, $8.2M price, value rating and confidence range.
