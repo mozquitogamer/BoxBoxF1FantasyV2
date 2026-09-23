@@ -169,6 +169,64 @@ def test_picks_hub_marks_completed_rounds_as_results():
     assert "Where can I find completed F1 Fantasy race results?" in html
 
 
+def test_race_page_assembly_preserves_status_url_and_update_date(tmp_path, monkeypatch):
+    monkeypatch.setattr(seo, "DATA", tmp_path)
+    current = race_week_predictions()
+    current["exported_at"] = "2026-07-21T10:00:00Z"
+    weather = {"round": 12, "last_updated": "2026-07-22T08:00:00Z"}
+    horizon = {
+        "generated_at": "2026-07-20T09:00:00Z",
+        "rounds": {"13": {
+            "drivers": {"A": {"expected_points": 20, "predicted_quali": 1, "predicted_race": 2}},
+            "constructors": {"X": {"expected_points": 30, "drivers": ["A"]}},
+        }},
+    }
+    context = {
+        "current": current,
+        "weather": weather,
+        "horizon": horizon,
+        "track_data": {},
+        "drivers_seed": {"A": {"driver_id": "A", "first_name": "Driver", "last_name": "A", "constructor_id": "X"}},
+        "constructors_seed": {"X": {"name": "Team X"}},
+        "prices": {"drivers": {"A": {"current_price": 10}}, "constructors": {"X": {"current_price": 15}}},
+    }
+
+    current_page = seo.assemble_race_page(
+        {"round": 12, "name": "Test Grand Prix", "date": "2026-07-19", "has_predictions": True},
+        **context,
+    )
+    assert current_page["status"] == "current"
+    assert current_page["lastmod"] == "2026-07-22"
+    assert '<link rel="canonical" href="https://boxboxf1fantasy.com/picks/test-gp-2026/">' in current_page["html"]
+
+    archive = {**current, "round": 11, "race": "Archive Grand Prix", "exported_at": "2026-07-14T10:00:00Z"}
+    (tmp_path / "predictions_round11.json").write_text(json.dumps(archive), encoding="utf-8")
+    archive_page = seo.assemble_race_page(
+        {"round": 11, "name": "Archive Grand Prix", "date": "2026-07-12", "has_predictions": True},
+        **context,
+    )
+    assert archive_page["status"] == "archive"
+    assert archive_page["slug"] == "archive-gp-2026"
+    assert archive_page["lastmod"] == "2026-07-14"
+
+    future_page = seo.assemble_race_page(
+        {"round": 13, "name": "Future Grand Prix", "date": "2026-07-26"},
+        **context,
+    )
+    assert future_page["status"] == "future"
+    assert future_page["lastmod"] == "2026-07-20"
+    assert '<link rel="canonical" href="https://boxboxf1fantasy.com/picks/future-gp-2026/">' in future_page["html"]
+
+    calendar_page = seo.assemble_race_page(
+        {"round": 14, "name": "Calendar Grand Prix", "date": "2026-08-02"},
+        **context,
+    )
+    assert calendar_page["status"] == "calendar"
+    assert calendar_page["lastmod"] is None
+    assert '<link rel="canonical" href="https://boxboxf1fantasy.com/picks/calendar-gp-2026/">' in calendar_page["html"]
+    assert seo.assemble_race_page({"round": 10, "name": "Past Grand Prix"}, **context) is None
+
+
 def test_race_rankings_link_profiles_and_item_lists_target_entities():
     _slug, html = seo.render_race_page(race_week_predictions(), True)
 

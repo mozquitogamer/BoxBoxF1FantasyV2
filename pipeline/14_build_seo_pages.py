@@ -5618,6 +5618,77 @@ STATIC_PAGES = [
 # --------------------------------------------------------------------------- #
 # main
 # --------------------------------------------------------------------------- #
+def assemble_race_page(
+    round_info: dict,
+    *,
+    current: dict,
+    weather: dict,
+    horizon: dict,
+    track_data: dict,
+    drivers_seed: dict,
+    constructors_seed: dict,
+    prices: dict,
+) -> dict | None:
+    """Choose the available race page and return its publishing metadata."""
+    rn = round_info["round"]
+    page_lastmod = None
+
+    if round_info.get("has_predictions"):
+        is_current = rn == current.get("round")
+        pred = current if is_current else load_json(DATA / f"predictions_round{rn}.json")
+        if not pred or not pred.get("drivers"):
+            print(f"  - round {rn}: no usable predictions, skipped")
+            return None
+        actual = load_json(DATA / f"actual_round{rn}.json") if round_info.get("has_actual") else None
+        status = "current" if is_current else "result" if actual else "archive"
+        slug, page = render_race_page(pred, is_current, weather if is_current else None, actual)
+        race_name = pred.get("race", round_info["name"])
+        race_date = pred.get("date", round_info.get("date", ""))
+        page_lastmod = max(
+            source_date(pred.get("exported_at"), pred.get("generated_at")) or LINEUP_CONTENT_LASTMOD,
+            LINEUP_CONTENT_LASTMOD,
+            (
+                source_date(weather.get("last_updated")) or LINEUP_CONTENT_LASTMOD
+                if is_current and weather.get("round") == rn
+                else LINEUP_CONTENT_LASTMOD
+            ),
+            source_date(round_info.get("date")) or LINEUP_CONTENT_LASTMOD if actual else LINEUP_CONTENT_LASTMOD,
+        )
+    elif str(rn) in (horizon.get("rounds") or {}):
+        pred = hydrate_horizon_round(
+            round_info,
+            horizon["rounds"][str(rn)],
+            drivers_seed,
+            constructors_seed,
+            prices,
+        )
+        if not pred.get("drivers"):
+            print(f"  - round {rn}: no usable horizon projections, skipped")
+            return None
+        slug, page = render_future_race_page(pred, horizon.get("generated_at", ""))
+        race_name = pred.get("race", round_info["name"])
+        race_date = pred.get("date", round_info.get("date", ""))
+        page_lastmod = source_date(horizon.get("generated_at"))
+        status = "future"
+    elif rn > current.get("round"):
+        slug, page = render_calendar_race_page(round_info, track_data)
+        race_name = round_info["name"]
+        race_date = round_info.get("date", "")
+        status = "calendar"
+    else:
+        return None
+
+    return {
+        "slug": slug,
+        "html": page,
+        "race_name": race_name,
+        "race_date": race_date,
+        "round": rn,
+        "status": status,
+        "lastmod": page_lastmod,
+    }
+
+
 def main() -> None:
     season = load_json(DATA / "season_summary.json")
     current = load_json(DATA / "predictions.json")
@@ -5647,8 +5718,6 @@ def main() -> None:
     write_prediction_schema()
     write_ai_summary(current, season)
 
-    current_round = current.get("round")
-    horizon_rounds = horizon.get("rounds") or {}
     drivers_seed = {
         d.get("driver_id"): d
         for d in (load_seed_json("drivers.json") or {}).get("drivers", [])
@@ -5662,7 +5731,6 @@ def main() -> None:
     prices = load_fantasy_price_data()
     PICKS.mkdir(parents=True, exist_ok=True)
     current_lastmod = source_date(current.get("exported_at"), current.get("generated_at"), season.get("generated_at"))
-    horizon_lastmod = source_date(horizon.get("generated_at"))
     lastmods: dict[str, str] = {}
     if current_lastmod:
         lastmods[""] = current_lastmod
@@ -5672,64 +5740,36 @@ def main() -> None:
     future_written = 0
     calendar_written = 0
     for r in season.get("rounds", []):
-        rn = r["round"]
         if r.get("cancelled"):
             continue
-        page_lastmod = None
-        status = "archive"
-        if r.get("has_predictions"):
-            is_current = (rn == current_round)
-            pred = current if is_current else load_json(DATA / f"predictions_round{rn}.json")
-            if not pred or not pred.get("drivers"):
-                print(f"  - round {rn}: no usable predictions, skipped")
-                continue
-            actual = load_json(DATA / f"actual_round{rn}.json") if r.get("has_actual") else None
-            status = "current" if is_current else "result" if actual else "archive"
-            slug, page = render_race_page(
-                pred,
-                is_current,
-                current_weather if is_current else None,
-                actual,
-            )
-            race_name = pred.get("race", r["name"])
-            race_date = pred.get("date", r.get("date", ""))
-            page_lastmod = max(
-                source_date(pred.get("exported_at"), pred.get("generated_at")) or LINEUP_CONTENT_LASTMOD,
-                LINEUP_CONTENT_LASTMOD,
-                (
-                    source_date(current_weather.get("last_updated")) or LINEUP_CONTENT_LASTMOD
-                    if is_current and current_weather.get("round") == rn
-                    else LINEUP_CONTENT_LASTMOD
-                ),
-                source_date(r.get("date")) or LINEUP_CONTENT_LASTMOD if actual else LINEUP_CONTENT_LASTMOD,
-            )
-            written += 1
-        elif str(rn) in horizon_rounds:
-            status = "future"
-            pred = hydrate_horizon_round(r, horizon_rounds[str(rn)], drivers_seed, constructors_seed, prices)
-            if not pred.get("drivers"):
-                print(f"  - round {rn}: no usable horizon projections, skipped")
-                continue
-            slug, page = render_future_race_page(pred, horizon.get("generated_at", ""))
-            race_name = pred.get("race", r["name"])
-            race_date = pred.get("date", r.get("date", ""))
-            page_lastmod = horizon_lastmod
-            future_written += 1
-        elif rn > current_round:
-            status = "calendar"
-            slug, page = render_calendar_race_page(r, track_data)
-            race_name = r["name"]
-            race_date = r.get("date", "")
-            calendar_written += 1
-        else:
+        race_page = assemble_race_page(
+            r,
+            current=current,
+            weather=current_weather,
+            horizon=horizon,
+            track_data=track_data,
+            drivers_seed=drivers_seed,
+            constructors_seed=constructors_seed,
+            prices=prices,
+        )
+        if race_page is None:
             continue
 
+        slug = race_page["slug"]
+        status = race_page["status"]
+        rn = race_page["round"]
         out_dir = PICKS / slug
         out_dir.mkdir(parents=True, exist_ok=True)
-        (out_dir / "index.html").write_text(page, encoding="utf-8")
-        entries.append((slug, race_name, race_date, rn, status))
-        if page_lastmod:
-            lastmods[f"picks/{slug}/"] = page_lastmod
+        (out_dir / "index.html").write_text(race_page["html"], encoding="utf-8")
+        entries.append((slug, race_page["race_name"], race_page["race_date"], rn, status))
+        if race_page["lastmod"]:
+            lastmods[f"picks/{slug}/"] = race_page["lastmod"]
+        if status in {"current", "result", "archive"}:
+            written += 1
+        elif status == "future":
+            future_written += 1
+        else:
+            calendar_written += 1
         suffix = ", current" if status == "current" else ", results" if status == "result" else ", early outlook" if status == "future" else ""
         print(f"  [OK] /picks/{slug}/  (round {rn}{suffix})")
 

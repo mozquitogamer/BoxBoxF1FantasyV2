@@ -55,7 +55,7 @@ POST_R14_SUBSTITUTION_ASSETS: tuple[dict[str, Any], ...] = (
         "number": 30,
         "price": 14.3,
         "starting_price": 14.3,
-        "availability": {"from_round": 14, "to_round": None},
+        "availability": {"from_round": 14, "to_round": 16},
         "legacy_asset_ids": ["LAW"],
         # Applying a constructor change to a driver's model prior is useful,
         # but the seat has no same-weekend evidence before FP1.  These fields
@@ -74,7 +74,7 @@ POST_R14_SUBSTITUTION_ASSETS: tuple[dict[str, Any], ...] = (
         "number": 22,
         "price": 9.7,
         "starting_price": 9.7,
-        "availability": {"from_round": 14, "to_round": None},
+        "availability": {"from_round": 14, "to_round": 16},
         "legacy_asset_ids": ["TSU"],
         "confidence_multiplier": 0.68,
         "mc_noise_multiplier": 1.35,
@@ -129,12 +129,22 @@ def active_driver_assets(
 ) -> list[dict[str, Any]]:
     """Return the active fantasy driver assets for ``round_num``.
 
-    The default is a copy of the historical 22-driver seed roster. From R14,
-    the active roster replaces Hadjar and the old Racing Bulls Lawson asset:
-    Lawson is re-seated at Red Bull and Tsunoda is introduced at Racing Bulls.
+    The default is a copy of the historical 22-driver seed roster. R14–R16
+    replace Hadjar and the old Racing Bulls Lawson asset with Lawson at Red
+    Bull and Tsunoda at Racing Bulls. R17 restores the original seats while
+    keeping the R14–R16 assets in historical predictions and results.
     """
     assets = _base_assets()
     if year != 2026 or int(round_num) < 14:
+        return assets
+
+    if int(round_num) >= 17:
+        if int(round_num) == 17:
+            for row in assets:
+                if row["asset_id"] in {"HAD", "LAW"}:
+                    row["confidence_multiplier"] = 0.68
+                    row["mc_noise_multiplier"] = 1.35
+                    row["asset_context"] = "returning_after_seat_change"
         return assets
 
     inactive = {"HAD", "LAW"}
@@ -223,7 +233,7 @@ def active_price_overrides(
     year: int = CURRENT_SEASON,
 ) -> dict[str, dict[str, Any]]:
     """Return round-scoped driver price entries keyed by active asset ID."""
-    if year != 2026 or int(round_num) < 14:
+    if year != 2026 or not 14 <= int(round_num) <= 16:
         return {}
     return {
         asset["asset_id"]: {
@@ -239,12 +249,19 @@ def active_price_overrides(
 
 def roster_provenance(round_num: int, year: int = CURRENT_SEASON) -> dict[str, Any]:
     """Metadata suitable for prediction/website sidecars and audit logs."""
-    is_override = year == 2026 and int(round_num) >= 14
+    is_substitution = year == 2026 and 14 <= int(round_num) <= 16
+    is_return = year == 2026 and int(round_num) == 17
+    source = (
+        OFFICIAL_ROSTER_SOURCE if is_substitution else
+        {"result": "Hadjar returns to Red Bull; Lawson returns to Racing Bulls; "
+                   "Tsunoda inactive from R17", "reported_at": "2026-09-23"}
+        if is_return else {"result": "canonical_seed_roster"}
+    )
     return {
         "round": int(round_num),
         "year": int(year),
-        "override_active": bool(is_override),
-        "source": copy.deepcopy(OFFICIAL_ROSTER_SOURCE if is_override else {"result": "canonical_seed_roster"}),
+        "override_active": bool(is_substitution or is_return),
+        "source": copy.deepcopy(source),
         "active_assets": [
             {
                 "asset_id": asset["asset_id"],

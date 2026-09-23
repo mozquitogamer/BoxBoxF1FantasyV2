@@ -47,6 +47,23 @@ def test_unavailable_held_assets_count_as_mandatory_transfers() -> None:
     assert transfers.tolist() == [2]
 
 
+def test_archived_round_uses_its_own_roster_prices_and_official_aliases() -> None:
+    rounds = sim.load_rounds(through_round=14)
+    assert rounds[-1].round_num == 14
+    before, after = rounds[-2:]
+    assert {"LAW", "HAD"}.issubset(before.drivers)
+    assert {"LAW", "HAD"}.isdisjoint(after.drivers)
+
+    lawson = after.drivers.index("LAW_RED_BULL")
+    tsunoda = after.drivers.index("TSU_RACING_BULLS")
+    assert after.driver_prices[lawson] == 14.5
+    assert after.driver_prices[tsunoda] == 10.3
+    assert after.driver_close_prices[lawson] == 14.3
+    assert after.driver_close_prices[tsunoda] == 9.7
+    assert after.driver_actual[lawson] == 12
+    assert after.driver_actual[tsunoda] == 5
+
+
 def _synthetic_round() -> sim.RoundInputs:
     drivers = ("A", "B", "C", "D", "E")
     constructors = ("X", "Y")

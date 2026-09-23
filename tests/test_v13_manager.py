@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 
 from pipeline import build_v13_manager as v13
 from pipeline import publish_v13_decision as publish
@@ -65,9 +66,13 @@ def test_r14_early_thoughts_are_frozen_from_a_pre_lock_archive() -> None:
     assert decision["transfer_penalty"] == 10
 
 
-def test_publishing_an_existing_decision_is_idempotent() -> None:
+def test_publishing_an_existing_decision_is_idempotent(tmp_path, monkeypatch) -> None:
     path = v13.DECISION_DIR / "round14_pre_fp.json"
     before = path.read_bytes()
+    public_path = tmp_path / "v13_manager.json"
+    public_path.write_text(json.dumps(v13.build_payload()), encoding="utf-8")
+    monkeypatch.setattr(publish, "PUBLIC_PATH", public_path)
+    monkeypatch.setattr(v13, "main", lambda: None)
     decision = publish.publish(14, "pre_fp")
 
     assert path.read_bytes() == before
@@ -82,11 +87,21 @@ def test_live_price_gain_value_is_horizon_aware_and_calibrated() -> None:
 
 def test_live_madrid_policy_respects_corrected_budget() -> None:
     public = v13.build_payload()
+    history = {row["round"]: row for row in public["live_history"]}
+    monza = history[15]
+    prior_budget = history[14]["budget_after"]
+    madrid_opening = publish.season.TeamState(
+        drivers=tuple(monza["post_fp_final"]["drivers"]),
+        constructors=tuple(monza["post_fp_final"]["constructors"]),
+        bank=round(prior_budget - monza["post_fp_final"]["team_cost"], 1),
+        budget=monza["budget_after"],
+        free_transfers=monza["free_transfers_next"],
+    )
     round_data = publish._round_input(16, "pre_fp")
     candidate = publish.season.choose_lineup(
         round_data=round_data,
         combos=publish.season.build_combo_matrices(round_data),
-        state=publish._state(public),
+        state=madrid_opening,
         strategy=v13.V13_STRATEGY,
         chip=None,
         risk_profile=v13.V13_RISK_PROFILE,
@@ -96,7 +111,7 @@ def test_live_madrid_policy_respects_corrected_budget() -> None:
     assert candidate.constructors == ("mercedes", "ferrari")
     assert candidate.projected_points == 209.4
     assert candidate.cost == 127.1
-    assert candidate.cost <= public["current_state"]["budget"]
+    assert candidate.cost <= madrid_opening.budget
     assert candidate.transfer_penalty == 0
 
 

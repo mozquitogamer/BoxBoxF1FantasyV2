@@ -22,9 +22,8 @@ import fastf1
 from config.settings import (
     FASTF1_RAW_DIR,
     FASTF1_CACHE_DIR,
-    CANCELLED_ROUNDS_2026,
-    CURRENT_SEASON,
     fastf1_round,
+    internal_rounds_for_year,
 )
 
 # Sessions to attempt per round (sprint weekends only have FP1)
@@ -41,20 +40,6 @@ def has_fp_data(year: int, round_num: int) -> bool:
     """Return True if FP1 parquet already exists for this round."""
     fp1_path = FASTF1_RAW_DIR / f"year{year}" / f"round{round_num}" / "fp1.parquet"
     return fp1_path.exists()
-
-
-def internal_rounds_for_year(year: int, ff1_schedule_len: int) -> list[int]:
-    """Internal round numbers to check for a season.
-
-    FastF1's schedule is compressed (it omits cancelled rounds). For the current
-    season we add the cancelled rounds back to recover the true internal max,
-    then skip the cancelled ones. Historical seasons had no cancellations, so
-    internal numbering == FastF1's compressed numbering.
-    """
-    if year == CURRENT_SEASON and CANCELLED_ROUNDS_2026:
-        internal_max = ff1_schedule_len + len(CANCELLED_ROUNDS_2026)
-        return [r for r in range(1, internal_max + 1) if r not in CANCELLED_ROUNDS_2026]
-    return list(range(1, ff1_schedule_len + 1))
 
 
 def download_fp_session(year: int, round_num: int, session_name: str, output_dir: Path) -> bool:

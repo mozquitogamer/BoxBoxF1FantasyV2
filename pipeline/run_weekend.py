@@ -56,15 +56,14 @@ def detect_current_round():
 def run_step(script_name, args_list, step_num, total, dry_run=False, non_fatal=False):
     """Run a pipeline script as subprocess.
 
-    non_fatal: if True, a failure prints a warning but does NOT abort the
-    weekend pipeline. Used for optional steps like predict_horizon.py where
-    a downstream failure (e.g. missing model file for a far-future round)
-    shouldn't undo the rest of the weekend's work.
+    Return whether the step succeeded. The caller decides whether a failure
+    should stop the pipeline; non_fatal only controls the displayed severity.
     """
     script_path = PIPELINE_DIR / script_name
     if not script_path.exists():
-        print(f"  [X] Script not found: {script_path}")
-        return non_fatal  # treat missing-script as success when non-fatal
+        level = "WARN" if non_fatal else "FAIL"
+        print(f"  [{level}] Script not found: {script_path}")
+        return False
 
     cmd = [sys.executable, str(script_path)] + args_list
     cmd_str = " ".join(cmd)
@@ -86,11 +85,29 @@ def run_step(script_name, args_list, step_num, total, dry_run=False, non_fatal=F
         else:
             level = "WARN" if non_fatal else "FAIL"
             print(f"         [{level}] Failed (exit code {result.returncode}, {elapsed:.1f}s)")
-            return non_fatal  # non-fatal: pretend it succeeded so loop continues
+            return False
     except Exception as e:
         level = "WARN" if non_fatal else "FAIL"
         print(f"         [{level}] Error: {e}")
-        return non_fatal
+        return False
+
+
+# Shared steps keep the prediction phases aligned.
+CURRENT_DOWNLOAD = ("01_download_data.py", ["--mode", "current", "--round", "{round}"])
+PREDICTION_STEPS = [
+    ("06_run_predictions.py", ["--round", "{round}"]),
+    ("07_calculate_fantasy.py", ["--round", "{round}"]),
+    ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),
+]
+FP_PREDICTION_STEPS = [
+    CURRENT_DOWNLOAD,
+    ("02_build_laps.py", ["--round", "{round}"]),
+    ("03_extract_features.py", ["--round", "{round}"]),
+    *PREDICTION_STEPS,
+    ("10_fp_analysis.py", ["--round", "{round}"]),
+]
+HORIZON_STEP = ("predict_horizon.py", ["--current-round", "{round}", "--horizon", "5"], {"non_fatal": True})
+SEO_STEP = ("14_build_seo_pages.py", [], {"non_fatal": True})
 
 
 # Phase definitions
@@ -108,18 +125,16 @@ PHASES = {
     "pre_fp_predict": {
         "description": "Pre-FP predictions for upcoming round using priors only (no FP telemetry)",
         "steps": [
-            ("01_download_data.py", ["--mode", "current", "--round", "{round}"]),
+            CURRENT_DOWNLOAD,
             ("03a_normalize_jolpica.py", ["--all"]),
             ("03b_build_jolpica_features.py", ["--all"]),
-            ("06_run_predictions.py", ["--round", "{round}"]),
-            ("07_calculate_fantasy.py", ["--round", "{round}"]),
-            ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),
+            *PREDICTION_STEPS,
             ("08_export_website_json.py", ["--round", "{round}", "--phase", "pre_fp"]),
             # P9: refresh ML projections for the next 5 rounds so the
             # multi-week planner sees fresh future-round data alongside the
             # updated current-round predictions. Non-fatal if it fails — the
             # planner falls back to the affinity heuristic.
-            ("predict_horizon.py", ["--current-round", "{round}", "--horizon", "5"], {"non_fatal": True}),
+            HORIZON_STEP,
             # Freeze the Beat V13 early-thoughts decision from the freshly
             # exported pre-FP archive. The publisher rebuilds the public live
             # state first. Keep this non-fatal so a page-only issue cannot stop
@@ -127,38 +142,26 @@ PHASES = {
             ("publish_v13_decision.py", ["--round", "{round}", "--phase", "pre_fp"], {"non_fatal": True}),
             # SEO: regenerate the static /picks/ race landing pages from the
             # freshly exported JSON. Non-fatal — a failure won't abort the weekend.
-            ("14_build_seo_pages.py", [], {"non_fatal": True}),
+            SEO_STEP,
         ],
     },
     "post_fp": {
         "description": "After free practice - generate predictions from FP data",
         "steps": [
-            ("01_download_data.py", ["--mode", "current", "--round", "{round}"]),
-            ("02_build_laps.py", ["--round", "{round}"]),
-            ("03_extract_features.py", ["--round", "{round}"]),
-            ("06_run_predictions.py", ["--round", "{round}"]),
-            ("07_calculate_fantasy.py", ["--round", "{round}"]),
-            ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),
-            ("10_fp_analysis.py", ["--round", "{round}"]),
+            *FP_PREDICTION_STEPS,
             ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_fp"]),
-            ("predict_horizon.py", ["--current-round", "{round}", "--horizon", "5"], {"non_fatal": True}),
+            HORIZON_STEP,
             ("publish_v13_decision.py", ["--round", "{round}", "--phase", "post_fp"], {"non_fatal": True}),
-            ("14_build_seo_pages.py", [], {"non_fatal": True}),
+            SEO_STEP,
         ],
     },
     "post_quali": {
         "description": "After qualifying - re-run predictions with updated data",
         "steps": [
-            ("01_download_data.py", ["--mode", "current", "--round", "{round}"]),
-            ("02_build_laps.py", ["--round", "{round}"]),
-            ("03_extract_features.py", ["--round", "{round}"]),
-            ("06_run_predictions.py", ["--round", "{round}"]),
-            ("07_calculate_fantasy.py", ["--round", "{round}"]),
-            ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),
-            ("10_fp_analysis.py", ["--round", "{round}"]),
+            *FP_PREDICTION_STEPS,
             ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_quali"]),
-            ("predict_horizon.py", ["--current-round", "{round}", "--horizon", "5"], {"non_fatal": True}),
-            ("14_build_seo_pages.py", [], {"non_fatal": True}),
+            HORIZON_STEP,
+            SEO_STEP,
         ],
     },
     "post_race": {
@@ -186,13 +189,13 @@ PHASES = {
             # Official points and prices now exist, so roll V13's live score,
             # budget and next-round state forward automatically.
             ("build_v13_manager.py", [], {"non_fatal": True}),
-            ("14_build_seo_pages.py", [], {"non_fatal": True}),
+            SEO_STEP,
         ],
     },
 }
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(
         description="BoxBoxF1Fantasy -Automated Weekend Pipeline Runner",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -217,7 +220,7 @@ Examples:
                         help="Round number (auto-detected if not provided)")
     parser.add_argument("--dry-run", action="store_true",
                         help="Show what would run without executing")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     phase = PHASES[args.phase]
 
@@ -276,8 +279,8 @@ Examples:
         # Replace {round} and {year} placeholders
         resolved_args = [a.replace("{round}", str(round_num)).replace("{year}", str(CURRENT_SEASON)) for a in step_args]
         success = run_step(script, resolved_args, i, total, dry_run=args.dry_run, non_fatal=non_fatal)
-        results.append((script, success))
-        if not success and not args.dry_run:
+        results.append((script, success, non_fatal))
+        if not success and not non_fatal and not args.dry_run:
             print(f"\n  Pipeline stopped at step {i}. Fix the issue and re-run.")
             break
 
@@ -287,18 +290,22 @@ Examples:
     print(f"\n{'=' * 60}")
     print(f"  Summary")
     print(f"{'=' * 60}")
-    for script, success in results:
-        status = "[OK]" if success else "[FAIL]"
+    for script, success, non_fatal in results:
+        status = "[OK]" if success else "[WARN]" if non_fatal else "[FAIL]"
         print(f"  {status} {script}")
 
-    successes = sum(1 for _, s in results if s)
+    successes = sum(1 for _, success, _ in results if success)
+    optional_warnings = sum(1 for _, success, non_fatal in results if not success and non_fatal)
+    required_failed = any(not success and not non_fatal for _, success, non_fatal in results)
     print(f"\n  {successes}/{len(results)} steps completed", end="")
+    if optional_warnings:
+        print(f"; {optional_warnings} optional warning(s)", end="")
     if not args.dry_run:
         print(f" ({elapsed:.1f}s)")
     else:
         print(" (dry run)")
 
-    if successes == len(results) and not args.dry_run:
+    if not required_failed and not args.dry_run:
         if args.phase in ("post_fp", "post_quali"):
             print(f"\n  [OK] Website data updated! Check web/public/data/predictions.json")
         elif args.phase == "pre_fp_predict":
@@ -306,6 +313,8 @@ Examples:
         elif args.phase == "post_race":
             print(f"\n  [OK] Post-race analysis complete! Check web/public/data/")
 
+    return 1 if required_failed else 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

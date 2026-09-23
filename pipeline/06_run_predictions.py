@@ -27,6 +27,7 @@ import argparse
 import importlib
 import json
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 import joblib
@@ -50,7 +51,10 @@ from config.settings import (
     load_pace_overrides,
     load_grid_penalties,
 )
-from pipeline.feature_engineering import engineer_features
+from pipeline.feature_engineering import (
+    engineer_features,
+    rederive_quali_dependent_features,
+)
 from pipeline.fp_long_runs import (
     FP_STINT_SEMANTICS_VERSION,
     require_fp_stint_semantics,
@@ -895,6 +899,275 @@ def _load_actual_sprint_grid(pred_df: pd.DataFrame, round_num: int, year: int) -
     return False
 
 
+# -- Feature assembly boundary ------------------------------------------------
+
+FP_IDENTITY_COLUMNS = {"driver_id", "constructor_id", "round"}
+
+
+def assemble_prediction_rows(
+    priors_df: pd.DataFrame,
+    fp_df: pd.DataFrame | None,
+    abbrev_to_jolpica: dict[str, str],
+    round_num: int,
+    year: int,
+) -> pd.DataFrame:
+    """Attach this round's fantasy assets and merge current-weekend FP evidence.
+
+    FP metadata cannot replace the round-scoped asset or internal round. If
+    a feature already exists in the priors, current FP replaces it; missing
+    current-weekend evidence becomes NaN rather than retaining stale pace.
+    """
+    pred_df = apply_active_asset_context(priors_df.copy(), round_num, year)
+    if fp_df is None or fp_df.empty:
+        return pred_df
+
+    fp_merged = fp_df.copy()
+    # FP uses abbreviations while priors use Jolpica IDs. Convert each row so
+    # a mixed-ID input cannot silently lose matches based on its first driver.
+    fp_merged["driver_id"] = fp_merged["driver_id"].map(
+        lambda driver_id: abbrev_to_jolpica.get(driver_id, driver_id)
+    )
+    fp_merged = fp_merged.dropna(subset=["driver_id"])
+    if fp_merged["driver_id"].duplicated().any():
+        raise ValueError("FP features must contain one row per driver")
+
+    feature_cols = [col for col in fp_merged.columns if col not in FP_IDENTITY_COLUMNS]
+    new_cols = [col for col in feature_cols if col not in pred_df.columns]
+    existing_cols = [col for col in feature_cols if col in pred_df.columns]
+    if new_cols:
+        pred_df = pred_df.merge(
+            fp_merged[["driver_id", *new_cols]], on="driver_id", how="left"
+        )
+        fp_matched = int(pred_df[new_cols[0]].notna().sum())
+        print(f"  Merged {len(new_cols)} FP columns, "
+              f"{fp_matched}/{len(pred_df)} drivers matched")
+
+    if existing_cols:
+        fp_by_driver = fp_merged.set_index("driver_id")
+        for col in existing_cols:
+            pred_df[col] = pred_df["driver_id"].map(fp_by_driver[col])
+    if existing_cols and not new_cols:
+        print("  Updated existing FP columns in priors")
+    return pred_df
+
+
+def build_race_grid_features(
+    pred_df: pd.DataFrame,
+    actual_quali_map: dict[str, int],
+    use_actual_quali: bool,
+    grid_penalties: dict,
+    jolpica_to_abbrev: dict[str, str],
+) -> pd.DataFrame:
+    """Set race-model qualifying features and the separate penalised race grid."""
+    result = pred_df.copy()
+    if use_actual_quali:
+        result["quali_position"] = result["driver_id"].map(actual_quali_map)
+        missing = result["quali_position"].isna()
+        if missing.any():
+            result.loc[missing, "quali_position"] = result.loc[
+                missing, "predicted_quali_position"
+            ]
+            print(f"  Using actual quali for {(~missing).sum()}/{len(result)} drivers (rest from predicted)")
+        else:
+            print(f"  Using actual quali for all {len(result)} drivers")
+    else:
+        result["quali_position"] = result["predicted_quali_position"]
+        print(f"  Using predicted quali for all {len(result)} drivers")
+
+    # Qualifying classification feeds model features and scoring. Grid penalties
+    # affect the race start and positions gained/lost, but not those features.
+    grid_abbrevs = result["driver_id"].map(jolpica_to_abbrev).fillna(result["driver_id"])
+    unpenalized_grid = result["quali_position"].astype(int).to_numpy()
+    penalized_grid = apply_grid_penalties(
+        unpenalized_grid, grid_abbrevs.tolist(), grid_penalties
+    )
+    result["predicted_grid_position"] = penalized_grid
+    result["grid_penalty_places"] = [
+        int(grid_penalties.get(str(abbrev).upper(), {}).get("places", 0))
+        for abbrev in grid_abbrevs
+    ]
+    result["grid_back_of_grid"] = [
+        bool(grid_penalties.get(str(abbrev).upper(), {}).get("back_of_grid", False))
+        for abbrev in grid_abbrevs
+    ]
+    result["grid_penalty"] = penalized_grid - unpenalized_grid
+    result["grid"] = penalized_grid
+
+    if grid_penalties:
+        applied = []
+        for idx, abbrev in enumerate(grid_abbrevs):
+            if grid_penalties.get(str(abbrev).upper()):
+                applied.append(
+                    f"{abbrev}: Q{unpenalized_grid[idx]}->Grid{penalized_grid[idx]}"
+                )
+        print(f"  Grid penalties applied: {', '.join(applied)}")
+
+    result = rederive_quali_dependent_features(result)
+    if "overtaking_difficulty" in result.columns:
+        result["grid_importance_factor"] = result["overtaking_difficulty"] / 10.0
+        result["pole_advantage"] = result["is_pole_position"] * (
+            1 + 2 * result["grid_importance_factor"]
+        )
+        result["front_row_advantage"] = result["is_front_row"] * (
+            0.5 + result["grid_importance_factor"]
+        )
+    if "team_strategy_rating" in result.columns and "safety_car_probability" in result.columns:
+        result["strategy_sc_advantage"] = (
+            result["team_strategy_rating"] * result["safety_car_probability"] / 10.0
+        )
+    for track_col, out_col in (
+        ("safety_car_probability", "top10_sc_interaction"),
+        ("turn1_incident_risk", "top10_turn1_interaction"),
+        ("is_street", "top10_street_interaction"),
+    ):
+        if track_col in result.columns:
+            result[out_col] = result["is_top10_quali"] * result[track_col]
+    if "pace_rank" in result.columns:
+        result["quali_vs_fp_rank"] = result["quali_position"] - result["pace_rank"]
+    return result
+
+
+# -- Model selection boundary -------------------------------------------------
+
+@dataclass(frozen=True)
+class ModelSelection:
+    path: Path
+    features: list[str]
+    algorithm: str
+    phase_label: str
+    uses_fp_variant: bool = False
+
+
+def select_race_model(
+    trained_dir: Path,
+    feature_columns: dict,
+    is_post_quali: bool,
+    has_fp: bool,
+    preferred_algorithm: str,
+) -> ModelSelection:
+    """Choose the race model and its matching training feature order."""
+    fp_path = trained_dir / "race_model_fp.json"
+    use_fp_variant = not is_post_quali and fp_path.exists()
+    json_path = fp_path if use_fp_variant else trained_dir / "race_model.json"
+    cbm_path = json_path.with_suffix(".cbm")
+    use_catboost = preferred_algorithm == "catboost" and cbm_path.exists()
+    path = cbm_path if use_catboost else json_path
+    features = feature_columns.get("race_fp_features") if use_fp_variant else None
+    if not features:
+        features = feature_columns["race_features"]
+
+    if use_fp_variant:
+        phase = "post-FP" if has_fp else "pre-FP"
+        phase += " (predicted quali)"
+    else:
+        phase = (
+            "post-quali (actual quali known)" if is_post_quali
+            else "post-FP (fallback; no race_model_fp)"
+        )
+    algorithm = "catboost" if use_catboost else "xgboost"
+    description = "CatBoost" if use_catboost else "XGBoost"
+    return ModelSelection(
+        path, features, algorithm, f"{phase} -> {description} ({path.name})",
+        use_fp_variant,
+    )
+
+
+def select_sprint_model(
+    trained_dir: Path,
+    feature_columns: dict,
+    race_features: list[str],
+    sprint_grid_loaded: bool,
+) -> ModelSelection:
+    """Choose the sprint model for an actual or predicted sprint grid."""
+    standard_path = trained_dir / "sprint_model.json"
+    fp_path = trained_dir / "sprint_model_fp.json"
+    use_fp_variant = not sprint_grid_loaded and fp_path.exists()
+    standard_features = feature_columns.get("sprint_features", race_features)
+    fp_features = feature_columns.get("sprint_fp_features", standard_features)
+    if use_fp_variant:
+        phase = "post-FP (pre-sprint-quali) -> sprint_model_fp.json"
+    elif sprint_grid_loaded:
+        phase = "post-sprint-quali (sprint_grid known) -> sprint_model.json"
+    else:
+        phase = (
+            "post-FP (pre-sprint-quali) -> sprint_model.json "
+            "(no sprint_model_fp.json available; falling back)"
+        )
+    return ModelSelection(
+        fp_path if use_fp_variant else standard_path,
+        fp_features if use_fp_variant else standard_features,
+        "xgboost", phase, use_fp_variant,
+    )
+
+
+def load_ranking_model(selection: ModelSelection, xgb_module):
+    """Load the chosen ranker; all rankers expose predict(DataFrame)."""
+    if selection.algorithm == "catboost":
+        from catboost import CatBoost
+        model = CatBoost()
+    else:
+        model = xgb_module.XGBRanker()
+    model.load_model(str(selection.path))
+    return model
+
+
+# -- Output boundary ----------------------------------------------------------
+
+PREDICTION_COLUMNS = [
+    "driver_id", "model_driver_id", "asset_id", "driver_abbrev", "driver_name",
+    "driver_number", "constructor_id", "asset_context",
+    "asset_legacy_ids", "asset_confidence_multiplier", "asset_mc_noise_multiplier",
+    "predicted_quali_position", "actual_quali_position",
+    "predicted_grid_position", "grid_penalty_places", "grid_back_of_grid",
+    "predicted_race_position", "confidence",
+    "predicted_quali_raw", "predicted_race_raw",
+]
+SPRINT_PREDICTION_COLUMNS = [
+    "predicted_sprint_position", "predicted_sprint_quali_position",
+    "predicted_sprint_raw", "sprint_grid", "sprint_grid_is_actual",
+]
+PREDICTION_EXPLANATION_COLUMNS = [
+    "best_lap_time", "avg_lap_time", "pace_rank", "long_run_avg",
+    "driver_roll_quali_3", "roll_finishpos_3", "team_recent_form",
+]
+
+
+def prediction_artifact_paths(round_num: int, output_suffix: str = "") -> tuple[Path, Path]:
+    """Return the paired prediction and metadata paths for a round."""
+    output_dir = PREDICTIONS_DIR / f"round{round_num}"
+    suffix = f"_{output_suffix}" if output_suffix else ""
+    return (
+        output_dir / f"predictions{suffix}.parquet",
+        output_dir / f"prediction_metadata{suffix}.json",
+    )
+
+
+def build_prediction_output(
+    pred_df: pd.DataFrame, round_num: int, year: int, is_sprint: bool
+) -> pd.DataFrame:
+    """Select the stable downstream schema without changing model rows."""
+    output_cols = PREDICTION_COLUMNS.copy()
+    if is_sprint:
+        output_cols.extend(SPRINT_PREDICTION_COLUMNS)
+    output_cols.extend(PREDICTION_EXPLANATION_COLUMNS)
+    output_cols = [col for col in output_cols if col in pred_df.columns]
+    output_df = pred_df[output_cols].copy()
+    output_df["season"] = year
+    output_df["round"] = round_num
+    output_df["is_sprint_weekend"] = is_sprint
+    return output_df
+
+
+def save_prediction_artifacts(
+    output_df: pd.DataFrame, metadata: dict, output_path: Path, metadata_path: Path
+) -> None:
+    """Write one prediction frame and its matching phase/audit sidecar."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_df.to_parquet(output_path, index=False, engine="pyarrow")
+    with metadata_path.open("w", encoding="utf-8") as handle:
+        json.dump(metadata, handle, indent=2)
+
+
 # -- Main prediction pipeline -------------------------------------------------
 
 def run_predictions(
@@ -914,7 +1187,6 @@ def run_predictions(
     to compute priors-only future-round projections without clobbering the
     canonical current-round predictions or polluting the accuracy archive.
     """
-    """Generate predictions for a specific round."""
     print("=" * 70)
     print(f"BoxBoxF1Fantasy — Predictions for {year} Round {round_num}")
     print("=" * 70)
@@ -928,8 +1200,7 @@ def run_predictions(
     # rebuilding for the recovery script).
     # P9: when output_suffix is set we're writing to a non-canonical file, so the
     # archive-pollution concern doesn't apply — the guard is skipped for suffixed runs.
-    out_filename = f"predictions_{output_suffix}.parquet" if output_suffix else "predictions.parquet"
-    output_path = PREDICTIONS_DIR / f"round{round_num}" / out_filename
+    output_path, metadata_path = prediction_artifact_paths(round_num, output_suffix)
     if not force and not output_suffix and is_race_completed(round_num, year) and output_path.exists():
         print(f"\n  [SKIP] Race for round {round_num} has already happened and "
               f"predictions.parquet exists.")
@@ -986,40 +1257,9 @@ def run_predictions(
 
     # ---- Step 3: Merge FP onto priors ----
     print(f"\n[Step 3] Merging FP features onto priors...")
-    pred_df = priors_df.copy()
-    # Attach the seat asset after priors are built.  ``driver_id`` remains the
-    # model/Jolpica identity; asset_id/driver_abbrev are the round-scoped
-    # Fantasy keys used by scoring, MC and the website.
-    pred_df = apply_active_asset_context(pred_df, round_num, year)
-
-    if fp_df is not None and not fp_df.empty:
-        # Convert FP driver_id (abbreviation) to Jolpica ID
-        fp_merged = fp_df.copy()
-        if fp_merged["driver_id"].iloc[0] in abbrev_to_jolpica:
-            fp_merged["driver_id"] = fp_merged["driver_id"].map(abbrev_to_jolpica)
-            fp_merged = fp_merged.dropna(subset=["driver_id"])
-
-        # Left-join FP features onto priors
-        fp_cols_to_merge = [c for c in fp_merged.columns
-                           if c != "driver_id" and c not in pred_df.columns]
-        if fp_cols_to_merge:
-            merge_cols = ["driver_id"] + fp_cols_to_merge
-            pred_df = pred_df.merge(
-                fp_merged[merge_cols], on="driver_id", how="left"
-            )
-            fp_matched = pred_df[fp_cols_to_merge[0]].notna().sum()
-            print(f"  Merged {len(fp_cols_to_merge)} FP columns, "
-                  f"{fp_matched}/{len(pred_df)} drivers matched")
-        else:
-            # FP columns may already be in pred_df — update them
-            for _, fp_row in fp_merged.iterrows():
-                driver_mask = pred_df["driver_id"] == fp_row["driver_id"]
-                if driver_mask.any():
-                    for col in fp_merged.columns:
-                        if col != "driver_id" and col in pred_df.columns:
-                            if pd.notna(fp_row[col]):
-                                pred_df.loc[driver_mask, col] = fp_row[col]
-            print(f"  Updated existing FP columns in priors")
+    pred_df = assemble_prediction_rows(
+        priors_df, fp_df, abbrev_to_jolpica, round_num, year
+    )
 
     # ---- Step 3.5: Inject weather forecast (Level 3 Phase D) ----
     print(f"\n[Step 3.5] Injecting weather forecast...")
@@ -1040,7 +1280,6 @@ def run_predictions(
 
     quali_path = TRAINED_DIR / "quali_model.json"
     race_path = TRAINED_DIR / "race_model.json"
-    race_fp_path = TRAINED_DIR / "race_model_fp.json"
     fp_model_path = TRAINED_DIR / "fp_signal_model.pkl"
     feature_cols_path = TRAINED_DIR / "feature_columns.json"
 
@@ -1063,38 +1302,6 @@ def run_predictions(
         pred_df["driver_id"].map(actual_quali_map) if is_post_quali else np.nan
     )
 
-    # Select race model: post-FP uses race_model_fp (trained on predicted quali)
-    # to match the distribution it sees at inference; post-quali uses race_model
-    # (trained on actual quali) since actual quali is known.
-    use_fp_race_model = (not is_post_quali) and race_fp_path.exists()
-
-    # Load ranking models. Quali stays XGBoost (rank:pairwise). The RACE models
-    # can be CatBoost YetiRank (settings.RACE_MODEL_ALGORITHM) — both emit
-    # relevance scores where higher = better (P1), so the downstream grid-anchor
-    # blend and ranking are identical. Both .predict() take a named-column
-    # DataFrame, so the call site below is unchanged regardless of algorithm.
-    quali_model = xgb.XGBRanker()
-    quali_model.load_model(str(quali_path))
-
-    chosen_json = race_fp_path if use_fp_race_model else race_path
-    chosen_cbm = chosen_json.with_suffix(".cbm")
-    use_catboost_race = (RACE_MODEL_ALGORITHM == "catboost") and chosen_cbm.exists()
-    if use_catboost_race:
-        from catboost import CatBoost
-        race_model = CatBoost()
-        race_model.load_model(str(chosen_cbm))
-        algo_desc = f"CatBoost ({chosen_cbm.name})"
-    else:
-        race_model = xgb.XGBRanker()
-        race_model.load_model(str(chosen_json))
-        algo_desc = f"XGBoost ({chosen_json.name})"
-    if use_fp_race_model:
-        phase_desc = "post-FP" if fp_df is not None and not fp_df.empty else "pre-FP"
-        print(f"  Phase: {phase_desc} (predicted quali) -> {algo_desc}")
-    else:
-        phase_desc = "post-quali (actual quali known)" if is_post_quali else "post-FP (fallback; no race_model_fp)"
-        print(f"  Phase: {phase_desc} -> {algo_desc}")
-
     # Load feature column lists
     with open(feature_cols_path) as f:
         feature_cols_data = json.load(f)
@@ -1107,9 +1314,17 @@ def run_predictions(
                 "Rebuild model inputs and run 05_train_models.py before post-FP inference."
             )
     quali_feature_list = feature_cols_data["quali_features"]
-    race_feature_list = feature_cols_data.get("race_fp_features") if use_fp_race_model else None
-    if not race_feature_list:
-        race_feature_list = feature_cols_data["race_features"]
+    race_selection = select_race_model(
+        TRAINED_DIR, feature_cols_data, is_post_quali,
+        fp_df is not None and not fp_df.empty, RACE_MODEL_ALGORITHM,
+    )
+    use_fp_race_model = race_selection.uses_fp_variant
+    race_feature_list = race_selection.features
+    quali_model = load_ranking_model(
+        ModelSelection(quali_path, quali_feature_list, "xgboost", "qualifying"), xgb
+    )
+    race_model = load_ranking_model(race_selection, xgb)
+    print(f"  Phase: {race_selection.phase_label}")
 
     # Load FP signal model (optional, pkl format)
     fp_info = joblib.load(fp_model_path) if fp_model_path.exists() else None
@@ -1196,89 +1411,12 @@ def run_predictions(
     #   race_model    -> trained on actual quali    -> post-quali inference
     #   race_model_fp -> trained on predicted quali -> post-FP inference
     print(f"\n[Step 7] Predicting race positions...")
-    if is_post_quali and not use_fp_race_model:
-        # Map actual quali onto pred_df by driver_id
-        pred_df["quali_position"] = pred_df["driver_id"].map(actual_quali_map)
-        # For any driver missing actual quali, fall back to predicted
-        missing = pred_df["quali_position"].isna()
-        if missing.any():
-            pred_df.loc[missing, "quali_position"] = pred_df.loc[missing, "predicted_quali_position"]
-            print(f"  Using actual quali for {(~missing).sum()}/{len(pred_df)} drivers (rest from predicted)")
-        else:
-            print(f"  Using actual quali for all {len(pred_df)} drivers")
-    else:
-        pred_df["quali_position"] = pred_df["predicted_quali_position"]
-        print(f"  Using predicted quali for all {len(pred_df)} drivers")
-
-    # Apply known race-grid penalties separately from the qualifying result.
-    # Qualifying points/display and the race model retain their trained
-    # qualifying semantics; downstream scoring and the hard-track anchor use
-    # the real starting grid.
     grid_penalties = load_grid_penalties(round_num)
-    grid_abbrevs = pred_df["driver_id"].map(jolpica_to_abbrev).fillna(pred_df["driver_id"])
-    unpenalized_grid = pred_df["quali_position"].astype(int).to_numpy()
-    penalized_grid = apply_grid_penalties(
-        unpenalized_grid,
-        grid_abbrevs.tolist(),
-        grid_penalties,
+    pred_df = build_race_grid_features(
+        pred_df, actual_quali_map,
+        is_post_quali and not use_fp_race_model,
+        grid_penalties, jolpica_to_abbrev,
     )
-    pred_df["predicted_grid_position"] = penalized_grid
-    pred_df["grid_penalty_places"] = [
-        int(grid_penalties.get(str(abbrev).upper(), {}).get("places", 0))
-        for abbrev in grid_abbrevs
-    ]
-    pred_df["grid_back_of_grid"] = [
-        bool(grid_penalties.get(str(abbrev).upper(), {}).get("back_of_grid", False))
-        for abbrev in grid_abbrevs
-    ]
-    pred_df["grid_penalty"] = penalized_grid - unpenalized_grid
-    pred_df["grid"] = penalized_grid
-    # Keep the race model's quali-derived features on their trained semantics.
-    # Historical training uses qualifying result (not post-penalty grid), so
-    # rewriting quali_position here would create an inference-only distribution
-    # shift. The explicit hard-track anchor below uses the real grid instead.
-    if grid_penalties:
-        applied = []
-        for idx, abbrev in enumerate(grid_abbrevs):
-            rule = grid_penalties.get(str(abbrev).upper())
-            if rule:
-                applied.append(
-                    f"{abbrev}: Q{unpenalized_grid[idx]}->Grid{penalized_grid[idx]}"
-                )
-        print(f"  Grid penalties applied: {', '.join(applied)}")
-
-    # Recompute grid-dependent features
-    # NOTE: grid_advantage formula MUST match 03b_build_jolpica_features.py::add_race_model_features
-    # (training data) to avoid train/inference distribution mismatch.
-    pred_df["is_pole_position"] = (pred_df["quali_position"] == 1).astype(int)
-    pred_df["is_front_row"] = (pred_df["quali_position"] <= 2).astype(int)
-    pred_df["is_top10_quali"] = (pred_df["quali_position"] <= 10).astype(int)
-    pred_df["grid_advantage"] = 11.0 - pred_df["quali_position"].astype(float)
-
-    # Recompute interaction features if track data available
-    if "overtaking_difficulty" in pred_df.columns:
-        pred_df["grid_importance_factor"] = pred_df["overtaking_difficulty"] / 10.0
-        pred_df["pole_advantage"] = pred_df["is_pole_position"] * (
-            1 + 2 * pred_df["grid_importance_factor"]
-        )
-        pred_df["front_row_advantage"] = pred_df["is_front_row"] * (
-            0.5 + 1 * pred_df["grid_importance_factor"]
-        )
-    if "team_strategy_rating" in pred_df.columns and "safety_car_probability" in pred_df.columns:
-        pred_df["strategy_sc_advantage"] = (
-            pred_df["team_strategy_rating"] * pred_df["safety_car_probability"] / 10.0
-        )
-    if "is_top10_quali" in pred_df.columns:
-        for col_pair in [("safety_car_probability", "top10_sc_interaction"),
-                         ("turn1_incident_risk", "top10_turn1_interaction"),
-                         ("is_street", "top10_street_interaction")]:
-            track_col, out_col = col_pair
-            if track_col in pred_df.columns:
-                pred_df[out_col] = pred_df["is_top10_quali"] * pred_df[track_col]
-
-    # Re-engineer FP features that depend on quali
-    if "pace_rank" in pred_df.columns:
-        pred_df["quali_vs_fp_rank"] = pred_df["quali_position"] - pred_df["pace_rank"]
 
     for col in race_feature_list:
         if col not in pred_df.columns:
@@ -1360,12 +1498,6 @@ def run_predictions(
     # ---- Sprint predictions (dedicated sprint model) ----
     if is_sprint:
         print(f"\n[Sprint] Generating sprint predictions...")
-        sprint_model_path = TRAINED_DIR / "sprint_model.json"
-        sprint_fp_model_path = TRAINED_DIR / "sprint_model_fp.json"
-        sprint_feature_list = feature_cols_data.get("sprint_features", race_feature_list)
-        sprint_fp_feature_list = feature_cols_data.get(
-            "sprint_fp_features", sprint_feature_list
-        )
 
         # === Sprint grid (for the sprint model) ===
         # The ACTUAL Sprint-Qualifying grid was already loaded BEFORE the quali
@@ -1474,33 +1606,24 @@ def run_predictions(
         #   - Post-FP (pre-sprint-quali, sprint_grid is fallback proxy) -> sprint_model_fp.json
         #     (trained with WF-predicted quali as both quali_position and sprint_grid)
         #   - Post-sprint-quali (actual sprint_grid loaded)             -> sprint_model.json
-        use_fp_sprint_model = (not sprint_grid_loaded) and sprint_fp_model_path.exists()
-        if use_fp_sprint_model:
+        sprint_selection = select_sprint_model(
+            TRAINED_DIR, feature_cols_data, race_feature_list, sprint_grid_loaded
+        )
+        if sprint_selection.uses_fp_variant:
             # For consistency with training: when the fp variant is chosen, the
             # training data substituted sprint_grid == predicted_quali, so the
             # quali_to_sprint_grid_delta feature is 0 by construction. Replicate
             # that at inference so the feature distribution matches.
             pred_df["quali_to_sprint_grid_delta"] = 0.0
 
-        active_sprint_path = sprint_fp_model_path if use_fp_sprint_model else sprint_model_path
-        active_sprint_features = sprint_fp_feature_list if use_fp_sprint_model else sprint_feature_list
+        if sprint_selection.path.exists():
+            print(f"  Phase: {sprint_selection.phase_label}")
+            sprint_model = load_ranking_model(sprint_selection, xgb)
 
-        if active_sprint_path.exists():
-            if use_fp_sprint_model:
-                phase_label = "post-FP (pre-sprint-quali) -> sprint_model_fp.json"
-            elif sprint_grid_loaded:
-                phase_label = "post-sprint-quali (sprint_grid known) -> sprint_model.json"
-            else:
-                phase_label = ("post-FP (pre-sprint-quali) -> sprint_model.json "
-                               "(no sprint_model_fp.json available; falling back)")
-            print(f"  Phase: {phase_label}")
-            sprint_model = xgb.XGBRanker()
-            sprint_model.load_model(str(active_sprint_path))
-
-            for col in active_sprint_features:
+            for col in sprint_selection.features:
                 if col not in pred_df.columns:
                     pred_df[col] = np.nan
-            X_s = pred_df[active_sprint_features].copy()
+            X_s = pred_df[sprint_selection.features].copy()
             sprint_raw = sprint_model.predict(X_s)
             sprint_ranks = pd.Series(-sprint_raw).rank(method="first").astype(int)
             pred_df["predicted_sprint_position"] = sprint_ranks.values
@@ -1514,7 +1637,6 @@ def run_predictions(
     # Map model IDs back to abbreviations for legacy rounds.  R14 already has
     # seat-scoped abbreviations from apply_active_asset_context; do not replace
     # those with the ambiguous legacy LAW code.
-    _, jolpica_to_abbrev = load_driver_id_maps()
     if "driver_abbrev" not in pred_df.columns:
         pred_df["driver_abbrev"] = pred_df["driver_id"].map(jolpica_to_abbrev)
     else:
@@ -1526,39 +1648,7 @@ def run_predictions(
     # LAST so the imposed order flows to every downstream artifact (07/08/MC/export).
     pred_df = _apply_pace_overrides(pred_df, round_num)
 
-    output_cols = [
-        "driver_id", "model_driver_id", "asset_id", "driver_abbrev", "driver_name",
-        "driver_number", "constructor_id", "asset_context",
-        "asset_legacy_ids", "asset_confidence_multiplier", "asset_mc_noise_multiplier",
-        "predicted_quali_position", "actual_quali_position",
-        "predicted_grid_position",
-        "grid_penalty_places", "grid_back_of_grid",
-        "predicted_race_position", "confidence",
-        "predicted_quali_raw", "predicted_race_raw",
-    ]
-    if is_sprint:
-        output_cols += ["predicted_sprint_position", "predicted_sprint_quali_position",
-                        "predicted_sprint_raw", "sprint_grid", "sprint_grid_is_actual"]
-
-    # Add key features for transparency
-    extra = ["best_lap_time", "avg_lap_time", "pace_rank", "long_run_avg",
-             "driver_roll_quali_3", "roll_finishpos_3", "team_recent_form"]
-    for col in extra:
-        if col in pred_df.columns:
-            output_cols.append(col)
-
-    output_cols = [c for c in output_cols if c in pred_df.columns]
-    output_df = pred_df[output_cols].copy()
-    output_df["season"] = year
-    output_df["round"] = round_num
-    output_df["is_sprint_weekend"] = is_sprint
-
-    # Save
-    output_dir = PREDICTIONS_DIR / f"round{round_num}"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    # P9: same suffix convention as the guard above
-    output_path = output_dir / out_filename
-    output_df.to_parquet(output_path, index=False, engine="pyarrow")
+    output_df = build_prediction_output(pred_df, round_num, year, is_sprint)
 
     # Write prediction metadata sidecar — the DEFINITIVE record of what phase
     # this prediction ran in. Read by 08_export_website_json.py instead of
@@ -1585,7 +1675,7 @@ def run_predictions(
     # Record the model that ACTUALLY made the prediction (CatBoost .cbm when the
     # flag selected it, else the XGBoost .json) so the audit trail / accuracy
     # archive attribute the forecast to the right algorithm.
-    race_model_used = chosen_cbm if use_catboost_race else chosen_json
+    race_model_used = race_selection.path
     metadata = {
         "round": round_num,
         "year": year,
@@ -1599,7 +1689,7 @@ def run_predictions(
         "skip_fp_flag": skip_fp,
         "force_flag": force,
         "race_model_used": race_model_used.name,
-        "race_model_algorithm": "catboost" if use_catboost_race else "xgboost",
+        "race_model_algorithm": race_selection.algorithm,
         "quali_model_sha256_16": _file_sha256(quali_path),
         "race_model_sha256_16": _file_sha256(race_model_used),
         "grid_penalties": grid_penalties,
@@ -1618,11 +1708,7 @@ def run_predictions(
         "weather_features_used": weather_meta,
         "driver_assets": roster_provenance(round_num, year),
     }
-    # P9: suffix the metadata file alongside the predictions parquet
-    meta_filename = f"prediction_metadata_{output_suffix}.json" if output_suffix else "prediction_metadata.json"
-    metadata_path = output_dir / meta_filename
-    with open(metadata_path, "w") as f:
-        json.dump(metadata, f, indent=2)
+    save_prediction_artifacts(output_df, metadata, output_path, metadata_path)
     print(f"Saved -> {metadata_path}  (phase={resolved_phase})")
 
     # Pretty print

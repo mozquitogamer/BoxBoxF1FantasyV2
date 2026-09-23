@@ -214,7 +214,8 @@ def _transfer_reason(
 
 
 def build_report(payload: dict[str, Any]) -> dict[str, Any]:
-    rounds = season.load_rounds()
+    last_round = max(int(row["round"]) for manager in payload["managers"] for row in manager["rounds"])
+    rounds = season.load_rounds(through_round=last_round)
     round_lookup = {round_data.round_num: round_data for round_data in rounds}
     driver_labels, constructor_labels = _labels()
     evolution = []

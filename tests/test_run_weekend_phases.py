@@ -2,6 +2,7 @@
 
 import importlib.util
 from pathlib import Path
+from types import SimpleNamespace
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -85,3 +86,54 @@ def test_v13_page_steps_do_not_block_core_weekend_outputs():
     ):
         step = next(row for row in RUN_WEEKEND.PHASES[phase]["steps"] if row[0] == script)
         assert step[2].get("non_fatal") is True
+
+
+def test_fp_and_quali_share_prediction_steps_in_the_same_order():
+    fp_steps = RUN_WEEKEND.PHASES["post_fp"]["steps"]
+    quali_steps = RUN_WEEKEND.PHASES["post_quali"]["steps"]
+
+    assert fp_steps[:7] == quali_steps[:7]
+    assert _step_names("post_fp")[:7] == [
+        "01_download_data.py", "02_build_laps.py", "03_extract_features.py",
+        "06_run_predictions.py", "07_calculate_fantasy.py",
+        "08_monte_carlo_fantasy.py", "10_fp_analysis.py",
+    ]
+
+
+def test_optional_step_failure_is_reported_as_a_failure(tmp_path, monkeypatch):
+    (tmp_path / "optional.py").write_text("", encoding="utf-8")
+    monkeypatch.setattr(RUN_WEEKEND, "PIPELINE_DIR", tmp_path)
+    monkeypatch.setattr(
+        RUN_WEEKEND.subprocess, "run", lambda *args, **kwargs: SimpleNamespace(returncode=2)
+    )
+
+    assert RUN_WEEKEND.run_step("optional.py", [], 1, 1, non_fatal=True) is False
+    assert RUN_WEEKEND.run_step("missing.py", [], 1, 1, non_fatal=True) is False
+
+
+def test_required_failure_stops_pipeline_and_returns_nonzero(monkeypatch, capsys):
+    calls = []
+
+    def fake_run_step(script, *args, **kwargs):
+        calls.append(script)
+        return False
+
+    monkeypatch.setattr(RUN_WEEKEND, "run_step", fake_run_step)
+    assert RUN_WEEKEND.main(["--phase", "pre_fp_predict", "--round", "16"]) == 1
+    assert calls == ["01_download_data.py"]
+    assert "[FAIL] 01_download_data.py" in capsys.readouterr().out
+
+
+def test_optional_failure_continues_with_warning_and_success_exit(monkeypatch, capsys):
+    calls = []
+
+    def fake_run_step(script, *args, **kwargs):
+        calls.append(script)
+        return script != "predict_horizon.py"
+
+    monkeypatch.setattr(RUN_WEEKEND, "run_step", fake_run_step)
+    assert RUN_WEEKEND.main(["--phase", "pre_fp_predict", "--round", "16"]) == 0
+    assert calls[-1] == "14_build_seo_pages.py"
+    output = capsys.readouterr().out
+    assert "[WARN] predict_horizon.py" in output
+    assert "1 optional warning(s)" in output

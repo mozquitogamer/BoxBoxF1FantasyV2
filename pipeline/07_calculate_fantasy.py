@@ -58,14 +58,14 @@ from config.fantasy_scoring import (
     SPRINT_FASTEST_LAP_BONUS,
     SPRINT_DNF_DSQ_PENALTY,
     RACE_POSITIONS_GAINED_PER_POS,
-    CONSTRUCTOR_QUALI_BONUSES,
     PITSTOP_TIME_POINTS,
     FASTEST_PITSTOP_BONUS,
     calc_qualifying_points_driver,
-    calc_constructor_quali_bonus,
+    calc_constructor_quali_bonus_from_positions,
 )
 from config.fantasy_prices import load_fantasy_price_maps
 from config.driver_assets import active_constructor_driver_assets, active_driver_assets
+from config.pitstop_priors import FALLBACK_PITSTOP_PRIOR, load_pitstop_priors
 
 
 # -- ID mapping ----------------------------------------------------------------
@@ -210,30 +210,6 @@ def risk_label(rating: float) -> str:
 
 
 # -- Pit stop expected value ---------------------------------------------------
-
-# Default pit stop priors per team (mean time in seconds, std)
-_DEFAULT_PITSTOP_PRIORS = {
-    "red_bull":       {"mean": 2.15, "std": 0.25, "stops_per_race": 1.5},
-    "mclaren":        {"mean": 2.20, "std": 0.25, "stops_per_race": 1.5},
-    "ferrari":        {"mean": 2.25, "std": 0.30, "stops_per_race": 1.5},
-    "mercedes":       {"mean": 2.20, "std": 0.25, "stops_per_race": 1.5},
-    "aston_martin":   {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5},
-    "alpine":         {"mean": 2.40, "std": 0.35, "stops_per_race": 1.5},
-    "williams":       {"mean": 2.45, "std": 0.35, "stops_per_race": 1.5},
-    "racing_bulls":   {"mean": 2.30, "std": 0.30, "stops_per_race": 1.5},
-    "haas":           {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5},
-    "audi":           {"mean": 2.55, "std": 0.40, "stops_per_race": 1.5},
-    "cadillac":       {"mean": 2.60, "std": 0.45, "stops_per_race": 1.5},
-}
-
-
-def _load_pitstop_priors() -> dict:
-    """Load pit stop priors from seed data or use defaults."""
-    path = SEED_DIR / "pit_stop_priors.json"
-    if path.exists():
-        with open(path) as f:
-            return json.load(f)
-    return _DEFAULT_PITSTOP_PRIORS
 
 
 def _expected_pitstop_points(mean: float, std: float, stops_per_race: float,
@@ -640,7 +616,7 @@ def calculate_constructor_fantasy(
     constructor_drivers = active_constructor_driver_assets(round_num)
 
     is_sprint = round_num in SPRINT_ROUNDS_2026
-    pitstop_priors = _load_pitstop_priors()
+    pitstop_priors = load_pitstop_priors()
     # Official-history expected pit points per team (shrunk mean of actual F1
     # Fantasy pit points) — the reliable basis for future pit prediction.
     official_pit_expected = official_pitstop_expected()
@@ -660,10 +636,9 @@ def calculate_constructor_fantasy(
         combined_quali = d_data["expected_quali_pts"].sum()
         driver_positions = d_data["predicted_quali_position"].tolist()
         if len(driver_positions) >= 2:
-            # 2026: 22 cars, Q2 eliminates P11-16 -> Q2 cutoff is P16 (not 15).
-            d1_session = "Q3" if driver_positions[0] <= 10 else ("Q2" if driver_positions[0] <= 16 else "Q1")
-            d2_session = "Q3" if driver_positions[1] <= 10 else ("Q2" if driver_positions[1] <= 16 else "Q1")
-            quali_bonus = calc_constructor_quali_bonus(d1_session, d2_session)
+            quali_bonus = calc_constructor_quali_bonus_from_positions(
+                driver_positions[0], driver_positions[1]
+            )
         else:
             quali_bonus = 0
         total_quali = combined_quali + quali_bonus
@@ -687,7 +662,7 @@ def calculate_constructor_fantasy(
         if cid in official_pit_expected:
             expected_pit_pts = round(official_pit_expected[cid], 1)
         else:
-            prior = pitstop_priors.get(cid, {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5})
+            prior = pitstop_priors.get(cid, FALLBACK_PITSTOP_PRIOR)
             expected_pit_pts = _expected_pitstop_points(
                 prior["mean"], prior["std"], prior["stops_per_race"], n_teams
             )

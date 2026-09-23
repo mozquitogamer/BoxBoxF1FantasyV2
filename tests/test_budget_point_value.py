@@ -142,16 +142,30 @@ def test_affordability_frontier_uses_smallest_positive_delta() -> None:
     assert result["share_unlocked_by_1_0m"] == 1.0
 
 
-def test_risk_experiment_context_compares_equal_budget_paths() -> None:
+def test_risk_experiment_context_summarizes_current_paths() -> None:
     result = budget.risk_experiment_context()
+    managers = budget.season._load_json(budget.RISK_EXPERIMENT)["managers"]
+    budgets = [float(manager["summary"]["final_budget"]) for manager in managers]
 
-    assert result["paths"] == 12
-    assert result["highest_budget"] == 124.3
-    assert result["points_spread_at_highest_budget"] == 150.0
+    assert result["paths"] == len(managers)
+    assert result["highest_budget"] == max(budgets)
+    assert all(row["final_budget"] == max(budgets) for row in result["highest_budget_paths"])
+    assert result["points_spread_at_highest_budget"] == round(
+        max(row["season_points"] for row in result["highest_budget_paths"])
+        - min(row["season_points"] for row in result["highest_budget_paths"]),
+        3,
+    )
+    budget_builder = {
+        manager["risk_profile"]: manager["summary"]
+        for manager in managers
+        if manager["strategy"] == "budget_builder"
+    }
+    medium = budget_builder["medium_tolerance"]
+    minimal = budget_builder["minimal_risk_accepted"]
     assert result["budget_builder_medium_vs_minimal"] == {
-        "points_difference": 150.0,
-        "genuine_points_difference": 73.0,
-        "budget_difference": 0.0,
+        "points_difference": float(medium["season_points"]) - float(minimal["season_points"]),
+        "genuine_points_difference": float(medium["genuine_archive_points"]) - float(minimal["genuine_archive_points"]),
+        "budget_difference": round(float(medium["final_budget"]) - float(minimal["final_budget"]), 3),
     }
 
 

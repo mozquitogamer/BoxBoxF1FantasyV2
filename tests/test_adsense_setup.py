@@ -75,4 +75,10 @@ def test_enforced_csp_has_not_been_silently_weakened():
     all_page_headers = next(item for item in vercel["headers"] if item["source"] == "/(.*)")
     csp = next(header["value"] for header in all_page_headers["headers"] if header["key"] == "Content-Security-Policy")
     assert "default-src 'self'" in csp
-    assert "pagead2.googlesyndication.com" not in csp
+    assert "script-src-attr 'none'" in csp
+    assert "object-src 'none'" in csp
+    assert "frame-ancestors 'none'" in csp
+    assert "'unsafe-eval'" not in csp
+    # Account verification loads Google's script; display inventory is still
+    # controlled by site_features.json rather than this CSP allowance.
+    assert "https://pagead2.googlesyndication.com" in csp

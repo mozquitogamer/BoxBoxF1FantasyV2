@@ -33,10 +33,10 @@ def test_monza_budget_and_madrid_affordability():
     assert history[14]["budget_after"] == 127.0
     assert history[15]["budget_after"] == 129.2
     assert history[15]["actual_points"] == 358.0
-    state = payload["current_state"]
-    assert state["bank"] == 0.4
-    assert state["budget"] == 129.2
-    assert state["early_thoughts"]["team_cost"] <= state["budget"]
+    monza_bank = round(history[14]["budget_after"] - history[15]["post_fp_final"]["team_cost"], 1)
+    assert monza_bank == 0.4
+    assert history[16]["early_thoughts"]["team_cost"] <= history[15]["budget_after"]
+    assert payload["current_state"]["as_of_round"] == max(history)
 
 
 def test_missing_held_asset_price_stops_settlement(monkeypatch):

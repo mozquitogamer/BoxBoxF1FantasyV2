@@ -6090,34 +6090,27 @@
     "best_points_path": {
       "strategy": "budget_builder",
       "risk_profile": "medium_tolerance",
-      "season_points": 2537.0,
-      "genuine_points": 1720.0,
-      "final_budget": 124.3
+      "season_points": 2572.0,
+      "genuine_points": 1784.0,
+      "final_budget": 125.3
     },
-    "highest_budget": 124.3,
+    "highest_budget": 125.3,
     "highest_budget_paths": [
       {
         "strategy": "budget_builder",
-        "risk_profile": "minimal_risk_accepted",
-        "season_points": 2387.0,
-        "genuine_points": 1647.0,
-        "final_budget": 124.3
-      },
-      {
-        "strategy": "budget_builder",
         "risk_profile": "medium_tolerance",
-        "season_points": 2537.0,
-        "genuine_points": 1720.0,
-        "final_budget": 124.3
+        "season_points": 2572.0,
+        "genuine_points": 1784.0,
+        "final_budget": 125.3
       }
     ],
-    "points_spread_at_highest_budget": 150.0,
+    "points_spread_at_highest_budget": 0.0,
     "budget_builder_medium_vs_minimal": {
-      "points_difference": 150.0,
-      "genuine_points_difference": 73.0,
-      "budget_difference": 0.0
+      "points_difference": 135.0,
+      "genuine_points_difference": 97.0,
+      "budget_difference": 0.6
     },
-    "interpretation": "The risk experiment is a consistency check, not a marginal valuation. Equal final budgets produced materially different points, confirming that budget creates options but does not score points by itself."
+    "interpretation": "The risk experiment compares manager outcomes under different policies. Its budget and points differences are descriptive, not a causal estimate of marginal budget value."
   },
   "marginal_records": [
     {

@@ -40,9 +40,9 @@ The Balanced-policy curve is retained in the JSON as a diagnostic only. It is ex
 
 ## How the risk-tolerance follow-up fits in
 
-- The highest final budget was $124.3M. Two Budget Builder paths reached it.
-- Those equal-budget paths finished 150 points apart.
-- Budget Builder with medium tolerance scored 150 more points than minimal risk while finishing with the same budget.
+- The highest final budget was $125.3M. 1 path reached it.
+- One path reached the highest budget, so it gives no equal-budget points comparison.
+- Budget Builder with medium tolerance differed from minimal risk by +135 points and +0.6M of final budget.
 - This supports treating budget as an option constraint, not as points already banked. Team selection quality still determines whether the spending power is converted into score.
 
 ## Price forecast calibration

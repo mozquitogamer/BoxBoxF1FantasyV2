@@ -45,6 +45,27 @@ test('builds the live Monza V13 broadcast with Resend unsubscribe handling', () 
     assert.match(content.text, /round_15_pre_fp/);
 });
 
+test('includes the provisional returning-driver budget rule in a V13 update', () => {
+    const current = predictions();
+    current.round = 17;
+    current.price_change_assumption = { note: 'Hadjar and Lawson use two assumed zero-point weeks.' };
+    const content = buildBroadcast(current, 'https://boxboxf1fantasy.com');
+    assert.match(content.html, /two assumed zero-point weeks/);
+    assert.match(content.text, /two assumed zero-point weeks/);
+});
+
+test('includes the current V13 team recommendation in the broadcast', () => {
+    const content = buildBroadcast(predictions(), 'https://boxboxf1fantasy.com', null, {
+        drivers: ['ANT', 'HAM'],
+        constructors: ['mercedes'],
+        captain: 'ANT',
+        projected_points: 120.5,
+    });
+    assert.match(content.html, /V13's updated team recommendation/);
+    assert.match(content.html, /Kimi Antonelli, Lewis Hamilton/);
+    assert.match(content.text, /projected 120.5 pts/);
+});
+
 test('uses a deterministic name for idempotent provider lookup', () => {
     assert.equal(broadcastName(predictions()), 'R15 Pre-practice simulation alert');
     assert.equal(broadcastName(predictions(), 'run_123'), 'R15 Pre-practice simulation alert · resend run_123');

@@ -75,11 +75,9 @@ from config.fantasy_scoring import (
     SPRINT_POSITIONS_GAINED_PER_POS,
     SPRINT_FASTEST_LAP_BONUS,
     SPRINT_DNF_DSQ_PENALTY,
-    CONSTRUCTOR_QUALI_BONUSES,
-    PITSTOP_TIME_POINTS,
     FASTEST_PITSTOP_BONUS,
-    PITSTOP_WORLD_RECORD_BONUS,
-    PITSTOP_WORLD_RECORD_TIME,
+    calc_pitstop_points_single,
+    calc_constructor_quali_bonus_from_positions,
 )
 from config.team_driver_ratings import (
     get_driver_wet_skill,
@@ -88,6 +86,8 @@ from config.team_driver_ratings import (
 from config.grid_penalties import apply_grid_penalties
 from config.fantasy_prices import load_fantasy_price_maps
 from config.driver_assets import active_driver_assets, roster_provenance
+from config.pitstop_priors import FALLBACK_PITSTOP_PRIOR, load_pitstop_priors
+from config.seed_roster import load_seed_driver_map, load_seed_constructor_map
 
 
 # ==============================================================================
@@ -589,9 +589,7 @@ def load_drivers_info(round_num: int | None = None, year: int = CURRENT_SEASON) 
     the correct R14 seat pairing.
     """
     if round_num is None:
-        with open(SEED_DIR / "drivers.json") as f:
-            data = json.load(f)
-        return {d["driver_id"]: d for d in data["drivers"]}
+        return load_seed_driver_map()
     return {
         asset["asset_id"]: {
             **asset,
@@ -606,9 +604,7 @@ def load_drivers_info(round_num: int | None = None, year: int = CURRENT_SEASON) 
 
 def load_constructors_info() -> dict:
     """Load constructor seed data keyed by constructor_id."""
-    with open(SEED_DIR / "constructors.json") as f:
-        data = json.load(f)
-    return {c["constructor_id"]: c for c in data["constructors"]}
+    return load_seed_constructor_map()
 
 
 def load_mechanical_shares(driver_id_list: list[str],
@@ -687,84 +683,6 @@ def load_overtake_history() -> dict:
 
     print(f"  Loaded overtake history for {len(result)} drivers ({int(df['round'].max())} rounds)")
     return result
-
-
-# ==============================================================================
-# Pit stop modeling
-# ==============================================================================
-
-def load_pitstop_priors():
-    """Load per-team pit stop time distributions from seed data or historical."""
-    path = SEED_DIR / "pit_stop_priors.json"
-    if path.exists():
-        with open(path) as f:
-            return json.load(f)
-    # Fallback: reasonable defaults for 2026 teams
-    return {
-        "red_bull":       {"mean": 2.15, "std": 0.25, "stops_per_race": 1.5},
-        "mclaren":        {"mean": 2.20, "std": 0.25, "stops_per_race": 1.5},
-        "ferrari":        {"mean": 2.25, "std": 0.30, "stops_per_race": 1.5},
-        "mercedes":       {"mean": 2.20, "std": 0.25, "stops_per_race": 1.5},
-        "aston_martin":   {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5},
-        "alpine":         {"mean": 2.40, "std": 0.35, "stops_per_race": 1.5},
-        "williams":       {"mean": 2.45, "std": 0.35, "stops_per_race": 1.5},
-        "racing_bulls":   {"mean": 2.30, "std": 0.30, "stops_per_race": 1.5},
-        "haas":           {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5},
-        "audi":           {"mean": 2.55, "std": 0.40, "stops_per_race": 1.5},
-        "cadillac":       {"mean": 2.60, "std": 0.45, "stops_per_race": 1.5},
-    }
-
-
-def score_pitstop(time_seconds):
-    """Score a single pit stop using official F1 Fantasy 2026 brackets."""
-    for lower, upper, pts in PITSTOP_TIME_POINTS:
-        if lower <= time_seconds < upper:
-            return pts
-    return 0
-
-
-def sample_pitstops(constructor_ids, rng, pitstop_priors):
-    """Sample pit stop times for all constructors in one simulation.
-
-    Returns dict: constructor_id -> {points, times, is_fastest}
-    """
-    # Get unique constructors
-    unique_constructors = list(set(constructor_ids))
-    all_stops = {}  # cid -> list of stop times
-
-    for cid in unique_constructors:
-        prior = pitstop_priors.get(cid, {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5})
-        # Sample number of stops (1 or 2, weighted by stops_per_race)
-        n_stops = 2 if rng.random() < (prior["stops_per_race"] - 1.0) else 1
-        # Sample each stop time
-        times = []
-        for _ in range(n_stops):
-            t = max(1.5, rng.normal(prior["mean"], prior["std"]))
-            times.append(round(t, 3))
-        all_stops[cid] = times
-
-    # Find fastest stop across all teams
-    fastest_time = 999.0
-    fastest_cid = None
-    for cid, times in all_stops.items():
-        best = min(times)
-        if best < fastest_time:
-            fastest_time = best
-            fastest_cid = cid
-
-    # Score each team
-    results = {}
-    for cid, times in all_stops.items():
-        pts = sum(score_pitstop(t) for t in times)
-        is_fastest = (cid == fastest_cid)
-        if is_fastest:
-            pts += FASTEST_PITSTOP_BONUS
-        # World record bonus
-        if min(times) < PITSTOP_WORLD_RECORD_TIME:
-            pts += PITSTOP_WORLD_RECORD_BONUS
-        results[cid] = {"points": pts, "times": times, "is_fastest": is_fastest}
-
-    return results
 
 
 # ==============================================================================
@@ -1734,21 +1652,7 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
                 # Quali teamwork bonus (from actual simulated positions)
                 q1 = all_quali_pos[sim, d1_idx]
                 q2 = all_quali_pos[sim, d2_idx]
-                # 2026: 22 cars, Q2 eliminates P11-16 -> Q2 cutoff is P16 (not 15).
-                both_q3 = (q1 <= 10) and (q2 <= 10)
-                one_q3 = (q1 <= 10) or (q2 <= 10)
-                both_q2 = (q1 <= 16) and (q2 <= 16)
-                one_q2 = (q1 <= 16) or (q2 <= 16)
-                if both_q3:
-                    quali_bonus = 10
-                elif one_q3:
-                    quali_bonus = 5
-                elif both_q2:
-                    quali_bonus = 3
-                elif one_q2:
-                    quali_bonus = 1
-                else:
-                    quali_bonus = -1
+                quali_bonus = calc_constructor_quali_bonus_from_positions(q1, q2)
 
                 quali_bonus_arr[sim] = quali_bonus
                 constructor_pts[sim] = d1_pts + d2_pts + quali_bonus
@@ -1764,13 +1668,13 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
                 pit_stop_pts_arr[:] = draws
                 constructor_pts += draws
             elif pitstop_priors:
-                prior = pitstop_priors.get(cid, {"mean": 2.50, "std": 0.40, "stops_per_race": 1.5})
+                prior = pitstop_priors.get(cid, FALLBACK_PITSTOP_PRIOR)
                 for sim in range(n_sims):
                     n_stops = 2 if rng.random() < (prior["stops_per_race"] - 1.0) else 1
                     pit_pts = 0
                     for _ in range(n_stops):
                         t = max(1.5, rng.normal(prior["mean"], prior["std"]))
-                        pit_pts += score_pitstop(t)
+                        pit_pts += calc_pitstop_points_single(t)
                     pit_stop_pts_arr[sim] = pit_pts
                     constructor_pts[sim] += pit_pts
                 # Fastest-stop bonus EV (only in the time-prior fallback; the

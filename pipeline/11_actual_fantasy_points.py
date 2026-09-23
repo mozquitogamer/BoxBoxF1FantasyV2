@@ -42,7 +42,7 @@ from config.settings import (
 )
 from config.fantasy_scoring import (
     calc_qualifying_points_driver,
-    calc_constructor_quali_bonus,
+    calc_constructor_quali_bonus_from_positions,
     calc_race_points_driver,
     calc_sprint_points_driver,
     calc_pitstop_points_constructor,
@@ -62,6 +62,7 @@ from config.fantasy_scoring import (
     CONSTRUCTOR_RACE_DSQ_PENALTY,
 )
 from config.fantasy_prices import load_fantasy_price_maps
+from config.seed_roster import load_seed_driver_map, load_seed_constructor_map
 from config.driver_assets import active_driver_assets
 
 # Telemetry-detected overtakes over-count (pit-cycle swaps, SC reshuffles, blue-flag
@@ -69,25 +70,6 @@ from config.driver_assets import active_driver_assets
 # overtakes.csv are the in-game truth and are NEVER capped (see _resolve_overtakes).
 MAX_RACE_OVERTAKES = 8
 MAX_SPRINT_OVERTAKES = 5
-
-
-def _quali_session_from_position(pos):
-    """Segment reached in 2026 qualifying, from final quali POSITION.
-
-    22 cars: Q1 eliminates P17-22, Q2 eliminates P11-16, Q3 = top 10. F1
-    Fantasy's constructor teamwork bonus counts the segment a driver REACHED
-    (their quali classification), NOT whether they set a time in it — a P10 car
-    that set no Q3 lap (e.g. LEC R9) still counts as 'reached Q3'. Deriving from
-    set-time presence under-counted these; position is the correct basis and
-    also gives the right Q2 cutoff (16, not 15).
-    """
-    if pos is None:
-        return "Q1"
-    if pos <= 10:
-        return "Q3"
-    if pos <= 16:
-        return "Q2"
-    return "Q1"
 
 
 def _resolve_overtakes(abbrev: str, merged: dict, seed: dict, cap: int):
@@ -150,16 +132,12 @@ def load_id_maps() -> tuple[dict, dict, dict]:
 
 def load_drivers_info() -> dict:
     """Load driver seed data keyed by abbreviation."""
-    with open(SEED_DIR / "drivers.json") as f:
-        data = json.load(f)
-    return {d["driver_id"]: d for d in data["drivers"]}
+    return load_seed_driver_map()
 
 
 def load_constructors_info() -> dict:
     """Load constructor seed data keyed by constructor_id."""
-    with open(SEED_DIR / "constructors.json") as f:
-        data = json.load(f)
-    return {c["constructor_id"]: c for c in data["constructors"]}
+    return load_seed_constructor_map()
 
 
 def load_fantasy_prices(round_num: int | None = None) -> tuple[dict, dict]:
@@ -886,10 +864,9 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
         # quali position), not on which Q-times they set. A driver who reaches Q3
         # but sets no Q3 lap still counts as Q3 for the teamwork bonus (verified
         # vs official: LEC R9 P10, no Q3 time -> Ferrari both-Q3 +10).
-        d1_session = _quali_session_from_position(d1.get("quali_position"))
-        d2_session = _quali_session_from_position(d2.get("quali_position"))
-
-        quali_bonus = calc_constructor_quali_bonus(d1_session, d2_session)
+        quali_bonus = calc_constructor_quali_bonus_from_positions(
+            d1.get("quali_position"), d2.get("quali_position")
+        )
 
         # Race: combined driver race points (excluding DOTD)
         d1_race = d1.get("race_points", 0) - d1.get("dotd_points", 0)

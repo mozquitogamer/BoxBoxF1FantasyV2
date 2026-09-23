@@ -211,30 +211,8 @@ let optimizeBasis = 'balanced';
 // forecast. Optimizer decisions should see the same current-round signal as
 // the driver/constructor cards, while historical price and form calculations
 // continue to use their untouched baseline fields.
-function adjustmentDelta(item) {
-    const delta = Number(item?.points_delta);
-    return Number.isFinite(delta) ? delta : 0;
-}
-
-function adjustedRiskPoints(item) {
-    const adjusted = Number(item?.expected_points_adjusted);
-    if (Number.isFinite(adjusted)) return adjusted;
-    const baseline = Number(item?.expected_points);
-    return Number.isFinite(baseline) ? baseline + adjustmentDelta(item) : 0;
-}
-
-function adjustedProjectedPoints(item) {
-    const baseline = Number(item?.projected_points);
-    if (Number.isFinite(baseline)) return baseline + adjustmentDelta(item);
-    return adjustedRiskPoints(item);
-}
-
 function basisPointsFor(item, basis = optimizeBasis) {
-    const risk = adjustedRiskPoints(item);
-    const proj = adjustedProjectedPoints(item);
-    if (basis === 'projected') return proj;
-    if (basis === 'risk_adjusted') return risk;
-    return (proj + risk) / 2; // balanced
+    return window.BoxBoxOptimizerScoring.basisPointsFor(item, basis);
 }
 function basisPoints(item) {
     return basisPointsFor(item, optimizeBasis);
@@ -329,8 +307,14 @@ function getScenarioView() {
 // for the legacy ID, so they can be held or sold but never bought from a picker
 // or introduced by an optimizer search.
 const HELD_ONLY_DRIVER_ASSETS = {
-    HAD: { name: 'Isack Hadjar', constructor: 'red_bull', priceSourceId: 'LAW_RED_BULL' },
-    LAW: { name: 'Liam Lawson', constructor: 'racing_bulls', priceSourceId: 'TSU_RACING_BULLS' },
+    14: {
+        HAD: { name: 'Isack Hadjar', constructor: 'red_bull', priceSourceId: 'LAW_RED_BULL' },
+        LAW: { name: 'Liam Lawson', constructor: 'racing_bulls', priceSourceId: 'TSU_RACING_BULLS' },
+    },
+    17: {
+        LAW_RED_BULL: { name: 'Liam Lawson', constructor: 'red_bull', priceSourceId: 'LAW', lastPrice: 15.1 },
+        TSU_RACING_BULLS: { name: 'Yuki Tsunoda', constructor: 'racing_bulls', priceSourceId: 'LIN', lastPrice: 9.7 },
+    },
 };
 
 function findDriverAsset(assetId, pool = data?.drivers) {
@@ -339,9 +323,11 @@ function findDriverAsset(assetId, pool = data?.drivers) {
     const active = drivers.find(driver => driver.driver_id === id)
         || (data?.drivers || []).find(driver => driver.driver_id === id);
     if (active) return active;
-    if (Number(data?.round) !== 14 || data?.driver_assets?.override_active !== true) return null;
+    if (Number(data?.round) < 17
+        && (Number(data?.round) !== 14 || data?.driver_assets?.override_active !== true)) return null;
 
-    const held = HELD_ONLY_DRIVER_ASSETS[id];
+    const heldRound = Number(data?.round) >= 17 ? 17 : Number(data?.round);
+    const held = HELD_ONLY_DRIVER_ASSETS[heldRound]?.[id];
     if (!held) return null;
     const priceSource = drivers.find(driver => driver.driver_id === held.priceSourceId)
         || (data?.drivers || []).find(driver => driver.driver_id === held.priceSourceId);
@@ -352,6 +338,7 @@ function findDriverAsset(assetId, pool = data?.drivers) {
         driver_id: id,
         name: held.name,
         constructor: held.constructor,
+        current_price: held.lastPrice ?? priceSource.current_price,
         expected_points: 0,
         projected_points: 0,
         expected_points_quali: 0,
@@ -374,6 +361,15 @@ function scenarioBannerHtml() {
     return `<div class="scenario-active-banner" title="Lineup scoring includes your What-If bumps. Open the floating Scenario pill (top-right) to manage or reset.">
         \u{2728} Results include your active scenario (<strong>${n}</strong> bump${n === 1 ? '' : 's'})
     </div>`;
+}
+
+function showPriceAssumptionBanner() {
+    const banner = document.getElementById('rosterPriceBanner');
+    if (!banner) return;
+    const assumption = data?.price_change_assumption;
+    const active = Number(assumption?.round) === Number(data?.round) && assumption?.note;
+    banner.hidden = !active;
+    if (active) banner.textContent = `Roster and budget update: ${assumption.note}`;
 }
 
 async function renderTabIfNeeded(tabName) {
@@ -1107,6 +1103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (e) {}
 
     // Phase 2: Render Drivers tab immediately
+    showPriceAssumptionBanner();
     renderHero();
     renderWeather();
     renderDrivers();
@@ -3637,7 +3634,9 @@ function renderPriceChangeBrackets(item) {
     else if (predicted >= pc.ptsForGood) activeBracket = 'good';
     else if (!atFloor && predicted >= pc.ptsForPoor) activeBracket = 'poor';
 
-    const sourceLabel = pc.hasOfficialData ? 'Official pts' : 'Calculated pts';
+    const sourceLabel = pc.priceWindowAssumedZero
+        ? 'Assumed pts'
+        : pc.hasOfficialData ? 'Official pts' : 'Calculated pts';
     const pastDisplay = pc.pastScores.length > 0
         ? pc.pastScores.map(s => s.toFixed(0)).join(', ')
         : 'No data';
@@ -3716,8 +3715,20 @@ function predictPriceChange(item, predictedPts) {
         }
     }
 
-    // PPM = average of last 3 rounds (including predicted this round) / price
-    const allScores = [...pastScores, predictedPts];
+    // A round-scoped provisional rule can replace the two scores used only for
+    // price forecasts. The recorded history and cumulative total stay intact.
+    const assumption = data?.price_change_assumption;
+    const priceWindowAssumedZero = isDriver
+        && Number(assumption?.round) === Number(data?.round)
+        && assumption?.driver_ids?.includes(itemId)
+        && Array.isArray(assumption?.previous_two_scores)
+        && assumption.previous_two_scores.length === 2;
+    const recentWindow = priceWindowAssumedZero
+        ? assumption.previous_two_scores.map(Number)
+        : pastScores.slice(-2);
+
+    // PPM = average of the two price-window scores plus this prediction / price.
+    const allScores = [...recentWindow, predictedPts];
     const last3 = allScores.slice(-3);
     const avgPts = last3.reduce((a, b) => a + b, 0) / last3.length;
     const avgPpm = avgPts / price;
@@ -3740,7 +3751,6 @@ function predictPriceChange(item, predictedPts) {
     // Rolling window = last 2 actual rounds + predicted this round = 3 total
     // new_avg = (sum_of_last2 + X) / windowSize
     // For avg/price >= threshold: X >= threshold * price * windowSize - sum_of_last2
-    const recentWindow = pastScores.slice(-2);
     const recentSum = recentWindow.reduce((a, b) => a + b, 0);
     const windowSize = Math.min(recentWindow.length + 1, 3);
     const ptsForGreat = PPM_RATINGS.GREAT * price * windowSize - recentSum;
@@ -3749,7 +3759,8 @@ function predictPriceChange(item, predictedPts) {
 
     return {
         avgPpm, rating, expectedChange, avgPts, atFloor,
-        cumulativeTotal, pastScores, isATier, tierChanges, hasOfficialData,
+        cumulativeTotal, pastScores: priceWindowAssumedZero ? recentWindow : pastScores,
+        isATier, tierChanges, hasOfficialData, priceWindowAssumedZero,
         tier: isATier ? 'A' : 'B',
         ptsForGreat, ptsForGood, ptsForPoor,
         // Compat aliases
@@ -3947,60 +3958,15 @@ function lineupScore(strategy, totalPoints, totalCost, allDrivers, constructorsL
 }
 
 function adjustedBasisPoints(item, chip) {
-    let pts = basisPoints(item);
-    if (chip === 'no_negative' && pts < 0) pts = 0;
-    return pts;
+    return window.BoxBoxOptimizerScoring.adjustedBasisPoints(item, chip, optimizeBasis);
 }
 
 function intervalPoints(item, key, chip) {
-    let pts;
-    if (key === 'p5') pts = item.mc_total_p5;
-    else if (key === 'p95') pts = item.mc_total_p95;
-    else pts = item.mc_total_mean;
-    if (typeof pts !== 'number') pts = (typeof item.expected_points === 'number') ? item.expected_points : 0;
-    if (chip === 'no_negative' && pts < 0) pts = 0;
-    return pts;
-}
-
-function getBoostTargets(drivers, chip) {
-    const sorted = [...drivers].sort((a, b) => adjustedBasisPoints(b, chip) - adjustedBasisPoints(a, chip));
-    return {
-        primary: sorted[0] || null,
-        secondary: (chip === '3x_boost' && sorted.length > 1) ? sorted[1] : null,
-    };
+    return window.BoxBoxOptimizerScoring.intervalPoints(item, key, chip);
 }
 
 function scoreTeamPicks(drivers, constructorsList, chip) {
-    const { primary, secondary } = getBoostTargets(drivers, chip);
-    const primaryId = primary ? primary.driver_id : null;
-    const secondaryId = secondary ? secondary.driver_id : null;
-
-    function totalFor(kind) {
-        let total = 0;
-        for (const d of drivers) {
-            total += kind === 'basis' ? adjustedBasisPoints(d, chip) : intervalPoints(d, kind, chip);
-        }
-        for (const c of constructorsList) {
-            total += kind === 'basis' ? adjustedBasisPoints(c, chip) : intervalPoints(c, kind, chip);
-        }
-        if (primary) {
-            const p = kind === 'basis' ? adjustedBasisPoints(primary, chip) : intervalPoints(primary, kind, chip);
-            total += p * (chip === '3x_boost' ? 2 : 1);
-        }
-        if (secondary) {
-            const p = kind === 'basis' ? adjustedBasisPoints(secondary, chip) : intervalPoints(secondary, kind, chip);
-            total += p;
-        }
-        return total;
-    }
-
-    return {
-        expected: totalFor('basis'),
-        floor: totalFor('p5'),
-        ceiling: totalFor('p95'),
-        boostedDriverId: primaryId,
-        secondBoostedDriverId: secondaryId,
-    };
+    return window.BoxBoxOptimizerScoring.scoreTeamPicks(drivers, constructorsList, chip, optimizeBasis);
 }
 
 // Iterate k-combinations of `freeDrivers` (which MUST be sorted by current_price
@@ -4153,65 +4119,6 @@ function withLoadingButton(buttonId, originalLabel, work) {
     }, 0);
 }
 
-// -- Final Fix calculator ----------------------------------------------------
-// Qualifying points are already banked when this tool is used. The comparison
-// therefore swaps only Grand Prix scoring while retaining the outgoing driver's
-// official qualifying points on both sides.
-const FF_QUALI_POSITION_POINTS = Object.freeze({
-    1: 10, 2: 9, 3: 8, 4: 7, 5: 6,
-    6: 5, 7: 4, 8: 3, 9: 2, 10: 1,
-});
-const FF_RACE_POSITION_POINTS = Object.freeze({
-    1: 25, 2: 18, 3: 15, 4: 12, 5: 10,
-    6: 8, 7: 6, 8: 4, 9: 2, 10: 1,
-});
-
-function calculateFinalFixRacePoints({
-    gridPosition,
-    finishPosition,
-    overtakes = 0,
-    fastestLap = false,
-    dotd = false,
-    isDnf = false,
-}) {
-    const safeOvertakes = Math.max(0, Math.min(30, Math.round(Number(overtakes) || 0)));
-    if (isDnf) {
-        return {
-            finishPoints: 0,
-            positionsGainedLost: 0,
-            overtakes: safeOvertakes,
-            fastestLapPoints: 0,
-            dotdPoints: 0,
-            dnfPoints: -20,
-            total: -20 + safeOvertakes,
-        };
-    }
-
-    const grid = Math.max(1, Math.min(22, Number(gridPosition) || 22));
-    const finish = Math.max(1, Math.min(22, Number(finishPosition) || 22));
-    const finishPoints = FF_RACE_POSITION_POINTS[finish] || 0;
-    const positionsGainedLost = grid - finish;
-    const fastestLapPoints = fastestLap ? 10 : 0;
-    const dotdPoints = dotd ? 10 : 0;
-    return {
-        finishPoints,
-        positionsGainedLost,
-        overtakes: safeOvertakes,
-        fastestLapPoints,
-        dotdPoints,
-        dnfPoints: 0,
-        total: finishPoints + positionsGainedLost + safeOvertakes + fastestLapPoints + dotdPoints,
-    };
-}
-
-function ffDriverById(driverId) {
-    return data?.drivers?.find(d => d.driver_id === driverId) || null;
-}
-
-function ffQualifyingPoints(position) {
-    return FF_QUALI_POSITION_POINTS[Number(position)] || 0;
-}
-
 async function loadBudgetValueData() {
     try {
         const resp = await fetch(cacheBust('data/budget_value.json'));
@@ -4223,253 +4130,13 @@ async function loadBudgetValueData() {
     }
 }
 
-function ffProjectedRacePoints(driver) {
-    const explicitRace = Number(driver?.projected_points_race);
-    if (Number.isFinite(explicitRace)) return explicitRace;
-
-    // Backward-compatible fallback for a briefly cached pre-field payload.
-    // Deliberately derive from projected_points; never fall back to the
-    // risk-adjusted expected_points or the global optimizer basis.
-    const projectedTotal = Number(driver?.projected_points);
-    if (!Number.isFinite(projectedTotal)) return 0;
-    const projectedQuali = Number.isFinite(Number(driver?.projected_points_quali))
-        ? Number(driver.projected_points_quali)
-        : ffQualifyingPoints(driver?.predicted_quali);
-    const projectedSprintRace = Number(driver?.projected_points_sprint_race) || 0;
-    return projectedTotal - projectedQuali - projectedSprintRace;
-}
-
-function ffSelectedAward(name) {
-    return document.querySelector(`input[name="${name}"]:checked`)?.value || 'none';
-}
-
-function ffSigned(value, digits = 0) {
-    const n = Number(value) || 0;
-    return `${n > 0 ? '+' : ''}${n.toFixed(digits)}`;
-}
-
-function ffFinishOptions() {
-    return [
-        ...Array.from({ length: 22 }, (_, i) => `<option value="${i + 1}">P${i + 1}</option>`),
-        '<option value="dnf">DNF / DSQ</option>',
-    ].join('');
-}
-
-function ffSetScenarioDriver(side, resetInputs = true) {
-    const prefix = side === 'out' ? 'ffOut' : 'ffIn';
-    const driver = ffDriverById(document.getElementById(`${prefix}Driver`)?.value);
-    if (!driver) return;
-
-    const isOutgoing = side === 'out';
-    const quali = Number(driver.predicted_quali);
-    const grid = Number(driver.predicted_grid ?? quali);
-    const gridPenalty = gridPenaltyText(driver);
-    const qPoints = ffQualifyingPoints(quali);
-    const projectedRace = ffProjectedRacePoints(driver);
-
-    document.getElementById(`${prefix}Name`).textContent = driver.name;
-    document.getElementById(`${prefix}Price`).textContent = `$${Number(driver.current_price || 0).toFixed(1)}M`;
-    const qLabel = isOutgoing ? `${qPoints} pts banked` : 'not counted after switch';
-    const gridText = gridPenalty
-        ? `P${grid} · ${gridPenalty}`
-        : `P${grid}`;
-    document.getElementById(`${prefix}Facts`).innerHTML = `
-        <div><span>Qualifying</span><strong>P${quali} · ${qLabel}</strong></div>
-        <div><span>Race start</span><strong>${gridText}</strong></div>
-        <div><span>Model finish</span><strong>P${driver.predicted_finish}</strong></div>
-        <div><span>Projected race points</span><strong>${projectedRace.toFixed(1)}</strong></div>
-    `;
-
-    if (resetInputs) {
-        document.getElementById(`${prefix}Finish`).value = String(driver.predicted_finish);
-        document.getElementById(`${prefix}Overtakes`).value = String(
-            Math.max(0, Math.round(Number(driver.mc_overtakes_mean ?? driver.expected_overtakes ?? 0)))
-        );
-    }
-}
-
-function ffSyncOvertakesToFinish(side) {
-    const prefix = side === 'out' ? 'ffOut' : 'ffIn';
-    const driver = ffDriverById(document.getElementById(`${prefix}Driver`)?.value);
-    const finishValue = document.getElementById(`${prefix}Finish`)?.value;
-    if (!driver || !finishValue || finishValue === 'dnf') return;
-    const grid = Number(driver.predicted_grid ?? driver.predicted_quali);
-    const finish = Number(finishValue);
-    // Editable starting assumption: one pass for each net place gained.
-    // Users can lower it for positions inherited through pit cycles/DNFs.
-    document.getElementById(`${prefix}Overtakes`).value = String(Math.max(0, grid - finish));
-}
-
-function ffScenarioFor(side, fastestLapWinner, dotdWinner) {
-    const prefix = side === 'out' ? 'ffOut' : 'ffIn';
-    const driver = ffDriverById(document.getElementById(`${prefix}Driver`)?.value);
-    const finishValue = document.getElementById(`${prefix}Finish`)?.value;
-    const isDnf = finishValue === 'dnf';
-    const finishPosition = isDnf ? 22 : Number(finishValue);
-    return {
-        driver,
-        finishLabel: isDnf ? 'DNF' : `P${finishPosition}`,
-        points: calculateFinalFixRacePoints({
-            gridPosition: driver?.predicted_grid ?? driver?.predicted_quali,
-            finishPosition,
-            overtakes: document.getElementById(`${prefix}Overtakes`)?.value,
-            fastestLap: fastestLapWinner === side,
-            dotd: dotdWinner === side,
-            isDnf,
-        }),
-    };
-}
-
-function ffBreakdownRow(label, scenario, multiplier) {
-    const p = scenario.points;
-    const bonus = p.fastestLapPoints + p.dotdPoints;
-    return `<tr>
-        <th>${label}<span>${scenario.driver.name}</span></th>
-        <td>P${scenario.driver.predicted_grid}</td>
-        <td>${scenario.finishLabel}</td>
-        <td>${ffSigned(p.finishPoints)}</td>
-        <td>${ffSigned(p.positionsGainedLost)}</td>
-        <td>${ffSigned(p.overtakes)}</td>
-        <td>${ffSigned(bonus)}</td>
-        <td><strong>${ffSigned(p.total * multiplier)}</strong></td>
-    </tr>`;
-}
-
-function calculateFinalFixComparison() {
-    const resultEl = document.getElementById('finalFixResult');
-    if (!resultEl || !data) return;
-
-    const outDriver = ffDriverById(document.getElementById('ffOutDriver')?.value);
-    const inDriver = ffDriverById(document.getElementById('ffInDriver')?.value);
-    if (!outDriver || !inDriver) return;
-    resultEl.classList.remove('hidden');
-
-    if (outDriver.driver_id === inDriver.driver_id) {
-        resultEl.innerHTML = '<div class="optimizer-warning">Choose two different drivers.</div>';
-        return;
-    }
-
-    const bank = Math.max(0, Number(document.getElementById('ffBank')?.value) || 0);
-    const available = Number(outDriver.current_price || 0) + bank;
-    const incomingPrice = Number(inDriver.current_price || 0);
-    const affordable = incomingPrice <= available + 1e-9;
-    const shortfall = Math.max(0, incomingPrice - available);
-    const multiplier = document.getElementById('ffBoosted')?.checked ? 2 : 1;
-    const fastestLapWinner = ffSelectedAward('ffFastestLap');
-    const dotdWinner = ffSelectedAward('ffDotd');
-    const outgoing = ffScenarioFor('out', fastestLapWinner, dotdWinner);
-    const incoming = ffScenarioFor('in', fastestLapWinner, dotdWinner);
-
-    const bankedQuali = ffQualifyingPoints(outDriver.predicted_quali);
-    const holdTotal = bankedQuali + outgoing.points.total * multiplier;
-    const switchTotal = bankedQuali + incoming.points.total * multiplier;
-    const scenarioDelta = switchTotal - holdTotal;
-
-    const modelOutRace = ffProjectedRacePoints(outDriver);
-    const modelInRace = ffProjectedRacePoints(inDriver);
-    const modelDelta = (modelInRace - modelOutRace) * multiplier;
-    const modelHold = bankedQuali + modelOutRace * multiplier;
-    const modelSwitch = bankedQuali + modelInRace * multiplier;
-
-    const verdictClass = !affordable ? 'unavailable' : scenarioDelta > 0 ? 'positive' : scenarioDelta < 0 ? 'negative' : 'neutral';
-    const verdict = !affordable
-        ? `Need $${shortfall.toFixed(1)}M more`
-        : scenarioDelta > 0
-            ? `Final Fix gains ${ffSigned(scenarioDelta, 1)} pts`
-            : scenarioDelta < 0
-                ? `Hold gains ${ffSigned(Math.abs(scenarioDelta), 1)} pts`
-                : 'Scenario is break-even';
-    const boostNote = multiplier === 2
-        ? 'The 2x Boost transfers and doubles Grand Prix points only.'
-        : 'No Boost transfer applied.';
-
-    resultEl.innerHTML = `
-        <div class="ff-verdict ${verdictClass}">
-            <span>Your scenario</span>
-            <strong>${verdict}</strong>
-            <p>Hold ${outDriver.name.split(' ').pop()}: ${holdTotal.toFixed(1)} · Final Fix to ${inDriver.name.split(' ').pop()}: ${switchTotal.toFixed(1)}</p>
-        </div>
-        <div class="ff-model-result">
-            <div>
-                <span>Projected points basis</span>
-                <strong>${modelDelta >= 0 ? 'Switch' : 'Hold'} by ${Math.abs(modelDelta).toFixed(1)} pts</strong>
-            </div>
-            <p>Hold ${modelHold.toFixed(1)} · Switch ${modelSwitch.toFixed(1)} · deterministic race projections, not Balanced or Risk-adjusted</p>
-        </div>
-        <div class="ff-locked-note">
-            <strong>${bankedQuali} Qualifying points stay banked from ${outDriver.name}.</strong>
-            Grid penalties affect the race start and positions gained/lost, not these points. ${boostNote}
-        </div>
-        <div class="ff-table-wrap">
-            <table class="ff-breakdown-table">
-                <thead><tr>
-                    <th>Choice</th><th>Start</th><th>Finish</th><th>Finish pts</th>
-                    <th>Gained/lost</th><th>Overtakes</th><th>FL + DOTD</th><th>Race total${multiplier === 2 ? ' (2x)' : ''}</th>
-                </tr></thead>
-                <tbody>
-                    ${ffBreakdownRow('Hold', outgoing, multiplier)}
-                    ${ffBreakdownRow('Switch', incoming, multiplier)}
-                </tbody>
-            </table>
-        </div>
-    `;
-}
-
+// -- Final Fix UI ------------------------------------------------------------
 function setupFinalFixTool() {
-    const outSelect = document.getElementById('ffOutDriver');
-    const inSelect = document.getElementById('ffInDriver');
-    if (!outSelect || !inSelect || !data?.drivers?.length) return;
-
-    const drivers = [...data.drivers].sort((a, b) =>
-        Number(a.predicted_grid ?? 99) - Number(b.predicted_grid ?? 99)
-    );
-    const options = drivers.map(d =>
-        `<option value="${d.driver_id}">${d.name} · $${Number(d.current_price || 0).toFixed(1)}M</option>`
-    ).join('');
-    outSelect.innerHTML = options;
-    inSelect.innerHTML = options;
-    document.getElementById('ffOutFinish').innerHTML = ffFinishOptions();
-    document.getElementById('ffInFinish').innerHTML = ffFinishOptions();
-
-    outSelect.value = drivers.some(d => d.driver_id === 'ANT') ? 'ANT' : drivers[0].driver_id;
-    inSelect.value = drivers.some(d => d.driver_id === 'NOR')
-        ? 'NOR'
-        : drivers.find(d => d.driver_id !== outSelect.value)?.driver_id;
-
-    const locked = Boolean(data.final_fix?.qualifying_locked);
-    const statusEl = document.getElementById('finalFixStatus');
-    statusEl.className = `ff-status ${locked ? 'ready' : 'waiting'}`;
-    statusEl.innerHTML = locked
-        ? '<strong>Post-qualifying projections ready.</strong> Actual Qualifying and the confirmed starting grid are locked. Comparisons use Projected points.'
-        : '<strong>Awaiting post-qualifying projections.</strong> Manual scenarios work, but model numbers still reflect the pre-Qualifying forecast.';
-
-    ffSetScenarioDriver('out');
-    ffSetScenarioDriver('in');
-
-    outSelect.addEventListener('change', () => {
-        ffSetScenarioDriver('out');
-        calculateFinalFixComparison();
+    window.BoxBoxFinalFix.mount({
+        document,
+        getData: () => data,
+        gridPenaltyText,
     });
-    inSelect.addEventListener('change', () => {
-        ffSetScenarioDriver('in');
-        calculateFinalFixComparison();
-    });
-    document.getElementById('ffOutFinish').addEventListener('change', () => {
-        ffSyncOvertakesToFinish('out');
-        calculateFinalFixComparison();
-    });
-    document.getElementById('ffInFinish').addEventListener('change', () => {
-        ffSyncOvertakesToFinish('in');
-        calculateFinalFixComparison();
-    });
-    ['ffOutOvertakes', 'ffInOvertakes', 'ffBank', 'ffBoosted'].forEach(id =>
-        document.getElementById(id)?.addEventListener('input', calculateFinalFixComparison)
-    );
-    document.querySelectorAll('input[name="ffFastestLap"], input[name="ffDotd"]').forEach(input =>
-        input.addEventListener('change', calculateFinalFixComparison)
-    );
-    document.getElementById('runFinalFixCompare')?.addEventListener('click', calculateFinalFixComparison);
-    calculateFinalFixComparison();
 }
 
 function runOptimizer() {
@@ -5260,6 +4927,11 @@ function normalizeOfficialAssetId(asset) {
     const pool = asset.asset_type === 'constructor' ? data.constructors : data.drivers;
     const idKey = asset.asset_type === 'constructor' ? 'constructor_id' : 'driver_id';
     const nameKey = asset.asset_type === 'constructor' ? 'name' : 'name';
+    if (asset.asset_type === 'driver' && Number(data.round) >= 17) {
+        if (name === 'yukitsunoda' && findDriverAsset('TSU_RACING_BULLS', pool)) return 'TSU_RACING_BULLS';
+        if (name === 'liamlawson' && String(asset.asset_id) === '116'
+            && findDriverAsset('LAW_RED_BULL', pool)) return 'LAW_RED_BULL';
+    }
     if (asset.asset_type === 'driver' && Number(data.round) === 14 && data.driver_assets?.override_active === true) {
         // The official feed exposes four distinct ownership records. Preserve
         // the exact held identity instead of silently changing a manager's

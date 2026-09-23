@@ -1,37 +1,43 @@
 # Tests
 
-A lightweight safety net. Not exhaustive — it targets the bug classes that have
-actually bitten this project: silent scoring errors, undefined frontend
-references, and grossly-broken prediction exports.
+The Python suite covers scoring, prediction contracts, archives, weather,
+pipeline ordering, and the manager and SEO tools. The JavaScript checks cover
+the static site's load-time bindings and key user-facing calculations.
 
-## Run everything
+## Run the checks
 
 ```bash
-# Python tests (scoring rules + prediction sanity guard)
 python -m pytest tests/ -q
-
-# Frontend smoke test (catches undefined-reference crashes node --check misses)
 node tests/smoke_app_js.js
+node tests/app_behavior_test.js
+node tests/team_state_test.js
 ```
 
-## What each test covers
+On Windows, use the project's virtual-environment Python if `python` is not
+on `PATH` (for example, `.pipeline-venv/Scripts/python.exe`).
 
-| File | Catches |
-|------|---------|
-| `test_fantasy_scoring.py` | Wrong point values, sign flips, off-by-one pitstop brackets, DOTD leaking into constructor totals. Every prediction flows through these functions. |
-| `test_prediction_sanity.py` | The pre-export guard itself — all-zeros, NaNs, gross point suppression (the bias-nerf class), ranking collapse. |
-| `smoke_app_js.js` | `app.js` failing to load, `TA_TUNABLES`/`MW_TUNABLES` undefined, key functions missing. `node --check` only validates syntax and would NOT catch these. |
+The GitHub publishing and scheduled-job workflows do not run this suite, so
+run these checks before publishing a code change. Research sweeps are separate
+experiments, listed in [the pipeline tool inventory](../docs/PIPELINE_TOOLS.md).
 
-## The pre-export guard
+## JavaScript checks
 
-`pipeline/prediction_sanity.py` runs automatically inside
-`08_export_website_json.py` before predictions are written to the live site. It
-prints `[OK]`, `[X] problem`, or `- warning` lines. Problems don't block the
-export (model output is a judgement call), but they print loudly so a regression
-can't ship silently the way the MC bias-nerf did.
+- `smoke_app_js.js` loads the standalone scoring modules and `app.js` in a
+  mocked browser and checks that their main bindings resolve. A syntax-only
+  check cannot catch an undefined top-level reference.
+- `app_behavior_test.js` exercises optimizer, Final Fix, Team Compare, price
+  history, and other pure frontend behavior. It also retains a few shell and
+  script-order checks that do not yet have browser-level coverage.
+- `app_js_harness.js` is shared setup for those two checks; it is not a test
+  command.
+- `team_state_test.js` checks the standalone team-state store.
 
-## Before pushing frontend or scoring changes
+## Prediction export guard
 
-```bash
-python -m pytest tests/ -q && node tests/smoke_app_js.js && echo "safe to push"
-```
+`pipeline/prediction_sanity.py` runs inside `08_export_website_json.py` before
+writing predictions. Problems print loudly; some warnings need judgment rather
+than blocking an export. `test_prediction_sanity.py` checks the guard itself.
+
+Tests that replay historical decisions should use frozen archive prices and
+round-specific rosters. Tests must write generated files to temporary paths,
+not into `web/public/data/`.

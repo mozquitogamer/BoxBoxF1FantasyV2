@@ -758,7 +758,7 @@
       "note": "Post-Dutch GP seat correction; historical R1-R13 assets remain unchanged.",
       "availability": {
         "from_round": 14,
-        "to_round": null
+        "to_round": 16
       },
       "source": {
         "url": "https://www.formula1.com/en/drivers",
@@ -778,7 +778,7 @@
           "constructor_id": "red_bull",
           "availability": {
             "from_round": 14,
-            "to_round": null
+            "to_round": 16
           },
           "legacy_asset_ids": [
             "LAW"
@@ -791,7 +791,7 @@
           "constructor_id": "racing_bulls",
           "availability": {
             "from_round": 14,
-            "to_round": null
+            "to_round": 16
           },
           "legacy_asset_ids": [
             "TSU"
@@ -800,10 +800,10 @@
       }
     },
     "16": {
-      "note": "Current official prices for Baku and subsequent rounds",
+      "note": "Prices captured after Madrid; R16 substitution assets retained for historical snapshots",
       "availability": {
         "from_round": 16,
-        "to_round": null
+        "to_round": 16
       },
       "source": {
         "url": "https://fantasy.formula1.com/en/my-team/1",
@@ -821,7 +821,7 @@
           "constructor_id": "red_bull",
           "availability": {
             "from_round": 14,
-            "to_round": null
+            "to_round": 16
           },
           "legacy_asset_ids": [
             "LAW"
@@ -834,12 +834,30 @@
           "constructor_id": "racing_bulls",
           "availability": {
             "from_round": 14,
-            "to_round": null
+            "to_round": 16
           },
           "legacy_asset_ids": [
             "TSU"
           ]
         }
+      }
+    },
+    "17": {
+      "note": "Baku roster return: Hadjar at Red Bull, Lawson at Racing Bulls; Tsunoda historical only",
+      "availability": {
+        "from_round": 17,
+        "to_round": null
+      },
+      "source": {
+        "result": "Roster change reported by site owner on 2026-09-23; returning-driver prices use the latest recorded seed values until the game feed is confirmed"
+      },
+      "inactive_driver_ids": [],
+      "drivers": {},
+      "price_change_assumption": {
+        "round": 17,
+        "driver_ids": ["HAD", "LAW"],
+        "previous_two_scores": [0, 0],
+        "note": "Hadjar returns to Red Bull and Lawson to Racing Bulls; Tsunoda is out. For their price-change forecasts only, we assume each returning driver scored 0 in the previous two rounds. F1 Fantasy has not confirmed how it treats inactive weeks, so the points needed for a price rise may change."
       }
     }
   }

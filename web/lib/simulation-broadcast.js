@@ -25,13 +25,14 @@ function broadcastName(predictions, resendToken = null) {
     return resendToken ? `${base} · resend ${resendToken}` : base;
 }
 
-function buildBroadcast(predictions, siteOrigin, resendToken = null) {
+function buildBroadcast(predictions, siteOrigin, resendToken = null, v13Decision = null) {
     const race = String(predictions.race || 'the next Grand Prix');
     const round = Number(predictions.round || 0);
     const phase = String(predictions.phase || 'updated');
     const phaseName = phaseLabel(phase);
     const drivers = top(predictions.drivers);
     const constructors = top(predictions.constructors);
+    const budgetNote = String(predictions.price_change_assumption?.note || '');
     const url = `${siteOrigin}/?utm_source=email&utm_medium=simulation_alert&utm_campaign=round_${round}_${phase}#drivers`;
     const driverRows = drivers.map(driver => (
         `<li><strong>${htmlEscape(driver.name || driver.driver_id || 'Driver')}</strong>`
@@ -41,6 +42,14 @@ function buildBroadcast(predictions, siteOrigin, resendToken = null) {
         `<li><strong>${htmlEscape(constructor.name || constructor.constructor_id || 'Constructor')}</strong>`
         + ` — ${points(constructor).toFixed(1)} expected pts</li>`
     )).join('');
+    const driverNames = new Map((predictions.drivers || []).map(driver => [driver.driver_id, driver.name || driver.driver_id]));
+    const constructorNames = new Map((predictions.constructors || []).map(constructor => [constructor.constructor_id, constructor.name || constructor.constructor_id]));
+    const v13Names = v13Decision?.drivers?.map(id => driverNames.get(id) || id) || [];
+    const v13Constructors = v13Decision?.constructors?.map(id => constructorNames.get(id) || id) || [];
+    const v13Html = v13Names.length ? `<h2 style="font-size:17px;margin:0 0 8px">V13's updated team recommendation</h2>
+      <p style="line-height:1.6;margin:0 0 10px"><strong>Drivers:</strong> ${v13Names.map(htmlEscape).join(', ')}<br><strong>Constructors:</strong> ${v13Constructors.map(htmlEscape).join(', ')}</p>
+      <p style="margin:0 0 20px">Captain: ${htmlEscape(driverNames.get(v13Decision.captain) || v13Decision.captain || '—')}; projected ${Number(v13Decision.projected_points || 0).toFixed(1)} pts.</p>` : '';
+    const v13Text = v13Names.length ? `V13's updated team recommendation\nDrivers: ${v13Names.join(', ')}\nConstructors: ${v13Constructors.join(', ')}\nCaptain: ${driverNames.get(v13Decision.captain) || v13Decision.captain || '—'}; projected ${Number(v13Decision.projected_points || 0).toFixed(1)} pts.\n\n` : '';
     const html = `<!doctype html><html><body style="margin:0;background:#f4f6f8;color:#151922;font-family:Arial,sans-serif">
 <div style="max-width:640px;margin:0 auto;padding:24px 16px">
   <div style="background:#0a0d12;color:#fff;border-radius:12px;overflow:hidden">
@@ -50,10 +59,12 @@ function buildBroadcast(predictions, siteOrigin, resendToken = null) {
       <p style="margin:0;color:#c7d0dc">${htmlEscape(race)} · ${htmlEscape(phaseName)}</p>
     </div>
     <div style="padding:22px 26px">
+      ${v13Html}
       <h2 style="font-size:17px;margin:0 0 8px">Top driver projections</h2>
       <ol style="padding-left:22px;line-height:1.8;margin:0 0 20px">${driverRows}</ol>
       <h2 style="font-size:17px;margin:0 0 8px">Top constructors</h2>
       <ol style="padding-left:22px;line-height:1.8;margin:0 0 24px">${constructorRows}</ol>
+      ${budgetNote ? `<p style="background:#fff8e1;color:#4a3a00;border-left:4px solid #d89b00;padding:12px 14px"><strong>Budget forecast note:</strong> ${htmlEscape(budgetNote)}</p>` : ''}
       <p style="margin:0"><a href="${url}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 17px;border-radius:7px;font-weight:700">Open the updated predictions</a></p>
     </div>
   </div>
@@ -65,7 +76,7 @@ function buildBroadcast(predictions, siteOrigin, resendToken = null) {
     const constructorText = constructors.map((constructor, index) => (
         `${index + 1}. ${constructor.name || constructor.constructor_id} — ${points(constructor).toFixed(1)} expected pts`
     )).join('\n');
-    const text = `BoxBoxF1Fantasy — ${race}\n${phaseName} simulations are live.\n\nTop driver projections\n${driverText}\n\nTop constructors\n${constructorText}\n\nOpen the updated predictions: ${url}\nUnsubscribe: ${UNSUBSCRIBE_URL}\n`;
+    const text = `BoxBoxF1Fantasy — ${race}\n${phaseName} simulations are live.\n\n${v13Text}Top driver projections\n${driverText}\n\nTop constructors\n${constructorText}\n\n${budgetNote ? `Budget forecast note: ${budgetNote}\n\n` : ''}Open the updated predictions: ${url}\nUnsubscribe: ${UNSUBSCRIBE_URL}\n`;
     return {
         name: broadcastName(predictions, resendToken),
         subject: `${race} simulations updated — ${phaseName}`,
@@ -122,8 +133,23 @@ async function sendV13Broadcast(res, { resendToken = null } = {}) {
         if (!Number.isFinite(generatedAtMs) || Date.now() - generatedAtMs > 72 * 60 * 60 * 1000) {
             return res.status(200).json({ ok: true, skipped: 'stale_simulation' });
         }
+        const v13Response = await fetch(`${config.siteOrigin}/data/v13_manager.json?v13_broadcast=${Date.now()}`, {
+            headers: { 'Cache-Control': 'no-cache' },
+        });
+        if (!v13Response.ok) throw new Error(`Could not load live V13 recommendation (${v13Response.status})`);
+        const v13Manager = await v13Response.json();
+        const v13Decision = predictions.phase === 'pre_fp'
+            ? v13Manager.current_state?.early_thoughts
+            : predictions.phase === 'post_fp' ? v13Manager.current_state?.post_fp_final : null;
+        if (predictions.phase !== 'post_quali' && !v13Decision) {
+            throw new Error('Current V13 recommendation is missing');
+        }
+        if (v13Decision && (Number(v13Decision.round) !== Number(predictions.round)
+            || v13Decision.source_generated_at !== predictions.generated_at)) {
+            throw new Error('Live V13 recommendation does not match the current simulation');
+        }
 
-        const content = buildBroadcast(predictions, config.siteOrigin, resendToken);
+        const content = buildBroadcast(predictions, config.siteOrigin, resendToken, v13Decision);
         const duplicate = await existingBroadcast(config.apiKey, content.name);
         const recipients = await activeContactCount(config.apiKey, segmentId);
         if (duplicate?.status === 'sent' || duplicate?.status === 'scheduled') {

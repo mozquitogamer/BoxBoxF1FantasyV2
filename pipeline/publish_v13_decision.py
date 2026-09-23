@@ -28,7 +28,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from config.settings import SEED_DIR, WEB_DATA_DIR
-from config.fantasy_prices import load_fantasy_price_data
 from pipeline import build_v13_manager as v13
 from pipeline import simulate_fantasy_season_strategies as season
 
@@ -94,6 +93,10 @@ def _round_input(round_num: int, phase: str) -> season.RoundInputs:
         corrected = WEB_DATA_DIR / R14_CORRECTED_PRE_FP_ARCHIVE
         if corrected.exists():
             archive = corrected
+    if round_num == 17 and phase == "pre_fp":
+        corrected = WEB_DATA_DIR / "predictions_round17_pre_fp_corrected.json"
+        if corrected.exists():
+            archive = corrected
     if not archive.exists():
         raise FileNotFoundError(f"Missing {phase} archive: {archive}")
     payload = v13._load_json(archive)
@@ -120,32 +123,27 @@ def _round_input(round_num: int, phase: str) -> season.RoundInputs:
     }
     drivers = tuple(archive_drivers)
     constructors = tuple(archive_constructors)
-    prices = load_fantasy_price_data(round_num=round_num)
-    driver_price_map = prices.get("drivers", {})
-    constructor_price_map = prices.get("constructors", {})
+    _, opening = _opening_prices(round_num)
 
-    def price(group: dict[str, Any], key: str, fallback: float) -> float:
-        entry = group.get(key) or {}
-        value = entry.get("current_price") if isinstance(entry, dict) else entry
-        return float(value if value is not None else fallback)
+    def price(row: dict[str, Any], group: dict[str, Any], key: str) -> float:
+        # The archived lock-time price must win over the live seed: the latter
+        # advances after every race and would reprice a frozen decision.
+        value = row.get("current_price")
+        if value is None:
+            value = group.get(key)
+        if value is None:
+            raise ValueError(f"Missing R{round_num} {phase} opening price for {key}")
+        return float(value)
 
     driver_prices = np.array(
         [
-            price(
-                driver_price_map,
-                key,
-                float(archive_drivers[key].get("current_price", 0.0)),
-            )
+            price(archive_drivers[key], opening["drivers"], key)
             for key in drivers
         ]
     )
     constructor_prices = np.array(
         [
-            price(
-                constructor_price_map,
-                key,
-                float(archive_constructors[key].get("current_price", 0.0)),
-            )
+            price(archive_constructors[key], opening["constructors"], key)
             for key in constructors
         ]
     )
@@ -186,6 +184,7 @@ def _round_input(round_num: int, phase: str) -> season.RoundInputs:
         phase=phase,
         official=official,
         completed_rounds=completed,
+        archive_path=archive,
     )
     if resolved is None:
         raise RuntimeError(f"Could not resolve R{round_num} {phase}")

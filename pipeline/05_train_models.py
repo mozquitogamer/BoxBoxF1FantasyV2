@@ -61,7 +61,10 @@ from config.settings import (
     FEATURE_COLUMNS,
     CURRENT_SEASON,
 )
-from pipeline.feature_engineering import engineer_features
+from pipeline.feature_engineering import (
+    engineer_features,
+    rederive_quali_dependent_features,
+)
 from pipeline.fp_long_runs import FP_STINT_SEMANTICS_VERSION
 
 try:
@@ -763,27 +766,6 @@ def generate_walk_forward_quali_predictions(
               f"predicted {len(test_df):,} rows, MAE={mae_wf:.3f}")
 
     return result
-
-
-def rederive_quali_dependent_features(
-    df: pd.DataFrame, quali_col: str = "quali_position"
-) -> pd.DataFrame:
-    """
-    Recompute quali-dependent features from `quali_col`.
-
-    Formulas MUST match 03b_build_jolpica_features.py::add_race_model_features
-    to avoid train/inference distribution shift. This function is called after
-    overwriting `quali_position` with walk-forward predictions during training,
-    and also at inference when the race model gets predicted quali instead of
-    actual quali.
-    """
-    d = df.copy()
-    qp = d[quali_col].astype(float)
-    d["is_pole_position"] = (qp == 1).astype(int)
-    d["is_front_row"] = (qp <= 2).astype(int)
-    d["is_top10_quali"] = (qp <= 10).astype(int)
-    d["grid_advantage"] = 11.0 - qp  # must match 03b
-    return d
 
 
 # ============================================================

@@ -56,6 +56,7 @@ from config.fantasy_prices import (
     load_fantasy_price_data,
 )
 from config.driver_assets import active_driver_assets, roster_provenance
+from config.seed_roster import load_seed_driver_map, load_seed_constructor_map
 
 
 VALID_PHASES = ("pre_fp", "post_fp", "post_quali")
@@ -200,15 +201,13 @@ def load_race_info() -> dict:
 def load_driver_info(round_num: int | None = None) -> dict:
     """Load driver metadata keyed by canonical or active asset ID."""
     if round_num is None:
-        with open(SEED_DIR / "drivers.json") as f:
-            return {d["driver_id"]: d for d in json.load(f)["drivers"]}
+        return load_seed_driver_map()
     return {asset["asset_id"]: asset for asset in active_driver_assets(round_num)}
 
 
 def load_constructor_info() -> dict:
     """Load constructor metadata."""
-    with open(SEED_DIR / "constructors.json") as f:
-        return {c["constructor_id"]: c for c in json.load(f)["constructors"]}
+    return load_seed_constructor_map()
 
 
 def _warn_if_prices_stale() -> None:
@@ -651,6 +650,11 @@ def build_predictions_json(round_num: int) -> dict | None:
         payload["calibration"] = calibration_meta
     if final_fix_meta is not None:
         payload["final_fix"] = final_fix_meta
+    price_assumption = (prices.get("active_round_override") or {}).get("price_change_assumption")
+    if isinstance(price_assumption, dict) and price_assumption.get("round") == round_num:
+        # Site price brackets and both email audiences use the same explicit
+        # provisional rule. It does not alter recorded historical points.
+        payload["price_change_assumption"] = price_assumption
     payload["driver_assets"] = roster_provenance(round_num)
     return payload
 

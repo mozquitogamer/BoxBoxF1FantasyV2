@@ -165,8 +165,9 @@ def _phase_projection(
     phase: str,
     official: dict[str, Any],
     completed_rounds: list[int],
+    archive_path: Path | None = None,
 ) -> season.RoundInputs | None:
-    archive = _phase_archive_path(base.round_num, phase)
+    archive = archive_path or _phase_archive_path(base.round_num, phase)
     if not archive.exists():
         return None
     payload = _load_json(archive)

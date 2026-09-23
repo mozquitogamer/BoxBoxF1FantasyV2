@@ -211,6 +211,27 @@ test('deduplicates member alerts across regenerated timestamps and deployments',
     assert.equal(notificationEventKey(regenerated), notificationEventKey(first));
 });
 
+test('R17 recommendation keeps a held Tsunoda asset and carries the budget note', () => {
+    const current = predictions();
+    current.round = 17;
+    current.phase = 'pre_fp';
+    current.price_change_assumption = { note: 'Assume two zero-point weeks for Hadjar and Lawson.' };
+    current.drivers.push(
+        { driver_id: 'HAD', name: 'Isack Hadjar', constructor: 'red_bull', projected_points: 18, expected_points: 18, current_price: 14.5 },
+        { driver_id: 'LAW', name: 'Liam Lawson', constructor: 'racing_bulls', projected_points: 15, expected_points: 15, current_price: 15.1 },
+        { driver_id: 'LIN', name: 'Arvid Lindblad', constructor: 'racing_bulls', projected_points: 12, expected_points: 12, current_price: 8.2 },
+    );
+    const heldTeam = team(2);
+    heldTeam.assets[0].asset_id = 'TSU_RACING_BULLS';
+    const result = buildRecommendation(current, heldTeam);
+    assert.equal(result.lineup.drivers.includes('Yuki Tsunoda'), true);
+    assert.equal(result.move.outgoing_id, 'TSU_RACING_BULLS');
+    assert.match(result.budget_note, /two zero-point weeks/);
+    const email = require('../api/members/notify').emailBody({ display_name: 'Fan' }, result, 'https://boxboxf1fantasy.com');
+    assert.match(email.html, /two zero-point weeks/);
+    assert.match(email.text, /two zero-point weeks/);
+});
+
 test('builds a generic simulation alert for Pit Wall segment-only contacts', () => {
     const content = genericPitWallEmail(predictions(), 'https://boxboxf1fantasy.com');
     assert.equal(content.subject, 'Test Grand Prix: Post-FP simulations are live');

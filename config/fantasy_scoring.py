@@ -189,6 +189,31 @@ def calc_constructor_quali_bonus(
         return CONSTRUCTOR_QUALI_BONUSES["neither_q2"]
 
 
+def qualifying_session_from_position(position: Optional[int]) -> str:
+    """Segment reached from the official 2026 qualifying classification.
+
+    Reaching Q3 counts even when a driver sets no Q3 time. With 22 cars,
+    Q2 covers P11-P16 and Q1 covers P17-P22.
+    """
+    if position is None:
+        return "Q1"
+    if position <= 10:
+        return "Q3"
+    if position <= 16:
+        return "Q2"
+    return "Q1"
+
+
+def calc_constructor_quali_bonus_from_positions(
+    driver1_position: Optional[int], driver2_position: Optional[int]
+) -> int:
+    """Score constructor qualifying teamwork from the drivers' classifications."""
+    return calc_constructor_quali_bonus(
+        qualifying_session_from_position(driver1_position),
+        qualifying_session_from_position(driver2_position),
+    )
+
+
 def calc_sprint_points_driver(
     finish_position: Optional[int],
     grid_position: int,
@@ -264,6 +289,14 @@ def calc_race_points_driver(
     return points
 
 
+def calc_pitstop_points_single(time_seconds: float) -> int:
+    """Score one pit stop using the official time brackets."""
+    for lower, upper, points in PITSTOP_TIME_POINTS:
+        if lower <= time_seconds < upper:
+            return points
+    return 0
+
+
 def calc_pitstop_points_constructor(pitstop_times: list[float]) -> int:
     """
     Calculate constructor pitstop fantasy points.
@@ -272,19 +305,9 @@ def calc_pitstop_points_constructor(pitstop_times: list[float]) -> int:
         pitstop_times: List of pitstop durations in seconds for the team.
 
     Returns:
-        Total pitstop points (time-based + fastest bonus + world record bonus).
+        Time-based pitstop points. Fastest and world-record bonuses are separate.
     """
-    if not pitstop_times:
-        return 0
-
-    total = 0
-    for t in pitstop_times:
-        for lower, upper, pts in PITSTOP_TIME_POINTS:
-            if lower <= t < upper:
-                total += pts
-                break
-
-    return total
+    return sum(calc_pitstop_points_single(t) for t in pitstop_times)
 
 
 def calc_fastest_pitstop_bonus(is_fastest: bool) -> int:

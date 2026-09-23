@@ -15,7 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import fastf1
-from config.settings import FASTF1_CACHE_DIR
+from config.settings import FASTF1_CACHE_DIR, internal_rounds_for_year
 
 
 def load_download_module():
@@ -57,7 +57,7 @@ def main():
         for year in range(args.start, args.end + 1):
             total = dl.get_total_rounds_for_year(year)
             print(f"Year {year}: {total} rounds")
-            for rnd in range(1, total + 1):
+            for rnd in internal_rounds_for_year(year, total):
                 dl.download_fastf1_round(year, rnd)
 
     elif args.mode == "fastf1_missing":
@@ -66,7 +66,7 @@ def main():
         for year in range(args.start, args.end + 1):
             total = dl.get_total_rounds_for_year(year)
             print(f"Year {year}: {total} rounds total")
-            for rnd in range(1, total + 1):
+            for rnd in internal_rounds_for_year(year, total):
                 round_dir = FASTF1_RAW_DIR / f"year{year}" / f"round{rnd}"
                 fp_files = list(round_dir.glob("fp*.parquet")) if round_dir.exists() else []
                 if len(fp_files) >= 2:  # At least FP1+FP2

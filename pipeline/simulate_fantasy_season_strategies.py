@@ -204,7 +204,7 @@ def load_rounds(through_round: int | None = None) -> list[RoundInputs]:
     track_data = _load_json(WEB_DATA_DIR / "track_data.json")
     driver_roster = _load_json(SEED_DIR / "drivers.json")["drivers"]
     constructor_roster = _load_json(SEED_DIR / "constructors.json")["constructors"]
-    driver_ids = tuple(row["driver_id"] for row in driver_roster)
+    base_driver_ids = tuple(row["driver_id"] for row in driver_roster)
     constructor_ids = tuple(row["constructor_id"] for row in constructor_roster)
     completed_rounds = sorted(
         int(value)
@@ -213,7 +213,7 @@ def load_rounds(through_round: int | None = None) -> list[RoundInputs]:
     )
     output: list[RoundInputs] = []
 
-    driver_history: dict[str, list[float]] = {key: [] for key in driver_ids}
+    driver_history: dict[str, list[float]] = {key: [] for key in base_driver_ids}
     constructor_history: dict[str, list[float]] = {
         key: [] for key in constructor_ids
     }
@@ -227,10 +227,46 @@ def load_rounds(through_round: int | None = None) -> list[RoundInputs]:
         if payload.get("phase") != "post_fp":
             raise ValueError(f"{archive.name} is not a post_fp archive")
         driver_rows = {row["driver_id"]: row for row in payload["drivers"]}
+        # Historical archives preserve the roster that was actually for sale.
+        # Keep the seed order for existing assets so older experiment tie-breaks
+        # stay stable, then append any replacement assets from this archive.
+        driver_ids = tuple(key for key in base_driver_ids if key in driver_rows) + tuple(
+            key for key in driver_rows if key not in base_driver_ids
+        )
         constructor_rows = {
             row["constructor_id"]: row for row in payload["constructors"]
         }
         actual = official[str(round_num)]
+
+        def driver_actual_points(asset_id: str) -> float:
+            actual_drivers = actual["drivers"]
+            for key in (asset_id, *driver_rows[asset_id].get("asset_legacy_ids", [])):
+                if key in actual_drivers:
+                    return float(actual_drivers[key])
+            raise KeyError(f"R{round_num} has no official points for {asset_id}")
+
+        def driver_open_price(asset_id: str) -> float:
+            value = opening["drivers"].get(asset_id)
+            if value is None:
+                value = driver_rows[asset_id].get("current_price")
+            if value is None:
+                raise KeyError(f"R{round_num} has no opening price for {asset_id}")
+            return float(value)
+
+        def driver_close_price(asset_id: str) -> float:
+            for group in (closing.get("driver_asset_prices", {}), closing["drivers"]):
+                if asset_id in group:
+                    return float(group[asset_id])
+            raise KeyError(f"R{round_num} has no closing price for {asset_id}")
+
+        def past_driver_points(asset_id: str) -> list[float]:
+            if driver_history.get(asset_id):
+                return driver_history[asset_id]
+            for alias in driver_rows[asset_id].get("asset_legacy_ids", []):
+                if alias in driver_history:
+                    return driver_history[alias]
+            return []
+
         circuit_id = track_data["race_circuit_map"].get(actual["race"], "unknown")
         track_features = track_data["track_features"].get(circuit_id, {})
         weather = payload.get("weather_adjustments") or {}
@@ -255,9 +291,7 @@ def load_rounds(through_round: int | None = None) -> list[RoundInputs]:
                 for key in constructor_ids
             ]
         )
-        driver_prices = np.array(
-            [float(opening["drivers"][key]) for key in driver_ids]
-        )
+        driver_prices = np.array([driver_open_price(key) for key in driver_ids])
         constructor_prices = np.array(
             [float(opening["constructors"][key]) for key in constructor_ids]
         )
@@ -266,7 +300,7 @@ def load_rounds(through_round: int | None = None) -> list[RoundInputs]:
                 _expected_price_change(
                     price=driver_prices[index],
                     projected_points=driver_projection[index],
-                    past_points=driver_history[key],
+                    past_points=past_driver_points(key),
                 )
                 for index, key in enumerate(driver_ids)
             ]
@@ -310,13 +344,13 @@ def load_rounds(through_round: int | None = None) -> list[RoundInputs]:
                 driver_prices=driver_prices,
                 constructor_prices=constructor_prices,
                 driver_close_prices=np.array(
-                    [float(closing["drivers"][key]) for key in driver_ids]
+                    [driver_close_price(key) for key in driver_ids]
                 ),
                 constructor_close_prices=np.array(
                     [float(closing["constructors"][key]) for key in constructor_ids]
                 ),
                 driver_actual=np.array(
-                    [float(actual["drivers"][key]) for key in driver_ids]
+                    [driver_actual_points(key) for key in driver_ids]
                 ),
                 constructor_actual=np.array(
                     [float(actual["constructors"][key]) for key in constructor_ids]
@@ -347,7 +381,7 @@ def load_rounds(through_round: int | None = None) -> list[RoundInputs]:
         )
 
         for key in driver_ids:
-            driver_history[key].append(float(actual["drivers"][key]))
+            driver_history.setdefault(key, []).append(driver_actual_points(key))
         for key in constructor_ids:
             constructor_history[key].append(float(actual["constructors"][key]))
 

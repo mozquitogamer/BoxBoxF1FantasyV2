@@ -50,6 +50,7 @@ from config.team_driver_ratings import (
     get_constructor_cold_skill,
     rating_as_of_for_event,
 )
+from pipeline.feature_engineering import rederive_quali_dependent_features
 
 # All seasons to load for cross-season rolling features
 ALL_SEASONS = sorted(set(HISTORICAL_SEASONS + [CURRENT_SEASON]))
@@ -693,14 +694,7 @@ def add_race_model_features(df: pd.DataFrame) -> pd.DataFrame:
     Quali-based features are known at prediction time (qualifying happens before the race).
     Rolling form features use shift(1) for time safety.
     """
-    d = df.copy()
-
-    # --- Current-round quali-based features (known at prediction time) ---
-    quali_pos = d["quali_position"].astype(float)
-    d["is_pole_position"] = (quali_pos == 1).astype(int)
-    d["is_front_row"] = (quali_pos <= 2).astype(int)
-    d["is_top10_quali"] = (quali_pos <= 10).astype(int)
-    d["grid_advantage"] = 11.0 - quali_pos  # positive = better than field avg (~11)
+    d = rederive_quali_dependent_features(df)
 
     # --- Position delta from previous races (shifted for time safety) ---
     d = d.sort_values(["driver_id", "season", "round"])

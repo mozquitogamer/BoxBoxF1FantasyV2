@@ -166,66 +166,30 @@ python pipeline/run_weekend.py --phase post_fp --dry-run    # Preview commands w
 
 If you omit `--round`, the runner inspects `data/seed/races.json` and picks the first non-cancelled race whose date is ≥ today (with a 1-day grace after the race, so you can still run `post_race` Monday). This is convenient but can pick the wrong round if today's date drifts. **Always pass `--round` explicitly during a live race weekend.**
 
-### Phase Compositions (Step Lists)
+### Phase Compositions
 
-These are encoded in `run_weekend.py::PHASES`. Re-printed here so you can see what each phase actually executes.
+`pipeline/run_weekend.py::PHASES` defines the step order and which steps are
+optional. Preview the current commands for any phase without running them:
 
-#### `pre_fp`
-```
-01_download_data.py  --mode historical --start-year 2020 --end-year 2025
-03a_normalize_jolpica.py
-03b_build_jolpica_features.py
-04_build_model_inputs.py  --exclude-after {year}:{round}
-05_train_models.py
+```bash
+python pipeline/run_weekend.py --phase post_race --round 7 --dry-run
 ```
 
-#### `pre_fp_predict`
-```
-01_download_data.py  --mode current --round {round}
-03a_normalize_jolpica.py  --all
-03b_build_jolpica_features.py  --all
-06_run_predictions.py  --round {round}
-07_calculate_fantasy.py  --round {round}
-08_monte_carlo_fantasy.py  --round {round}
-08_export_website_json.py  --round {round}
-predict_horizon.py  --current-round {round} --horizon 5    (optional, non-fatal)
-```
+| Phase | Main work |
+|---|---|
+| `pre_fp` | Download historical data, rebuild training rows, train models. |
+| `pre_fp_predict` | Refresh priors, predict and score, simulate, export, then refresh the horizon, V13 decision, and SEO pages. |
+| `post_fp` | Build FP features, predict and score, simulate, analyze FP, export, then refresh the horizon, V13 decision, and SEO pages. |
+| `post_quali` | Run the FP prediction chain with qualifying available, then refresh the horizon and SEO pages. |
+| `post_race` | Fetch results and session weather, analyze the race, collect overtakes and pit times, calculate actual points, export, then refresh the V13 manager and SEO pages. |
 
-#### `post_fp`
-```
-01_download_data.py  --mode current --round {round}
-02_build_laps.py  --round {round}
-03_extract_features.py  --round {round}
-06_run_predictions.py  --round {round}
-07_calculate_fantasy.py  --round {round}
-08_monte_carlo_fantasy.py  --round {round}
-10_fp_analysis.py  --round {round}
-08_export_website_json.py  --round {round}
-predict_horizon.py  --current-round {round} --horizon 5    (optional, non-fatal)
-```
+Horizon, V13, and SEO steps are optional in the runner. A failure there warns
+without stopping the required prediction or export steps. Horizon projections
+cover the next five rounds; the transfer planner uses them when available.
+For a standalone horizon refresh:
 
-#### `post_quali`
-Same step list as `post_fp` — `06_run_predictions.py` is phase-aware: when actual qualifying data is available it auto-switches to `race_model.json` (trained on real quali) instead of `race_model_fp.json` (trained on predicted quali). `predict_horizon.py` also runs at the end (optional, non-fatal).
-
-#### About `predict_horizon.py` (P9)
-This is the last step of each prediction phase. It runs **priors-only** ML predictions for the next 5 rounds and exports `web/public/data/horizon_projections.json`. The multi-week transfer planner consumes that file instead of its older track-similarity heuristic, so future-round projections are now real ML predictions (same XGBoost models used for the current round, just rolled forward without FP telemetry).
-
-It's tagged `non_fatal` in `run_weekend.py`: a failure prints a `[WARN]` but doesn't abort the pipeline. If it fails, the planner silently falls back to the affinity heuristic. To run it manually outside of the weekend pipeline:
-
-```
+```bash
 python pipeline/predict_horizon.py --current-round 7 --horizon 5
-```
-
-#### `post_race`
-```
-01_download_data.py  --mode current --round {round}
-09_post_race_analysis.py  --round {round}
-11_actual_fantasy_points.py  --round {round}
-11_race_deep_dive.py  --round {round}
-12_count_overtakes.py  --round {round}
-13_fetch_openf1_overtakes.py  --year 2026 --round {round}
-13_fetch_pitstop_stationary.py  --year 2026 --round {round}
-08_export_website_json.py  --round {round}
 ```
 
 ---
@@ -268,7 +232,7 @@ python pipeline/05_train_models.py
 python pipeline/run_weekend.py --phase pre_fp_predict --round 7
 ```
 
-What runs (see [Phase Compositions](#phase-compositions-step-lists)):
+What runs (see [Phase Compositions](#phase-compositions)):
 1. `01_download_data.py --mode current --round 7` — Jolpica results for any rounds that finished since last update.
 2. `03a_normalize_jolpica.py --all` + `03b_build_jolpica_features.py --all` — rebuild the historical rolling features so the new round's predictions reflect the latest completed race(s).
 3. `06_run_predictions.py --round 7` — predicts using priors only. Detects no FP features → uses `race_model_fp.json`. Recomputes track-similarity AND circuit-specific features (`driver_circuit_exp`, `driver_circuit_roll_3`, `constructor_circuit_exp`) for the target circuit so each driver's Canada-specific (or whichever) history flows correctly.
@@ -337,7 +301,8 @@ git add web/public/data/ && git commit -m "Post-FP predictions for R7 (Canada)" 
 python pipeline/run_weekend.py --phase post_quali --round 7
 ```
 
-Same step list as `post_fp`. The intelligence is in `06_run_predictions.py`:
+The prediction and FP steps match `post_fp`; the export uses the `post_quali`
+phase and V13 publishing is omitted. The intelligence is in `06_run_predictions.py`:
 - It calls `_load_actual_quali()` which checks normalized Jolpica CSV first, then falls back to the FastF1 qualifying session.
 - If actual quali is found, it switches to `race_model.json` and feeds in real `quali_position` values.
 - It preserves that classification as `actual_quali_position`, applies `grid_penalties.json` separately, and writes the final start as `predicted_grid_position`.
@@ -403,15 +368,13 @@ This powers the per-cause reliability features and the MC's **cause-gated teamma
 python pipeline/run_weekend.py --phase post_race --round 7
 ```
 
-What runs:
-1. `01_download_data.py --mode current --round 7` — fetches Jolpica race results (and sprint if sprint weekend) and FastF1 race session.
-2. `09_post_race_analysis.py` — predicted vs actual position comparison. Output: `post_race_round{N}.json`.
-3. `11_actual_fantasy_points.py` — computes actual fantasy points for every driver and constructor using real positions, sprint results, overtakes (from `overtakes.csv` if present), pit stops, fastest lap, DOTD. Output: `actual_round{N}.json`. **Will print "Manual overtakes.csv override for race (N drivers)" / "for sprint (N drivers)" if the seed file is being used.**
-4. `11_race_deep_dive.py` — detailed race breakdown (pace, tyre strategy, stints, fuel-corrected pace). Output: `deep_dive_round{N}.json`.
-5. `12_count_overtakes.py` — FastF1 sector-method overtake detection. Output: `data/overtakes/year{Y}/round{N}/overtakes_fastf1.json`.
-6. `13_fetch_openf1_overtakes.py` — OpenF1 API overtake counts (with 30s pit-stop window filter). Output: `data/overtakes/year{Y}/round{N}/overtakes.json`.
-7. `13_fetch_pitstop_stationary.py` — pit stop stationary times (the actual scoring metric). Output: `data/processed/pitstops/year{Y}/round{N}/pitstops.json`.
-8. `08_export_website_json.py` — bundles everything into web JSONs.
+The runner saves completed-session weather, analyzes race pace, then writes the
+FastF1 overtake fallback before OpenF1's canonical overtake file. It formats
+pit-stop times **before** `11_actual_fantasy_points.py` calculates actual
+scores, so the first scoring run sees the final available inputs. The export
+then refreshes web JSON; optional V13 manager and SEO steps follow. The
+actual-points step reports when `overtakes.csv` overrides detected counts.
+Use the [dry run](#phase-compositions) for the exact current order.
 
 ### Post-step: Update prices and official points
 
@@ -593,7 +556,7 @@ Edit only on driver swaps mid-season (rare).
 
 ### `web/public/index.html` cache version
 
-When you edit `web/public/app.js`, bump the `app.js?v=N` query string in `index.html` so users get the new version instead of a stale cached copy. Currently at `v=73`.
+When you edit `web/public/app.js`, bump its `?v=N` query string in `index.html` so users get the new version. Do the same for any standalone script you change, such as `final-fix.js`.
 
 ### `config/track_classifications.py`
 
@@ -700,7 +663,10 @@ No CLI args. Trains all 5 models (`quali`, `race`, `race_fp`, `sprint`, `fp_sign
 
 The statistical gate any hyperparameter change must clear **before** it ships. Runs walk-forward cross-validation across 2022–2026 (≈97 round-folds, not just the 5 completed 2026 rounds), with paired bootstrap confidence intervals and multiple-testing correction (Bonferroni + Benjamini-Hochberg). A tuning change that looks significant on 5 folds but collapses at 97 is rejected here — this is the harness that caught two small-sample false positives in May 2026. Read-only; never touches `models/trained/`.
 
-Replaced the old throwaway `05b_experiment_models.py` (deleted). Companion research one-offs (also read-only, not part of normal operation): `run_oat_sweep.py`, `run_combined_grid.py`, `run_race_fp_sweep.py`, `validate_race_fp.py`, `validate_alt_algorithm.py` / `validate_alt_algo_v2.py` (CatBoost / RandomForest evaluation), `analyze_multiple_testing.py`.
+Replaced the old throwaway `05b_experiment_models.py` (deleted). The historical
+sweep launchers live in `pipeline/research/`; the validators remain in
+`pipeline/`. See [the script inventory](PIPELINE_TOOLS.md) for their inputs and
+status.
 
 ### `pipeline/validate_weather_features.py` — Weather model validation gate (manual)
 
@@ -1050,18 +1016,18 @@ Trains a logistic-regression DNF-probability model conditioned on weather / temp
 
 ### Testing & safety net (`tests/`)
 
-A lightweight suite targets the bug classes that have actually bitten this project (silent scoring errors, undefined frontend references, grossly-broken exports). Run before pushing any frontend or scoring change:
+A focused suite targets scoring, prediction, archive, and frontend regressions. Run before pushing a pipeline or frontend change:
 
 ```bash
-python -m pytest tests/ -q          # scoring rules + the prediction sanity guard
-node tests/smoke_app_js.js          # app.js loads; TA_TUNABLES/MW_TUNABLES defined; key fns resolve
-# one-liner before pushing:
-python -m pytest tests/ -q && node tests/smoke_app_js.js && echo "safe to push"
+python -m pytest tests/ -q
+node tests/smoke_app_js.js          # app.js load and binding check
+node tests/app_behavior_test.js     # optimizer, Final Fix, and Team Compare behavior
+node tests/team_state_test.js       # saved-team state behavior
 ```
 
 - `tests/test_fantasy_scoring.py` — every scoring function in `config/fantasy_scoring.py` (position ladders, overtakes, FL/DOTD, pit-stop brackets, DOTD-excluded-from-constructors). Catches silent scoring drift.
 - `tests/test_prediction_sanity.py` — the export guard itself (all-zeros, NaN, gross suppression, ranking collapse, strict mode).
-- `tests/smoke_app_js.js` — evaluates `app.js` in a mocked-browser sandbox so an undefined reference throws here instead of in a user's browser. `node --check` only validates *syntax* and would miss this class — it's exactly how a crashing Transfer Advisor once shipped.
+- `tests/smoke_app_js.js` — loads `app.js` in a mocked-browser sandbox so undefined references fail before they reach a user. `tests/app_behavior_test.js` exercises the main frontend calculations in that same harness.
 
 See `tests/README.md` for details.
 
@@ -1123,9 +1089,11 @@ No build step. The Vercel project root is `web/`; its active config is `web/verc
 
 ### Cache busting
 
-When you change `web/public/app.js`, bump the version in `web/public/index.html`:
+When you change a frontend script, bump its version in `web/public/index.html`:
 ```html
-<script src="app.js?v=73"></script>   <!-- bump from 73 → 74 -->
+<script src="final-fix.js?v=N"></script>
+<script src="optimizer-scoring.js?v=N"></script>
+<script src="app.js?v=N"></script>
 ```
 
 Likewise, when you change `web/public/styles.css`, bump its query string: `<link rel="stylesheet" href="styles.css?v=N">` (the `scenarios.css` / `weather.css` links are versioned the same way).
@@ -1238,6 +1206,7 @@ git add web/public/data/ && git commit -m "Post-FP R{N}" && git push
 python pipeline/run_weekend.py --phase post_quali --round N
 # Confirm the MC log reports that qualifying + grid were fixed, then verify:
 node tests/smoke_app_js.js
+node tests/app_behavior_test.js
 git add web/public/data/ && git commit -m "Post-quali R{N}" && git push
 ```
 

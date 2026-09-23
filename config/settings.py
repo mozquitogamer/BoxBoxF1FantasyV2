@@ -131,17 +131,39 @@ CANCELLED_ROUNDS_2026: list[int] = [4, 5]
 
 
 def fastf1_round(internal_round: int, year: int = CURRENT_SEASON) -> int:
-    """Map internal round number → FastF1 round number.
+    """Map an internal round to FastF1/Jolpica's compressed round number.
 
-    FastF1's calendar omits cancelled races entirely, so its round numbering
-    skips them. Our internal `races.json` preserves original numbering. For
-    any internal round, the FastF1 equivalent is internal − (count of
-    cancelled rounds strictly before it).
+    Both APIs omit cancelled races; OpenF1 preserves original calendar order
+    and must not use this mapping. Internal paths always retain the original
+    round number.
     """
+    if internal_round < 1:
+        raise ValueError(f"Round must be positive: {internal_round}")
     if year != 2026:
         return internal_round
+    if internal_round in CANCELLED_ROUNDS_2026:
+        raise ValueError(f"2026 round {internal_round} was cancelled")
     skipped = sum(1 for r in CANCELLED_ROUNDS_2026 if r < internal_round)
     return internal_round - skipped
+
+
+def internal_round_from_api(api_round: int, year: int = CURRENT_SEASON) -> int:
+    """Invert FastF1/Jolpica numbering for an active round (never OpenF1)."""
+    if api_round < 1:
+        raise ValueError(f"API round must be positive: {api_round}")
+    if year != 2026:
+        return api_round
+    internal_round = api_round
+    for cancelled_round in sorted(CANCELLED_ROUNDS_2026):
+        if cancelled_round <= internal_round:
+            internal_round += 1
+    return internal_round
+
+
+def internal_rounds_for_year(year: int, api_round_count: int) -> list[int]:
+    """Internal round IDs represented by a compressed API season schedule."""
+    return [internal_round_from_api(api_round, year)
+            for api_round in range(1, api_round_count + 1)]
 
 
 def is_race_completed(round_num: int, year: int = CURRENT_SEASON) -> bool:

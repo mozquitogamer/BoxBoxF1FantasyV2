@@ -75,6 +75,17 @@ class TestConstructorQualiBonus:
         # One Q3 + one Q2 should be 5 (one_q3), NOT 5+3.
         assert fs.calc_constructor_quali_bonus("Q3", "Q2") == 5
 
+    @pytest.mark.parametrize("positions, expected", [
+        ((10, 10), 10),  # Both reached Q3, even without a Q3 lap time.
+        ((10, 16), 5),
+        ((11, 16), 3),   # P16 is still Q2 in a 22-car field.
+        ((16, 17), 1),
+        ((17, 22), -1),
+        ((None, 10), 5),
+    ])
+    def test_official_position_cutoffs(self, positions, expected):
+        assert fs.calc_constructor_quali_bonus_from_positions(*positions) == expected
+
 
 # ---------------------------------------------------------------------------
 # Race — drivers

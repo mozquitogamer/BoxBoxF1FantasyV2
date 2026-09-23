@@ -903,10 +903,9 @@ def risk_experiment_context() -> dict[str, Any]:
             ),
         },
         "interpretation": (
-            "The risk experiment is a consistency check, not a marginal "
-            "valuation. Equal final budgets produced materially different "
-            "points, confirming that budget creates options but does not score "
-            "points by itself."
+            "The risk experiment compares manager outcomes under different "
+            "policies. Its budget and points differences are descriptive, "
+            "not a causal estimate of marginal budget value."
         ),
     }
 
@@ -1022,6 +1021,7 @@ def build_markdown(result: dict[str, Any]) -> str:
     frontiers = result["affordability_frontiers"]
     experiments = result["strategy_experiment_context"]
     risk_experiment = result["risk_experiment_context"]
+    highest_budget_path_count = len(risk_experiment["highest_budget_paths"])
     examples = result["decision_examples"]["by_races_remaining"]
     lines = [
         "# 2026 marginal budget-to-points analysis",
@@ -1128,16 +1128,22 @@ def build_markdown(result: dict[str, Any]) -> str:
             "",
             (
                 f"- The highest final budget was ${risk_experiment['highest_budget']:.1f}M. "
-                "Two Budget Builder paths reached it."
+                f"{highest_budget_path_count} "
+                f"{'path' if highest_budget_path_count == 1 else 'paths'} "
+                "reached it."
             ),
             (
-                "- Those equal-budget paths finished "
+                "- Those paths finished "
                 f"{risk_experiment['points_spread_at_highest_budget']:.0f} points apart."
+                if highest_budget_path_count > 1
+                else "- One path reached the highest budget, so it gives no equal-budget points comparison."
             ),
             (
-                "- Budget Builder with medium tolerance scored "
-                f"{risk_experiment['budget_builder_medium_vs_minimal']['points_difference']:.0f} "
-                "more points than minimal risk while finishing with the same budget."
+                "- Budget Builder with medium tolerance differed from minimal risk by "
+                f"{risk_experiment['budget_builder_medium_vs_minimal']['points_difference']:+.0f} "
+                "points and "
+                f"{risk_experiment['budget_builder_medium_vs_minimal']['budget_difference']:+.1f}M "
+                "of final budget."
             ),
             (
                 "- This supports treating budget as an option constraint, not as "

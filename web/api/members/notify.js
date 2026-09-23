@@ -49,10 +49,15 @@ function officialTeamForRecommendation(snapshot, predictions, fallback) {
     };
     const assets = snapshot.assets.map(item => {
         const lookup = item.asset_type === 'constructor' ? constructors : drivers;
+        const historicalName = normalizedName(item.name);
         const ownershipId = item.asset_type === 'driver'
             && Number(predictions.round) === 14
             && predictions.driver_assets?.override_active === true
             ? r14OwnershipIds[String(item.asset_id)]
+            : item.asset_type === 'driver' && Number(predictions.round) >= 17
+                ? historicalName === 'yukitsunoda' ? 'TSU_RACING_BULLS'
+                    : historicalName === 'liamlawson' && String(item.asset_id) === '116'
+                        ? 'LAW_RED_BULL' : null
             : null;
         const assetId = ownershipId
             || lookup.get(normalizedName(item.name))
@@ -89,6 +94,9 @@ function emailBody(profile, recommendation, origin) {
     const captainLine = recommendation.captain
         ? `<p><strong>2x check:</strong> ${htmlEscape(recommendation.captain.name)} is the highest-projected driver currently in your saved lineup.</p>`
         : '';
+    const budgetNote = recommendation.budget_note
+        ? `<p style="background:#fff8e1;border-left:4px solid #d89b00;padding:12px 14px"><strong>Budget forecast note:</strong> ${htmlEscape(recommendation.budget_note)}</p>`
+        : '';
     const lineup = `${recommendation.lineup.drivers.join(', ')} · ${recommendation.lineup.constructors.join(', ')}`;
     const url = `${origin}/?utm_source=pit_wall_email&utm_medium=personalized_sim_alert&utm_campaign=round_${recommendation.round}_${recommendation.phase}#optimizer`;
     const html = `<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#151922">
@@ -102,13 +110,14 @@ function emailBody(profile, recommendation, origin) {
             <p>The latest simulations are live. Against the team you saved, the model’s clearest action is:</p>
             ${moveBlock}
             ${captainLine}
+            ${budgetNote}
             <p><strong>Saved lineup:</strong> ${htmlEscape(lineup)}</p>
             <p><strong>Projected team score:</strong> ${recommendation.projected_team_points.toFixed(1)} points, including the model’s best 2x choice.</p>
             <p><a href="${url}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 17px;border-radius:7px;font-weight:700">Open Transfer Advisor</a></p>
             <p style="color:#667085;font-size:12px;line-height:1.5">This is model-based guidance, not a guarantee. You receive it because personalized simulation updates are enabled in your Pit Wall account. Sign in on the site to change that setting.</p>
         </div>
     </div>`;
-    const text = `BoxBoxF1Fantasy Pit Wall — ${recommendation.race}\n\n${greeting.replace(/<[^>]+>/g, '')}\n\n${recommendation.headline}\n${recommendation.explanation}\n\n${recommendation.captain ? `2x check: ${recommendation.captain.name}\n` : ''}Projected team score: ${recommendation.projected_team_points.toFixed(1)} points.\n\nOpen Transfer Advisor: ${url}\n\nThis is model-based guidance, not a guarantee. Sign in on the site to manage personalized simulation emails.`;
+    const text = `BoxBoxF1Fantasy Pit Wall — ${recommendation.race}\n\n${greeting.replace(/<[^>]+>/g, '')}\n\n${recommendation.headline}\n${recommendation.explanation}\n\n${recommendation.captain ? `2x check: ${recommendation.captain.name}\n` : ''}Projected team score: ${recommendation.projected_team_points.toFixed(1)} points.\n\n${recommendation.budget_note ? `Budget forecast note: ${recommendation.budget_note}\n\n` : ''}Open Transfer Advisor: ${url}\n\nThis is model-based guidance, not a guarantee. Sign in on the site to manage personalized simulation emails.`;
     return { html, text, url };
 }
 
@@ -116,6 +125,7 @@ function genericPitWallEmail(predictions, origin) {
     const phase = phaseLabel(predictions.phase);
     const race = String(predictions.race || 'the next Grand Prix');
     const url = `${origin}/?utm_source=pit_wall_email&utm_medium=simulation_alert&utm_campaign=round_${Number(predictions.round)}_${encodeURIComponent(predictions.phase)}#drivers`;
+    const budgetNote = String(predictions.price_change_assumption?.note || '');
     const html = `<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#151922">
         <div style="background:#0a0d12;color:#fff;border-radius:12px 12px 0 0;padding:22px 26px;border-bottom:3px solid #e10600">
             <div style="font-size:13px;color:#aab4c3">BoxBox<span style="color:#e10600">F1</span>Fantasy · Pit Wall · R${Number(predictions.round)}</div>
@@ -124,11 +134,12 @@ function genericPitWallEmail(predictions, origin) {
         </div>
         <div style="border:1px solid #e4e7ec;border-top:0;border-radius:0 0 12px 12px;padding:22px 26px">
             <p>The latest projections are ready. Open the Pit Wall to review the updated driver and constructor outlook.</p>
+            ${budgetNote ? `<p style="background:#fff8e1;border-left:4px solid #d89b00;padding:12px 14px"><strong>Budget forecast note:</strong> ${htmlEscape(budgetNote)}</p>` : ''}
             <p><a href="${url}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 17px;border-radius:7px;font-weight:700">Open the updated predictions</a></p>
             <p style="color:#667085;font-size:12px;line-height:1.5">You receive this because your address is on the active Pit Wall member list.</p>
         </div>
     </div>`;
-    const text = `BoxBoxF1Fantasy Pit Wall — ${race}\n\nFresh ${phase} simulations are live.\n\nOpen the updated predictions: ${url}\n`;
+    const text = `BoxBoxF1Fantasy Pit Wall — ${race}\n\nFresh ${phase} simulations are live.\n\n${budgetNote ? `Budget forecast note: ${budgetNote}\n\n` : ''}Open the updated predictions: ${url}\n`;
     return { subject: `${race}: ${phase} simulations are live`, html, text };
 }
 

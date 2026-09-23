@@ -16,13 +16,18 @@ function assetScore(asset, phase = 'post_fp') {
 }
 
 function heldDriverAssets(predictions) {
-    if (Number(predictions.round) !== 14 || predictions.driver_assets?.override_active !== true) return [];
+    const round = Number(predictions.round);
+    if (round !== 14 && round < 17) return [];
+    if (round === 14 && predictions.driver_assets?.override_active !== true) return [];
     const drivers = predictions.drivers || [];
-    const definitions = [
+    const definitions = round === 14 ? [
         ['HAD', 'Isack Hadjar', 'red_bull', 'LAW_RED_BULL'],
         ['LAW', 'Liam Lawson', 'racing_bulls', 'TSU_RACING_BULLS'],
+    ] : [
+        ['LAW_RED_BULL', 'Liam Lawson', 'red_bull', 'LAW', 15.1],
+        ['TSU_RACING_BULLS', 'Yuki Tsunoda', 'racing_bulls', 'LIN', 9.7],
     ];
-    return definitions.map(([driverId, name, constructor, priceSourceId]) => {
+    return definitions.map(([driverId, name, constructor, priceSourceId, lastPrice]) => {
         const source = drivers.find(item => String(item.driver_id) === priceSourceId);
         if (!source) return null;
         return {
@@ -30,6 +35,7 @@ function heldDriverAssets(predictions) {
             driver_id: driverId,
             name,
             constructor,
+            current_price: lastPrice ?? source.current_price,
             projected_points: 0,
             expected_points: 0,
             projected_points_race: 0,
@@ -150,6 +156,7 @@ function buildRecommendation(predictions, team) {
             constructors: constructors.map(item => item.name || item.constructor_id),
         },
         generated_from: predictions.generated_at || predictions.exported_at || null,
+        budget_note: String(predictions.price_change_assumption?.note || ''),
     };
 }
 

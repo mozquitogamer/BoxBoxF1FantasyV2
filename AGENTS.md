@@ -242,7 +242,7 @@ Before each round, update `data/seed/fantasy_prices.json` with current F1 Fantas
 
 | Task | How |
 |------|-----|
-| Add a new round's predictions | `python pipeline/run_weekend.py --round N` then `python pipeline/08_export_website_json.py --round N` |
+| Add a new round's predictions | `python pipeline/run_weekend.py --phase post_fp --round N` (or `pre_fp_predict` before practice; the runner includes export) |
 | Update prices | Edit `data/seed/fantasy_prices.json`, add entry to `price_history` |
 | Retrain models | `python pipeline/05_train_models.py` (uses all historical data) |
 | Add official fantasy points | Edit `data/seed/official_fantasy_points.json`, run export |

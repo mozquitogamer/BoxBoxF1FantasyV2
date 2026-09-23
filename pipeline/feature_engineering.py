@@ -9,6 +9,23 @@ import numpy as np
 import pandas as pd
 
 
+def rederive_quali_dependent_features(
+    df: pd.DataFrame, quali_col: str = "quali_position"
+) -> pd.DataFrame:
+    """Refresh race-model qualifying features from the chosen classification.
+
+    Training, historical row construction, and inference must use the same
+    formulas. A grid penalty changes the race start, not these model features.
+    """
+    result = df.copy()
+    positions = result[quali_col].astype(float)
+    result["is_pole_position"] = (positions == 1).astype(int)
+    result["is_front_row"] = (positions <= 2).astype(int)
+    result["is_top10_quali"] = (positions <= 10).astype(int)
+    result["grid_advantage"] = 11.0 - positions
+    return result
+
+
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     Create interaction and ratio features from raw FP data.

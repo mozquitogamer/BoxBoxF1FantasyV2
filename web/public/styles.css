@@ -519,6 +519,18 @@ select:focus, input:focus {
 }
 .upgrade-banner strong { color: #c7d2fe; }
 
+.roster-price-banner {
+    margin: 0 0 18px;
+    padding: 13px 16px;
+    border: 1px solid rgba(234, 179, 8, 0.42);
+    border-radius: 8px;
+    background: rgba(234, 179, 8, 0.12);
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+.roster-price-banner[hidden] { display: none; }
+
 .card-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

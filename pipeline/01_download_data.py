@@ -37,6 +37,8 @@ from config.settings import (
     ALL_SESSIONS,
     CANCELLED_ROUNDS_2026,
     fastf1_round,
+    internal_round_from_api,
+    internal_rounds_for_year,
 )
 
 
@@ -197,22 +199,23 @@ def download_jolpica_year(year: int) -> None:
 
     # 2. Download per-round data
     for race in tqdm(races, desc=f"    Downloading rounds", unit="round"):
-        rnd = int(race["round"])
-        round_dir = year_dir / f"round{rnd}"
+        api_round = int(race["round"])
+        internal_round = internal_round_from_api(api_round, year)
+        round_dir = year_dir / f"round{internal_round}"
         round_dir.mkdir(parents=True, exist_ok=True)
 
         # Race results
-        data = jolpica_get(f"{year}/{rnd}/results.json")
+        data = jolpica_get(f"{year}/{api_round}/results.json")
         if data:
             save_jolpica_json(data, round_dir / "results.json")
 
         # Qualifying results
-        data = jolpica_get(f"{year}/{rnd}/qualifying.json")
+        data = jolpica_get(f"{year}/{api_round}/qualifying.json")
         if data:
             save_jolpica_json(data, round_dir / "qualifying.json")
 
         # Sprint results (may not exist for all rounds)
-        data = jolpica_get(f"{year}/{rnd}/sprint.json")
+        data = jolpica_get(f"{year}/{api_round}/sprint.json")
         if data:
             sprint_races = (
                 data.get("MRData", {}).get("RaceTable", {}).get("Races", [])
@@ -221,7 +224,7 @@ def download_jolpica_year(year: int) -> None:
                 save_jolpica_json(data, round_dir / "sprint.json")
 
         # Pit stops
-        data = jolpica_get(f"{year}/{rnd}/pitstops.json?limit=100")
+        data = jolpica_get(f"{year}/{api_round}/pitstops.json?limit=100")
         if data:
             save_jolpica_json(data, round_dir / "pitstops.json")
 
@@ -251,10 +254,9 @@ def download_jolpica_round(year: int, round_num: int) -> None:
     so we translate internal -> API round for the URL but keep the file path
     on internal numbering. e.g. internal R6 (Miami) -> Jolpica R4 in 2026.
     """
+    api_round = fastf1_round(round_num, year)
     round_dir = JOLPICA_RAW_DIR / f"year{year}" / f"round{round_num}"
     round_dir.mkdir(parents=True, exist_ok=True)
-
-    api_round = fastf1_round(round_num, year)
     print(f"\n  Jolpica API — {year} Round {round_num} (API round {api_round})")
 
     endpoints = {
@@ -346,7 +348,7 @@ def main() -> None:
                 print(f"  Could not determine rounds for {year}, skipping FastF1")
                 continue
             print(f"\n  FastF1 — downloading {total_rounds} rounds...")
-            for rnd in tqdm(range(1, total_rounds + 1), desc=f"  FastF1 {year}", unit="round"):
+            for rnd in tqdm(internal_rounds_for_year(year, total_rounds), desc=f"  FastF1 {year}", unit="round"):
                 download_fastf1_round(year, rnd)
         print("\n" + "=" * 60)
         print("Download complete!")
@@ -393,7 +395,7 @@ def main() -> None:
                 continue
 
             print(f"\n  FastF1 — downloading {total_rounds} rounds...")
-            for rnd in tqdm(range(1, total_rounds + 1), desc=f"  FastF1 {year}", unit="round"):
+            for rnd in tqdm(internal_rounds_for_year(year, total_rounds), desc=f"  FastF1 {year}", unit="round"):
                 download_fastf1_round(year, rnd)
 
     elif choice == "3":
@@ -410,7 +412,7 @@ def main() -> None:
 
             total_rounds = get_total_rounds_for_year(year)
             if total_rounds > 0:
-                for rnd in tqdm(range(1, total_rounds + 1), desc=f"  FastF1 {year}", unit="round"):
+                for rnd in tqdm(internal_rounds_for_year(year, total_rounds), desc=f"  FastF1 {year}", unit="round"):
                     download_fastf1_round(year, rnd)
 
         # Current season rounds
