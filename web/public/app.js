@@ -8031,25 +8031,29 @@ function renderFPAnalysis() {
             id, best_lap: d.best_lap,
             theoretical_best: fpAnalysis.sectors?.[id]?.theoretical_best ?? null,
             best_3_avg: d.best_3_avg, best_5_avg: d.best_5_avg,
-            gap: d.gap_to_fastest, laps: d.total_laps
+            gap: d.gap_to_fastest, laps: d.total_laps,
+            best_lap_context: d.best_lap_session && d.best_lap_compound
+                ? `${d.best_lap_session} · ${d.best_lap_compound}` : '—'
         }));
         const tbl = sortableTable('fpQualiTable', [
             { key: '_rank', label: '#', cls: 'num', fmt: (r, i) => i + 1 },
             { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
             { key: 'theoretical_best', label: 'Theo. Best', cls: 'num', title: 'Sum of this driver’s best Sector 1, Sector 2, and Sector 3 times across practice laps', fmt: r => fmtTime(r.theoretical_best) },
             { key: 'best_lap', label: 'Best Lap', cls: 'num', title: 'Fastest single lap in FP sessions', fmt: r => fmtTime(r.best_lap) },
+            { key: 'best_lap_context', label: 'Run', title: 'Session and tyre compound of the fastest lap' },
             { key: 'best_3_avg', label: 'Best 3 Avg', cls: 'num', title: 'Average of 3 fastest laps', fmt: r => fmtTime(r.best_3_avg) },
             { key: 'best_5_avg', label: 'Best 5 Avg', cls: 'num', title: 'Average of 5 fastest laps', fmt: r => fmtTime(r.best_5_avg) },
             { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to fastest driver', fmt: r => r.gap === 0 ? '<span class="text-green">Leader</span>' : r.gap != null ? '+' + r.gap.toFixed(3) : '-' },
             { key: 'laps', label: 'Laps', cls: 'num', title: 'Total clean laps completed' }
         ], rows, 'best_lap', true);
-        html += `<div class="analysis-block"><h3>Qualifying Pace (Short Runs)</h3><p class="analysis-note">Theo. Best adds each driver's quickest three sectors from practice, even if they came on different laps. Best Lap is a completed lap. Click column headers to sort.</p><div class="table-wrapper">${tbl.getHtml()}</div></div>`;
+        html += `<div class="analysis-block"><h3>Fastest Pre-Qualifying Laps (Qualifying Indicator)</h3><p class="analysis-note">These are observed laps from practice and, on sprint weekends, Sprint Qualifying. They are not a fuel-adjusted qualifying simulation. Run shows the session and tyre of each fastest lap; direct gaps can reflect different programmes. Theo. Best adds each driver's quickest three sectors, even if they came on different laps. Click column headers to sort.</p><div class="table-wrapper">${tbl.getHtml()}</div></div>`;
         postRenderFns.push(tbl.renderTable);
     }
 
     // Personal lap selections recalculate this comparison without mutating model data.
     let longRunExplorer = null;
-    if (fpAnalysis.long_run_pace && Object.keys(fpAnalysis.long_run_pace).length > 0) {
+    if (Object.keys(fpAnalysis.long_run_comparisons?.drivers || {}).length > 0 ||
+        (fpAnalysis.long_run_pace && Object.keys(fpAnalysis.long_run_pace).length > 0)) {
         html += '<div id="fpLongRunExplorer"></div>';
         postRenderFns.push(() => {
             const roster = (data?.drivers || []).map(driver => driver.driver_id);
@@ -8058,7 +8062,7 @@ function renderFPAnalysis() {
     }
 
     // Fuel-Corrected Pace
-    if (fpAnalysis.fuel_corrected_pace && Object.keys(fpAnalysis.fuel_corrected_pace).length > 0) {
+    if (!fpAnalysis.long_run_comparisons && fpAnalysis.fuel_corrected_pace && Object.keys(fpAnalysis.fuel_corrected_pace).length > 0) {
         const rows = Object.entries(fpAnalysis.fuel_corrected_pace).map(([id, d]) => ({
             id,
             avg_pace: d.fuel_corrected_avg ?? d.avg_corrected_pace ?? d.corrected_pace,

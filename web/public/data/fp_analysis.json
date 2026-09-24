@@ -9,6 +9,8 @@
       "best_3_avg": 106.708,
       "best_5_avg": 106.986,
       "total_laps": 20,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 2.776
     },
     "ALO": {
@@ -16,6 +18,8 @@
       "best_3_avg": 107.878,
       "best_5_avg": 108.005,
       "total_laps": 14,
+      "best_lap_session": "FP1",
+      "best_lap_compound": "MEDIUM",
       "gap_to_fastest": 4.488
     },
     "ANT": {
@@ -23,6 +27,8 @@
       "best_3_avg": 104.774,
       "best_5_avg": 105.593,
       "total_laps": 10,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 0.552
     },
     "BEA": {
@@ -30,6 +36,8 @@
       "best_3_avg": 106.956,
       "best_5_avg": 107.268,
       "total_laps": 11,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "UNKNOWN",
       "gap_to_fastest": 3.454
     },
     "BOR": {
@@ -37,6 +45,8 @@
       "best_3_avg": 106.319,
       "best_5_avg": 106.577,
       "total_laps": 14,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 2.447
     },
     "BOT": {
@@ -44,6 +54,8 @@
       "best_3_avg": 107.532,
       "best_5_avg": 108.083,
       "total_laps": 21,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 3.39
     },
     "COL": {
@@ -51,6 +63,8 @@
       "best_3_avg": 106.114,
       "best_5_avg": 106.593,
       "total_laps": 22,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 2.132
     },
     "GAS": {
@@ -58,6 +72,8 @@
       "best_3_avg": 105.596,
       "best_5_avg": 106.16,
       "total_laps": 15,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.496
     },
     "HAD": {
@@ -65,6 +81,8 @@
       "best_3_avg": 105.544,
       "best_5_avg": 106.63,
       "total_laps": 12,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.521
     },
     "HAM": {
@@ -72,6 +90,8 @@
       "best_3_avg": 104.874,
       "best_5_avg": 105.333,
       "total_laps": 20,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.318
     },
     "HUL": {
@@ -79,6 +99,8 @@
       "best_3_avg": 105.977,
       "best_5_avg": 106.325,
       "total_laps": 19,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 2.507
     },
     "LAW": {
@@ -86,6 +108,8 @@
       "best_3_avg": 106.082,
       "best_5_avg": 106.212,
       "total_laps": 23,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 2.334
     },
     "LEC": {
@@ -93,6 +117,8 @@
       "best_3_avg": 105.359,
       "best_5_avg": 105.845,
       "total_laps": 22,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.126
     },
     "LIN": {
@@ -100,6 +126,8 @@
       "best_3_avg": 106.588,
       "best_5_avg": 106.987,
       "total_laps": 7,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "MEDIUM",
       "gap_to_fastest": 3.044
     },
     "NOR": {
@@ -107,6 +135,8 @@
       "best_3_avg": 105.488,
       "best_5_avg": 106.224,
       "total_laps": 14,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.484
     },
     "OCO": {
@@ -114,6 +144,8 @@
       "best_3_avg": 105.931,
       "best_5_avg": 106.375,
       "total_laps": 16,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.943
     },
     "PER": {
@@ -121,6 +153,8 @@
       "best_3_avg": 106.383,
       "best_5_avg": 106.814,
       "total_laps": 18,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 2.413
     },
     "PIA": {
@@ -128,6 +162,8 @@
       "best_3_avg": 105.744,
       "best_5_avg": 106.22,
       "total_laps": 15,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.51
     },
     "RUS": {
@@ -135,6 +171,8 @@
       "best_3_avg": 103.881,
       "best_5_avg": 104.595,
       "total_laps": 21,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 0.0
     },
     "SAI": {
@@ -142,6 +180,8 @@
       "best_3_avg": 106.663,
       "best_5_avg": 107.029,
       "total_laps": 17,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 2.874
     },
     "STR": {
@@ -149,6 +189,8 @@
       "best_3_avg": 108.007,
       "best_5_avg": 108.212,
       "total_laps": 18,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 4.056
     },
     "VER": {
@@ -156,933 +198,3089 @@
       "best_3_avg": 104.594,
       "best_5_avg": 105.1,
       "total_laps": 18,
+      "best_lap_session": "FP2",
+      "best_lap_compound": "SOFT",
       "gap_to_fastest": 0.827
     }
   },
-  "long_run_pace": {
-    "ALB": {
-      "runs": [
-        {
-          "session": "FP1",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 5,
-          "avg_pace": 107.592,
-          "best_pace": 106.939,
-          "consistency": 0.415,
-          "kept_laps": [
-            108.172,
-            107.777,
-            106.939,
-            107.368,
-            107.704
-          ],
-          "excluded_laps": [
-            139.111,
-            145.633,
-            141.771,
-            147.731,
-            128.366
-          ]
-        },
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 7,
-          "avg_pace": 110.019,
-          "best_pace": 109.349,
-          "consistency": 0.482,
-          "kept_laps": [
-            110.742,
-            110.542,
-            109.964,
-            109.349,
-            109.982,
-            110.14,
-            109.417
-          ],
-          "excluded_laps": [
-            143.511
-          ]
-        }
-      ],
-      "avg_long_run_pace": 110.019,
-      "headline_session": "FP2",
-      "headline_laps": 7,
-      "total_long_run_laps": 12,
-      "gap_to_fastest": 1.607
+  "long_run_comparisons": {
+    "default_group": "FP2",
+    "groups": [
+      {
+        "id": "FP2",
+        "session": "FP2",
+        "drivers": 17,
+        "clean_drivers": 13,
+        "partial_drivers": 5,
+        "compounds": [
+          "HARD",
+          "MEDIUM",
+          "SOFT"
+        ]
+      },
+      {
+        "id": "FP1",
+        "session": "FP1",
+        "drivers": 7,
+        "clean_drivers": 3,
+        "partial_drivers": 5,
+        "compounds": [
+          "HARD",
+          "MEDIUM",
+          "SOFT"
+        ]
+      }
+    ],
+    "drivers": {
+      "NOR": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 109.706,
+            "avg_pace": 109.174,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 109.706,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 142.461,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 110.141,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 139.612,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 107.676,
+                "selected": true
+              },
+              {
+                "lap_number": 7,
+                "time": 143.0,
+                "selected": false
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "interrupted",
+            "laps": 4,
+            "median_pace": 108.688,
+            "avg_pace": 108.751,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 13,
+                "time": 109.139,
+                "selected": true
+              },
+              {
+                "lap_number": 14,
+                "time": 108.272,
+                "selected": false
+              },
+              {
+                "lap_number": 15,
+                "time": 108.748,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 109.684,
+                "selected": false
+              },
+              {
+                "lap_number": 17,
+                "time": 108.627,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 113.044,
+                "selected": false
+              },
+              {
+                "lap_number": 19,
+                "time": 108.491,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 143.134,
+                "selected": false
+              }
+            ]
+          }
+        ]
+      },
+      "GAS": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 2,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 4,
+            "median_pace": 107.419,
+            "avg_pace": 107.541,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 4,
+                "time": 110.955,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 126.788,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 140.065,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 127.522,
+                "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 108.283,
+                "selected": true
+              },
+              {
+                "lap_number": 9,
+                "time": 131.066,
+                "selected": false
+              },
+              {
+                "lap_number": 10,
+                "time": 107.342,
+                "selected": true
+              },
+              {
+                "lap_number": 11,
+                "time": 131.917,
+                "selected": false
+              },
+              {
+                "lap_number": 12,
+                "time": 107.043,
+                "selected": true
+              },
+              {
+                "lap_number": 13,
+                "time": 134.745,
+                "selected": false
+              },
+              {
+                "lap_number": 14,
+                "time": 107.497,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "short",
+            "laps": 3,
+            "median_pace": 134.153,
+            "avg_pace": 134.177,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 17,
+                "time": 134.153,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 132.411,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 135.967,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 106.97,
+            "avg_pace": 107.146,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 108.353,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 136.86,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 106.97,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 146.051,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 106.116,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "MEDIUM",
+            "quality": "clean",
+            "laps": 5,
+            "median_pace": 109.551,
+            "avg_pace": 109.496,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 16,
+                "time": 110.012,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 109.551,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 108.972,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 110.043,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 108.9,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 142.714,
+                "selected": false
+              }
+            ]
+          }
+        ]
+      },
+      "PER": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 110.135,
+            "avg_pace": 110.58,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 112.292,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 135.312,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 110.135,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 109.312,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "short",
+            "laps": 3,
+            "median_pace": 108.036,
+            "avg_pace": 110.039,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 115.237,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 108.036,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 106.843,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "clean",
+            "laps": 7,
+            "median_pace": 110.615,
+            "avg_pace": 110.534,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 14,
+                "time": 111.137,
+                "selected": true
+              },
+              {
+                "lap_number": 15,
+                "time": 110.683,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 109.966,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 110.902,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 110.615,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 110.14,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 110.295,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 142.237,
+                "selected": false
+              }
+            ]
+          }
+        ]
+      },
+      "ANT": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 107.375,
+            "avg_pace": 107.853,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 130.749,
+                "selected": false
+              },
+              {
+                "lap_number": 3,
+                "time": 109.92,
+                "selected": true
+              },
+              {
+                "lap_number": 4,
+                "time": 138.824,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 107.375,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 140.884,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 106.265,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "SOFT",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 104.753,
+            "avg_pace": 104.774,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 105.671,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 139.736,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 104.753,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 134.627,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 103.899,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 2,
+            "compound": "MEDIUM",
+            "quality": "partial",
+            "laps": 4,
+            "median_pace": 108.421,
+            "avg_pace": 108.519,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 10,
+                "time": 109.444,
+                "selected": true
+              },
+              {
+                "lap_number": 11,
+                "time": 108.703,
+                "selected": true
+              },
+              {
+                "lap_number": 12,
+                "time": 108.138,
+                "selected": true
+              },
+              {
+                "lap_number": 13,
+                "time": 107.793,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "ALO": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 4,
+            "median_pace": 109.597,
+            "avg_pace": 110.341,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 116.766,
+                "selected": false
+              },
+              {
+                "lap_number": 3,
+                "time": 113.65,
+                "selected": true
+              },
+              {
+                "lap_number": 4,
+                "time": 132.859,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 110.034,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 135.337,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 109.16,
+                "selected": true
+              },
+              {
+                "lap_number": 8,
+                "time": 139.814,
+                "selected": false
+              },
+              {
+                "lap_number": 9,
+                "time": 108.518,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 2,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 107.936,
+            "avg_pace": 108.101,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 12,
+                "time": 120.983,
+                "selected": false
+              },
+              {
+                "lap_number": 13,
+                "time": 120.125,
+                "selected": false
+              },
+              {
+                "lap_number": 14,
+                "time": 138.636,
+                "selected": false
+              },
+              {
+                "lap_number": 15,
+                "time": 108.531,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 130.817,
+                "selected": false
+              },
+              {
+                "lap_number": 17,
+                "time": 107.835,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 138.049,
+                "selected": false
+              },
+              {
+                "lap_number": 19,
+                "time": 107.936,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "SOFT",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 107.911,
+            "avg_pace": 108.084,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 124.293,
+                "selected": false
+              },
+              {
+                "lap_number": 3,
+                "time": 108.452,
+                "selected": true
+              },
+              {
+                "lap_number": 4,
+                "time": 141.383,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 107.889,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 140.249,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 107.911,
+                "selected": true
+              },
+              {
+                "lap_number": 8,
+                "time": 148.121,
+                "selected": false
+              }
+            ]
+          }
+        ]
+      },
+      "LEC": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "partial",
+            "laps": 4,
+            "median_pace": 108.386,
+            "avg_pace": 108.406,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 114.395,
+                "selected": false
+              },
+              {
+                "lap_number": 3,
+                "time": 110.231,
+                "selected": true
+              },
+              {
+                "lap_number": 4,
+                "time": 109.025,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 140.907,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 107.746,
+                "selected": true
+              },
+              {
+                "lap_number": 7,
+                "time": 133.247,
+                "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 106.621,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 2,
+            "compound": "MEDIUM",
+            "quality": "partial",
+            "laps": 4,
+            "median_pace": 109.109,
+            "avg_pace": 109.46,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 11,
+                "time": 132.951,
+                "selected": false
+              },
+              {
+                "lap_number": 12,
+                "time": 111.69,
+                "selected": true
+              },
+              {
+                "lap_number": 13,
+                "time": 113.831,
+                "selected": true
+              },
+              {
+                "lap_number": 14,
+                "time": 145.947,
+                "selected": false
+              },
+              {
+                "lap_number": 15,
+                "time": 106.528,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 124.432,
+                "selected": false
+              },
+              {
+                "lap_number": 17,
+                "time": 105.791,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 110.167,
+            "avg_pace": 112.813,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 20,
+                "time": 110.167,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 135.781,
+                "selected": false
+              },
+              {
+                "lap_number": 22,
+                "time": 119.154,
+                "selected": true
+              },
+              {
+                "lap_number": 23,
+                "time": 109.118,
+                "selected": true
+              },
+              {
+                "lap_number": 24,
+                "time": 138.864,
+                "selected": false
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 112.546,
+            "avg_pace": 111.035,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 123.609,
+                "selected": false
+              },
+              {
+                "lap_number": 3,
+                "time": 105.812,
+                "selected": true
+              },
+              {
+                "lap_number": 4,
+                "time": 134.365,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 114.747,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 122.723,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 112.546,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "clean",
+            "laps": 5,
+            "median_pace": 108.841,
+            "avg_pace": 108.773,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 17,
+                "time": 109.262,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 109.076,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 108.841,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 108.751,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 107.933,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "STR": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "short",
+            "laps": 3,
+            "median_pace": 114.022,
+            "avg_pace": 114.928,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 118.137,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 114.022,
+                "selected": true
+              },
+              {
+                "lap_number": 4,
+                "time": 112.626,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 2,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 109.435,
+            "avg_pace": 109.668,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 8,
+                "time": 110.572,
+                "selected": true
+              },
+              {
+                "lap_number": 9,
+                "time": 137.464,
+                "selected": false
+              },
+              {
+                "lap_number": 10,
+                "time": 109.435,
+                "selected": true
+              },
+              {
+                "lap_number": 11,
+                "time": 143.525,
+                "selected": false
+              },
+              {
+                "lap_number": 12,
+                "time": 108.997,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "SOFT",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 108.491,
+            "avg_pace": 108.673,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 124.363,
+                "selected": false
+              },
+              {
+                "lap_number": 3,
+                "time": 109.071,
+                "selected": true
+              },
+              {
+                "lap_number": 4,
+                "time": 146.47,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 108.491,
+                "selected": true
+              },
+              {
+                "lap_number": 7,
+                "time": 108.458,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "clean",
+            "laps": 4,
+            "median_pace": 113.513,
+            "avg_pace": 113.381,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 17,
+                "time": 115.47,
+                "selected": false
+              },
+              {
+                "lap_number": 18,
+                "time": 113.69,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 113.337,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 112.424,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 114.074,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "ALB": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 110.824,
+            "avg_pace": 110.64,
+            "interruptions": 4,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 123.395,
+                "selected": false
+              },
+              {
+                "lap_number": 3,
+                "time": 122.267,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 111.516,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 128.302,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 121.392,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 110.824,
+                "selected": true
+              },
+              {
+                "lap_number": 8,
+                "time": 121.435,
+                "selected": false
+              },
+              {
+                "lap_number": 9,
+                "time": 126.377,
+                "selected": false
+              },
+              {
+                "lap_number": 10,
+                "time": 109.579,
+                "selected": true
+              },
+              {
+                "lap_number": 11,
+                "time": 129.87,
+                "selected": false
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "interrupted",
+            "laps": 5,
+            "median_pace": 107.704,
+            "avg_pace": 107.592,
+            "interruptions": 5,
+            "lap_sequence": [
+              {
+                "lap_number": 18,
+                "time": 108.172,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 139.111,
+                "selected": false
+              },
+              {
+                "lap_number": 20,
+                "time": 107.777,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 145.633,
+                "selected": false
+              },
+              {
+                "lap_number": 22,
+                "time": 106.939,
+                "selected": true
+              },
+              {
+                "lap_number": 23,
+                "time": 141.771,
+                "selected": false
+              },
+              {
+                "lap_number": 24,
+                "time": 107.368,
+                "selected": true
+              },
+              {
+                "lap_number": 25,
+                "time": 147.731,
+                "selected": false
+              },
+              {
+                "lap_number": 26,
+                "time": 128.366,
+                "selected": false
+              },
+              {
+                "lap_number": 27,
+                "time": 107.704,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 107.44,
+            "avg_pace": 107.763,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 108.789,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 144.013,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 107.44,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 146.345,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 107.061,
+                "selected": true
+              },
+              {
+                "lap_number": 7,
+                "time": 138.214,
+                "selected": false
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "clean",
+            "laps": 7,
+            "median_pace": 109.982,
+            "avg_pace": 110.019,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 15,
+                "time": 110.742,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 110.542,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 109.964,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 109.349,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 109.982,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 110.14,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 109.417,
+                "selected": true
+              },
+              {
+                "lap_number": 22,
+                "time": 143.511,
+                "selected": false
+              }
+            ]
+          }
+        ]
+      },
+      "HUL": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 4,
+            "median_pace": 108.93,
+            "avg_pace": 109.616,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 112.397,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 129.44,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 109.534,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 137.515,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 108.325,
+                "selected": true
+              },
+              {
+                "lap_number": 7,
+                "time": 137.582,
+                "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 108.208,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "clean",
+            "laps": 5,
+            "median_pace": 110.463,
+            "avg_pace": 110.651,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 17,
+                "time": 110.819,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 110.463,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 110.408,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 109.96,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 111.605,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 4,
+            "compound": "MEDIUM",
+            "quality": "short",
+            "laps": 3,
+            "median_pace": 108.677,
+            "avg_pace": 108.842,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 15,
+                "time": 109.244,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 108.677,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 108.604,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "VER": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 106.635,
+            "avg_pace": 107.45,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 109.202,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 133.981,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 106.635,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 145.404,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 106.512,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "HARD",
+            "quality": "partial",
+            "laps": 5,
+            "median_pace": 109.491,
+            "avg_pace": 109.607,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 14,
+                "time": 110.386,
+                "selected": true
+              },
+              {
+                "lap_number": 15,
+                "time": 109.306,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 109.141,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 128.492,
+                "selected": false
+              },
+              {
+                "lap_number": 18,
+                "time": 126.376,
+                "selected": false
+              },
+              {
+                "lap_number": 19,
+                "time": 109.491,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 109.709,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 105.115,
+            "avg_pace": 105.18,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 105.933,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 145.531,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 105.115,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 143.369,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 104.492,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "partial",
+            "laps": 4,
+            "median_pace": 108.145,
+            "avg_pace": 108.119,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 14,
+                "time": 110.111,
+                "selected": false
+              },
+              {
+                "lap_number": 15,
+                "time": 108.333,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 107.851,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 117.937,
+                "selected": false
+              },
+              {
+                "lap_number": 18,
+                "time": 108.13,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 125.376,
+                "selected": false
+              },
+              {
+                "lap_number": 20,
+                "time": 108.161,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 147.965,
+                "selected": false
+              }
+            ]
+          }
+        ]
+      },
+      "LAW": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "clean",
+            "laps": 4,
+            "median_pace": 110.6,
+            "avg_pace": 111.449,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 116.964,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 111.54,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 109.659,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 142.771,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 107.634,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "MEDIUM",
+            "quality": "partial",
+            "laps": 7,
+            "median_pace": 109.324,
+            "avg_pace": 109.041,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 15,
+                "time": 106.707,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 142.209,
+                "selected": false
+              },
+              {
+                "lap_number": 17,
+                "time": 106.44,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 122.633,
+                "selected": false
+              },
+              {
+                "lap_number": 19,
+                "time": 110.753,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 110.287,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 109.324,
+                "selected": true
+              },
+              {
+                "lap_number": 22,
+                "time": 137.186,
+                "selected": false
+              },
+              {
+                "lap_number": 23,
+                "time": 110.489,
+                "selected": true
+              },
+              {
+                "lap_number": 24,
+                "time": 109.288,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 106.375,
+            "avg_pace": 106.634,
+            "interruptions": 4,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 107.254,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 137.321,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 134.845,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 106.375,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 143.077,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 132.384,
+                "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 106.274,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "MEDIUM",
+            "quality": "clean",
+            "laps": 5,
+            "median_pace": 110.171,
+            "avg_pace": 110.134,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 16,
+                "time": 111.131,
+                "selected": false
+              },
+              {
+                "lap_number": 17,
+                "time": 110.322,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 110.171,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 110.132,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 109.837,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 112.107,
+                "selected": false
+              },
+              {
+                "lap_number": 22,
+                "time": 110.209,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "LIN": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 4,
+            "median_pace": 107.836,
+            "avg_pace": 108.412,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 7,
+                "time": 110.53,
+                "selected": true
+              },
+              {
+                "lap_number": 8,
+                "time": 133.723,
+                "selected": false
+              },
+              {
+                "lap_number": 9,
+                "time": 107.946,
+                "selected": true
+              },
+              {
+                "lap_number": 10,
+                "time": 146.424,
+                "selected": false
+              },
+              {
+                "lap_number": 11,
+                "time": 107.726,
+                "selected": true
+              },
+              {
+                "lap_number": 12,
+                "time": 135.686,
+                "selected": false
+              },
+              {
+                "lap_number": 13,
+                "time": 107.444,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "COL": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "MEDIUM",
+            "quality": "partial",
+            "laps": 6,
+            "median_pace": 111.084,
+            "avg_pace": 110.971,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 12,
+                "time": 113.133,
+                "selected": false
+              },
+              {
+                "lap_number": 13,
+                "time": 111.621,
+                "selected": true
+              },
+              {
+                "lap_number": 14,
+                "time": 111.276,
+                "selected": true
+              },
+              {
+                "lap_number": 15,
+                "time": 111.278,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 110.892,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 111.623,
+                "selected": false
+              },
+              {
+                "lap_number": 18,
+                "time": 110.397,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 134.403,
+                "selected": false
+              },
+              {
+                "lap_number": 20,
+                "time": 118.428,
+                "selected": false
+              },
+              {
+                "lap_number": 21,
+                "time": 110.359,
+                "selected": true
+              },
+              {
+                "lap_number": 22,
+                "time": 136.405,
+                "selected": false
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 107.098,
+            "avg_pace": 107.557,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 108.791,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 135.702,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 107.098,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 106.783,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "HARD",
+            "quality": "clean",
+            "laps": 5,
+            "median_pace": 109.204,
+            "avg_pace": 109.633,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 16,
+                "time": 109.583,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 109.073,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 108.681,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 111.625,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 109.204,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 140.884,
+                "selected": false
+              }
+            ]
+          }
+        ]
+      },
+      "HAM": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 5,
+            "median_pace": 107.54,
+            "avg_pace": 108.544,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 114.224,
+                "selected": false
+              },
+              {
+                "lap_number": 3,
+                "time": 112.369,
+                "selected": true
+              },
+              {
+                "lap_number": 4,
+                "time": 109.567,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 140.277,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 107.54,
+                "selected": true
+              },
+              {
+                "lap_number": 7,
+                "time": 142.663,
+                "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 106.879,
+                "selected": true
+              },
+              {
+                "lap_number": 9,
+                "time": 129.5,
+                "selected": false
+              },
+              {
+                "lap_number": 10,
+                "time": 106.365,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 2,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 4,
+            "median_pace": 106.322,
+            "avg_pace": 106.291,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 13,
+                "time": 106.696,
+                "selected": true
+              },
+              {
+                "lap_number": 14,
+                "time": 130.082,
+                "selected": false
+              },
+              {
+                "lap_number": 15,
+                "time": 106.426,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 139.524,
+                "selected": false
+              },
+              {
+                "lap_number": 17,
+                "time": 106.217,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 144.954,
+                "selected": false
+              },
+              {
+                "lap_number": 19,
+                "time": 105.824,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "partial",
+            "laps": 4,
+            "median_pace": 108.906,
+            "avg_pace": 108.925,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 16,
+                "time": 109.714,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 109.325,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 109.139,
+                "selected": false
+              },
+              {
+                "lap_number": 19,
+                "time": 108.488,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 108.172,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "BOR": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 4,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 111.5,
+            "avg_pace": 110.744,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 6,
+                "time": 111.899,
+                "selected": true
+              },
+              {
+                "lap_number": 7,
+                "time": 149.414,
+                "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 137.229,
+                "selected": false
+              },
+              {
+                "lap_number": 9,
+                "time": 111.5,
+                "selected": true
+              },
+              {
+                "lap_number": 10,
+                "time": 125.539,
+                "selected": false
+              },
+              {
+                "lap_number": 11,
+                "time": 108.833,
+                "selected": true
+              },
+              {
+                "lap_number": 12,
+                "time": 126.24,
+                "selected": false
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 106.774,
+            "avg_pace": 106.967,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 122.512,
+                "selected": false
+              },
+              {
+                "lap_number": 3,
+                "time": 107.651,
+                "selected": true
+              },
+              {
+                "lap_number": 4,
+                "time": 137.274,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 106.774,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 133.43,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 106.476,
+                "selected": true
+              },
+              {
+                "lap_number": 8,
+                "time": 146.624,
+                "selected": false
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "partial",
+            "laps": 4,
+            "median_pace": 110.112,
+            "avg_pace": 110.012,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 17,
+                "time": 110.532,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 110.192,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 109.492,
+                "selected": false
+              },
+              {
+                "lap_number": 20,
+                "time": 110.031,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 109.293,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "SAI": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 2,
+            "compound": "SOFT",
+            "quality": "interrupted",
+            "laps": 5,
+            "median_pace": 108.022,
+            "avg_pace": 107.966,
+            "interruptions": 5,
+            "lap_sequence": [
+              {
+                "lap_number": 7,
+                "time": 127.658,
+                "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 109.165,
+                "selected": true
+              },
+              {
+                "lap_number": 9,
+                "time": 143.267,
+                "selected": false
+              },
+              {
+                "lap_number": 10,
+                "time": 108.321,
+                "selected": true
+              },
+              {
+                "lap_number": 11,
+                "time": 148.791,
+                "selected": false
+              },
+              {
+                "lap_number": 12,
+                "time": 108.022,
+                "selected": true
+              },
+              {
+                "lap_number": 13,
+                "time": 147.581,
+                "selected": false
+              },
+              {
+                "lap_number": 14,
+                "time": 131.184,
+                "selected": false
+              },
+              {
+                "lap_number": 15,
+                "time": 107.429,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 136.891,
+                "selected": false
+              },
+              {
+                "lap_number": 17,
+                "time": 106.893,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "MEDIUM",
+            "quality": "clean",
+            "laps": 5,
+            "median_pace": 109.68,
+            "avg_pace": 109.649,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 14,
+                "time": 111.246,
+                "selected": false
+              },
+              {
+                "lap_number": 15,
+                "time": 110.139,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 109.68,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 109.278,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 109.337,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 109.813,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 139.084,
+                "selected": false
+              }
+            ]
+          }
+        ]
+      },
+      "HAD": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 109.037,
+            "avg_pace": 109.608,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 111.915,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 135.009,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 109.037,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 140.454,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 107.873,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "clean",
+            "laps": 6,
+            "median_pace": 109.337,
+            "avg_pace": 109.525,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 13,
+                "time": 110.108,
+                "selected": true
+              },
+              {
+                "lap_number": 14,
+                "time": 109.595,
+                "selected": true
+              },
+              {
+                "lap_number": 15,
+                "time": 108.648,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 109.079,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 111.013,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 108.708,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "RUS": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 107.166,
+            "avg_pace": 107.292,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 120.597,
+                "selected": false
+              },
+              {
+                "lap_number": 3,
+                "time": 108.109,
+                "selected": true
+              },
+              {
+                "lap_number": 4,
+                "time": 145.517,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 107.166,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 146.167,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 106.601,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "partial",
+            "laps": 4,
+            "median_pace": 110.037,
+            "avg_pace": 110.246,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 17,
+                "time": 112.313,
+                "selected": false
+              },
+              {
+                "lap_number": 18,
+                "time": 109.881,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 109.358,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 138.077,
+                "selected": false
+              },
+              {
+                "lap_number": 21,
+                "time": 111.551,
+                "selected": true
+              },
+              {
+                "lap_number": 22,
+                "time": 110.193,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 105.944,
+            "avg_pace": 105.594,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 106.3,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 131.449,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 105.944,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 143.354,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 104.537,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 4,
+            "compound": "MEDIUM",
+            "quality": "clean",
+            "laps": 4,
+            "median_pace": 107.871,
+            "avg_pace": 107.96,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 17,
+                "time": 112.977,
+                "selected": false
+              },
+              {
+                "lap_number": 18,
+                "time": 108.336,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 107.905,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 107.763,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 107.837,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "BOT": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 4,
+            "median_pace": 110.411,
+            "avg_pace": 112.475,
+            "interruptions": 5,
+            "lap_sequence": [
+              {
+                "lap_number": 4,
+                "time": 119.763,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 143.403,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 130.442,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 111.036,
+                "selected": true
+              },
+              {
+                "lap_number": 8,
+                "time": 124.352,
+                "selected": false
+              },
+              {
+                "lap_number": 9,
+                "time": 121.973,
+                "selected": false
+              },
+              {
+                "lap_number": 10,
+                "time": 109.786,
+                "selected": true
+              },
+              {
+                "lap_number": 11,
+                "time": 128.474,
+                "selected": false
+              },
+              {
+                "lap_number": 12,
+                "time": 109.315,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 4,
+            "compound": "MEDIUM",
+            "quality": "clean",
+            "laps": 5,
+            "median_pace": 112.981,
+            "avg_pace": 113.556,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 15,
+                "time": 114.443,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 112.981,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 112.512,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 141.872,
+                "selected": false
+              },
+              {
+                "lap_number": 19,
+                "time": 115.936,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 111.908,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "partial",
+            "laps": 4,
+            "median_pace": 109.138,
+            "avg_pace": 111.241,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 118.631,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 109.771,
+                "selected": true
+              },
+              {
+                "lap_number": 4,
+                "time": 141.811,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 108.504,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 142.991,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 108.058,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "clean",
+            "laps": 6,
+            "median_pace": 111.602,
+            "avg_pace": 111.693,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 16,
+                "time": 112.842,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 116.901,
+                "selected": false
+              },
+              {
+                "lap_number": 18,
+                "time": 111.868,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 111.564,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 111.117,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 111.126,
+                "selected": true
+              },
+              {
+                "lap_number": 22,
+                "time": 111.64,
+                "selected": true
+              },
+              {
+                "lap_number": 23,
+                "time": 115.37,
+                "selected": false
+              }
+            ]
+          }
+        ]
+      },
+      "PIA": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 109.046,
+            "avg_pace": 109.53,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 112.137,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 142.258,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 109.046,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 141.234,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 107.407,
+                "selected": true
+              },
+              {
+                "lap_number": 7,
+                "time": 142.13,
+                "selected": false
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "clean",
+            "laps": 6,
+            "median_pace": 108.394,
+            "avg_pace": 108.597,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 13,
+                "time": 111.979,
+                "selected": false
+              },
+              {
+                "lap_number": 14,
+                "time": 109.857,
+                "selected": true
+              },
+              {
+                "lap_number": 15,
+                "time": 108.547,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 108.345,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 108.043,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 108.363,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 108.426,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "BEA": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 107.839,
+            "avg_pace": 107.59,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 13,
+                "time": 107.839,
+                "selected": true
+              },
+              {
+                "lap_number": 14,
+                "time": 142.447,
+                "selected": false
+              },
+              {
+                "lap_number": 15,
+                "time": 107.937,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 138.128,
+                "selected": false
+              },
+              {
+                "lap_number": 17,
+                "time": 106.994,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "UNKNOWN",
+            "quality": "interrupted",
+            "laps": 4,
+            "median_pace": 107.354,
+            "avg_pace": 107.648,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 109.083,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 138.747,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 107.634,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 146.167,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 107.074,
+                "selected": true
+              },
+              {
+                "lap_number": 7,
+                "time": 143.212,
+                "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 106.801,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "OCO": {
+        "runs": [
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 4,
+            "median_pace": 107.293,
+            "avg_pace": 107.697,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 109.347,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 135.497,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 107.361,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 142.045,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 107.225,
+                "selected": true
+              },
+              {
+                "lap_number": 7,
+                "time": 142.813,
+                "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 106.856,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "clean",
+            "laps": 4,
+            "median_pace": 109.931,
+            "avg_pace": 109.923,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 16,
+                "time": 144.275,
+                "selected": false
+              },
+              {
+                "lap_number": 17,
+                "time": 110.028,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 109.501,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 109.834,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 111.051,
+                "selected": false
+              },
+              {
+                "lap_number": 21,
+                "time": 110.328,
+                "selected": true
+              },
+              {
+                "lap_number": 22,
+                "time": 126.549,
+                "selected": false
+              },
+              {
+                "lap_number": 23,
+                "time": 143.533,
+                "selected": false
+              }
+            ]
+          }
+        ]
+      }
     },
-    "ALO": {
-      "runs": [
-        {
-          "session": "FP1",
-          "stint": 1,
-          "compound": "HARD",
-          "laps": 5,
-          "avg_pace": 111.626,
-          "best_pace": 108.518,
-          "consistency": 3.124,
-          "kept_laps": [
-            116.766,
-            113.65,
-            110.034,
-            109.16,
-            108.518
-          ],
-          "excluded_laps": [
-            132.859,
-            135.337,
-            139.814
-          ]
-        }
-      ],
-      "avg_long_run_pace": 111.626,
-      "headline_session": "FP1",
-      "headline_laps": 5,
-      "total_long_run_laps": 5,
-      "gap_to_fastest": 3.214
-    },
-    "BOR": {
-      "runs": [
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 4,
-          "avg_pace": 110.012,
-          "best_pace": 109.293,
-          "consistency": 0.453,
-          "kept_laps": [
-            110.532,
-            110.192,
-            110.031,
-            109.293
-          ],
-          "excluded_laps": [
-            109.492
-          ]
-        }
-      ],
-      "avg_long_run_pace": 110.012,
-      "headline_session": "FP2",
-      "headline_laps": 4,
-      "total_long_run_laps": 4,
-      "gap_to_fastest": 1.6
-    },
-    "BOT": {
-      "runs": [
-        {
-          "session": "FP1",
-          "stint": 3,
-          "compound": "MEDIUM",
-          "laps": 4,
-          "avg_pace": 112.475,
-          "best_pace": 109.315,
-          "consistency": 4.254,
-          "kept_laps": [
-            119.763,
-            111.036,
-            109.786,
-            109.315
-          ],
-          "excluded_laps": [
-            143.403,
-            130.442,
-            124.352,
-            121.973,
-            128.474
-          ]
-        },
-        {
-          "session": "FP1",
-          "stint": 4,
-          "compound": "MEDIUM",
-          "laps": 5,
-          "avg_pace": 113.556,
-          "best_pace": 111.908,
-          "consistency": 1.455,
-          "kept_laps": [
-            114.443,
-            112.981,
-            112.512,
-            115.936,
-            111.908
-          ],
-          "excluded_laps": [
-            141.872
-          ]
-        },
-        {
-          "session": "FP2",
-          "stint": 1,
-          "compound": "MEDIUM",
-          "laps": 4,
-          "avg_pace": 111.241,
-          "best_pace": 108.058,
-          "consistency": 4.313,
-          "kept_laps": [
-            118.631,
-            109.771,
-            108.504,
-            108.058
-          ],
-          "excluded_laps": [
-            141.811,
-            142.991
-          ]
-        },
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 6,
-          "avg_pace": 111.693,
-          "best_pace": 111.117,
-          "consistency": 0.581,
-          "kept_laps": [
-            112.842,
-            111.868,
-            111.564,
-            111.117,
-            111.126,
-            111.64
-          ],
-          "excluded_laps": [
-            116.901,
-            115.37
-          ]
-        }
-      ],
-      "avg_long_run_pace": 111.512,
-      "headline_session": "FP2",
-      "headline_laps": 10,
-      "total_long_run_laps": 19,
-      "gap_to_fastest": 3.1
-    },
-    "COL": {
-      "runs": [
-        {
-          "session": "FP1",
-          "stint": 3,
-          "compound": "MEDIUM",
-          "laps": 6,
-          "avg_pace": 110.971,
-          "best_pace": 110.359,
-          "consistency": 0.469,
-          "kept_laps": [
-            111.621,
-            111.276,
-            111.278,
-            110.892,
-            110.397,
-            110.359
-          ],
-          "excluded_laps": [
-            113.133,
-            111.623,
-            134.403,
-            118.428,
-            136.405
-          ]
-        },
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "HARD",
-          "laps": 5,
-          "avg_pace": 109.633,
-          "best_pace": 108.681,
-          "consistency": 1.037,
-          "kept_laps": [
-            109.583,
-            109.073,
-            108.681,
-            111.625,
-            109.204
-          ],
-          "excluded_laps": [
-            140.884
-          ]
-        }
-      ],
-      "avg_long_run_pace": 109.633,
-      "headline_session": "FP2",
-      "headline_laps": 5,
-      "total_long_run_laps": 11,
-      "gap_to_fastest": 1.221
-    },
-    "GAS": {
-      "runs": [
-        {
-          "session": "FP1",
-          "stint": 2,
-          "compound": "HARD",
-          "laps": 5,
-          "avg_pace": 108.224,
-          "best_pace": 107.043,
-          "consistency": 1.426,
-          "kept_laps": [
-            110.955,
-            108.283,
-            107.342,
-            107.043,
-            107.497
-          ],
-          "excluded_laps": [
-            126.788,
-            140.065,
-            127.522,
-            131.066,
-            131.917,
-            134.745
-          ]
-        },
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "MEDIUM",
-          "laps": 5,
-          "avg_pace": 109.496,
-          "best_pace": 108.9,
-          "consistency": 0.49,
-          "kept_laps": [
-            110.012,
-            109.551,
-            108.972,
-            110.043,
-            108.9
-          ],
-          "excluded_laps": [
-            142.714
-          ]
-        }
-      ],
-      "avg_long_run_pace": 109.496,
-      "headline_session": "FP2",
-      "headline_laps": 5,
-      "total_long_run_laps": 10,
-      "gap_to_fastest": 1.084
-    },
-    "HAD": {
-      "runs": [
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 6,
-          "avg_pace": 109.525,
-          "best_pace": 108.648,
-          "consistency": 0.836,
-          "kept_laps": [
-            110.108,
-            109.595,
-            108.648,
-            109.079,
-            111.013,
-            108.708
-          ],
-          "excluded_laps": []
-        }
-      ],
-      "avg_long_run_pace": 109.525,
-      "headline_session": "FP2",
-      "headline_laps": 6,
-      "total_long_run_laps": 6,
-      "gap_to_fastest": 1.113
-    },
-    "HAM": {
-      "runs": [
-        {
-          "session": "FP1",
-          "stint": 1,
-          "compound": "HARD",
-          "laps": 6,
-          "avg_pace": 109.491,
-          "best_pace": 106.365,
-          "consistency": 2.918,
-          "kept_laps": [
-            114.224,
-            112.369,
-            109.567,
-            107.54,
-            106.879,
-            106.365
-          ],
-          "excluded_laps": [
-            140.277,
-            142.663,
-            129.5
-          ]
-        },
-        {
-          "session": "FP1",
-          "stint": 2,
-          "compound": "MEDIUM",
-          "laps": 4,
-          "avg_pace": 106.291,
-          "best_pace": 105.824,
-          "consistency": 0.319,
-          "kept_laps": [
-            106.696,
-            106.426,
-            106.217,
-            105.824
-          ],
-          "excluded_laps": [
-            130.082,
-            139.524,
-            144.954
-          ]
-        },
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 4,
-          "avg_pace": 108.925,
-          "best_pace": 108.172,
-          "consistency": 0.621,
-          "kept_laps": [
-            109.714,
-            109.325,
-            108.488,
-            108.172
-          ],
-          "excluded_laps": [
-            109.139
-          ]
-        }
-      ],
-      "avg_long_run_pace": 108.925,
-      "headline_session": "FP2",
-      "headline_laps": 4,
-      "total_long_run_laps": 14,
-      "gap_to_fastest": 0.513
-    },
-    "HUL": {
-      "runs": [
-        {
-          "session": "FP1",
-          "stint": 1,
-          "compound": "HARD",
-          "laps": 4,
-          "avg_pace": 109.616,
-          "best_pace": 108.208,
-          "consistency": 1.687,
-          "kept_laps": [
-            112.397,
-            109.534,
-            108.325,
-            108.208
-          ],
-          "excluded_laps": [
-            129.44,
-            137.515,
-            137.582
-          ]
-        },
-        {
-          "session": "FP1",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 5,
-          "avg_pace": 110.651,
-          "best_pace": 109.96,
-          "consistency": 0.55,
-          "kept_laps": [
-            110.819,
-            110.463,
-            110.408,
-            109.96,
-            111.605
-          ],
-          "excluded_laps": []
-        }
-      ],
-      "avg_long_run_pace": 110.191,
-      "headline_session": "FP1",
-      "headline_laps": 9,
-      "total_long_run_laps": 9,
-      "gap_to_fastest": 1.779
-    },
-    "LAW": {
-      "runs": [
-        {
-          "session": "FP1",
-          "stint": 1,
-          "compound": "HARD",
-          "laps": 4,
-          "avg_pace": 111.449,
-          "best_pace": 107.634,
-          "consistency": 3.471,
-          "kept_laps": [
-            116.964,
-            111.54,
-            109.659,
-            107.634
-          ],
-          "excluded_laps": [
-            142.771
-          ]
-        },
-        {
-          "session": "FP1",
-          "stint": 3,
-          "compound": "MEDIUM",
-          "laps": 7,
-          "avg_pace": 109.041,
-          "best_pace": 106.44,
-          "consistency": 1.645,
-          "kept_laps": [
-            106.707,
-            106.44,
-            110.753,
-            110.287,
-            109.324,
-            110.489,
-            109.288
-          ],
-          "excluded_laps": [
-            142.209,
-            122.633,
-            137.186
-          ]
-        },
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "MEDIUM",
-          "laps": 5,
-          "avg_pace": 110.134,
-          "best_pace": 109.837,
-          "consistency": 0.162,
-          "kept_laps": [
-            110.322,
-            110.171,
-            110.132,
-            109.837,
-            110.209
-          ],
-          "excluded_laps": [
-            111.131,
-            112.107
-          ]
-        }
-      ],
-      "avg_long_run_pace": 110.134,
-      "headline_session": "FP2",
-      "headline_laps": 5,
-      "total_long_run_laps": 16,
-      "gap_to_fastest": 1.722
-    },
-    "LEC": {
-      "runs": [
-        {
-          "session": "FP1",
-          "stint": 1,
-          "compound": "HARD",
-          "laps": 5,
-          "avg_pace": 109.604,
-          "best_pace": 106.621,
-          "consistency": 2.684,
-          "kept_laps": [
-            114.395,
-            110.231,
-            109.025,
-            107.746,
-            106.621
-          ],
-          "excluded_laps": [
-            140.907,
-            133.247
-          ]
-        },
-        {
-          "session": "FP1",
-          "stint": 2,
-          "compound": "MEDIUM",
-          "laps": 4,
-          "avg_pace": 109.46,
-          "best_pace": 105.791,
-          "consistency": 3.396,
-          "kept_laps": [
-            111.69,
-            113.831,
-            106.528,
-            105.791
-          ],
-          "excluded_laps": [
-            132.951,
-            145.947,
-            124.432
-          ]
-        },
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 5,
-          "avg_pace": 108.773,
-          "best_pace": 107.933,
-          "consistency": 0.456,
-          "kept_laps": [
-            109.262,
-            109.076,
-            108.841,
-            108.751,
-            107.933
-          ],
-          "excluded_laps": []
-        }
-      ],
-      "avg_long_run_pace": 108.773,
-      "headline_session": "FP2",
-      "headline_laps": 5,
-      "total_long_run_laps": 14,
-      "gap_to_fastest": 0.361
-    },
-    "LIN": {
-      "runs": [
-        {
-          "session": "FP1",
-          "stint": 3,
-          "compound": "HARD",
-          "laps": 4,
-          "avg_pace": 108.412,
-          "best_pace": 107.444,
-          "consistency": 1.236,
-          "kept_laps": [
-            110.53,
-            107.946,
-            107.726,
-            107.444
-          ],
-          "excluded_laps": [
-            133.723,
-            146.424,
-            135.686
-          ]
-        }
-      ],
-      "avg_long_run_pace": 108.412,
-      "headline_session": "FP1",
-      "headline_laps": 4,
-      "total_long_run_laps": 4,
-      "gap_to_fastest": 0.0
-    },
-    "NOR": {
-      "runs": [
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 4,
-          "avg_pace": 108.751,
-          "best_pace": 108.491,
-          "consistency": 0.242,
-          "kept_laps": [
-            109.139,
-            108.748,
-            108.627,
-            108.491
-          ],
-          "excluded_laps": [
-            108.272,
-            109.684,
-            113.044,
-            143.134
-          ]
-        }
-      ],
-      "avg_long_run_pace": 108.751,
-      "headline_session": "FP2",
-      "headline_laps": 4,
-      "total_long_run_laps": 4,
-      "gap_to_fastest": 0.339
-    },
-    "OCO": {
-      "runs": [
-        {
-          "session": "FP2",
-          "stint": 1,
-          "compound": "MEDIUM",
-          "laps": 4,
-          "avg_pace": 107.697,
-          "best_pace": 106.856,
-          "consistency": 0.97,
-          "kept_laps": [
-            109.347,
-            107.361,
-            107.225,
-            106.856
-          ],
-          "excluded_laps": [
-            135.497,
-            142.045,
-            142.813
-          ]
-        },
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 4,
-          "avg_pace": 109.923,
-          "best_pace": 109.501,
-          "consistency": 0.3,
-          "kept_laps": [
-            110.028,
-            109.501,
-            109.834,
-            110.328
-          ],
-          "excluded_laps": [
-            144.275,
-            111.051,
-            126.549,
-            143.533
-          ]
-        }
-      ],
-      "avg_long_run_pace": 108.81,
-      "headline_session": "FP2",
-      "headline_laps": 8,
-      "total_long_run_laps": 8,
-      "gap_to_fastest": 0.398
-    },
-    "PER": {
-      "runs": [
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 7,
-          "avg_pace": 110.534,
-          "best_pace": 109.966,
-          "consistency": 0.39,
-          "kept_laps": [
-            111.137,
-            110.683,
-            109.966,
-            110.902,
-            110.615,
-            110.14,
-            110.295
-          ],
-          "excluded_laps": [
-            142.237
-          ]
-        }
-      ],
-      "avg_long_run_pace": 110.534,
-      "headline_session": "FP2",
-      "headline_laps": 7,
-      "total_long_run_laps": 7,
-      "gap_to_fastest": 2.122
-    },
-    "PIA": {
-      "runs": [
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 7,
-          "avg_pace": 109.08,
-          "best_pace": 108.043,
-          "consistency": 1.301,
-          "kept_laps": [
-            111.979,
-            109.857,
-            108.547,
-            108.345,
-            108.043,
-            108.363,
-            108.426
-          ],
-          "excluded_laps": []
-        }
-      ],
-      "avg_long_run_pace": 109.08,
-      "headline_session": "FP2",
-      "headline_laps": 7,
-      "total_long_run_laps": 7,
-      "gap_to_fastest": 0.668
-    },
-    "RUS": {
-      "runs": [
-        {
-          "session": "FP1",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 5,
-          "avg_pace": 110.659,
-          "best_pace": 109.358,
-          "consistency": 1.1,
-          "kept_laps": [
-            112.313,
-            109.881,
-            109.358,
-            111.551,
-            110.193
-          ],
-          "excluded_laps": [
-            138.077
-          ]
-        },
-        {
-          "session": "FP2",
-          "stint": 4,
-          "compound": "MEDIUM",
-          "laps": 5,
-          "avg_pace": 108.964,
-          "best_pace": 107.763,
-          "consistency": 2.017,
-          "kept_laps": [
-            112.977,
-            108.336,
-            107.905,
-            107.763,
-            107.837
-          ],
-          "excluded_laps": []
-        }
-      ],
-      "avg_long_run_pace": 108.964,
-      "headline_session": "FP2",
-      "headline_laps": 5,
-      "total_long_run_laps": 10,
-      "gap_to_fastest": 0.552
-    },
-    "SAI": {
-      "runs": [
-        {
-          "session": "FP1",
-          "stint": 2,
-          "compound": "SOFT",
-          "laps": 5,
-          "avg_pace": 107.966,
-          "best_pace": 106.893,
-          "consistency": 0.775,
-          "kept_laps": [
-            109.165,
-            108.321,
-            108.022,
-            107.429,
-            106.893
-          ],
-          "excluded_laps": [
-            127.658,
-            143.267,
-            148.791,
-            147.581,
-            131.184,
-            136.891
-          ]
-        },
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "MEDIUM",
-          "laps": 6,
-          "avg_pace": 109.916,
-          "best_pace": 109.278,
-          "consistency": 0.662,
-          "kept_laps": [
-            111.246,
-            110.139,
-            109.68,
-            109.278,
-            109.337,
-            109.813
-          ],
-          "excluded_laps": [
-            139.084
-          ]
-        }
-      ],
-      "avg_long_run_pace": 109.916,
-      "headline_session": "FP2",
-      "headline_laps": 6,
-      "total_long_run_laps": 11,
-      "gap_to_fastest": 1.504
-    },
-    "STR": {
-      "runs": [
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 5,
-          "avg_pace": 113.799,
-          "best_pace": 112.424,
-          "consistency": 0.998,
-          "kept_laps": [
-            115.47,
-            113.69,
-            113.337,
-            112.424,
-            114.074
-          ],
-          "excluded_laps": []
-        }
-      ],
-      "avg_long_run_pace": 113.799,
-      "headline_session": "FP2",
-      "headline_laps": 5,
-      "total_long_run_laps": 5,
-      "gap_to_fastest": 5.387
-    },
-    "VER": {
-      "runs": [
-        {
-          "session": "FP1",
-          "stint": 3,
-          "compound": "HARD",
-          "laps": 5,
-          "avg_pace": 109.607,
-          "best_pace": 109.141,
-          "consistency": 0.433,
-          "kept_laps": [
-            110.386,
-            109.306,
-            109.141,
-            109.491,
-            109.709
-          ],
-          "excluded_laps": [
-            128.492,
-            126.376
-          ]
-        },
-        {
-          "session": "FP2",
-          "stint": 3,
-          "compound": "SOFT",
-          "laps": 5,
-          "avg_pace": 108.517,
-          "best_pace": 107.851,
-          "consistency": 0.812,
-          "kept_laps": [
-            110.111,
-            108.333,
-            107.851,
-            108.13,
-            108.161
-          ],
-          "excluded_laps": [
-            117.937,
-            125.376,
-            147.965
-          ]
-        }
-      ],
-      "avg_long_run_pace": 108.517,
-      "headline_session": "FP2",
-      "headline_laps": 5,
-      "total_long_run_laps": 10,
-      "gap_to_fastest": 0.105
-    }
+    "method": "same-session-all-compounds-per-run-median-v2"
   },
   "tyre_degradation": {
     "ALB": {
@@ -5323,168 +7521,6 @@
         "gap": 1.242
       }
     ]
-  },
-  "fuel_corrected_pace": {
-    "ALB": {
-      "fuel_corrected_avg": 109.914,
-      "fuel_corrected_best": 109.244,
-      "fuel_corrected_median": 109.912,
-      "laps_used": 7,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 1.607
-    },
-    "ALO": {
-      "fuel_corrected_avg": 111.493,
-      "fuel_corrected_best": 108.518,
-      "fuel_corrected_median": 109.894,
-      "laps_used": 5,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 3.186
-    },
-    "BOR": {
-      "fuel_corrected_avg": 109.942,
-      "fuel_corrected_best": 109.293,
-      "fuel_corrected_median": 110.041,
-      "laps_used": 4,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 1.635
-    },
-    "BOT": {
-      "fuel_corrected_avg": 111.418,
-      "fuel_corrected_best": 108.058,
-      "fuel_corrected_median": 111.275,
-      "laps_used": 10,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 3.111
-    },
-    "COL": {
-      "fuel_corrected_avg": 109.563,
-      "fuel_corrected_best": 108.611,
-      "fuel_corrected_median": 109.204,
-      "laps_used": 5,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 1.256
-    },
-    "GAS": {
-      "fuel_corrected_avg": 109.426,
-      "fuel_corrected_best": 108.9,
-      "fuel_corrected_median": 109.446,
-      "laps_used": 5,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 1.119
-    },
-    "HAD": {
-      "fuel_corrected_avg": 109.438,
-      "fuel_corrected_best": 108.543,
-      "fuel_corrected_median": 109.232,
-      "laps_used": 6,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 1.131
-    },
-    "HAM": {
-      "fuel_corrected_avg": 108.855,
-      "fuel_corrected_best": 108.172,
-      "fuel_corrected_median": 108.837,
-      "laps_used": 4,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 0.548
-    },
-    "HUL": {
-      "fuel_corrected_avg": 110.105,
-      "fuel_corrected_best": 108.208,
-      "fuel_corrected_median": 110.338,
-      "laps_used": 9,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 1.798
-    },
-    "LAW": {
-      "fuel_corrected_avg": 110.036,
-      "fuel_corrected_best": 109.767,
-      "fuel_corrected_median": 110.031,
-      "laps_used": 5,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 1.729
-    },
-    "LEC": {
-      "fuel_corrected_avg": 108.703,
-      "fuel_corrected_best": 107.933,
-      "fuel_corrected_median": 108.771,
-      "laps_used": 5,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 0.396
-    },
-    "LIN": {
-      "fuel_corrected_avg": 108.307,
-      "fuel_corrected_best": 107.444,
-      "fuel_corrected_median": 107.731,
-      "laps_used": 4,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 0.0
-    },
-    "NOR": {
-      "fuel_corrected_avg": 108.646,
-      "fuel_corrected_best": 108.491,
-      "fuel_corrected_median": 108.583,
-      "laps_used": 4,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 0.339
-    },
-    "OCO": {
-      "fuel_corrected_avg": 108.718,
-      "fuel_corrected_best": 106.856,
-      "fuel_corrected_median": 109.267,
-      "laps_used": 8,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 0.411
-    },
-    "PER": {
-      "fuel_corrected_avg": 110.429,
-      "fuel_corrected_best": 109.826,
-      "fuel_corrected_median": 110.508,
-      "laps_used": 7,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 2.122
-    },
-    "PIA": {
-      "fuel_corrected_avg": 108.975,
-      "fuel_corrected_best": 107.973,
-      "fuel_corrected_median": 108.407,
-      "laps_used": 7,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 0.668
-    },
-    "RUS": {
-      "fuel_corrected_avg": 108.894,
-      "fuel_corrected_best": 107.728,
-      "fuel_corrected_median": 107.837,
-      "laps_used": 5,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 0.587
-    },
-    "SAI": {
-      "fuel_corrected_avg": 109.828,
-      "fuel_corrected_best": 109.208,
-      "fuel_corrected_median": 109.694,
-      "laps_used": 6,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 1.521
-    },
-    "STR": {
-      "fuel_corrected_avg": 113.729,
-      "fuel_corrected_best": 112.389,
-      "fuel_corrected_median": 113.585,
-      "laps_used": 5,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 5.422
-    },
-    "VER": {
-      "fuel_corrected_avg": 108.398,
-      "fuel_corrected_best": 107.711,
-      "fuel_corrected_median": 108.158,
-      "laps_used": 5,
-      "fuel_correction_per_lap": 0.035,
-      "gap_to_fastest": 0.091
-    }
   },
   "improvement_trajectory": {
     "ALB": {

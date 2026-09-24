@@ -141,3 +141,46 @@ test('edits persist on tab remount but reset for new round or changed lap data',
     modelFor(source, []).toggle(modelFor(source, []).rows()[0].runs[1].laps[0].key);
     assert.equal(modelFor({ ...source, round: 17 }, []).changes, 0);
 });
+
+test('race runs on different tyres stay separate in one session', () => {
+    const source = {
+        season: 2026, round: 17,
+        long_run_comparisons: {
+            default_group: 'FP2',
+            groups: [
+                { id: 'FP2', session: 'FP2', drivers: 2 },
+            ],
+            drivers: {
+                AAA: { runs: [
+                    { session: 'FP2', compound: 'SOFT', stint: 3, quality: 'clean', lap_sequence: [
+                        { lap_number: 13, time: 108, selected: true },
+                        { lap_number: 14, time: 140, selected: false },
+                        { lap_number: 15, time: 109, selected: true },
+                        { lap_number: 16, time: 110, selected: true },
+                    ] },
+                    { session: 'FP2', compound: 'MEDIUM', stint: 1, quality: 'clean', lap_sequence: [
+                        { lap_number: 1, time: 100, selected: true },
+                    ] },
+                ] },
+                BBB: { runs: [
+                    { session: 'FP2', compound: 'SOFT', stint: 3, quality: 'interrupted', lap_sequence: [
+                        { lap_number: 1, time: 99, selected: true },
+                        { lap_number: 2, time: 130, selected: false },
+                        { lap_number: 3, time: 98, selected: true },
+                    ] },
+                ] },
+            },
+        },
+    };
+    const model = createModel(source);
+    assert.equal(model.comparable, true);
+    assert.deepEqual(model.runRows().map(row => [row.id, row.compound, row.average]), [
+        ['AAA', 'SOFT', 109], ['AAA', 'MEDIUM', 100],
+    ]);
+    assert.equal(model.runRows()[1].gap, null);
+    assert.equal(driver(model, 'BBB').comparisonRuns, 0);
+    assert.deepEqual(driver(model, 'AAA').runs[0].laps.map(lap => lap.ordinal), [13, 14, 15, 16]);
+    const key = driver(model, 'AAA').runs[0].laps[0].key;
+    model.toggle(key);
+    assert.equal(model.runRows()[0].average, 109.5);
+});

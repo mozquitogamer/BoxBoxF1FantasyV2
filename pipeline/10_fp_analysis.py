@@ -2,8 +2,8 @@
 Script 10 — Free Practice Data Analysis
 
 Crunches FP session data into detailed analysis for the website:
-- Qualifying pace (best lap, best 3/5 avg)
-- Long run / race pace prediction
+- Pre-qualifying lap indicator (best lap, best 3/5 avg)
+- Comparable practice long-run evidence by session and tyre
 - Tyre degradation per compound
 - Sector analysis
 - Temperature-pace correlation
@@ -52,6 +52,7 @@ from pipeline.fp_long_runs import (
     extract_representative_long_runs,
     select_headline_long_run,
 )
+from pipeline.fp_simulations import analyze_comparable_long_runs
 
 
 # -- Load helpers --------------------------------------------------------------
@@ -117,8 +118,11 @@ def load_driver_info() -> tuple[dict, dict]:
 
 def analyze_qualifying_pace(df: pd.DataFrame) -> dict:
     """
-    Analyze single-lap qualifying pace from FP data.
-    Uses short runs (stints of 1-3 laps) as quali simulation proxy.
+    Analyze the fastest pre-qualifying laps as a qualifying-pace indicator.
+
+    This is not a stint-classified qualifying simulation. A short-stint soft
+    replacement was tested against completed 2026 qualifying rounds and did
+    not improve the ranking, so retain the observed fastest-lap signal.
     """
     if df is None or df.empty or "lap_time" not in df.columns:
         return {}
@@ -132,6 +136,7 @@ def analyze_qualifying_pace(df: pd.DataFrame) -> dict:
     result = {}
     for driver_id, group in clean.groupby("driver_id"):
         times = group["lap_time"].sort_values().values
+        best_row = group.loc[group["lap_time"].idxmin()]
 
         best_lap = float(times[0]) if len(times) > 0 else None
         best_3_avg = float(np.mean(times[:3])) if len(times) >= 3 else best_lap
@@ -142,6 +147,8 @@ def analyze_qualifying_pace(df: pd.DataFrame) -> dict:
             "best_3_avg": round(best_3_avg, 3) if best_3_avg else None,
             "best_5_avg": round(best_5_avg, 3) if best_5_avg else None,
             "total_laps": len(times),
+            "best_lap_session": str(best_row.get("session", "?")),
+            "best_lap_compound": str(best_row.get("compound", "UNKNOWN")),
         }
 
     # Rank and delta
@@ -817,15 +824,16 @@ def run_fp_analysis(round_num: int, year: int = CURRENT_SEASON) -> dict:
     sessions = laps_df["session"].unique() if "session" in laps_df.columns else []
     print(f"  Loaded {len(laps_df):,} laps across sessions: {sorted(sessions)}")
 
-    # 1. Qualifying pace
-    print("\n[1] Analyzing qualifying pace (short runs)...")
+    # 1. Observed practice-lap qualifying indicator
+    print("\n[1] Analyzing fastest pre-qualifying laps...")
     output["qualifying_pace"] = analyze_qualifying_pace(laps_df)
     print(f"  {len(output['qualifying_pace'])} drivers")
 
-    # 2. Long run / race pace
-    print("[2] Analyzing long run pace (predicted race pace)...")
-    output["long_run_pace"] = analyze_long_run_pace(laps_df)
-    print(f"  {len(output['long_run_pace'])} drivers with long runs")
+    # 2. Reader-facing race-run evidence. Keep the versioned model extractor
+    # unchanged until a full retrain/backtest validates a feature change.
+    print("[2] Classifying comparable practice long runs...")
+    output["long_run_comparisons"] = analyze_comparable_long_runs(laps_df)
+    print(f"  {len(output['long_run_comparisons']['drivers'])} drivers with run evidence")
 
     # 3. Tyre degradation
     print("[3] Analyzing tyre degradation...")
@@ -892,13 +900,10 @@ def run_fp_analysis(round_num: int, year: int = CURRENT_SEASON) -> dict:
     else:
         print("  No sector data available")
 
-    # 12. Fuel-corrected pace estimate
-    print("[12] Estimating fuel-corrected pace...")
-    output["fuel_corrected_pace"] = analyze_fuel_corrected_pace(laps_df)
-    print(f"  {len(output['fuel_corrected_pace'])} drivers")
-
-    # 13. Improvement trajectory
-    print("[13] Analyzing improvement trajectory...")
+    # 12. Improvement trajectory. A field-wide fuel-corrected pace table is
+    # deliberately omitted: initial fuel loads are unknown, and the fixed
+    # within-stint burn adjustment cannot make different programmes comparable.
+    print("[12] Analyzing improvement trajectory...")
     trajectory = analyze_improvement_trajectory(laps_df)
     if trajectory:
         output["improvement_trajectory"] = trajectory

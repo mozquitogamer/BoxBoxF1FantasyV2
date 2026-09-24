@@ -1,6 +1,15 @@
 {
   "entries": [
     {
+      "date": "2026-09-24",
+      "title": "Practice pace comparisons now show comparable evidence",
+      "tags": ["fix", "feature"],
+      "body": [
+        "The Analysis tab now identifies sustained race runs on any tyre. Each valid run appears separately within its practice session, with its compound shown and gaps calculated only against runs on the same tyre. It uses the median selected lap, labels shorter runs as partial evidence, and keeps interrupted push/cool patterns visible without letting them set the pace ranking.",
+        "Lap detail now follows the actual lap order. The qualifying indicator accepts laps on any tyre, including medium, and identifies the session and tyre of each fastest lap. A global fuel-corrected ranking was removed because the teams' starting fuel loads are unknown. The trained Fantasy predictions are unchanged."
+      ]
+    },
+    {
       "date": "2026-09-12",
       "title": "Choose the laps in your long-run comparison",
       "tags": ["feature"],
