@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-24T12:48:21.379106+02:00",
+  "generated_at": "2026-09-24T15:38:05.437611+02:00",
   "manager": {
     "id": "v13",
     "name": "V13",
@@ -1600,13 +1600,13 @@
       "race": "Azerbaijan Grand Prix",
       "phase": "post_fp",
       "status": "corrected_before_lock",
-      "published_at": "2026-09-24T10:48:21.369084+00:00",
-      "source_generated_at": "2026-09-24T10:47:25.401128+00:00",
+      "published_at": "2026-09-24T13:38:05.428584+00:00",
+      "source_generated_at": "2026-09-24T13:36:48.489162+00:00",
       "lock_deadline": "2026-09-25T12:00:00Z",
-      "archive": "web/public/data/predictions_round17_post_fp_corrected.json",
-      "archive_sha256": "f3037eeed59ac13dbce7905e33ffcc50f6a6513c275baf4d1a6639b2983bf45b",
-      "previous_decision": "data/v13/decisions/round17_post_fp.json",
-      "previous_decision_sha256": "22e1b2e73ad9649fe31dd5b48994c0a7c6fcc2c53b466ce6cb39e44b47ef4914",
+      "archive": "web/public/data/predictions_round17_post_fp2.json",
+      "archive_sha256": "d3c414083d8e3b8b8990fe3e0c60022b73158577f0c3f545747b3e1a86df70d5",
+      "previous_decision": "data/v13/decisions/round17_post_fp_revision2.json",
+      "previous_decision_sha256": "2be21dddcabadd13c326851903218899d33fd81e61b6a1b732ba16263190d36a",
       "price_snapshot_after_round": 16,
       "drivers": [
         "ANT",
@@ -1622,9 +1622,9 @@
       "captain": "ANT",
       "second_boost": null,
       "chip": null,
-      "projected_points": 189.3,
+      "projected_points": 189.7,
       "projected_price_gain": 1.1,
-      "downside_risk": 64.6,
+      "downside_risk": 67.8,
       "team_cost": 124.8,
       "transfers": 2,
       "transfer_penalty": 0,
@@ -1642,7 +1642,7 @@
       },
       "chip_decision": {
         "result": "save",
-        "current_selected_team_extra_points": 40.5,
+        "current_selected_team_extra_points": 40.9,
         "largest_remaining_priors_top_two": 96.5,
         "largest_remaining_priors_round": 18,
         "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast."
@@ -1655,10 +1655,10 @@
         "negative_p5_weight": 0.75,
         "price_value_method": "horizon curve × price reliability × points realisation"
       },
-      "revision": 2,
-      "correction_reason": "Exclude non-representative five-lap FP1 pace from qualifying blend; Hadjar hard-tyre run inflated projected position gains",
-      "supersedes": "data/v13/decisions/round17_post_fp.json",
-      "supersedes_sha256": "22e1b2e73ad9649fe31dd5b48994c0a7c6fcc2c53b466ce6cb39e44b47ef4914"
+      "revision": 3,
+      "correction_reason": "Refresh before lock with Azerbaijan FP2 telemetry and updated post-FP simulations",
+      "supersedes": "data/v13/decisions/round17_post_fp_revision2.json",
+      "supersedes_sha256": "2be21dddcabadd13c326851903218899d33fd81e61b6a1b732ba16263190d36a"
     }
   },
   "labels": {
