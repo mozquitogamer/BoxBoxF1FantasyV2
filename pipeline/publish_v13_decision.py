@@ -84,7 +84,9 @@ def _opening_prices(round_num: int) -> tuple[str, dict[str, Any]]:
     return key, price_history[key]
 
 
-def _round_input(round_num: int, phase: str) -> season.RoundInputs:
+def _round_input(
+    round_num: int, phase: str, archive_override: str | None = None,
+) -> season.RoundInputs:
     archive = WEB_DATA_DIR / f"predictions_round{round_num}_{phase}.json"
     # Keep the original frozen phase archive immutable for V13 auditability.
     # An explicit R14 availability correction may publish a separate source
@@ -97,6 +99,10 @@ def _round_input(round_num: int, phase: str) -> season.RoundInputs:
         corrected = WEB_DATA_DIR / "predictions_round17_pre_fp_corrected.json"
         if corrected.exists():
             archive = corrected
+    if archive_override is not None:
+        archive = (ROOT / archive_override).resolve()
+        if not archive.is_relative_to(WEB_DATA_DIR.resolve()):
+            raise ValueError("Correction archive must be inside web/public/data")
     if not archive.exists():
         raise FileNotFoundError(f"Missing {phase} archive: {archive}")
     payload = v13._load_json(archive)
@@ -306,8 +312,9 @@ def _decision(
     round_num: int,
     phase: str,
     public: dict[str, Any],
+    archive_override: str | None = None,
 ) -> dict[str, Any]:
-    round_data = _round_input(round_num, phase)
+    round_data = _round_input(round_num, phase, archive_override)
     state = _state_for_round(public, round_num)
     combos = season.build_combo_matrices(round_data)
     normal = season.choose_lineup(
@@ -443,7 +450,10 @@ def publish(round_num: int, phase: str) -> dict[str, Any]:
     return decision
 
 
-def publish_correction(round_num: int, phase: str, reason: str) -> dict[str, Any]:
+def publish_correction(
+    round_num: int, phase: str, reason: str,
+    archive_override: str | None = None,
+) -> dict[str, Any]:
     """Append an explicit audited correction without rewriting the original."""
     reason = str(reason or "").strip()
     if not reason:
@@ -466,7 +476,7 @@ def publish_correction(round_num: int, phase: str, reason: str) -> dict[str, Any
     superseded_path = revisions[-1] if revisions else base_path
     superseded = v13._load_json(superseded_path)
     revision = int(superseded.get("revision", 1)) + 1
-    decision = _decision(round_num, phase, public)
+    decision = _decision(round_num, phase, public, archive_override)
     decision.update(
         {
             "revision": revision,
@@ -490,9 +500,17 @@ def main() -> None:
         "--correction-reason",
         help="Append an audited revision instead of rewriting the original decision.",
     )
+    parser.add_argument(
+        "--correction-archive",
+        help="Project-relative corrected forecast archive for the audited revision.",
+    )
     args = parser.parse_args()
+    if args.correction_archive and not args.correction_reason:
+        parser.error("--correction-archive requires --correction-reason")
     decision = (
-        publish_correction(args.round, args.phase, args.correction_reason)
+        publish_correction(
+            args.round, args.phase, args.correction_reason, args.correction_archive,
+        )
         if args.correction_reason
         else publish(args.round, args.phase)
     )

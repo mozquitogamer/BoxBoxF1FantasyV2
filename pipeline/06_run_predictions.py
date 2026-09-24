@@ -149,7 +149,25 @@ FP_QUALI_BLEND_TUNABLES = {
     "hard_track_pivot": 6,         # at/below this difficulty, use base weight
     "min_drivers_with_pace": 10,   # need at least this many FP times to blend
     "pace_cols": ["best_lap_time", "best_3_lap_avg", "best_5_lap_avg"],  # composite; lower = faster
+    "min_laps_for_composite": 5,
+    "max_best5_gap_seconds": 5.0,  # reject FP samples padded by traffic/slow laps
 }
+
+
+def representative_fp_pace_mask(features: pd.DataFrame) -> pd.Series:
+    """Exclude sparse FP samples whose best-five average includes slow laps."""
+    required = {"total_laps", "best_lap_time", "best_5_lap_avg"}
+    if not required.issubset(features.columns):
+        return pd.Series(True, index=features.index)
+    lap_count = pd.to_numeric(features["total_laps"], errors="coerce")
+    best = pd.to_numeric(features["best_lap_time"], errors="coerce")
+    best_five = pd.to_numeric(features["best_5_lap_avg"], errors="coerce")
+    return (
+        lap_count.ge(FP_QUALI_BLEND_TUNABLES["min_laps_for_composite"])
+        & best_five.sub(best).between(
+            0, FP_QUALI_BLEND_TUNABLES["max_best5_gap_seconds"]
+        )
+    )
 
 
 def phase_aware_grid_anchor_weight(
@@ -1378,9 +1396,19 @@ def run_predictions(
         # a faster (lower) time scores higher. Blending the single best lap with
         # best-3 and best-5 lap averages rewards repeatable pace over a one-off
         # banker lap (backtests better than any single metric — see tunables).
+        representative = representative_fp_pace_mask(pred_df)
+        # A short, disrupted FP run can have one representative lap followed by
+        # very slow laps. Treating its best-five average as qualifying pace can
+        # turn an expected P8 starter into P20 and award phantom race gains.
+        # Keep the model prior for that driver until a comparable sample exists.
+        if "best_lap_time" in pred_df.columns:
+            best = pd.to_numeric(pred_df["best_lap_time"], errors="coerce")
+            rejected = int((best.notna() & ~representative).sum())
+            if rejected:
+                print(f"  Excluded {rejected} driver(s) with non-representative FP pace")
         zmat = []
         for c in pace_cols:
-            col = pd.to_numeric(pred_df[c], errors="coerce")
+            col = pd.to_numeric(pred_df[c], errors="coerce").where(representative)
             sd = col.std()
             zmat.append(-(col - col.mean()) / sd if sd and sd > 1e-9 else col * 0.0)
         fp_pace_z = pd.concat(zmat, axis=1).mean(axis=1, skipna=True)  # NaN if all metrics NaN
