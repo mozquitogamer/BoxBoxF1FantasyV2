@@ -1,7 +1,14 @@
 {
-  "updated": "2026-09-23T15:04:21Z",
+  "updated": "2026-09-24T15:12:24Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "QEjFTxR3-TM",
+      "title": "GET RID OF $3M Drivers NOW (Why 3A is the answer) - Baku / Azerbaijan GP F1 Fantasy Early Thoughts",
+      "published": "2026-09-23",
+      "thumbnail": "https://i.ytimg.com/vi/QEjFTxR3-TM/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=QEjFTxR3-TM"
+    },
     {
       "id": "yj4WOxl1r9I",
       "title": "F1 Fantasy Is Broken. And So Is F1.",
@@ -22,13 +29,6 @@
       "published": "2026-09-12",
       "thumbnail": "https://i.ytimg.com/vi/ZLRC1DaREa4/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=ZLRC1DaREa4"
-    },
-    {
-      "id": "rrvZC19JY1U",
-      "title": "Bring in Perez - Madness in the Madring - Spanish Grand Prix Early Thoughts for F1 Fantasy",
-      "published": "2026-09-10",
-      "thumbnail": "https://i.ytimg.com/vi/rrvZC19JY1U/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=rrvZC19JY1U"
     }
   ]
 }
