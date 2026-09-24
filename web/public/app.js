@@ -8028,19 +8028,22 @@ function renderFPAnalysis() {
     // Qualifying Pace
     if (fpAnalysis.qualifying_pace && Object.keys(fpAnalysis.qualifying_pace).length > 0) {
         const rows = Object.entries(fpAnalysis.qualifying_pace).filter(([,v]) => v.best_lap).map(([id, d]) => ({
-            id, best_lap: d.best_lap, best_3_avg: d.best_3_avg, best_5_avg: d.best_5_avg,
+            id, best_lap: d.best_lap,
+            theoretical_best: fpAnalysis.sectors?.[id]?.theoretical_best ?? null,
+            best_3_avg: d.best_3_avg, best_5_avg: d.best_5_avg,
             gap: d.gap_to_fastest, laps: d.total_laps
         }));
         const tbl = sortableTable('fpQualiTable', [
             { key: '_rank', label: '#', cls: 'num', fmt: (r, i) => i + 1 },
             { key: 'id', label: 'Driver', fmt: r => `<strong>${r.id}</strong>` },
+            { key: 'theoretical_best', label: 'Theo. Best', cls: 'num', title: 'Sum of this driver’s best Sector 1, Sector 2, and Sector 3 times across practice laps', fmt: r => fmtTime(r.theoretical_best) },
             { key: 'best_lap', label: 'Best Lap', cls: 'num', title: 'Fastest single lap in FP sessions', fmt: r => fmtTime(r.best_lap) },
             { key: 'best_3_avg', label: 'Best 3 Avg', cls: 'num', title: 'Average of 3 fastest laps', fmt: r => fmtTime(r.best_3_avg) },
             { key: 'best_5_avg', label: 'Best 5 Avg', cls: 'num', title: 'Average of 5 fastest laps', fmt: r => fmtTime(r.best_5_avg) },
             { key: 'gap', label: 'Gap', cls: 'num', title: 'Gap to fastest driver', fmt: r => r.gap === 0 ? '<span class="text-green">Leader</span>' : r.gap != null ? '+' + r.gap.toFixed(3) : '-' },
             { key: 'laps', label: 'Laps', cls: 'num', title: 'Total clean laps completed' }
         ], rows, 'best_lap', true);
-        html += `<div class="analysis-block"><h3>Qualifying Pace (Short Runs)</h3><p class="analysis-note">Best single-lap and multi-lap averages. Click column headers to sort.</p>${tbl.getHtml()}</div>`;
+        html += `<div class="analysis-block"><h3>Qualifying Pace (Short Runs)</h3><p class="analysis-note">Theo. Best adds each driver's quickest three sectors from practice, even if they came on different laps. Best Lap is a completed lap. Click column headers to sort.</p><div class="table-wrapper">${tbl.getHtml()}</div></div>`;
         postRenderFns.push(tbl.renderTable);
     }
 
