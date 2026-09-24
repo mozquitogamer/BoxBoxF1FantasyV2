@@ -6,7 +6,24 @@
       "tags": ["fix", "feature"],
       "body": [
         "The Analysis tab now identifies sustained race runs on any tyre. Each valid run appears separately within its practice session, with its compound shown and gaps calculated only against runs on the same tyre. It uses the median selected lap, labels shorter runs as partial evidence, and keeps interrupted push/cool patterns visible without letting them set the pace ranking.",
-        "Lap detail now follows the actual lap order. The qualifying indicator accepts laps on any tyre, including medium, and identifies the session and tyre of each fastest lap. A global fuel-corrected ranking was removed because the teams' starting fuel loads are unknown. The trained Fantasy predictions are unchanged."
+        "Lap detail now follows the actual lap order. The qualifying indicator accepts laps on any tyre, including medium, and identifies the session and tyre of each fastest lap. Its Theo. Best column adds the quickest three sectors, which may come from different laps and is not a completed lap. A global fuel-corrected ranking was removed because the teams' starting fuel loads are unknown. This Analysis change did not alter the trained Fantasy predictions."
+      ]
+    },
+    {
+      "date": "2026-09-24",
+      "title": "Sparse practice laps no longer skew the qualifying forecast",
+      "tags": ["fix", "model"],
+      "body": [
+        "A driver with only a few representative practice laps could have one quick lap and several much slower ones in their best-five average. Blending that sample into the qualifying forecast could move the driver far down the predicted grid and create misleading projected race gains.",
+        "The practice-pace blend now waits for at least five usable laps and rejects a best-five average padded by very slow laps. For those drivers it keeps the model's prior until better practice evidence arrives. Azerbaijan predictions were refreshed with this safeguard."
+      ]
+    },
+    {
+      "date": "2026-09-14",
+      "title": "Excluded picks no longer appear as a hold recommendation",
+      "tags": ["fix"],
+      "body": [
+        "Transfer Advisor could still recommend keeping the current team after you excluded one of its drivers or constructors. The current team remains a scoring baseline, but it is no longer offered as a valid recommendation when it contains an excluded pick."
       ]
     },
     {
