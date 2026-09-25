@@ -31,11 +31,11 @@
     },
     {
       "date": "2026-09-25",
-      "temp_max": 24.0,
-      "temp_min": 21.1,
+      "temp_max": 24.6,
+      "temp_min": 21.3,
       "precip_probability_max": 0,
       "precip_sum_mm": 0.0,
-      "wind_max_kmh": 43.5,
+      "wind_max_kmh": 42.2,
       "weather_description": "Overcast",
       "weather_category": "overcast",
       "weather_icon": "\u2601\ufe0f",
@@ -44,11 +44,11 @@
     },
     {
       "date": "2026-09-26",
-      "temp_max": 26.0,
+      "temp_max": 26.5,
       "temp_min": 20.5,
       "precip_probability_max": 0,
       "precip_sum_mm": 0.0,
-      "wind_max_kmh": 31.0,
+      "wind_max_kmh": 30.6,
       "weather_description": "Overcast",
       "weather_category": "overcast",
       "weather_icon": "\u2601\ufe0f",
@@ -59,7 +59,7 @@
   "sessions": [
     {
       "name": "FP1",
-      "day_label": "Friday",
+      "day_label": "Thursday",
       "date": "2026-09-24",
       "rain_probability": 0,
       "rain_risk": "NONE",
@@ -114,7 +114,7 @@
     },
     {
       "name": "FP2",
-      "day_label": "Friday",
+      "day_label": "Thursday",
       "date": "2026-09-24",
       "rain_probability": 0,
       "rain_risk": "NONE",
@@ -169,12 +169,12 @@
     },
     {
       "name": "FP3",
-      "day_label": "Saturday",
+      "day_label": "Friday",
       "date": "2026-09-25",
       "rain_probability": 0,
       "rain_risk": "NONE",
-      "avg_temp": 23.7,
-      "avg_wind": 42.3,
+      "avg_temp": 24.0,
+      "avg_wind": 41.9,
       "total_precip_mm": 0.0,
       "weather_description": "Partly cloudy",
       "weather_category": "cloudy",
@@ -186,157 +186,157 @@
           "humidity": 75,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 41.1,
-          "windgusts": 68.0,
+          "windspeed": 42.0,
+          "windgusts": 67.0,
           "weather_code": 2
         },
         {
           "hour": 11,
           "temp": 23.8,
-          "humidity": 71,
+          "humidity": 73,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 42.5,
-          "windgusts": 71.3,
+          "windspeed": 41.8,
+          "windgusts": 67.3,
           "weather_code": 2
         },
         {
           "hour": 12,
-          "temp": 23.9,
-          "humidity": 72,
+          "temp": 24.6,
+          "humidity": 69,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 43.5,
-          "windgusts": 70.9,
+          "windspeed": 41.4,
+          "windgusts": 68.0,
           "weather_code": 2
         },
         {
           "hour": 13,
-          "temp": 24.0,
-          "humidity": 72,
+          "temp": 24.5,
+          "humidity": 69,
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 42.2,
-          "windgusts": 71.3,
-          "weather_code": 2
+          "windgusts": 68.4,
+          "weather_code": 1
         }
       ]
     },
     {
       "name": "Qualifying",
-      "day_label": "Saturday",
+      "day_label": "Friday",
       "date": "2026-09-25",
       "rain_probability": 0,
       "rain_risk": "NONE",
-      "avg_temp": 23.4,
-      "avg_wind": 41.4,
-      "total_precip_mm": 0.0,
-      "weather_description": "Partly cloudy",
-      "weather_category": "cloudy",
-      "weather_icon": "\u26c5",
-      "hourly": [
-        {
-          "hour": 14,
-          "temp": 24.0,
-          "humidity": 70,
-          "precip_prob": 0,
-          "precip_mm": 0.0,
-          "windspeed": 42.7,
-          "windgusts": 70.2,
-          "weather_code": 2
-        },
-        {
-          "hour": 15,
-          "temp": 23.7,
-          "humidity": 72,
-          "precip_prob": 0,
-          "precip_mm": 0.0,
-          "windspeed": 42.7,
-          "windgusts": 70.2,
-          "weather_code": 2
-        },
-        {
-          "hour": 16,
-          "temp": 23.2,
-          "humidity": 76,
-          "precip_prob": 0,
-          "precip_mm": 0.0,
-          "windspeed": 40.8,
-          "windgusts": 69.8,
-          "weather_code": 2
-        },
-        {
-          "hour": 17,
-          "temp": 22.7,
-          "humidity": 79,
-          "precip_prob": 0,
-          "precip_mm": 0.0,
-          "windspeed": 39.4,
-          "windgusts": 66.6,
-          "weather_code": 2
-        }
-      ]
-    },
-    {
-      "name": "Race",
-      "day_label": "Sunday",
-      "date": "2026-09-26",
-      "rain_probability": 0,
-      "rain_risk": "NONE",
-      "avg_temp": 25.9,
-      "avg_wind": 22.8,
+      "avg_temp": 24.0,
+      "avg_wind": 41.1,
       "total_precip_mm": 0.0,
       "weather_description": "Mainly clear",
       "weather_category": "clear",
       "weather_icon": "\u2600\ufe0f",
       "hourly": [
         {
-          "hour": 13,
-          "temp": 25.7,
-          "humidity": 56,
+          "hour": 14,
+          "temp": 24.5,
+          "humidity": 69,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 23.6,
-          "windgusts": 39.6,
+          "windspeed": 41.8,
+          "windgusts": 68.8,
           "weather_code": 2
         },
         {
-          "hour": 14,
-          "temp": 25.9,
-          "humidity": 55,
-          "precip_prob": 0,
-          "precip_mm": 0.0,
-          "windspeed": 23.2,
-          "windgusts": 37.4,
-          "weather_code": 1
-        },
-        {
           "hour": 15,
-          "temp": 26.0,
-          "humidity": 54,
+          "temp": 24.2,
+          "humidity": 70,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 23.1,
-          "windgusts": 36.7,
+          "windspeed": 41.8,
+          "windgusts": 68.0,
           "weather_code": 1
         },
         {
           "hour": 16,
-          "temp": 25.9,
-          "humidity": 52,
+          "temp": 23.9,
+          "humidity": 71,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 21.4,
-          "windgusts": 36.4,
+          "windspeed": 41.5,
+          "windgusts": 68.0,
           "weather_code": 1
+        },
+        {
+          "hour": 17,
+          "temp": 23.3,
+          "humidity": 74,
+          "precip_prob": 0,
+          "precip_mm": 0.0,
+          "windspeed": 39.2,
+          "windgusts": 67.0,
+          "weather_code": 1
+        }
+      ]
+    },
+    {
+      "name": "Race",
+      "day_label": "Saturday",
+      "date": "2026-09-26",
+      "rain_probability": 0,
+      "rain_risk": "NONE",
+      "avg_temp": 26.3,
+      "avg_wind": 18.4,
+      "total_precip_mm": 0.0,
+      "weather_description": "Partly cloudy",
+      "weather_category": "cloudy",
+      "weather_icon": "\u26c5",
+      "hourly": [
+        {
+          "hour": 13,
+          "temp": 25.9,
+          "humidity": 54,
+          "precip_prob": 0,
+          "precip_mm": 0.0,
+          "windspeed": 19.9,
+          "windgusts": 34.9,
+          "weather_code": 2
+        },
+        {
+          "hour": 14,
+          "temp": 26.3,
+          "humidity": 50,
+          "precip_prob": 0,
+          "precip_mm": 0.0,
+          "windspeed": 18.7,
+          "windgusts": 31.3,
+          "weather_code": 2
+        },
+        {
+          "hour": 15,
+          "temp": 26.5,
+          "humidity": 47,
+          "precip_prob": 0,
+          "precip_mm": 0.0,
+          "windspeed": 17.7,
+          "windgusts": 29.5,
+          "weather_code": 1
+        },
+        {
+          "hour": 16,
+          "temp": 26.4,
+          "humidity": 40,
+          "precip_prob": 0,
+          "precip_mm": 0.0,
+          "windspeed": 17.1,
+          "windgusts": 27.0,
+          "weather_code": 3
         }
       ]
     }
   ],
-  "last_updated": "2026-09-25T02:36:16Z",
-  "next_update": "2026-09-25T08:36:16Z",
+  "last_updated": "2026-09-25T10:33:30Z",
+  "next_update": "2026-09-25T16:33:30Z",
   "data_source": "Open-Meteo (open-meteo.com)",
-  "forecast_snapshot_id": "2026-09-25T02-36-16.668284Z",
-  "forecast_retrieved_at": "2026-09-25T02:36:16.668284+00:00",
-  "forecast_archive_path": "data/forecasts/weather/year2026/round17/2026-09-25T02-36-16.668284Z_open_meteo.json"
+  "forecast_snapshot_id": "2026-09-25T10-33-30.881907Z",
+  "forecast_retrieved_at": "2026-09-25T10:33:30.881907+00:00",
+  "forecast_archive_path": "data/forecasts/weather/year2026/round17/2026-09-25T10-33-30.881907Z_open_meteo.json"
 }

@@ -11,6 +11,19 @@ import pytest
 from pipeline import weather_forecast
 
 
+def test_session_day_labels_follow_saturday_race_date() -> None:
+    sessions = weather_forecast.build_session_schedule(
+        {"date": "2026-09-26", "sprint": False}
+    )
+    assert [(session["name"], session["date"], session["day_label"]) for session in sessions] == [
+        ("FP1", "2026-09-24", "Thursday"),
+        ("FP2", "2026-09-24", "Thursday"),
+        ("FP3", "2026-09-25", "Friday"),
+        ("Qualifying", "2026-09-25", "Friday"),
+        ("Race", "2026-09-26", "Saturday"),
+    ]
+
+
 def _forecast() -> dict:
     return {
         "round": 14,

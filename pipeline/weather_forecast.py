@@ -159,9 +159,7 @@ def build_session_schedule(race: dict) -> list[dict]:
     Build the F1 session schedule for a race weekend.
     Returns list of {name, day_label, date, start_hour, end_hour}.
 
-    Friday: FP1/FP2 (or FP1/Sprint Qualifying for sprint)
-    Saturday: FP3/Qualifying (or Sprint/Qualifying for sprint)
-    Sunday: Race
+    Sessions are placed relative to the race date, which can be a Saturday.
     """
     race_date = datetime.strptime(race["date"], "%Y-%m-%d")
     friday = race_date - timedelta(days=2)
@@ -172,19 +170,19 @@ def build_session_schedule(race: dict) -> list[dict]:
 
     if is_sprint:
         sessions = [
-            {"name": "FP1",               "day_label": "Friday",   "date": friday.strftime("%Y-%m-%d"),   "hours": (10, 18)},
-            {"name": "Sprint Qualifying",  "day_label": "Friday",   "date": friday.strftime("%Y-%m-%d"),   "hours": (14, 18)},
-            {"name": "Sprint",             "day_label": "Saturday", "date": saturday.strftime("%Y-%m-%d"), "hours": (10, 14)},
-            {"name": "Qualifying",         "day_label": "Saturday", "date": saturday.strftime("%Y-%m-%d"), "hours": (14, 18)},
-            {"name": "Race",               "day_label": "Sunday",   "date": sunday.strftime("%Y-%m-%d"),   "hours": (13, 17)},
+            {"name": "FP1",               "day_label": friday.strftime("%A"),   "date": friday.strftime("%Y-%m-%d"),   "hours": (10, 18)},
+            {"name": "Sprint Qualifying",  "day_label": friday.strftime("%A"),   "date": friday.strftime("%Y-%m-%d"),   "hours": (14, 18)},
+            {"name": "Sprint",             "day_label": saturday.strftime("%A"), "date": saturday.strftime("%Y-%m-%d"), "hours": (10, 14)},
+            {"name": "Qualifying",         "day_label": saturday.strftime("%A"), "date": saturday.strftime("%Y-%m-%d"), "hours": (14, 18)},
+            {"name": "Race",               "day_label": sunday.strftime("%A"),   "date": sunday.strftime("%Y-%m-%d"),   "hours": (13, 17)},
         ]
     else:
         sessions = [
-            {"name": "FP1",        "day_label": "Friday",   "date": friday.strftime("%Y-%m-%d"),   "hours": (10, 14)},
-            {"name": "FP2",        "day_label": "Friday",   "date": friday.strftime("%Y-%m-%d"),   "hours": (14, 18)},
-            {"name": "FP3",        "day_label": "Saturday", "date": saturday.strftime("%Y-%m-%d"), "hours": (10, 14)},
-            {"name": "Qualifying", "day_label": "Saturday", "date": saturday.strftime("%Y-%m-%d"), "hours": (14, 18)},
-            {"name": "Race",       "day_label": "Sunday",   "date": sunday.strftime("%Y-%m-%d"),   "hours": (13, 17)},
+            {"name": "FP1",        "day_label": friday.strftime("%A"),   "date": friday.strftime("%Y-%m-%d"),   "hours": (10, 14)},
+            {"name": "FP2",        "day_label": friday.strftime("%A"),   "date": friday.strftime("%Y-%m-%d"),   "hours": (14, 18)},
+            {"name": "FP3",        "day_label": saturday.strftime("%A"), "date": saturday.strftime("%Y-%m-%d"), "hours": (10, 14)},
+            {"name": "Qualifying", "day_label": saturday.strftime("%A"), "date": saturday.strftime("%Y-%m-%d"), "hours": (14, 18)},
+            {"name": "Race",       "day_label": sunday.strftime("%A"),   "date": sunday.strftime("%Y-%m-%d"),   "hours": (13, 17)},
         ]
 
     return sessions
