@@ -144,7 +144,7 @@ def dnf_cause_bucket(status: pd.Series, is_dnf: pd.Series, is_dsq: pd.Series) ->
     mechanical = st.str.contains(
         "engine|gearbox|power unit|electrical|hydraulic|oil|fuel|cooling|"
         "water|battery|turbo|driveshaft|transmission|mechanical|brakes|"
-        "clutch|suspension|puncture|tyre|tire",
+        "clutch|suspension|puncture|" r"\btyre\b|\btire\b",
         regex=True,
     )
     collision = st.str.contains(

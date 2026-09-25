@@ -392,6 +392,8 @@ def get_track_features(circuit_id):
     """
     # Normalize circuit_id
     circuit_id = circuit_id.lower().replace(' ', '_')
+    # Jolpica uses "madring" for the 2026 Madrid race; our profile is "madrid".
+    circuit_id = {'madring': 'madrid'}.get(circuit_id, circuit_id)
 
     if circuit_id in TRACK_DATABASE:
         return TRACK_DATABASE[circuit_id]

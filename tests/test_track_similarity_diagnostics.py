@@ -4,6 +4,10 @@ from config import track_classifications as tracks
 from config.track_similarity import similarity_diagnostics
 
 
+def test_madring_uses_madrid_track_profile() -> None:
+    assert tracks.get_track_features("madring") == tracks.TRACK_DATABASE["madrid"]
+
+
 def test_current_track_similarity_saturation_is_reported() -> None:
     result = similarity_diagnostics()
 
