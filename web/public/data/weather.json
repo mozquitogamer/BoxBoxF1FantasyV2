@@ -322,21 +322,21 @@
         },
         {
           "hour": 16,
-          "temp": 26.1,
-          "humidity": 43,
+          "temp": 26.3,
+          "humidity": 41,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 18.9,
+          "windspeed": 19.0,
           "windgusts": 29.9,
           "weather_code": 2
         }
       ]
     }
   ],
-  "last_updated": "2026-09-26T15:24:17Z",
-  "next_update": "2026-09-26T21:24:17Z",
+  "last_updated": "2026-09-26T20:23:40Z",
+  "next_update": "2026-09-27T02:23:40Z",
   "data_source": "Open-Meteo (open-meteo.com)",
-  "forecast_snapshot_id": "2026-09-26T15-24-17.578567Z",
-  "forecast_retrieved_at": "2026-09-26T15:24:17.578567+00:00",
-  "forecast_archive_path": "data/forecasts/weather/year2026/round17/2026-09-26T15-24-17.578567Z_open_meteo.json"
+  "forecast_snapshot_id": "2026-09-26T20-23-40.826331Z",
+  "forecast_retrieved_at": "2026-09-26T20:23:40.826331+00:00",
+  "forecast_archive_path": "data/forecasts/weather/year2026/round17/2026-09-26T20-23-40.826331Z_open_meteo.json"
 }
