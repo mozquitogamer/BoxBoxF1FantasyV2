@@ -44,7 +44,7 @@
     },
     {
       "date": "2026-09-26",
-      "temp_max": 26.7,
+      "temp_max": 26.6,
       "temp_min": 20.5,
       "precip_probability_max": 0,
       "precip_sum_mm": 0.0,
@@ -283,47 +283,47 @@
       "date": "2026-09-26",
       "rain_probability": 0,
       "rain_risk": "NONE",
-      "avg_temp": 26.4,
-      "avg_wind": 18.1,
+      "avg_temp": 26.2,
+      "avg_wind": 18.4,
       "total_precip_mm": 0.0,
-      "weather_description": "Partly cloudy",
-      "weather_category": "cloudy",
-      "weather_icon": "\u26c5",
+      "weather_description": "Mainly clear",
+      "weather_category": "clear",
+      "weather_icon": "\u2600\ufe0f",
       "hourly": [
         {
           "hour": 13,
-          "temp": 25.9,
-          "humidity": 52,
+          "temp": 25.7,
+          "humidity": 53,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 18.4,
+          "windspeed": 19.6,
           "windgusts": 33.1,
           "weather_code": 2
         },
         {
           "hour": 14,
-          "temp": 26.6,
-          "humidity": 44,
+          "temp": 26.3,
+          "humidity": 46,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 17.1,
-          "windgusts": 29.2,
-          "weather_code": 2
+          "windspeed": 17.3,
+          "windgusts": 30.2,
+          "weather_code": 1
         },
         {
           "hour": 15,
-          "temp": 26.7,
+          "temp": 26.6,
           "humidity": 40,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 17.8,
-          "windgusts": 28.1,
+          "windspeed": 17.9,
+          "windgusts": 28.8,
           "weather_code": 1
         },
         {
           "hour": 16,
-          "temp": 26.2,
-          "humidity": 42,
+          "temp": 26.1,
+          "humidity": 43,
           "precip_prob": 0,
           "precip_mm": 0.0,
           "windspeed": 18.9,
@@ -333,10 +333,10 @@
       ]
     }
   ],
-  "last_updated": "2026-09-26T10:31:38Z",
-  "next_update": "2026-09-26T16:31:38Z",
+  "last_updated": "2026-09-26T15:24:17Z",
+  "next_update": "2026-09-26T21:24:17Z",
   "data_source": "Open-Meteo (open-meteo.com)",
-  "forecast_snapshot_id": "2026-09-26T10-31-38.532398Z",
-  "forecast_retrieved_at": "2026-09-26T10:31:38.532398+00:00",
-  "forecast_archive_path": "data/forecasts/weather/year2026/round17/2026-09-26T10-31-38.532398Z_open_meteo.json"
+  "forecast_snapshot_id": "2026-09-26T15-24-17.578567Z",
+  "forecast_retrieved_at": "2026-09-26T15:24:17.578567+00:00",
+  "forecast_archive_path": "data/forecasts/weather/year2026/round17/2026-09-26T15-24-17.578567Z_open_meteo.json"
 }
