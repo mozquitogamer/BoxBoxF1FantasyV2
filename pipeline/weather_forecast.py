@@ -89,6 +89,19 @@ def find_next_round(races: list[dict], target_round: int | None = None) -> dict 
         return None
 
     today = datetime.now().date()
+    # Follow the event already published on the homepage when post-race work
+    # has advanced it before the previous race's date window expires.
+    live_path = WEB_DATA_DIR / "predictions.json"
+    try:
+        live = json.loads(live_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        live = {}
+    if live.get("season") == CURRENT_SEASON:
+        for race in races:
+            if race["round"] != live.get("round") or race.get("cancelled", False):
+                continue
+            if datetime.strptime(race["date"], "%Y-%m-%d").date() >= today - timedelta(days=1):
+                return race
     for r in races:
         if r.get("cancelled", False):
             continue

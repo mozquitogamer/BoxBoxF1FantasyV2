@@ -11,6 +11,23 @@ import pytest
 from pipeline import weather_forecast
 
 
+def test_automatic_weather_follows_published_next_round(tmp_path, monkeypatch):
+    class RaceDay(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls(2026, 9, 26, 23, 30)
+
+    monkeypatch.setattr(weather_forecast, "datetime", RaceDay)
+    monkeypatch.setattr(weather_forecast, "WEB_DATA_DIR", tmp_path)
+    (tmp_path / "predictions.json").write_text(json.dumps({"season": 2026, "round": 18}))
+    races = [
+        {"round": 17, "date": "2026-09-26", "cancelled": False},
+        {"round": 18, "date": "2026-10-04", "cancelled": False},
+    ]
+    assert weather_forecast.find_next_round(races)["round"] == 18
+    assert weather_forecast.find_next_round(races, target_round=17)["round"] == 17
+
+
 def test_session_day_labels_follow_saturday_race_date() -> None:
     sessions = weather_forecast.build_session_schedule(
         {"date": "2026-09-26", "sprint": False}

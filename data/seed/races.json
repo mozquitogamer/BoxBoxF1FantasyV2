@@ -1,7 +1,9 @@
 {
   "season": 2026,
-  "total_rounds": 24,
-  "active_rounds": 22,
+  "total_rounds": 25,
+  "active_rounds": 23,
+  "calendar_source": "https://www.formula1.com/en/racing/2026/bahrain",
+  "calendar_note": "Updated 2026-09-26: Bahrain GP in Malaysia added at Sepang on October 4. Historical internal R1-R17 IDs and cancelled April R4/R5 slots retained; upcoming Singapore onward moves one internal slot later.",
   "races": [
     {"round": 1, "name": "Australian Grand Prix", "circuit": "Melbourne", "date": "2026-03-08", "sprint": false, "cancelled": false},
     {"round": 2, "name": "Chinese Grand Prix", "circuit": "Shanghai", "date": "2026-03-15", "sprint": true, "cancelled": false},
@@ -20,12 +22,13 @@
     {"round": 15, "name": "Italian Grand Prix", "circuit": "Monza", "date": "2026-09-06", "sprint": false, "cancelled": false},
     {"round": 16, "name": "Spanish Grand Prix (Madrid)", "circuit": "Madrid", "date": "2026-09-13", "sprint": false, "cancelled": false},
     {"round": 17, "name": "Azerbaijan Grand Prix", "circuit": "Baku", "date": "2026-09-26", "sprint": false, "cancelled": false},
-    {"round": 18, "name": "Singapore Grand Prix", "circuit": "Singapore", "date": "2026-10-11", "sprint": true, "cancelled": false},
-    {"round": 19, "name": "United States Grand Prix", "circuit": "Austin", "date": "2026-10-25", "sprint": false, "cancelled": false},
-    {"round": 20, "name": "Mexican Grand Prix", "circuit": "Mexico City", "date": "2026-11-01", "sprint": false, "cancelled": false},
-    {"round": 21, "name": "Brazilian Grand Prix", "circuit": "São Paulo", "date": "2026-11-08", "sprint": false, "cancelled": false},
-    {"round": 22, "name": "Las Vegas Grand Prix", "circuit": "Las Vegas", "date": "2026-11-21", "sprint": false, "cancelled": false},
-    {"round": 23, "name": "Qatar Grand Prix", "circuit": "Lusail", "date": "2026-11-29", "sprint": false, "cancelled": false},
-    {"round": 24, "name": "Abu Dhabi Grand Prix", "circuit": "Yas Marina", "date": "2026-12-06", "sprint": false, "cancelled": false}
+    {"round": 18, "name": "Bahrain Grand Prix in Malaysia", "circuit": "Sepang", "date": "2026-10-04", "sprint": false, "cancelled": false},
+    {"round": 19, "name": "Singapore Grand Prix", "circuit": "Singapore", "date": "2026-10-11", "sprint": true, "cancelled": false},
+    {"round": 20, "name": "United States Grand Prix", "circuit": "Austin", "date": "2026-10-25", "sprint": false, "cancelled": false},
+    {"round": 21, "name": "Mexican Grand Prix", "circuit": "Mexico City", "date": "2026-11-01", "sprint": false, "cancelled": false},
+    {"round": 22, "name": "Brazilian Grand Prix", "circuit": "São Paulo", "date": "2026-11-08", "sprint": false, "cancelled": false},
+    {"round": 23, "name": "Las Vegas Grand Prix", "circuit": "Las Vegas", "date": "2026-11-21", "sprint": false, "cancelled": false},
+    {"round": 24, "name": "Qatar Grand Prix", "circuit": "Lusail", "date": "2026-11-29", "sprint": false, "cancelled": false},
+    {"round": 25, "name": "Abu Dhabi Grand Prix", "circuit": "Yas Marina", "date": "2026-12-06", "sprint": false, "cancelled": false}
   ]
 }

@@ -24,6 +24,7 @@ CIRCUIT_COORDINATES = {
     "Monza":              (45.6156, 9.2811,  "Europe/Rome"),
     "Madrid":             (40.4614, -3.5892, "Europe/Madrid"),
     "Baku":               (40.3725, 49.8533, "Asia/Baku"),
+    "Sepang":             (2.7608, 101.7383, "Asia/Kuala_Lumpur"),
     "Singapore":          (1.2914,  103.8640, "Asia/Singapore"),
     "Austin":             (30.1328, -97.6411, "America/Chicago"),
     "Mexico City":        (19.4042, -99.0907, "America/Mexico_City"),

@@ -241,6 +241,17 @@
       "safety_car_probability": 5,
       "track_evolution": 5,
       "grip_level": 7
+    },
+    "sepang": {
+      "is_street": 0,
+      "overtaking_difficulty": 4,
+      "avg_corner_speed": 7,
+      "straight_line_importance": 7,
+      "downforce_level": 7,
+      "turn1_incident_risk": 7,
+      "safety_car_probability": 5,
+      "track_evolution": 6,
+      "grip_level": 7
     }
   },
   "race_circuit_map": {
@@ -259,6 +270,7 @@
     "Italian Grand Prix": "monza",
     "Spanish Grand Prix (Madrid)": "madrid",
     "Azerbaijan Grand Prix": "baku",
+    "Bahrain Grand Prix in Malaysia": "sepang",
     "Singapore Grand Prix": "marina_bay",
     "United States Grand Prix": "americas",
     "Mexican Grand Prix": "rodriguez",
@@ -284,6 +296,6 @@
     7,
     11,
     14,
-    18
+    19
   ]
 }

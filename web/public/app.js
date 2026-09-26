@@ -35,6 +35,7 @@ const RACE_FLAGS = {
     'Dutch Grand Prix': '🇳🇱',
     'Italian Grand Prix': '🇮🇹',
     'Azerbaijan Grand Prix': '🇦🇿',
+    'Bahrain Grand Prix in Malaysia': '🇲🇾',
     'Singapore Grand Prix': '🇸🇬',
     'United States Grand Prix': '🇺🇸',
     'Mexico City Grand Prix': '🇲🇽',
@@ -47,7 +48,7 @@ const RACE_FLAGS = {
 // -- 2026 F1 Fantasy Lock Deadlines (UTC) --
 // Lock deadline = start of QUALIFYING on normal weekends, or the start of the
 // SPRINT RACE on sprint weekends (standard F1 Fantasy sprint rule — the lock is
-// the sprint race, not sprint qualifying). Sprint rounds: 2, 6, 7, 11, 14, 18.
+// the sprint race, not sprint qualifying). Sprint rounds: 2, 6, 7, 11, 14, 19.
 const LOCK_DEADLINES = [
     { round: 1,  race: 'Australian Grand Prix',      lock: '2026-03-07T05:00:00Z', sprint: false },
     { round: 2,  race: 'Chinese Grand Prix',          lock: '2026-03-13T07:30:00Z', sprint: true  },
@@ -66,13 +67,14 @@ const LOCK_DEADLINES = [
     { round: 15, race: 'Italian Grand Prix',           lock: '2026-09-05T14:00:00Z', sprint: false },
     { round: 16, race: 'Spanish Grand Prix (Madrid)',   lock: '2026-09-12T14:00:00Z', sprint: false },
     { round: 17, race: 'Azerbaijan Grand Prix',        lock: '2026-09-25T12:00:00Z', sprint: false },
-    { round: 18, race: 'Singapore Grand Prix',         lock: '2026-10-10T13:00:00Z', sprint: true  },
-    { round: 19, race: 'United States Grand Prix',     lock: '2026-10-23T21:30:00Z', sprint: false },
-    { round: 20, race: 'Mexican Grand Prix',           lock: '2026-10-31T20:00:00Z', sprint: false },
-    { round: 21, race: 'Brazilian Grand Prix',         lock: '2026-11-06T18:30:00Z', sprint: false },
-    { round: 22, race: 'Las Vegas Grand Prix',         lock: '2026-11-21T04:00:00Z', sprint: false },
-    { round: 23, race: 'Qatar Grand Prix',             lock: '2026-11-27T16:30:00Z', sprint: false },
-    { round: 24, race: 'Abu Dhabi Grand Prix',         lock: '2026-12-05T13:00:00Z', sprint: false },
+    { round: 18, race: 'Bahrain Grand Prix in Malaysia', lock: '2026-10-03T08:00:00Z', sprint: false },
+    { round: 19, race: 'Singapore Grand Prix',         lock: '2026-10-10T13:00:00Z', sprint: true  },
+    { round: 20, race: 'United States Grand Prix',     lock: '2026-10-23T21:30:00Z', sprint: false },
+    { round: 21, race: 'Mexican Grand Prix',           lock: '2026-10-31T20:00:00Z', sprint: false },
+    { round: 22, race: 'Brazilian Grand Prix',         lock: '2026-11-06T18:30:00Z', sprint: false },
+    { round: 23, race: 'Las Vegas Grand Prix',         lock: '2026-11-21T04:00:00Z', sprint: false },
+    { round: 24, race: 'Qatar Grand Prix',             lock: '2026-11-27T16:30:00Z', sprint: false },
+    { round: 25, race: 'Abu Dhabi Grand Prix',         lock: '2026-12-05T13:00:00Z', sprint: false },
 ];
 
 // -- State --
@@ -911,7 +913,7 @@ function renderV13() {
             <div>
                 <span class="v13-eyebrow">Beat the Bot challenge · Free entry</span>
                 <h2>${registrationOpen ? 'Registration is open now' : 'Registration is closed'}</h2>
-                <p>${registrationOpen ? v13Escape(competition.registration_window) : 'Registration closed at the Round 22 Las Vegas F1 Fantasy team lock.'} Scores use the official full-2026 total, leaving R23 and R24 to decide the challenge. ${registrationOpen ? 'Confirm your email now; after the season, submit one official team and its full-season score screenshot.' : 'Registered entrants will receive end-of-season score-submission instructions.'} A private league remains available as a verification backup.</p>
+                <p>${registrationOpen ? v13Escape(competition.registration_window) : 'Registration closed at the Round 23 Las Vegas F1 Fantasy team lock.'} Scores use the official full-2026 total, leaving R24 and R25 to decide the challenge. ${registrationOpen ? 'Confirm your email now; after the season, submit one official team and its full-season score screenshot.' : 'Registered entrants will receive end-of-season score-submission instructions.'} A private league remains available as a verification backup.</p>
                 <p class="v13-rules-note">${v13Escape(competition.eligibility_note)}</p>
                 ${registrationOpen ? '<button class="v13-registration-button" id="v13RegisterButton" type="button">Register or access my entry</button>' : ''}
             </div>
@@ -973,7 +975,7 @@ function setupV13Popup() {
     const fineprint = popup.querySelector('.v13-popup-fineprint');
     if (!registrationOpen) {
         exploreButton.textContent = 'Follow V13';
-        if (fineprint) fineprint.textContent = 'Registration closed at the Round 22 Las Vegas F1 Fantasy team lock. The final two rounds now decide the challenge.';
+        if (fineprint) fineprint.textContent = 'Registration closed at the Round 23 Las Vegas F1 Fantasy team lock. The final two rounds now decide the challenge.';
     }
 
     const storageKey = 'boxbox-v13-popup-until';

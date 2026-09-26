@@ -1276,7 +1276,9 @@ def print_summary(output: dict) -> None:
 def get_completed_rounds(year: int) -> list[int]:
     """Determine which rounds have been completed (have results data)."""
     completed = []
-    for rnd in range(1, 25):
+    with open(SEED_DIR / "races.json") as handle:
+        calendar = json.load(handle)["races"]
+    for rnd in sorted(race["round"] for race in calendar):
         if rnd in CANCELLED_ROUNDS_2026:
             continue
         # Check for Jolpica results or post_race_analysis

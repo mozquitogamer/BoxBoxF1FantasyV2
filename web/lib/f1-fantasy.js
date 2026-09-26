@@ -454,7 +454,7 @@ function numberOrNull(value) {
 
 function officialGameDay(internalRound) {
     const round = Number(internalRound);
-    if (!Number.isInteger(round) || round < 1 || round > 24) throw new Error('Invalid internal F1 round.');
+    if (!Number.isInteger(round) || round < 1 || round > 25) throw new Error('Invalid internal F1 round.');
     return round - (round > 4 ? 1 : 0) - (round > 5 ? 1 : 0);
 }
 

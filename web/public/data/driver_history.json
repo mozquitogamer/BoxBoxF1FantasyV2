@@ -86,6 +86,12 @@
           "circuit_id": "madrid",
           "points": 38,
           "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 43,
+          "is_dnf": false
         }
       ]
     },
@@ -173,6 +179,12 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 27,
+          "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 45,
           "is_dnf": false
         }
       ]
@@ -262,6 +274,12 @@
           "circuit_id": "madrid",
           "points": 35,
           "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 28,
+          "is_dnf": false
         }
       ]
     },
@@ -349,6 +367,12 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 19,
+          "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 20,
           "is_dnf": false
         }
       ]
@@ -438,6 +462,12 @@
           "circuit_id": "madrid",
           "points": -13,
           "is_dnf": true
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 15,
+          "is_dnf": false
         }
       ]
     },
@@ -526,6 +556,12 @@
           "circuit_id": "madrid",
           "points": 23,
           "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": -11,
+          "is_dnf": true
         }
       ]
     },
@@ -613,6 +649,12 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 3,
+          "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 6,
           "is_dnf": false
         }
       ]
@@ -702,6 +744,12 @@
           "circuit_id": "madrid",
           "points": 5,
           "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 17,
+          "is_dnf": false
         }
       ]
     },
@@ -789,6 +837,12 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 0,
+          "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 8,
           "is_dnf": false
         }
       ]
@@ -878,6 +932,12 @@
           "circuit_id": "madrid",
           "points": 4,
           "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": -15,
+          "is_dnf": true
         }
       ]
     },
@@ -965,6 +1025,12 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 5,
+          "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 12,
           "is_dnf": false
         }
       ]
@@ -1054,6 +1120,12 @@
           "circuit_id": "madrid",
           "points": -18,
           "is_dnf": true
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 15,
+          "is_dnf": false
         }
       ]
     },
@@ -1142,6 +1214,12 @@
           "circuit_id": "madrid",
           "points": 4,
           "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": -16,
+          "is_dnf": true
         }
       ]
     },
@@ -1230,6 +1308,12 @@
           "circuit_id": "madrid",
           "points": 13,
           "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": -18,
+          "is_dnf": true
         }
       ]
     },
@@ -1317,6 +1401,12 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 16,
+          "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 3,
           "is_dnf": false
         }
       ]
@@ -1406,6 +1496,12 @@
           "circuit_id": "madrid",
           "points": -18,
           "is_dnf": true
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 11,
+          "is_dnf": false
         }
       ]
     },
@@ -1475,6 +1571,12 @@
           "round": 13,
           "circuit_id": "hungaroring",
           "points": 15,
+          "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 26,
           "is_dnf": false
         }
       ]
@@ -1564,6 +1666,12 @@
           "circuit_id": "madrid",
           "points": 4,
           "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": -14,
+          "is_dnf": true
         }
       ]
     },
@@ -1651,6 +1759,12 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 9,
+          "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 0,
           "is_dnf": false
         }
       ]
@@ -1740,6 +1854,12 @@
           "circuit_id": "madrid",
           "points": 1,
           "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 6,
+          "is_dnf": false
         }
       ]
     },
@@ -1828,6 +1948,12 @@
           "circuit_id": "madrid",
           "points": 2,
           "is_dnf": false
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 15,
+          "is_dnf": false
         }
       ]
     },
@@ -1915,6 +2041,12 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": -22,
+          "is_dnf": true
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": -20,
           "is_dnf": true
         }
       ]
@@ -2014,6 +2146,11 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 87
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 88
         }
       ]
     },
@@ -2088,6 +2225,11 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 18
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 45
         }
       ]
     },
@@ -2162,6 +2304,11 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 59
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 71
         }
       ]
     },
@@ -2236,6 +2383,11 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 13
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 23
         }
       ]
     },
@@ -2310,6 +2462,11 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 11
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 21
         }
       ]
     },
@@ -2384,6 +2541,11 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 24
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": -18
         }
       ]
     },
@@ -2458,6 +2620,11 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": -11
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 6
         }
       ]
     },
@@ -2532,6 +2699,11 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 44
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 1
         }
       ]
     },
@@ -2606,6 +2778,11 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": 10
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 27
         }
       ]
     },
@@ -2680,6 +2857,11 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": -16
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": 16
         }
       ]
     },
@@ -2754,6 +2936,11 @@
           "round": 16,
           "circuit_id": "madrid",
           "points": -17
+        },
+        {
+          "round": 17,
+          "circuit_id": "baku",
+          "points": -35
         }
       ]
     }

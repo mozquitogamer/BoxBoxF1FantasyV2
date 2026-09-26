@@ -311,6 +311,21 @@ TRACK_DATABASE = {
         'grip_level': 7,
     },
 
+    # Sepang returns for the 2026 Bahrain GP in Malaysia. These are manual
+    # circuit priors, like the other profiles; no 2020-2025 training race exists.
+    # Layout reference: https://www.formula1.com/en/racing/2026/bahrain
+    'sepang': {
+        'is_street': 0,
+        'overtaking_difficulty': 4,
+        'avg_corner_speed': 7,
+        'straight_line_importance': 7,
+        'downforce_level': 7,
+        'turn1_incident_risk': 7,
+        'safety_car_probability': 5,
+        'track_evolution': 6,
+        'grip_level': 7,
+    },
+
     # === HISTORIC/ONE-OFF CIRCUITS (2020-2021) ===
     'mugello': {  # Tuscany 2020
         'is_street': 0,
@@ -424,6 +439,8 @@ RACE_NAME_TO_CIRCUIT = {
     'chinese grand prix': 'shanghai',
     'japanese grand prix': 'suzuka',
     'bahrain grand prix': 'bahrain',
+    'bahrain grand prix in malaysia': 'sepang',
+    'malaysian grand prix': 'sepang',
     'saudi arabian grand prix': 'jeddah',
     'miami grand prix': 'miami',
     'canadian grand prix': 'villeneuve',

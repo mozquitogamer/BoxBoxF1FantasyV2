@@ -2,7 +2,9 @@
 
 import importlib
 import json
+import re
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -15,12 +17,43 @@ from config.settings import (
 
 
 def test_2026_round_trip_skips_cancelled_calendar_slots():
-    active_rounds = [r for r in range(1, 25) if r not in (4, 5)]
-    assert internal_rounds_for_year(2026, 22) == active_rounds
+    active_rounds = [r for r in range(1, 26) if r not in (4, 5)]
+    assert internal_rounds_for_year(2026, 23) == active_rounds
     assert internal_rounds_for_year(2026, 4) == [1, 2, 3, 6]
     for api_round, internal_round in enumerate(active_rounds, start=1):
         assert internal_round_from_api(api_round, 2026) == internal_round
         assert fastf1_round(internal_round, 2026) == api_round
+
+
+def test_sepang_insertion_preserves_history_and_aligns_future_sessions():
+    from config.settings import SEED_DIR, SPRINT_ROUNDS_2026
+    from config.track_classifications import get_circuit_id_from_race_name
+    from config.circuit_coordinates import get_circuit_location
+
+    calendar = json.loads((SEED_DIR / "races.json").read_text())
+    active = [race for race in calendar["races"] if not race.get("cancelled")]
+    assert len(active) == calendar["active_rounds"] == 23
+    assert [race["date"] for race in active] == sorted(race["date"] for race in active)
+    by_round = {race["round"]: race for race in active}
+    assert by_round[17]["name"] == "Azerbaijan Grand Prix"
+    assert by_round[18]["name"] == "Bahrain Grand Prix in Malaysia"
+    assert by_round[18]["date"] == "2026-10-04"
+    assert fastf1_round(17) == 15
+    assert fastf1_round(18) == 16
+    assert fastf1_round(19) == 17
+    assert by_round[19]["name"] == "Singapore Grand Prix"
+    assert by_round[25]["name"] == "Abu Dhabi Grand Prix"
+    assert [race["round"] for race in active if race["sprint"]] == SPRINT_ROUNDS_2026
+    assert get_circuit_id_from_race_name(by_round[18]["name"]) == "sepang"
+    assert get_circuit_location(by_round[18]["circuit"])[2] == "Asia/Kuala_Lumpur"
+
+    app = (Path(__file__).resolve().parents[1] / "web/public/app.js").read_text(encoding="utf-8")
+    deadlines = re.findall(r"\{ round: (\d+),\s+race: '([^']+)',\s+lock: '([^']+)',\s+sprint: (true|false)", app)
+    deadline_map = {int(number): (name, lock, sprint == "true") for number, name, lock, sprint in deadlines}
+    for race in active:
+        assert deadline_map[race["round"]][0] == race["name"]
+        assert deadline_map[race["round"]][2] == race["sprint"]
+    assert deadline_map[18][1] == "2026-10-03T08:00:00Z"
 
 
 def test_other_seasons_keep_their_round_numbers():

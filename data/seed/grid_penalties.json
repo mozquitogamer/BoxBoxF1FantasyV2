@@ -29,5 +29,11 @@
     "ALB": {
       "back_of_grid": true
     }
+  },
+  "18": {
+    "_note": "Bahrain GP in Malaysia: Colapinto receives a five-place grid drop for the Baku restart collision. Source: https://www.formula1.com/en/latest/article/colapinto-hit-with-five-place-grid-penalty-for-bahrain-gp-in-malaysia-after-baku-collision.3gWVfzDMMr5hReiwTt1fPD",
+    "COL": {
+      "places": 5
+    }
   }
 }

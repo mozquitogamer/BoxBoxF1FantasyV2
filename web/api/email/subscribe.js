@@ -71,12 +71,12 @@ async function sendConfirmation(entry, email, config, now) {
             subject: 'Confirm your free Beat V13 registration',
             html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#141821">
                 <h1 style="font-size:24px">Confirm your Beat V13 entry</h1>
-                <p>Beat V13 entry is free, but one more step is required: confirm this email address before the Round 22 Las Vegas F1 Fantasy team lock on 21 November 2026 at 04:00 UTC.</p>
+                <p>Beat V13 entry is free, but one more step is required: confirm this email address before the Round 23 Las Vegas F1 Fantasy team lock on 21 November 2026 at 04:00 UTC.</p>
                 <p><a href="${confirmationUrl}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 18px;border-radius:7px;font-weight:700">Confirm free registration</a></p>
                 <p>You will receive concise V13 early thoughts, post-FP simulation updates and competition instructions after confirming.</p>
                 <p style="color:#667085;font-size:13px">This link expires in ${config.ttlHours} hours. If you did not request this, <a href="${cancelUrl}">cancel this registration</a> and no entry will be created.</p>
             </div>`,
-            text: `Confirm your free Beat V13 registration:\n\n${confirmationUrl}\n\nOne more step is required: confirm this address before the Round 22 Las Vegas F1 Fantasy team lock on 21 November 2026 at 04:00 UTC. You will receive concise V13 early thoughts, post-FP simulation updates and competition instructions after confirming. This link expires in ${config.ttlHours} hours. If you did not request this, cancel this registration here: ${cancelUrl}`,
+            text: `Confirm your free Beat V13 registration:\n\n${confirmationUrl}\n\nOne more step is required: confirm this address before the Round 23 Las Vegas F1 Fantasy team lock on 21 November 2026 at 04:00 UTC. You will receive concise V13 early thoughts, post-FP simulation updates and competition instructions after confirming. This link expires in ${config.ttlHours} hours. If you did not request this, cancel this registration here: ${cancelUrl}`,
         },
     });
     const id = providerId(result);
@@ -140,11 +140,11 @@ async function scheduleReminder(entry, email, config, now) {
                 scheduled_at: scheduledAt,
                 html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#141821">
                     <h1 style="font-size:24px">Your Beat V13 entry is waiting</h1>
-                    <p>One more step is required to enter: confirm your email address before the Round 22 team lock.</p>
+                    <p>One more step is required to enter: confirm your email address before the Round 23 team lock.</p>
                     <p><a href="${confirmationUrl}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 18px;border-radius:7px;font-weight:700">Confirm free registration</a></p>
                     <p style="color:#667085;font-size:13px">If you did not request this, <a href="${cancelUrl}">cancel this registration</a>.</p>
                 </div>`,
-                text: `Your Beat V13 entry is waiting. One more step is required: confirm your email address before the Round 22 team lock. Confirm here: ${confirmationUrl}\n\nIf you did not request this, cancel this registration here: ${cancelUrl}`,
+                text: `Your Beat V13 entry is waiting. One more step is required: confirm your email address before the Round 23 team lock. Confirm here: ${confirmationUrl}\n\nIf you did not request this, cancel this registration here: ${cancelUrl}`,
             },
         });
         const id = providerId(result);
@@ -196,7 +196,7 @@ module.exports = async function subscribe(req, res) {
     if (!isBeatV13RegistrationOpen()) {
         return res.status(410).json({
             ok: false,
-            message: 'Beat V13 registration closed at the Round 22 F1 Fantasy team lock.',
+            message: 'Beat V13 registration closed at the Round 23 F1 Fantasy team lock.',
         });
     }
 
@@ -211,7 +211,7 @@ module.exports = async function subscribe(req, res) {
         return res.status(202).json({
             ok: true,
             entry_status: 'pending',
-            message: 'Confirmation email sent. One more step is required: open the email and confirm your address before the Round 22 lock.',
+            message: 'Confirmation email sent. One more step is required: open the email and confirm your address before the Round 23 lock.',
         });
     }
 
@@ -264,7 +264,7 @@ module.exports = async function subscribe(req, res) {
         return res.status(202).json({
             ok: true,
             entry_status: 'pending',
-            message: 'Confirmation email sent. One more step is required: open the email and confirm your address before the Round 22 lock.',
+            message: 'Confirmation email sent. One more step is required: open the email and confirm your address before the Round 23 lock.',
         });
     } catch (error) {
         console.error('Could not start Beat V13 registration:', error.message);

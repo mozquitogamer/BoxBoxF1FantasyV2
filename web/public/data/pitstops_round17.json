@@ -1,0 +1,241 @@
+{
+  "round": 17,
+  "by_constructor": {
+    "williams": [
+      {
+        "lap": 20,
+        "stationary": null,
+        "lane": 20.6,
+        "stationary_missing": true
+      },
+      {
+        "lap": 30,
+        "stationary": null,
+        "lane": 21.4,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 15.9,
+        "stationary_missing": true
+      }
+    ],
+    "cadillac": [
+      {
+        "lap": 26,
+        "stationary": null,
+        "lane": 23.0,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 15.0,
+        "stationary_missing": true
+      },
+      {
+        "lap": 30,
+        "stationary": null,
+        "lane": 22.2,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 15.3,
+        "stationary_missing": true
+      }
+    ],
+    "alpine": [
+      {
+        "lap": 30,
+        "stationary": null,
+        "lane": 20.7,
+        "stationary_missing": true
+      },
+      {
+        "lap": 30,
+        "stationary": null,
+        "lane": 20.7,
+        "stationary_missing": true
+      }
+    ],
+    "mercedes": [
+      {
+        "lap": 30,
+        "stationary": null,
+        "lane": 20.7,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 16.3,
+        "stationary_missing": true
+      },
+      {
+        "lap": 31,
+        "stationary": null,
+        "lane": 20.6,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 15.1,
+        "stationary_missing": true
+      }
+    ],
+    "mclaren": [
+      {
+        "lap": 30,
+        "stationary": null,
+        "lane": 20.8,
+        "stationary_missing": true
+      },
+      {
+        "lap": 31,
+        "stationary": null,
+        "lane": 20.5,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 15.1,
+        "stationary_missing": true
+      }
+    ],
+    "haas": [
+      {
+        "lap": 30,
+        "stationary": null,
+        "lane": 21.2,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 16.3,
+        "stationary_missing": true
+      },
+      {
+        "lap": 30,
+        "stationary": null,
+        "lane": 21.4,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 16.1,
+        "stationary_missing": true
+      }
+    ],
+    "racing_bulls": [
+      {
+        "lap": 30,
+        "stationary": null,
+        "lane": 22.1,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 16.0,
+        "stationary_missing": true
+      },
+      {
+        "lap": 31,
+        "stationary": null,
+        "lane": 21.7,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 23.6,
+        "stationary_missing": true
+      }
+    ],
+    "audi": [
+      {
+        "lap": 30,
+        "stationary": null,
+        "lane": 20.3,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 15.2,
+        "stationary_missing": true
+      },
+      {
+        "lap": 32,
+        "stationary": null,
+        "lane": 20.1,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 15.3,
+        "stationary_missing": true
+      }
+    ],
+    "red_bull": [
+      {
+        "lap": 31,
+        "stationary": null,
+        "lane": 20.8,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 15.2,
+        "stationary_missing": true
+      },
+      {
+        "lap": 31,
+        "stationary": null,
+        "lane": 21.9,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 15.2,
+        "stationary_missing": true
+      }
+    ],
+    "ferrari": [
+      {
+        "lap": 31,
+        "stationary": null,
+        "lane": 22.0,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 15.5,
+        "stationary_missing": true
+      },
+      {
+        "lap": 31,
+        "stationary": null,
+        "lane": 22.1,
+        "stationary_missing": true
+      },
+      {
+        "lap": 36,
+        "stationary": null,
+        "lane": 16.5,
+        "stationary_missing": true
+      }
+    ]
+  }
+}

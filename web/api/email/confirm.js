@@ -146,7 +146,7 @@ module.exports = async function confirm(req, res) {
     if (!isBeatV13RegistrationOpen()) {
         return res.status(410).send(htmlPage(
             'Registration closed',
-            'Beat V13 registration closed at the Round 22 F1 Fantasy team lock.',
+            'Beat V13 registration closed at the Round 23 F1 Fantasy team lock.',
             false,
             REGISTER_URL,
             'View Beat V13',

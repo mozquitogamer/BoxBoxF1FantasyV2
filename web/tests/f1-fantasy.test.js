@@ -260,6 +260,10 @@ test('maps internal rounds around the two cancelled races', () => {
     assert.equal(officialGameDay(3), 3);
     assert.equal(officialGameDay(6), 4);
     assert.equal(officialGameDay(13), 11);
+    assert.equal(officialGameDay(18), 16);
+    assert.equal(officialGameDay(19), 17);
+    assert.equal(officialGameDay(25), 23);
+    assert.throws(() => officialGameDay(26), /Invalid internal F1 round/);
 });
 
 test('official-team discovery uses exact name only across public F1 lists', async () => {

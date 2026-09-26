@@ -124,7 +124,7 @@ TARGET_COLUMNS: list[str] = [
 ]
 
 # -- Sprint weekends for 2026 --------------------------------------------------
-SPRINT_ROUNDS_2026: list[int] = [2, 6, 7, 11, 14, 18]
+SPRINT_ROUNDS_2026: list[int] = [2, 6, 7, 11, 14, 19]
 
 # -- Cancelled rounds for 2026 ------------------------------------------------
 CANCELLED_ROUNDS_2026: list[int] = [4, 5]

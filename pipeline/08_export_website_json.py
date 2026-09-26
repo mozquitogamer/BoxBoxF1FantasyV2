@@ -673,7 +673,7 @@ def build_season_summary(current_round: int | None = None) -> dict:
 
     # Gather completed rounds
     completed_rounds = []
-    for rnd_num in range(1, 25):
+    for rnd_num in sorted(race_info):
         pred_path = PREDICTIONS_DIR / f"round{rnd_num}" / "fantasy_points.parquet"
         post_race_path = PREDICTIONS_DIR / f"round{rnd_num}" / "post_race_analysis.json"
         actual_path = PREDICTIONS_DIR / f"round{rnd_num}" / "actual_fantasy_points.json"
@@ -746,7 +746,7 @@ def copy_analysis_files(round_num: int) -> None:
         print(f"  Copied FP analysis -> {out}")
 
     # Post-race analysis (copy all available)
-    for rnd in range(1, 25):
+    for rnd in sorted(load_race_info()):
         pr_path = PREDICTIONS_DIR / f"round{rnd}" / "post_race_analysis.json"
         if pr_path.exists():
             with open(pr_path) as f:
@@ -831,7 +831,7 @@ def build_driver_history_json() -> dict:
     drivers = {}
     constructors = {}
 
-    for rnd_num in range(1, 25):
+    for rnd_num in sorted(race_info):
         if rnd_num in CANCELLED_ROUNDS_2026:
             continue
 

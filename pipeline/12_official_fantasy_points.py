@@ -71,13 +71,14 @@ RACE_NAMES = {
     15: "Italian Grand Prix",
     16: "Spanish Grand Prix (Madrid)",
     17: "Azerbaijan Grand Prix",
-    18: "Singapore Grand Prix",
-    19: "United States Grand Prix",
-    20: "Mexican Grand Prix",
-    21: "Brazilian Grand Prix",
-    22: "Las Vegas Grand Prix",
-    23: "Qatar Grand Prix",
-    24: "Abu Dhabi Grand Prix",
+    18: "Bahrain Grand Prix in Malaysia",
+    19: "Singapore Grand Prix",
+    20: "United States Grand Prix",
+    21: "Mexican Grand Prix",
+    22: "Brazilian Grand Prix",
+    23: "Las Vegas Grand Prix",
+    24: "Qatar Grand Prix",
+    25: "Abu Dhabi Grand Prix",
 }
 
 

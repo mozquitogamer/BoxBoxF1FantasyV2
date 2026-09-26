@@ -9,7 +9,7 @@ F1 Fantasy prediction pipeline and website for the 2026 season. Predicts qualify
 - **ML:** XGBoost ranking models (LambdaMART) for qualifying and race position prediction
 - **Frontend:** Vanilla JS, no framework, static JSON data, hosted on Vercel
 - **Deployment:** `git push` to GitHub → Vercel auto-deploys
-- **Sprint rounds 2026:** 2, 6, 7, 11, 14, 18
+- **Sprint rounds 2026:** 2, 6, 7, 11, 14, 19
 - **Cancelled rounds 2026:** 4, 5
 
 ## Project Structure
@@ -94,6 +94,8 @@ XGBoost's native NaN handling means: when FP data exists → model uses it to re
 Model features are extracted ONLY from FP sessions (`all_laps_fp*.parquet`). Sprint qualifying laps are saved separately and consumed only by `10_fp_analysis.py` for the Deep Dive page — they do not feed model training/inference. The model still picks up sprint qualifying as a grid input via `06_run_predictions.py` (the `sprint_grid` feature).
 
 ## Calendar Mapping: Internal Round vs External APIs
+
+**Calendar update (2026-09-26):** The Bahrain Grand Prix in Malaysia at Sepang takes place on October 4 and is inserted as internal R18 (external API R16). Historical R1-R17 IDs and the cancelled April R4/R5 slots remain fixed. Singapore is now internal R19 (external R17), and the remaining upcoming races shift one slot later through Abu Dhabi R25. The season has 23 active races. Use the updated seed calendar, including Sepang's circuit profile, GPS coordinates, October 3 08:00 UTC qualifying/Fantasy deadline, and Colapinto's confirmed five-place grid penalty for R18.
 
 `data/seed/races.json` preserves original 2026 numbering with `cancelled: true` markers (Bahrain R4, Saudi R5). **Both FastF1 AND Jolpica/Ergast omit cancelled races from their numbering**, so external round numbers diverge from internal after the first cancellation. Use `config.settings.fastf1_round(internal_round, year)` at every external API boundary — it subtracts the count of cancelled rounds preceding the target round. (The helper is named `fastf1_round` for historical reasons but applies to Jolpica too — both APIs compress identically.)
 
