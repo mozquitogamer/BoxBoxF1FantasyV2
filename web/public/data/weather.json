@@ -44,7 +44,7 @@
     },
     {
       "date": "2026-09-26",
-      "temp_max": 26.0,
+      "temp_max": 26.7,
       "temp_min": 20.5,
       "precip_probability_max": 0,
       "precip_sum_mm": 0.0,
@@ -283,60 +283,60 @@
       "date": "2026-09-26",
       "rain_probability": 0,
       "rain_risk": "NONE",
-      "avg_temp": 25.9,
-      "avg_wind": 19.6,
+      "avg_temp": 26.4,
+      "avg_wind": 18.1,
       "total_precip_mm": 0.0,
-      "weather_description": "Mainly clear",
-      "weather_category": "clear",
-      "weather_icon": "\u2600\ufe0f",
+      "weather_description": "Partly cloudy",
+      "weather_category": "cloudy",
+      "weather_icon": "\u26c5",
       "hourly": [
         {
           "hour": 13,
-          "temp": 25.6,
-          "humidity": 54,
+          "temp": 25.9,
+          "humidity": 52,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 21.1,
-          "windgusts": 37.1,
+          "windspeed": 18.4,
+          "windgusts": 33.1,
           "weather_code": 2
         },
         {
           "hour": 14,
-          "temp": 26.0,
-          "humidity": 49,
+          "temp": 26.6,
+          "humidity": 44,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 20.4,
-          "windgusts": 33.5,
-          "weather_code": 1
+          "windspeed": 17.1,
+          "windgusts": 29.2,
+          "weather_code": 2
         },
         {
           "hour": 15,
-          "temp": 26.0,
-          "humidity": 47,
+          "temp": 26.7,
+          "humidity": 40,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 19.5,
-          "windgusts": 32.0,
+          "windspeed": 17.8,
+          "windgusts": 28.1,
           "weather_code": 1
         },
         {
           "hour": 16,
-          "temp": 26.0,
-          "humidity": 44,
+          "temp": 26.2,
+          "humidity": 42,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 17.6,
-          "windgusts": 31.0,
-          "weather_code": 3
+          "windspeed": 18.9,
+          "windgusts": 29.9,
+          "weather_code": 2
         }
       ]
     }
   ],
-  "last_updated": "2026-09-26T02:38:59Z",
-  "next_update": "2026-09-26T08:38:59Z",
+  "last_updated": "2026-09-26T10:31:38Z",
+  "next_update": "2026-09-26T16:31:38Z",
   "data_source": "Open-Meteo (open-meteo.com)",
-  "forecast_snapshot_id": "2026-09-26T02-38-59.040310Z",
-  "forecast_retrieved_at": "2026-09-26T02:38:59.040310+00:00",
-  "forecast_archive_path": "data/forecasts/weather/year2026/round17/2026-09-26T02-38-59.040310Z_open_meteo.json"
+  "forecast_snapshot_id": "2026-09-26T10-31-38.532398Z",
+  "forecast_retrieved_at": "2026-09-26T10:31:38.532398+00:00",
+  "forecast_archive_path": "data/forecasts/weather/year2026/round17/2026-09-26T10-31-38.532398Z_open_meteo.json"
 }
