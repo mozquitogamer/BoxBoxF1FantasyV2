@@ -939,6 +939,12 @@
             "to_round": null
           }
         }
+      },
+      "price_change_assumption": {
+        "round": 18,
+        "driver_ids": ["HAD", "LAW"],
+        "history_from_round": 17,
+        "note": "Hadjar is $15.1M and Lawson is $9.1M after Baku. Their Sepang price-change estimates use Baku as the first score in a fresh pricing window, matching an independent Sepang threshold chart. F1 Fantasy has not published its substitution pricing rule."
       }
     }
   }

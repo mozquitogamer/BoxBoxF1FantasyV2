@@ -137,8 +137,8 @@ let slotPickerCompareIndex = 0;
 
 // -- F1 Fantasy Price Change Thresholds --
 // PPM = cumulative_season_points / current_price
-// A-tier: assets priced > $18.5M (smaller price swings)
-// B-tier: assets priced <= $18.5M (larger price swings)
+// A-tier: assets priced >= $18.5M (smaller price swings)
+// B-tier: assets priced < $18.5M (larger price swings)
 const PRICE_TIERS = {
     A_TIER_THRESHOLD: 18.5,
     A_TIER_CHANGES: { great: 0.3, good: 0.1, poor: -0.1, terrible: -0.3 },
@@ -147,10 +147,10 @@ const PRICE_TIERS = {
 };
 // PPM rating thresholds (rolling avg of last 3 rounds / price)
 const PPM_RATINGS = {
-    GREAT: 1.2,    // >= 1.2 PPM = Great
+    GREAT: 1.195,  // >= 1.195 PPM = Great (2026 F1 Fantasy Tools cutoff)
     GOOD: 0.9,     // >= 0.9 PPM = Good
-    POOR: 0.6,     // >= 0.6 PPM = Poor
-    // < 0.6 = Terrible
+    POOR: 0.605,   // >= 0.605 PPM = Poor
+    // < 0.605 = Terrible
 };
 
 function ensureChartJs() {
@@ -3638,6 +3638,8 @@ function renderPriceChangeBrackets(item) {
 
     const sourceLabel = pc.priceWindowAssumedZero
         ? 'Assumed pts'
+        : pc.priceWindowReset
+        ? 'Return pts'
         : pc.hasOfficialData ? 'Official pts' : 'Calculated pts';
     const pastDisplay = pc.pastScores.length > 0
         ? pc.pastScores.map(s => s.toFixed(0)).join(', ')
@@ -3685,13 +3687,14 @@ function getPpmRating(avgPpm) {
 
 function predictPriceChange(item, predictedPts) {
     const price = item.current_price || 10;
-    const isATier = price > PRICE_TIERS.A_TIER_THRESHOLD;
+    const isATier = price >= PRICE_TIERS.A_TIER_THRESHOLD;
     const tierChanges = isATier ? PRICE_TIERS.A_TIER_CHANGES : PRICE_TIERS.B_TIER_CHANGES;
     const isDriver = !!item.driver_id;
     const itemId = isDriver ? item.driver_id : item.constructor_id;
 
     // Collect past scores — prefer official F1 Fantasy points over calculated
     const pastScores = [];
+    const scoreRounds = [];
     let cumulativeTotal = 0;
     let hasOfficialData = false;
     if (seasonSummary && seasonSummary.rounds) {
@@ -3700,6 +3703,7 @@ function predictPriceChange(item, predictedPts) {
             const result = getOfficialScore(r.round, itemId, isDriver);
             if (result) {
                 pastScores.push(result.points);
+                scoreRounds.push(r.round);
                 cumulativeTotal += result.points;
                 if (result.source === 'official') hasOfficialData = true;
             }
@@ -3711,6 +3715,7 @@ function predictPriceChange(item, predictedPts) {
             const result = getOfficialScore(rn, itemId, isDriver);
             if (result) {
                 pastScores.push(result.points);
+                scoreRounds.push(rn);
                 cumulativeTotal += result.points;
                 if (result.source === 'official') hasOfficialData = true;
             }
@@ -3725,8 +3730,18 @@ function predictPriceChange(item, predictedPts) {
         && assumption?.driver_ids?.includes(itemId)
         && Array.isArray(assumption?.previous_two_scores)
         && assumption.previous_two_scores.length === 2;
+    // Substituted drivers can return on the same game asset ID after several
+    // inactive rounds. Baku's actual prices and the published Sepang price
+    // thresholds fit a fresh pricing window from the return round. Keep all
+    // older scores in the season total, but exclude them from this forecast.
+    const priceWindowReset = isDriver
+        && Number(assumption?.round) === Number(data?.round)
+        && assumption?.driver_ids?.includes(itemId)
+        && Number.isInteger(assumption?.history_from_round);
     const recentWindow = priceWindowAssumedZero
         ? assumption.previous_two_scores.map(Number)
+        : priceWindowReset
+        ? pastScores.filter((_, index) => scoreRounds[index] >= assumption.history_from_round).slice(-2)
         : pastScores.slice(-2);
 
     // PPM = average of the two price-window scores plus this prediction / price.
@@ -3761,8 +3776,8 @@ function predictPriceChange(item, predictedPts) {
 
     return {
         avgPpm, rating, expectedChange, avgPts, atFloor,
-        cumulativeTotal, pastScores: priceWindowAssumedZero ? recentWindow : pastScores,
-        isATier, tierChanges, hasOfficialData, priceWindowAssumedZero,
+        cumulativeTotal, pastScores: (priceWindowAssumedZero || priceWindowReset) ? recentWindow : pastScores,
+        isATier, tierChanges, hasOfficialData, priceWindowAssumedZero, priceWindowReset,
         tier: isATier ? 'A' : 'B',
         ptsForGreat, ptsForGood, ptsForPoor,
         // Compat aliases

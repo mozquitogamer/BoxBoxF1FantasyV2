@@ -87,6 +87,48 @@ try {
   fail('Round 17 return or price assumption threw: ' + e.message);
 }
 
+// The actual Baku prices and the Sepang price chart support a fresh pricing
+// window for both returning assets. Earlier scores remain in season history.
+try {
+  const prices = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/seed/fantasy_prices.json'), 'utf8'));
+  const assumption = prices.round_overrides['18'].price_change_assumption;
+  const live = {
+    round: 18,
+    price_change_assumption: assumption,
+    drivers: [
+      { driver_id: 'HAD', current_price: prices.drivers.HAD.current_price },
+      { driver_id: 'LAW', current_price: prices.drivers.LAW.current_price },
+    ],
+  };
+  const official = { rounds: {
+    '12': { drivers: { HAD: 38, LAW: 3 } },
+    '13': { drivers: { HAD: 15, LAW: 13 } },
+    '15': { drivers: { LAW: 25 } },
+    '16': { drivers: { LAW: 16 } },
+    '17': { drivers: { HAD: 26, LAW: 3 } },
+  } };
+  const summary = { rounds: [12, 13, 15, 16, 17].map(round => ({ round, has_actual: true })) };
+  S.setPriceLoaderState(live, official, summary);
+  for (const [id, price, score, thresholds] of [
+    ['HAD', 15.1, 26, [11, 2, -7]],
+    ['LAW', 9.1, 3, [19, 14, 9]],
+  ]) {
+    const item = live.drivers.find(driver => driver.driver_id === id);
+    const result = S.predictPriceChange(item, 10);
+    const actualThresholds = [result.ptsForGreat, result.ptsForGood, result.ptsForPoor].map(Math.ceil);
+    if (item.current_price !== price || !result.priceWindowReset || result.pastScores.join(',') !== String(score)
+        || actualThresholds.join(',') !== thresholds.join(',')) {
+      fail(`R18 ${id} price or price-change thresholds mismatch: ${JSON.stringify(actualThresholds)}`);
+    }
+    if (id === 'LAW' && (S.predictPriceChange(item, 8).expectedChange !== -0.6
+        || S.predictPriceChange(item, 9).expectedChange !== -0.2)) {
+      fail('R18 Lawson $0.6M fall boundary must be between 8 and 9 points');
+    }
+  }
+} catch (e) {
+  fail('Round 18 return-price verification threw: ' + e.message);
+}
+
 // Calibrated budget value observes timing and forecast reliability.
 try {
   S.setBudgetValueData({
