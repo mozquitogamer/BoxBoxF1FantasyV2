@@ -2516,7 +2516,7 @@ function driverCard(d, i) {
         ${renderWeatherBadges()}
         ${gridPenalty ? `<div class="grid-penalty-notice" title="Known race-start penalty; qualifying fantasy points still use the qualifying result.">⚠ ${gridPenalty} · starts P${d.predicted_grid ?? 22}</div>` : ""}
 
-        <div class="points-badge" title="Projected = points if the predicted finishing order holds (the 'if it goes to plan' score). Risk-adj = the Monte-Carlo average over 10,000 sims — it factors in DNFs, chaos and position swings, so it sits lower. The likely outcome is between the two; the P5–P95 range is shown below.">
+        <div class="points-badge" title="Projected uses the predicted qualifying and finishing order, with expected overtakes and DNF risk. Risk-adj is the average of 10,000 simulated weekends. It can be higher or lower than projected; the P5–P95 range below shows uncertainty.">
             ${(typeof d.projected_points === 'number' ? d.projected_points : d.expected_points).toFixed(1)}
             <span class="points-label">proj</span>
             <span class="points-adj">
