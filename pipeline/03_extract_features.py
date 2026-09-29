@@ -398,6 +398,10 @@ def main() -> None:
     features_df["year"] = CURRENT_SEASON
     features_df["round"] = round_num
     features_df["fp_sessions_used"] = len(fp_files)
+    # Preserve the exact source sessions for downstream publication gates.
+    features_df["fp_sessions_included"] = ",".join(
+        f.stem.removeprefix("all_laps_").upper() for f in fp_files
+    )
     # This is metadata, not a model feature. It lets training and inference
     # reject stale parquets produced with the old cross-session stint rules.
     features_df["fp_stint_semantics_version"] = FP_STINT_SEMANTICS_VERSION

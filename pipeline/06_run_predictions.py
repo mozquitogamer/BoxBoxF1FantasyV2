@@ -1711,6 +1711,11 @@ def run_predictions(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "is_post_quali": is_post_quali,
         "used_fp_features": has_fp,
+        "fp_sessions_included": (
+            sorted({session.strip() for value in fp_df["fp_sessions_included"].dropna()
+                    for session in str(value).split(",") if session.strip()})
+            if has_fp and "fp_sessions_included" in fp_df.columns else []
+        ),
         "fp_stint_semantics_version": (
             FP_STINT_SEMANTICS_VERSION if has_fp else None
         ),

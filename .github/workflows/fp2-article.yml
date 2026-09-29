@@ -1,0 +1,51 @@
+name: Publish FP2 analysis article
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - web/public/data/predictions.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fp2-article-master
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Draft article from the live FP2 simulation
+        id: draft
+        run: |
+          python pipeline/publish_fp2_article.py
+          if [ -n "$(git ls-files --others --exclude-standard articles/)" ]; then
+            echo "created=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Refresh article feed and search pages
+        if: steps.draft.outputs.created == 'true'
+        run: |
+          python pipeline/build_articles.py
+          python pipeline/14_build_seo_pages.py
+      - name: Publish article
+        if: steps.draft.outputs.created == 'true'
+        run: |
+          git checkout -B master
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add articles/ web/public/data/articles.json web/public/data/predictions_round*_post_fp2.json web/public/articles/ web/public/sitemap.xml web/public/feed.xml web/public/feed.json web/public/search-index.json web/public/llms.txt web/public/llms-full.txt
+          git commit -m "Publish round $(python -c 'import json; print(json.load(open("web/public/data/predictions.json"))["round"])') FP2 analysis"
+          for attempt in 1 2 3; do
+            git pull --rebase origin master
+            if git push origin HEAD:master; then exit 0; fi
+          done
+          exit 1

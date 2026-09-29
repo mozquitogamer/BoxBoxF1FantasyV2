@@ -184,6 +184,7 @@ def load_fp_features_for_round(
         "year",
         "round",
         "fp_stint_semantics_version",
+        "fp_sessions_included",
     }
     unexpected = sorted(
         c for c in df.columns

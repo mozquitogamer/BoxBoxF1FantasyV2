@@ -938,6 +938,10 @@ def main():
         # Tag the payload with phase + reconstruction info
         predictions["phase"] = phase
         predictions["exported_at"] = datetime.now(timezone.utc).isoformat()
+        metadata = load_prediction_metadata(round_num) or {}
+        if (phase == "post_fp" and metadata.get("phase") == "post_fp"
+                and metadata.get("round") == round_num):
+            predictions["fp_sessions_included"] = metadata.get("fp_sessions_included", [])
         if args.reconstructed:
             predictions["reconstructed"] = True
 
