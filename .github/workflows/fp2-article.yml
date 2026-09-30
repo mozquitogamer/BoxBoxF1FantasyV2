@@ -42,7 +42,7 @@ jobs:
           git checkout -B master
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add articles/ web/public/data/articles.json web/public/data/predictions_round*_post_fp2.json web/public/articles/ web/public/sitemap.xml web/public/feed.xml web/public/feed.json web/public/search-index.json web/public/llms.txt web/public/llms-full.txt
+          git add articles/ web/public/data/articles.json web/public/data/latest_article.json web/public/data/predictions_round*_post_fp2.json web/public/articles/ web/public/sitemap.xml web/public/feed.xml web/public/feed.json web/public/search-index.json web/public/llms.txt web/public/llms-full.txt
           git commit -m "Publish round $(python -c 'import json; print(json.load(open("web/public/data/predictions.json"))["round"])') FP2 analysis"
           for attempt in 1 2 3; do
             git pull --rebase origin master

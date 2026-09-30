@@ -28,6 +28,7 @@ def test_build_preserves_json_only_articles_and_replaces_markdown_slugs(tmp_path
     )
     monkeypatch.setattr(articles, "ARTICLES_DIR", source_dir)
     monkeypatch.setattr(articles, "OUT_PATH", output)
+    monkeypatch.setattr(articles, "LATEST_PATH", tmp_path / "latest_article.json")
 
     articles.build()
 
@@ -40,6 +41,9 @@ def test_build_preserves_json_only_articles_and_replaces_markdown_slugs(tmp_path
     assert built[0]["image_alt"] == "Accessible chart description"
     assert '<img src="/images/chart.png" alt="Accessible chart description" width="1200" height="630"' in built[0]["content_html"]
     assert built[1]["title"] == "Keep me"
+    assert json.loads((tmp_path / "latest_article.json").read_text(encoding="utf-8")) == {
+        "slug": "from-markdown", "title": "New article", "date": "2026-07-13", "round": None,
+    }
 
 
 def test_markdown_inline_preserves_underscores_in_links_code_and_plain_text():

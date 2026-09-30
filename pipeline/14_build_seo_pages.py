@@ -841,7 +841,7 @@ def write_homepage_prediction_snapshot(current: dict) -> None:
             f'<div class="driver-number">{esc(d.get("number", ""))}</div></div>'
             f'{penalty_html}'
             f'<div class="points-badge">{projected:.1f}<span class="points-label">projected</span>'
-            f'<span class="points-adj"><span class="points-adj-val">{expected:.1f}</span><span class="points-adj-label">risk-adjusted</span></span></div>'
+            f'<span class="points-adj"><span class="points-adj-val">{expected:.1f}</span><span class="points-adj-label">Sim. avg</span></span></div>'
             '<div class="card-stats">'
             f'<div class="stat"><div class="stat-value">P{esc(d.get("predicted_quali", "-"))}</div><div class="stat-label">Quali</div></div>'
             f'<div class="stat"><div class="stat-value">P{esc(d.get("predicted_finish", "-"))}</div><div class="stat-label">Race</div></div>'

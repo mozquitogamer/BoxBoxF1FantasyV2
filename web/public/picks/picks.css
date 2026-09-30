@@ -175,7 +175,10 @@ td small { color: var(--muted); font-size: 0.72rem; }
 @media (max-width: 600px) {
   .season-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   h1 { font-size: 1.5rem; }
-  .topbar .cta { padding: 7px 11px; font-size: 0.8rem; }
+  .topbar .wrap { gap: 8px; min-width: 0; }
+  .topbar .brand { min-width: 0; font-size: 1rem; }
+  /* The brand and breadcrumb both lead home; keep the account control visible. */
+  .topbar .cta { display: none; }
   th, td { padding: 7px 6px; font-size: 0.84rem; }
   table {
     display: block;

@@ -371,7 +371,34 @@ function showPriceAssumptionBanner() {
     const assumption = data?.price_change_assumption;
     const active = Number(assumption?.round) === Number(data?.round) && assumption?.note;
     banner.hidden = !active;
-    if (active) banner.textContent = `Roster and budget update: ${assumption.note}`;
+    if (active) {
+        document.getElementById('rosterPriceBannerText').textContent = assumption.note;
+        banner.open = !window.matchMedia('(max-width: 768px)').matches;
+    }
+}
+
+async function showLatestArticle() {
+    try {
+        const response = await fetch(cacheBust('data/latest_article.json'));
+        if (!response.ok) return;
+        const article = await response.json();
+        if (!article?.slug || !article?.title || !article?.date) return;
+        const title = document.getElementById('readingStripTitle');
+        const kicker = document.getElementById('latestArticleKicker');
+        const description = document.getElementById('latestArticleDescription');
+        const link = document.getElementById('latestArticleLink');
+        if (!title || !kicker || !description || !link) return;
+        const date = new Date(`${article.date}T00:00:00Z`);
+        const dateLabel = Number.isNaN(date.getTime()) ? article.date :
+            date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+        kicker.textContent = 'Latest analysis';
+        title.textContent = article.title;
+        description.textContent = `${dateLabel}${article.round ? ` · Round ${article.round}` : ''}`;
+        link.href = `/articles/${encodeURIComponent(article.slug)}/`;
+        link.innerHTML = 'Read article <span aria-hidden="true">&rarr;</span>';
+    } catch (e) {
+        // The always-visible article hub remains the fallback.
+    }
 }
 
 async function renderTabIfNeeded(tabName) {
@@ -963,85 +990,18 @@ function renderV13() {
     }
 }
 
-function setupV13Popup() {
-    const popup = document.getElementById('v13Popup');
-    const closeButton = document.getElementById('v13PopupClose');
-    const exploreButton = document.getElementById('v13PopupExplore');
-    const supportLink = popup?.querySelector('.v13-popup-support');
-    if (!popup || !closeButton || !exploreButton) return;
-
-    const registrationDeadline = Date.parse('2026-11-21T04:00:00Z');
-    const registrationOpen = Date.now() < registrationDeadline;
-    const fineprint = popup.querySelector('.v13-popup-fineprint');
-    if (!registrationOpen) {
-        exploreButton.textContent = 'Follow V13';
-        if (fineprint) fineprint.textContent = 'Registration closed at the Round 23 Las Vegas F1 Fantasy team lock. The final two rounds now decide the challenge.';
+function setupV13Invite() {
+    const exploreButton = document.getElementById('v13InlineExplore');
+    if (!exploreButton) return;
+    if (Date.now() >= Date.parse('2026-11-21T04:00:00Z')) {
+        exploreButton.innerHTML = 'Follow V13 <span aria-hidden="true">&rarr;</span>';
     }
-
-    const storageKey = 'boxbox-v13-popup-until';
-    const engagedKey = 'boxbox-v13-popup-engaged';
-    let previousFocus = null;
-
-    const rememberDismissal = (days = 10) => {
-        try { localStorage.setItem(storageKey, String(Date.now() + days * 86400000)); } catch (e) {}
-    };
-    const hide = (remember = true) => {
-        popup.classList.add('hidden');
-        document.body.classList.remove('v13-popup-open');
-        if (remember) rememberDismissal();
-        previousFocus?.focus?.();
-    };
-    const show = () => {
-        if (location.hash.replace('#', '') === 'beatbot') return;
-        try {
-            if (localStorage.getItem(engagedKey) === '1') return;
-            if (Number(localStorage.getItem(storageKey) || 0) > Date.now()) return;
-        } catch (e) {}
-        previousFocus = document.activeElement;
-        popup.classList.remove('hidden');
-        document.body.classList.add('v13-popup-open');
-        closeButton.focus();
-        if (typeof gtag === 'function') gtag('event', 'beat_v13_popup_impression');
-    };
-
-    closeButton.addEventListener('click', () => {
-        hide(true);
-        if (typeof gtag === 'function') gtag('event', 'beat_v13_popup_dismiss');
-    });
-    popup.addEventListener('click', event => {
-        if (event.target === popup) hide(true);
-    });
     exploreButton.addEventListener('click', () => {
-        try { localStorage.setItem(engagedKey, '1'); } catch (e) {}
-        hide(false);
         switchTab('beatbot');
         history.replaceState(null, '', '#beatbot');
         document.querySelector('.tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        if (typeof gtag === 'function') gtag('event', 'beat_v13_popup_click');
+        if (typeof gtag === 'function') gtag('event', 'beat_v13_inline_click');
     });
-    supportLink?.addEventListener('click', () => {
-        rememberDismissal(30);
-        if (typeof gtag === 'function') gtag('event', 'beat_v13_kofi_click', { location: 'popup' });
-    });
-    popup.addEventListener('keydown', event => {
-        if (event.key === 'Escape') {
-            event.preventDefault();
-            hide(true);
-            return;
-        }
-        if (event.key !== 'Tab') return;
-        const focusable = [...popup.querySelectorAll('button, a[href]')].filter(el => !el.disabled);
-        if (!focusable.length) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault(); last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault(); first.focus();
-        }
-    });
-
-    window.setTimeout(show, 12000);
 }
 
 // -- Init --
@@ -1082,7 +1042,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupControls();
     setupCompareSources(readCompareMemberApi());
     renderTeamCompareGrid();
-    setupV13Popup();
+    setupV13Invite();
 
     // The Pit Wall account entry point can load before the optimizer controls
     // have attached their click handlers. Resolve the deep links here, after
@@ -1107,6 +1067,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Phase 2: Render Drivers tab immediately
     showPriceAssumptionBanner();
     renderHero();
+    showLatestArticle();
     renderWeather();
     renderDrivers();
     document.getElementById('driverLiveRegion')?.classList.remove('is-hydrating');
@@ -2145,7 +2106,10 @@ function renderHero() {
     const hero = document.getElementById('heroSection');
     if (!hero) return;
 
-    const topPick = data.drivers[0]; // already sorted by expected_points
+    // The featured pick uses the same projected-points basis as the default
+    // Drivers sort and the large score shown on every card.
+    const topPick = [...data.drivers].sort((a, b) =>
+        (b.projected_points ?? b.expected_points) - (a.projected_points ?? a.expected_points))[0];
 
     // Best Value: highest value_score but must have positive ACTUAL cumulative season points
     // Filters out drivers whose season has been net-negative (sustained poor performance)
@@ -2203,7 +2167,8 @@ function heroCard(label, driver, type) {
             <div class="hero-card-label">${icon} ${label}</div>
             <div class="hero-card-driver">${driver.name || driver.driver_id}</div>
             <div class="hero-card-team">${team.name}</div>
-            <div class="hero-card-pts">${(typeof driver.projected_points === 'number' ? driver.projected_points : driver.expected_points).toFixed(1)} pts <span style="font-size:0.55em;font-weight:600;opacity:0.8;">proj · ${driver.expected_points.toFixed(1)} risk-adj</span></div>
+            <div class="hero-card-pts"><strong>${(typeof driver.projected_points === 'number' ? driver.projected_points : driver.expected_points).toFixed(1)} <small>pts</small></strong><span>Projected</span></div>
+            <div class="hero-card-sim">Simulation average <strong>${driver.expected_points.toFixed(1)} pts</strong></div>
             <div class="hero-card-meta">$${driver.current_price.toFixed(1)}M \u00b7 ${(driver.value_score||0).toFixed(2)} ppm</div>
         </div>
     `;
@@ -2516,11 +2481,11 @@ function driverCard(d, i) {
         ${renderWeatherBadges()}
         ${gridPenalty ? `<div class="grid-penalty-notice" title="Known race-start penalty; qualifying fantasy points still use the qualifying result.">⚠ ${gridPenalty} · starts P${d.predicted_grid ?? 22}</div>` : ""}
 
-        <div class="points-badge" title="Projected uses the predicted qualifying and finishing order, with expected overtakes and DNF risk. Risk-adj is the average of 10,000 simulated weekends. It can be higher or lower than projected; the P5–P95 range below shows uncertainty.">
+        <div class="points-badge" title="Projected uses the predicted qualifying and finishing order, with expected overtakes and DNF risk. Simulation average is the mean of 10,000 simulated weekends. It can be higher or lower than projected; the P5–P95 range below shows uncertainty.">
             ${(typeof d.projected_points === 'number' ? d.projected_points : d.expected_points).toFixed(1)}
-            <span class="points-label">proj</span>
+            <span class="points-label">Projected</span>
             <span class="points-adj">
-                <span class="points-adj-val">${d.expected_points.toFixed(1)}</span><span class="points-adj-label">risk-adj</span>
+                <span class="points-adj-val">${d.expected_points.toFixed(1)}</span><span class="points-adj-label">Sim. avg</span>
                 ${(typeof d.expected_points_adjusted === 'number' && Math.abs(d.points_delta || 0) >= 0.1) ? `
                     <span class="upgrade-delta ${d.points_delta > 0 ? 'pos' : 'neg'}"
                           title="With manual team upgrade (pace bump ${d.pace_bump >= 0 ? '+' : ''}${d.pace_bump}): risk-adjusted to ${d.expected_points_adjusted.toFixed(1)} pts (P${d.predicted_finish_adjusted} race)">
@@ -3464,11 +3429,11 @@ function constructorCard(c, i) {
                 </div>
                 <div class="card-cost" title="Current F1 Fantasy price">$${c.current_price.toFixed(1)}M</div>
             </div>
-            <div class="points-badge" title="Projected = points if the predicted result holds. Risk-adj = Monte-Carlo average over 10,000 sims (factors in DNFs, chaos and swings), so it sits lower.">
+            <div class="points-badge" title="Projected is based on the predicted result. Simulation average is the mean of 10,000 simulated weekends, including DNFs and other race outcomes. It can be higher or lower than projected.">
                 ${(typeof c.projected_points === 'number' ? c.projected_points : c.expected_points).toFixed(1)}
-                <span class="points-label">proj</span>
+                <span class="points-label">Projected</span>
                 <span class="points-adj">
-                    <span class="points-adj-val">${c.expected_points.toFixed(1)}</span><span class="points-adj-label">risk-adj</span>
+                    <span class="points-adj-val">${c.expected_points.toFixed(1)}</span><span class="points-adj-label">Sim. avg</span>
                     ${(typeof c.expected_points_adjusted === 'number' && Math.abs(c.points_delta || 0) >= 0.1) ? `
                         <span class="upgrade-delta ${c.points_delta > 0 ? 'pos' : 'neg'}"
                               title="With manual team upgrade (pace bump ${c.pace_bump >= 0 ? '+' : ''}${c.pace_bump}): risk-adjusted to ${c.expected_points_adjusted.toFixed(1)} pts">

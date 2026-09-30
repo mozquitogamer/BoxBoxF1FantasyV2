@@ -23,6 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 ARTICLES_DIR = ROOT / "articles"
 OUT_PATH = ROOT / "web" / "public" / "data" / "articles.json"
+LATEST_PATH = ROOT / "web" / "public" / "data" / "latest_article.json"
 
 
 def parse_frontmatter(text: str) -> tuple[dict, str]:
@@ -235,6 +236,9 @@ def build():
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps({"articles": articles}, indent=2, ensure_ascii=False), encoding="utf-8")
+    latest = ({key: articles[0].get(key) for key in ("slug", "title", "date", "round")}
+              if articles else {})
+    LATEST_PATH.write_text(json.dumps(latest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"Built {len(articles)} article(s) -> {OUT_PATH}")
 
 
