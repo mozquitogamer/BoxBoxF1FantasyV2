@@ -1,17 +1,17 @@
 ---
-title: Sepang F1 Fantasy preview: building around a $128.2M budget
-seo_title: Sepang 2026 F1 Fantasy Preview and $128.2M Team Ideas
+title: Sepang F1 Fantasy preview: building around a $129.3M budget
+seo_title: Sepang 2026 F1 Fantasy Preview and $129.3M Team Ideas
 date: 2026-09-30
 round: 18
 tags: sepang, bahrain gp in malaysia, f1 fantasy, race preview, team strategy
 sources: /data/predictions.json, /data/weather.json, https://f1fantasytools.com/team-calculator, https://f1fantasytools.com/budget-builder, https://www.formula1.com/en/latest/article/its-race-week-5-storylines-were-excited-about-ahead-of-the-2026-bahrain-grand-prix-in-malaysia.5VJ800Id8hGFvoRpQQFc9u
 ---
 
-Sepang is back for 2026. We compare BoxBox's pre-practice simulations with F1 Fantasy Tools and build a team around a $128.2M budget.
+Sepang is back for 2026. We compare BoxBox's pre-practice simulations with F1 Fantasy Tools and build a team around a $129.3M budget.
 
 The race is officially called the Bahrain Grand Prix in Malaysia. It is a fascinating fantasy weekend and an awkward one to predict. The current cars have never raced here, the last Formula 1 visit was in 2017, and the rain forecast is moving faster than the early simulations.
 
-For a team with **$128.2M**, my first instinct is to spend heavily on constructors. The harder decision is which premium driver gets the 2x Boost and how much risk to accept in the remaining four seats.
+For a team with **$129.3M**, my first instinct is to spend heavily on constructors. The harder decision is which premium driver gets the 2x Boost and how much risk to accept in the remaining four seats.
 
 This is a **pre-practice preview**, using BoxBox's September 26 model run and F1 Fantasy Tools' early Sepang simulation, last updated September 25. Neither has this weekend's practice laps. Treat the team below as a starting point for Friday, not a locked recommendation for Saturday.
 
@@ -31,17 +31,17 @@ F1 Fantasy Tools has Verstappen marginally first among those three at **29.7 exp
 
 ## A $127.6M starting team
 
-If I were building a fresh team under your **$128.2M cap** using our current simulation averages and the normal 2x Boost, this is the highest-scoring combination:
+If I were building a fresh team under your **$129.3M cap** using our current simulation averages and the normal 2x Boost, this is still the highest-scoring combination:
 
 - **Constructors:** Mercedes ($33.8M) and Ferrari ($27.6M)
 - **Drivers:** Antonelli ($26.9M, 2x), Isack Hadjar ($15.1M), Arvid Lindblad ($8.8M), Franco Colapinto ($10.0M) and Nico Hulkenberg ($5.4M)
-- **Total:** $127.6M, leaving $0.6M
+- **Total:** $127.6M, leaving $1.7M
 
-Our simulation averages **191.3 team points with Antonelli boosted**. That is a model mean, not a guarantee. It assumes a fresh seven-asset build, so your actual transfer limit, money already held in assets and any chips still available could change the right move.
+Our simulation averages **191.3 team points with Antonelli boosted**. The extra budget does not improve that model maximum, so there is no reason to spend the remaining $1.7M just to use it. That is a model mean, not a guarantee. It assumes a fresh seven-asset build, so your actual transfer limit, money already held in assets and any chips still available could change the right move.
 
-The uncomfortable name is Colapinto. He carries a confirmed **five-place grid penalty** from Baku. Our current grid projection moves him from P11 in qualifying to P16 at the start, and the model still finds a path to points through positions gained. That path is fragile if the weather or Alpine's pace changes. Swapping him for Gabriel Bortoleto makes the team **$125.8M** and reduces our simulated total to **188.4**, while removing that specific grid-penalty bet. Leaving $2.4M unused is perfectly reasonable if it buys you a lineup you trust more.
+The uncomfortable name is Colapinto. He carries a confirmed **five-place grid penalty** from Baku. Our current grid projection moves him from P11 in qualifying to P16 at the start, and the model still finds a path to points through positions gained. That path is fragile if the weather or Alpine's pace changes. Swapping him for Gabriel Bortoleto makes the team **$125.8M** and reduces our simulated total to **188.4**, while removing that specific grid-penalty bet. Leaving $3.5M unused is perfectly reasonable if it buys you a lineup you trust more.
 
-F1 Fantasy Tools' top team at a $128.2M limit takes a different route: **Mercedes, Ferrari, Verstappen at 2x, Hadjar, Pierre Gasly, Liam Lawson and Lance Stroll**. It also costs **$127.6M**. Their expected total is **246.2** on their own simulation, so compare the *picks and assumptions*, not that number directly with BoxBox's 191.3. Their early run was set to dry or average conditions.
+At a **$129.3M limit**, F1 Fantasy Tools now puts a full-budget team first: **Mercedes, Ferrari, Antonelli at 2x, Hadjar, Pierre Gasly, Liam Lawson and Hulkenberg**. It costs exactly **$129.3M** and shows **246.2 expected points**. Their Verstappen-led option with Stroll instead of Hulkenberg still shows **246.2** at the displayed precision, but costs $127.6M. More money creates another route here, not a clear points gap. Compare the *picks and assumptions*, not either Tools total directly with BoxBox's 191.3. Their early run was set to dry or average conditions.
 
 ## Hadjar is the call to revisit after FP2
 
