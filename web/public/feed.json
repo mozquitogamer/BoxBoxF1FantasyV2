@@ -7,11 +7,25 @@
   "language": "en",
   "items": [
     {
+      "id": "https://boxboxf1fantasy.com/articles/",
+      "url": "https://boxboxf1fantasy.com/articles/",
+      "title": "F1 Fantasy Articles 2026",
+      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
+      "date_modified": "2026-09-30T00:00:00+00:00"
+    },
+    {
+      "id": "https://boxboxf1fantasy.com/articles/2026-09-30-sepang-f1-fantasy-preview/",
+      "url": "https://boxboxf1fantasy.com/articles/2026-09-30-sepang-f1-fantasy-preview/",
+      "title": "Sepang F1 Fantasy preview: building around a $128.2M budget",
+      "summary": "Sepang is back for 2026. We compare BoxBox's pre-practice simulations with F1 Fantasy Tools and build a team around a $128.2M budget. The race is officially called the Bahrain Grand Prix in Malaysia. It is a fascinating...",
+      "date_modified": "2026-09-30T00:00:00+00:00"
+    },
+    {
       "id": "https://boxboxf1fantasy.com/picks/bahrain-gp-in-malaysia-2026/",
       "url": "https://boxboxf1fantasy.com/picks/bahrain-gp-in-malaysia-2026/",
       "title": "F1 Fantasy Picks: Bahrain GP in Malaysia 2026",
       "summary": "Race-week F1 Fantasy picks, projected points, value picks and constructor choices for Bahrain Grand Prix in Malaysia.",
-      "date_modified": "2026-09-26T00:00:00+00:00"
+      "date_modified": "2026-09-29T00:00:00+00:00"
     },
     {
       "id": "https://boxboxf1fantasy.com/picks/azerbaijan-gp-2026/",
@@ -173,13 +187,6 @@
       "title": "F1 Fantasy Results: Italian GP 2026",
       "summary": "Recorded F1 Fantasy driver and constructor results plus the archived prediction review for Italian Grand Prix.",
       "date_modified": "2026-09-06T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/articles/",
-      "url": "https://boxboxf1fantasy.com/articles/",
-      "title": "F1 Fantasy Articles 2026",
-      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
-      "date_modified": "2026-08-24T00:00:00+00:00"
     },
     {
       "id": "https://boxboxf1fantasy.com/articles/2026-08-24-dutch-gp-model-review/",
@@ -347,13 +354,6 @@
       "url": "https://boxboxf1fantasy.com/tools/team-compare/",
       "title": "F1 Fantasy Team Compare & Score Calculator",
       "summary": "Free F1 Fantasy team compare tool: enter up to three candidate teams and compare budget, projected points, confidence range, price movement and downside risk.",
-      "date_modified": "2026-07-22T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/tools/transfer-planner/",
-      "url": "https://boxboxf1fantasy.com/tools/transfer-planner/",
-      "title": "F1 Fantasy Transfer Planner & Advisor",
-      "summary": "Free F1 Fantasy transfer tools: find your best one or two swaps this week, or plan transfers and chips across 2-5 upcoming rounds with a multi-week planner.",
       "date_modified": "2026-07-22T00:00:00+00:00"
     }
   ]
