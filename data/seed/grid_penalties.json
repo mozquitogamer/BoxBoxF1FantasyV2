@@ -31,9 +31,16 @@
     }
   },
   "18": {
-    "_note": "Bahrain GP in Malaysia: Colapinto receives a five-place grid drop for the Baku restart collision. Source: https://www.formula1.com/en/latest/article/colapinto-hit-with-five-place-grid-penalty-for-bahrain-gp-in-malaysia-after-baku-collision.3gWVfzDMMr5hReiwTt1fPD",
+    "_note": "Updated 2026-10-02 for Bahrain GP in Malaysia power-unit changes: Colapinto receives 15 places total (five from the Baku restart collision plus ten for a new engine); Hadjar receives five places; Lindblad receives 30 places and starts at the back of the grid. Sources: https://www.formula1.com/en/latest/article/colapinto-hit-with-five-place-grid-penalty-for-bahrain-gp-in-malaysia-after-baku-collision.3gWVfzDMMr5hReiwTt1fPD ; https://gp.news/documents/2026-bahrain-grand-prix-doc-17/ ; https://gp.news/documents/2026-bahrain-grand-prix-doc-18/ ; https://gp.news/documents/2026-bahrain-grand-prix-doc-19/",
     "COL": {
+      "places": 15
+    },
+    "HAD": {
       "places": 5
+    },
+    "LIN": {
+      "places": 30,
+      "back_of_grid": true
     }
   }
 }
