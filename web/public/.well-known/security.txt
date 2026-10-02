@@ -1,5 +1,5 @@
 Contact: mailto:boxboxf1fantasy@gmail.com
-Expires: 2027-09-26T21:37:53Z
+Expires: 2027-10-02T06:56:29Z
 Preferred-Languages: en
 Canonical: https://boxboxf1fantasy.com/.well-known/security.txt
 Policy: https://boxboxf1fantasy.com/privacy/
