@@ -139,7 +139,7 @@ PHASES = {
             # exported pre-FP archive. The publisher rebuilds the public live
             # state first. Keep this non-fatal so a page-only issue cannot stop
             # the core prediction/export weekend flow.
-            ("publish_v13_decision.py", ["--round", "{round}", "--phase", "pre_fp"], {"non_fatal": True}),
+            ("publish_v13_decision.py", ["--round", "{round}", "--phase", "pre_fp", "--refresh-live"], {"non_fatal": True}),
             # SEO: regenerate the static /picks/ race landing pages from the
             # freshly exported JSON. Non-fatal — a failure won't abort the weekend.
             SEO_STEP,
@@ -151,7 +151,7 @@ PHASES = {
             *FP_PREDICTION_STEPS,
             ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_fp"]),
             HORIZON_STEP,
-            ("publish_v13_decision.py", ["--round", "{round}", "--phase", "post_fp"], {"non_fatal": True}),
+            ("publish_v13_decision.py", ["--round", "{round}", "--phase", "post_fp", "--refresh-live"], {"non_fatal": True}),
             SEO_STEP,
         ],
     },

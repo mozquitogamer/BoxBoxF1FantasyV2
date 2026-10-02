@@ -5,6 +5,9 @@ forecast hash, its generation time, the F1 Fantasy lock time, and the previous
 decision hash are stored with the lineup.  Re-running the same command never
 rewrites an existing record.
 
+The weekend runner uses --refresh-live to append an audited revision whenever
+the live forecast changes, keeping notifications tied to the current forecast.
+
 Usage:
     python pipeline/publish_v13_decision.py --round 14 --phase pre_fp
     python pipeline/publish_v13_decision.py --round 14 --phase post_fp
@@ -492,10 +495,57 @@ def publish_correction(
     return decision
 
 
+def publish_live(round_num: int, phase: str) -> dict[str, Any]:
+    """Align the current recommendation with the live forecast via revisions.
+
+    Original decisions and accuracy archives remain immutable. Each refresh
+    gets a separate content-addressed snapshot, so retries reuse the same
+    decision and older forecasts cannot rewind a newer recommendation.
+    """
+    active = publish(round_num, phase)
+    public = v13._load_json(PUBLIC_PATH)
+    if int(public["current_state"]["next_round"]) != round_num:
+        return active
+    live_path = WEB_DATA_DIR / "predictions.json"
+    live_bytes = live_path.read_bytes()
+    live = json.loads(live_bytes)
+    if live.get("round") != round_num or live.get("phase") != phase:
+        raise ValueError("Live forecast round/phase does not match the V13 request")
+    if live.get("reconstructed"):
+        raise ValueError("Cannot refresh a live V13 decision from reconstructed predictions")
+    active_archive = ROOT / active["archive"]
+    if v13._sha256(active_archive) != active["archive_sha256"]:
+        raise RuntimeError("Active V13 decision's frozen source archive has changed")
+    if live == v13._load_json(active_archive):
+        return active
+    generated_at = _parse_time(live["generated_at"])
+    if generated_at >= _parse_time(_lock_deadline(round_num)):
+        raise ValueError("Cannot refresh a V13 decision from a forecast generated after lock")
+    if generated_at < _parse_time(active["source_generated_at"]):
+        raise ValueError("Cannot replace a V13 recommendation with an older live forecast")
+    digest = hashlib.sha256(live_bytes).hexdigest()
+    snapshot = WEB_DATA_DIR / f"predictions_round{round_num}_{phase}_refresh_{digest[:16]}.json"
+    if snapshot.exists():
+        if snapshot.read_bytes() != live_bytes:
+            raise RuntimeError("Live refresh snapshot exists with different content")
+    else:
+        with snapshot.open("xb") as f:
+            f.write(live_bytes)
+    return publish_correction(
+        round_num, phase,
+        f"Automatic live forecast refresh: {live['generated_at']} ({digest[:16]}).",
+        str(snapshot.relative_to(ROOT)).replace("\\", "/"),
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--round", type=int, required=True)
     parser.add_argument("--phase", choices=tuple(PHASE_ORDER), required=True)
+    parser.add_argument(
+        "--refresh-live", action="store_true",
+        help="Append an audited revision when the live forecast has changed.",
+    )
     parser.add_argument(
         "--correction-reason",
         help="Append an audited revision instead of rewriting the original decision.",
@@ -507,11 +557,14 @@ def main() -> None:
     args = parser.parse_args()
     if args.correction_archive and not args.correction_reason:
         parser.error("--correction-archive requires --correction-reason")
+    if args.refresh_live and args.correction_reason:
+        parser.error("--refresh-live cannot be combined with --correction-reason")
     decision = (
         publish_correction(
             args.round, args.phase, args.correction_reason, args.correction_archive,
         )
         if args.correction_reason
+        else publish_live(args.round, args.phase) if args.refresh_live
         else publish(args.round, args.phase)
     )
     print(

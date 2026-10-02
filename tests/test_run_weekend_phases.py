@@ -60,13 +60,13 @@ def test_v13_publishes_with_prediction_phases_and_rolls_after_race():
     pre_fp_step = RUN_WEEKEND.PHASES["pre_fp_predict"]["steps"][
         pre_fp_names.index("publish_v13_decision.py")
     ]
-    assert pre_fp_step[1] == ["--round", "{round}", "--phase", "pre_fp"]
+    assert pre_fp_step[1] == ["--round", "{round}", "--phase", "pre_fp", "--refresh-live"]
     assert pre_fp_step[2] == {"non_fatal": True}
 
     post_fp_step = RUN_WEEKEND.PHASES["post_fp"]["steps"][
         post_fp_names.index("publish_v13_decision.py")
     ]
-    assert post_fp_step[1] == ["--round", "{round}", "--phase", "post_fp"]
+    assert post_fp_step[1] == ["--round", "{round}", "--phase", "post_fp", "--refresh-live"]
     assert post_fp_step[2] == {"non_fatal": True}
 
     assert post_race_names.index("08_export_website_json.py") < post_race_names.index(

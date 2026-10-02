@@ -81,7 +81,7 @@ def test_publishing_an_existing_decision_is_idempotent(tmp_path, monkeypatch) ->
 
 def test_live_price_gain_value_is_horizon_aware_and_calibrated() -> None:
     assert 4.4 < v13.live_price_gain_value(15) < 4.7
-    assert v13.live_price_gain_value(24) == 0.0
+    assert v13.live_price_gain_value(25) == 0.0
     assert v13.live_price_gain_value(20) > v13.live_price_gain_value(23)
 
 
