@@ -126,18 +126,25 @@
       "date_modified": "2026-10-02T00:00:00+00:00"
     },
     {
+      "id": "https://boxboxf1fantasy.com/articles/",
+      "url": "https://boxboxf1fantasy.com/articles/",
+      "title": "F1 Fantasy Articles 2026",
+      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
+      "date_modified": "2026-10-02T00:00:00+00:00"
+    },
+    {
+      "id": "https://boxboxf1fantasy.com/articles/2026-round18-fp2-fantasy-briefing/",
+      "url": "https://boxboxf1fantasy.com/articles/2026-round18-fp2-fantasy-briefing/",
+      "title": "Bahrain Grand Prix in Malaysia FP2 Fantasy briefing: what the simulations say",
+      "summary": "Bahrain Grand Prix in Malaysia: the FP2 picture Our post-FP2 simulation for round 18 is now live. These are average Fantasy points across the simulations , using the practice data available so far. Qualifying and the...",
+      "date_modified": "2026-10-02T00:00:00+00:00"
+    },
+    {
       "id": "https://boxboxf1fantasy.com/data/",
       "url": "https://boxboxf1fantasy.com/data/",
       "title": "BoxBoxF1Fantasy Public Data 2026",
       "summary": "Public JSON endpoint index for BoxBoxF1Fantasy predictions, season summary, driver history, track data, weather, articles, videos and changelog.",
       "date_modified": "2026-10-02T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/articles/",
-      "url": "https://boxboxf1fantasy.com/articles/",
-      "title": "F1 Fantasy Articles 2026",
-      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
-      "date_modified": "2026-09-30T00:00:00+00:00"
     },
     {
       "id": "https://boxboxf1fantasy.com/articles/2026-09-30-sepang-f1-fantasy-preview/",
@@ -347,13 +354,6 @@
       "url": "https://boxboxf1fantasy.com/tools/f1-fantasy-deadline/",
       "title": "F1 Fantasy Deadline 2026: Lock Times & Race Calendar",
       "summary": "F1 Fantasy 2026 deadline tracker: see each race lock time, sprint-weekend lock rule, next deadline and the full season deadline table.",
-      "date_modified": "2026-07-22T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/tools/team-compare/",
-      "url": "https://boxboxf1fantasy.com/tools/team-compare/",
-      "title": "F1 Fantasy Team Compare & Score Calculator",
-      "summary": "Free F1 Fantasy team compare tool: enter up to three candidate teams and compare budget, projected points, confidence range, price movement and downside risk.",
       "date_modified": "2026-07-22T00:00:00+00:00"
     }
   ]

@@ -1,6 +1,23 @@
 {
   "articles": [
     {
+      "slug": "2026-round18-fp2-fantasy-briefing",
+      "title": "Bahrain Grand Prix in Malaysia FP2 Fantasy briefing: what the simulations say",
+      "date": "2026-10-02",
+      "round": 18,
+      "tags": [
+        "analysis",
+        "FP2",
+        "predictions",
+        "fantasy"
+      ],
+      "content_html": "<h2>Bahrain Grand Prix in Malaysia: the FP2 picture</h2>\n<p>\nOur post-FP2 simulation for round 18 is now live. These are <strong>average Fantasy points across the simulations</strong>, using the practice data available so far. Qualifying and the race have not happened; the numbers will change if new information arrives.\n</p>\n<h2>Leading drivers</h2>\n<ol>\n<li><strong>Max Verstappen</strong> — 24.1 expected points at £27.6m. The middle 90% of simulated outcomes runs from -10.5 to 50.0 points.</li>\n<li><strong>Kimi Antonelli</strong> — 22.9 expected points at £26.9m. The middle 90% of simulated outcomes runs from -7.7 to 44.0 points.</li>\n<li><strong>Arvid Lindblad</strong> — 22.6 expected points at £8.8m. The middle 90% of simulated outcomes runs from -12.6 to 40.0 points.</li>\n</ol>\n<p>\nThe wide ranges show why a high average is only part of the decision: a strong result and a difficult weekend are both possible.\n</p>\n<h2>Constructor watch</h2>\n<ul>\n<li><strong>Mercedes</strong> — 56.7 expected points; middle 90% from 18.0 to 91.0.</li>\n<li><strong>Red Bull</strong> — 56.0 expected points; middle 90% from 8.0 to 93.0.</li>\n</ul>\n<h2>A lower-cost option</h2>\n<p>\n<strong>Arvid Lindblad</strong> has the highest expected points among drivers priced at or below the field's median price: 22.6 points at £8.8m. That makes them a useful budget comparison, although the projection alone does not account for the rest of your team's balance.\n</p>\n<h2>Before locking your team</h2>\n<p>\nUse this as an early shortlist. Compare the current prices and uncertainty ranges on the <a href=\"/\">Drivers and Constructors pages</a>, then revisit the predictions if FP3 or other weekend information changes the outlook. The <a href=\"/data/predictions_round18_post_fp2.json\">FP2 simulation snapshot</a> behind this article is preserved. These are model estimates, not guaranteed scores.\n</p>",
+      "sources": [
+        "/data/predictions_round18_post_fp2.json",
+        "/methodology/"
+      ]
+    },
+    {
       "slug": "2026-09-30-sepang-f1-fantasy-preview",
       "title": "Sepang F1 Fantasy preview: building around a $129.3M budget",
       "date": "2026-09-30",
