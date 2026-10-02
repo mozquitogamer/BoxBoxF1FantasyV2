@@ -75,13 +75,15 @@
                         return { ...run, laps, count: selected.length, average: median(selected), comparison };
                     });
                     const comparisonRuns = runs.filter(run => run.comparison);
+                    const runPaces = comparisonRuns.map(run => run.average).filter(pace => pace != null);
                     return {
                         id: driver.id, session, runs, comparisonRuns: comparisonRuns.length,
+                        fastestRunPace: runPaces.length ? Math.min(...runPaces) : null,
                         count: comparisonRuns.reduce((sum, run) => sum + run.count, 0),
                         changes: runs.flatMap(run => run.laps).filter(lap => lap.modified).length,
                     };
                 });
-                return rows.sort((a, b) => a.id.localeCompare(b.id));
+                return rows.sort((a, b) => (a.fastestRunPace ?? Infinity) - (b.fastestRunPace ?? Infinity) || a.id.localeCompare(b.id));
             },
             runRows() {
                 const rows = this.rows().flatMap(driver => driver.runs
@@ -243,7 +245,7 @@
             </div>
             <div class="analysis-block">
                 <h3>Long Run Detail</h3>
-                <p class="analysis-note">Green laps are included; crossed-out laps are excluded. Click again to undo. ${model.comparable ? 'Laps appear in their original order. Clean or partial runs on the selected session enter the table regardless of tyre.' : 'Runs marked In comparison supply the headline average. Other sessions keep their own run averages.'} Edits stay while switching tabs and reset on reload or new practice data.</p>
+                <p class="analysis-note">Green laps are included; crossed-out laps are excluded. Click again to undo. ${model.comparable ? 'Drivers are ordered by their fastest valid run median in the selected session, fastest first; drivers without comparable pace appear last. Laps appear in their original order. Clean or partial runs on the selected session enter the table regardless of tyre.' : 'Runs marked In comparison supply the headline average. Other sessions keep their own run averages.'} Edits stay while switching tabs and reset on reload or new practice data.</p>
                 <div class="lr-detail-grid">${rows.map(row => `<div class="lr-card" data-lr-driver="${escape(row.id)}">
                     <div class="lr-head"><strong>${escape(row.id)}</strong>${model.comparable ? '' : `<span class="lr-headavg">${time(row.average)}</span><span class="lr-headgap">${gap(row)}</span>`}</div>
                     <div class="lr-card-summary">${escape(row.session)} comparison · ${model.comparable ? `${row.comparisonRuns} race run${row.comparisonRuns === 1 ? '' : 's'}` : `${row.count} selected lap${row.count === 1 ? '' : 's'}${row.average == null ? ' · No comparable pace' : ''}${row.count > 0 && row.count < 4 ? ' · Small sample' : ''}`}</div>
