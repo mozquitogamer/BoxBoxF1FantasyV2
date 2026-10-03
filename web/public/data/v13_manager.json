@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-02T11:52:10.202028+02:00",
+  "generated_at": "2026-10-03T08:12:00.928230+02:00",
   "manager": {
     "id": "v13",
     "name": "V13",
@@ -1750,51 +1750,49 @@
       "race": "Bahrain Grand Prix in Malaysia",
       "phase": "post_fp",
       "status": "corrected_before_lock",
-      "published_at": "2026-10-02T09:52:10.173037+00:00",
-      "source_generated_at": "2026-10-02T09:51:14.329386+00:00",
+      "published_at": "2026-10-03T06:12:00.922229+00:00",
+      "source_generated_at": "2026-10-03T06:11:06.453382+00:00",
       "lock_deadline": "2026-10-03T08:00:00Z",
-      "archive": "web/public/data/predictions_round18_post_fp_corrected.json",
-      "archive_sha256": "6cea81ea8e5f906d3227e1e460aa33960f3da6e89b1b99d0865a7a41a0231be2",
-      "previous_decision": "data/v13/decisions/round18_post_fp.json",
-      "previous_decision_sha256": "f4c510399d7cd475d99860538c3d33aea93bf845576d938f932029ed6d3557d4",
+      "archive": "web/public/data/predictions_round18_post_fp_refresh_b6460e4f22104b35.json",
+      "archive_sha256": "b6460e4f22104b3557464af2d0ecf24a9ff3fb66929fb6cc2b1f4d0b25d37c1b",
+      "previous_decision": "data/v13/decisions/round18_post_fp_revision2.json",
+      "previous_decision_sha256": "d71a230edb752658d51527f050a58c5c2af7af9df9001e5080b1588e534b734f",
       "price_snapshot_after_round": 17,
       "drivers": [
-        "VER",
         "ANT",
         "LIN",
         "HAD",
-        "LAW"
+        "COL",
+        "BOR"
       ],
       "constructors": [
-        "ferrari",
-        "racing_bulls"
+        "mercedes",
+        "ferrari"
       ],
-      "captain": "VER",
+      "captain": "ANT",
       "second_boost": null,
       "chip": null,
-      "projected_points": 201.7,
-      "projected_price_gain": 1.9,
-      "downside_risk": 60.4,
+      "projected_points": 226.1,
+      "projected_price_gain": 0.3,
+      "downside_risk": 63.2,
       "team_cost": 130.4,
       "transfers": 2,
       "transfer_penalty": 0,
       "changes": {
         "drivers_out": [
-          "HUL"
+          "HUL",
+          "LAW"
         ],
         "drivers_in": [
-          "VER"
+          "BOR",
+          "COL"
         ],
-        "constructors_out": [
-          "mercedes"
-        ],
-        "constructors_in": [
-          "racing_bulls"
-        ]
+        "constructors_out": [],
+        "constructors_in": []
       },
       "chip_decision": {
         "result": "save",
-        "current_selected_team_extra_points": 47.0,
+        "current_selected_team_extra_points": 47.9,
         "largest_remaining_priors_top_two": 92.6,
         "largest_remaining_priors_round": 19,
         "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast."
@@ -1807,10 +1805,10 @@
         "negative_p5_weight": 0.75,
         "price_value_method": "horizon curve × price reliability × points realisation"
       },
-      "revision": 2,
-      "correction_reason": "R18 power-unit penalties updated: Colapinto 15 places total, Hadjar 5 places, Lindblad 30 places and back of grid.",
-      "supersedes": "data/v13/decisions/round18_post_fp.json",
-      "supersedes_sha256": "f4c510399d7cd475d99860538c3d33aea93bf845576d938f932029ed6d3557d4"
+      "revision": 3,
+      "correction_reason": "Automatic live forecast refresh: 2026-10-03T06:11:06.453382+00:00 (b6460e4f22104b35).",
+      "supersedes": "data/v13/decisions/round18_post_fp_revision2.json",
+      "supersedes_sha256": "d71a230edb752658d51527f050a58c5c2af7af9df9001e5080b1588e534b734f"
     }
   },
   "labels": {
