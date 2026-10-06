@@ -1,0 +1,1508 @@
+{
+  "race": "Bahrain Grand Prix in Malaysia",
+  "round": 18,
+  "season": 2026,
+  "type": "post_race_analysis",
+  "is_sprint_weekend": false,
+  "results": [
+    {
+      "driver_id": "VER",
+      "constructor_id": "red_bull",
+      "grid": 1,
+      "classified_position": 1,
+      "finish_position": 1,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 25.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "ANT",
+      "constructor_id": "mercedes",
+      "grid": 3,
+      "classified_position": 2,
+      "finish_position": 2,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 18.0,
+      "positions_gained": 1
+    },
+    {
+      "driver_id": "HAM",
+      "constructor_id": "ferrari",
+      "grid": 2,
+      "classified_position": 3,
+      "finish_position": 3,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 15.0,
+      "positions_gained": -1
+    },
+    {
+      "driver_id": "LEC",
+      "constructor_id": "ferrari",
+      "grid": 4,
+      "classified_position": 4,
+      "finish_position": 4,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 12.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "HAD",
+      "constructor_id": "red_bull",
+      "grid": 8,
+      "classified_position": 5,
+      "finish_position": 5,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 10.0,
+      "positions_gained": 3
+    },
+    {
+      "driver_id": "PIA",
+      "constructor_id": "mclaren",
+      "grid": 6,
+      "classified_position": 6,
+      "finish_position": 6,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 8.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "LAW",
+      "constructor_id": "rb",
+      "grid": 11,
+      "classified_position": 7,
+      "finish_position": 7,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 6.0,
+      "positions_gained": 4
+    },
+    {
+      "driver_id": "ALO",
+      "constructor_id": "aston_martin",
+      "grid": 12,
+      "classified_position": 8,
+      "finish_position": 8,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 4.0,
+      "positions_gained": 4
+    },
+    {
+      "driver_id": "NOR",
+      "constructor_id": "mclaren",
+      "grid": 5,
+      "classified_position": 9,
+      "finish_position": 9,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 2.0,
+      "positions_gained": -4
+    },
+    {
+      "driver_id": "LIN",
+      "constructor_id": "rb",
+      "grid": 22,
+      "classified_position": 10,
+      "finish_position": 10,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 1.0,
+      "positions_gained": 12
+    },
+    {
+      "driver_id": "HUL",
+      "constructor_id": "audi",
+      "grid": 15,
+      "classified_position": 11,
+      "finish_position": 11,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": 4
+    },
+    {
+      "driver_id": "STR",
+      "constructor_id": "aston_martin",
+      "grid": 14,
+      "classified_position": 12,
+      "finish_position": 12,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": 2
+    },
+    {
+      "driver_id": "COL",
+      "constructor_id": "alpine",
+      "grid": 21,
+      "classified_position": 13,
+      "finish_position": 13,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": 8
+    },
+    {
+      "driver_id": "BEA",
+      "constructor_id": "haas",
+      "grid": 16,
+      "classified_position": 14,
+      "finish_position": 14,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": 2
+    },
+    {
+      "driver_id": "OCO",
+      "constructor_id": "haas",
+      "grid": 17,
+      "classified_position": 15,
+      "finish_position": 15,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": 2
+    },
+    {
+      "driver_id": "GAS",
+      "constructor_id": "alpine",
+      "grid": 9,
+      "classified_position": 16,
+      "finish_position": 16,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": -7
+    },
+    {
+      "driver_id": "SAI",
+      "constructor_id": "williams",
+      "grid": 13,
+      "classified_position": 17,
+      "finish_position": 17,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": -4
+    },
+    {
+      "driver_id": "BOR",
+      "constructor_id": "audi",
+      "grid": 10,
+      "classified_position": 18,
+      "finish_position": 18,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": -8
+    },
+    {
+      "driver_id": "PER",
+      "constructor_id": "cadillac",
+      "grid": 20,
+      "classified_position": 19,
+      "finish_position": 19,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": 1
+    },
+    {
+      "driver_id": "RUS",
+      "constructor_id": "mercedes",
+      "grid": 7,
+      "classified_position": 20,
+      "finish_position": 20,
+      "status": "Retired",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": -13
+    },
+    {
+      "driver_id": "ALB",
+      "constructor_id": "williams",
+      "grid": 18,
+      "classified_position": 21,
+      "finish_position": null,
+      "status": "Retired",
+      "is_classified": false,
+      "is_finished": false,
+      "points": 0.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "BOT",
+      "constructor_id": "cadillac",
+      "grid": 19,
+      "classified_position": 22,
+      "finish_position": null,
+      "status": "Retired",
+      "is_classified": false,
+      "is_finished": false,
+      "points": 0.0,
+      "positions_gained": 0
+    }
+  ],
+  "pitstops": {
+    "by_driver": {
+      "PER": [
+        {
+          "lap": 1,
+          "stop_number": 1,
+          "duration": 38.032
+        },
+        {
+          "lap": 2,
+          "stop_number": 2,
+          "duration": 41.721
+        },
+        {
+          "lap": 9,
+          "stop_number": 3,
+          "duration": 29.87
+        },
+        {
+          "lap": 18,
+          "stop_number": 4,
+          "duration": 28.887
+        },
+        {
+          "lap": 21,
+          "stop_number": 5,
+          "duration": 29.266
+        },
+        {
+          "lap": 39,
+          "stop_number": 6,
+          "duration": 31.338
+        },
+        {
+          "lap": 44,
+          "stop_number": 7,
+          "duration": 28.937
+        }
+      ],
+      "PIA": [
+        {
+          "lap": 2,
+          "stop_number": 1,
+          "duration": 81.474
+        },
+        {
+          "lap": 9,
+          "stop_number": 2,
+          "duration": 29.204
+        },
+        {
+          "lap": 33,
+          "stop_number": 3,
+          "duration": 28.337
+        },
+        {
+          "lap": 45,
+          "stop_number": 4,
+          "duration": 27.498
+        }
+      ],
+      "BOR": [
+        {
+          "lap": 2,
+          "stop_number": 1,
+          "duration": 73.866
+        },
+        {
+          "lap": 9,
+          "stop_number": 2,
+          "duration": 27.873
+        },
+        {
+          "lap": 15,
+          "stop_number": 3,
+          "duration": 36.773
+        },
+        {
+          "lap": 34,
+          "stop_number": 4,
+          "duration": 51.819
+        },
+        {
+          "lap": 44,
+          "stop_number": 5,
+          "duration": 27.704
+        }
+      ],
+      "STR": [
+        {
+          "lap": 2,
+          "stop_number": 1,
+          "duration": 60.446
+        },
+        {
+          "lap": 9,
+          "stop_number": 2,
+          "duration": 28.021
+        },
+        {
+          "lap": 28,
+          "stop_number": 3,
+          "duration": 28.351
+        },
+        {
+          "lap": 43,
+          "stop_number": 4,
+          "duration": 27.446
+        }
+      ],
+      "HUL": [
+        {
+          "lap": 2,
+          "stop_number": 1,
+          "duration": 61.177
+        },
+        {
+          "lap": 8,
+          "stop_number": 2,
+          "duration": 27.594
+        },
+        {
+          "lap": 32,
+          "stop_number": 3,
+          "duration": 28.419
+        },
+        {
+          "lap": 45,
+          "stop_number": 4,
+          "duration": 28.277
+        }
+      ],
+      "LEC": [
+        {
+          "lap": 3,
+          "stop_number": 1,
+          "duration": 38.01
+        },
+        {
+          "lap": 9,
+          "stop_number": 2,
+          "duration": 28.651
+        },
+        {
+          "lap": 28,
+          "stop_number": 3,
+          "duration": 27.957
+        },
+        {
+          "lap": 43,
+          "stop_number": 4,
+          "duration": 28.178
+        }
+      ],
+      "ANT": [
+        {
+          "lap": 9,
+          "stop_number": 1,
+          "duration": 27.739
+        },
+        {
+          "lap": 33,
+          "stop_number": 2,
+          "duration": 27.682
+        },
+        {
+          "lap": 44,
+          "stop_number": 3,
+          "duration": 27.295
+        }
+      ],
+      "VER": [
+        {
+          "lap": 9,
+          "stop_number": 1,
+          "duration": 27.641
+        },
+        {
+          "lap": 33,
+          "stop_number": 2,
+          "duration": 27.834
+        },
+        {
+          "lap": 43,
+          "stop_number": 3,
+          "duration": 27.642
+        }
+      ],
+      "RUS": [
+        {
+          "lap": 9,
+          "stop_number": 1,
+          "duration": 28.801
+        },
+        {
+          "lap": 32,
+          "stop_number": 2,
+          "duration": 27.677
+        },
+        {
+          "lap": 44,
+          "stop_number": 3,
+          "duration": 27.702
+        }
+      ],
+      "HAD": [
+        {
+          "lap": 9,
+          "stop_number": 1,
+          "duration": 28.134
+        },
+        {
+          "lap": 31,
+          "stop_number": 2,
+          "duration": 28.522
+        },
+        {
+          "lap": 44,
+          "stop_number": 3,
+          "duration": 27.345
+        }
+      ],
+      "LAW": [
+        {
+          "lap": 9,
+          "stop_number": 1,
+          "duration": 28.6
+        },
+        {
+          "lap": 30,
+          "stop_number": 2,
+          "duration": 28.026
+        },
+        {
+          "lap": 45,
+          "stop_number": 3,
+          "duration": 29.624
+        }
+      ],
+      "OCO": [
+        {
+          "lap": 9,
+          "stop_number": 1,
+          "duration": 28.691
+        },
+        {
+          "lap": 29,
+          "stop_number": 2,
+          "duration": 29.057
+        },
+        {
+          "lap": 41,
+          "stop_number": 3,
+          "duration": 28.419
+        }
+      ],
+      "SAI": [
+        {
+          "lap": 9,
+          "stop_number": 1,
+          "duration": 32.065
+        },
+        {
+          "lap": 26,
+          "stop_number": 2,
+          "duration": 28.233
+        },
+        {
+          "lap": 42,
+          "stop_number": 3,
+          "duration": 39.685
+        }
+      ],
+      "LIN": [
+        {
+          "lap": 9,
+          "stop_number": 1,
+          "duration": 28.598
+        },
+        {
+          "lap": 28,
+          "stop_number": 2,
+          "duration": 29.254
+        },
+        {
+          "lap": 43,
+          "stop_number": 3,
+          "duration": 28.072
+        }
+      ],
+      "ALB": [
+        {
+          "lap": 9,
+          "stop_number": 1,
+          "duration": 32.467
+        },
+        {
+          "lap": 16,
+          "stop_number": 2,
+          "duration": 27.608
+        },
+        {
+          "lap": 29,
+          "stop_number": 3,
+          "duration": 27.859
+        }
+      ],
+      "NOR": [
+        {
+          "lap": 9,
+          "stop_number": 1,
+          "duration": 30.79
+        },
+        {
+          "lap": 34,
+          "stop_number": 2,
+          "duration": 28.25
+        },
+        {
+          "lap": 45,
+          "stop_number": 3,
+          "duration": 27.869
+        }
+      ],
+      "ALO": [
+        {
+          "lap": 9,
+          "stop_number": 1,
+          "duration": 28.314
+        },
+        {
+          "lap": 31,
+          "stop_number": 2,
+          "duration": 27.615
+        },
+        {
+          "lap": 45,
+          "stop_number": 3,
+          "duration": 27.809
+        }
+      ],
+      "GAS": [
+        {
+          "lap": 9,
+          "stop_number": 1,
+          "duration": 28.152
+        },
+        {
+          "lap": 25,
+          "stop_number": 2,
+          "duration": 27.758
+        },
+        {
+          "lap": 37,
+          "stop_number": 3,
+          "duration": 27.854
+        },
+        {
+          "lap": 45,
+          "stop_number": 4,
+          "duration": 28.335
+        }
+      ],
+      "COL": [
+        {
+          "lap": 9,
+          "stop_number": 1,
+          "duration": 27.955
+        },
+        {
+          "lap": 31,
+          "stop_number": 2,
+          "duration": 27.631
+        },
+        {
+          "lap": 42,
+          "stop_number": 3,
+          "duration": 28.211
+        }
+      ],
+      "BEA": [
+        {
+          "lap": 10,
+          "stop_number": 1,
+          "duration": 28.553
+        },
+        {
+          "lap": 24,
+          "stop_number": 2,
+          "duration": 29.045
+        },
+        {
+          "lap": 38,
+          "stop_number": 3,
+          "duration": 28.017
+        }
+      ],
+      "HAM": [
+        {
+          "lap": 31,
+          "stop_number": 1,
+          "duration": 27.802
+        },
+        {
+          "lap": 43,
+          "stop_number": 2,
+          "duration": 28.053
+        }
+      ]
+    },
+    "by_team": [
+      {
+        "constructor_id": "mercedes",
+        "constructor_name": "Mercedes",
+        "avg_pitstop": 27.816,
+        "best_pitstop": 27.295,
+        "total_stops": 6
+      },
+      {
+        "constructor_id": "red_bull",
+        "constructor_name": "Red Bull",
+        "avg_pitstop": 27.853,
+        "best_pitstop": 27.345,
+        "total_stops": 6
+      },
+      {
+        "constructor_id": "aston_martin",
+        "constructor_name": "Aston Martin",
+        "avg_pitstop": 27.926,
+        "best_pitstop": 27.446,
+        "total_stops": 6
+      },
+      {
+        "constructor_id": "alpine",
+        "constructor_name": "Alpine",
+        "avg_pitstop": 27.985,
+        "best_pitstop": 27.631,
+        "total_stops": 7
+      },
+      {
+        "constructor_id": "haas",
+        "constructor_name": "Haas",
+        "avg_pitstop": 28.63,
+        "best_pitstop": 28.017,
+        "total_stops": 6
+      },
+      {
+        "constructor_id": "mclaren",
+        "constructor_name": "McLaren",
+        "avg_pitstop": 28.658,
+        "best_pitstop": 27.498,
+        "total_stops": 6
+      },
+      {
+        "constructor_id": "racing_bulls",
+        "constructor_name": "Racing Bulls",
+        "avg_pitstop": 28.696,
+        "best_pitstop": 28.026,
+        "total_stops": 6
+      },
+      {
+        "constructor_id": "ferrari",
+        "constructor_name": "Ferrari",
+        "avg_pitstop": 29.775,
+        "best_pitstop": 27.802,
+        "total_stops": 6
+      },
+      {
+        "constructor_id": "williams",
+        "constructor_name": "Williams",
+        "avg_pitstop": 31.32,
+        "best_pitstop": 27.608,
+        "total_stops": 6
+      },
+      {
+        "constructor_id": "cadillac",
+        "constructor_name": "Cadillac",
+        "avg_pitstop": 32.579,
+        "best_pitstop": 28.887,
+        "total_stops": 7
+      },
+      {
+        "constructor_id": "audi",
+        "constructor_name": "Audi",
+        "avg_pitstop": 32.637,
+        "best_pitstop": 27.594,
+        "total_stops": 7
+      }
+    ]
+  },
+  "race_pace": {
+    "ALB": {
+      "avg_race_pace": 104.297,
+      "median_race_pace": 103.813,
+      "best_race_lap": 102.284,
+      "consistency_std": 2.017,
+      "laps_analyzed": 25,
+      "pace_delta_to_leader": 3.157
+    },
+    "ALO": {
+      "avg_race_pace": 103.293,
+      "median_race_pace": 103.234,
+      "best_race_lap": 100.353,
+      "consistency_std": 1.88,
+      "laps_analyzed": 32,
+      "pace_delta_to_leader": 2.153
+    },
+    "ANT": {
+      "avg_race_pace": 101.978,
+      "median_race_pace": 101.591,
+      "best_race_lap": 98.589,
+      "consistency_std": 2.273,
+      "laps_analyzed": 34,
+      "pace_delta_to_leader": 0.838
+    },
+    "BEA": {
+      "avg_race_pace": 103.813,
+      "median_race_pace": 103.208,
+      "best_race_lap": 100.366,
+      "consistency_std": 2.316,
+      "laps_analyzed": 33,
+      "pace_delta_to_leader": 2.673
+    },
+    "BOR": {
+      "avg_race_pace": 104.714,
+      "median_race_pace": 103.83,
+      "best_race_lap": 101.382,
+      "consistency_std": 2.831,
+      "laps_analyzed": 35,
+      "pace_delta_to_leader": 3.574
+    },
+    "COL": {
+      "avg_race_pace": 103.567,
+      "median_race_pace": 103.185,
+      "best_race_lap": 100.988,
+      "consistency_std": 2.206,
+      "laps_analyzed": 34,
+      "pace_delta_to_leader": 2.427
+    },
+    "GAS": {
+      "avg_race_pace": 103.798,
+      "median_race_pace": 103.268,
+      "best_race_lap": 101.514,
+      "consistency_std": 2.169,
+      "laps_analyzed": 34,
+      "pace_delta_to_leader": 2.658
+    },
+    "HAD": {
+      "avg_race_pace": 102.143,
+      "median_race_pace": 102.087,
+      "best_race_lap": 99.792,
+      "consistency_std": 1.404,
+      "laps_analyzed": 32,
+      "pace_delta_to_leader": 1.003
+    },
+    "HAM": {
+      "avg_race_pace": 101.924,
+      "median_race_pace": 101.936,
+      "best_race_lap": 98.61,
+      "consistency_std": 1.815,
+      "laps_analyzed": 32,
+      "pace_delta_to_leader": 0.784
+    },
+    "HUL": {
+      "avg_race_pace": 104.191,
+      "median_race_pace": 103.799,
+      "best_race_lap": 101.394,
+      "consistency_std": 2.6,
+      "laps_analyzed": 35,
+      "pace_delta_to_leader": 3.051
+    },
+    "LAW": {
+      "avg_race_pace": 103.353,
+      "median_race_pace": 103.239,
+      "best_race_lap": 100.254,
+      "consistency_std": 1.983,
+      "laps_analyzed": 33,
+      "pace_delta_to_leader": 2.213
+    },
+    "LEC": {
+      "avg_race_pace": 102.363,
+      "median_race_pace": 101.886,
+      "best_race_lap": 99.336,
+      "consistency_std": 2.118,
+      "laps_analyzed": 32,
+      "pace_delta_to_leader": 1.223
+    },
+    "LIN": {
+      "avg_race_pace": 103.954,
+      "median_race_pace": 103.463,
+      "best_race_lap": 100.315,
+      "consistency_std": 2.106,
+      "laps_analyzed": 33,
+      "pace_delta_to_leader": 2.814
+    },
+    "NOR": {
+      "avg_race_pace": 103.019,
+      "median_race_pace": 102.97,
+      "best_race_lap": 99.97,
+      "consistency_std": 2.341,
+      "laps_analyzed": 33,
+      "pace_delta_to_leader": 1.879
+    },
+    "OCO": {
+      "avg_race_pace": 104.628,
+      "median_race_pace": 103.762,
+      "best_race_lap": 102.062,
+      "consistency_std": 2.632,
+      "laps_analyzed": 34,
+      "pace_delta_to_leader": 3.488
+    },
+    "PER": {
+      "avg_race_pace": 106.883,
+      "median_race_pace": 105.41,
+      "best_race_lap": 102.688,
+      "consistency_std": 3.506,
+      "laps_analyzed": 38,
+      "pace_delta_to_leader": 5.743
+    },
+    "PIA": {
+      "avg_race_pace": 103.296,
+      "median_race_pace": 103.137,
+      "best_race_lap": 99.485,
+      "consistency_std": 2.952,
+      "laps_analyzed": 35,
+      "pace_delta_to_leader": 2.156
+    },
+    "RUS": {
+      "avg_race_pace": 102.59,
+      "median_race_pace": 102.225,
+      "best_race_lap": 100.715,
+      "consistency_std": 2.008,
+      "laps_analyzed": 30,
+      "pace_delta_to_leader": 1.45
+    },
+    "SAI": {
+      "avg_race_pace": 103.948,
+      "median_race_pace": 103.793,
+      "best_race_lap": 101.738,
+      "consistency_std": 1.599,
+      "laps_analyzed": 33,
+      "pace_delta_to_leader": 2.808
+    },
+    "STR": {
+      "avg_race_pace": 103.793,
+      "median_race_pace": 103.511,
+      "best_race_lap": 101.248,
+      "consistency_std": 1.854,
+      "laps_analyzed": 32,
+      "pace_delta_to_leader": 2.653
+    },
+    "VER": {
+      "avg_race_pace": 101.14,
+      "median_race_pace": 101.185,
+      "best_race_lap": 98.22,
+      "consistency_std": 1.318,
+      "laps_analyzed": 32,
+      "pace_delta_to_leader": 0.0
+    }
+  },
+  "tyre_management": {
+    "ALB": {
+      "stints": [
+        {
+          "stint": 3,
+          "compound": "HARD",
+          "laps": 11,
+          "avg_pace": 103.794,
+          "degradation_rate": 0.1523
+        },
+        {
+          "stint": 4,
+          "compound": "SOFT",
+          "laps": 11,
+          "avg_pace": 103.458,
+          "degradation_rate": 0.2069
+        }
+      ],
+      "avg_degradation": 0.1796,
+      "management_score": 0
+    },
+    "ALO": {
+      "stints": [
+        {
+          "stint": 2,
+          "compound": "HARD",
+          "laps": 18,
+          "avg_pace": 104.354,
+          "degradation_rate": -0.0132
+        },
+        {
+          "stint": 3,
+          "compound": "None",
+          "laps": 10,
+          "avg_pace": 102.372,
+          "degradation_rate": 0.16
+        },
+        {
+          "stint": 4,
+          "compound": "SOFT",
+          "laps": 4,
+          "avg_pace": 100.821,
+          "degradation_rate": -0.3593
+        }
+      ],
+      "avg_degradation": -0.0708,
+      "management_score": 100
+    },
+    "ANT": {
+      "stints": [
+        {
+          "stint": 2,
+          "compound": "MEDIUM",
+          "laps": 21,
+          "avg_pace": 102.654,
+          "degradation_rate": 0.0316
+        },
+        {
+          "stint": 3,
+          "compound": "SOFT",
+          "laps": 8,
+          "avg_pace": 100.94,
+          "degradation_rate": 0.1713
+        },
+        {
+          "stint": 4,
+          "compound": "SOFT",
+          "laps": 4,
+          "avg_pace": 98.822,
+          "degradation_rate": 0.1061
+        }
+      ],
+      "avg_degradation": 0.103,
+      "management_score": 31
+    },
+    "BEA": {
+      "stints": [
+        {
+          "stint": 2,
+          "compound": "MEDIUM",
+          "laps": 13,
+          "avg_pace": 104.89,
+          "degradation_rate": -0.0972
+        },
+        {
+          "stint": 3,
+          "compound": "HARD",
+          "laps": 13,
+          "avg_pace": 103.316,
+          "degradation_rate": 0.3196
+        },
+        {
+          "stint": 4,
+          "compound": "None",
+          "laps": 7,
+          "avg_pace": 102.736,
+          "degradation_rate": 0.1264
+        }
+      ],
+      "avg_degradation": 0.1163,
+      "management_score": 22
+    },
+    "BOR": {
+      "stints": [
+        {
+          "stint": 4,
+          "compound": "HARD",
+          "laps": 18,
+          "avg_pace": 104.485,
+          "degradation_rate": 0.2402
+        },
+        {
+          "stint": 5,
+          "compound": "SOFT",
+          "laps": 6,
+          "avg_pace": 102.06,
+          "degradation_rate": -0.0572
+        },
+        {
+          "stint": 6,
+          "compound": "SOFT",
+          "laps": 6,
+          "avg_pace": 103.359,
+          "degradation_rate": 0.0589
+        }
+      ],
+      "avg_degradation": 0.0806,
+      "management_score": 46
+    },
+    "BOT": {
+      "stints": [
+        {
+          "stint": 1,
+          "compound": "SOFT",
+          "laps": 4,
+          "avg_pace": 127.042,
+          "degradation_rate": -4.7812
+        }
+      ],
+      "avg_degradation": -4.7812,
+      "management_score": 100
+    },
+    "COL": {
+      "stints": [
+        {
+          "stint": 2,
+          "compound": "MEDIUM",
+          "laps": 20,
+          "avg_pace": 104.319,
+          "degradation_rate": -0.0117
+        },
+        {
+          "stint": 3,
+          "compound": "HARD",
+          "laps": 9,
+          "avg_pace": 102.139,
+          "degradation_rate": 0.1616
+        },
+        {
+          "stint": 4,
+          "compound": "MEDIUM",
+          "laps": 5,
+          "avg_pace": 103.126,
+          "degradation_rate": -1.6135
+        }
+      ],
+      "avg_degradation": -0.4879,
+      "management_score": 100
+    },
+    "GAS": {
+      "stints": [
+        {
+          "stint": 2,
+          "compound": "MEDIUM",
+          "laps": 14,
+          "avg_pace": 104.807,
+          "degradation_rate": -0.0646
+        },
+        {
+          "stint": 3,
+          "compound": "HARD",
+          "laps": 11,
+          "avg_pace": 103.668,
+          "degradation_rate": 0.3492
+        },
+        {
+          "stint": 5,
+          "compound": "SOFT",
+          "laps": 6,
+          "avg_pace": 102.748,
+          "degradation_rate": -0.1202
+        }
+      ],
+      "avg_degradation": 0.0548,
+      "management_score": 63
+    },
+    "HAD": {
+      "stints": [
+        {
+          "stint": 2,
+          "compound": "SOFT",
+          "laps": 18,
+          "avg_pace": 103.049,
+          "degradation_rate": -0.0621
+        },
+        {
+          "stint": 3,
+          "compound": "None",
+          "laps": 10,
+          "avg_pace": 101.263,
+          "degradation_rate": 0.0975
+        },
+        {
+          "stint": 4,
+          "compound": "SOFT",
+          "laps": 4,
+          "avg_pace": 100.264,
+          "degradation_rate": 0.0475
+        }
+      ],
+      "avg_degradation": 0.0276,
+      "management_score": 82
+    },
+    "HAM": {
+      "stints": [
+        {
+          "stint": 1,
+          "compound": "SOFT",
+          "laps": 18,
+          "avg_pace": 102.935,
+          "degradation_rate": 0.0192
+        },
+        {
+          "stint": 2,
+          "compound": "MEDIUM",
+          "laps": 10,
+          "avg_pace": 101.194,
+          "degradation_rate": 0.1086
+        },
+        {
+          "stint": 3,
+          "compound": "SOFT",
+          "laps": 4,
+          "avg_pace": 99.196,
+          "degradation_rate": -0.0047
+        }
+      ],
+      "avg_degradation": 0.041,
+      "management_score": 73
+    },
+    "HUL": {
+      "stints": [
+        {
+          "stint": 3,
+          "compound": "SOFT",
+          "laps": 20,
+          "avg_pace": 104.766,
+          "degradation_rate": 0.0215
+        },
+        {
+          "stint": 4,
+          "compound": "SOFT",
+          "laps": 9,
+          "avg_pace": 102.486,
+          "degradation_rate": 0.2001
+        },
+        {
+          "stint": 5,
+          "compound": "SOFT",
+          "laps": 4,
+          "avg_pace": 101.671,
+          "degradation_rate": 0.1412
+        }
+      ],
+      "avg_degradation": 0.1209,
+      "management_score": 19
+    },
+    "LAW": {
+      "stints": [
+        {
+          "stint": 2,
+          "compound": "HARD",
+          "laps": 17,
+          "avg_pace": 104.171,
+          "degradation_rate": -0.1198
+        },
+        {
+          "stint": 3,
+          "compound": "HARD",
+          "laps": 11,
+          "avg_pace": 102.36,
+          "degradation_rate": 0.1429
+        },
+        {
+          "stint": 4,
+          "compound": "SOFT",
+          "laps": 5,
+          "avg_pace": 102.753,
+          "degradation_rate": -1.9853
+        }
+      ],
+      "avg_degradation": -0.6541,
+      "management_score": 100
+    },
+    "LEC": {
+      "stints": [
+        {
+          "stint": 3,
+          "compound": "SOFT",
+          "laps": 15,
+          "avg_pace": 103.905,
+          "degradation_rate": 0.0944
+        },
+        {
+          "stint": 4,
+          "compound": "None",
+          "laps": 13,
+          "avg_pace": 101.454,
+          "degradation_rate": 0.0499
+        },
+        {
+          "stint": 5,
+          "compound": "SOFT",
+          "laps": 4,
+          "avg_pace": 99.537,
+          "degradation_rate": 0.0534
+        }
+      ],
+      "avg_degradation": 0.0659,
+      "management_score": 56
+    },
+    "LIN": {
+      "stints": [
+        {
+          "stint": 2,
+          "compound": "HARD",
+          "laps": 16,
+          "avg_pace": 105.006,
+          "degradation_rate": 0.0214
+        },
+        {
+          "stint": 3,
+          "compound": "HARD",
+          "laps": 13,
+          "avg_pace": 103.487,
+          "degradation_rate": 0.2414
+        },
+        {
+          "stint": 4,
+          "compound": "SOFT",
+          "laps": 4,
+          "avg_pace": 101.258,
+          "degradation_rate": -0.5568
+        }
+      ],
+      "avg_degradation": -0.098,
+      "management_score": 100
+    },
+    "NOR": {
+      "stints": [
+        {
+          "stint": 2,
+          "compound": "HARD",
+          "laps": 22,
+          "avg_pace": 104.116,
+          "degradation_rate": -0.0477
+        },
+        {
+          "stint": 3,
+          "compound": "SOFT",
+          "laps": 7,
+          "avg_pace": 100.894,
+          "degradation_rate": 0.1153
+        },
+        {
+          "stint": 4,
+          "compound": "SOFT",
+          "laps": 4,
+          "avg_pace": 100.702,
+          "degradation_rate": -0.2871
+        }
+      ],
+      "avg_degradation": -0.0732,
+      "management_score": 100
+    },
+    "OCO": {
+      "stints": [
+        {
+          "stint": 2,
+          "compound": "SOFT",
+          "laps": 17,
+          "avg_pace": 104.799,
+          "degradation_rate": 0.0529
+        },
+        {
+          "stint": 3,
+          "compound": "HARD",
+          "laps": 11,
+          "avg_pace": 104.229,
+          "degradation_rate": 0.4357
+        },
+        {
+          "stint": 4,
+          "compound": "SOFT",
+          "laps": 5,
+          "avg_pace": 103.479,
+          "degradation_rate": -1.2126
+        }
+      ],
+      "avg_degradation": -0.2413,
+      "management_score": 100
+    },
+    "PER": {
+      "stints": [
+        {
+          "stint": 3,
+          "compound": "INTERMEDIATE",
+          "laps": 4,
+          "avg_pace": 113.766,
+          "degradation_rate": 0.2024
+        },
+        {
+          "stint": 4,
+          "compound": "MEDIUM",
+          "laps": 6,
+          "avg_pace": 108.788,
+          "degradation_rate": -0.3227
+        },
+        {
+          "stint": 6,
+          "compound": "HARD",
+          "laps": 16,
+          "avg_pace": 105.379,
+          "degradation_rate": 0.2334
+        },
+        {
+          "stint": 8,
+          "compound": "SOFT",
+          "laps": 9,
+          "avg_pace": 105.161,
+          "degradation_rate": -0.4393
+        }
+      ],
+      "avg_degradation": -0.0816,
+      "management_score": 100
+    },
+    "PIA": {
+      "stints": [
+        {
+          "stint": 3,
+          "compound": "HARD",
+          "laps": 21,
+          "avg_pace": 104.21,
+          "degradation_rate": -0.0554
+        },
+        {
+          "stint": 4,
+          "compound": "HARD",
+          "laps": 8,
+          "avg_pace": 100.723,
+          "degradation_rate": 0.1177
+        },
+        {
+          "stint": 5,
+          "compound": "MEDIUM",
+          "laps": 4,
+          "avg_pace": 99.958,
+          "degradation_rate": -0.0326
+        }
+      ],
+      "avg_degradation": 0.0099,
+      "management_score": 93
+    },
+    "RUS": {
+      "stints": [
+        {
+          "stint": 2,
+          "compound": "MEDIUM",
+          "laps": 20,
+          "avg_pace": 102.922,
+          "degradation_rate": 0.0829
+        },
+        {
+          "stint": 3,
+          "compound": "SOFT",
+          "laps": 9,
+          "avg_pace": 101.125,
+          "degradation_rate": 0.105
+        }
+      ],
+      "avg_degradation": 0.094,
+      "management_score": 37
+    },
+    "SAI": {
+      "stints": [
+        {
+          "stint": 2,
+          "compound": "SOFT",
+          "laps": 13,
+          "avg_pace": 104.862,
+          "degradation_rate": 0.1112
+        },
+        {
+          "stint": 3,
+          "compound": "HARD",
+          "laps": 14,
+          "avg_pace": 103.576,
+          "degradation_rate": 0.0943
+        },
+        {
+          "stint": 4,
+          "compound": "SOFT",
+          "laps": 6,
+          "avg_pace": 102.836,
+          "degradation_rate": 0.0178
+        }
+      ],
+      "avg_degradation": 0.0744,
+      "management_score": 50
+    },
+    "STR": {
+      "stints": [
+        {
+          "stint": 3,
+          "compound": "HARD",
+          "laps": 15,
+          "avg_pace": 104.623,
+          "degradation_rate": 0.0197
+        },
+        {
+          "stint": 4,
+          "compound": "HARD",
+          "laps": 13,
+          "avg_pace": 103.494,
+          "degradation_rate": 0.2283
+        },
+        {
+          "stint": 5,
+          "compound": "SOFT",
+          "laps": 4,
+          "avg_pace": 101.653,
+          "degradation_rate": -0.3278
+        }
+      ],
+      "avg_degradation": -0.0266,
+      "management_score": 100
+    },
+    "VER": {
+      "stints": [
+        {
+          "stint": 2,
+          "compound": "SOFT",
+          "laps": 20,
+          "avg_pace": 101.814,
+          "degradation_rate": -0.0358
+        },
+        {
+          "stint": 3,
+          "compound": "SOFT",
+          "laps": 8,
+          "avg_pace": 100.802,
+          "degradation_rate": 0.0505
+        },
+        {
+          "stint": 4,
+          "compound": "SOFT",
+          "laps": 4,
+          "avg_pace": 98.447,
+          "degradation_rate": -0.0524
+        }
+      ],
+      "avg_degradation": -0.0126,
+      "management_score": 100
+    }
+  }
+}

@@ -108,6 +108,7 @@ src += `
 const fail = (msg) => { console.error('FAIL: ' + msg); process.exit(1); };
 
 try {
+  vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'web', 'public', 'prediction-context.js'), 'utf8'), sandbox, { filename: 'prediction-context.js' });
   vm.runInContext(fs.readFileSync(FINAL_FIX, 'utf8'), sandbox, { filename: 'final-fix.js' });
   vm.runInContext(fs.readFileSync(OPTIMIZER_SCORING, 'utf8'), sandbox, { filename: 'optimizer-scoring.js' });
   vm.runInContext(src, sandbox, { filename: 'app.js' });

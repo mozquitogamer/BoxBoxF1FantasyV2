@@ -372,7 +372,11 @@ function showPriceAssumptionBanner() {
     const active = Number(assumption?.round) === Number(data?.round) && assumption?.note;
     banner.hidden = !active;
     if (active) {
-        document.getElementById('rosterPriceBannerText').textContent = assumption.note;
+        banner.querySelector('summary').textContent = `${data.race} · Round ${data.round} pricing note`;
+        const historyStart = Number(assumption.history_from_round);
+        document.getElementById('rosterPriceBannerText').textContent = historyStart > 0
+            ? `Returning-driver price forecasts use the recorded scoring history from Round ${historyStart} onwards. F1 Fantasy has not published its substitution pricing rule.`
+            : assumption.note;
         banner.open = !window.matchMedia('(max-width: 768px)').matches;
     }
 }
@@ -1400,37 +1404,7 @@ async function loadData() {
         return;
     }
 
-    // Update header — show next upcoming race if the predicted race is already over
-    const now = new Date();
-    const predRound = LOCK_DEADLINES.find(dl => dl.round === data.round);
-    const predRaceOver = predRound && new Date(predRound.lock) < now;
-
-    let headerRace, headerRound, headerSprint, headerMeta;
-    if (predRaceOver) {
-        // Find next upcoming non-cancelled race
-        const nextRace = LOCK_DEADLINES.find(dl => !dl.cancelled && new Date(dl.lock) > now);
-        if (nextRace) {
-            headerRace = nextRace.race;
-            headerRound = nextRace.round;
-            headerSprint = nextRace.sprint;
-            headerMeta = `Round ${nextRace.round} · ${data.season}${nextRace.sprint ? ' · Sprint Weekend' : ''} · Upcoming`;
-        } else {
-            headerRace = data.race;
-            headerRound = data.round;
-            headerMeta = `Round ${data.round} · ${data.season} · Season Complete`;
-        }
-    } else {
-        headerRace = data.race;
-        headerRound = data.round;
-        headerMeta = `Round ${data.round} · ${data.season}${data.is_sprint_weekend ? ' · Sprint Weekend' : ''}`;
-    }
-
-    const flag = RACE_FLAGS[headerRace] || '🏁';
-    document.getElementById('raceFlag').textContent = flag;
-    document.getElementById('raceName').textContent = headerRace;
-    document.getElementById('raceMeta').textContent = headerMeta;
-    document.getElementById('generatedAt').textContent =
-        `Predictions generated: ${new Date(data.generated_at).toLocaleString()}`;
+    renderPredictionContext();
 
     // Populate team filter
     const teams = [...new Set(data.drivers.map(d => d.constructor))].sort();
@@ -1441,6 +1415,35 @@ async function loadData() {
         opt.textContent = TEAMS[t]?.name || t;
         teamFilter.appendChild(opt);
     });
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+}
+
+function renderPredictionContext() {
+    if (!data) return;
+    const context = window.BoxBoxPredictionContext.context(data, seasonSummary?.rounds || []);
+    const runTime = new Date(context.generatedAt);
+    const timeText = Number.isNaN(runTime.getTime()) ? 'Run time unavailable'
+        : runTime.toLocaleString(undefined, { timeZoneName: 'short' });
+    document.getElementById('raceFlag').textContent = RACE_FLAGS[data.race] || '🏁';
+    document.getElementById('raceName').textContent = data.race;
+    document.getElementById('raceMeta').textContent =
+        `Round ${data.round} · ${data.season}${data.is_sprint_weekend ? ' · Sprint Weekend' : ''} · ${context.status}`;
+    document.getElementById('generatedAt').textContent = `${context.phase} · Simulation run: ${timeText}`;
+    for (const id of ['driverPredictionContext', 'constructorPredictionContext']) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        el.innerHTML = `<div class="prediction-context${context.archived ? ' is-archived' : ''}">
+            <div class="prediction-context-heading"><strong>${escapeHtml(data.race)} · Round ${data.round}</strong>
+                <span class="prediction-phase">${escapeHtml(context.phase)}</span></div>
+            <p>${escapeHtml(context.evidence)} Simulation run: ${escapeHtml(timeText)}.</p>
+            ${context.notice ? `<p class="prediction-context-notice">${escapeHtml(context.notice)}</p>` : ''}
+        </div>`;
+    }
 }
 
 async function loadSeasonData() {
@@ -2261,7 +2264,7 @@ function renderWeather() {
     // being adjusted in the Monte Carlo. Honest about the cause.
     const wxAdj = data && data.weather_adjustments;
     let wxExplainer = '';
-    if (wxAdj && wxAdj.is_active) {
+    if (wxAdj && wxAdj.is_active && Number(w.round) === Number(data.round)) {
         const parts = [];
         if (wxAdj.rain_risk && wxAdj.rain_risk !== 'NONE') {
             const widenPct = Math.round((wxAdj.noise_mult - 1) * 100);
@@ -2290,13 +2293,14 @@ function renderWeather() {
             <div class="weather-header">
                 <div class="weather-title">
                     <span class="weather-title-icon">\u{1F326}\ufe0f</span>
-                    <span>Weekend Weather</span>
+                    <span>Weather — ${escapeHtml(w.race || 'Race unavailable')} · Round ${w.round ?? '?'}</span>
                     <span class="weather-overall-badge" style="background:${overallColor}">${w.overall_rain_risk} RAIN RISK</span>
                 </div>
                 <div class="weather-update-info">
                     Updated ${formatTime(lastUpdate)} \u00b7 Next update ${formatUntil(nextUpdate)}
                 </div>
             </div>
+            ${Number(w.round) !== Number(data?.round) ? `<p class="weather-round-notice">This forecast is for Round ${w.round ?? '?'}. The simulations shown here are for ${escapeHtml(data?.race || 'a different race')} (Round ${data?.round ?? '?'}).</p>` : ''}
             <div class="weather-sessions-grid">
                 ${sessionsHtml}
             </div>
@@ -2366,6 +2370,7 @@ function renderWeatherBadges() {
 // -- Driver rendering --
 function renderDrivers() {
     if (!data) return;
+    renderPredictionContext();
 
     const sortKey = document.getElementById('driverSort').value;
     const teamFilter = document.getElementById('teamFilter').value;
@@ -2599,6 +2604,7 @@ function driverRow(d, i) {
 // -- Constructor rendering --
 function renderConstructors() {
     if (!data) return;
+    renderPredictionContext();
 
     const sortKey = document.getElementById('constructorSort').value;
     const view = (window.scenarios && !window.scenarios.isEmpty())

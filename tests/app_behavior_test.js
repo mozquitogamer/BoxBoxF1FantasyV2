@@ -96,8 +96,8 @@ try {
     round: 18,
     price_change_assumption: assumption,
     drivers: [
-      { driver_id: 'HAD', current_price: prices.drivers.HAD.current_price },
-      { driver_id: 'LAW', current_price: prices.drivers.LAW.current_price },
+      { driver_id: 'HAD', current_price: prices.price_history['17'].drivers.HAD },
+      { driver_id: 'LAW', current_price: prices.price_history['17'].drivers.LAW },
     ],
   };
   const official = { rounds: {

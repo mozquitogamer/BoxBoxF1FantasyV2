@@ -2,10 +2,10 @@
   "site": "https://boxboxf1fantasy.com",
   "name": "BoxBoxF1Fantasy",
   "description": "Free F1 Fantasy 2026 predictions, race picks, lineup optimizer, transfer tools, strategy guides, public data and accuracy tracking.",
-  "generated_at": "2026-10-03T06:12:26.935228+00:00",
+  "generated_at": "2026-10-06T22:03:24.110383+00:00",
   "language": "en",
-  "current_round": 18,
-  "current_race": "Bahrain Grand Prix in Malaysia",
+  "current_round": 19,
+  "current_race": "Singapore Grand Prix",
   "discovery": {
     "sitemap": "https://boxboxf1fantasy.com/sitemap.xml",
     "llms": "https://boxboxf1fantasy.com/llms.txt",
@@ -60,9 +60,9 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/qatar-gp-2026/",
       "path": "/picks/qatar-gp-2026/",
-      "title": "F1 Fantasy Qatar GP 2026: Strategy Watchlist | BoxBox",
-      "description": "Early F1 Fantasy strategy watchlist for the Qatar GP 2026: race date, sprint status, circuit traits and what to monitor before projections are published.",
-      "h1": "F1 Fantasy Strategy Watchlist: Qatar Grand Prix 2026",
+      "title": "F1 Fantasy Qatar GP 2026: Early Picks | BoxBox",
+      "description": "Early F1 Fantasy outlook for Qatar Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.",
+      "h1": "F1 Fantasy Early Outlook: Qatar Grand Prix 2026",
       "type": "race_picks_page"
     },
     {
@@ -100,17 +100,17 @@
     {
       "url": "https://boxboxf1fantasy.com/picks/singapore-gp-2026/",
       "path": "/picks/singapore-gp-2026/",
-      "title": "F1 Fantasy Singapore GP 2026: Early Picks | BoxBox",
-      "description": "Early F1 Fantasy outlook for Singapore Grand Prix 2026: projected drivers, constructors and transfer notes before race-week practice data arrives.",
-      "h1": "F1 Fantasy Early Outlook: Singapore Grand Prix 2026",
+      "title": "F1 Fantasy Singapore GP 2026: Picks, Captain & Tips | BoxBox",
+      "description": "F1 Fantasy Singapore GP 2026 picks: driver and constructor projections, best values, boost choice, optimized lineup, weather forecast and risk outlook.",
+      "h1": "F1 Fantasy Picks: Singapore Grand Prix 2026",
       "type": "race_picks_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/picks/bahrain-gp-in-malaysia-2026/",
       "path": "/picks/bahrain-gp-in-malaysia-2026/",
-      "title": "F1 Fantasy Bahrain GP in Malaysia 2026: Picks, Captain & Tips | BoxBox",
-      "description": "F1 Fantasy Bahrain GP in Malaysia 2026 picks: driver and constructor projections, best values, boost choice, optimized lineup, weather forecast and risk outlook.",
-      "h1": "F1 Fantasy Picks: Bahrain Grand Prix in Malaysia 2026",
+      "title": "F1 Fantasy Bahrain GP in Malaysia 2026 Results & Review | BoxBox",
+      "description": "F1 Fantasy Bahrain GP in Malaysia 2026 results: Max Verstappen led drivers with 57 points. See every driver and constructor score plus the archived forecast review.",
+      "h1": "F1 Fantasy Results: Bahrain Grand Prix in Malaysia 2026",
       "type": "race_picks_page"
     },
     {
@@ -245,167 +245,159 @@
       "url": "https://boxboxf1fantasy.com/drivers/kimi-antonelli/",
       "path": "/drivers/kimi-antonelli/",
       "title": "Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Kimi Antonelli F1 Fantasy 2026 projection: 27.4 expected points for the Bahrain GP in Malaysia, $26.9M price, value rating and confidence range.",
+      "description": "Kimi Antonelli F1 Fantasy 2026 projection: 26.2 expected points for the Singapore GP, $27.0M price, value rating and confidence range.",
       "h1": "Kimi Antonelli F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/max-verstappen/",
-      "path": "/drivers/max-verstappen/",
-      "title": "Max Verstappen F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Max Verstappen F1 Fantasy 2026 projection: 23.4 expected points for the Bahrain GP in Malaysia, $27.6M price, value rating and confidence range.",
-      "h1": "Max Verstappen F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/arvid-lindblad/",
-      "path": "/drivers/arvid-lindblad/",
-      "title": "Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Arvid Lindblad F1 Fantasy 2026 projection: 20.5 expected points for the Bahrain GP in Malaysia, $8.8M price, value rating and confidence range.",
-      "h1": "Arvid Lindblad F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/george-russell/",
       "path": "/drivers/george-russell/",
       "title": "George Russell F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "George Russell F1 Fantasy 2026 projection: 19.3 expected points for the Bahrain GP in Malaysia, $28.1M price, value rating and confidence range.",
+      "description": "George Russell F1 Fantasy 2026 projection: 24.9 expected points for the Singapore GP, $28.0M price, value rating and confidence range.",
       "h1": "George Russell F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/isack-hadjar/",
-      "path": "/drivers/isack-hadjar/",
-      "title": "Isack Hadjar F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Isack Hadjar F1 Fantasy 2026 projection: 19.2 expected points for the Bahrain GP in Malaysia, $15.1M price, value rating and confidence range.",
-      "h1": "Isack Hadjar F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/lewis-hamilton/",
-      "path": "/drivers/lewis-hamilton/",
-      "title": "Lewis Hamilton F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Lewis Hamilton F1 Fantasy 2026 projection: 18.8 expected points for the Bahrain GP in Malaysia, $24.6M price, value rating and confidence range.",
-      "h1": "Lewis Hamilton F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/max-verstappen/",
+      "path": "/drivers/max-verstappen/",
+      "title": "Max Verstappen F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Max Verstappen F1 Fantasy 2026 projection: 22.1 expected points for the Singapore GP, $27.9M price, value rating and confidence range.",
+      "h1": "Max Verstappen F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/charles-leclerc/",
       "path": "/drivers/charles-leclerc/",
       "title": "Charles Leclerc F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Charles Leclerc F1 Fantasy 2026 projection: 18.2 expected points for the Bahrain GP in Malaysia, $23.7M price, value rating and confidence range.",
+      "description": "Charles Leclerc F1 Fantasy 2026 projection: 21.1 expected points for the Singapore GP, $23.8M price, value rating and confidence range.",
       "h1": "Charles Leclerc F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/lando-norris/",
-      "path": "/drivers/lando-norris/",
-      "title": "Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Lando Norris F1 Fantasy 2026 projection: 15.9 expected points for the Bahrain GP in Malaysia, $26.7M price, value rating and confidence range.",
-      "h1": "Lando Norris F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/franco-colapinto/",
-      "path": "/drivers/franco-colapinto/",
-      "title": "Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Franco Colapinto F1 Fantasy 2026 projection: 14.7 expected points for the Bahrain GP in Malaysia, $10.0M price, value rating and confidence range.",
-      "h1": "Franco Colapinto F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/lewis-hamilton/",
+      "path": "/drivers/lewis-hamilton/",
+      "title": "Lewis Hamilton F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Lewis Hamilton F1 Fantasy 2026 projection: 20.3 expected points for the Singapore GP, $24.3M price, value rating and confidence range.",
+      "h1": "Lewis Hamilton F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/oscar-piastri/",
       "path": "/drivers/oscar-piastri/",
       "title": "Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Oscar Piastri F1 Fantasy 2026 projection: 13.0 expected points for the Bahrain GP in Malaysia, $24.0M price, value rating and confidence range.",
+      "description": "Oscar Piastri F1 Fantasy 2026 projection: 17.4 expected points for the Singapore GP, $23.7M price, value rating and confidence range.",
       "h1": "Oscar Piastri F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/",
-      "path": "/drivers/gabriel-bortoleto/",
-      "title": "Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Gabriel Bortoleto F1 Fantasy 2026 projection: 3.4 expected points for the Bahrain GP in Malaysia, $8.2M price, value rating and confidence range.",
-      "h1": "Gabriel Bortoleto F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/pierre-gasly/",
-      "path": "/drivers/pierre-gasly/",
-      "title": "Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Pierre Gasly F1 Fantasy 2026 projection: 2.5 expected points for the Bahrain GP in Malaysia, $11.4M price, value rating and confidence range.",
-      "h1": "Pierre Gasly F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/lando-norris/",
+      "path": "/drivers/lando-norris/",
+      "title": "Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Lando Norris F1 Fantasy 2026 projection: 17.1 expected points for the Singapore GP, $26.4M price, value rating and confidence range.",
+      "h1": "Lando Norris F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/liam-lawson/",
       "path": "/drivers/liam-lawson/",
       "title": "Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Liam Lawson F1 Fantasy 2026 projection: 2.5 expected points for the Bahrain GP in Malaysia, $9.1M price, value rating and confidence range.",
+      "description": "Liam Lawson F1 Fantasy 2026 projection: 10.8 expected points for the Singapore GP, $9.3M price, value rating and confidence range.",
       "h1": "Liam Lawson F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/esteban-ocon/",
-      "path": "/drivers/esteban-ocon/",
-      "title": "Esteban Ocon F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Esteban Ocon F1 Fantasy 2026 projection: 1.6 expected points for the Bahrain GP in Malaysia, $9.1M price, value rating and confidence range.",
-      "h1": "Esteban Ocon F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/isack-hadjar/",
+      "path": "/drivers/isack-hadjar/",
+      "title": "Isack Hadjar F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Isack Hadjar F1 Fantasy 2026 projection: 10.1 expected points for the Singapore GP, $15.7M price, value rating and confidence range.",
+      "h1": "Isack Hadjar F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/carlos-sainz/",
-      "path": "/drivers/carlos-sainz/",
-      "title": "Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Carlos Sainz F1 Fantasy 2026 projection: -0.2 expected points for the Bahrain GP in Malaysia, $8.4M price, value rating and confidence range.",
-      "h1": "Carlos Sainz F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/",
+      "path": "/drivers/gabriel-bortoleto/",
+      "title": "Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Gabriel Bortoleto F1 Fantasy 2026 projection: 9.4 expected points for the Singapore GP, $7.6M price, value rating and confidence range.",
+      "h1": "Gabriel Bortoleto F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/arvid-lindblad/",
+      "path": "/drivers/arvid-lindblad/",
+      "title": "Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Arvid Lindblad F1 Fantasy 2026 projection: 9.3 expected points for the Singapore GP, $9.4M price, value rating and confidence range.",
+      "h1": "Arvid Lindblad F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/franco-colapinto/",
+      "path": "/drivers/franco-colapinto/",
+      "title": "Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Franco Colapinto F1 Fantasy 2026 projection: 8.4 expected points for the Singapore GP, $9.4M price, value rating and confidence range.",
+      "h1": "Franco Colapinto F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/nico-hulkenberg/",
       "path": "/drivers/nico-hulkenberg/",
       "title": "Nico Hulkenberg F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Nico Hulkenberg F1 Fantasy 2026 projection: -1.3 expected points for the Bahrain GP in Malaysia, $5.4M price, value rating and confidence range.",
+      "description": "Nico Hulkenberg F1 Fantasy 2026 projection: 6.4 expected points for the Singapore GP, $6.0M price, value rating and confidence range.",
       "h1": "Nico Hulkenberg F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/oliver-bearman/",
-      "path": "/drivers/oliver-bearman/",
-      "title": "Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Oliver Bearman F1 Fantasy 2026 projection: -2.6 expected points for the Bahrain GP in Malaysia, $5.6M price, value rating and confidence range.",
-      "h1": "Oliver Bearman F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/esteban-ocon/",
+      "path": "/drivers/esteban-ocon/",
+      "title": "Esteban Ocon F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Esteban Ocon F1 Fantasy 2026 projection: 5.8 expected points for the Singapore GP, $9.3M price, value rating and confidence range.",
+      "h1": "Esteban Ocon F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/alex-albon/",
-      "path": "/drivers/alex-albon/",
-      "title": "Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Alex Albon F1 Fantasy 2026 projection: -3.8 expected points for the Bahrain GP in Malaysia, $5.8M price, value rating and confidence range.",
-      "h1": "Alex Albon F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/pierre-gasly/",
+      "path": "/drivers/pierre-gasly/",
+      "title": "Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Pierre Gasly F1 Fantasy 2026 projection: 4.0 expected points for the Singapore GP, $10.8M price, value rating and confidence range.",
+      "h1": "Pierre Gasly F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/carlos-sainz/",
+      "path": "/drivers/carlos-sainz/",
+      "title": "Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Carlos Sainz F1 Fantasy 2026 projection: 3.7 expected points for the Singapore GP, $7.8M price, value rating and confidence range.",
+      "h1": "Carlos Sainz F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/sergio-perez/",
       "path": "/drivers/sergio-perez/",
       "title": "Sergio Perez F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Sergio Perez F1 Fantasy 2026 projection: -5.7 expected points for the Bahrain GP in Malaysia, $3.0M price, value rating and confidence range.",
+      "description": "Sergio Perez F1 Fantasy 2026 projection: 2.4 expected points for the Singapore GP, $3.0M price, value rating and confidence range.",
       "h1": "Sergio Perez F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/fernando-alonso/",
-      "path": "/drivers/fernando-alonso/",
-      "title": "Fernando Alonso F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Fernando Alonso F1 Fantasy 2026 projection: -5.8 expected points for the Bahrain GP in Malaysia, $6.2M price, value rating and confidence range.",
-      "h1": "Fernando Alonso F1 Fantasy 2026",
+      "url": "https://boxboxf1fantasy.com/drivers/alex-albon/",
+      "path": "/drivers/alex-albon/",
+      "title": "Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Alex Albon F1 Fantasy 2026 projection: 1.0 expected points for the Singapore GP, $5.2M price, value rating and confidence range.",
+      "h1": "Alex Albon F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/oliver-bearman/",
+      "path": "/drivers/oliver-bearman/",
+      "title": "Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Oliver Bearman F1 Fantasy 2026 projection: 0.8 expected points for the Singapore GP, $5.8M price, value rating and confidence range.",
+      "h1": "Oliver Bearman F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/lance-stroll/",
       "path": "/drivers/lance-stroll/",
       "title": "Lance Stroll F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Lance Stroll F1 Fantasy 2026 projection: -6.3 expected points for the Bahrain GP in Malaysia, $3.0M price, value rating and confidence range.",
+      "description": "Lance Stroll F1 Fantasy 2026 projection: -0.1 expected points for the Singapore GP, $3.0M price, value rating and confidence range.",
       "h1": "Lance Stroll F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -413,8 +405,16 @@
       "url": "https://boxboxf1fantasy.com/drivers/valtteri-bottas/",
       "path": "/drivers/valtteri-bottas/",
       "title": "Valtteri Bottas F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Valtteri Bottas F1 Fantasy 2026 projection: -7.0 expected points for the Bahrain GP in Malaysia, $3.6M price, value rating and confidence range.",
+      "description": "Valtteri Bottas F1 Fantasy 2026 projection: -0.4 expected points for the Singapore GP, $3.0M price, value rating and confidence range.",
       "h1": "Valtteri Bottas F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/fernando-alonso/",
+      "path": "/drivers/fernando-alonso/",
+      "title": "Fernando Alonso F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Fernando Alonso F1 Fantasy 2026 projection: -1.5 expected points for the Singapore GP, $5.6M price, value rating and confidence range.",
+      "h1": "Fernando Alonso F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
@@ -429,23 +429,15 @@
       "url": "https://boxboxf1fantasy.com/constructors/mercedes/",
       "path": "/constructors/mercedes/",
       "title": "Mercedes F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Mercedes F1 Fantasy 2026 constructor projection: 63.1 expected points for the Bahrain GP in Malaysia, $33.8M price, pit-stop points and value rating.",
+      "description": "Mercedes F1 Fantasy 2026 constructor projection: 66.8 expected points for the Singapore GP, $34.0M price, pit-stop points and value rating.",
       "h1": "Mercedes F1 Fantasy Constructor 2026",
-      "type": "constructor_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/constructors/red-bull/",
-      "path": "/constructors/red-bull/",
-      "title": "Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Red Bull F1 Fantasy 2026 constructor projection: 54.7 expected points for the Bahrain GP in Malaysia, $32.1M price, pit-stop points and value rating.",
-      "h1": "Red Bull F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/constructors/ferrari/",
       "path": "/constructors/ferrari/",
       "title": "Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Ferrari F1 Fantasy 2026 constructor projection: 50.4 expected points for the Bahrain GP in Malaysia, $27.6M price, pit-stop points and value rating.",
+      "description": "Ferrari F1 Fantasy 2026 constructor projection: 53.9 expected points for the Singapore GP, $27.9M price, pit-stop points and value rating.",
       "h1": "Ferrari F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -453,39 +445,47 @@
       "url": "https://boxboxf1fantasy.com/constructors/mclaren/",
       "path": "/constructors/mclaren/",
       "title": "McLaren F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "McLaren F1 Fantasy 2026 constructor projection: 41.3 expected points for the Bahrain GP in Malaysia, $32.2M price, pit-stop points and value rating.",
+      "description": "McLaren F1 Fantasy 2026 constructor projection: 45.3 expected points for the Singapore GP, $32.3M price, pit-stop points and value rating.",
       "h1": "McLaren F1 Fantasy Constructor 2026",
+      "type": "constructor_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/constructors/red-bull/",
+      "path": "/constructors/red-bull/",
+      "title": "Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Red Bull F1 Fantasy 2026 constructor projection: 43.6 expected points for the Singapore GP, $32.4M price, pit-stop points and value rating.",
+      "h1": "Red Bull F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/constructors/racing-bulls/",
       "path": "/constructors/racing-bulls/",
       "title": "Racing Bulls F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Racing Bulls F1 Fantasy 2026 constructor projection: 32.1 expected points for the Bahrain GP in Malaysia, $15.3M price, pit-stop points and value rating.",
+      "description": "Racing Bulls F1 Fantasy 2026 constructor projection: 30.4 expected points for the Singapore GP, $15.9M price, pit-stop points and value rating.",
       "h1": "Racing Bulls F1 Fantasy Constructor 2026",
-      "type": "constructor_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/constructors/alpine/",
-      "path": "/constructors/alpine/",
-      "title": "Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Alpine F1 Fantasy 2026 constructor projection: 22.1 expected points for the Bahrain GP in Malaysia, $19.4M price, pit-stop points and value rating.",
-      "h1": "Alpine F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/constructors/audi/",
       "path": "/constructors/audi/",
       "title": "Audi F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Audi F1 Fantasy 2026 constructor projection: 9.2 expected points for the Bahrain GP in Malaysia, $9.2M price, pit-stop points and value rating.",
+      "description": "Audi F1 Fantasy 2026 constructor projection: 23.5 expected points for the Singapore GP, $9.8M price, pit-stop points and value rating.",
       "h1": "Audi F1 Fantasy Constructor 2026",
+      "type": "constructor_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/constructors/alpine/",
+      "path": "/constructors/alpine/",
+      "title": "Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Alpine F1 Fantasy 2026 constructor projection: 18.7 expected points for the Singapore GP, $19.1M price, pit-stop points and value rating.",
+      "h1": "Alpine F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/constructors/haas/",
       "path": "/constructors/haas/",
       "title": "Haas F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Haas F1 Fantasy 2026 constructor projection: 1.9 expected points for the Bahrain GP in Malaysia, $10.8M price, pit-stop points and value rating.",
+      "description": "Haas F1 Fantasy 2026 constructor projection: 9.5 expected points for the Singapore GP, $11.4M price, pit-stop points and value rating.",
       "h1": "Haas F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -493,24 +493,24 @@
       "url": "https://boxboxf1fantasy.com/constructors/williams/",
       "path": "/constructors/williams/",
       "title": "Williams F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Williams F1 Fantasy 2026 constructor projection: -1.3 expected points for the Bahrain GP in Malaysia, $13.8M price, pit-stop points and value rating.",
+      "description": "Williams F1 Fantasy 2026 constructor projection: 9.4 expected points for the Singapore GP, $13.2M price, pit-stop points and value rating.",
       "h1": "Williams F1 Fantasy Constructor 2026",
-      "type": "constructor_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/constructors/aston-martin/",
-      "path": "/constructors/aston-martin/",
-      "title": "Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Aston Martin F1 Fantasy 2026 constructor projection: -9.0 expected points for the Bahrain GP in Malaysia, $5.7M price, pit-stop points and value rating.",
-      "h1": "Aston Martin F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/constructors/cadillac/",
       "path": "/constructors/cadillac/",
       "title": "Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Cadillac F1 Fantasy 2026 constructor projection: -13.0 expected points for the Bahrain GP in Malaysia, $3.6M price, pit-stop points and value rating.",
+      "description": "Cadillac F1 Fantasy 2026 constructor projection: 1.5 expected points for the Singapore GP, $3.0M price, pit-stop points and value rating.",
       "h1": "Cadillac F1 Fantasy Constructor 2026",
+      "type": "constructor_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/constructors/aston-martin/",
+      "path": "/constructors/aston-martin/",
+      "title": "Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Aston Martin F1 Fantasy 2026 constructor projection: 1.1 expected points for the Singapore GP, $5.1M price, pit-stop points and value rating.",
+      "h1": "Aston Martin F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
     {

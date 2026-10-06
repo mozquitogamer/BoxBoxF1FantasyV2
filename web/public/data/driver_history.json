@@ -92,6 +92,12 @@
           "circuit_id": "baku",
           "points": 43,
           "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 57.0,
+          "is_dnf": false
         }
       ]
     },
@@ -185,6 +191,12 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 45,
+          "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": -5.0,
           "is_dnf": false
         }
       ]
@@ -280,6 +292,12 @@
           "circuit_id": "baku",
           "points": 28,
           "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 29.0,
+          "is_dnf": false
         }
       ]
     },
@@ -373,6 +391,12 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 20,
+          "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 33.0,
           "is_dnf": false
         }
       ]
@@ -468,6 +492,12 @@
           "circuit_id": "baku",
           "points": 15,
           "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 32.0,
+          "is_dnf": false
         }
       ]
     },
@@ -562,6 +592,12 @@
           "circuit_id": "baku",
           "points": -11,
           "is_dnf": true
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 16.0,
+          "is_dnf": false
         }
       ]
     },
@@ -655,6 +691,12 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 6,
+          "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 7.0,
           "is_dnf": false
         }
       ]
@@ -750,6 +792,12 @@
           "circuit_id": "baku",
           "points": 17,
           "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 28.0,
+          "is_dnf": false
         }
       ]
     },
@@ -843,6 +891,12 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 8,
+          "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 4.0,
           "is_dnf": false
         }
       ]
@@ -938,6 +992,12 @@
           "circuit_id": "baku",
           "points": -15,
           "is_dnf": true
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 0.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1031,6 +1091,12 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 12,
+          "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 12.0,
           "is_dnf": false
         }
       ]
@@ -1126,6 +1192,12 @@
           "circuit_id": "baku",
           "points": 15,
           "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 4.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1219,6 +1291,12 @@
           "round": 17,
           "circuit_id": "baku",
           "points": -16,
+          "is_dnf": true
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": -10.0,
           "is_dnf": true
         }
       ]
@@ -1314,6 +1392,12 @@
           "circuit_id": "baku",
           "points": -18,
           "is_dnf": true
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 13.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1407,6 +1491,12 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 3,
+          "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 17.0,
           "is_dnf": false
         }
       ]
@@ -1502,6 +1592,12 @@
           "circuit_id": "baku",
           "points": 11,
           "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 9.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1577,6 +1673,12 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 26,
+          "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 25.0,
           "is_dnf": false
         }
       ]
@@ -1672,6 +1774,12 @@
           "circuit_id": "baku",
           "points": -14,
           "is_dnf": true
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 17.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1765,6 +1873,12 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 0,
+          "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 29.0,
           "is_dnf": false
         }
       ]
@@ -1860,6 +1974,12 @@
           "circuit_id": "baku",
           "points": 6,
           "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": -20.0,
+          "is_dnf": true
         }
       ]
     },
@@ -1953,6 +2073,12 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 15,
+          "is_dnf": false
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 19.0,
           "is_dnf": false
         }
       ]
@@ -2048,6 +2174,12 @@
           "circuit_id": "baku",
           "points": -20,
           "is_dnf": true
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 11.0,
+          "is_dnf": false
         }
       ]
     },
@@ -2151,6 +2283,11 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 88
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 39.0
         }
       ]
     },
@@ -2230,6 +2367,11 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 45
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 80.0
         }
       ]
     },
@@ -2309,6 +2451,11 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 71
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 97.0
         }
       ]
     },
@@ -2388,6 +2535,11 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 23
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 53.0
         }
       ]
     },
@@ -2467,6 +2619,11 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 21
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 20.0
         }
       ]
     },
@@ -2546,6 +2703,11 @@
           "round": 17,
           "circuit_id": "baku",
           "points": -18
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 28.0
         }
       ]
     },
@@ -2625,6 +2787,11 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 6
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 5.0
         }
       ]
     },
@@ -2704,6 +2871,11 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 1
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 57.0
         }
       ]
     },
@@ -2783,6 +2955,11 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 27
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 38.0
         }
       ]
     },
@@ -2862,6 +3039,11 @@
           "round": 17,
           "circuit_id": "baku",
           "points": 16
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": -12.0
         }
       ]
     },
@@ -2941,6 +3123,11 @@
           "round": 17,
           "circuit_id": "baku",
           "points": -35
+        },
+        {
+          "round": 18,
+          "circuit_id": "sepang",
+          "points": 36.0
         }
       ]
     }

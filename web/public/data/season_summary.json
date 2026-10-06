@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-10-03T06:11:07.077380+00:00",
+  "generated_at": "2026-10-06T22:02:15.660489+00:00",
   "rounds": [
     {
       "round": 1,
@@ -143,15 +143,15 @@
       "circuit": "Sepang",
       "date": "2026-10-04",
       "has_predictions": true,
-      "has_post_race": false,
-      "has_actual": false
+      "has_post_race": true,
+      "has_actual": true
     },
     {
       "round": 19,
       "name": "Singapore Grand Prix",
       "circuit": "Singapore",
       "date": "2026-10-11",
-      "has_predictions": false,
+      "has_predictions": true,
       "has_post_race": false,
       "has_actual": false
     },

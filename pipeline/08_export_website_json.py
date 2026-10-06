@@ -687,9 +687,9 @@ def build_season_summary(current_round: int | None = None) -> dict:
             "name": race.get("name", f"Round {rnd_num}"),
             "circuit": race.get("circuit", ""),
             "date": race.get("date", ""),
-            "has_predictions": pred_path.exists(),
-            "has_post_race": post_race_path.exists(),
-            "has_actual": actual_path.exists(),
+            "has_predictions": pred_path.exists() or (WEB_DATA_DIR / f"predictions_round{rnd_num}.json").exists(),
+            "has_post_race": post_race_path.exists() or (WEB_DATA_DIR / f"post_race_round{rnd_num}.json").exists(),
+            "has_actual": actual_path.exists() or (WEB_DATA_DIR / f"actual_round{rnd_num}.json").exists(),
         }
         completed_rounds.append(round_entry)
 
@@ -733,11 +733,11 @@ def build_season_summary(current_round: int | None = None) -> dict:
     }
 
 
-def copy_analysis_files(round_num: int) -> None:
+def copy_analysis_files(round_num: int, *, include_fp: bool = True) -> None:
     """Copy FP and post-race analysis JSONs to web data dir."""
     # FP analysis
     fp_path = PREDICTIONS_DIR / f"round{round_num}" / "fp_analysis.json"
-    if fp_path.exists():
+    if include_fp and fp_path.exists():
         with open(fp_path) as f:
             data = json.load(f)
         out = WEB_DATA_DIR / "fp_analysis.json"
@@ -879,6 +879,8 @@ def build_driver_history_json() -> dict:
 def main():
     parser = argparse.ArgumentParser(description="Export website JSON data")
     parser.add_argument("--round", type=int, required=True)
+    parser.add_argument("--actuals-only", action="store_true",
+                        help="Refresh completed-race data without rewriting pre-race forecasts or live FP data")
     parser.add_argument("--phase", choices=("auto", *VALID_PHASES), default="auto",
                         help="Pipeline phase that produced this prediction "
                              "(pre_fp/post_fp/post_quali). Default 'auto' detects from data state.")
@@ -923,7 +925,7 @@ def main():
 
     # 1. Current round predictions
     print("\n[1] Exporting predictions...")
-    predictions = build_predictions_json(round_num)
+    predictions = None if args.actuals_only else build_predictions_json(round_num)
     if predictions:
         # Sanity guard: flag grossly-broken predictions (all zeros, NaNs, a
         # winner predicted to score single digits, ranking collapse) BEFORE we
@@ -939,6 +941,9 @@ def main():
         predictions["phase"] = phase
         predictions["exported_at"] = datetime.now(timezone.utc).isoformat()
         metadata = load_prediction_metadata(round_num) or {}
+        # Re-exporting actuals must not make an old forecast look newly simulated.
+        if metadata.get("round") == round_num and metadata.get("generated_at"):
+            predictions["simulation_generated_at"] = metadata["generated_at"]
         if (phase == "post_fp" and metadata.get("phase") == "post_fp"
                 and metadata.get("round") == round_num):
             predictions["fp_sessions_included"] = metadata.get("fp_sessions_included", [])
@@ -1036,7 +1041,7 @@ def main():
 
     # 4. Analysis files
     print("[4] Copying analysis files...")
-    copy_analysis_files(round_num)
+    copy_analysis_files(round_num, include_fp=not args.actuals_only)
 
     # 5. Track data for multi-week planner
     print("[5] Exporting track data...")

@@ -5386,3 +5386,11 @@ body.v13-popup-open { overflow: hidden; }
     .pit-wall-workspace-actions { display:grid; grid-template-columns:1fr; }
     .tab-more-menu { position:fixed; top:auto; right:10px; left:10px; }
 }
+/* Race and simulation version remain visible on both prediction tabs. */
+.prediction-context { margin: 0 0 20px; padding: 16px 20px; border: 1px solid var(--border); border-left: 4px solid var(--accent, #e10600); border-radius: 10px; background: var(--card); }
+.prediction-context-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.prediction-context p { margin: 8px 0 0; color: var(--text-secondary); font-size: .85rem; line-height: 1.5; }
+.prediction-phase { padding: 4px 10px; border-radius: 999px; background: rgba(225,6,0,.12); color: var(--text); font-size: .8rem; font-weight: 700; }
+.prediction-context.is-archived { border-left-color: #f39c12; }
+.prediction-context .prediction-context-notice, .weather-round-notice { color: var(--text); font-weight: 600; }
+.weather-round-notice { font-size: .85rem; line-height: 1.5; margin: 0 0 14px; }

@@ -168,16 +168,17 @@ PHASES = {
         "description": "After the race - download results, compute actuals, analyze accuracy",
         "steps": [
             ("01_download_data.py", ["--mode", "current", "--round", "{round}"]),
+            ("sync_post_race_official.py", ["--round", "{round}"]),
             # Persist the completed session's weather before the next retrain.
-            ("03c_extract_session_weather.py", ["--year", "{year}", "--round", "{round}"]),
+            ("03c_extract_session_weather.py", ["--year", "{year}", "--round", "{round}"], {"non_fatal": True}),
             ("09_post_race_analysis.py", ["--round", "{round}"]),
-            ("11_race_deep_dive.py", ["--round", "{round}"]),
+            ("11_race_deep_dive.py", ["--round", "{round}"], {"non_fatal": True}),
             # Keep the FastF1 detector as a diagnostic/fallback first. OpenF1 then
             # backs it up and writes the canonical file consumed by actual scoring.
             # Reversing these two steps silently overwrites OpenF1 overtakes and
             # removes its pit-stop block.
-            ("12_count_overtakes.py", ["--round", "{round}"]),
-            ("13_fetch_openf1_overtakes.py", ["--year", str(CURRENT_SEASON), "--round", "{round}"]),
+            ("12_count_overtakes.py", ["--round", "{round}"], {"non_fatal": True}),
+            ("13_fetch_openf1_overtakes.py", ["--year", str(CURRENT_SEASON), "--round", "{round}"], {"non_fatal": True}),
             # Format pit-stop stationary times before scoring/export when OpenF1
             # has published them. This formatter is cache-only and remains safe
             # to rerun when stop_duration arrives later.
@@ -185,7 +186,8 @@ PHASES = {
             # Score actuals only after the canonical overtake/pit file is final.
             # This avoids a second run producing different totals from the first.
             ("11_actual_fantasy_points.py", ["--round", "{round}"]),
-            ("08_export_website_json.py", ["--round", "{round}"]),
+            ("sync_post_race_official.py", ["--round", "{round}", "--reconcile-actuals"]),
+            ("08_export_website_json.py", ["--round", "{round}", "--actuals-only"]),
             # Official points and prices now exist, so roll V13's live score,
             # budget and next-round state forward automatically.
             ("build_v13_manager.py", [], {"non_fatal": True}),

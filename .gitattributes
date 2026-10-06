@@ -1,3 +1,6 @@
 web/public/data/predictions_round17_pre_fp.json -text -diff
 web/public/data/predictions_round17_pre_fp_corrected.json -text -diff
 web/public/data/predictions_round*_refresh_*.json -text
+# Frozen forecast and audit hashes must survive Windows/Linux checkouts.
+web/public/data/predictions_round*.json -text
+data/audit/snapshots/**/*.json -text
