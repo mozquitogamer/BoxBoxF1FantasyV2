@@ -55,7 +55,7 @@ jobs:
           python -m pytest tests/test_auto_weekend.py tests/test_auto_post_race.py tests/test_run_weekend_phases.py tests/test_prediction_archive_immutability.py tests/test_fantasy_prices.py tests/test_post_race_classification.py -q
           node --test web/tests/prediction-context.test.js
       - name: Check the live schedule without running a pipeline
-        run: python pipeline/auto_weekend.py --plan
+        run: python -I -S pipeline/auto_weekend.py --plan
 
   update-and-publish:
     needs: verify
@@ -90,7 +90,7 @@ jobs:
             fi
             args+=(--round "$REQUESTED_ROUND")
           fi
-          python pipeline/auto_weekend.py --plan "${args[@]}"
+          python -I -S pipeline/auto_weekend.py --plan "${args[@]}"
           result=$?
           if [[ "$result" == 75 ]]; then
             echo 'due=false' >> "$GITHUB_OUTPUT"

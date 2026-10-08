@@ -248,3 +248,13 @@ def test_provider_live_window_is_retried_without_running_pipeline(monkeypatch):
         raise urllib.error.HTTPError(url, 401, 'Live data requires access', {}, None)
     monkeypatch.setattr(automatic, 'fetch_json', live)
     assert automatic.load_control(123) == []
+
+
+def test_planner_imports_with_all_third_party_packages_disabled():
+    import subprocess
+    import sys
+    from pathlib import Path
+    command = Path(__file__).resolve().parents[1] / 'pipeline/auto_weekend.py'
+    result = subprocess.run([sys.executable, '-I', '-S', str(command), '--help'],
+                            check=True, capture_output=True, text=True)
+    assert 'post_race' in result.stdout

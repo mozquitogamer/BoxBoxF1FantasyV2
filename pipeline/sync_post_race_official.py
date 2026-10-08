@@ -20,7 +20,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from config.settings import SEED_DIR, PREDICTIONS_DIR, WEB_DATA_DIR, CURRENT_SEASON, fastf1_round
-from config.driver_assets import active_driver_assets
 
 CONSTRUCTOR_IDS = {
     'MER': 'mercedes', 'MCL': 'mclaren', 'RBR': 'red_bull', 'FER': 'ferrari',
@@ -73,6 +72,8 @@ def number(value, label):
 
 
 def roster(payload, round_num):
+    # Roster processing needs pandas; lightweight schedule checks do not.
+    from config.driver_assets import active_driver_assets
     rows = payload.get('Data', {}).get('Value', [])
     active = [row for row in rows if str(row.get('IsActive')) == '1']
     constructors = {CONSTRUCTOR_IDS[row['DriverTLA']]: row for row in active
@@ -215,6 +216,7 @@ def save_seeds(round_num, next_round, snapshot):
 def reconcile_actuals(round_num):
     """Use official session totals to reconcile the computed point breakdown."""
     import csv
+    from config.driver_assets import active_driver_assets
     from config.fantasy_scoring import calc_sprint_points_driver
     snapshot_path = PREDICTIONS_DIR / f'round{round_num}' / 'official_feed_snapshot.json'
     if not snapshot_path.exists():
