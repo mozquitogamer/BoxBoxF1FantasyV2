@@ -240,3 +240,11 @@ def test_ready_check_refreshes_fastf1_cache_and_retries_missing_telemetry(tmp_pa
     with pytest.raises(PendingData, match='telemetry'):
         automatic.require_session({'round': 19, 'session': 'FP1'})
     assert cache_calls == [{'force_renew': True}]
+
+
+def test_provider_live_window_is_retried_without_running_pipeline(monkeypatch):
+    import urllib.error
+    def live(url):
+        raise urllib.error.HTTPError(url, 401, 'Live data requires access', {}, None)
+    monkeypatch.setattr(automatic, 'fetch_json', live)
+    assert automatic.load_control(123) == []

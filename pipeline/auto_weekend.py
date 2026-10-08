@@ -10,6 +10,7 @@ import importlib.util
 import json
 import os
 import sys
+import urllib.error
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -100,6 +101,17 @@ def read_json(path, default):
     return json.loads(path.read_text(encoding='utf-8')) if path.exists() else default
 
 
+def load_control(session_key):
+    # Free OpenF1 access starts after the live-data window. A delayed session
+    # can still be in that window when its original scheduled end has passed.
+    try:
+        return fetch_json(f'https://api.openf1.org/v1/race_control?session_key={session_key}&category=SessionStatus')
+    except urllib.error.HTTPError as exc:
+        if exc.code in (401, 403):
+            return []
+        raise
+
+
 def plan(now):
     calendar = read_json(SEED_DIR / 'races.json', {})['races']
     if not any(not race.get('cancelled') and now.date() - timedelta(days=7) <=
@@ -112,7 +124,7 @@ def plan(now):
     return select_due(calendar, sessions, read_json(STATE_PATH, {}),
                       read_json(auto_post_race.STATE_PATH, {}),
                       read_json(WEB_DATA_DIR / 'predictions.json', {}).get('round', 0), now,
-                      lambda key: fetch_json(f'https://api.openf1.org/v1/race_control?session_key={key}&category=SessionStatus'))
+                      load_control)
 
 
 def manual_event(phase, round_num):
