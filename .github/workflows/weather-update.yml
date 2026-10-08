@@ -22,7 +22,13 @@ jobs:
           python-version: '3.12'
 
       - name: Run weather forecast
-        run: python pipeline/weather_forecast.py
+        run: |
+          python - <<'PY'
+          import json, subprocess, sys
+          from pathlib import Path
+          round_num = json.loads(Path('web/public/data/predictions.json').read_text())['round']
+          subprocess.run([sys.executable, 'pipeline/weather_forecast.py', '--round', str(round_num)], check=True)
+          PY
 
       - name: Check for changes
         id: changes

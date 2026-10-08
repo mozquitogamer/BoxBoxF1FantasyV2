@@ -191,6 +191,27 @@ def write_phase_archive_safely(
     return True
 
 
+
+def session_version(payload: dict) -> str | None:
+    """Refine post_fp into FP1/FP2/FP3/SQ without changing frozen phase records."""
+    if payload.get("phase") != "post_fp":
+        return None
+    if payload.get("sprint_grid_is_actual"):
+        return "sq"
+    return next((code.lower() for code in ("FP3", "FP2", "FP1")
+                 if code in payload.get("fp_sessions_included", [])), None)
+
+
+def write_session_archive(payload: dict, round_num: int) -> bool:
+    version = session_version(payload)
+    if version is None:
+        return False
+    return write_phase_archive_safely(
+        WEB_DATA_DIR / f"predictions_round{round_num}_post_fp_{version}.json",
+        payload, round_num, "post_fp",
+    )
+
+
 def load_race_info() -> dict:
     """Load race calendar."""
     with open(SEED_DIR / "races.json") as f:
@@ -947,6 +968,7 @@ def main():
         if (phase == "post_fp" and metadata.get("phase") == "post_fp"
                 and metadata.get("round") == round_num):
             predictions["fp_sessions_included"] = metadata.get("fp_sessions_included", [])
+            predictions["sprint_grid_is_actual"] = bool(metadata.get("sprint_grid_is_actual"))
         if args.reconstructed:
             predictions["reconstructed"] = True
 
@@ -998,6 +1020,9 @@ def main():
                 print(f"  Prospective holdout -> {holdout_path}")
             except Exception as exc:
                 print(f"  WARNING: prospective holdout registration failed: {exc}")
+
+        # Preserve each practice/SQ version as well as the original phase holdout.
+        write_session_archive(predictions, round_num)
 
         # Canonical archive: guarded against post-race overwrite
         canonical_archive = WEB_DATA_DIR / f"predictions_round{round_num}.json"

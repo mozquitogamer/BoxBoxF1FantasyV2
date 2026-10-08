@@ -1711,6 +1711,7 @@ def run_predictions(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "is_post_quali": is_post_quali,
         "used_fp_features": has_fp,
+        "sprint_grid_is_actual": bool(is_sprint and pred_df["sprint_grid_is_actual"].all()),
         "fp_sessions_included": (
             sorted({session.strip() for value in fp_df["fp_sessions_included"].dropna()
                     for session in str(value).split(",") if session.strip()})

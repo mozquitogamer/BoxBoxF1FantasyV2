@@ -64,3 +64,11 @@ test('the page loads the version helper before the app and includes both labels'
     assert.match(html, /id="driverPredictionContext"/);
     assert.match(html, /id="constructorPredictionContext"/);
 });
+
+test('sprint qualifying is labelled separately and leaves Grand Prix qualifying unlocked', () => {
+    const prediction = { ...forecast, round: 19, fp_sessions_included: ['FP1'],
+        sprint_grid_is_actual: true };
+    assert.equal(phaseLabel(prediction), 'Post sprint qualifying');
+    assert.match(context(prediction).evidence, /Grand Prix qualifying is still simulated/);
+    assert.equal(phaseLabel({ ...prediction, phase: 'post_quali' }), 'Post qualifying');
+});

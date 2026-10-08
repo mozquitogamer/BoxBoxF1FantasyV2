@@ -5,6 +5,7 @@
         if (prediction.phase === 'pre_fp') return 'Pre-practice';
         if (prediction.phase === 'post_quali') return 'Post qualifying';
         if (prediction.phase === 'post_fp') {
+            if (prediction.sprint_grid_is_actual) return 'Post sprint qualifying';
             const sessions = prediction.fp_sessions_included || [];
             const latest = ['FP3', 'FP2', 'FP1'].find(session => sessions.includes(session));
             return latest ? `Post ${latest}` : 'Post practice';
@@ -29,6 +30,7 @@
             generatedAt: prediction.simulation_generated_at || prediction.generated_at,
             evidence: prediction.phase === 'pre_fp' ? 'Based on historical results; practice is not included.'
                 : prediction.phase === 'post_quali' ? 'Official qualifying included; the race is simulated.'
+                : prediction.sprint_grid_is_actual ? 'Official sprint grid and practice included; Grand Prix qualifying is still simulated.'
                 : prediction.fp_sessions_included?.length ? `Practice included: ${prediction.fp_sessions_included.join(', ')}.`
                 : 'Practice session details were not recorded for this version.',
         };

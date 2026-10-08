@@ -60,3 +60,20 @@ def test_phase_archive_rejects_mislabeled_payload(tmp_path: Path) -> None:
             14,
             "post_fp",
         )
+
+
+def test_each_practice_and_sprint_qualifying_version_is_frozen(tmp_path, monkeypatch):
+    monkeypatch.setattr(EXPORT, "WEB_DATA_DIR", tmp_path)
+    for sessions, sprint, version in [
+        (["FP1"], False, "fp1"),
+        (["FP1", "FP2"], False, "fp2"),
+        (["FP1", "FP2", "FP3"], False, "fp3"),
+        (["FP1"], True, "sq"),
+    ]:
+        payload = {**_payload(1), "fp_sessions_included": sessions,
+                   "sprint_grid_is_actual": sprint}
+        assert EXPORT.write_session_archive(payload, 14)
+        assert not EXPORT.write_session_archive({**payload, "drivers": []}, 14)
+        saved = json.loads((tmp_path / f"predictions_round14_post_fp_{version}.json").read_text())
+        assert saved["drivers"]
+    assert EXPORT.session_version({"phase": "post_quali", "sprint_grid_is_actual": True}) is None
