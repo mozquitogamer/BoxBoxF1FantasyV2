@@ -227,7 +227,7 @@
           "precip_prob": 27,
           "precip_mm": 0.0,
           "windspeed": 8.9,
-          "windgusts": 13.7,
+          "windgusts": 14.8,
           "weather_code": 3
         },
         {
@@ -247,7 +247,7 @@
           "precip_prob": 43,
           "precip_mm": 0.0,
           "windspeed": 10.0,
-          "windgusts": 14.0,
+          "windgusts": 13.7,
           "weather_code": 3
         },
         {
@@ -257,7 +257,7 @@
           "precip_prob": 67,
           "precip_mm": 0.0,
           "windspeed": 11.6,
-          "windgusts": 16.6,
+          "windgusts": 16.9,
           "weather_code": 3
         }
       ]
@@ -282,7 +282,7 @@
           "precip_prob": 86,
           "precip_mm": 0.0,
           "windspeed": 12.9,
-          "windgusts": 20.9,
+          "windgusts": 19.8,
           "weather_code": 3
         },
         {
@@ -292,7 +292,7 @@
           "precip_prob": 95,
           "precip_mm": 0.3,
           "windspeed": 14.0,
-          "windgusts": 23.0,
+          "windgusts": 22.3,
           "weather_code": 51
         },
         {
@@ -302,7 +302,7 @@
           "precip_prob": 98,
           "precip_mm": 0.0,
           "windspeed": 9.7,
-          "windgusts": 22.7,
+          "windgusts": 23.4,
           "weather_code": 3
         },
         {
@@ -312,7 +312,7 @@
           "precip_prob": 98,
           "precip_mm": 0.0,
           "windspeed": 5.5,
-          "windgusts": 22.7,
+          "windgusts": 24.1,
           "weather_code": 3
         }
       ]
@@ -337,7 +337,7 @@
           "precip_prob": 76,
           "precip_mm": 0.2,
           "windspeed": 5.9,
-          "windgusts": 22.3,
+          "windgusts": 21.2,
           "weather_code": 51
         },
         {
@@ -357,7 +357,7 @@
           "precip_prob": 99,
           "precip_mm": 0.1,
           "windspeed": 7.2,
-          "windgusts": 20.2,
+          "windgusts": 16.9,
           "weather_code": 51
         },
         {
@@ -367,16 +367,16 @@
           "precip_prob": 100,
           "precip_mm": 1.7,
           "windspeed": 7.2,
-          "windgusts": 20.5,
+          "windgusts": 14.8,
           "weather_code": 80
         }
       ]
     }
   ],
-  "last_updated": "2026-10-09T19:15:54Z",
-  "next_update": "2026-10-10T01:15:54Z",
+  "last_updated": "2026-10-09T22:01:31Z",
+  "next_update": "2026-10-10T04:01:31Z",
   "data_source": "Open-Meteo (open-meteo.com)",
-  "forecast_snapshot_id": "2026-10-09T19-15-54.512677Z",
-  "forecast_retrieved_at": "2026-10-09T19:15:54.512677+00:00",
-  "forecast_archive_path": "data/forecasts/weather/year2026/round19/2026-10-09T19-15-54.512677Z_open_meteo.json"
+  "forecast_snapshot_id": "2026-10-09T22-01-31.868144Z",
+  "forecast_retrieved_at": "2026-10-09T22:01:31.868144+00:00",
+  "forecast_archive_path": "data/forecasts/weather/year2026/round19/2026-10-09T22-01-31.868144Z_open_meteo.json"
 }
