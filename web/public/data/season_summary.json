@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-10-06T22:02:15.660489+00:00",
+  "generated_at": "2026-10-09T10:01:53.191540+00:00",
   "rounds": [
     {
       "round": 1,
@@ -214,137 +214,137 @@
     "RUS": {
       "name": "George Russell",
       "constructor": "mercedes",
-      "current_price": 28.1,
+      "current_price": 28.0,
       "starting_price": 27.4,
-      "price_change": 0.7,
+      "price_change": 0.6,
       "price_trend": "up"
     },
     "VER": {
       "name": "Max Verstappen",
       "constructor": "red_bull",
-      "current_price": 27.6,
+      "current_price": 27.9,
       "starting_price": 27.7,
-      "price_change": -0.1,
+      "price_change": 0.2,
       "price_trend": "stable"
     },
     "NOR": {
       "name": "Lando Norris",
       "constructor": "mclaren",
-      "current_price": 26.7,
+      "current_price": 26.4,
       "starting_price": 27.2,
-      "price_change": -0.5,
+      "price_change": -0.8,
       "price_trend": "down"
     },
     "PIA": {
       "name": "Oscar Piastri",
       "constructor": "mclaren",
-      "current_price": 24.0,
+      "current_price": 23.7,
       "starting_price": 25.5,
-      "price_change": -1.5,
+      "price_change": -1.8,
       "price_trend": "down"
     },
     "ANT": {
       "name": "Kimi Antonelli",
       "constructor": "mercedes",
-      "current_price": 26.9,
+      "current_price": 27.0,
       "starting_price": 23.2,
-      "price_change": 3.7,
+      "price_change": 3.8,
       "price_trend": "up"
     },
     "LEC": {
       "name": "Charles Leclerc",
       "constructor": "ferrari",
-      "current_price": 23.7,
+      "current_price": 23.8,
       "starting_price": 22.8,
-      "price_change": 0.9,
+      "price_change": 1.0,
       "price_trend": "up"
     },
     "HAM": {
       "name": "Lewis Hamilton",
       "constructor": "ferrari",
-      "current_price": 24.6,
+      "current_price": 24.3,
       "starting_price": 22.5,
-      "price_change": 2.1,
+      "price_change": 1.8,
       "price_trend": "up"
     },
     "HAD": {
       "name": "Isack Hadjar",
       "constructor": "red_bull",
-      "current_price": 15.1,
+      "current_price": 15.7,
       "starting_price": 15.1,
-      "price_change": 0.0,
-      "price_trend": "stable"
+      "price_change": 0.6,
+      "price_trend": "up"
     },
     "GAS": {
       "name": "Pierre Gasly",
       "constructor": "alpine",
-      "current_price": 11.4,
+      "current_price": 10.8,
       "starting_price": 12.0,
-      "price_change": -0.6,
+      "price_change": -1.2,
       "price_trend": "down"
     },
     "SAI": {
       "name": "Carlos Sainz",
       "constructor": "williams",
-      "current_price": 8.4,
+      "current_price": 7.8,
       "starting_price": 12.0,
-      "price_change": -3.6,
+      "price_change": -4.2,
       "price_trend": "down"
     },
     "ALB": {
       "name": "Alex Albon",
       "constructor": "williams",
-      "current_price": 5.8,
+      "current_price": 5.2,
       "starting_price": 10.5,
-      "price_change": -4.7,
+      "price_change": -5.3,
       "price_trend": "down"
     },
     "ALO": {
       "name": "Fernando Alonso",
       "constructor": "aston_martin",
-      "current_price": 6.2,
+      "current_price": 5.6,
       "starting_price": 10.0,
-      "price_change": -3.8,
+      "price_change": -4.4,
       "price_trend": "down"
     },
     "BEA": {
       "name": "Oliver Bearman",
       "constructor": "haas",
-      "current_price": 5.6,
+      "current_price": 5.8,
       "starting_price": 7.4,
-      "price_change": -1.8,
+      "price_change": -1.6,
       "price_trend": "down"
     },
     "OCO": {
       "name": "Esteban Ocon",
       "constructor": "haas",
-      "current_price": 9.1,
+      "current_price": 9.3,
       "starting_price": 8.0,
-      "price_change": 1.1,
+      "price_change": 1.3,
       "price_trend": "up"
     },
     "LIN": {
       "name": "Arvid Lindblad",
       "constructor": "racing_bulls",
-      "current_price": 8.8,
+      "current_price": 9.4,
       "starting_price": 7.0,
-      "price_change": 1.8,
+      "price_change": 2.4,
       "price_trend": "up"
     },
     "COL": {
       "name": "Franco Colapinto",
       "constructor": "alpine",
-      "current_price": 10.0,
+      "current_price": 9.4,
       "starting_price": 6.2,
-      "price_change": 3.8,
+      "price_change": 3.2,
       "price_trend": "up"
     },
     "LAW": {
       "name": "Liam Lawson",
       "constructor": "racing_bulls",
-      "current_price": 9.1,
+      "current_price": 9.3,
       "starting_price": 9.7,
-      "price_change": -0.6,
+      "price_change": -0.4,
       "price_trend": "down"
     },
     "STR": {
@@ -358,9 +358,9 @@
     "BOR": {
       "name": "Gabriel Bortoleto",
       "constructor": "audi",
-      "current_price": 8.2,
+      "current_price": 7.6,
       "starting_price": 6.5,
-      "price_change": 1.7,
+      "price_change": 1.1,
       "price_trend": "up"
     },
     "PER": {
@@ -374,17 +374,17 @@
     "HUL": {
       "name": "Nico Hulkenberg",
       "constructor": "audi",
-      "current_price": 5.4,
+      "current_price": 6.0,
       "starting_price": 6.0,
-      "price_change": -0.6,
-      "price_trend": "down"
+      "price_change": 0.0,
+      "price_trend": "stable"
     },
     "BOT": {
       "name": "Valtteri Bottas",
       "constructor": "cadillac",
-      "current_price": 3.6,
+      "current_price": 3.0,
       "starting_price": 5.0,
-      "price_change": -1.4,
+      "price_change": -2.0,
       "price_trend": "down"
     }
   },
@@ -392,89 +392,89 @@
     "mercedes": {
       "name": "Mercedes",
       "full_name": "Mercedes-AMG Petronas F1 Team",
-      "current_price": 33.8,
+      "current_price": 34.0,
       "starting_price": 29.3,
-      "price_change": 4.5,
+      "price_change": 4.7,
       "price_trend": "up"
     },
     "mclaren": {
       "name": "McLaren",
       "full_name": "McLaren F1 Team",
-      "current_price": 32.2,
+      "current_price": 32.3,
       "starting_price": 28.9,
-      "price_change": 3.3,
+      "price_change": 3.4,
       "price_trend": "up"
     },
     "red_bull": {
       "name": "Red Bull",
       "full_name": "Oracle Red Bull Racing",
-      "current_price": 32.1,
+      "current_price": 32.4,
       "starting_price": 28.2,
-      "price_change": 3.9,
+      "price_change": 4.2,
       "price_trend": "up"
     },
     "ferrari": {
       "name": "Ferrari",
       "full_name": "Scuderia Ferrari HP",
-      "current_price": 27.6,
+      "current_price": 27.9,
       "starting_price": 23.3,
-      "price_change": 4.3,
+      "price_change": 4.6,
       "price_trend": "up"
     },
     "alpine": {
       "name": "Alpine",
       "full_name": "BWT Alpine F1 Team",
-      "current_price": 19.4,
+      "current_price": 19.1,
       "starting_price": 12.5,
-      "price_change": 6.9,
+      "price_change": 6.6,
       "price_trend": "up"
     },
     "williams": {
       "name": "Williams",
       "full_name": "Williams Racing",
-      "current_price": 13.8,
+      "current_price": 13.2,
       "starting_price": 12.0,
-      "price_change": 1.8,
+      "price_change": 1.2,
       "price_trend": "up"
     },
     "aston_martin": {
       "name": "Aston Martin",
       "full_name": "Aston Martin Aramco F1 Team",
-      "current_price": 5.7,
+      "current_price": 5.1,
       "starting_price": 9.5,
-      "price_change": -3.8,
+      "price_change": -4.4,
       "price_trend": "down"
     },
     "haas": {
       "name": "Haas",
       "full_name": "MoneyGram Haas F1 Team",
-      "current_price": 10.8,
+      "current_price": 11.4,
       "starting_price": 8.0,
-      "price_change": 2.8,
+      "price_change": 3.4,
       "price_trend": "up"
     },
     "racing_bulls": {
       "name": "Racing Bulls",
       "full_name": "Visa Cash App Racing Bulls",
-      "current_price": 15.3,
+      "current_price": 15.9,
       "starting_price": 6.3,
-      "price_change": 9.0,
+      "price_change": 9.6,
       "price_trend": "up"
     },
     "audi": {
       "name": "Audi",
       "full_name": "Audi F1 Team",
-      "current_price": 9.2,
+      "current_price": 9.8,
       "starting_price": 5.5,
-      "price_change": 3.7,
+      "price_change": 4.3,
       "price_trend": "up"
     },
     "cadillac": {
       "name": "Cadillac",
       "full_name": "Cadillac F1 Team",
-      "current_price": 3.6,
+      "current_price": 3.0,
       "starting_price": 5.0,
-      "price_change": -1.4,
+      "price_change": -2.0,
       "price_trend": "down"
     }
   }
