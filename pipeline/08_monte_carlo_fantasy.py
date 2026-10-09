@@ -1234,7 +1234,9 @@ def run_simulations(
     print(f"  Running {n_sims:,} simulations for {n_drivers} drivers...")
 
     # Pre-compute unique constructors and per-driver constructor mapping for correlation
-    unique_constructors = list(set(constructors))
+    # Hash-randomized set order must not assign random team shocks differently
+    # in separate Python processes that use identical inputs and the same seed.
+    unique_constructors = sorted(set(constructors))
 
     # Sprint grid (B4): post-sprint-qualifying the sprint grid is KNOWN, so fix it
     # every sim (positions-gained is measured from the real grid). Pre-SQ it's a
@@ -1506,6 +1508,7 @@ def run_simulations(
         "simulation_params": {
             "n_simulations": n_sims,
             "seed": seed,
+            "constructor_sampling_order": unique_constructors,
             "quali_noise_base": QUALI_NOISE_BASE,
             "race_noise_base": RACE_NOISE_BASE,
             "calibrated_quali_noise": round(cal_quali_noise, 4),
@@ -2034,6 +2037,28 @@ def main() -> None:
         n_sims=args.simulations,
         seed=args.seed,
     )
+
+    from pipeline.prediction_replay import freeze_simulation_inputs
+    metadata_path = PREDICTIONS_DIR / f'round{args.round}' / 'prediction_metadata.json'
+    if metadata_path.exists():
+        metadata = json.loads(metadata_path.read_text(encoding='utf-8'))
+        simulation_path = freeze_simulation_inputs(Path(__file__).resolve().parents[1], metadata,
+            {'scoring_predictions': pred_df, 'driver_fantasy': fantasy_df},
+            {'seed': args.seed, 'n_simulations': args.simulations, 'is_sprint': is_sprint,
+             'calibration': calibration, 'weather': weather, 'overtake_multiplier': ot_mult,
+             'position_noise_multiplier': pos_noise_mult, 'chaos_multiplier': chaos_mult,
+             'dotd_overrides': dotd_overrides, 'driver_prices': driver_prices,
+             'constructor_prices': constructor_prices, 'drivers': drivers_info,
+             'constructors': constructors_info, 'pitstop_priors': pitstop_priors,
+             'overtake_history': load_overtake_history(),
+             'mechanical_shares': load_mechanical_shares(pred_df['driver_id'].tolist()).tolist()})
+        if simulation_path:
+            from pipeline.prediction_replay import digest
+            metadata['simulation_bundle'] = {
+                'manifest': simulation_path.relative_to(Path(__file__).resolve().parents[1]).as_posix(),
+                'sha256': digest(simulation_path)}
+            metadata_path.write_text(json.dumps(metadata, indent=2), encoding='utf-8')
+
 
     # Display and save
     print_summary(results, constructor_results)

@@ -38,6 +38,8 @@ from scipy.stats import kendalltau, spearmanr
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from pipeline.qualifying_transform import blend_event_scores
+
 from config.settings import (  # noqa: E402
     CANCELLED_ROUNDS_2026,
     CURRENT_SEASON,
@@ -130,6 +132,8 @@ class EvaluationConfig:
     first_round: int | None = None
     last_round: int | None = None
     allow_oracle_weather: bool = False
+    qualifying_transform: str = "live_fp"
+    race_fp_training_inputs: str = "event_prequential"
     drop_features: list[str] = field(default_factory=list)
     drop_prefixes: list[str] = field(default_factory=list)
     quali_params: dict[str, Any] = field(
@@ -383,7 +387,9 @@ def precompute_event_prequential_quali(
         # Preserve original row identity across the production helper's
         # sort/reset_index. Never rely on tied sort keys preserving driver order.
         test_df["_prequential_source_index"] = test_df.index
-        ordered, _, predicted = predict_event(model, test_df, used)
+        ordered, scores, predicted = predict_event(model, test_df, used)
+        if config.qualifying_transform == 'live_fp':
+            predicted = scores_to_positions(blend_event_scores(ordered, scores), ordered)
         result.loc[ordered["_prequential_source_index"].to_numpy()] = predicted
         if verbose and (position % 20 == 0 or year == CURRENT_SEASON):
             print(
@@ -413,6 +419,19 @@ def _eligible_rows(
     return rederive_quali_dependent_features(out, "quali_position")
 
 
+def _prediction_test_rows(df, model_name, mask, prequential_quali):
+    """Predict the whole available field; actual retirements cannot set its order."""
+    if model_name == 'quali':
+        return df.loc[mask & df['quali_position'].notna()].copy()
+    if model_name == 'race_fp':
+        if prequential_quali is None:
+            raise ValueError('race_fp requires strict-prior qualifying inputs')
+        out = df.loc[mask & prequential_quali.notna()].copy()
+        out['quali_position'] = prequential_quali.loc[out.index].to_numpy(dtype=float)
+        return rederive_quali_dependent_features(out, 'quali_position')
+    return df.loc[mask].copy()
+
+
 def evaluate(
     df: pd.DataFrame,
     config: EvaluationConfig,
@@ -440,6 +459,16 @@ def evaluate(
         elif not prequential_quali.index.equals(df.index):
             raise ValueError("Cached qualifying predictions do not align to dataset index")
 
+    training_quali = prequential_quali
+    if 'race_fp' in config.models and config.race_fp_training_inputs == 'legacy_season_raw':
+        # A faithful control for the deployed training recipe, including its
+        # earliest-season actual-quali fallback. Test events remain strict-prior
+        # and use the live practice transform; this mode is a diagnostic control.
+        import xgboost as xgb
+        training_quali = _tm.generate_walk_forward_quali_predictions(
+            apply_training_weights(df, 'quali', config.current_season_weight, 1.0),
+            features['quali'], lambda: xgb.XGBRanker(**config.quali_params))
+
     fold_rows: list[dict[str, Any]] = []
     prediction_rows: list[dict[str, Any]] = []
     for year, round_num in targets:
@@ -447,9 +476,9 @@ def evaluate(
         target = event_mask(df, year, round_num)
         for model_name in config.models:
             train_df = _eligible_rows(
-                df, model_name, prior, prequential_quali
+                df, model_name, prior, training_quali
             )
-            test_df = _eligible_rows(
+            test_df = _prediction_test_rows(
                 df, model_name, target, prequential_quali
             )
             n_events = len(train_df[["season", "round"]].drop_duplicates())
@@ -477,8 +506,13 @@ def evaluate(
                 train_df, features[model_name], target_col, algorithm, params
             )
             ordered, scores, predicted = predict_event(model, test_df, used)
+            if model_name == 'quali' and config.qualifying_transform == 'live_fp':
+                scores = blend_event_scores(ordered, scores)
+                predicted = scores_to_positions(scores, ordered)
             actual = ordered[target_col].to_numpy(dtype=float)
-            metrics = calculate_metrics(predicted, actual)
+            evaluated = (ordered['quali_position'].notna().to_numpy() if model_name == 'quali'
+                         else classified_finisher_mask(ordered).to_numpy())
+            metrics = calculate_metrics(predicted[evaluated], actual[evaluated])
             cluster_id = f"{year}-R{round_num:02d}"
             phase = {
                 "quali": "post_fp_quali",
@@ -495,6 +529,7 @@ def evaluate(
                 "train_events": n_events,
                 "train_rows": len(train_df),
                 "test_rows": len(ordered),
+                "evaluated_rows": int(evaluated.sum()),
                 **metrics,
             }
             fold_rows.append(fold)
@@ -511,7 +546,8 @@ def evaluate(
                         "actual_position": float(actual[i]),
                         "predicted_position": float(predicted[i]),
                         "raw_score": float(scores[i]),
-                        "absolute_error": float(abs(predicted[i] - actual[i])),
+                        "evaluated": bool(evaluated[i]),
+                        "absolute_error": float(abs(predicted[i] - actual[i])) if evaluated[i] else None,
                     }
                 )
             if verbose:
@@ -605,7 +641,9 @@ def quali_cache_identity(
     if layer not in {"history", "current"}:
         raise ValueError(f"Unknown qualifying cache layer: {layer}")
     payload = {
-        "schema_version": 2,
+        "schema_version": 3,
+        "qualifying_transform": config.qualifying_transform,
+        "qualifying_transform_sha256": sha256_file(PROJECT_ROOT / 'pipeline/qualifying_transform.py'),
         "layer": layer,
         "dataset_sha256": dataset_sha256,
         "evaluator_source_sha256": sha256_file(Path(__file__).resolve()),
@@ -917,6 +955,8 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config-name", required=True)
     parser.add_argument("--models", default="quali,race,race_fp")
+    parser.add_argument("--qualifying-transform", choices=['raw', 'live_fp'], default='live_fp')
+    parser.add_argument("--race-fp-training-inputs", choices=['event_prequential', 'legacy_season_raw'], default='event_prequential')
     parser.add_argument("--algorithm", choices=["xgboost", "catboost"], default="xgboost")
     parser.add_argument(
         "--data",
@@ -982,6 +1022,8 @@ def main() -> None:
         name=args.config_name,
         models=[item.strip() for item in args.models.split(",") if item.strip()],
         algorithm=args.algorithm,
+        qualifying_transform=args.qualifying_transform,
+        race_fp_training_inputs=args.race_fp_training_inputs,
         current_season_weight=args.weight_2026,
         wet_weight=args.wet_weight,
         recency_decay=args.recency_decay,

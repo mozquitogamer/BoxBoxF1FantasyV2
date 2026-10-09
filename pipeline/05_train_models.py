@@ -772,6 +772,19 @@ def generate_walk_forward_quali_predictions(
 # Main
 # ============================================================
 
+def generate_aligned_quali_predictions(df, quali_features, model_factory):
+    """Strict event-prior inputs with the same FP transform as live forecasts.
+
+    Cold-start events stay missing instead of substituting their actual quali.
+    This opt-in recipe is kept separate until paired validation justifies release.
+    """
+    from pipeline.evaluate_prequential_2026 import EvaluationConfig, precompute_event_prequential_quali
+    config = EvaluationConfig(name='aligned_training', models=['quali'],
+                              qualifying_transform='live_fp',
+                              quali_params=model_factory().get_params())
+    return precompute_event_prequential_quali(df, quali_features, config)
+
+
 def train_and_save_catboost_race(
     X,
     y_relevance,
@@ -817,6 +830,12 @@ def train_and_save_catboost_race(
 
 def main() -> None:
     """Train all models using combined Jolpica priors + FP telemetry."""
+    import argparse
+    parser = argparse.ArgumentParser(description='Train the weekend prediction models')
+    parser.add_argument('--quali-input-mode', choices=['legacy_season_raw', 'aligned_event'],
+                        default='legacy_season_raw')
+    args = parser.parse_args()
+
     print("=" * 70)
     print("BoxBoxF1Fantasy — Train Models (XGBoost + Walk-Forward)")
     print("=" * 70)
@@ -966,9 +985,9 @@ def main() -> None:
     print("Walk-Forward Predicted Quali (for race_model_fp)")
     print(f"{'=' * 60}")
     print(f"  Generating walk-forward quali predictions for training data...")
-    wf_quali = generate_walk_forward_quali_predictions(
-        df, quali_feature_cols, make_quali_model
-    )
+    generator = (generate_aligned_quali_predictions if args.quali_input_mode == 'aligned_event'
+                 else generate_walk_forward_quali_predictions)
+    wf_quali = generator(df, quali_feature_cols, make_quali_model)
     df["predicted_quali_wf"] = wf_quali
 
     # Stats
@@ -1640,6 +1659,7 @@ def main() -> None:
             "training_samples": race_fp_train_size,
             "trained": race_fp_model is not None,
             "trained_on": "walk-forward predicted quali_position",
+            "quali_input_mode": args.quali_input_mode,
             "used_for": "post-FP inference (predicted quali only)",
             "params": {
                 "n_estimators": 650,

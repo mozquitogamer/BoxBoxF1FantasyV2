@@ -138,36 +138,9 @@ from config.driver_assets import (
 # pace. Backtest on 2026 R1/3/6/7: composite MAE 2.24 vs 2.36 for best-lap alone
 # — better than any single metric. (best_10_lap_avg excluded: 2.67, too diluted
 # by traffic/fuel laps.)
-FP_QUALI_BLEND_TUNABLES = {
-    "weight": 0.6,                 # base (normal tracks): 0 = pure model, 1 = pure FP pace
-    "weight_hard_track": 0.80,     # FP weight at overtaking_difficulty 10 (Monaco)
-    "weight_sprint": 0.15,         # SPRINT weekends: only FP1 (short, quali-sim heavy) AND
-                                   # the actual Sprint-Qualifying grid is now a strong
-                                   # in-model quali signal -> lean FAR less on FP pace.
-                                   # Sweep on 23 sprint folds: min at 0.10, 0.15 robust;
-                                   # 0.15 vs 0.60 = -0.34 quali MAE (95% CI excludes 0).
-    "hard_track_pivot": 6,         # at/below this difficulty, use base weight
-    "min_drivers_with_pace": 10,   # need at least this many FP times to blend
-    "pace_cols": ["best_lap_time", "best_3_lap_avg", "best_5_lap_avg"],  # composite; lower = faster
-    "min_laps_for_composite": 5,
-    "max_best5_gap_seconds": 5.0,  # reject FP samples padded by traffic/slow laps
-}
-
-
-def representative_fp_pace_mask(features: pd.DataFrame) -> pd.Series:
-    """Exclude sparse FP samples whose best-five average includes slow laps."""
-    required = {"total_laps", "best_lap_time", "best_5_lap_avg"}
-    if not required.issubset(features.columns):
-        return pd.Series(True, index=features.index)
-    lap_count = pd.to_numeric(features["total_laps"], errors="coerce")
-    best = pd.to_numeric(features["best_lap_time"], errors="coerce")
-    best_five = pd.to_numeric(features["best_5_lap_avg"], errors="coerce")
-    return (
-        lap_count.ge(FP_QUALI_BLEND_TUNABLES["min_laps_for_composite"])
-        & best_five.sub(best).between(
-            0, FP_QUALI_BLEND_TUNABLES["max_best5_gap_seconds"]
-        )
-    )
+from pipeline.qualifying_transform import (
+    FP_QUALI_BLEND_TUNABLES, representative_fp_pace_mask, blend_qualifying_scores,
+)
 
 
 def phase_aware_grid_anchor_weight(
@@ -1362,71 +1335,19 @@ def run_predictions(
     for col in quali_feature_list:
         if col not in pred_df.columns:
             pred_df[col] = np.nan
+    inference_frames = {'qualifying_context': pred_df.copy()}
     X_q = pred_df[quali_feature_list].copy()
+    inference_frames['qualifying_features'] = X_q.copy()
     quali_raw = quali_model.predict(X_q)
 
-    # ---- FP-pace blend for qualifying (see FP_QUALI_BLEND_TUNABLES) ----
-    # Lean the model's quali ordering toward this weekend's FP single-lap pace,
-    # which backtests as a stronger quali predictor than the model alone. Done in
-    # z-score space and OVERWRITES quali_raw so both predicted_quali_position AND
-    # predicted_quali_raw (-> MC sim, -> race model's quali_position feature)
-    # inherit the blend. Only blends drivers that actually set an FP lap.
+    # The same transform is used by strict chronological training experiments.
     fp_blend = FP_QUALI_BLEND_TUNABLES
-    pace_cols = [c for c in fp_blend["pace_cols"] if c in pred_df.columns]
-    fp_pace_driver_count = 0
-    fp_quali_blend_applied = False
-    # Scale the FP weight up on quali-dominant (hard-to-overtake) tracks.
-    w_fp = fp_quali_blend_weight(
-        target_circuit, fp_blend["weight"], fp_blend["weight_hard_track"],
-        fp_blend["hard_track_pivot"],
-    )
-    if is_sprint:
-        # Sprint weekends override the track-scaled base: FP is FP1-only and the
-        # actual Sprint-Qualifying grid is now an in-model quali feature, so a heavy
-        # FP-pace blend hurts (sweep on 23 sprint folds, w=0.15 vs 0.60 -0.34 MAE,
-        # 95% CI excludes 0). Only fires when this weekend is a sprint round.
-        w_fp = fp_blend["weight_sprint"]
-    if w_fp > 0 and pace_cols:
-        def _zscore_q(a: np.ndarray) -> np.ndarray:
-            a = np.asarray(a, dtype=float)
-            s = a.std()
-            return (a - a.mean()) / s if s > 1e-9 else a - a.mean()
-
-        # Composite FP quali-pace signal: mean of per-metric z-scores, negated so
-        # a faster (lower) time scores higher. Blending the single best lap with
-        # best-3 and best-5 lap averages rewards repeatable pace over a one-off
-        # banker lap (backtests better than any single metric — see tunables).
-        representative = representative_fp_pace_mask(pred_df)
-        # A short, disrupted FP run can have one representative lap followed by
-        # very slow laps. Treating its best-five average as qualifying pace can
-        # turn an expected P8 starter into P20 and award phantom race gains.
-        # Keep the model prior for that driver until a comparable sample exists.
-        if "best_lap_time" in pred_df.columns:
-            best = pd.to_numeric(pred_df["best_lap_time"], errors="coerce")
-            rejected = int((best.notna() & ~representative).sum())
-            if rejected:
-                print(f"  Excluded {rejected} driver(s) with non-representative FP pace")
-        zmat = []
-        for c in pace_cols:
-            col = pd.to_numeric(pred_df[c], errors="coerce").where(representative)
-            sd = col.std()
-            zmat.append(-(col - col.mean()) / sd if sd and sd > 1e-9 else col * 0.0)
-        fp_pace_z = pd.concat(zmat, axis=1).mean(axis=1, skipna=True)  # NaN if all metrics NaN
-        has_pace = fp_pace_z.notna().values
-        fp_pace_driver_count = int(has_pace.sum())
-        if fp_pace_driver_count >= fp_blend["min_drivers_with_pace"]:
-            z_model = _zscore_q(quali_raw)
-            comp_z = np.zeros(len(pred_df))
-            comp_z[has_pace] = _zscore_q(fp_pace_z.values[has_pace])
-            blended = z_model.copy()
-            blended[has_pace] = (1.0 - w_fp) * z_model[has_pace] + w_fp * comp_z[has_pace]
-            quali_raw = blended
-            fp_quali_blend_applied = True
-            print(f"  FP-pace quali blend applied (weight={w_fp:.2f}, "
-                  f"cols={pace_cols}, {fp_pace_driver_count}/{len(pred_df)} drivers)")
-        else:
-            print(f"  FP-pace quali blend skipped (only {fp_pace_driver_count} drivers "
-                  f"with FP pace < {fp_blend['min_drivers_with_pace']} min)")
+    quali_raw, blend_evidence = blend_qualifying_scores(
+        pred_df, quali_raw, target_circuit, is_sprint)
+    fp_pace_driver_count = blend_evidence['driver_count']
+    fp_quali_blend_applied = blend_evidence['applied']
+    print(f"  FP-pace qualifying blend: applied={fp_quali_blend_applied}, "
+          f"weight={blend_evidence['weight']:.2f}, {fp_pace_driver_count}/{len(pred_df)} drivers")
 
     # Ranking model: higher score = better position (P1). Rank descending.
     quali_ranks = pd.Series(-quali_raw).rank(method="first").astype(int)
@@ -1450,6 +1371,7 @@ def run_predictions(
         if col not in pred_df.columns:
             pred_df[col] = np.nan
     X_r = pred_df[race_feature_list].copy()
+    inference_frames['race_features'] = X_r.copy()
     race_raw = race_model.predict(X_r)
 
     # ---- Phase-aware grid-anchoring on hard-to-overtake circuits ----
@@ -1652,6 +1574,7 @@ def run_predictions(
                 if col not in pred_df.columns:
                     pred_df[col] = np.nan
             X_s = pred_df[sprint_selection.features].copy()
+            inference_frames['sprint_features'] = X_s.copy()
             sprint_raw = sprint_model.predict(X_s)
             sprint_ranks = pd.Series(-sprint_raw).rank(method="first").astype(int)
             pred_df["predicted_sprint_position"] = sprint_ranks.values
@@ -1742,6 +1665,30 @@ def run_predictions(
         "weather_features_used": weather_meta,
         "driver_assets": roster_provenance(round_num, year),
     }
+    # Save exact input frames before any next update changes priors or models.
+    # Content-addressed source copies keep each model/config version only once.
+    from pipeline.prediction_replay import freeze_inference_bundle
+    project_root = Path(__file__).resolve().parents[1]
+    source_names = ['pipeline/06_run_predictions.py', 'pipeline/07_calculate_fantasy.py',
+                    'pipeline/08_monte_carlo_fantasy.py', 'pipeline/feature_engineering.py',
+                    'pipeline/fp_long_runs.py', 'pipeline/qualifying_transform.py',
+                    'pipeline/prediction_replay.py', 'config/settings.py',
+                    'config/fantasy_scoring.py', 'config/track_classifications.py',
+                    'config/track_similarity.py', 'config/grid_penalties.py',
+                    'config/circuit_priors.py', 'config/driver_assets.py',
+                    'config/fantasy_prices.py', 'config/seed_roster.py',
+                    'config/pitstop_priors.py', 'config/team_driver_ratings.py', 'config/tyre_deg.py']
+    sources = [project_root / name for name in source_names]
+    sources += [quali_path, race_model_used, TRAINED_DIR / 'feature_columns.json',
+                TRAINED_DIR / 'model_metadata.json', fp_model_path,
+                JOLPICA_MODEL_ROWS_DIR / 'all_model_rows.parquet', WEB_DATA_DIR / 'weather.json']
+    public_seeds = ['races.json', 'drivers.json', 'constructors.json', 'fantasy_prices.json',
+                    'mc_calibration.json', 'dotd_overrides.json', 'grid_penalties.json',
+                    'pace_overrides.json', 'overtakes.csv', 'pit_stop_priors.json']
+    sources += [SEED_DIR / name for name in public_seeds]
+    if is_sprint and sprint_selection.path.exists():
+        sources.append(sprint_selection.path)
+    metadata['input_bundle'] = freeze_inference_bundle(project_root, metadata, inference_frames, sources)
     save_prediction_artifacts(output_df, metadata, output_path, metadata_path)
     print(f"Saved -> {metadata_path}  (phase={resolved_phase})")
 

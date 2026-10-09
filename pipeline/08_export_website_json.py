@@ -51,6 +51,7 @@ from pipeline.audit import (
 )
 from pipeline.prediction_sanity import print_report as _sanity_report
 from pipeline.prospective_holdout import freeze_phase_archive
+from pipeline.forecast_archive import build_accuracy_prelock_index
 from config.fantasy_prices import (
     current_price_mismatches,
     load_fantasy_price_data,
@@ -1081,6 +1082,11 @@ def main():
     with open(WEB_DATA_DIR / "driver_history.json", "w") as f:
         json.dump(history, f, indent=2)
     print(f"  {len(history['drivers'])} drivers, {len(history['constructors'])} constructors with history")
+
+    accuracy = build_accuracy_prelock_index(WEB_DATA_DIR)
+    (WEB_DATA_DIR / 'accuracy_prelock.json').write_text(
+        json.dumps(accuracy, separators=(',', ':')), encoding='utf-8')
+    print(f"  Accuracy: {len(accuracy['rounds'])} complete pre-lock forecasts")
 
     print(f"\nAll data exported to {WEB_DATA_DIR}")
     print("=" * 70)

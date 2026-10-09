@@ -9454,7 +9454,7 @@ let accuracyPairs = [];
 let accuracyMissingNote = '';
 let accuracySelectedRounds = new Set();
 let accuracyEntityType = 'drivers'; // 'drivers' | 'constructors'
-let accuracyPhase = 'latest';       // 'latest' | 'pre_fp' | 'post_fp' | 'post_quali'
+let accuracyPhase = 'prelock';       // 'latest' | 'pre_fp' | 'post_fp' | 'post_quali'
 // Cache of all loaded archives, keyed by `${round}__${phase}`. Used to swap phases
 // without re-fetching. Built lazily by ensureAccuracyDataForPhase.
 let accuracyByPhase = {}; // phase -> [{ round, name, pred, act, archivePhase }]
@@ -9495,8 +9495,17 @@ async function renderAccuracy() {
                 container.innerHTML = accuracyMissingNote + '<p class="no-data">Analyzing prediction accuracy...</p>';
 
                 // Load all phase archives + canonical + actuals in parallel
-                const phases = ['latest', 'pre_fp', 'post_fp', 'post_quali'];
+                const phases = ['prelock', 'latest', 'pre_fp', 'post_fp', 'post_quali'];
                 for (const ph of phases) accuracyByPhase[ph] = [];
+
+                let beforeLock = {};
+                try {
+                    const response = await fetch('data/accuracy_prelock.json');
+                    if (response.ok) {
+                        const evidence = await response.json();
+                        beforeLock = Object.fromEntries((evidence.rounds || []).map(row => [row.round, row.forecast]));
+                    }
+                } catch (error) { console.warn('Before-lock accuracy evidence unavailable', error); }
 
                 for (const r of roundsWithBoth) {
                     const [actual, latestArc, preFp, postFp, postQuali] = await Promise.all([
@@ -9507,6 +9516,8 @@ async function renderAccuracy() {
                         loadPredictionsForPhase(r.round, 'post_quali'),
                     ]);
                     if (!actual) continue;
+                    const eligible = validateAccuracyPrelock(beforeLock[r.round], r.round);
+                    if (eligible) accuracyByPhase['prelock'].push({ round: r.round, name: r.name, pred: eligible, act: actual });
                     if (latestArc)   accuracyByPhase['latest']    .push({ round: r.round, name: r.name, pred: latestArc, act: actual });
                     if (preFp)       accuracyByPhase['pre_fp']    .push({ round: r.round, name: r.name, pred: preFp,     act: actual });
                     if (postFp)      accuracyByPhase['post_fp']   .push({ round: r.round, name: r.name, pred: postFp,    act: actual });
@@ -9515,12 +9526,7 @@ async function renderAccuracy() {
 
                 // Initial pairs = chosen phase
                 accuracyPairs = accuracyByPhase[accuracyPhase] || [];
-                if (accuracyPairs.length === 0 && accuracyByPhase['latest'].length > 0) {
-                    accuracyPhase = 'latest';
-                    accuracyPairs = accuracyByPhase['latest'];
-                }
-
-                if (accuracyPairs.length === 0) {
+                if (!Object.values(accuracyByPhase).some(pairs => pairs.length)) {
                     container.innerHTML = '<p class="no-data">Could not load prediction/actual data pairs.</p>';
                     return { aborted: true };
                 }
@@ -9536,6 +9542,26 @@ async function renderAccuracy() {
     }
 
     renderAccuracyWithFilters(container);
+}
+
+function validateAccuracyPrelock(forecast, round) {
+    if (!forecast || forecast.round !== round || forecast.reconstructed ||
+        !['pre_fp', 'post_fp'].includes(forecast.phase)) return null;
+    const lock = LOCK_DEADLINES.find(row => row.round === round);
+    const generated = Date.parse(forecast.generated_at), exported = Date.parse(forecast.exported_at);
+    const deadline = lock ? Date.parse(lock.lock) : NaN;
+    return Number.isFinite(generated) && Number.isFinite(exported) && Number.isFinite(deadline) &&
+        generated <= exported && exported <= deadline ? forecast : null;
+}
+
+function accuracyForecastForAsset(forecasts, id, actual, isDriver) {
+    const field = isDriver ? 'driver_id' : 'constructor_id';
+    const direct = forecasts.find(row => row[field] === id);
+    if (direct && (!isDriver || direct.constructor === actual?.constructor)) return direct;
+    if (!isDriver || !actual?.constructor) return null;
+    const aliases = forecasts.filter(row => (row.asset_legacy_ids || []).includes(id) &&
+        row.constructor === actual.constructor);
+    return aliases.length === 1 ? aliases[0] : null;
 }
 
 function renderAccuracyWithFilters(container) {
@@ -9572,7 +9598,7 @@ function renderAccuracyWithFilters(container) {
 
         const allIds = [...new Set([...Object.keys(predMap), ...Object.keys(actMap)])];
         allIds.forEach(id => {
-            const p = predMap[id], a = actMap[id];
+            const a = actMap[id], p = accuracyForecastForAsset(predList, id, a, isDrivers);
             if (!p || !a) return;
             const predPts = p.expected_points || 0;
             const offScore = getOfficialScore(round, id, isDrivers);
@@ -9657,6 +9683,9 @@ function renderAccuracyWithFilters(container) {
 
         roundStats.push({
             round, name,
+            forecastLabel: pred.phase === 'post_fp' && pred.fp_sessions_included?.length
+                ? `Post ${pred.fp_sessions_included.join(' + ')}` : (pred.phase || 'Version not recorded'),
+            forecastTime: pred.exported_at || pred.generated_at,
             ptsMAE: rCount > 0 ? (rPtsMAE / rCount).toFixed(1) : '-',
             qualiMAE: isDrivers ? (rQualiCount > 0 ? (rQualiMAE / rQualiCount).toFixed(1) : '-') : '-',
             raceMAE: isDrivers ? (rPosCount > 0 ? (rPosMAE / rPosCount).toFixed(1) : '-') : '-',
@@ -9698,7 +9727,8 @@ function renderAccuracyWithFilters(container) {
     // Phase toggle (Latest / Pre-FP / Post-FP / Post-Quali). Buttons for phases
     // with no archives available are disabled with a count badge.
     const phaseDefs = [
-        { key: 'latest',     label: 'Latest' },
+        { key: 'prelock',    label: 'Before Fantasy lock' },
+        { key: 'latest',     label: 'Latest saved' },
         { key: 'pre_fp',     label: 'Pre-FP' },
         { key: 'post_fp',    label: 'Post-FP' },
         { key: 'post_quali', label: 'Post-Quali' },
@@ -9725,6 +9755,9 @@ function renderAccuracyWithFilters(container) {
         <span class="accuracy-filter-label">Phase:</span>
         <div class="accuracy-filter-buttons">${phaseButtons}</div>
     </div>
+    <p class="data-note">${accuracyPhase === 'prelock'
+        ? 'Latest complete forecast saved before each Fantasy deadline. Reconstructed, late and unmatched-roster forecasts are excluded.'
+        : 'Saved archive view: versions may be retrospective. Post-FP shows the first saved practice forecast; use Before Fantasy lock for the final usable forecast.'}</p>
     ${reconstructedNote}`;
 
     // Race filter toggle buttons
@@ -9751,7 +9784,9 @@ function renderAccuracyWithFilters(container) {
     // Per-round table
     const positionMAEHeaders = isDrivers ? '<th class="num">Quali MAE</th><th class="num">Race MAE</th>' : '';
     const roundTableRows = roundStats.map(r => `<tr>
-        <td>R${r.round}</td><td>${r.name}</td><td class="num">${r.ptsMAE}</td>
+        <td>R${r.round}</td><td>${r.name}</td>
+        <td>${escapeHtml(r.forecastLabel)}<br><small>${r.forecastTime ? escapeHtml(new Date(r.forecastTime).toLocaleString()) : 'Time not recorded'}</small></td>
+        <td class="num">${r.ptsMAE}</td>
         ${isDrivers ? `<td class="num">${r.qualiMAE}</td><td class="num">${r.raceMAE}</td>` : ''}<td class="num">${r.ciCoverage}</td>
         <td>${r.best}</td><td>${r.worst}</td>
     </tr>`).join('');
@@ -9878,7 +9913,7 @@ function renderAccuracyWithFilters(container) {
         <div class="table-wrapper">
             <table class="data-table accuracy-round-table sortable">
                 <thead><tr>
-                    <th>Rd</th><th>Race</th><th class="num">Pts MAE</th>
+                    <th>Rd</th><th>Race</th><th>Forecast used</th><th class="num">Pts MAE</th>
                     ${positionMAEHeaders}<th class="num">CI Coverage</th>
                     <th>Best Prediction</th><th>Worst Prediction</th>
                 </tr></thead>
