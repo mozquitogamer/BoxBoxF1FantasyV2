@@ -1,0 +1,791 @@
+{
+  "race": "Singapore Grand Prix",
+  "round": 19,
+  "season": 2026,
+  "type": "post_race_analysis",
+  "is_sprint_weekend": true,
+  "results": [
+    {
+      "driver_id": "VER",
+      "constructor_id": "red_bull",
+      "grid": 1,
+      "classified_position": 1,
+      "finish_position": 1,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 25.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "LEC",
+      "constructor_id": "ferrari",
+      "grid": 2,
+      "classified_position": 2,
+      "finish_position": 2,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 18.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "ANT",
+      "constructor_id": "mercedes",
+      "grid": 4,
+      "classified_position": 3,
+      "finish_position": 3,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 15.0,
+      "positions_gained": 1
+    },
+    {
+      "driver_id": "NOR",
+      "constructor_id": "mclaren",
+      "grid": 5,
+      "classified_position": 4,
+      "finish_position": 4,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 12.0,
+      "positions_gained": 1
+    },
+    {
+      "driver_id": "PIA",
+      "constructor_id": "mclaren",
+      "grid": 6,
+      "classified_position": 5,
+      "finish_position": 5,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 10.0,
+      "positions_gained": 1
+    },
+    {
+      "driver_id": "HAM",
+      "constructor_id": "ferrari",
+      "grid": 3,
+      "classified_position": 6,
+      "finish_position": 6,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 8.0,
+      "positions_gained": -3
+    },
+    {
+      "driver_id": "LAW",
+      "constructor_id": "rb",
+      "grid": 8,
+      "classified_position": 7,
+      "finish_position": 7,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 6.0,
+      "positions_gained": 1
+    },
+    {
+      "driver_id": "HUL",
+      "constructor_id": "audi",
+      "grid": 10,
+      "classified_position": 8,
+      "finish_position": 8,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 4.0,
+      "positions_gained": 2
+    },
+    {
+      "driver_id": "RUS",
+      "constructor_id": "mercedes",
+      "grid": 19,
+      "classified_position": 9,
+      "finish_position": 9,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 2.0,
+      "positions_gained": 10
+    },
+    {
+      "driver_id": "HAD",
+      "constructor_id": "red_bull",
+      "grid": 22,
+      "classified_position": 10,
+      "finish_position": 10,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 1.0,
+      "positions_gained": 12
+    },
+    {
+      "driver_id": "GAS",
+      "constructor_id": "alpine",
+      "grid": 7,
+      "classified_position": 11,
+      "finish_position": 11,
+      "status": "Lapped",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": -4
+    },
+    {
+      "driver_id": "BEA",
+      "constructor_id": "haas",
+      "grid": 11,
+      "classified_position": 12,
+      "finish_position": 12,
+      "status": "Lapped",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": -1
+    },
+    {
+      "driver_id": "OCO",
+      "constructor_id": "haas",
+      "grid": 12,
+      "classified_position": 13,
+      "finish_position": 13,
+      "status": "Lapped",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": -1
+    },
+    {
+      "driver_id": "SAI",
+      "constructor_id": "williams",
+      "grid": 13,
+      "classified_position": 14,
+      "finish_position": 14,
+      "status": "Lapped",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": -1
+    },
+    {
+      "driver_id": "LIN",
+      "constructor_id": "rb",
+      "grid": 9,
+      "classified_position": 15,
+      "finish_position": 15,
+      "status": "Lapped",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": -6
+    },
+    {
+      "driver_id": "ALO",
+      "constructor_id": "aston_martin",
+      "grid": 20,
+      "classified_position": 16,
+      "finish_position": 16,
+      "status": "Lapped",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": 4
+    },
+    {
+      "driver_id": "PER",
+      "constructor_id": "cadillac",
+      "grid": 17,
+      "classified_position": 17,
+      "finish_position": 17,
+      "status": "Lapped",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "ALB",
+      "constructor_id": "williams",
+      "grid": 16,
+      "classified_position": 18,
+      "finish_position": 18,
+      "status": "Retired",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": -2
+    },
+    {
+      "driver_id": "BOT",
+      "constructor_id": "cadillac",
+      "grid": 18,
+      "classified_position": 19,
+      "finish_position": 19,
+      "status": "Lapped",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": -1
+    },
+    {
+      "driver_id": "STR",
+      "constructor_id": "aston_martin",
+      "grid": 21,
+      "classified_position": 20,
+      "finish_position": null,
+      "status": "Retired",
+      "is_classified": false,
+      "is_finished": false,
+      "points": 0.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "COL",
+      "constructor_id": "alpine",
+      "grid": 15,
+      "classified_position": 21,
+      "finish_position": null,
+      "status": "Retired",
+      "is_classified": false,
+      "is_finished": false,
+      "points": 0.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "BOR",
+      "constructor_id": "audi",
+      "grid": 14,
+      "classified_position": 22,
+      "finish_position": null,
+      "status": "Retired",
+      "is_classified": false,
+      "is_finished": false,
+      "points": 0.0,
+      "positions_gained": 0
+    }
+  ],
+  "pitstops": {
+    "by_driver": {
+      "HAM": [
+        {
+          "lap": 18,
+          "stop_number": 1,
+          "duration": 24.048
+        }
+      ],
+      "PER": [
+        {
+          "lap": 21,
+          "stop_number": 1,
+          "duration": 25.287
+        },
+        {
+          "lap": 38,
+          "stop_number": 2,
+          "duration": 24.85
+        }
+      ],
+      "ALB": [
+        {
+          "lap": 22,
+          "stop_number": 1,
+          "duration": 24.093
+        },
+        {
+          "lap": 37,
+          "stop_number": 2,
+          "duration": 25.872
+        }
+      ],
+      "ANT": [
+        {
+          "lap": 23,
+          "stop_number": 1,
+          "duration": 24.115
+        },
+        {
+          "lap": 39,
+          "stop_number": 2,
+          "duration": 23.591
+        }
+      ],
+      "LEC": [
+        {
+          "lap": 24,
+          "stop_number": 1,
+          "duration": 24.641
+        },
+        {
+          "lap": 39,
+          "stop_number": 2,
+          "duration": 24.109
+        }
+      ],
+      "LIN": [
+        {
+          "lap": 26,
+          "stop_number": 1,
+          "duration": 24.372
+        }
+      ],
+      "STR": [
+        {
+          "lap": 26,
+          "stop_number": 1,
+          "duration": 23.601
+        }
+      ],
+      "OCO": [
+        {
+          "lap": 28,
+          "stop_number": 1,
+          "duration": 24.931
+        }
+      ],
+      "BOT": [
+        {
+          "lap": 28,
+          "stop_number": 1,
+          "duration": 29.266
+        }
+      ],
+      "GAS": [
+        {
+          "lap": 29,
+          "stop_number": 1,
+          "duration": 24.581
+        }
+      ],
+      "HUL": [
+        {
+          "lap": 30,
+          "stop_number": 1,
+          "duration": 24.375
+        }
+      ],
+      "LAW": [
+        {
+          "lap": 31,
+          "stop_number": 1,
+          "duration": 24.663
+        }
+      ],
+      "SAI": [
+        {
+          "lap": 31,
+          "stop_number": 1,
+          "duration": 24.202
+        }
+      ],
+      "VER": [
+        {
+          "lap": 32,
+          "stop_number": 1,
+          "duration": 23.698
+        }
+      ],
+      "NOR": [
+        {
+          "lap": 32,
+          "stop_number": 1,
+          "duration": 23.922
+        }
+      ],
+      "PIA": [
+        {
+          "lap": 33,
+          "stop_number": 1,
+          "duration": 25.713
+        },
+        {
+          "lap": 41,
+          "stop_number": 2,
+          "duration": 24.076
+        }
+      ],
+      "BEA": [
+        {
+          "lap": 33,
+          "stop_number": 1,
+          "duration": 24.871
+        }
+      ],
+      "HAD": [
+        {
+          "lap": 33,
+          "stop_number": 1,
+          "duration": 24.549
+        }
+      ],
+      "ALO": [
+        {
+          "lap": 35,
+          "stop_number": 1,
+          "duration": 24.33
+        }
+      ],
+      "RUS": [
+        {
+          "lap": 39,
+          "stop_number": 1,
+          "duration": 23.648
+        }
+      ]
+    },
+    "by_team": [
+      {
+        "constructor_id": "mercedes",
+        "constructor_name": "Mercedes",
+        "avg_pitstop": 23.785,
+        "best_pitstop": 23.591,
+        "total_stops": 3
+      },
+      {
+        "constructor_id": "aston_martin",
+        "constructor_name": "Aston Martin",
+        "avg_pitstop": 23.965,
+        "best_pitstop": 23.601,
+        "total_stops": 2
+      },
+      {
+        "constructor_id": "red_bull",
+        "constructor_name": "Red Bull",
+        "avg_pitstop": 24.123,
+        "best_pitstop": 23.698,
+        "total_stops": 2
+      },
+      {
+        "constructor_id": "ferrari",
+        "constructor_name": "Ferrari",
+        "avg_pitstop": 24.266,
+        "best_pitstop": 24.048,
+        "total_stops": 3
+      },
+      {
+        "constructor_id": "audi",
+        "constructor_name": "Audi",
+        "avg_pitstop": 24.375,
+        "best_pitstop": 24.375,
+        "total_stops": 1
+      },
+      {
+        "constructor_id": "racing_bulls",
+        "constructor_name": "Racing Bulls",
+        "avg_pitstop": 24.517,
+        "best_pitstop": 24.372,
+        "total_stops": 2
+      },
+      {
+        "constructor_id": "mclaren",
+        "constructor_name": "McLaren",
+        "avg_pitstop": 24.57,
+        "best_pitstop": 23.922,
+        "total_stops": 3
+      },
+      {
+        "constructor_id": "alpine",
+        "constructor_name": "Alpine",
+        "avg_pitstop": 24.581,
+        "best_pitstop": 24.581,
+        "total_stops": 1
+      },
+      {
+        "constructor_id": "williams",
+        "constructor_name": "Williams",
+        "avg_pitstop": 24.722,
+        "best_pitstop": 24.093,
+        "total_stops": 3
+      },
+      {
+        "constructor_id": "haas",
+        "constructor_name": "Haas",
+        "avg_pitstop": 24.901,
+        "best_pitstop": 24.871,
+        "total_stops": 2
+      },
+      {
+        "constructor_id": "cadillac",
+        "constructor_name": "Cadillac",
+        "avg_pitstop": 26.468,
+        "best_pitstop": 24.85,
+        "total_stops": 3
+      }
+    ]
+  },
+  "race_pace": {},
+  "tyre_management": {},
+  "sprint_results": [
+    {
+      "driver_id": "VER",
+      "constructor_id": "red_bull",
+      "grid": 1,
+      "classified_position": 1,
+      "finish_position": 1,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 8.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "HAM",
+      "constructor_id": "ferrari",
+      "grid": 6,
+      "classified_position": 2,
+      "finish_position": 2,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 7.0,
+      "positions_gained": 4
+    },
+    {
+      "driver_id": "LEC",
+      "constructor_id": "ferrari",
+      "grid": 3,
+      "classified_position": 3,
+      "finish_position": 3,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 6.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "ANT",
+      "constructor_id": "mercedes",
+      "grid": 7,
+      "classified_position": 4,
+      "finish_position": 4,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 5.0,
+      "positions_gained": 3
+    },
+    {
+      "driver_id": "LAW",
+      "constructor_id": "rb",
+      "grid": 8,
+      "classified_position": 5,
+      "finish_position": 5,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 4.0,
+      "positions_gained": 3
+    },
+    {
+      "driver_id": "BEA",
+      "constructor_id": "haas",
+      "grid": 13,
+      "classified_position": 6,
+      "finish_position": 6,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 3.0,
+      "positions_gained": 7
+    },
+    {
+      "driver_id": "HUL",
+      "constructor_id": "audi",
+      "grid": 12,
+      "classified_position": 7,
+      "finish_position": 7,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 2.0,
+      "positions_gained": 5
+    },
+    {
+      "driver_id": "NOR",
+      "constructor_id": "mclaren",
+      "grid": 5,
+      "classified_position": 8,
+      "finish_position": 8,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 1.0,
+      "positions_gained": -3
+    },
+    {
+      "driver_id": "GAS",
+      "constructor_id": "alpine",
+      "grid": 10,
+      "classified_position": 9,
+      "finish_position": 9,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": 1
+    },
+    {
+      "driver_id": "OCO",
+      "constructor_id": "haas",
+      "grid": 16,
+      "classified_position": 10,
+      "finish_position": 10,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": 6
+    },
+    {
+      "driver_id": "ALO",
+      "constructor_id": "aston_martin",
+      "grid": 15,
+      "classified_position": 11,
+      "finish_position": 11,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": 4
+    },
+    {
+      "driver_id": "SAI",
+      "constructor_id": "williams",
+      "grid": 22,
+      "classified_position": 12,
+      "finish_position": 12,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": 10
+    },
+    {
+      "driver_id": "LIN",
+      "constructor_id": "rb",
+      "grid": 17,
+      "classified_position": 13,
+      "finish_position": 13,
+      "status": "Finished",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": 4
+    },
+    {
+      "driver_id": "PIA",
+      "constructor_id": "mclaren",
+      "grid": 4,
+      "classified_position": 14,
+      "finish_position": 14,
+      "status": "Retired",
+      "is_classified": true,
+      "is_finished": true,
+      "points": 0.0,
+      "positions_gained": -10
+    },
+    {
+      "driver_id": "ALB",
+      "constructor_id": "williams",
+      "grid": 19,
+      "classified_position": 15,
+      "finish_position": null,
+      "status": "Retired",
+      "is_classified": false,
+      "is_finished": false,
+      "points": 0.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "BOR",
+      "constructor_id": "audi",
+      "grid": 14,
+      "classified_position": 16,
+      "finish_position": null,
+      "status": "Retired",
+      "is_classified": false,
+      "is_finished": false,
+      "points": 0.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "BOT",
+      "constructor_id": "cadillac",
+      "grid": 21,
+      "classified_position": 17,
+      "finish_position": null,
+      "status": "Retired",
+      "is_classified": false,
+      "is_finished": false,
+      "points": 0.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "HAD",
+      "constructor_id": "red_bull",
+      "grid": 9,
+      "classified_position": 18,
+      "finish_position": null,
+      "status": "Retired",
+      "is_classified": false,
+      "is_finished": false,
+      "points": 0.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "COL",
+      "constructor_id": "alpine",
+      "grid": 11,
+      "classified_position": 19,
+      "finish_position": null,
+      "status": "Retired",
+      "is_classified": false,
+      "is_finished": false,
+      "points": 0.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "RUS",
+      "constructor_id": "mercedes",
+      "grid": 2,
+      "classified_position": 20,
+      "finish_position": null,
+      "status": "Retired",
+      "is_classified": false,
+      "is_finished": false,
+      "points": 0.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "PER",
+      "constructor_id": "cadillac",
+      "grid": 20,
+      "classified_position": 21,
+      "finish_position": null,
+      "status": "Retired",
+      "is_classified": false,
+      "is_finished": false,
+      "points": 0.0,
+      "positions_gained": 0
+    },
+    {
+      "driver_id": "STR",
+      "constructor_id": "aston_martin",
+      "grid": 18,
+      "classified_position": 22,
+      "finish_position": null,
+      "status": "Retired",
+      "is_classified": false,
+      "is_finished": false,
+      "points": 0.0,
+      "positions_gained": 0
+    }
+  ],
+  "sprint_pace": {},
+  "sprint_tyre_management": {}
+}

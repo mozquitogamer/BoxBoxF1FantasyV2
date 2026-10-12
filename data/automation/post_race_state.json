@@ -6,6 +6,12 @@
       "source_sha256": "e007484f8cf08a90c707f858ccfcb9241a2515e35d2f56fc354beb0261c14db8",
       "completed_at": "2026-10-06T22:03:24.494158+00:00",
       "next_round": 19
+    },
+    "19": {
+      "race": "Singapore Grand Prix",
+      "source_sha256": "dba0e25e43a808fb800a29bacb6ed55037b147531eb44bd4091df511cca5bf43",
+      "completed_at": "2026-10-12T19:23:54.137754+00:00",
+      "next_round": 20
     }
   }
 }

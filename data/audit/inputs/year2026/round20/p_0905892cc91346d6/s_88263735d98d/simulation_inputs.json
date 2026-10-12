@@ -1,0 +1,854 @@
+{
+  "schema_version": 1,
+  "inference_manifest": {
+    "manifest": "data/audit/inputs/year2026/round20/p_0905892cc91346d6/manifest.json",
+    "sha256": "fd1bbcd27894c840a312edfd698177555c7c775b6da8c201532fa370683dc373"
+  },
+  "parameters": {
+    "seed": 42,
+    "n_simulations": 10000,
+    "is_sprint": false,
+    "calibration": {
+      "noise_multiplier": 1.1754,
+      "bias_correction": 1.12,
+      "per_tier_bias": {
+        "front": -0.15,
+        "midfield": 4.55,
+        "back": -0.51
+      },
+      "n_rounds": 11,
+      "coverage_90": 0.8383,
+      "source": "cumulative_through_R17",
+      "calibration_phase": "pre_fp"
+    },
+    "weather": {
+      "rain_risk": "LOW",
+      "race_air_temp": 24.2,
+      "noise_mult": 1.02,
+      "dnf_mult": 1.05,
+      "wet_weight": 0.01,
+      "cold_weight": 0.0,
+      "is_active": true,
+      "source": "2026-10-12T19:22:47Z",
+      "overall_rain_risk": "MEDIUM"
+    },
+    "overtake_multiplier": 1.0,
+    "position_noise_multiplier": 1.0,
+    "chaos_multiplier": 1.18,
+    "dotd_overrides": {},
+    "driver_prices": {
+      "RUS": 27.9,
+      "VER": 28.2,
+      "NOR": 26.1,
+      "PIA": 23.4,
+      "ANT": 27.1,
+      "LEC": 24.1,
+      "HAM": 24.4,
+      "HAD": 16.3,
+      "GAS": 10.2,
+      "SAI": 8.4,
+      "ALB": 4.6,
+      "ALO": 5.4,
+      "BEA": 6.4,
+      "OCO": 9.9,
+      "LIN": 10.0,
+      "COL": 8.8,
+      "LAW": 9.9,
+      "STR": 3.0,
+      "BOR": 7.0,
+      "PER": 3.6,
+      "HUL": 6.6,
+      "BOT": 3.0
+    },
+    "constructor_prices": {
+      "mercedes": 34.0,
+      "mclaren": 32.4,
+      "red_bull": 32.7,
+      "ferrari": 28.2,
+      "alpine": 18.8,
+      "williams": 12.6,
+      "aston_martin": 4.5,
+      "haas": 12.0,
+      "racing_bulls": 16.5,
+      "audi": 10.4,
+      "cadillac": 3.0
+    },
+    "drivers": {
+      "RUS": {
+        "driver_id": "RUS",
+        "first_name": "George",
+        "last_name": "Russell",
+        "constructor_id": "mercedes",
+        "number": 63,
+        "asset_id": "RUS",
+        "driver_abbrev": "RUS",
+        "model_driver_id": "russell",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "RUS"
+      },
+      "VER": {
+        "driver_id": "VER",
+        "first_name": "Max",
+        "last_name": "Verstappen",
+        "constructor_id": "red_bull",
+        "number": 33,
+        "asset_id": "VER",
+        "driver_abbrev": "VER",
+        "model_driver_id": "max_verstappen",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "VER"
+      },
+      "NOR": {
+        "driver_id": "NOR",
+        "first_name": "Lando",
+        "last_name": "Norris",
+        "constructor_id": "mclaren",
+        "number": 4,
+        "asset_id": "NOR",
+        "driver_abbrev": "NOR",
+        "model_driver_id": "norris",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "NOR"
+      },
+      "PIA": {
+        "driver_id": "PIA",
+        "first_name": "Oscar",
+        "last_name": "Piastri",
+        "constructor_id": "mclaren",
+        "number": 81,
+        "asset_id": "PIA",
+        "driver_abbrev": "PIA",
+        "model_driver_id": "piastri",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "PIA"
+      },
+      "ANT": {
+        "driver_id": "ANT",
+        "first_name": "Kimi",
+        "last_name": "Antonelli",
+        "constructor_id": "mercedes",
+        "number": 12,
+        "asset_id": "ANT",
+        "driver_abbrev": "ANT",
+        "model_driver_id": "antonelli",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "ANT"
+      },
+      "LEC": {
+        "driver_id": "LEC",
+        "first_name": "Charles",
+        "last_name": "Leclerc",
+        "constructor_id": "ferrari",
+        "number": 16,
+        "asset_id": "LEC",
+        "driver_abbrev": "LEC",
+        "model_driver_id": "leclerc",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "LEC"
+      },
+      "HAM": {
+        "driver_id": "HAM",
+        "first_name": "Lewis",
+        "last_name": "Hamilton",
+        "constructor_id": "ferrari",
+        "number": 44,
+        "asset_id": "HAM",
+        "driver_abbrev": "HAM",
+        "model_driver_id": "hamilton",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "HAM"
+      },
+      "HAD": {
+        "driver_id": "HAD",
+        "first_name": "Isack",
+        "last_name": "Hadjar",
+        "constructor_id": "red_bull",
+        "number": 6,
+        "asset_id": "HAD",
+        "driver_abbrev": "HAD",
+        "model_driver_id": "hadjar",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "HAD"
+      },
+      "GAS": {
+        "driver_id": "GAS",
+        "first_name": "Pierre",
+        "last_name": "Gasly",
+        "constructor_id": "alpine",
+        "number": 10,
+        "asset_id": "GAS",
+        "driver_abbrev": "GAS",
+        "model_driver_id": "gasly",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "GAS"
+      },
+      "SAI": {
+        "driver_id": "SAI",
+        "first_name": "Carlos",
+        "last_name": "Sainz",
+        "constructor_id": "williams",
+        "number": 55,
+        "asset_id": "SAI",
+        "driver_abbrev": "SAI",
+        "model_driver_id": "sainz",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "SAI"
+      },
+      "ALB": {
+        "driver_id": "ALB",
+        "first_name": "Alex",
+        "last_name": "Albon",
+        "constructor_id": "williams",
+        "number": 23,
+        "asset_id": "ALB",
+        "driver_abbrev": "ALB",
+        "model_driver_id": "albon",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "ALB"
+      },
+      "ALO": {
+        "driver_id": "ALO",
+        "first_name": "Fernando",
+        "last_name": "Alonso",
+        "constructor_id": "aston_martin",
+        "number": 14,
+        "asset_id": "ALO",
+        "driver_abbrev": "ALO",
+        "model_driver_id": "alonso",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "ALO"
+      },
+      "BEA": {
+        "driver_id": "BEA",
+        "first_name": "Oliver",
+        "last_name": "Bearman",
+        "constructor_id": "haas",
+        "number": 87,
+        "asset_id": "BEA",
+        "driver_abbrev": "BEA",
+        "model_driver_id": "bearman",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "BEA"
+      },
+      "OCO": {
+        "driver_id": "OCO",
+        "first_name": "Esteban",
+        "last_name": "Ocon",
+        "constructor_id": "haas",
+        "number": 31,
+        "asset_id": "OCO",
+        "driver_abbrev": "OCO",
+        "model_driver_id": "ocon",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "OCO"
+      },
+      "LIN": {
+        "driver_id": "LIN",
+        "first_name": "Arvid",
+        "last_name": "Lindblad",
+        "constructor_id": "racing_bulls",
+        "number": 40,
+        "asset_id": "LIN",
+        "driver_abbrev": "LIN",
+        "model_driver_id": "arvid_lindblad",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "LIN"
+      },
+      "COL": {
+        "driver_id": "COL",
+        "first_name": "Franco",
+        "last_name": "Colapinto",
+        "constructor_id": "alpine",
+        "number": 43,
+        "asset_id": "COL",
+        "driver_abbrev": "COL",
+        "model_driver_id": "colapinto",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "COL"
+      },
+      "LAW": {
+        "driver_id": "LAW",
+        "first_name": "Liam",
+        "last_name": "Lawson",
+        "constructor_id": "racing_bulls",
+        "number": 30,
+        "asset_id": "LAW",
+        "driver_abbrev": "LAW",
+        "model_driver_id": "lawson",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "LAW"
+      },
+      "STR": {
+        "driver_id": "STR",
+        "first_name": "Lance",
+        "last_name": "Stroll",
+        "constructor_id": "aston_martin",
+        "number": 18,
+        "asset_id": "STR",
+        "driver_abbrev": "STR",
+        "model_driver_id": "stroll",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "STR"
+      },
+      "BOR": {
+        "driver_id": "BOR",
+        "first_name": "Gabriel",
+        "last_name": "Bortoleto",
+        "constructor_id": "audi",
+        "number": 5,
+        "asset_id": "BOR",
+        "driver_abbrev": "BOR",
+        "model_driver_id": "bortoleto",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "BOR"
+      },
+      "PER": {
+        "driver_id": "PER",
+        "first_name": "Sergio",
+        "last_name": "Perez",
+        "constructor_id": "cadillac",
+        "number": 11,
+        "asset_id": "PER",
+        "driver_abbrev": "PER",
+        "model_driver_id": "perez",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "PER"
+      },
+      "HUL": {
+        "driver_id": "HUL",
+        "first_name": "Nico",
+        "last_name": "Hulkenberg",
+        "constructor_id": "audi",
+        "number": 27,
+        "asset_id": "HUL",
+        "driver_abbrev": "HUL",
+        "model_driver_id": "hulkenberg",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "HUL"
+      },
+      "BOT": {
+        "driver_id": "BOT",
+        "first_name": "Valtteri",
+        "last_name": "Bottas",
+        "constructor_id": "cadillac",
+        "number": 77,
+        "asset_id": "BOT",
+        "driver_abbrev": "BOT",
+        "model_driver_id": "bottas",
+        "confidence_multiplier": 1.0,
+        "mc_noise_multiplier": 1.0,
+        "asset_context": "canonical_season_asset",
+        "availability": {
+          "from_round": 1,
+          "to_round": null
+        },
+        "legacy_asset_ids": [],
+        "abbreviation": "BOT"
+      }
+    },
+    "constructors": {
+      "mercedes": {
+        "constructor_id": "mercedes",
+        "name": "Mercedes",
+        "full_name": "Mercedes-AMG Petronas F1 Team"
+      },
+      "red_bull": {
+        "constructor_id": "red_bull",
+        "name": "Red Bull",
+        "full_name": "Oracle Red Bull Racing"
+      },
+      "mclaren": {
+        "constructor_id": "mclaren",
+        "name": "McLaren",
+        "full_name": "McLaren F1 Team"
+      },
+      "ferrari": {
+        "constructor_id": "ferrari",
+        "name": "Ferrari",
+        "full_name": "Scuderia Ferrari HP"
+      },
+      "alpine": {
+        "constructor_id": "alpine",
+        "name": "Alpine",
+        "full_name": "BWT Alpine F1 Team"
+      },
+      "williams": {
+        "constructor_id": "williams",
+        "name": "Williams",
+        "full_name": "Williams Racing"
+      },
+      "aston_martin": {
+        "constructor_id": "aston_martin",
+        "name": "Aston Martin",
+        "full_name": "Aston Martin Aramco F1 Team"
+      },
+      "haas": {
+        "constructor_id": "haas",
+        "name": "Haas",
+        "full_name": "MoneyGram Haas F1 Team"
+      },
+      "racing_bulls": {
+        "constructor_id": "racing_bulls",
+        "name": "Racing Bulls",
+        "full_name": "Visa Cash App Racing Bulls"
+      },
+      "audi": {
+        "constructor_id": "audi",
+        "name": "Audi",
+        "full_name": "Audi F1 Team"
+      },
+      "cadillac": {
+        "constructor_id": "cadillac",
+        "name": "Cadillac",
+        "full_name": "Cadillac F1 Team"
+      }
+    },
+    "pitstop_priors": {
+      "red_bull": {
+        "mean": 2.15,
+        "std": 0.25,
+        "stops_per_race": 1.5
+      },
+      "mclaren": {
+        "mean": 2.2,
+        "std": 0.25,
+        "stops_per_race": 1.5
+      },
+      "ferrari": {
+        "mean": 2.25,
+        "std": 0.3,
+        "stops_per_race": 1.5
+      },
+      "mercedes": {
+        "mean": 2.2,
+        "std": 0.25,
+        "stops_per_race": 1.5
+      },
+      "aston_martin": {
+        "mean": 2.5,
+        "std": 0.4,
+        "stops_per_race": 1.5
+      },
+      "alpine": {
+        "mean": 2.4,
+        "std": 0.35,
+        "stops_per_race": 1.5
+      },
+      "williams": {
+        "mean": 2.45,
+        "std": 0.35,
+        "stops_per_race": 1.5
+      },
+      "racing_bulls": {
+        "mean": 2.3,
+        "std": 0.3,
+        "stops_per_race": 1.5
+      },
+      "haas": {
+        "mean": 2.5,
+        "std": 0.4,
+        "stops_per_race": 1.5
+      },
+      "audi": {
+        "mean": 2.55,
+        "std": 0.4,
+        "stops_per_race": 1.5
+      },
+      "cadillac": {
+        "mean": 2.6,
+        "std": 0.45,
+        "stops_per_race": 1.5
+      }
+    },
+    "overtake_history": {
+      "albon": {
+        "avg_overtakes": 4.294117647058823,
+        "avg_pos_gained": 1.0,
+        "avg_pos_lost": 0.5294117647058824,
+        "races": 17,
+        "avg_sprint_overtakes": 3.3333333333333335,
+        "avg_sprint_pos_gained": 0.7647058823529411,
+        "avg_sprint_pos_lost": 0.0
+      },
+      "alonso": {
+        "avg_overtakes": 4.882352941176471,
+        "avg_pos_gained": 2.588235294117647,
+        "avg_pos_lost": 0.0,
+        "races": 17,
+        "avg_sprint_overtakes": 3.1666666666666665,
+        "avg_sprint_pos_gained": 0.5882352941176471,
+        "avg_sprint_pos_lost": 0.0
+      },
+      "antonelli": {
+        "avg_overtakes": 4.294117647058823,
+        "avg_pos_gained": 2.235294117647059,
+        "avg_pos_lost": 1.588235294117647,
+        "races": 17,
+        "avg_sprint_overtakes": 3.4,
+        "avg_sprint_pos_gained": 0.11764705882352941,
+        "avg_sprint_pos_lost": 0.47058823529411764
+      },
+      "arvid_lindblad": {
+        "avg_overtakes": 4.588235294117647,
+        "avg_pos_gained": 1.8235294117647058,
+        "avg_pos_lost": 0.8823529411764706,
+        "races": 17,
+        "avg_sprint_overtakes": 4.0,
+        "avg_sprint_pos_gained": 0.058823529411764705,
+        "avg_sprint_pos_lost": 0.0
+      },
+      "bearman": {
+        "avg_overtakes": 5.117647058823529,
+        "avg_pos_gained": 1.2352941176470589,
+        "avg_pos_lost": 0.5882352941176471,
+        "races": 17,
+        "avg_sprint_overtakes": 2.8333333333333335,
+        "avg_sprint_pos_gained": 0.4117647058823529,
+        "avg_sprint_pos_lost": 0.0
+      },
+      "bortoleto": {
+        "avg_overtakes": 5.352941176470588,
+        "avg_pos_gained": 1.4705882352941178,
+        "avg_pos_lost": 1.0,
+        "races": 17,
+        "avg_sprint_overtakes": 3.6666666666666665,
+        "avg_sprint_pos_gained": 0.058823529411764705,
+        "avg_sprint_pos_lost": 0.058823529411764705
+      },
+      "bottas": {
+        "avg_overtakes": 2.1176470588235294,
+        "avg_pos_gained": 1.0588235294117647,
+        "avg_pos_lost": 0.29411764705882354,
+        "races": 17,
+        "avg_sprint_overtakes": 1.6,
+        "avg_sprint_pos_gained": 0.23529411764705882,
+        "avg_sprint_pos_lost": 0.0
+      },
+      "colapinto": {
+        "avg_overtakes": 4.882352941176471,
+        "avg_pos_gained": 1.8823529411764706,
+        "avg_pos_lost": 0.29411764705882354,
+        "races": 17,
+        "avg_sprint_overtakes": 4.25,
+        "avg_sprint_pos_gained": 0.5294117647058824,
+        "avg_sprint_pos_lost": 0.11764705882352941
+      },
+      "gasly": {
+        "avg_overtakes": 4.764705882352941,
+        "avg_pos_gained": 1.5294117647058822,
+        "avg_pos_lost": 1.1764705882352942,
+        "races": 17,
+        "avg_sprint_overtakes": 3.2,
+        "avg_sprint_pos_gained": 0.11764705882352941,
+        "avg_sprint_pos_lost": 0.23529411764705882
+      },
+      "hadjar": {
+        "avg_overtakes": 5.357142857142857,
+        "avg_pos_gained": 2.857142857142857,
+        "avg_pos_lost": 0.2857142857142857,
+        "races": 14,
+        "avg_sprint_overtakes": 4.0,
+        "avg_sprint_pos_gained": 0.0,
+        "avg_sprint_pos_lost": 1.3571428571428572
+      },
+      "hamilton": {
+        "avg_overtakes": 4.764705882352941,
+        "avg_pos_gained": 0.5882352941176471,
+        "avg_pos_lost": 0.47058823529411764,
+        "races": 17,
+        "avg_sprint_overtakes": 3.5,
+        "avg_sprint_pos_gained": 0.058823529411764705,
+        "avg_sprint_pos_lost": 0.11764705882352941
+      },
+      "hulkenberg": {
+        "avg_overtakes": 5.588235294117647,
+        "avg_pos_gained": 1.3529411764705883,
+        "avg_pos_lost": 0.11764705882352941,
+        "races": 17,
+        "avg_sprint_overtakes": 4.25,
+        "avg_sprint_pos_gained": 0.0,
+        "avg_sprint_pos_lost": 0.35294117647058826
+      },
+      "lawson": {
+        "avg_overtakes": 4.529411764705882,
+        "avg_pos_gained": 2.5294117647058822,
+        "avg_pos_lost": 0.5294117647058824,
+        "races": 17,
+        "avg_sprint_overtakes": 3.6,
+        "avg_sprint_pos_gained": 0.8823529411764706,
+        "avg_sprint_pos_lost": 0.0
+      },
+      "leclerc": {
+        "avg_overtakes": 4.294117647058823,
+        "avg_pos_gained": 0.5882352941176471,
+        "avg_pos_lost": 1.1764705882352942,
+        "races": 17,
+        "avg_sprint_overtakes": 2.6,
+        "avg_sprint_pos_gained": 0.4117647058823529,
+        "avg_sprint_pos_lost": 0.058823529411764705
+      },
+      "max_verstappen": {
+        "avg_overtakes": 5.823529411764706,
+        "avg_pos_gained": 2.0,
+        "avg_pos_lost": 1.0,
+        "races": 17,
+        "avg_sprint_overtakes": 7.0,
+        "avg_sprint_pos_gained": 0.0,
+        "avg_sprint_pos_lost": 0.23529411764705882
+      },
+      "norris": {
+        "avg_overtakes": 4.529411764705882,
+        "avg_pos_gained": 1.0,
+        "avg_pos_lost": 0.29411764705882354,
+        "races": 17,
+        "avg_sprint_overtakes": 2.3333333333333335,
+        "avg_sprint_pos_gained": 0.23529411764705882,
+        "avg_sprint_pos_lost": 0.11764705882352941
+      },
+      "ocon": {
+        "avg_overtakes": 6.529411764705882,
+        "avg_pos_gained": 1.8235294117647058,
+        "avg_pos_lost": 0.4117647058823529,
+        "races": 17,
+        "avg_sprint_overtakes": 3.5,
+        "avg_sprint_pos_gained": 0.5882352941176471,
+        "avg_sprint_pos_lost": 0.0
+      },
+      "perez": {
+        "avg_overtakes": 4.294117647058823,
+        "avg_pos_gained": 2.4705882352941178,
+        "avg_pos_lost": 0.23529411764705882,
+        "races": 17,
+        "avg_sprint_overtakes": 3.0,
+        "avg_sprint_pos_gained": 0.29411764705882354,
+        "avg_sprint_pos_lost": 0.29411764705882354
+      },
+      "piastri": {
+        "avg_overtakes": 5.235294117647059,
+        "avg_pos_gained": 0.9411764705882353,
+        "avg_pos_lost": 1.2941176470588236,
+        "races": 17,
+        "avg_sprint_overtakes": 3.25,
+        "avg_sprint_pos_gained": 0.058823529411764705,
+        "avg_sprint_pos_lost": 0.11764705882352941
+      },
+      "russell": {
+        "avg_overtakes": 4.647058823529412,
+        "avg_pos_gained": 0.7647058823529411,
+        "avg_pos_lost": 2.5294117647058822,
+        "races": 17,
+        "avg_sprint_overtakes": 3.4,
+        "avg_sprint_pos_gained": 0.17647058823529413,
+        "avg_sprint_pos_lost": 0.0
+      },
+      "sainz": {
+        "avg_overtakes": 5.823529411764706,
+        "avg_pos_gained": 2.176470588235294,
+        "avg_pos_lost": 0.7058823529411765,
+        "races": 17,
+        "avg_sprint_overtakes": 3.5,
+        "avg_sprint_pos_gained": 0.4117647058823529,
+        "avg_sprint_pos_lost": 0.11764705882352941
+      },
+      "stroll": {
+        "avg_overtakes": 3.3529411764705883,
+        "avg_pos_gained": 1.1764705882352942,
+        "avg_pos_lost": 0.0,
+        "races": 17,
+        "avg_sprint_overtakes": 2.8333333333333335,
+        "avg_sprint_pos_gained": 0.4117647058823529,
+        "avg_sprint_pos_lost": 0.0
+      },
+      "tsunoda": {
+        "avg_overtakes": 5.333333333333333,
+        "avg_pos_gained": 2.0,
+        "avg_pos_lost": 0.0,
+        "races": 3,
+        "avg_sprint_overtakes": 0,
+        "avg_sprint_pos_gained": 0.0,
+        "avg_sprint_pos_lost": 0.3333333333333333
+      }
+    },
+    "mechanical_shares": [
+      0.20400000000000001,
+      0.554,
+      0.68,
+      0.68,
+      0.9039999999999999,
+      0.68,
+      0.43733333333333335,
+      0.20400000000000001,
+      0.20400000000000001,
+      0.68,
+      0.9039999999999999,
+      0.68,
+      0.68,
+      0.20400000000000001,
+      0.20400000000000001,
+      0.20400000000000001,
+      0.9039999999999999,
+      0.9039999999999999,
+      0.68,
+      0.20400000000000001,
+      0.20400000000000001,
+      0.7289999999999999
+    ]
+  },
+  "frames": [
+    {
+      "path": "data/audit/inputs/year2026/round20/p_0905892cc91346d6/s_88263735d98d/scoring_predictions.parquet",
+      "sha256": "06a5ef089fd39b051014d8ff3d7bd0c4ef333265c9ff96eae0bf9604285d768e"
+    },
+    {
+      "path": "data/audit/inputs/year2026/round20/p_0905892cc91346d6/s_88263735d98d/driver_fantasy.parquet",
+      "sha256": "5713cadd1b8a32a247d7af0c62c371e4062b076e30f18d4065c18bef546b7d38"
+    }
+  ]
+}

@@ -98,6 +98,12 @@
           "circuit_id": "sepang",
           "points": 57.0,
           "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 53.0,
+          "is_dnf": false
         }
       ]
     },
@@ -197,6 +203,12 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": -5.0,
+          "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 17.0,
           "is_dnf": false
         }
       ]
@@ -298,6 +310,12 @@
           "circuit_id": "sepang",
           "points": 29.0,
           "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 33.0,
+          "is_dnf": false
         }
       ]
     },
@@ -397,6 +415,12 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 33.0,
+          "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 43.0,
           "is_dnf": false
         }
       ]
@@ -498,6 +522,12 @@
           "circuit_id": "sepang",
           "points": 32.0,
           "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 33.0,
+          "is_dnf": false
         }
       ]
     },
@@ -597,6 +627,12 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 16.0,
+          "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 18.0,
           "is_dnf": false
         }
       ]
@@ -698,6 +734,12 @@
           "circuit_id": "sepang",
           "points": 7.0,
           "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 18.0,
+          "is_dnf": false
         }
       ]
     },
@@ -797,6 +839,12 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 28.0,
+          "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 1.0,
           "is_dnf": false
         }
       ]
@@ -898,6 +946,12 @@
           "circuit_id": "sepang",
           "points": 4.0,
           "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": -29.0,
+          "is_dnf": true
         }
       ]
     },
@@ -998,6 +1052,12 @@
           "circuit_id": "sepang",
           "points": 0.0,
           "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 3.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1096,6 +1156,12 @@
         {
           "round": 18,
           "circuit_id": "sepang",
+          "points": 12.0,
+          "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
           "points": 12.0,
           "is_dnf": false
         }
@@ -1198,6 +1264,12 @@
           "circuit_id": "sepang",
           "points": 4.0,
           "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 13.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1298,6 +1370,12 @@
           "circuit_id": "sepang",
           "points": -10.0,
           "is_dnf": true
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": -10.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1398,6 +1476,12 @@
           "circuit_id": "sepang",
           "points": 13.0,
           "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": -28.0,
+          "is_dnf": true
         }
       ]
     },
@@ -1497,6 +1581,12 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 17.0,
+          "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 18.0,
           "is_dnf": false
         }
       ]
@@ -1598,6 +1688,12 @@
           "circuit_id": "sepang",
           "points": 9.0,
           "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": -9.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1679,6 +1775,12 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 25.0,
+          "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 8.0,
           "is_dnf": false
         }
       ]
@@ -1780,6 +1882,12 @@
           "circuit_id": "sepang",
           "points": 17.0,
           "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 11.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1879,6 +1987,12 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 29.0,
+          "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 6.0,
           "is_dnf": false
         }
       ]
@@ -1980,6 +2094,12 @@
           "circuit_id": "sepang",
           "points": -20.0,
           "is_dnf": true
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": -11.0,
+          "is_dnf": false
         }
       ]
     },
@@ -2079,6 +2199,12 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 19.0,
+          "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 17.0,
           "is_dnf": false
         }
       ]
@@ -2180,6 +2306,12 @@
           "circuit_id": "sepang",
           "points": 11.0,
           "is_dnf": false
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": -28.0,
+          "is_dnf": true
         }
       ]
     },
@@ -2288,6 +2420,11 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 39.0
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 65.0
         }
       ]
     },
@@ -2372,6 +2509,11 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 80.0
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 91.0
         }
       ]
     },
@@ -2456,6 +2598,11 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 97.0
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 66.0
         }
       ]
     },
@@ -2540,6 +2687,11 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 53.0
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 34.0
         }
       ]
     },
@@ -2624,6 +2776,11 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 20.0
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 35.0
         }
       ]
     },
@@ -2708,6 +2865,11 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 28.0
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": -20.0
         }
       ]
     },
@@ -2792,6 +2954,11 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 5.0
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 6.0
         }
       ]
     },
@@ -2876,6 +3043,11 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 57.0
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": 36.0
         }
       ]
     },
@@ -2960,6 +3132,11 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 38.0
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": -9.0
         }
       ]
     },
@@ -3044,6 +3221,11 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": -12.0
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": -21.0
         }
       ]
     },
@@ -3128,6 +3310,11 @@
           "round": 18,
           "circuit_id": "sepang",
           "points": 36.0
+        },
+        {
+          "round": 19,
+          "circuit_id": "marina_bay",
+          "points": -13.0
         }
       ]
     }
