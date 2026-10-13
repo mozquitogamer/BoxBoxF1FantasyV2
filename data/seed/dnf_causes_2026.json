@@ -133,7 +133,18 @@
       "ALB": "driver_error",
       "ALO": "mechanical",
       "STR": "mechanical"
+    },
+    "18": {
+      "RUS": "mechanical",
+      "ALB": "mechanical",
+      "BOT": "driver_error"
+    },
+    "19": {
+      "ALB": "mechanical",
+      "STR": "mechanical",
+      "COL": "mechanical",
+      "BOR": "mechanical"
     }
   },
-  "_source": "Causes researched from race reports and official team/FIA/F1 reports through 2026-09-25. mechanical=car/PU failure; collision=contact; driver_error=solo crash; other=external/freak or unclear damage. R14: https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-netherlands-2026.1GTy1x6hObFlkGkaXKqhNS (2026-08-23). R15: https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-italy-2026.43DzkIlg5jfZZOc1IBjSv3 (2026-09-07). R16: https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-spain-2026.7IhNkhQqXuGU1ZEg9JBm1C (2026-09-13). R17: https://www.formula1.com/en/latest/article/russell-narrowly-holds-off-verstappen-to-take-victory-over-the-line-in-chaotic-azerbaijan-gp.5J4lgNh82JDL2GM302irF0 (2026-09-26). Bottas was classified P16 after a late solo crash; Colapinto/Gasly/Norris retired in the restart collision; Albon crashed solo; Alonso/Stroll had mechanical issues."
+  "_source": "Causes researched from race reports and official team/FIA/F1 reports through 2026-09-25. mechanical=car/PU failure; collision=contact; driver_error=solo crash; other=external/freak or unclear damage. R14: https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-the-netherlands-2026.1GTy1x6hObFlkGkaXKqhNS (2026-08-23). R15: https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-italy-2026.43DzkIlg5jfZZOc1IBjSv3 (2026-09-07). R16: https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-spain-2026.7IhNkhQqXuGU1ZEg9JBm1C (2026-09-13). R17: https://www.formula1.com/en/latest/article/russell-narrowly-holds-off-verstappen-to-take-victory-over-the-line-in-chaotic-azerbaijan-gp.5J4lgNh82JDL2GM302irF0 (2026-09-26). Bottas was classified P16 after a late solo crash; Colapinto/Gasly/Norris retired in the restart collision; Albon crashed solo; Alonso/Stroll had mechanical issues. R18: https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-malaysia-for-the-2026-bahrain-grand-prix-in-malaysia-at-the-sepang-international-circuit.4kwHL7ygJLqVlSMHhAj6ce (2026-10-04): Russell PU failure, Albon gearbox, Bottas solo spin. R19: https://www.formula1.com/en/latest/article/what-the-teams-said-race-day-in-singapore-2026.3lLHolVW3aIRAl7Ohxlxf6 (2026-10-11): Albon fuel/brake issues, Stroll clutch, Colapinto driveline, Bortoleto gearbox. Verified 2026-10-13."
 }
