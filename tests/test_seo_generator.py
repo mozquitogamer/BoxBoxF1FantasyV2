@@ -30,6 +30,39 @@ def current_predictions():
     }
 
 
+def test_registration_deadline_uses_published_terms(monkeypatch, tmp_path):
+    monkeypatch.setattr(seo, "DATA", tmp_path)
+    monkeypatch.setattr(seo, "WEB", tmp_path)
+    (tmp_path / "v13_manager.json").write_text(json.dumps({"competition": {
+        "registration_deadline_round": 24,
+        "registration_deadline_race": "Test Grand Prix",
+        "registration_deadline_at": "2026-11-28T06:00:00+02:00",
+    }}), encoding="utf-8")
+    homepage = tmp_path / "index.html"
+    homepage.write_text('<p>Before <span id="v13RegistrationDeadline">old date</span>.</p>', encoding="utf-8")
+    seo.write_homepage_registration_deadline()
+    assert "Round 24 Test GP team lock on 28 November 2026 at 04:00 UTC" in homepage.read_text(encoding="utf-8")
+    (tmp_path / "v13_manager.json").write_text('{"competition": {}}', encoding="utf-8")
+    assert seo.registration_deadline_text() == "the deadline shown in Beat V13"
+
+
+def test_retained_pages_get_current_shared_terms_without_changing_content(monkeypatch, tmp_path):
+    monkeypatch.setattr(seo, "WEB", tmp_path)
+    page = tmp_path / "retired-driver.html"
+    page.write_text('<main>Archived driver analysis</main>\n<div class="engagement-shell"><p>Old terms</p></div>\n<footer class="footer">Links</footer>\n<script src="/engagement.js?v=10"></script>', encoding="utf-8")
+    unrelated = tmp_path / "other.html"
+    unrelated.write_text("<main>Other page</main>", encoding="utf-8")
+    seo.refresh_retained_engagement_blocks()
+    updated = page.read_text(encoding="utf-8")
+    assert updated.startswith('<main>Archived driver analysis</main>\n')
+    assert seo.ENGAGEMENT_BLOCK in updated
+    assert '<footer class="footer">Links</footer>' in updated
+    assert '/engagement.js?v=18' in updated
+    assert unrelated.read_text(encoding="utf-8") == "<main>Other page</main>"
+    seo.refresh_retained_engagement_blocks()
+    assert page.read_text(encoding="utf-8") == updated
+
+
 def race_week_predictions():
     pred = current_predictions()
     pred.update({

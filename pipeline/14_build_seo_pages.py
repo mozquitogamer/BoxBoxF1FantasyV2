@@ -47,7 +47,7 @@ CONTACT_EMAIL = "boxboxf1fantasy@gmail.com"
 INDEXNOW_KEY = "779753a5fbbf054b3ea496085a0ce1e4"
 # Bump only when generated page templates, metadata, structured data or links
 # receive a significant site-wide content change.
-SEO_CONTENT_LASTMOD = "2026-07-22"
+SEO_CONTENT_LASTMOD = "2026-10-18"
 LINEUP_CONTENT_LASTMOD = "2026-07-13"
 
 TOP_DRIVERS = 10      # rows in the "top picks" table
@@ -941,12 +941,41 @@ def page_head(
 """
 
 
+def registration_deadline_text() -> str:
+    """Use the published competition terms for both static pages and the homepage."""
+    competition = (load_json(DATA / "v13_manager.json") or {}).get("competition", {})
+    deadline = competition.get("registration_deadline_at")
+    race = competition.get("registration_deadline_race")
+    round_num = competition.get("registration_deadline_round")
+    if not (deadline and race and round_num):
+        return "the deadline shown in Beat V13"
+    try:
+        when = datetime.fromisoformat(deadline.replace("Z", "+00:00")).astimezone(timezone.utc)
+    except (ValueError, TypeError):
+        return "the deadline shown in Beat V13"
+    return f"Round {round_num} {short_race(race)} team lock on {when.day} {when:%B %Y at %H:%M} UTC"
+
+
+def write_homepage_registration_deadline() -> None:
+    path = WEB / "index.html"
+    if not path.exists():
+        return
+    text = path.read_text(encoding="utf-8")
+    text = re.sub(
+        r'(<span id="v13RegistrationDeadline">).*?(</span>)',
+        lambda match: match[1] + esc(registration_deadline_text()) + match[2],
+        text,
+        flags=re.S,
+    )
+    path.write_text(text, encoding="utf-8")
+
+
 ENGAGEMENT_BLOCK = """<div class="engagement-shell">
 <section class="email-updates-panel" id="emailUpdatesPanel" aria-labelledby="emailUpdatesTitle" hidden>
   <div class="email-updates-copy">
     <span class="email-updates-eyebrow">Beat V13 &middot; Free email entry</span>
     <h2 id="emailUpdatesTitle">Take your shot at the bot</h2>
-    <p>Confirm your email before the Round 22 Las Vegas team lock on 21 November 2026 at 04:00 UTC. No password or payment is required; Pit Wall is a separate optional membership.</p>
+    <p>Confirm your email before {registration_deadline}. No password or payment is required; Pit Wall is a separate optional membership.</p>
   </div>
   <form class="email-updates-form" id="emailUpdatesForm" novalidate>
     <div class="email-updates-fields">
@@ -974,7 +1003,7 @@ ENGAGEMENT_BLOCK = """<div class="engagement-shell">
     <span class="bottom-banner-cta" id="bottomBannerCta">Learn more</span>
   </a>
 </aside>
-</div>"""
+</div>""".replace("{registration_deadline}", esc(registration_deadline_text()))
 
 
 FOOTER = f"""</main>
@@ -984,7 +1013,7 @@ FOOTER = f"""</main>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
-<script src="/engagement.js?v=10"></script>
+<script src="/engagement.js?v=18"></script>
 </body>
 </html>
 """
@@ -993,6 +1022,20 @@ FOOTER = f"""</main>
 # --------------------------------------------------------------------------- #
 # per-race page
 # --------------------------------------------------------------------------- #
+def refresh_retained_engagement_blocks() -> None:
+    """Keep shared terms current on retained pages outside the active roster."""
+    pattern = re.compile(r'<div class="engagement-shell">.*?\s*(?=<footer class="footer">)', re.S)
+    for path in WEB.rglob("*.html"):
+        original = path.read_text(encoding="utf-8")
+        if not pattern.search(original):
+            continue
+        updated = pattern.sub(lambda _: ENGAGEMENT_BLOCK + "\n", original)
+        updated = re.sub(r'<script src="/engagement\.js\?v=\d+"></script>',
+                         '<script src="/engagement.js?v=18"></script>', updated)
+        if updated != original:
+            path.write_text(updated, encoding="utf-8")
+
+
 def current_weather_html(pred: dict, weather: dict | None) -> str:
     if not weather or weather.get("round") != pred.get("round"):
         return ""
@@ -4855,7 +4898,7 @@ def render_list_hub(base, crumb, hub, items, current: dict | None = None) -> str
             f'<div class="callout"><strong>Current round: {esc(race)}.</strong> '
             f'<a href="/picks/{slugify(race)}/">Read the race-week picks</a>, '
             '<a href="/tools/lineup-optimizer/">build an optimized lineup</a>, or '
-            '<a href="/tools/team-compare/">compare up to three teams</a> before lock.</div>'
+            '<a href="/tools/team-compare/">compare manual or saved teams</a> before lock.</div>'
         )
     faq_section = (f'<h2>F1 Fantasy {esc(crumb.lower())} FAQ</h2>{_faq_html(faqs)}') if faqs else ""
     body = (
@@ -4956,7 +4999,7 @@ TOOLS_HUB = {
     "body": (
         "<h2>Choose a tool for the decision you need to make</h2>"
         '<ul><li><strong>Starting from scratch:</strong> use the <a href="/tools/lineup-optimizer/">Lineup Optimizer</a> to search every legal team within your budget.</li>'
-        '<li><strong>Choosing between drafts:</strong> use <a href="/tools/team-compare/">Team Compare</a> for up to three lineups, including expected points, downside, budget and projected price gain.</li>'
+        '<li><strong>Choosing between drafts:</strong> use <a href="/tools/team-compare/">Team Compare</a> for manual or saved lineups, including expected points, downside, budget and projected price gain.</li>'
         '<li><strong>Improving an existing team:</strong> use the <a href="/tools/transfer-planner/">Transfer Planner</a> to compare swaps and multi-round plans.</li>'
         '<li><strong>Growing team value:</strong> combine the <a href="/tools/budget-builder/">Budget Builder</a> with the <a href="/tools/f1-fantasy-price-changes/">price-change outlook</a>.</li>'
         '<li><strong>Checking one assumption:</strong> inspect <a href="/tools/f1-fantasy-predictions/">projections</a>, '
@@ -5370,24 +5413,33 @@ TOOLS = [
         "base": "tools", "crumb": "Tools", "slug": "team-compare",
         "crumb_self": "Team Compare",
         "title": "F1 Fantasy Team Compare & Score Calculator (Free) | BoxBox",
-        "desc": "Free F1 Fantasy team compare tool: enter up to three candidate teams and compare budget, projected points, confidence range, price movement and downside risk.",
-        "features": ["Compare up to three teams", "Projected team score", "Budget remaining", "Worst-case downside", "Pick-level contribution"],
+        "desc": "Compare three manual F1 Fantasy teams for free, or up to three saved Pit Wall teams plus a manual alternative. Check points, budget, chips and downside.",
+        "features": ["Three free manual teams", "Saved Pit Wall teams plus a manual alternative", "Projected team score", "Budget remaining", "Downside estimates", "Pick-level contribution"],
         "h1": "F1 Fantasy Team Compare & Score Calculator",
-        "intro": '<p class="lede">Compare up to three possible F1 Fantasy teams side-by-side before you lock in transfers or chips.</p>',
+        "intro": '<p class="lede">Compare complete lineups before you commit to transfers: three manual teams for free, or up to three saved Pit Wall teams and one manual alternative.</p>',
         "body": (
             "<h2>What it compares</h2>"
-            "<p>Team Compare lets you enter full 5-driver, 2-constructor lineups and see how they stack up on expected points, total cost, budget left, projected budget gain, points-per-million, confidence range and worst-case downside.</p>"
+            "<p>Each lineup contains five drivers and two constructors. Compare its score on your chosen points basis, squad cost, cash in bank, projected price movement and downside estimates. Only complete teams enter the results; check any over-budget warning before using a lineup.</p>"
             "<h2>Why it helps</h2>"
             "<p>The best-looking team is not always the best fantasy team. A lineup with slightly fewer headline points might have a stronger budget path, a safer floor, or better value for future transfers. Team Compare puts those trade-offs in one view.</p>"
             "<h2>How to use it</h2>"
-            "<ul><li>Enter Team A, Team B and Team C, or copy your current Transfer Advisor team with <strong>Use Current</strong>.</li>"
-            "<li>Watch the live budget tracker while you add drivers and constructors.</li>"
-            "<li>Pick a points basis and chip, then compare team totals and per-pick contributions.</li></ul>"
-            '<div class="callout">Use it after the Optimizer if you have two or three realistic teams and want to understand the trade-off before making the final call.</div>'
+            "<ol><li><strong>Without signing in:</strong> build up to three manual teams, using your Transfer Advisor lineup as a starting point when available. Enter your actual spending power.</li>"
+            "<li><strong>With saved Pit Wall teams:</strong> select the saved teams to compare, with one optional manual alternative. Saved teams retain their individual bank, spending power and chip state.</li>"
+            "<li>Choose Projected, Risk-adjusted or Balanced points. Projected uses the predicted finishing order; Risk-adjusted uses the simulation mean; Balanced averages the two.</li>"
+            "<li>Select the chip treatment, then click <strong>Compare Teams</strong>. Inspect the boost recipient and the score difference versus the first team.</li></ol>"
+            "<h2>Worked example: a higher score can still be a worse transfer</h2>"
+            "<p><strong>Illustrative numbers, not current recommendations.</strong> Suppose your current team scores 100 projected points and a legal alternative scores 107 on the same basis, including the same boost treatment. The alternative costs $0.8M more, and you have $1.0M in the bank.</p>"
+            "<ul><li>The alternative is affordable and leaves $0.2M in the bank.</li>"
+            "<li>If the switch uses only free transfers, its projected improvement is seven points.</li>"
+            "<li>If it needs one paid transfer, the ten-point penalty turns that into a three-point loss versus holding: 107 &minus; 10 &minus; 100 = &minus;3.</li></ul>"
+            "<p>Team Compare compares lineups; it does not establish the transfer route or deduct the cost of getting from one to another. Use the <a href=\"/tools/transfer-planner/\">Transfer Advisor</a> to check the actual moves and penalties.</p>"
+            "<h2>Read the downside alongside the headline</h2>"
+            "<p>A lineup can lead on projected points while relying heavily on one driver's recovery, a bonus or an unreliable constructor. Check the pick-level contributions and DNF exposure. A displayed downside estimate is not a guaranteed minimum, and combining individual pick ranges does not establish an exact 90% probability range for the whole team: teammates and race incidents can be correlated.</p>"
+            '<div class="callout">Keep the points basis, forecast phase and chip assumptions consistent when comparing drafts. Recheck prices and bank against your official F1 Fantasy team before the deadline.</div>'
         ),
         "faqs": [
             ("Can I compare F1 Fantasy teams before choosing one?",
-             "Yes. BoxBox Team Compare lets you enter up to three full F1 Fantasy teams and compare projected score, budget, value, confidence range, price movement and downside risk side-by-side."),
+             "Yes. Compare up to three manual teams for free without signing in. Pit Wall members can compare up to three saved teams plus one manual alternative, using each saved team's own finances and chip state."),
             ("Does Team Compare include the captain boost?",
              "Yes. The comparison automatically applies the normal 2x boost to the highest-scoring driver by the selected points basis. With the 3x Boost chip, the top driver gets 3x and the second driver gets 2x."),
         ],
@@ -5403,14 +5455,27 @@ TOOLS = [
         "intro": '<p class="lede">Make the right transfers &mdash; this week and several rounds ahead &mdash; without the &minus;10 guesswork.</p>',
         "body": (
             "<h2>Transfer Advisor</h2>"
-            "<p>Enter your current team, budget and free transfers, and it finds your best one or two swaps. Each suggestion shows the points gained, the cash impact, and whether an extra &minus;10 transfer is actually worth it versus holding.</p>"
+            "<p>Enter your five drivers, two constructors, cash in bank and free transfers. Set the maximum extra transfers you are willing to pay for. The advisor searches for affordable changes and shows their net gain versus keeping your current team, including the ten-point penalty for each transfer beyond your free allowance.</p>"
+            "<h2>Start with the right budget</h2>"
+            "<p>Spending power is the current value of all seven picks plus cash in bank. It is not just the cash you have left. Check both figures against the official game, select your points basis and active chip, and lock any picks you intend to keep. Exclude picks you do not want suggested.</p>"
+            "<h2>Worked example: pay for a swap or hold?</h2>"
+            "<p><strong>This is an illustrative calculation, not a live pick.</strong> Suppose the rest of your team stays unchanged, neither affected driver has a boost, and you have no free transfers. Your outgoing driver costs $10.0M and projects 12 points; the replacement costs $10.7M and projects 25. With $0.8M in the bank, the move leaves $0.1M.</p>"
+            "<p>The gross improvement is 25 &minus; 12 = 13 points. After the ten-point transfer penalty, the net gain is only <strong>three points</strong>. If the replacement instead projects 20 points, the net result is 20 &minus; 12 &minus; 10 = <strong>minus two</strong>, so holding scores better on those assumptions.</p>"
+            "<p>Even the three-point advantage is uncertain. Compare the drivers' downside and reliability, and check whether using the transfer now prevents a more useful move next round. If the boost recipient or a constructor changes, compare the complete team's score rather than only the two driver cards.</p>"
             "<h2>Multi-Week Planner</h2>"
-            "<p>Plan transfers across 2&ndash;5 upcoming rounds at once. It projects future scores from track similarity and ML, propagates your budget forward, schedules chips, and can even chase a specific target team.</p>"
+            "<p>Plan transfers across two to five upcoming rounds. Future rounds use priors-only ML forecasts when available: historical form, circuit and reliability information, without practice telemetry from a weekend that has not happened. When a forecast is missing, the planner falls back to a confidence-weighted track-affinity estimate.</p>"
+            "<p>Select the chips you still have, a planning horizon and a strategy. The search compares sequences of moves, transfer banking and chip timing. Projected price changes carry forward into future spending power. A Target Team is optional; its intensity setting controls how much the search prioritises reaching that team.</p>"
+            "<h2>How to choose a plan</h2>"
+            "<ol><li>Read the net points versus holding, not just the biggest total or price rise.</li>"
+            "<li>Check each round's bank and affordability. A plan depending on a forecast price rise may become unaffordable if that rise does not happen.</li>"
+            "<li>Check whether a chip is available and whether its timing fits the remaining calendar.</li>"
+            "<li>Rerun after practice and after official price changes. Future-round forecasts are planning estimates, not locked-in scores.</li></ol>"
+            "<p>The planner searches a limited set of promising sequences; it does not prove the global best plan across every possible transfer path. A small forecast edge is a reason to compare options, not a guarantee that a transfer will pay off.</p>"
             '<div class="callout">Both respect picks you <strong>lock</strong> or <strong>exclude</strong>, so you can protect your keepers while optimising the rest.</div>'
         ),
         "faqs": [
             ("Should I take a hit for an extra F1 Fantasy transfer?",
-             "Only if the extra pick is projected to gain more than the 10-point penalty versus holding. The BoxBox Transfer Advisor shows the net gain after the penalty for every option, so you can see at a glance whether a hit is worth it."),
+             "Compare the whole team's improvement with the ten-point penalty for each paid transfer, then account for uncertainty and future flexibility. The Transfer Advisor displays net gain versus holding. A positive forecast edge is not a guaranteed return."),
             ("Can I plan F1 Fantasy transfers several weeks ahead?",
              "Yes. The Multi-Week Planner plans transfers and chip usage across 2-5 upcoming rounds, projecting future scores and carrying your budget forward so you don't trade away a pick that's ideal for the next few tracks."),
         ],
@@ -5429,7 +5494,15 @@ TOOLS = [
             "<p>F1 Fantasy prices move based on how a pick performs relative to its cost. Catching price rises early &mdash; especially in the first 6&ndash;8 rounds &mdash; compounds into extra budget you can later spend on elite drivers.</p>"
             "<h2>How to use it</h2>"
             "<p>In the Optimizer, choose the <strong>Budget Builder</strong> strategy. It favours strong points-per-million picks that our model expects to rise in price, balancing this-week points with asset growth. The Season tab's price trackers show who's trending up or down.</p>"
-            '<div class="callout">Tip: sometimes holding a fading pick one more round lets you sell just before a price drop &mdash; the price-change brackets on each card show when you\'re near a threshold.</div>'
+            "<h2>Worked example: when a price rise helps</h2>"
+            "<p><strong>Illustrative numbers, not a current price forecast.</strong> You have $0.3M in the bank and want a future swap that costs $0.7M more. If the pick you plan to sell rises $0.5M while the target's price stays unchanged, that swap's extra cost falls to $0.2M, within your bank. A rise in a pick you keep does not add cash to your bank. The rise only helps once it has actually happened; it cannot fund a transfer before the current deadline.</p>"
+            "<p>Now suppose choosing that appreciating pick costs eight projected points this round. A possible $0.5M rise does not automatically justify the sacrifice: it must unlock enough later points to compensate, and you may need another paid transfer to spend it. With fewer races remaining there are fewer opportunities to recover those points.</p>"
+            "<h2>A practical decision sequence</h2>"
+            "<ol><li>Identify a specific future upgrade and its affordability gap.</li>"
+            "<li>Compare the points you would give up now, including any paid transfers.</li>"
+            "<li>Inspect price-change probabilities rather than treating the most likely bracket as certain.</li>"
+            "<li>Use the <a href=\"/tools/transfer-planner/\">Multi-Week Planner</a> or the optimizer's Points vs Budget mode to judge whether the extra spending power has time to earn those points back.</li></ol>"
+            '<div class="callout">A price forecast can miss. Recheck the official prices after each round, and keep a workable alternative if the hoped-for rise does not arrive. Avoid holding an asset purely for growth when its likely drop would put the next move out of reach.</div>'
         ),
         "faqs": [
             ("How do F1 Fantasy prices change?",
@@ -5483,8 +5556,10 @@ STATIC_PAGES = [
             '<p><strong>Beat V13 registration is free and email-only.</strong> Confirming an address enters the Beat V13 challenge and joins the mailing list for V13 decisions, simulation updates and competition instructions. It does not create a site account and does not require payment.</p>'
             '<p><strong>The public predictions and tools remain free with no login.</strong> Pit Wall is a separate, optional $5/month membership purchased through <a href="https://ko-fi.com/boxboxf1fantasy/tiers" rel="noopener">Ko-fi</a>. Members create a password once using the exact email used on Ko-fi, then sign in normally to remember and sync an official F1 Fantasy team and receive personalized suggestions when new simulations arrive.</p>'
             "<h2>Editorial authorship</h2>"
+            '<p><strong>Quintin Engelbrecht is the founder and maintainer of BoxBoxF1Fantasy.</strong> This independent F1 Fantasy project brings together the prediction pipeline, public tools and race analysis. Questions and corrections reach Quintin through the contact email below.</p>'
             '<p>Analysis, guides and generated race pages carry the <strong>BoxBoxF1Fantasy</strong> byline because they are published and maintained as part of this independent project rather than attributed to a fictional individual contributor. Recurring tables, rankings and scorecards are generated programmatically from the site\'s versioned prediction and result data. Longer explanations are assembled around those outputs, sources and documented model behavior. The site maintainer is responsible for the final published pages, corrections and disclosures.</p>'
             '<p>Each editorial byline links here for ownership and contact context and to the <a href="/methodology/">Methodology</a> for the production process, data layers, uncertainty and limitations.</p>'
+            '<p>Generated rankings are model outputs, not eyewitness reporting. The evidence behind an analysis should identify its race and forecast phase, distinguish official results from estimates, and explain material limitations. Readers can check those claims against the linked race data and public accuracy record, and report a mismatch for correction. A new forecast is not a retrospective edit to an earlier prediction.</p>'
             "<h2>How to use it</h2>"
             '<p>Start with the <a href="/">live predictions</a>, then use the <a href="/tools/lineup-optimizer/">Optimizer</a> or <a href="/tools/team-compare/">Team Compare</a> when you need to turn those projections into an actual team. The <a href="/picks/">race-pick pages</a> give a quicker written summary for each Grand Prix, while the <a href="/guides/">guides</a> explain scoring, chips and strategy.</p>'
             "<h2>How the predictions are produced</h2>"
@@ -5505,7 +5580,7 @@ STATIC_PAGES = [
         "faq_heading": "About BoxBoxF1Fantasy FAQ",
         "faqs": [
             ("Who runs BoxBoxF1Fantasy?",
-             "BoxBoxF1Fantasy is an independently maintained fan project. It is not operated by Formula 1, the FIA, F1 Fantasy, any team or any driver. Contact and correction requests go to boxboxf1fantasy@gmail.com."),
+             "Quintin Engelbrecht founded and maintains BoxBoxF1Fantasy as an independent fan project. It is not operated by Formula 1, the FIA, F1 Fantasy, any team or any driver. Contact and correction requests go to boxboxf1fantasy@gmail.com."),
             ("Why is BoxBoxF1Fantasy listed as the author?",
              "The brand byline identifies the independent project responsible for publishing and maintaining the analysis. Generated tables and rankings come from versioned site data, and the maintainer is accountable for final publication, disclosures and corrections."),
             ("Are BoxBox F1 Fantasy predictions guaranteed?",
@@ -5715,6 +5790,7 @@ def main() -> None:
 
     write_homepage_prediction_snapshot(current)
     write_homepage_adsense_head()
+    write_homepage_registration_deadline()
     write_prediction_schema()
     write_ai_summary(current, season)
 
@@ -6042,6 +6118,8 @@ def main() -> None:
         static_lastmod = source_date(page.get("lastmod"))
         if static_lastmod:
             lastmods[f"{page['slug']}/"] = static_lastmod
+
+    refresh_retained_engagement_blocks()
 
     for path in rel_paths:
         lastmods[path] = max(lastmods.get(path, SEO_CONTENT_LASTMOD), SEO_CONTENT_LASTMOD)

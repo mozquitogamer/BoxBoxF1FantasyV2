@@ -553,7 +553,7 @@
                         <span class="pitstop-panel-hint">Stationary (wheels-up) times • click to collapse</span>
                     </summary>
                     <div id="pitstopPanelBody">
-                        <p class="no-data">No pit stop data yet — comes online after the first race of the season.</p>
+                        <p class="no-data">Pit-stop analysis compares each constructor’s stationary stop times. <a href="/constructors/">Browse constructor profiles and scoring context</a> while the detailed table loads.</p>
                     </div>
                 </details>
 
@@ -771,9 +771,9 @@
                     <div class="tool-explainer">
                         <details>
                             <summary>How does the Multi-Week Planner work?</summary>
-                            <p>Plans optimal transfer sequences across 2-5 upcoming rounds using track-similarity-weighted projections. It uses beam search to find when to make transfers, bank free transfers, and deploy chips for maximum value.</p>
+                            <p>Compares transfer sequences across 2–5 upcoming rounds using ML horizon forecasts where available, with a confidence-weighted track-affinity fallback. It explores promising plans for transfers, banked free transfers and chips; it does not exhaust every possible sequence.</p>
                             <ul>
-                                <li><strong>Score projections:</strong> Future scores are estimated from recent form x track similarity (how similar the upcoming circuit is to tracks where each driver has performed well)</li>
+                                <li><strong>Score projections:</strong> Future scores use priors-only ML forecasts when available, without future practice data. Missing forecasts fall back to recent form and track affinity, with weaker evidence given less weight.</li>
                                 <li><strong>Transfer banking:</strong> You receive 2 free transfers each round; one unused transfer can roll over for a maximum of 3.</li>
                                 <li><strong>Chips:</strong> Check the chips you still have &mdash; the planner will suggest when to deploy them</li>
                                 <li><strong>Target team:</strong> Optionally define a dream team you want to reach &mdash; the planner finds the optimal transfer path to get there</li>
@@ -782,7 +782,7 @@
                     </div>
                     <div class="my-team-section">
                         <h3>Multi-Week Transfer Planner</h3>
-                        <p class="hint">Plan your transfers across the next 2-5 rounds. Uses track similarity to project future scores and finds optimal swap timing.</p>
+                        <p class="hint">Compare transfer and chip plans across the next 2–5 rounds. Future scores use ML horizon forecasts where available and a track-affinity fallback otherwise.</p>
                         <div class="my-team-grid" id="myTeamGridMW"></div>
                         <div class="my-team-controls">
                             <div class="control-group">
@@ -961,12 +961,12 @@
                     <div class="tool-explainer">
                         <details>
                             <summary>How does Team Compare work?</summary>
-                            <p>Choose any two or all three saved Pit Wall teams, then add one manual alternative if you want. Each complete team is compared using its own spending power, bank and chip state.</p>
+                            <p>Compare up to three manual teams for free without signing in. With Pit Wall, choose up to three saved teams plus one manual alternative; saved teams use their own spending power, bank and chip state. Complete at least two teams to compare.</p>
                         </details>
                     </div>
                     <div class="my-team-section">
                         <h3>Team Score Compare</h3>
-                        <p class="hint">Compare 2–3 saved Pit Wall teams, with one optional manual team (up to 4 total).</p>
+                        <p class="hint">Compare up to three manual teams for free, or saved Pit Wall teams plus one manual alternative (up to four total).</p>
                         <div class="my-team-controls compare-controls">
                             <div class="control-group">
                                 <label>Manual budget ($M)</label>
@@ -1021,7 +1021,7 @@
             <!-- Beat V13 Tab -->
             <section class="tab-content" id="tab-beatbot">
                 <section class="email-updates-panel v13-hero-registration" data-email-updates data-registration-location="beat_v13" aria-labelledby="v13RegistrationTitleTop" hidden>
-                    <div class="email-updates-copy"><span class="email-updates-eyebrow">Free 2026 challenge entry</span><h2 id="v13RegistrationTitleTop">Put your real team on the grid</h2><p>Confirm your email before the Round 23 lock. Follow V13 and the optional public-league benchmark now, then submit your official full-season score after Abu Dhabi.</p></div>
+                    <div class="email-updates-copy"><span class="email-updates-eyebrow">Free 2026 challenge entry</span><h2 id="v13RegistrationTitleTop">Put your real team on the grid</h2><p>Confirm your email before <span id="v13RegistrationDeadline">Round 23 Las Vegas GP team lock on 21 November 2026 at 04:00 UTC</span>. Follow V13 and the optional public-league benchmark now, then submit your official full-season score after Abu Dhabi.</p></div>
                     <form class="email-updates-form" novalidate><div class="email-updates-fields"><label class="sr-only" for="v13RegistrationEmail">Email address</label><input id="v13RegistrationEmail" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required><button type="submit">Enter / access</button></div><div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div><label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Register me for Beat V13 and send me V13, simulation and competition updates. If I am already confirmed, email me a secure dashboard access link. I can unsubscribe at any time.</span></label><p class="email-updates-privacy">Already entered? Use the same email to get a fresh access link &middot; No Pit Wall membership required &middot; <a href="/privacy/">Privacy</a></p><p class="email-updates-status" role="status" aria-live="polite"></p></form>
                 </section>
                 <div class="v13-root" id="v13Root" aria-live="polite">
@@ -1045,7 +1045,7 @@
                 <!-- FP Analysis Panel -->
                 <div class="analysis-panel active" id="panel-fp">
                     <div id="fpAnalysisContent">
-                        <p class="no-data">No FP analysis data available. Run pipeline/10_fp_analysis.py first.</p>
+                        <p class="no-data">Practice analysis compares one-lap pace, long runs and tyre behaviour once session data is available. <a href="/methodology/">Read how practice informs the forecast</a> or <a href="/picks/">browse the race outlooks</a>.</p>
                     </div>
                 </div>
 
@@ -1058,7 +1058,7 @@
                         </div>
                     </div>
                     <div id="postRaceContent">
-                        <p class="no-data">No post-race analysis data available.</p>
+                        <p class="no-data">Select a completed round to compare the forecast with the result. <a href="/accuracy/">View the public accuracy record</a> and <a href="/articles/">read the race reviews</a>.</p>
                     </div>
                 </div>
             </section>
@@ -1133,7 +1133,7 @@
                     </div>
                 </div>
                 <div id="accuracyContent">
-                    <p class="no-data">Loading accuracy data...</p>
+                    <p class="no-data">Explore prediction errors and uncertainty coverage by round. <a href="/accuracy/">Open the public accuracy record</a> while the interactive charts load.</p>
                 </div>
             </section>
 
@@ -1160,7 +1160,7 @@
                     <a href="https://www.youtube.com/@BoxBoxF1Fantasy" target="_blank" rel="noopener" class="btn-yt-subscribe">Subscribe on YouTube</a>
                 </div>
                 <div class="videos-grid" id="videosGrid">
-                    <p class="no-data">Loading videos...</p>
+                    <p class="no-data">Race analysis and strategy discussions from BoxBox. <a href="/videos/">Browse the video library</a>.</p>
                 </div>
             </section>
 
@@ -1171,7 +1171,7 @@
                     <p>Analysis, insights, and commentary from each race weekend.</p>
                 </div>
                 <div id="articlesContent">
-                    <p class="no-data">Loading articles...</p>
+                    <p class="no-data">Read the reasoning behind the picks, strategy experiments and post-race reviews. <a href="/articles/">Browse all articles</a>.</p>
                 </div>
             </section>
 
@@ -1182,7 +1182,7 @@
                     <p>Model and feature updates — the meaningful changes behind your fantasy picks.</p>
                 </div>
                 <div id="changelogContent">
-                    <p class="no-data">Loading changelog...</p>
+                    <p class="no-data">See what changed in the models, scoring and tools. <a href="/changelog/">Read the release notes</a>.</p>
                 </div>
             </section>
 
@@ -1260,7 +1260,7 @@
                             <li><strong>Wide confidence intervals are honest, not noisy.</strong> A 90% CI of "8 — 53 pts" reflects real F1 volatility (DNFs, safety cars, weather, strategy). When the model is genuinely uncertain, it says so rather than pretending otherwise. A narrow CI on a leader and a wide CI on a midfielder is usually correct, not a bug.</li>
                             <li><strong>Predictions shift across the weekend.</strong> Pre-FP predictions rely on historical patterns only (~65% confidence). Once practice data lands, telemetry sharpens the picture (~90% confidence). Qualifying then locks in the grid and tightens the race forecast further. If a driver moves up or down between Friday and Sunday, that's the model integrating new evidence.</li>
                             <li><strong>Sprint weekends have less data to work with.</strong> Sprint weekends compress practice into a single FP1 session before sprint qualifying. Less telemetry means slightly lower confidence and wider intervals than a regular weekend.</li>
-                            <li><strong>The Multi-Week Planner's future rounds use heuristics, not real ML.</strong> Only the current round has full model predictions. Future rounds (2-5 weeks ahead) project using recent form weighted by track similarity to past circuits. Treat them as directional, not precise.</li>
+                            <li><strong>Future rounds have less evidence.</strong> The Multi-Week Planner uses priors-only ML horizon forecasts when available, with a confidence-weighted track-affinity fallback. Future practice data is not available yet, and projected price rises may not happen. Revisit plans as each race approaches.</li>
                             <li><strong>New teams lean conservative.</strong> Cadillac has no 2020-2025 history to learn from, so their priors fall back toward grid averages. As 2026 results accumulate, their predictions will sharpen and reflect their actual pace.</li>
                             <li><strong>2026 has fewer historical signals than usual.</strong> New regulations (active aero, redesigned ground effect, new power units) mean older data is partially out-of-distribution. The model weights 2026 races more heavily than older seasons, but early-season predictions carry more uncertainty than they would mid-season under stable rules.</li>
                             <li><strong>The calendar skips R4 and R5.</strong> Bahrain (R4) and Saudi Arabia (R5) were cancelled from the 2026 calendar but their round numbers are preserved. Miami is R6, Canada is R7, etc. — Round 4 and 5 just aren't shown.</li>
@@ -1401,8 +1401,8 @@
     <script src="final-fix.js?v=2"></script>
     <script src="optimizer-scoring.js?v=1"></script>
     <script src="prediction-context.js?v=2"></script>
-    <script src="app.js?v=163"></script>
+    <script src="app.js?v=164"></script>
     <script src="members.js?v=27"></script>
-    <script src="engagement.js?v=17"></script>
+    <script src="engagement.js?v=18"></script>
 </body>
 </html>

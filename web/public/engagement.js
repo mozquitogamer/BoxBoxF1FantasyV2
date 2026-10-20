@@ -151,7 +151,7 @@ window.BoxBoxFreeAccess = Object.freeze({
             const body = panel.querySelector('.email-updates-copy p');
             if (eyebrow) eyebrow.textContent = 'Beat V13 registration · Closed';
             if (title) title.textContent = 'The grid is locked';
-            if (body) body.textContent = 'Registration closed at the Round 22 Las Vegas F1 Fantasy team lock. Registered entrants will receive the final submission instructions after the season.';
+            if (body) body.textContent = 'Registration closed at the Las Vegas F1 Fantasy team lock. Registered entrants will receive the final submission instructions after the season.';
             return;
         }
 

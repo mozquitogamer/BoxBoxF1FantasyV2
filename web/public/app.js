@@ -1397,7 +1397,7 @@ async function loadData() {
             <div class="container" style="text-align:center;padding:60px 20px;">
                 <h2>No predictions available</h2>
                 <p style="color:var(--text-secondary);margin-top:8px;">
-                    Run the prediction pipeline first, then export to JSON.
+                    Predictions could not be loaded. Please refresh, or browse the <a href="/picks/">race guides</a> and <a href="/methodology/">how the forecasts work</a>.
                 </p>
             </div>
         `;
@@ -3253,7 +3253,7 @@ function renderPitstopPanel() {
 
     const ps = window._pitstopData;
     if (!ps || !ps.last_round) {
-        body.innerHTML = '<p class="no-data">No pit stop data yet — comes online after the first race of the season.</p>';
+        body.innerHTML = '<p class="no-data">Pit-stop timings are not available in this view yet. <a href="/constructors/">See constructor profiles and scoring context</a>.</p>';
         return;
     }
 
@@ -3285,7 +3285,7 @@ function renderPitstopPanel() {
     }
 
     if (rows.length === 0) {
-        body.innerHTML = '<p class="no-data">No pit stop data yet — comes online after the first race of the season.</p>';
+        body.innerHTML = '<p class="no-data">Pit-stop timings are not available in this view yet. <a href="/constructors/">See constructor profiles and scoring context</a>.</p>';
         return;
     }
 
@@ -7958,7 +7958,7 @@ function fmtTime(seconds) {
 function renderFPAnalysis() {
     const el = document.getElementById('fpAnalysisContent');
     if (!fpAnalysis || fpAnalysis.error) {
-        el.innerHTML = '<p class="no-data">No FP analysis data available yet. Run the FP analysis pipeline after free practice sessions.</p>';
+        el.innerHTML = '<p class="no-data">Practice analysis is not available for this weekend yet. <a href="/picks/">Read the current race outlook</a> or <a href="/methodology/">see how practice informs the forecast</a>.</p>';
         return;
     }
 
@@ -8938,7 +8938,7 @@ function renderSeason() {
     // Calendar
     const calEl = document.getElementById('seasonCalendar');
     if (!seasonSummary || !seasonSummary.rounds) {
-        calEl.innerHTML = '<p class="no-data">No season data available. Run pipeline/08_export_website_json.py first.</p>';
+        calEl.innerHTML = '<p class="no-data">The season calendar could not be loaded. Please refresh, or <a href="/picks/">browse the race pages</a>.</p>';
     } else {
         let html = `<table class="data-table sortable">
             <thead><tr>

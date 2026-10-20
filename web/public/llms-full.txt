@@ -1,6 +1,6 @@
 # BoxBoxF1Fantasy - Full Site Summary for LLMs and Agents
 
-Last updated: 2026-10-13
+Last updated: 2026-10-20
 Canonical site: https://boxboxf1fantasy.com/
 Primary language: English
 Season covered: 2026 F1 Fantasy
@@ -189,7 +189,7 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - F1 Fantasy Price Changes 2026: Rise & Fall Watchlist | BoxBox: https://boxboxf1fantasy.com/tools/f1-fantasy-price-changes/ - Free F1 Fantasy price-change watchlist for 2026: see drivers and constructors under price-rise or price-drop pressure based on current projections and value signals.
 - F1 Fantasy DNF Risk 2026: Driver Reliability | BoxBox: https://boxboxf1fantasy.com/tools/f1-fantasy-dnf-risk/ - Current F1 Fantasy DNF risk for every driver and constructor, with reliability bands, expected points and Monte Carlo downside floors.
 - Free F1 Fantasy Team Optimizer 2026 | BoxBox: https://boxboxf1fantasy.com/tools/lineup-optimizer/ - Free F1 Fantasy optimizer checking 1.4 million legal teams within your budget using ML projections, chips, locks, exclusions and four strategies.
-- F1 Fantasy Team Compare & Score Calculator (Free) | BoxBox: https://boxboxf1fantasy.com/tools/team-compare/ - Free F1 Fantasy team compare tool: enter up to three candidate teams and compare budget, projected points, confidence range, price movement and downside risk.
+- F1 Fantasy Team Compare & Score Calculator (Free) | BoxBox: https://boxboxf1fantasy.com/tools/team-compare/ - Compare three manual F1 Fantasy teams for free, or up to three saved Pit Wall teams plus a manual alternative. Check points, budget, chips and downside.
 - F1 Fantasy Transfer Planner & Advisor (Free) | BoxBox: https://boxboxf1fantasy.com/tools/transfer-planner/ - Free F1 Fantasy transfer tools: find your best one or two swaps this week, or plan transfers and chips across 2-5 upcoming rounds with a multi-week planner.
 - F1 Fantasy Budget Builder: Grow Your Team Value (Free) | BoxBox: https://boxboxf1fantasy.com/tools/budget-builder/ - Free F1 Fantasy budget builder: find the picks most likely to rise in price so your team value compounds, leaving more to spend on stars later in the season.
 - F1 Fantasy Points Calculator & Predictions (Free) | BoxBox: https://boxboxf1fantasy.com/tools/points-calculator/ - Free F1 Fantasy points calculator with current driver and constructor projections, qualifying and race breakdowns, overtakes and bonuses.
