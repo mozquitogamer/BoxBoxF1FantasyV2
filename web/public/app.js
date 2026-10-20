@@ -2259,34 +2259,13 @@ function renderWeather() {
 
     const overallColor = riskColors[w.overall_rain_risk] || '#666';
 
-    // Weather-aware modelling explainer: if predictions.json reports
-    // weather_adjustments with non-neutral multipliers, show what's actually
-    // being adjusted in the Monte Carlo. Honest about the cause.
-    const wxAdj = data && data.weather_adjustments;
-    let wxExplainer = '';
-    if (wxAdj && wxAdj.is_active && Number(w.round) === Number(data.round)) {
-        const parts = [];
-        if (wxAdj.rain_risk && wxAdj.rain_risk !== 'NONE') {
-            const widenPct = Math.round((wxAdj.noise_mult - 1) * 100);
-            const dnfX = wxAdj.dnf_mult.toFixed(1);
-            // Surface the RACE-session rain probability so the widening makes sense:
-            // practice/quali can be bone dry while race day carries the risk, and
-            // showing only "LOW RAIN RISK" against clear practice days reads as wrong.
-            const raceSession = (w.sessions || []).find(s => (s.name || '').toLowerCase() === 'race');
-            const racePct = raceSession && raceSession.rain_probability != null
-                ? raceSession.rain_probability
-                : (w.max_rain_probability != null ? w.max_rain_probability : null);
-            const pctStr = racePct != null ? ` (race ~${racePct}% rain)` : '';
-            parts.push(`Race rain risk <strong>${wxAdj.rain_risk}</strong>${pctStr} \u2192 confidence intervals widened ~${widenPct}%, DNF risk \u00d7${dnfX}, wet-skilled drivers favoured.`);
-        }
-        if (wxAdj.cold_weight && wxAdj.cold_weight > 0) {
-            const tStr = wxAdj.race_air_temp_C != null ? `${wxAdj.race_air_temp_C.toFixed(1)}\u00b0C` : 'cool';
-            parts.push(`Cool race forecast (${tStr}) \u2192 Mercedes &amp; Williams get a small score boost in the simulation.`);
-        }
-        if (parts.length > 0) {
-            wxExplainer = `<div class="weather-adjust-explainer">${parts.join(' ')}</div>`;
-        }
-    }
+    // Values below come only from the simulation's saved weather record.
+    const weatherContext = window.BoxBoxWeatherContext.describe(data, w);
+    const wxExplainer = `<div class="weather-adjust-explainer" role="note">
+        <strong>${escapeHtml(weatherContext.title)}</strong>
+        ${weatherContext.notice ? `<p>${escapeHtml(weatherContext.notice)}</p>` : ''}
+        ${weatherContext.notes.length ? `<p>${weatherContext.notes.map(escapeHtml).join(' ')}</p>` : ''}
+    </div>`;
 
     el.innerHTML = `
         <div class="weather-widget">
@@ -2354,14 +2333,15 @@ function renderWeatherBadges() {
     const w = data && data.weather_adjustments;
     if (!w || !w.is_active) return '';
     const badges = [];
+    const sourceLabel = escapeHtml(window.BoxBoxWeatherContext.dateLabel(w.source));
     if (w.rain_risk && w.rain_risk !== 'NONE') {
-        const label = w.rain_risk === 'HIGH' ? 'Wet race forecast' :
-                      w.rain_risk === 'MEDIUM' ? 'Wet race likely' : 'Light rain risk';
-        badges.push(`<span class="card-weather-badge wet" title="Race rain risk: ${w.rain_risk}. Downside widened, DNF risk \u00d7${w.dnf_mult.toFixed(1)}, wet-strong drivers favoured.">\u{1F327} ${label}</span>`);
+        const label = w.rain_risk === 'HIGH' ? 'Simulation: wet risk' :
+                      w.rain_risk === 'MEDIUM' ? 'Simulation: rain risk' : 'Simulation: low rain risk';
+        badges.push(`<span class="card-weather-badge wet" title="Simulation weather from ${sourceLabel}: rain risk ${escapeHtml(w.rain_risk)}. DNF multiplier \u00d7${Number(w.dnf_mult.toFixed(2))}. This may differ from the latest forecast.">\u{1F327} ${label}</span>`);
     }
     if (w.cold_weight && w.cold_weight > 0) {
         const tStr = w.race_air_temp_C != null ? `${w.race_air_temp_C.toFixed(0)}\u00b0C` : 'cool';
-        badges.push(`<span class="card-weather-badge cold" title="Cool race forecast (${tStr} air). Cold-strong constructors (Mercedes, Williams) favoured.">\u{1F976} Cool race ${tStr}</span>`);
+        badges.push(`<span class="card-weather-badge cold" title="Simulation weather from ${sourceLabel}: ${tStr} air. Cool-weather team adjustments were applied. This may differ from the latest forecast.">\u{1F976} Simulation: cool ${tStr}</span>`);
     }
     if (badges.length === 0) return '';
     return `<div class="card-weather-badges">${badges.join('')}</div>`;

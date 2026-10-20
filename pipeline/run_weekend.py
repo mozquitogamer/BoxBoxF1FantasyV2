@@ -95,6 +95,7 @@ def run_step(script_name, args_list, step_num, total, dry_run=False, non_fatal=F
 # Shared steps keep the prediction phases aligned.
 CURRENT_DOWNLOAD = ("01_download_data.py", ["--mode", "current", "--round", "{round}"])
 PREDICTION_STEPS = [
+    ("weather_forecast.py", ["--round", "{round}"]),
     ("06_run_predictions.py", ["--round", "{round}"]),
     ("07_calculate_fantasy.py", ["--round", "{round}"]),
     ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),

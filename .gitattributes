@@ -4,3 +4,8 @@ web/public/data/predictions_round*_refresh_*.json -text
 # Frozen forecast and audit hashes must survive Windows/Linux checkouts.
 web/public/data/predictions_round*.json -text
 data/audit/snapshots/**/*.json -text
+
+# Content-addressed simulation inputs must retain their exact bytes.
+data/audit/objects/** -text
+data/audit/inputs/** -text
+data/forecasts/weather/** -text

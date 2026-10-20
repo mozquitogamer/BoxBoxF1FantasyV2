@@ -352,6 +352,8 @@ def load_weather_for_mc(round_num: int) -> dict:
         return result
 
     result["source"] = wjson.get("last_updated") or "unknown"
+    result["round"] = wr
+    result["forecast_snapshot_id"] = wjson.get("forecast_snapshot_id")
     result["overall_rain_risk"] = wjson.get("overall_rain_risk")
 
     # Find the Race session specifically
@@ -371,6 +373,7 @@ def load_weather_for_mc(round_num: int) -> dict:
     if race_risk not in ("NONE", "LOW", "MEDIUM", "HIGH"):
         race_risk = "NONE"
     result["rain_risk"] = race_risk
+    result["race_rain_probability"] = race_session.get("rain_probability")
 
     rain_cfg = MC_WEATHER_TUNABLES["rain"][race_risk]
     result["noise_mult"] = rain_cfg["noise_mult"]
@@ -1528,6 +1531,10 @@ def run_simulations(
             "is_sprint_weekend": is_sprint,
             "qualifying_locked": fixed_quali_positions is not None,
             "weather_adjustments_active": {
+                "provenance_version": 1,
+                "round": wx.get("round"),
+                "forecast_snapshot_id": wx.get("forecast_snapshot_id"),
+                "race_rain_probability": wx.get("race_rain_probability"),
                 "is_active": bool(wx["is_active"]),
                 "rain_risk": wx.get("rain_risk", "NONE"),
                 "race_air_temp_C": wx.get("race_air_temp"),
@@ -1988,6 +1995,10 @@ def main() -> None:
     # (Level 3 Option B: widen CI + DNF on wet, bias toward wet-strong drivers
     # and cold-weather teams). See MC_WEATHER_TUNABLES.
     weather = load_weather_for_mc(args.round)
+    from pipeline.weather_provenance import validate_simulation_weather
+    weather_metadata_path = PREDICTIONS_DIR / f'round{args.round}' / 'prediction_metadata.json'
+    weather_metadata = json.loads(weather_metadata_path.read_text(encoding='utf-8'))
+    validate_simulation_weather(weather_metadata, weather)
     if weather["is_active"]:
         print(f"  Weather adjustments: rain={weather['rain_risk']}, "
               f"air_temp={weather['race_air_temp']}C")

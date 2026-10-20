@@ -506,13 +506,14 @@ def run_weather_forecast(round_num: int | None = None) -> dict:
 
 # -- CLI -----------------------------------------------------------------------
 
-def main() -> None:
+def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Fetch weather forecast for F1 race weekend")
     parser.add_argument("--round", type=int, default=None, help="Round number (auto-detects next if omitted)")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
-    run_weather_forecast(args.round)
+    result = run_weather_forecast(args.round)
+    return 0 if result else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

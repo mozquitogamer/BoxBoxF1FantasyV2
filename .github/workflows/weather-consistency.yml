@@ -1,0 +1,39 @@
+name: Weather consistency checks
+on:
+  push:
+    paths:
+      - 'web/public/app.js'
+      - 'web/public/index.html'
+      - 'web/public/weather-context.js'
+      - 'web/tests/weather-context.test.js'
+      - 'pipeline/*weather*.py'
+      - 'pipeline/08_monte_carlo_fantasy.py'
+      - 'pipeline/08_export_website_json.py'
+      - 'pipeline/run_weekend.py'
+      - 'tests/test_weather*.py'
+      - 'tests/test_run_weekend_phases.py'
+      - '.github/workflows/weather-consistency.yml'
+  pull_request:
+    paths:
+      - 'web/public/**'
+      - 'web/tests/**'
+      - 'pipeline/**'
+      - 'tests/**'
+      - '.github/workflows/weather-consistency.yml'
+permissions:
+  contents: read
+jobs:
+  weather-consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install pytest
+      - run: python -m pytest tests/test_weather_provenance.py tests/test_weather_forecast_cli.py tests/test_run_weekend_phases.py -q
+      - run: node --test web/tests/weather-context.test.js
+      - run: node --check web/public/app.js

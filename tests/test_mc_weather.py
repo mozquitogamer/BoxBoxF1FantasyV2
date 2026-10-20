@@ -30,10 +30,11 @@ def test_race_session_risk_overrides_overall_and_resolves_temperature(tmp_path, 
     weather = {
         "round": 12,
         "last_updated": "test",
+        "forecast_snapshot_id": "snapshot-12",
         "overall_rain_risk": "HIGH",
         "sessions": [
             {"name": "Qualifying", "rain_risk": "HIGH", "avg_temp": 22.0},
-            {"name": "Race", "rain_risk": "MEDIUM", "avg_temp": 18.8},
+            {"name": "Race", "rain_risk": "MEDIUM", "rain_probability": 55, "avg_temp": 18.8},
         ],
     }
     (tmp_path / "weather.json").write_text(json.dumps(weather), encoding="utf-8")
@@ -47,6 +48,9 @@ def test_race_session_risk_overrides_overall_and_resolves_temperature(tmp_path, 
     assert result["wet_weight"] == 0.03
     assert result["cold_weight"] == 0.01
     assert result["is_active"] is True
+    assert result["round"] == 12
+    assert result["forecast_snapshot_id"] == "snapshot-12"
+    assert result["race_rain_probability"] == 55
 
 
 def test_stale_weather_file_is_neutral(tmp_path, monkeypatch):

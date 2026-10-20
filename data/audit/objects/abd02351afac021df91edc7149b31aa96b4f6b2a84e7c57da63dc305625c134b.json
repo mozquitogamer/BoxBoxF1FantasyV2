@@ -1,0 +1,6 @@
+{
+  "_comment": "Manual per-round Driver-of-the-Day probability overrides — judgment calls for fan-vote favourites the position heuristic can't see (e.g. a home hero near-certain to win DOTD). Keyed by INTERNAL round number (string) -> jolpica driver_id -> probability (0..1). Read by 07_calculate_fantasy.py (sets the displayed DOTD %) AND 08_monte_carlo_fantasy.py (forces the DOTD bonus in the sim, which drives the displayed expected points). Remove an entry to revert that round to the automatic heuristic.",
+  "8": {
+    "leclerc": 0.65
+  }
+}

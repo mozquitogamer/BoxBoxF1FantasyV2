@@ -26,6 +26,15 @@ def test_pre_fp_supplies_required_all_flags():
     assert args_by_script["03b_build_jolpica_features.py"] == ["--all"]
 
 
+def test_every_prediction_phase_refreshes_weather_before_models():
+    for phase in ('pre_fp_predict', 'post_fp', 'post_quali'):
+        names = _step_names(phase)
+        assert names.index('weather_forecast.py') < names.index('06_run_predictions.py')
+        step = next(s for s in RUN_WEEKEND.PHASES[phase]['steps'] if s[0] == 'weather_forecast.py')
+        assert step[1] == ['--round', '{round}']
+        assert len(step) == 2  # A failed refresh must stop the phase.
+
+
 def test_post_race_canonical_data_is_final_before_actual_scoring():
     names = _step_names("post_race")
 
@@ -92,10 +101,10 @@ def test_fp_and_quali_share_prediction_steps_in_the_same_order():
     fp_steps = RUN_WEEKEND.PHASES["post_fp"]["steps"]
     quali_steps = RUN_WEEKEND.PHASES["post_quali"]["steps"]
 
-    assert fp_steps[:7] == quali_steps[:7]
-    assert _step_names("post_fp")[:7] == [
+    assert fp_steps[:8] == quali_steps[:8]
+    assert _step_names("post_fp")[:8] == [
         "01_download_data.py", "02_build_laps.py", "03_extract_features.py",
-        "06_run_predictions.py", "07_calculate_fantasy.py",
+        "weather_forecast.py", "06_run_predictions.py", "07_calculate_fantasy.py",
         "08_monte_carlo_fantasy.py", "10_fp_analysis.py",
     ]
 

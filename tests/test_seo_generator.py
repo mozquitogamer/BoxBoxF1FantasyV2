@@ -46,6 +46,16 @@ def test_registration_deadline_uses_published_terms(monkeypatch, tmp_path):
     assert seo.registration_deadline_text() == "the deadline shown in Beat V13"
 
 
+def test_same_day_weather_update_is_pending_even_after_a_neutral_simulation():
+    prediction = {'round': 20, 'race': 'Test Grand Prix', 'weather_adjustments': {
+        'is_active': False, 'source': '2026-10-20T01:00:00Z', 'rain_risk': 'NONE'}}
+    forecast = {'round': 20, 'last_updated': '2026-10-20T07:00:00Z', 'sessions': [
+        {'name': 'Race', 'rain_probability': 50, 'rain_risk': 'MEDIUM', 'avg_temp': 25}]}
+    rendered = seo.current_weather_html(prediction, forecast)
+    assert 'This newer forecast has not yet been applied' in rendered
+    assert '01:00 UTC' in rendered
+
+
 def test_retained_pages_get_current_shared_terms_without_changing_content(monkeypatch, tmp_path):
     monkeypatch.setattr(seo, "WEB", tmp_path)
     page = tmp_path / "retired-driver.html"
@@ -307,7 +317,7 @@ def test_current_weather_distinguishes_latest_feed_from_model_snapshot():
     assert "Belgian GP weather outlook" in html
     assert "FP2:</strong> 71% rain probability" in html
     assert "Race:</strong> 22% rain probability" in html
-    assert "earlier medium-risk weather snapshot from July 9, 2026" in html
+    assert "earlier weather snapshot from July 9, 2026 19:22 UTC" in html
     assert "newer forecast has not yet been applied" in html
     assert "/data/weather.json" in html
 

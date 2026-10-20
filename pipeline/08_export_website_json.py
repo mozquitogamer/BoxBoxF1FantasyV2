@@ -664,6 +664,9 @@ def build_predictions_json(round_num: int) -> dict | None:
     if upgrade_meta:
         payload["upgrade_adjustments"] = upgrade_meta
     if weather_adjustments_active is not None:
+        if weather_adjustments_active.get("provenance_version") == 1:
+            from pipeline.weather_provenance import validate_simulation_weather
+            validate_simulation_weather(load_prediction_metadata(round_num), weather_adjustments_active)
         # Surfaced to the frontend so driver/constructor cards can show
         # wet/cold badges and the weather widget can render an explainer
         # of what's being adjusted in the Monte Carlo.

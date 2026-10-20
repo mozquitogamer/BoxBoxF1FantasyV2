@@ -1,0 +1,465 @@
+# ============================================================================
+# TEAM STRATEGY & DRIVER SKILL RATINGS
+# ============================================================================
+# Manual expert ratings for team strategy and driver-specific skills
+# Scale: 1-10 (higher = better)
+
+from datetime import date, datetime
+
+
+# The first versioned snapshot is the table below, authored after the 2026
+# Chinese GP. No earlier snapshots exist, so dates before this boundary must
+# receive neutral values rather than today's hindsight-informed judgments.
+CURRENT_RATING_SNAPSHOT_ID = "post_2026_r02"
+RATING_SNAPSHOT_EFFECTIVE_FROM = date(2026, 3, 16)
+RATING_SNAPSHOT_EFFECTIVE_EVENT = (2026, 3)
+
+
+def rating_as_of_for_event(season, round_num) -> date:
+    """Resolve an event key to the rating snapshot available before it.
+
+    Historical model rows do not currently retain ``race_date``.  The first
+    manually authored table was created after 2026 round 2, so round 3 is the
+    first event allowed to consume it.  Earlier events deliberately receive
+    ``date.min`` and therefore the neutral pre-snapshot ratings.
+    """
+    try:
+        event_key = (int(season), int(round_num))
+    except (TypeError, ValueError):
+        return date.min
+    if event_key >= RATING_SNAPSHOT_EFFECTIVE_EVENT:
+        return RATING_SNAPSHOT_EFFECTIVE_FROM
+    return date.min
+
+# ============================================================================
+# TEAM STRATEGY RATINGS (2026 — updated post China GP Round 2 race results)
+# ============================================================================
+# Based on 2026 performance + 2025 track record. Constructor order: Mercedes >
+# Ferrari > McLaren ≈ Red Bull > Haas/VCARB > Alpine/Audi > rest
+# R2 race: Antonelli P1, Russell P2, Hamilton P3, Leclerc P4, Bearman P5, Lawson P7
+# R2 DNFs: Norris, Verstappen, Piastri, Albon, Alonso, Stroll, Bortoleto
+
+TEAM_STRATEGY_RATINGS = {
+    # 2026 season ratings — updated to reflect current constructor order
+    'mercedes': {
+        'strategy_rating': 9,    # Dominant car, Hamilton + Russell precision strategy
+        'pit_stop_speed': 8,
+        'adaptability': 9,
+    },
+    'ferrari': {
+        'strategy_rating': 7,    # Hamilton upgrade — experience clearly elevating strategy
+        'pit_stop_speed': 8,
+        'adaptability': 7,
+    },
+    'red_bull': {
+        'strategy_rating': 8,    # Excellent infrastructure but car clearly off-pace in 2026; DNF China
+        'pit_stop_speed': 9,     # Consistently sub-2.5s stops
+        'adaptability': 7,       # Car not adapting well to new 2026 regs
+    },
+    'mclaren': {
+        'strategy_rating': 8,    # Very strong in 2024/2025, continues in 2026
+        'pit_stop_speed': 8,     # World record stop holders
+        'adaptability': 8,
+    },
+    'haas': {
+        'strategy_rating': 7,    # Bearman + Ocon strong pairing — P9/P12 in China SQ
+        'pit_stop_speed': 7,
+        'adaptability': 7,
+    },
+    'rb': {                      # VCARB / Racing Bulls
+        'strategy_rating': 7,    # Lawson P7 race R2, punching above weight
+        'pit_stop_speed': 7,
+        'adaptability': 7,       # Lawson adapting well to new regs
+    },
+    'racing_bulls': {            # Alias for 'rb' — used in V2 pipeline
+        'strategy_rating': 7,
+        'pit_stop_speed': 7,
+        'adaptability': 7,
+    },
+    'alpine': {
+        'strategy_rating': 5,
+        'pit_stop_speed': 6,
+        'adaptability': 5,
+    },
+    'williams': {
+        'strategy_rating': 6,    # Improving, Sainz brings experience
+        'pit_stop_speed': 7,
+        'adaptability': 6,
+    },
+    'aston_martin': {
+        'strategy_rating': 4,    # Struggling in 2026
+        'pit_stop_speed': 3,
+        'adaptability': 3,
+    },
+    'audi': {                    # Formerly Kick Sauber / Sauber
+        'strategy_rating': 5,
+        'pit_stop_speed': 6,
+        'adaptability': 5,
+    },
+    'cadillac': {                # New 2026 entry
+        'strategy_rating': 4,    # Brand new team, still learning
+        'pit_stop_speed': 5,
+        'adaptability': 4,
+    },
+    # Legacy constructor IDs kept for 2020-2025 training data compatibility
+    'kick_sauber': {
+        'strategy_rating': 5,
+        'pit_stop_speed': 6,
+        'adaptability': 5,
+    },
+    'alfa': {
+        'strategy_rating': 5,
+        'pit_stop_speed': 6,
+        'adaptability': 5,
+    },
+    'alphatauri': {
+        'strategy_rating': 6,
+        'pit_stop_speed': 7,
+        'adaptability': 6,
+    },
+}
+
+# ============================================================================
+# DRIVER SKILL RATINGS
+# ============================================================================
+
+DRIVER_TIRE_MANAGEMENT = {
+    # 2026 grid — updated post Round 1 Australia + China SQ
+    # Legendary tire managers
+    'fernando_alonso': 10,
+    'lewis_hamilton': 9,
+
+    # Very good
+    'max_verstappen': 9,
+    'george_russell': 8,
+    'carlos_sainz': 8,
+    'oscar_piastri': 8,
+    'lando_norris': 8,
+    'nico_hulkenberg': 8,
+
+    # Good
+    'valtteri_bottas': 7,
+    'sergio_perez': 8,
+    'esteban_ocon': 7,
+    'pierre_gasly': 7,
+    'alexander_albon': 7,
+    'lance_stroll': 6,
+    'charles_leclerc': 8,     # Consistently strong race pace — P4 race R2, P2 sprint
+    'kimi_antonelli': 8,      # R2 race winner — controlled, composed tire management
+
+    # Average-Good
+    'oliver_bearman': 7,      # P5 R2 race — strong tire management for a young driver
+    'liam_lawson': 7,         # P7 R2 race — overperforming vs car expectations
+    'isack_hadjar': 6,
+    'gabriel_bortoleto': 6,
+    'franco_colapinto': 6,
+
+    # Rookie / limited F1 data
+    'arvid_lindblad': 7,
+
+    # Legacy drivers (2020-2025 training data compatibility)
+    'daniel_ricciardo': 7,
+    'kevin_magnussen': 7,
+    'yuki_tsunoda': 6,
+    'zhou_guanyu': 6,
+    'mick_schumacher': 6,
+    'nicholas_latifi': 6,
+    'nikita_mazepin': 5,
+    'logan_sargeant': 6,
+    'jack_doohan': 6,
+    'ollie_bearman': 6,
+}
+
+DRIVER_WET_WEATHER_SKILL = {
+    # 2026 grid — updated ratings
+    # Elite in the wet
+    'max_verstappen': 10,
+    'lewis_hamilton': 10,
+
+    # Excellent
+    'fernando_alonso': 9,
+    'charles_leclerc': 8,
+    'george_russell': 8,
+    'lando_norris': 8,
+
+    # Good
+    'kimi_antonelli': 8,      # Exceptional wet form in junior categories; R2 race winner composure
+    'carlos_sainz': 7,
+    'sergio_perez': 7,
+    'oscar_piastri': 7,
+    'pierre_gasly': 7,
+    'esteban_ocon': 7,
+    'alexander_albon': 7,
+    'isack_hadjar': 7,
+    'franco_colapinto': 7,
+
+    # Average
+    'valtteri_bottas': 7,
+    'nico_hulkenberg': 6,
+    'lance_stroll': 7,
+    'oliver_bearman': 6,
+    'liam_lawson': 6,
+    'gabriel_bortoleto': 6,
+
+    # Rookie / limited data
+    'arvid_lindblad': 6,
+
+    # Legacy drivers (2020-2025 training data compatibility)
+    'daniel_ricciardo': 7,
+    'yuki_tsunoda': 6,
+    'kevin_magnussen': 6,
+    'zhou_guanyu': 6,
+    'mick_schumacher': 6,
+    'nicholas_latifi': 5,
+    'nikita_mazepin': 4,
+    'logan_sargeant': 5,
+    'jack_doohan': 6,
+    'ollie_bearman': 6,
+}
+
+CONSTRUCTOR_COLD_WEATHER_SKILL = {
+    # Hand-curated per-constructor rating: how well does this team's car
+    # perform in cool/cold-temperature races (air <= ~18C)? Scale 1-10, 5 = neutral.
+    # Mercedes has historically been strongest in cold conditions
+    # (W11/W14/W16 power unit + chassis combo). Used as both a model feature
+    # (via 03b_build_jolpica_features) and an MC perturbation when
+    # weather.json forecasts a cold race.
+    #
+    # Update from observation as the season progresses; defaults to 5 for
+    # constructors not listed.
+    'mercedes':     8,
+    'williams':     7,   # Mercedes-powered, historically OK in cool
+    'ferrari':      6,
+    'red_bull':     6,
+    'mclaren':      6,
+    'aston_martin': 5,
+    'alpine':       5,
+    'racing_bulls': 5,
+    'rb':           5,
+    'haas':         5,
+    'audi':         5,
+    'sauber':       5,
+    'alfa_romeo':   5,
+    'cadillac':     5,
+    # Legacy constructor IDs (2020-2025 training compatibility)
+    'alphatauri':   5,
+}
+
+DRIVER_OVERTAKING_SKILL = {
+    # 2026 grid — updated ratings
+    # Elite overtakers
+    'max_verstappen': 10,
+    'fernando_alonso': 10,
+    'lewis_hamilton': 9,
+
+    # Very good
+    'charles_leclerc': 9,
+    'carlos_sainz': 8,
+    'lando_norris': 8,
+    'george_russell': 8,
+
+    # Good
+    'kimi_antonelli': 8,      # R2 race winner — controlled passes, excellent race craft
+    'gabriel_bortoleto': 7,   # F2 champion, excellent racecraft
+    'franco_colapinto': 7,
+    'oscar_piastri': 7,
+    'pierre_gasly': 7,
+    'esteban_ocon': 7,
+    'alexander_albon': 7,
+    'isack_hadjar': 7,
+    'liam_lawson': 7,
+    'oliver_bearman': 8,
+    'sergio_perez': 7,
+    'nico_hulkenberg': 7,
+
+    # Average
+    'valtteri_bottas': 7,
+    'lance_stroll': 6,
+    'arvid_lindblad': 6,
+
+    # Legacy drivers (2020-2025 training data compatibility)
+    'daniel_ricciardo': 9,
+    'yuki_tsunoda': 7,
+    'kevin_magnussen': 8,
+    'zhou_guanyu': 6,
+    'mick_schumacher': 6,
+    'nicholas_latifi': 5,
+    'logan_sargeant': 5,
+    'jack_doohan': 6,
+    'ollie_bearman': 7,
+}
+
+DRIVER_QUALIFYING_SPECIALIST = {
+    # 2026 grid — updated post China GP R2 (SQ + race results)
+    # One-lap pace kings
+    'george_russell': 10,     # P1 China SQ, consistently best qualifier in 2026
+    'charles_leclerc': 9,     # Elite one-lap pace; P6 SQ but P4 race shows consistency
+    'max_verstappen': 9,      # P8 China SQ — exceptional driver, car not at 2023/24 level
+    'lewis_hamilton': 9,      # P4 China SQ — still elite over one lap
+    'lando_norris': 9,        # P3 China SQ — one-lap pace unaffected by reliability
+
+    # Very good
+    'kimi_antonelli': 9,      # P2 China SQ — exceptional one-lap pace from day 1
+    'oscar_piastri': 8,       # P5 China SQ
+    'isack_hadjar': 8,        # Strong quali record from junior series, P10 SQ
+    'carlos_sainz': 8,
+    'fernando_alonso': 8,
+
+    # Good
+    'pierre_gasly': 7,        # P7 China SQ — impressive for Alpine
+    'oliver_bearman': 7,      # P9 China SQ — punching above car weight
+    'esteban_ocon': 7,
+    'alexander_albon': 7,
+    'nico_hulkenberg': 7,
+    'liam_lawson': 7,
+    'gabriel_bortoleto': 7,   # F2 champion
+    'franco_colapinto': 7,
+
+    # Average
+    'sergio_perez': 6,        # DNS China SQ (mechanical), historically struggles vs teammate
+    'valtteri_bottas': 5,
+    'lance_stroll': 4,
+    'arvid_lindblad': 6,
+
+    # Legacy drivers (2020-2025 training data compatibility)
+    'daniel_ricciardo': 7,
+    'yuki_tsunoda': 7,
+    'kevin_magnussen': 6,
+    'zhou_guanyu': 6,
+    'mick_schumacher': 6,
+    'nicholas_latifi': 5,
+    'logan_sargeant': 5,
+    'jack_doohan': 6,
+    'ollie_bearman': 7,
+}
+
+# The feature pipeline uses Jolpica/Ergast IDs (for example ``russell`` and
+# ``hamilton``), while the hand-maintained tables above use readable full-name
+# keys (``george_russell`` and ``lewis_hamilton``). Verstappen was a dangerous
+# accidental exception because his Jolpica ID is already ``max_verstappen``:
+# he received his elite ratings while most of the field silently fell back to
+# the default value of 6.
+#
+# Keep the readable table keys, but normalize every API ID at the lookup
+# boundary. Callers that already pass a full-name key continue to work.
+DRIVER_RATING_ID_ALIASES = {
+    # 2026 grid
+    'russell': 'george_russell',
+    'norris': 'lando_norris',
+    'piastri': 'oscar_piastri',
+    'antonelli': 'kimi_antonelli',
+    'leclerc': 'charles_leclerc',
+    'hamilton': 'lewis_hamilton',
+    'hadjar': 'isack_hadjar',
+    'gasly': 'pierre_gasly',
+    'sainz': 'carlos_sainz',
+    'albon': 'alexander_albon',
+    'alonso': 'fernando_alonso',
+    'bearman': 'oliver_bearman',
+    'ocon': 'esteban_ocon',
+    'colapinto': 'franco_colapinto',
+    'lawson': 'liam_lawson',
+    'stroll': 'lance_stroll',
+    'bortoleto': 'gabriel_bortoleto',
+    'perez': 'sergio_perez',
+    'hulkenberg': 'nico_hulkenberg',
+    'bottas': 'valtteri_bottas',
+    # Legacy Jolpica IDs used by the 2020-2025 training rows
+    'ricciardo': 'daniel_ricciardo',
+    'tsunoda': 'yuki_tsunoda',
+    'magnussen': 'kevin_magnussen',
+    'zhou': 'zhou_guanyu',
+    'latifi': 'nicholas_latifi',
+    'mazepin': 'nikita_mazepin',
+    'sargeant': 'logan_sargeant',
+    'doohan': 'jack_doohan',
+}
+
+
+def canonical_driver_rating_id(driver_id):
+    """Return the full-name key used by the manual driver-rating tables."""
+    key = str(driver_id).strip().lower()
+    return DRIVER_RATING_ID_ALIASES.get(key, key)
+
+
+def _coerce_as_of(as_of) -> date | None:
+    """Normalize a date-like value; invalid historical values stay unknown."""
+    if as_of is None:
+        return None
+    if isinstance(as_of, datetime):
+        return as_of.date()
+    if isinstance(as_of, date):
+        return as_of
+    try:
+        return date.fromisoformat(str(as_of)[:10])
+    except (TypeError, ValueError):
+        return None
+
+
+def get_rating_snapshot_id(as_of=None) -> str:
+    """Return the snapshot available on a date.
+
+    ``as_of=None`` is the operational/live lookup and uses the current table.
+    Historical calls with a real date before the first snapshot are explicitly
+    neutral.
+    """
+    resolved = _coerce_as_of(as_of)
+    if as_of is None or (
+        resolved is not None and resolved >= RATING_SNAPSHOT_EFFECTIVE_FROM
+    ):
+        return CURRENT_RATING_SNAPSHOT_ID
+    return "neutral_pre_snapshot"
+
+
+def _rating_snapshot_is_effective(as_of=None) -> bool:
+    return get_rating_snapshot_id(as_of) == CURRENT_RATING_SNAPSHOT_ID
+
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+def get_team_strategy_rating(constructor_id, *, as_of=None):
+    """Get strategy rating for a constructor"""
+    if not _rating_snapshot_is_effective(as_of):
+        return 5
+    if constructor_id in TEAM_STRATEGY_RATINGS:
+        return TEAM_STRATEGY_RATINGS[constructor_id]['strategy_rating']
+    return 5  # Default average
+
+def get_team_adaptability(constructor_id, *, as_of=None):
+    """Get adaptability rating (important for SC/rain)"""
+    if not _rating_snapshot_is_effective(as_of):
+        return 5
+    if constructor_id in TEAM_STRATEGY_RATINGS:
+        return TEAM_STRATEGY_RATINGS[constructor_id]['adaptability']
+    return 5
+
+def get_driver_tire_mgmt(driver_id, *, as_of=None):
+    """Get driver tire management skill"""
+    if not _rating_snapshot_is_effective(as_of):
+        return 6
+    return DRIVER_TIRE_MANAGEMENT.get(canonical_driver_rating_id(driver_id), 6)  # Default average
+
+def get_driver_wet_skill(driver_id, *, as_of=None):
+    """Get driver wet weather skill"""
+    if not _rating_snapshot_is_effective(as_of):
+        return 6
+    return DRIVER_WET_WEATHER_SKILL.get(canonical_driver_rating_id(driver_id), 6)
+
+def get_constructor_cold_skill(constructor_id, *, as_of=None):
+    """Get constructor cold-weather rating (1-10, 5=neutral). Default 5."""
+    if not _rating_snapshot_is_effective(as_of):
+        return 5
+    return CONSTRUCTOR_COLD_WEATHER_SKILL.get(constructor_id, 5)
+
+def get_driver_overtaking(driver_id, *, as_of=None):
+    """Get driver overtaking ability"""
+    if not _rating_snapshot_is_effective(as_of):
+        return 6
+    return DRIVER_OVERTAKING_SKILL.get(canonical_driver_rating_id(driver_id), 6)
+
+def get_driver_quali_skill(driver_id, *, as_of=None):
+    """Get driver qualifying specialist rating"""
+    if not _rating_snapshot_is_effective(as_of):
+        return 6
+    return DRIVER_QUALIFYING_SPECIALIST.get(canonical_driver_rating_id(driver_id), 6)

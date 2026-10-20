@@ -1068,22 +1068,30 @@ def current_weather_html(pred: dict, weather: dict | None) -> str:
     updated_copy = fmt_date(updated_date) if updated_date else "the latest available update"
     model_weather = pred.get("weather_adjustments") or {}
     model_weather_date = source_date(model_weather.get("source"))
-    if model_weather.get("is_active"):
+    try:
+        forecast_time = datetime.fromisoformat(str(weather.get("last_updated")).replace("Z", "+00:00"))
+        model_time = datetime.fromisoformat(str(model_weather.get("source")).replace("Z", "+00:00"))
+        newer_weather = forecast_time > model_time
+    except (ValueError, TypeError):
+        newer_weather = False
+    if newer_weather:
+        impact = (
+            f'The published points and confidence ranges used an earlier weather snapshot '
+            f'from {esc(fmt_utc_datetime(model_weather.get("source")))}. This newer forecast has not yet been applied to the model; '
+            'the next prediction run will recalculate the weather adjustment.'
+        )
+    elif not model_weather_date:
+        impact = 'The weather version used for these predictions was not recorded, so it cannot be matched to this forecast.'
+    elif model_weather.get("is_active"):
         model_risk = str(model_weather.get("rain_risk") or "weather").lower()
-        if updated_date and model_weather_date and updated_date > model_weather_date:
-            impact = (
-                f'The published points and confidence ranges used an earlier {esc(model_risk)}-risk weather snapshot '
-                f'from {esc(fmt_date(model_weather_date))}. This newer forecast has not yet been applied to the model; '
-                'the next prediction run will recalculate the weather adjustment.'
-            )
-        else:
-            impact = (
-                f'The published points and confidence ranges include the model\'s {esc(model_risk)}-risk weather adjustment.'
-            )
+        impact = (
+            f'The published points and confidence ranges include the model\'s {esc(model_risk)}-risk weather adjustment '
+            f'using weather from {esc(fmt_utc_datetime(model_weather.get("source")))}.'
+        )
     else:
         impact = (
-            'The published points and confidence ranges do not currently include a weather adjustment; '
-            'check again after the next prediction run.'
+            f'No extra rain or cool-weather simulation adjustments were applied, using weather '
+            f'from {esc(fmt_utc_datetime(model_weather.get("source")))}.'
         )
 
     overall = str(weather.get("overall_rain_risk") or "unknown").lower()
