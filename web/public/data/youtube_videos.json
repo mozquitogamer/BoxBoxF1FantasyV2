@@ -1,7 +1,14 @@
 {
-  "updated": "2026-10-21T15:19:42Z",
+  "updated": "2026-10-22T15:20:24Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "z8D7gysmh8I",
+      "title": "Time for Ferrari in Again? (Perfect F1 Fantasy Team for US GP) - F1 Fantasy Early Thoughts",
+      "published": "2026-10-22",
+      "thumbnail": "https://i.ytimg.com/vi/z8D7gysmh8I/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=z8D7gysmh8I"
+    },
     {
       "id": "aG8UySRhK5U",
       "title": "All in on Red Bull? (Perfect F1 Fantasy Team for Malaysian GP) - F1 Fantasy Early Thoughts",
@@ -22,13 +29,6 @@
       "published": "2026-09-24",
       "thumbnail": "https://i.ytimg.com/vi/xpBN1SZFaso/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=xpBN1SZFaso"
-    },
-    {
-      "id": "QEjFTxR3-TM",
-      "title": "GET RID OF $3M Drivers NOW (Why 3A is the answer) - Baku / Azerbaijan GP F1 Fantasy Early Thoughts",
-      "published": "2026-09-23",
-      "thumbnail": "https://i.ytimg.com/vi/QEjFTxR3-TM/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=QEjFTxR3-TM"
     }
   ]
 }
