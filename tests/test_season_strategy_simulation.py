@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 
 import numpy as np
+import pytest
 
 
 sim = importlib.import_module("pipeline.simulate_fantasy_season_strategies")
@@ -23,6 +24,17 @@ def test_expected_price_change_matches_ppm_brackets_and_floor() -> None:
     assert sim._expected_price_change(
         price=3.0, projected_points=0.0, past_points=[0.0, 0.0]
     ) == 0.0
+
+
+@pytest.mark.parametrize(
+    "price,points,expected",
+    [(34.0, 100, 0.0), (33.9, 100, 0.1), (33.8, 100, 0.2),
+     (34.0, 0, -0.3), (3.1, 0, -0.1), (3.5, 0, -0.5)],
+)
+def test_expected_price_change_respects_asset_bounds(price, points, expected):
+    assert sim._expected_price_change(
+        price=price, projected_points=points, past_points=[points, points],
+    ) == expected
 
 
 def test_free_transfers_have_two_per_round_with_one_rollover_and_cap_three() -> None:

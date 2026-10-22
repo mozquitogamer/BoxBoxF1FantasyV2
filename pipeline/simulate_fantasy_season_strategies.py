@@ -37,6 +37,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from config.settings import CURRENT_SEASON, SEED_DIR, WEB_DATA_DIR
+from config.fantasy_prices import clamp_price_change
 
 
 STARTING_BUDGET = 100.0
@@ -193,9 +194,7 @@ def _expected_price_change(
         change = changes[2]
     else:
         change = changes[3]
-    if price <= 3.001 and change < 0:
-        return 0.0
-    return change
+    return clamp_price_change(price, change)
 
 
 def load_rounds(through_round: int | None = None) -> list[RoundInputs]:

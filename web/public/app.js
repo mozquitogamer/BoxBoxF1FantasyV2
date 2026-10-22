@@ -144,6 +144,7 @@ const PRICE_TIERS = {
     A_TIER_CHANGES: { great: 0.3, good: 0.1, poor: -0.1, terrible: -0.3 },
     B_TIER_CHANGES: { great: 0.6, good: 0.2, poor: -0.2, terrible: -0.6 },
     FLOOR: 3.0,   // F1 Fantasy minimum asset price ($M); an asset at the floor can't drop further
+    CEILING: 34.0, // Maximum price for every driver and constructor ($M)
 };
 // PPM rating thresholds (rolling avg of last 3 rounds / price)
 const PPM_RATINGS = {
@@ -2551,11 +2552,12 @@ function driverRow(d, i) {
     // driver by computeDriverPriceFields() so the columns are sortable. Each
     // tier shows the points RANGE that lands the asset in that price bracket.
     const G = d._pts_great, Gd = d._pts_good, P = d._pts_poor;
-    const tc = d._price_tier === 'A' ? PRICE_TIERS.A_TIER_CHANGES : PRICE_TIERS.B_TIER_CHANGES;
+    const tc = boundedPriceTierChanges(d.current_price);
     const fmtChg = (v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}M`;
     // " to " separator (not an en-dash) so negative ranges like "-25 to -11" read cleanly.
-    const greatCell = `${G}+`;
-    const goodCell = G > Gd ? `${Gd} to ${G - 1}` : `${Gd}+`;
+    const atCeiling = d.current_price >= PRICE_TIERS.CEILING;
+    const greatCell = atCeiling ? 'ceiling' : `${G}+`;
+    const goodCell = atCeiling ? 'ceiling' : (G > Gd ? `${Gd} to ${G - 1}` : `${Gd}+`);
     const poorCell = d._at_floor ? 'floor' : (Gd > P ? `${P} to ${Gd - 1}` : `${P}+`);
     const terribleCell = d._at_floor ? 'floor' : `<${P}`;
 
@@ -3560,16 +3562,19 @@ function makeTableSortable(tableEl) {
 function renderPriceChangeBrackets(item) {
     const pc = predictPriceChange(item, item.expected_points);
     const atFloor = pc.atFloor;
+    const atCeiling = pc.atCeiling;
     const floorStr = `$${PRICE_TIERS.FLOOR.toFixed(1)}M`;
+    const ceilingStr = `$${PRICE_TIERS.CEILING.toFixed(1)}M`;
     const changeColor = pc.expectedChange > 0 ? 'var(--green)' : pc.expectedChange < 0 ? 'var(--red, #ef4444)' : 'var(--text-secondary)';
     const changeSign = pc.expectedChange >= 0 ? '+' : '';
     const tierLabel = pc.isATier ? 'A-tier' : 'B-tier';
     const tc = pc.tierChanges;
 
-    // Build bracket rows — points needed for each bracket. At the price floor the
-    // two drop brackets collapse into a single "won't drop" row (it can't fall
-    // below the floor); rise brackets stay since it can still go up.
-    const brackets = [
+    // Collapse the blocked direction at either bound; partial moves near a
+    // bound use the actual remaining headroom in the bracket labels.
+    const brackets = atCeiling ? [
+        { label: 'No rise', threshold: 'ceiling', pts: pc.ptsForGood, color: 'var(--text-secondary)', ceilingRow: true },
+    ] : [
         { label: `${tc.great >= 0 ? '+' : ''}${tc.great.toFixed(1)}M`, threshold: 'great', pts: pc.ptsForGreat, color: 'var(--green)' },
         { label: `${tc.good >= 0 ? '+' : ''}${tc.good.toFixed(1)}M`, threshold: 'good', pts: pc.ptsForGood, color: '#22d3ee' },
     ];
@@ -3586,6 +3591,7 @@ function renderPriceChangeBrackets(item) {
     if (predicted >= pc.ptsForGreat) activeBracket = 'great';
     else if (predicted >= pc.ptsForGood) activeBracket = 'good';
     else if (!atFloor && predicted >= pc.ptsForPoor) activeBracket = 'poor';
+    if (atCeiling && predicted >= pc.ptsForGood) activeBracket = 'ceiling';
 
     const sourceLabel = pc.priceWindowAssumedZero
         ? 'Assumed pts'
@@ -3600,6 +3606,7 @@ function renderPriceChangeBrackets(item) {
         const isActive = b.threshold === activeBracket;
         let ptsText;
         if (b.floorRow) ptsText = `won't drop &middot; min ${floorStr}`;
+        else if (b.ceilingRow) ptsText = `${Math.ceil(b.pts)} pts or more &middot; max ${ceilingStr}`;
         else if (b.pts != null) ptsText = `${Math.ceil(b.pts)} pts or more`;
         else ptsText = `< ${Math.ceil(pc.ptsForPoor)} pts`;
         return `<div class="bracket-row ${isActive ? 'bracket-active' : ''}" style="--bracket-color:${b.color}">
@@ -3610,6 +3617,8 @@ function renderPriceChangeBrackets(item) {
 
     const predictedHtml = (atFloor && pc.expectedChange <= 0)
         ? `<span class="price-change-predicted" style="color:var(--text-secondary)" title="At the ${floorStr} price floor — can't drop further, only rise">\u{1F512} At ${floorStr} floor</span>`
+        : (atCeiling && pc.expectedChange >= 0)
+        ? `<span class="price-change-predicted" style="color:var(--text-secondary)" title="At the ${ceilingStr} price ceiling — can't rise further">\u{1F512} At ${ceilingStr} ceiling</span>`
         : `<span class="price-change-predicted" style="color:${changeColor}">${changeSign}${pc.expectedChange.toFixed(1)}M</span>`;
 
     return `
@@ -3629,6 +3638,19 @@ function renderPriceChangeBrackets(item) {
 }
 
 // -- Price change prediction helpers --
+function clampPriceChange(price, change) {
+    const nextPrice = Math.max(PRICE_TIERS.FLOOR, Math.min(PRICE_TIERS.CEILING, price + change));
+    return Math.round((nextPrice - price) * 10) / 10;
+}
+
+function boundedPriceTierChanges(price) {
+    const changes = price >= PRICE_TIERS.A_TIER_THRESHOLD
+        ? PRICE_TIERS.A_TIER_CHANGES : PRICE_TIERS.B_TIER_CHANGES;
+    return Object.fromEntries(Object.entries(changes).map(([rating, change]) => [
+        rating, clampPriceChange(price, change),
+    ]));
+}
+
 function getPpmRating(avgPpm) {
     if (avgPpm >= PPM_RATINGS.GREAT) return { label: 'Great', class: 'rating-great', color: 'var(--green)' };
     if (avgPpm >= PPM_RATINGS.GOOD) return { label: 'Good', class: 'rating-good', color: '#22d3ee' };
@@ -3639,7 +3661,7 @@ function getPpmRating(avgPpm) {
 function predictPriceChange(item, predictedPts) {
     const price = item.current_price || 10;
     const isATier = price >= PRICE_TIERS.A_TIER_THRESHOLD;
-    const tierChanges = isATier ? PRICE_TIERS.A_TIER_CHANGES : PRICE_TIERS.B_TIER_CHANGES;
+    const tierChanges = boundedPriceTierChanges(price);
     const isDriver = !!item.driver_id;
     const itemId = isDriver ? item.driver_id : item.constructor_id;
 
@@ -3709,11 +3731,10 @@ function predictPriceChange(item, predictedPts) {
     else if (avgPpm >= PPM_RATINGS.POOR) expectedChange = tierChanges.poor;
     else expectedChange = tierChanges.terrible;
 
-    // Price floor: the game won't let an asset fall below PRICE_TIERS.FLOOR ($3.0M).
-    // An asset already at the floor can't drop, so clamp any predicted negative
-    // change to zero. Rises are still possible if it hits the points threshold.
+    // Effective bracket changes already respect both bounds, including partial
+    // moves for assets close to the floor or ceiling.
     const atFloor = price <= PRICE_TIERS.FLOOR + 0.001;
-    if (atFloor && expectedChange < 0) expectedChange = 0;
+    const atCeiling = price >= PRICE_TIERS.CEILING - 0.001;
 
     // Points needed this round for each threshold
     // Rolling window = last 2 actual rounds + predicted this round = 3 total
@@ -3726,7 +3747,7 @@ function predictPriceChange(item, predictedPts) {
     const ptsForPoor = PPM_RATINGS.POOR * price * windowSize - recentSum;
 
     return {
-        avgPpm, rating, expectedChange, avgPts, atFloor,
+        avgPpm, rating, expectedChange, avgPts, atFloor, atCeiling,
         cumulativeTotal, pastScores: (priceWindowAssumedZero || priceWindowReset) ? recentWindow : pastScores,
         isATier, tierChanges, hasOfficialData, priceWindowAssumedZero, priceWindowReset,
         tier: isATier ? 'A' : 'B',
@@ -3804,6 +3825,21 @@ function projectedTeamPriceChange(drivers, constructorsList, scoreLookup = null)
         total += predictPriceChange(item, predicted).expectedChange;
     }
     return Math.round(total * 100) / 100;
+}
+
+function projectPriceChangesForRounds(drivers, constructorsList, projections) {
+    const assets = [...drivers, ...constructorsList].map(item => ({ ...item }));
+    return projections.map(projection => {
+        const changes = {};
+        for (const item of assets) {
+            const id = item.driver_id || item.constructor_id;
+            const scores = item.driver_id ? projection.drivers : projection.constructors;
+            const change = predictPriceChange(item, scores[id] || 0).expectedChange;
+            changes[id] = change;
+            item.current_price = Math.round((item.current_price + change) * 10) / 10;
+        }
+        return changes;
+    });
 }
 
 function setupBudgetValueTool() {
@@ -6996,16 +7032,18 @@ async function runMultiWeekPlanner() {
     const holdDriverObjects = teamDrivers
         .map(id => findDriverAsset(id))
         .filter(Boolean);
-    const holdConstructorObjects = teamCons
-        .map(id => data.constructors.find(c => c.constructor_id === id))
-        .filter(Boolean);
+    // Market prices evolve independently of ownership. Share one bounded path
+    // across hold, feasibility and beam states, including picks bought later.
+    const plannerDriverObjects = [...new Map(
+        [...data.drivers, ...holdDriverObjects].map(item => [item.driver_id, item]),
+    ).values()];
+    const priceChangesByRound = projectPriceChangesForRounds(
+        plannerDriverObjects, data.constructors, roundProjections,
+    );
     let runningHoldBudget = budget;
-    const holdBudgetPath = roundProjections.map(proj => {
-        const scoreLookup = { ...proj.drivers, ...proj.constructors };
-        runningHoldBudget += projectedTeamPriceChange(
-            holdDriverObjects,
-            holdConstructorObjects,
-            scoreLookup,
+    const holdBudgetPath = roundProjections.map((proj, ri) => {
+        runningHoldBudget += [...teamDrivers, ...teamCons].reduce(
+            (sum, id) => sum + (priceChangesByRound[ri][id] || 0), 0,
         );
         runningHoldBudget = Math.round(runningHoldBudget * 100) / 100;
         return runningHoldBudget;
@@ -7046,14 +7084,9 @@ async function runMultiWeekPlanner() {
         // Uses the same per-round projected scores as the beam search (so this is
         // consistent with P1's in-loop budget propagation).
         let horizonAppreciation = 0;
-        for (const proj of roundProjections) {
-            for (const d of currentDriverObjs) {
-                const pc = predictPriceChange(d, proj.drivers[d.driver_id] || 0);
-                horizonAppreciation += pc.expectedChange;
-            }
-            for (const c of currentConObjs) {
-                const pc = predictPriceChange(c, proj.constructors[c.constructor_id] || 0);
-                horizonAppreciation += pc.expectedChange;
+        for (const changes of priceChangesByRound) {
+            for (const item of [...currentDriverObjs, ...currentConObjs]) {
+                horizonAppreciation += changes[item.driver_id || item.constructor_id] || 0;
             }
         }
 
@@ -7364,23 +7397,9 @@ async function runMultiWeekPlanner() {
                 // computed on the PERSISTED team, not the dream team. Without
                 // this, firing Limitless would boost next-round budget by the
                 // dream team's appreciation (which the user never owned).
-                let roundAppreciation = 0;
-                for (const did of persistedDrivers) {
-                    const d = findDriverAsset(did);
-                    if (d) {
-                        const projPts = proj.drivers[did] || 0;
-                        const pc = predictPriceChange(d, projPts);
-                        roundAppreciation += pc.expectedChange;
-                    }
-                }
-                for (const cid of persistedCons) {
-                    const c = data.constructors.find(x => x.constructor_id === cid);
-                    if (c) {
-                        const projPts = proj.constructors[cid] || 0;
-                        const pc = predictPriceChange(c, projPts);
-                        roundAppreciation += pc.expectedChange;
-                    }
-                }
+                const roundAppreciation = [...persistedDrivers, ...persistedCons].reduce(
+                    (sum, id) => sum + (priceChangesByRound[ri][id] || 0), 0,
+                );
                 const budgetBefore = state.budget;
                 const budgetAfter = Math.round((state.budget + roundAppreciation) * 100) / 100;
                 const nextTotalPoints = state.totalPoints + netPts;

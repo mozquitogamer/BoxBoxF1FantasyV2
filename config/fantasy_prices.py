@@ -11,6 +11,16 @@ from typing import Any
 from config.settings import SEED_DIR
 
 
+ASSET_PRICE_FLOOR = 3.0
+ASSET_PRICE_CEILING = 34.0
+
+
+def clamp_price_change(price: float, change: float) -> float:
+    """Keep forecast driver and constructor prices within the game bounds ($M)."""
+    next_price = max(ASSET_PRICE_FLOOR, min(ASSET_PRICE_CEILING, price + change))
+    return round(next_price - price, 1)
+
+
 class FantasyPriceDataError(ValueError):
     """Raised when a price snapshot cannot safely represent the full field."""
 
