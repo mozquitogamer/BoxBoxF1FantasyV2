@@ -402,6 +402,10 @@ def main() -> None:
     features_df["fp_sessions_included"] = ",".join(
         f.stem.removeprefix("all_laps_").upper() for f in fp_files
     )
+    features_df["fp_data_sources"] = ",".join(sorted({
+        str(source) for frame in all_laps
+        for source in frame.get("fp_data_source", pd.Series(["fastf1"])).dropna().unique()
+    }))
     # This is metadata, not a model feature. It lets training and inference
     # reject stale parquets produced with the old cross-session stint rules.
     features_df["fp_stint_semantics_version"] = FP_STINT_SEMANTICS_VERSION

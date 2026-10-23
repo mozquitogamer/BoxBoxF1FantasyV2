@@ -42,5 +42,17 @@
       "places": 30,
       "back_of_grid": true
     }
+  },
+  "20": {
+    "_note": "United States GP post-FP1: penalties supplied by the user on 2026-10-23. Bortoleto starts at the back of the grid; Colapinto drops 10 places; Lindblad drops five places. Qualifying points use the unpenalised classification.",
+    "BOR": {
+      "back_of_grid": true
+    },
+    "COL": {
+      "places": 10
+    },
+    "LIN": {
+      "places": 5
+    }
   }
 }

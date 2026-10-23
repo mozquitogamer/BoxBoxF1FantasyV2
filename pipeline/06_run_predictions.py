@@ -1634,6 +1634,11 @@ def run_predictions(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "is_post_quali": is_post_quali,
         "used_fp_features": has_fp,
+        "fp_data_sources": (
+            sorted({source.strip() for value in fp_df["fp_data_sources"].dropna()
+                    for source in str(value).split(",") if source.strip()})
+            if has_fp and "fp_data_sources" in fp_df.columns else []
+        ),
         "sprint_grid_is_actual": bool(is_sprint and pred_df["sprint_grid_is_actual"].all()),
         "fp_sessions_included": (
             sorted({session.strip() for value in fp_df["fp_sessions_included"].dropna()
@@ -1669,7 +1674,8 @@ def run_predictions(
     # Content-addressed source copies keep each model/config version only once.
     from pipeline.prediction_replay import freeze_inference_bundle
     project_root = Path(__file__).resolve().parents[1]
-    source_names = ['pipeline/06_run_predictions.py', 'pipeline/07_calculate_fantasy.py',
+    source_names = ['pipeline/03_extract_features.py', 'pipeline/import_openf1_fp.py',
+                    'pipeline/06_run_predictions.py', 'pipeline/07_calculate_fantasy.py',
                     'pipeline/08_monte_carlo_fantasy.py', 'pipeline/feature_engineering.py',
                     'pipeline/fp_long_runs.py', 'pipeline/qualifying_transform.py',
                     'pipeline/prediction_replay.py', 'config/settings.py',

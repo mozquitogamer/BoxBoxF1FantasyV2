@@ -1,0 +1,58 @@
+{
+  "_comment": "Known race starting-grid penalties. 'places' drops a driver from each predicted/simulated qualifying result; 'back_of_grid' fixes them behind the field. Qualifying fantasy points remain based on the unpenalized qualifying result.",
+  "12": {
+    "_note": "Belgian GP confirmed penalties before FP3: HAD starts at the back; NOR and STR receive 10-place drops.",
+    "HAD": {
+      "back_of_grid": true
+    },
+    "NOR": {
+      "places": 10
+    },
+    "STR": {
+      "places": 10
+    }
+  },
+  "13": {
+    "_note": "Hungarian GP confirmed post-qualifying penalties: HAM and ANT receive three-place grid drops.",
+    "HAM": {
+      "places": 3
+    },
+    "ANT": {
+      "places": 3
+    }
+  },
+  "15": {
+    "_note": "Italian GP confirmed pre-qualifying penalties: ANT and ALB start from the back of the grid regardless of qualifying position.",
+    "ANT": {
+      "back_of_grid": true
+    },
+    "ALB": {
+      "back_of_grid": true
+    }
+  },
+  "18": {
+    "_note": "Updated 2026-10-02 for Bahrain GP in Malaysia power-unit changes: Colapinto receives 15 places total (five from the Baku restart collision plus ten for a new engine); Hadjar receives five places; Lindblad receives 30 places and starts at the back of the grid. Sources: https://www.formula1.com/en/latest/article/colapinto-hit-with-five-place-grid-penalty-for-bahrain-gp-in-malaysia-after-baku-collision.3gWVfzDMMr5hReiwTt1fPD ; https://gp.news/documents/2026-bahrain-grand-prix-doc-17/ ; https://gp.news/documents/2026-bahrain-grand-prix-doc-18/ ; https://gp.news/documents/2026-bahrain-grand-prix-doc-19/",
+    "COL": {
+      "places": 15
+    },
+    "HAD": {
+      "places": 5
+    },
+    "LIN": {
+      "places": 30,
+      "back_of_grid": true
+    }
+  },
+  "20": {
+    "_note": "United States GP post-FP1: penalties supplied by the user on 2026-10-23. Bortoleto starts at the back of the grid; Colapinto drops 10 places; Lindblad drops five places. Qualifying points use the unpenalised classification.",
+    "BOR": {
+      "back_of_grid": true
+    },
+    "COL": {
+      "places": 10
+    },
+    "LIN": {
+      "places": 5
+    }
+  }
+}

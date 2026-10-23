@@ -1,0 +1,53 @@
+[
+  {
+    "session_key": 11270,
+    "session_type": "Practice",
+    "session_name": "Practice 1",
+    "date_start": "2026-05-01T16:00:00+00:00",
+    "date_end": "2026-05-01T17:30:00+00:00",
+    "meeting_key": 1284,
+    "circuit_key": 151,
+    "circuit_short_name": "Miami",
+    "country_key": 19,
+    "country_code": "USA",
+    "country_name": "United States",
+    "location": "Miami Gardens",
+    "gmt_offset": "-04:00:00",
+    "year": 2026,
+    "is_cancelled": false
+  },
+  {
+    "session_key": 11389,
+    "session_type": "Practice",
+    "session_name": "Practice 1",
+    "date_start": "2026-10-23T17:30:00+00:00",
+    "date_end": "2026-10-23T18:30:00+00:00",
+    "meeting_key": 1297,
+    "circuit_key": 9,
+    "circuit_short_name": "Austin",
+    "country_key": 19,
+    "country_code": "USA",
+    "country_name": "United States",
+    "location": "Austin",
+    "gmt_offset": "-05:00:00",
+    "year": 2026,
+    "is_cancelled": false
+  },
+  {
+    "session_key": 11413,
+    "session_type": "Practice",
+    "session_name": "Practice 1",
+    "date_start": "2026-11-20T00:30:00+00:00",
+    "date_end": "2026-11-20T01:30:00+00:00",
+    "meeting_key": 1300,
+    "circuit_key": 152,
+    "circuit_short_name": "Las Vegas",
+    "country_key": 19,
+    "country_code": "USA",
+    "country_name": "United States",
+    "location": "Las Vegas",
+    "gmt_offset": "-08:00:00",
+    "year": 2026,
+    "is_cancelled": false
+  }
+]

@@ -67,6 +67,67 @@ def test_round15_antonelli_and_albon_start_at_back_in_qualifying_order():
     assert by_driver["ALB"] == 22
 
 
+def test_round20_us_gp_penalties_preserve_a_unique_grid():
+    rules = load_grid_penalties(20)
+    assert rules == {
+        "BOR": {"back_of_grid": True},
+        "COL": {"places": 10},
+        "LIN": {"places": 5},
+    }
+    positions = np.arange(1, 23)
+    by_driver = dict(zip(QUALIFYING_ORDER, apply_grid_penalties(positions, QUALIFYING_ORDER, rules)))
+    assert by_driver["BOR"] == 22
+    assert by_driver["COL"] == 21
+    assert by_driver["LIN"] == 14
+    rng = np.random.default_rng(20)
+    for _ in range(1000):
+        qualifying = rng.permutation(positions)
+        grid = apply_grid_penalties(qualifying, QUALIFYING_ORDER, rules)
+        assert sorted(grid.tolist()) == positions.tolist()
+        assert grid[QUALIFYING_ORDER.index("BOR")] == 22
+
+
+def test_round20_mc_scores_qualifying_separately_and_samples_overtakes_from_penalised_grid(monkeypatch):
+    mc = importlib.import_module("pipeline.08_monte_carlo_fantasy")
+    rules = load_grid_penalties(20)
+    n = len(QUALIFYING_ORDER)
+    positions = np.arange(1, n + 1)
+    rows = pd.DataFrame({
+        "driver_id": QUALIFYING_ORDER, "driver_abbrev": QUALIFYING_ORDER,
+        "constructor_id": [f"team_{index // 2}" for index in range(n)],
+        "confidence": [70] * n,
+        "predicted_quali_position": positions,
+        "predicted_grid_position": apply_grid_penalties(positions, QUALIFYING_ORDER, rules),
+        "predicted_race_position": positions,
+        "predicted_quali_raw": -positions.astype(float),
+        "predicted_race_raw": -positions.astype(float),
+        "grid_penalty_places": [rules.get(driver, {}).get("places", 0) for driver in QUALIFYING_ORDER],
+        "grid_back_of_grid": [rules.get(driver, {}).get("back_of_grid", False) for driver in QUALIFYING_ORDER],
+    })
+    points = pd.DataFrame({"driver_abbrev": QUALIFYING_ORDER, "dnf_probability": [0.0] * n})
+    monkeypatch.setattr(mc, "load_overtake_history", lambda: {})
+    monkeypatch.setattr(mc, "load_drivers_info", lambda: {})
+    monkeypatch.setattr(mc, "load_mechanical_shares", lambda _: np.zeros(n))
+    seen_grids = []
+    original_overtakes = mc.sample_overtakes
+
+    def record_grid(grid, race, dnf, rng, **kwargs):
+        seen_grids.append(grid.copy())
+        return original_overtakes(grid, race, dnf, rng, **kwargs)
+
+    monkeypatch.setattr(mc, "sample_overtakes", record_grid)
+    result = mc.run_simulations(rows, points, n_sims=100, seed=20)
+    arrays = result["_sim_arrays"]
+    assert not result["simulation_params"]["qualifying_locked"]
+    assert len(seen_grids) == 100
+    for qualifying, grid, quali_points in zip(arrays["all_quali_pos"], seen_grids, arrays["all_quali_pts"]):
+        assert np.array_equal(grid, apply_grid_penalties(qualifying, QUALIFYING_ORDER, rules))
+        assert grid[QUALIFYING_ORDER.index("BOR")] == 22
+        assert sorted(grid.tolist()) == positions.tolist()
+        assert quali_points.tolist() == [fantasy.calc_qualifying_points_driver(int(position)) for position in qualifying]
+    assert fantasy.estimate_overtakes(22, 11) > fantasy.estimate_overtakes(13, 11)
+
+
 def test_no_penalties_is_identity_and_place_drop_caps_at_field_tail():
     positions = np.array([3, 1, 2])
     drivers = ["A", "B", "C"]

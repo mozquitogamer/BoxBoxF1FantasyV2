@@ -972,6 +972,7 @@ def main():
         if (phase == "post_fp" and metadata.get("phase") == "post_fp"
                 and metadata.get("round") == round_num):
             predictions["fp_sessions_included"] = metadata.get("fp_sessions_included", [])
+            predictions["fp_data_sources"] = metadata.get("fp_data_sources", [])
             predictions["sprint_grid_is_actual"] = bool(metadata.get("sprint_grid_is_actual"))
         if args.reconstructed:
             predictions["reconstructed"] = True

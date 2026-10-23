@@ -1,0 +1,72 @@
+{
+  "source": "openf1",
+  "session": {
+    "session_key": 11389,
+    "session_type": "Practice",
+    "session_name": "Practice 1",
+    "date_start": "2026-10-23T17:30:00+00:00",
+    "date_end": "2026-10-23T18:30:00+00:00",
+    "meeting_key": 1297,
+    "circuit_key": 9,
+    "circuit_short_name": "Austin",
+    "country_key": 19,
+    "country_code": "USA",
+    "country_name": "United States",
+    "location": "Austin",
+    "gmt_offset": "-05:00:00",
+    "year": 2026,
+    "is_cancelled": false
+  },
+  "round": 20,
+  "imported_at": "2026-10-23T19:04:24.128157+00:00",
+  "clean_laps": 256,
+  "drivers": [
+    "ALO",
+    "ANT",
+    "BEA",
+    "BOR",
+    "BOT",
+    "COL",
+    "GAS",
+    "HAD",
+    "HAM",
+    "HER",
+    "HUL",
+    "LAW",
+    "LEC",
+    "LIN",
+    "NOR",
+    "OCO",
+    "PIA",
+    "RUS",
+    "SAI",
+    "STR",
+    "VER"
+  ],
+  "sources": {
+    "drivers": {
+      "sha256": "dc2c1fc9ad5c167b9ed1e7db1c584c9f471e0006421d47e637d4abc4f13c9f00",
+      "url": "https://api.openf1.org/v1/drivers?session_key=11389"
+    },
+    "laps": {
+      "sha256": "ba366a349c923e87fa5acb06697457a8ea7cbf4c0c2e32a287ba78b6d2c75edb",
+      "url": "https://api.openf1.org/v1/laps?session_key=11389"
+    },
+    "stints": {
+      "sha256": "cbc58900a6cd447e4b91e4abc8429c84e40f6acae45f0fdb7ba6f1cf4d332281",
+      "url": "https://api.openf1.org/v1/stints?session_key=11389"
+    },
+    "race_control": {
+      "sha256": "28a67af8fb472379119f404e91f9d33191d70c5b8b8b6c1090032450da7d578e",
+      "url": "https://api.openf1.org/v1/race_control?session_key=11389"
+    },
+    "weather": {
+      "sha256": "6ec7fc9aff50a6231c2c3d98a3b263a1c4f7a8096d614c962b210f7acc123351",
+      "url": "https://api.openf1.org/v1/weather?session_key=11389"
+    },
+    "session_result": {
+      "sha256": "5fce8bf288340b2d0fe5714bfc95ba145c541340dc272cec63ee720a804f0157",
+      "url": "https://api.openf1.org/v1/session_result?session_key=11389"
+    }
+  }
+}
