@@ -68,6 +68,24 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _archive_sha256_matches(path: Path, expected: str) -> bool:
+    """Verify frozen bytes, allowing only historical Git LF/CRLF conversion.
+
+    Older forecasts were hashed on Windows before Git preserved their exact
+    bytes. Keep those recorded hashes intact: reconstruct the two possible
+    line-ending forms rather than reserializing JSON or accepting other edits.
+    New records continue to store the raw-byte hash from ``_sha256``.
+    """
+    raw = path.read_bytes()
+    if hashlib.sha256(raw).hexdigest() == expected:
+        return True
+    lf = raw.replace(b"\r\n", b"\n")
+    return expected in {
+        hashlib.sha256(lf).hexdigest(),
+        hashlib.sha256(lf.replace(b"\n", b"\r\n")).hexdigest(),
+    }
+
+
 def _names() -> tuple[dict[str, str], dict[str, str]]:
     drivers = _load_json(SEED_DIR / "drivers.json")["drivers"]
     constructors = _load_json(SEED_DIR / "constructors.json")["constructors"]
@@ -718,6 +736,10 @@ def _final_fix(
         return None
 
     actual_path = ROOT / "data" / "predictions" / f"round{round_num}" / "actual_fantasy_points.json"
+    if not actual_path.exists():
+        # 11_actual_fantasy_points writes the same result to both locations.
+        # The published copy is tracked; local pipeline outputs are Git-ignored.
+        actual_path = WEB_DATA_DIR / f"actual_round{round_num}.json"
     actual = _load_json(actual_path)
     actual_rows = {item["driver_id"]: item for item in actual["drivers"]}
     multiplier = 2 if best["boost_transferred"] else 1

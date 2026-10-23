@@ -423,7 +423,7 @@ def publish(round_num: int, phase: str) -> dict[str, Any]:
     if path.exists():
         existing = v13._load_json(path)
         current_archive = ROOT / existing["archive"]
-        if v13._sha256(current_archive) != existing["archive_sha256"]:
+        if not v13._archive_sha256_matches(current_archive, existing["archive_sha256"]):
             raise RuntimeError(
                 f"{path.name} is frozen but its source archive has changed; investigate"
             )
@@ -514,7 +514,7 @@ def publish_live(round_num: int, phase: str) -> dict[str, Any]:
     if live.get("reconstructed"):
         raise ValueError("Cannot refresh a live V13 decision from reconstructed predictions")
     active_archive = ROOT / active["archive"]
-    if v13._sha256(active_archive) != active["archive_sha256"]:
+    if not v13._archive_sha256_matches(active_archive, active["archive_sha256"]):
         raise RuntimeError("Active V13 decision's frozen source archive has changed")
     if live == v13._load_json(active_archive):
         return active

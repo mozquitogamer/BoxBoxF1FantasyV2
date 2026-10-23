@@ -54,7 +54,7 @@ def test_r14_early_thoughts_are_frozen_from_a_pre_lock_archive() -> None:
     assert datetime.fromisoformat(decision["source_generated_at"]) < datetime.fromisoformat(
         decision["lock_deadline"].replace("Z", "+00:00")
     )
-    assert v13._sha256(v13.ROOT / decision["archive"]) == decision["archive_sha256"]
+    assert v13._archive_sha256_matches(v13.ROOT / decision["archive"], decision["archive_sha256"])
     assert "HAD" not in decision["drivers"]
     assert "LAW" not in decision["drivers"]
     assert set(decision["drivers"]).issubset(
@@ -76,7 +76,7 @@ def test_publishing_an_existing_decision_is_idempotent(tmp_path, monkeypatch) ->
     decision = publish.publish(14, "pre_fp")
 
     assert path.read_bytes() == before
-    assert decision["archive_sha256"] == v13._sha256(v13.ROOT / decision["archive"])
+    assert v13._archive_sha256_matches(v13.ROOT / decision["archive"], decision["archive_sha256"])
 
 
 def test_live_price_gain_value_is_horizon_aware_and_calibrated() -> None:

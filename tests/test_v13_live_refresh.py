@@ -64,6 +64,33 @@ def test_fp2_refresh_preserves_fp1_and_retry_reuses_revision(workspace):
     assert [archive.read_bytes(), base_path.read_bytes()] == frozen
 
 
+def test_refresh_accepts_legacy_newlines_without_rewriting_the_frozen_record(workspace):
+    _, archive, base_path, decisions, _ = workspace
+    lf = (json.dumps(json.loads(archive.read_bytes()), indent=2) + "\n").encode()
+    original_windows_bytes = lf.replace(b"\n", b"\r\n")
+    base = json.loads(base_path.read_bytes())
+    base["archive_sha256"] = hashlib.sha256(original_windows_bytes).hexdigest()
+    base_path.write_bytes(publisher._canonical_bytes(base))
+    archive.write_bytes(lf)
+    frozen = [archive.read_bytes(), base_path.read_bytes()]
+
+    result = publisher.publish_live(18, "post_fp")
+
+    assert result["revision"] == 2
+    assert result["supersedes_sha256"] == publisher._record_sha256(base)
+    assert len(list(decisions.glob("*revision*.json"))) == 1
+    assert [archive.read_bytes(), base_path.read_bytes()] == frozen
+
+
+def test_refresh_rejects_a_tampered_original_source(workspace):
+    _, archive, _, decisions, _ = workspace
+    source = json.loads(archive.read_bytes())
+    archive.write_bytes(json.dumps({**source, "round": 19}).encode())
+    with pytest.raises(RuntimeError, match="source archive has changed"):
+        publisher.publish_live(18, "post_fp")
+    assert not list(decisions.glob("*revision*.json"))
+
+
 @pytest.mark.parametrize("changes", [
     {"round": 19}, {"phase": "post_quali"}, {"reconstructed": True},
     {"generated_at": "2026-10-03T08:00:00Z"},

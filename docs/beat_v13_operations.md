@@ -74,6 +74,16 @@ the input forecast's SHA-256 hash and generation time, the published F1 Fantasy
 lock time, and the hash of the previous V13 decision. An existing record is
 never regenerated or overwritten by the publishing command.
 
+New forecast hashes use the exact file bytes. When verifying older records,
+V13 also checks the LF and CRLF forms because Git converted some Windows
+archives before byte preservation was configured. This compatibility check
+does not reserialize JSON, accept content edits, or rewrite frozen hashes.
+
+Final Fix evaluation uses the local actual-points output when available and
+falls back to the identical published `web/public/data/actual_roundN.json`.
+The published copy is tracked, so a clean checkout can rebuild the manager
+record without the Git-ignored `data/predictions/` directory.
+
 ## Weekly workflow
 
 ### 1. Early thoughts
