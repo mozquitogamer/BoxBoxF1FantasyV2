@@ -256,6 +256,7 @@ Before each round, update `data/seed/fantasy_prices.json` with current F1 Fantas
 ## Important Conventions
 
 - Pipeline scripts are numbered (01-13) and run sequentially
+- **Deleted practice laps remain pace evidence (FP semantics v4):** retain real timed deleted FP laps in both FastF1 and OpenF1 imports, with `lap_deleted` as provenance. Continue filtering pit laps, missing/nonpositive times and SC/VSC/red-flag interruptions; long-run extraction trims cooldown/traffic spikes. Deletion alone must not remove a lap from qualifying-pace features, race-pace features or simulations. Official qualifying classifications, banked points and confirmed grids remain separate legal results. Rebuild training and prediction features consistently; never relabel old legal-only lap populations as v4. `pipeline/rebuild_fp_pace.py --output <staging-directory>` reconstructs existing FP coverage from archived raw sources without rewriting historical forecasts.
 - All rolling features use `.shift(1)` to prevent data leakage
 - Constructor scoring never includes driver boost multipliers (2x/3x)
 - **Post-quali scoring keeps two position concepts:** `actual_quali_position` is the official qualifying classification used for banked qualifying points; `predicted_grid_position` is the confirmed penalised race start used for positions gained/lost. Never replace one with the other. In post-quali MC both are fixed, and Final Fix retains the outgoing driver's qualifying points while swapping only deterministic `projected_points_race`.

@@ -1,0 +1,864 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-24T07:35:09.897660+00:00",
+  "metadata": {
+    "round": 24,
+    "year": 2026,
+    "phase": "pre_fp",
+    "generated_at": "2026-10-24T07:35:09.688541+00:00",
+    "is_post_quali": false,
+    "used_fp_features": false,
+    "fp_data_sources": [],
+    "sprint_grid_is_actual": false,
+    "fp_sessions_included": [],
+    "fp_stint_semantics_version": null,
+    "skip_fp_flag": true,
+    "force_flag": true,
+    "race_model_used": "race_model_fp.json",
+    "race_model_algorithm": "xgboost",
+    "quali_model_sha256_16": "e0e6f8541f58a521",
+    "race_model_sha256_16": "659cc4761aa72224",
+    "grid_penalties": {},
+    "grid_anchor": {
+      "candidate_weight": 0.0,
+      "applied_weight": 0.0,
+      "applied": false,
+      "reason": "track_anchor_disabled",
+      "fp_pace_driver_count": 0,
+      "min_fp_pace_drivers": 10,
+      "fp_quali_blend_applied": false
+    },
+    "weather_features_used": {
+      "source": "2026-10-24T05:35:03Z",
+      "missing": true,
+      "per_session": {},
+      "stale": true,
+      "weather_round": 20
+    },
+    "driver_assets": {
+      "round": 24,
+      "year": 2026,
+      "override_active": false,
+      "source": {
+        "result": "canonical_seed_roster"
+      },
+      "active_assets": [
+        {
+          "asset_id": "RUS",
+          "model_driver_id": "russell",
+          "constructor_id": "mercedes",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "VER",
+          "model_driver_id": "max_verstappen",
+          "constructor_id": "red_bull",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "NOR",
+          "model_driver_id": "norris",
+          "constructor_id": "mclaren",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "PIA",
+          "model_driver_id": "piastri",
+          "constructor_id": "mclaren",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "ANT",
+          "model_driver_id": "antonelli",
+          "constructor_id": "mercedes",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "LEC",
+          "model_driver_id": "leclerc",
+          "constructor_id": "ferrari",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "HAM",
+          "model_driver_id": "hamilton",
+          "constructor_id": "ferrari",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "HAD",
+          "model_driver_id": "hadjar",
+          "constructor_id": "red_bull",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "GAS",
+          "model_driver_id": "gasly",
+          "constructor_id": "alpine",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "SAI",
+          "model_driver_id": "sainz",
+          "constructor_id": "williams",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "ALB",
+          "model_driver_id": "albon",
+          "constructor_id": "williams",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "ALO",
+          "model_driver_id": "alonso",
+          "constructor_id": "aston_martin",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "BEA",
+          "model_driver_id": "bearman",
+          "constructor_id": "haas",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "OCO",
+          "model_driver_id": "ocon",
+          "constructor_id": "haas",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "LIN",
+          "model_driver_id": "arvid_lindblad",
+          "constructor_id": "racing_bulls",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "COL",
+          "model_driver_id": "colapinto",
+          "constructor_id": "alpine",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "LAW",
+          "model_driver_id": "lawson",
+          "constructor_id": "racing_bulls",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "STR",
+          "model_driver_id": "stroll",
+          "constructor_id": "aston_martin",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "BOR",
+          "model_driver_id": "bortoleto",
+          "constructor_id": "audi",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "PER",
+          "model_driver_id": "perez",
+          "constructor_id": "cadillac",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "HUL",
+          "model_driver_id": "hulkenberg",
+          "constructor_id": "audi",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        },
+        {
+          "asset_id": "BOT",
+          "model_driver_id": "bottas",
+          "constructor_id": "cadillac",
+          "availability": {
+            "from_round": 1,
+            "to_round": null
+          },
+          "asset_context": "canonical_season_asset"
+        }
+      ]
+    }
+  },
+  "frames": [
+    {
+      "path": "data/audit/inputs/year2026/round24/p_958639f0b9c44ad6/qualifying_context.parquet",
+      "sha256": "cc697ed24f703b6a093acda0a009ea1c566fb5c890559618828e2eb7621aa802",
+      "rows": 22,
+      "columns": [
+        "season",
+        "round",
+        "circuit_id",
+        "driver_id",
+        "constructor_id",
+        "grid",
+        "finish_position",
+        "points",
+        "laps_completed",
+        "quali_position",
+        "has_sprint",
+        "sprint_position",
+        "sprint_points",
+        "sprint_grid",
+        "is_classified",
+        "is_dnf",
+        "is_dns",
+        "is_dsq",
+        "dnf_mechanical",
+        "dnf_collision",
+        "dnf_driver_error",
+        "roll_points_3",
+        "roll_finishpos_3",
+        "roll_quali_3",
+        "roll_points_5",
+        "roll_finishpos_5",
+        "roll_quali_5",
+        "roll_dnf_rate_5",
+        "roll_mech_dnf_rate_5_driver",
+        "roll_collision_dnf_rate_5_driver",
+        "roll_drivererror_dnf_rate_5_driver",
+        "sim_weighted_points_3",
+        "sim_weighted_finishpos_3",
+        "sim_weighted_quali_3",
+        "sim_weighted_points_5",
+        "sim_weighted_finishpos_5",
+        "sim_weighted_quali_5",
+        "driver_quali_last",
+        "driver_roll_quali_3",
+        "driver_roll_quali_5",
+        "driver_season_avg_quali",
+        "driver_season_med_quali",
+        "driver_vs_field_season",
+        "constructor_vs_field_season",
+        "team_delta_last",
+        "team_delta_roll_3",
+        "team_delta_roll_5",
+        "driver_circuit_exp",
+        "driver_circuit_roll_3",
+        "driver_circuit_reliability",
+        "driver_circuit_roll_3_reliability",
+        "is_pole_position",
+        "is_front_row",
+        "is_top10_quali",
+        "grid_advantage",
+        "position_delta_prev",
+        "recent_wins",
+        "recent_podiums",
+        "recent_points_rate",
+        "recent_form_weighted",
+        "form_trend",
+        "season_progress",
+        "is_street",
+        "overtaking_difficulty",
+        "avg_corner_speed",
+        "straight_line_importance",
+        "downforce_level",
+        "turn1_incident_risk",
+        "safety_car_probability",
+        "track_evolution",
+        "grip_level",
+        "strategy_rating",
+        "adaptability",
+        "cold_skill",
+        "tire_mgmt",
+        "wet_skill",
+        "overtaking",
+        "quali_skill",
+        "strategy_sc_advantage",
+        "quali_skill_x_ot_diff",
+        "roll_mech_dnf_rate_5_constructor",
+        "constructor_quali_last",
+        "constructor_roll_quali_3",
+        "constructor_roll_quali_5",
+        "constructor_season_avg_quali",
+        "field_season_avg_quali",
+        "constructor_circuit_exp",
+        "team_recent_form",
+        "model_driver_id",
+        "asset_id",
+        "driver_abbrev",
+        "asset_confidence_multiplier",
+        "asset_mc_noise_multiplier",
+        "asset_context",
+        "asset_legacy_ids",
+        "driver_name",
+        "driver_number",
+        "weather_was_wet_quali",
+        "weather_track_temp_quali",
+        "weather_air_temp_quali",
+        "weather_humidity_quali",
+        "weather_precip_minutes_quali",
+        "weather_was_wet_race",
+        "weather_track_temp_race",
+        "weather_air_temp_race",
+        "weather_humidity_race",
+        "weather_precip_minutes_race",
+        "weather_was_wet_sprint",
+        "weather_track_temp_sprint",
+        "weather_air_temp_sprint",
+        "weather_humidity_sprint",
+        "weather_precip_minutes_sprint",
+        "actual_quali_position",
+        "avg_lap_time",
+        "avg_pace_delta_to_median",
+        "avg_sector_1",
+        "avg_sector_2",
+        "avg_sector_3",
+        "best_10_lap_avg",
+        "best_3_lap_avg",
+        "best_5_lap_avg",
+        "best_lap_time",
+        "best_sector_1",
+        "best_sector_2",
+        "best_sector_3",
+        "cv_lap_time",
+        "deg_x_laps",
+        "degradation_rate",
+        "fp_sessions_used",
+        "hard_degradation",
+        "hard_long_run_avg",
+        "lap_time_std",
+        "lap_time_variance",
+        "laps_per_session",
+        "long_run_avg",
+        "long_run_delta",
+        "long_run_delta_to_median",
+        "long_run_laps",
+        "long_run_rank",
+        "median_lap_time",
+        "medium_degradation",
+        "medium_hard_gap",
+        "medium_long_run_avg",
+        "p50_to_p95_avg",
+        "pace_consistency_ratio",
+        "pace_delta",
+        "pace_delta_to_fastest",
+        "pace_delta_to_median",
+        "pace_rank",
+        "prior_vs_fp_rank",
+        "race_pace_delta_to_median",
+        "sector_1_delta",
+        "sector_1_delta_to_fastest",
+        "sector_2_delta",
+        "sector_2_delta_to_fastest",
+        "sector_3_delta",
+        "sector_3_delta_to_fastest",
+        "short_run_best",
+        "soft_avg_lap",
+        "soft_best_lap",
+        "soft_degradation",
+        "soft_long_run_avg",
+        "soft_medium_gap",
+        "soft_vs_overall_best",
+        "theoretical_best",
+        "top3_vs_top5",
+        "top5_vs_top10",
+        "total_laps"
+      ]
+    },
+    {
+      "path": "data/audit/inputs/year2026/round24/p_958639f0b9c44ad6/qualifying_features.parquet",
+      "sha256": "68232032f53d62fe949e87c56c91955588571689befbbde47a343f4a51c958af",
+      "rows": 22,
+      "columns": [
+        "avg_corner_speed",
+        "avg_lap_time",
+        "avg_pace_delta_to_median",
+        "avg_sector_1",
+        "avg_sector_2",
+        "avg_sector_3",
+        "best_10_lap_avg",
+        "best_3_lap_avg",
+        "best_5_lap_avg",
+        "best_lap_time",
+        "best_sector_1",
+        "best_sector_2",
+        "best_sector_3",
+        "constructor_circuit_exp",
+        "constructor_quali_last",
+        "constructor_roll_quali_3",
+        "constructor_roll_quali_5",
+        "constructor_season_avg_quali",
+        "constructor_vs_field_season",
+        "cv_lap_time",
+        "deg_x_laps",
+        "degradation_rate",
+        "downforce_level",
+        "driver_circuit_exp",
+        "driver_circuit_roll_3",
+        "driver_quali_last",
+        "driver_roll_quali_3",
+        "driver_roll_quali_5",
+        "driver_season_avg_quali",
+        "driver_season_med_quali",
+        "driver_vs_field_season",
+        "field_season_avg_quali",
+        "fp_sessions_used",
+        "grip_level",
+        "hard_degradation",
+        "hard_long_run_avg",
+        "is_street",
+        "lap_time_std",
+        "lap_time_variance",
+        "laps_per_session",
+        "long_run_avg",
+        "long_run_delta",
+        "long_run_delta_to_median",
+        "long_run_laps",
+        "long_run_rank",
+        "median_lap_time",
+        "medium_degradation",
+        "medium_hard_gap",
+        "medium_long_run_avg",
+        "overtaking_difficulty",
+        "p50_to_p95_avg",
+        "pace_consistency_ratio",
+        "pace_delta",
+        "pace_delta_to_fastest",
+        "pace_delta_to_median",
+        "pace_rank",
+        "prior_vs_fp_rank",
+        "race_pace_delta_to_median",
+        "roll_collision_dnf_rate_5_driver",
+        "roll_dnf_rate_5",
+        "roll_drivererror_dnf_rate_5_driver",
+        "roll_mech_dnf_rate_5_constructor",
+        "roll_mech_dnf_rate_5_driver",
+        "roll_quali_3",
+        "roll_quali_5",
+        "safety_car_probability",
+        "season_progress",
+        "sector_1_delta",
+        "sector_1_delta_to_fastest",
+        "sector_2_delta",
+        "sector_2_delta_to_fastest",
+        "sector_3_delta",
+        "sector_3_delta_to_fastest",
+        "short_run_best",
+        "sim_weighted_finishpos_3",
+        "sim_weighted_finishpos_5",
+        "sim_weighted_points_3",
+        "sim_weighted_points_5",
+        "sim_weighted_quali_3",
+        "sim_weighted_quali_5",
+        "soft_avg_lap",
+        "soft_best_lap",
+        "soft_degradation",
+        "soft_long_run_avg",
+        "soft_medium_gap",
+        "soft_vs_overall_best",
+        "sprint_grid",
+        "straight_line_importance",
+        "team_delta_last",
+        "team_delta_roll_3",
+        "team_delta_roll_5",
+        "theoretical_best",
+        "top3_vs_top5",
+        "top5_vs_top10",
+        "total_laps",
+        "track_evolution",
+        "turn1_incident_risk"
+      ]
+    },
+    {
+      "path": "data/audit/inputs/year2026/round24/p_958639f0b9c44ad6/race_features.parquet",
+      "sha256": "a25dbd2a6fb2e133daa01a23758f8250651330fdad082ecfb3c82b3b3eafdff7",
+      "rows": 22,
+      "columns": [
+        "avg_corner_speed",
+        "avg_lap_time",
+        "avg_pace_delta_to_median",
+        "avg_sector_1",
+        "avg_sector_2",
+        "avg_sector_3",
+        "best_10_lap_avg",
+        "best_3_lap_avg",
+        "best_5_lap_avg",
+        "best_lap_time",
+        "best_sector_1",
+        "best_sector_2",
+        "best_sector_3",
+        "constructor_circuit_exp",
+        "constructor_quali_last",
+        "constructor_roll_quali_3",
+        "constructor_roll_quali_5",
+        "constructor_season_avg_quali",
+        "constructor_vs_field_season",
+        "cv_lap_time",
+        "deg_x_laps",
+        "degradation_rate",
+        "downforce_level",
+        "driver_circuit_exp",
+        "driver_circuit_roll_3",
+        "driver_quali_last",
+        "driver_roll_quali_3",
+        "driver_roll_quali_5",
+        "driver_season_avg_quali",
+        "driver_season_med_quali",
+        "driver_vs_field_season",
+        "field_season_avg_quali",
+        "fp_sessions_used",
+        "grip_level",
+        "hard_degradation",
+        "hard_long_run_avg",
+        "is_street",
+        "lap_time_std",
+        "lap_time_variance",
+        "laps_per_session",
+        "long_run_avg",
+        "long_run_delta",
+        "long_run_delta_to_median",
+        "long_run_laps",
+        "long_run_rank",
+        "median_lap_time",
+        "medium_degradation",
+        "medium_hard_gap",
+        "medium_long_run_avg",
+        "overtaking_difficulty",
+        "p50_to_p95_avg",
+        "pace_consistency_ratio",
+        "pace_delta",
+        "pace_delta_to_fastest",
+        "pace_delta_to_median",
+        "pace_rank",
+        "prior_vs_fp_rank",
+        "race_pace_delta_to_median",
+        "roll_collision_dnf_rate_5_driver",
+        "roll_dnf_rate_5",
+        "roll_drivererror_dnf_rate_5_driver",
+        "roll_mech_dnf_rate_5_constructor",
+        "roll_mech_dnf_rate_5_driver",
+        "roll_quali_3",
+        "roll_quali_5",
+        "safety_car_probability",
+        "season_progress",
+        "sector_1_delta",
+        "sector_1_delta_to_fastest",
+        "sector_2_delta",
+        "sector_2_delta_to_fastest",
+        "sector_3_delta",
+        "sector_3_delta_to_fastest",
+        "short_run_best",
+        "sim_weighted_finishpos_3",
+        "sim_weighted_finishpos_5",
+        "sim_weighted_points_3",
+        "sim_weighted_points_5",
+        "sim_weighted_quali_3",
+        "sim_weighted_quali_5",
+        "soft_avg_lap",
+        "soft_best_lap",
+        "soft_degradation",
+        "soft_long_run_avg",
+        "soft_medium_gap",
+        "soft_vs_overall_best",
+        "sprint_grid",
+        "straight_line_importance",
+        "team_delta_last",
+        "team_delta_roll_3",
+        "team_delta_roll_5",
+        "theoretical_best",
+        "top3_vs_top5",
+        "top5_vs_top10",
+        "total_laps",
+        "track_evolution",
+        "turn1_incident_risk",
+        "quali_position",
+        "roll_finishpos_3",
+        "roll_finishpos_5",
+        "roll_points_3",
+        "roll_points_5",
+        "position_delta_prev",
+        "recent_wins",
+        "recent_podiums",
+        "recent_points_rate",
+        "recent_form_weighted",
+        "form_trend",
+        "team_recent_form",
+        "is_pole_position",
+        "is_front_row",
+        "is_top10_quali",
+        "grid_advantage"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "source": "config/circuit_priors.py",
+      "object": "data/audit/objects/c15ddf55ecd05298f43d97fd15ea7ab4968aef3d74cf5c3f7c04dca7df3eb777.py",
+      "sha256": "c15ddf55ecd05298f43d97fd15ea7ab4968aef3d74cf5c3f7c04dca7df3eb777"
+    },
+    {
+      "source": "config/driver_assets.py",
+      "object": "data/audit/objects/d5100c6ce3fb859800c3aefeda739a06c28476dce8bf291a4fe89fb82e357cf1.py",
+      "sha256": "d5100c6ce3fb859800c3aefeda739a06c28476dce8bf291a4fe89fb82e357cf1"
+    },
+    {
+      "source": "config/fantasy_prices.py",
+      "object": "data/audit/objects/5b8f9d134f46f51f0dd4789bb061815c1b570cc060f0525878d98333e795916d.py",
+      "sha256": "5b8f9d134f46f51f0dd4789bb061815c1b570cc060f0525878d98333e795916d"
+    },
+    {
+      "source": "config/fantasy_scoring.py",
+      "object": "data/audit/objects/1b0e0a16e2293bc97062c5efd7bbf0941ec1567b6189ca3bf28d250ceb7167b5.py",
+      "sha256": "1b0e0a16e2293bc97062c5efd7bbf0941ec1567b6189ca3bf28d250ceb7167b5"
+    },
+    {
+      "source": "config/grid_penalties.py",
+      "object": "data/audit/objects/26057b2bf858167a4025694ced9d13b69dfee4cbf4cca6f82769e4a4e9e2d3d9.py",
+      "sha256": "26057b2bf858167a4025694ced9d13b69dfee4cbf4cca6f82769e4a4e9e2d3d9"
+    },
+    {
+      "source": "config/pitstop_priors.py",
+      "object": "data/audit/objects/2c45b597d639c486ffafa5f0dc564a7bf724e973d251bceb139807a434180160.py",
+      "sha256": "2c45b597d639c486ffafa5f0dc564a7bf724e973d251bceb139807a434180160"
+    },
+    {
+      "source": "config/seed_roster.py",
+      "object": "data/audit/objects/1c17ab67bb7b8687e29625355d77aa2d2037f05c3c0b42d8a68e05ee63c60d40.py",
+      "sha256": "1c17ab67bb7b8687e29625355d77aa2d2037f05c3c0b42d8a68e05ee63c60d40"
+    },
+    {
+      "source": "config/settings.py",
+      "object": "data/audit/objects/dca5eac5061e2e832df71721953d0fddb362c2a5ae0c0e5b8c7fb5e46f5abdd7.py",
+      "sha256": "dca5eac5061e2e832df71721953d0fddb362c2a5ae0c0e5b8c7fb5e46f5abdd7"
+    },
+    {
+      "source": "config/team_driver_ratings.py",
+      "object": "data/audit/objects/4bbd44490ab581cda509b48d254f836c53ef7dfc91758ad39ee6ee5848e087d5.py",
+      "sha256": "4bbd44490ab581cda509b48d254f836c53ef7dfc91758ad39ee6ee5848e087d5"
+    },
+    {
+      "source": "config/track_classifications.py",
+      "object": "data/audit/objects/f354be4c8cbfc08aa5ca506cbc1e833b9fd557f59ab2dd5b85ac0eb6b88b13c2.py",
+      "sha256": "f354be4c8cbfc08aa5ca506cbc1e833b9fd557f59ab2dd5b85ac0eb6b88b13c2"
+    },
+    {
+      "source": "config/track_similarity.py",
+      "object": "data/audit/objects/f2557e4bb55facc1e9b4defabe8e2c1b8f7f71a96de8bfa1174881905b5124cc.py",
+      "sha256": "f2557e4bb55facc1e9b4defabe8e2c1b8f7f71a96de8bfa1174881905b5124cc"
+    },
+    {
+      "source": "config/tyre_deg.py",
+      "object": "data/audit/objects/97aa422ce56ac110583f3317f188167196ea2b05d63058c54845c66594e7c9cf.py",
+      "sha256": "97aa422ce56ac110583f3317f188167196ea2b05d63058c54845c66594e7c9cf"
+    },
+    {
+      "source": "data/processed/jolpica/model_rows/all_model_rows.parquet",
+      "object": "data/audit/objects/86f98fbe7d05275d896045dce3a82ada48bf627e9a8977802b64499f12fc7044.parquet",
+      "sha256": "86f98fbe7d05275d896045dce3a82ada48bf627e9a8977802b64499f12fc7044"
+    },
+    {
+      "source": "data/seed/constructors.json",
+      "object": "data/audit/objects/008a5e26bb5860d801846ef78f06bb88653a9272be813eace0e3f68f0ca6ab10.json",
+      "sha256": "008a5e26bb5860d801846ef78f06bb88653a9272be813eace0e3f68f0ca6ab10"
+    },
+    {
+      "source": "data/seed/dotd_overrides.json",
+      "object": "data/audit/objects/a299b002842606262b34e4bbd9c12974f22bf81ddba3a410c11aad87f5931511.json",
+      "sha256": "a299b002842606262b34e4bbd9c12974f22bf81ddba3a410c11aad87f5931511"
+    },
+    {
+      "source": "data/seed/drivers.json",
+      "object": "data/audit/objects/e4a1b4f6b2c4beee5e60d4d29bea5a4d5c76c2210f6ff844fa3cde58cc7a61c7.json",
+      "sha256": "e4a1b4f6b2c4beee5e60d4d29bea5a4d5c76c2210f6ff844fa3cde58cc7a61c7"
+    },
+    {
+      "source": "data/seed/fantasy_prices.json",
+      "object": "data/audit/objects/9e2652ee9d82d5a977003303de513126e604586a5484b80a37d2c5beef674578.json",
+      "sha256": "9e2652ee9d82d5a977003303de513126e604586a5484b80a37d2c5beef674578"
+    },
+    {
+      "source": "data/seed/grid_penalties.json",
+      "object": "data/audit/objects/94557e6ddc4e0bd7e96d0feb2b70ec827b482ea829c5b2503f23fd549dbe0a8d.json",
+      "sha256": "94557e6ddc4e0bd7e96d0feb2b70ec827b482ea829c5b2503f23fd549dbe0a8d"
+    },
+    {
+      "source": "data/seed/mc_calibration.json",
+      "object": "data/audit/objects/2f31f70224f69c901e46e6078f4d29b1532f0cba51e6e562fd7c502fbc76fc19.json",
+      "sha256": "2f31f70224f69c901e46e6078f4d29b1532f0cba51e6e562fd7c502fbc76fc19"
+    },
+    {
+      "source": "data/seed/overtakes.csv",
+      "object": "data/audit/objects/2883d308a7dd5d1009a4f3e852dece10ceccda602358f83165da1b119aaf37a1.csv",
+      "sha256": "2883d308a7dd5d1009a4f3e852dece10ceccda602358f83165da1b119aaf37a1"
+    },
+    {
+      "source": "data/seed/pace_overrides.json",
+      "object": "data/audit/objects/2f4fce2c7e239060fc757cab2ac52c5cb5f14b23eb0fc5f72de91be04481593e.json",
+      "sha256": "2f4fce2c7e239060fc757cab2ac52c5cb5f14b23eb0fc5f72de91be04481593e"
+    },
+    {
+      "source": "data/seed/races.json",
+      "object": "data/audit/objects/99dbb0b271dfcb5b3773e6316049e91d4b507afe0df3c32a7ba987ab0567100f.json",
+      "sha256": "99dbb0b271dfcb5b3773e6316049e91d4b507afe0df3c32a7ba987ab0567100f"
+    },
+    {
+      "source": "models/trained/feature_columns.json",
+      "object": "data/audit/objects/41d634df7e364b709efb33045af7d63f5e464b5c8b19dd3fa932dcad7f22888a.json",
+      "sha256": "41d634df7e364b709efb33045af7d63f5e464b5c8b19dd3fa932dcad7f22888a"
+    },
+    {
+      "source": "models/trained/fp_signal_model.pkl",
+      "object": "data/audit/objects/497c51566e4a43b14f9f240e643338eb0e06633000e715a6bacc6c5ba574b5af.pkl",
+      "sha256": "497c51566e4a43b14f9f240e643338eb0e06633000e715a6bacc6c5ba574b5af"
+    },
+    {
+      "source": "models/trained/model_metadata.json",
+      "object": "data/audit/objects/8ed4bce56c70d8432ceb43c5d9662a7d1926beb53cdd836e75e1e68221633725.json",
+      "sha256": "8ed4bce56c70d8432ceb43c5d9662a7d1926beb53cdd836e75e1e68221633725"
+    },
+    {
+      "source": "models/trained/quali_model.json",
+      "object": "data/audit/objects/e0e6f8541f58a52104d979ac4c004cc1016c65d01b6742b849e61e8f662e6c8d.json",
+      "sha256": "e0e6f8541f58a52104d979ac4c004cc1016c65d01b6742b849e61e8f662e6c8d"
+    },
+    {
+      "source": "models/trained/race_model_fp.json",
+      "object": "data/audit/objects/659cc4761aa722242e534bcede7f0b3e9eba76b2d88160538520317f5a721fdb.json",
+      "sha256": "659cc4761aa722242e534bcede7f0b3e9eba76b2d88160538520317f5a721fdb"
+    },
+    {
+      "source": "pipeline/03_extract_features.py",
+      "object": "data/audit/objects/cc228fd5b3f78aeafc5b51893ad343bba76646d1054fbc55518844f75031f3b2.py",
+      "sha256": "cc228fd5b3f78aeafc5b51893ad343bba76646d1054fbc55518844f75031f3b2"
+    },
+    {
+      "source": "pipeline/06_run_predictions.py",
+      "object": "data/audit/objects/89e0441f7ed60fc7765eab4581b1ce3a427ba9d0759c6bd909072c3ccc1fbc82.py",
+      "sha256": "89e0441f7ed60fc7765eab4581b1ce3a427ba9d0759c6bd909072c3ccc1fbc82"
+    },
+    {
+      "source": "pipeline/07_calculate_fantasy.py",
+      "object": "data/audit/objects/9ecc0bc007824e9ecdc49b61ffa66d6cf02d9af6199e741feb405ed0a621dc66.py",
+      "sha256": "9ecc0bc007824e9ecdc49b61ffa66d6cf02d9af6199e741feb405ed0a621dc66"
+    },
+    {
+      "source": "pipeline/08_monte_carlo_fantasy.py",
+      "object": "data/audit/objects/45a6ef3feac97945b6df5b6c744d5b69c35aa1aff30ace9f9419b12e9dce8051.py",
+      "sha256": "45a6ef3feac97945b6df5b6c744d5b69c35aa1aff30ace9f9419b12e9dce8051"
+    },
+    {
+      "source": "pipeline/feature_engineering.py",
+      "object": "data/audit/objects/6d7f49b68d5b072cb2c71e6aee885a01cd20d3643afd59425d7c1d2ba6237168.py",
+      "sha256": "6d7f49b68d5b072cb2c71e6aee885a01cd20d3643afd59425d7c1d2ba6237168"
+    },
+    {
+      "source": "pipeline/fp_long_runs.py",
+      "object": "data/audit/objects/498efc0f7e5f8dedcdf50e00c2aefa25c2486aa9cabc979c1f3064329908f261.py",
+      "sha256": "498efc0f7e5f8dedcdf50e00c2aefa25c2486aa9cabc979c1f3064329908f261"
+    },
+    {
+      "source": "pipeline/import_openf1_fp.py",
+      "object": "data/audit/objects/1589b99b74f29cfac4a8dce9570bbca6ec2aa80df4ddba14a00ea44a36baa461.py",
+      "sha256": "1589b99b74f29cfac4a8dce9570bbca6ec2aa80df4ddba14a00ea44a36baa461"
+    },
+    {
+      "source": "pipeline/prediction_replay.py",
+      "object": "data/audit/objects/e25c808c703db60ac3777fc16ac842089074521347a4b4c646466f49d01a708b.py",
+      "sha256": "e25c808c703db60ac3777fc16ac842089074521347a4b4c646466f49d01a708b"
+    },
+    {
+      "source": "pipeline/qualifying_transform.py",
+      "object": "data/audit/objects/de44e6a39f5403b1641d45c3ff49f4b8bb91e96e1f73fb17ce7453f96851a3a3.py",
+      "sha256": "de44e6a39f5403b1641d45c3ff49f4b8bb91e96e1f73fb17ce7453f96851a3a3"
+    },
+    {
+      "source": "web/public/data/weather.json",
+      "object": "data/audit/objects/16afecd7fd926a4af58756553df9a40a10033d1679791fe1a89168d5d8bfe5d9.json",
+      "sha256": "16afecd7fd926a4af58756553df9a40a10033d1679791fe1a89168d5d8bfe5d9"
+    }
+  ],
+  "packages": {
+    "numpy": "2.4.0",
+    "pandas": "2.3.3",
+    "xgboost": "3.2.0",
+    "fastf1": "3.8.1",
+    "scipy": "1.17.1"
+  }
+}

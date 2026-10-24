@@ -1,0 +1,48 @@
+{
+  "round": 19,
+  "year": 2026,
+  "session": {
+    "session_key": 11378,
+    "session_type": "Practice",
+    "session_name": "Practice 1",
+    "date_start": "2026-10-09T08:30:00+00:00",
+    "date_end": "2026-10-09T09:30:00+00:00",
+    "meeting_key": 1296,
+    "circuit_key": 61,
+    "circuit_short_name": "Singapore",
+    "country_key": 157,
+    "country_code": "SGP",
+    "country_name": "Singapore",
+    "location": "Marina Bay",
+    "gmt_offset": "08:00:00",
+    "year": 2026,
+    "is_cancelled": false
+  },
+  "reason": "Original FastF1 raw/processed/cache files unreadable via OneDrive; no source times invented",
+  "sources": {
+    "drivers": {
+      "url": "https://api.openf1.org/v1/drivers?session_key=11378",
+      "sha256": "314fe2a9c9ab478356f915d919190e5feea594cb618a5f2d16df3ddc37377485"
+    },
+    "laps": {
+      "url": "https://api.openf1.org/v1/laps?session_key=11378",
+      "sha256": "e121708f05240834acc702fdee82c944c47039681809ebb17057145d9c687f45"
+    },
+    "stints": {
+      "url": "https://api.openf1.org/v1/stints?session_key=11378",
+      "sha256": "c5d9a3adee1f1923f6e535dccfc2cbbea43cf8d080c4b6a781bf0a67c1576e30"
+    },
+    "race_control": {
+      "url": "https://api.openf1.org/v1/race_control?session_key=11378",
+      "sha256": "e07415f89eb567f1013357014b976ee1b619aedb082c091444ff6d0501fd57ad"
+    },
+    "weather": {
+      "url": "https://api.openf1.org/v1/weather?session_key=11378",
+      "sha256": "fcae888aea9b79b7c63be12e75b1ec9d15eed06439c345bb15dcf085f64fc20c"
+    },
+    "session_result": {
+      "url": "https://api.openf1.org/v1/session_result?session_key=11378",
+      "sha256": "518b0859015cc83383363da46ce9d36e4bf948fa72f2f6a9dcc24da0dcad65f9"
+    }
+  }
+}

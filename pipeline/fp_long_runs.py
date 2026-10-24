@@ -21,7 +21,9 @@ RACE_COMPOUNDS = frozenset({"SOFT", "MEDIUM", "HARD", "INTERMEDIATE", "WET"})
 LONG_RUN_MIN_RAW = 5
 LONG_RUN_MIN_CLEAN = 4
 SESSION_PRIORITY = {"FP2": 3, "FP1": 2, "FP3": 1}
-FP_STINT_SEMANTICS_VERSION = 3
+# v4 also versions the upstream lap population: timed deleted FP laps are
+# retained as pace evidence. Models/features built from legal-only FP are v3.
+FP_STINT_SEMANTICS_VERSION = 4
 
 _COMPOUND_ALIASES = {
     "M": "MEDIUM",
@@ -60,6 +62,17 @@ def require_fp_stint_semantics(
         raise RuntimeError(
             f"FP feature semantics mismatch in {source}: found {found}, expected "
             f"v{FP_STINT_SEMANTICS_VERSION}. Re-extract FP features before use."
+        )
+
+
+def require_fp_lap_semantics(df: pd.DataFrame, *, source: object) -> None:
+    """Do not stamp new features from an old, deletion-filtered lap population."""
+    values = pd.to_numeric(df.get("fp_lap_semantics_version", pd.Series(dtype=float)), errors="coerce")
+    if (len(values) != len(df) or values.isna().any()
+            or not values.eq(FP_STINT_SEMANTICS_VERSION).all()):
+        raise RuntimeError(
+            f"FP lap semantics mismatch in {source}; rebuild laps from raw data "
+            f"with deleted practice laps retained (v{FP_STINT_SEMANTICS_VERSION})."
         )
 
 

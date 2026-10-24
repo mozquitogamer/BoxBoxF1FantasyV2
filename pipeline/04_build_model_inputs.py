@@ -185,6 +185,7 @@ def load_fp_features_for_round(
         "round",
         "fp_stint_semantics_version",
         "fp_sessions_included",
+        "fp_data_sources",
     }
     unexpected = sorted(
         c for c in df.columns
@@ -583,7 +584,7 @@ def main() -> None:
     training_metadata_path.write_text(json.dumps({
         "fp_stint_semantics_version": FP_STINT_SEMANTICS_VERSION,
         "fp_stint_semantics": (
-            "session+stint+compound; clean race compounds including SOFT; FP2>FP1>FP3 headline"
+            "timed deleted FP laps retained; session+stint+compound; clean race compounds including SOFT; FP2>FP1>FP3 headline"
         ),
     }, indent=2))
 

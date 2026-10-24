@@ -24,10 +24,11 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from config.settings import CURRENT_SEASON, LAPS_DIR, SEED_DIR
+from pipeline.fp_long_runs import FP_STINT_SEMANTICS_VERSION
 
 
 def build_practice_laps(bundle: dict, session: dict, round_num: int) -> pd.DataFrame:
-    """Convert source laps, retaining physical stints and excluding invalid laps."""
+    """Retain timed FP deletions as pace evidence, with physical run identity."""
     session_key = session["session_key"]
     session_name = {"Practice 1": "FP1", "Practice 2": "FP2", "Practice 3": "FP3"}.get(session["session_name"])
     if session_name is None:
@@ -88,8 +89,7 @@ def build_practice_laps(bundle: dict, session: dict, round_num: int) -> pd.DataF
         duration = lap.get("lap_duration")
         if duration is None or duration <= 0 or lap.get("is_pit_out_lap"):
             continue
-        if round(duration, 3) in deleted.get(number, set()) or (number, lap_number) in deleted_laps:
-            continue
+        lap_deleted = round(duration, 3) in deleted.get(number, set()) or (number, lap_number) in deleted_laps
         # The lap immediately before an out-lap ends in the pits. Final laps
         # after the chequered flag are likewise excluded unless a flying lap
         # started before the flag, as in the FastF1 path.
@@ -130,18 +130,21 @@ def build_practice_laps(bundle: dict, session: dict, round_num: int) -> pd.DataF
             "speed_trap_1": lap.get("i1_speed"), "speed_trap_2": lap.get("i2_speed"),
             "speed_st": lap.get("st_speed"), "fp_data_source": "openf1",
             "source_session_key": session_key,
+            "lap_deleted": lap_deleted,
+            "fp_lap_semantics_version": FP_STINT_SEMANTICS_VERSION,
         })
     frame = pd.DataFrame(rows)
     if frame.empty:
         raise ValueError("No valid OpenF1 practice laps")
-    # Reject any purported clean lap faster than the published classification.
+    # Deleted FP laps may beat the published legal best. Validate only legal
+    # laps against that classification, without discarding useful pace data.
     for result in bundle["session_result"]:
         duration = result.get("duration")
         driver = drivers.get(result["driver_number"])
         if not isinstance(duration, (float, int)) or driver is None:
             continue
         driver_id = driver_map.get(driver["name_acronym"], driver["name_acronym"])
-        best = frame.loc[frame["driver_id"] == driver_id, "lap_time"].min()
+        best = frame.loc[(frame["driver_id"] == driver_id) & ~frame["lap_deleted"], "lap_time"].min()
         if pd.notna(best) and best < duration - 0.005:
             raise ValueError(f"Unfiltered invalid best lap for {driver_id}: {best} < {duration}")
     return frame
@@ -177,6 +180,8 @@ def main():
         "source": "openf1", "session": session, "round": args.round,
         "imported_at": datetime.now(timezone.utc).isoformat(),
         "clean_laps": len(frame), "drivers": sorted(frame["driver_id"].unique()),
+        "deleted_laps_retained": int(frame["lap_deleted"].sum()),
+        "fp_lap_semantics_version": FP_STINT_SEMANTICS_VERSION,
         "sources": {name: {"sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
                             "url": f"https://api.openf1.org/v1/{name}?session_key={args.session_key}"}
                     for name, path in paths.items()},

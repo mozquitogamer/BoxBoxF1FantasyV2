@@ -35,16 +35,17 @@ def inputs():
     return bundle, session
 
 
-def test_filters_deleted_in_out_and_red_flag_laps_without_merging_runs(inputs):
+def test_retains_deleted_pace_but_filters_in_out_and_red_flag_laps(inputs):
     bundle, session = inputs
     before = copy.deepcopy(bundle)
     frame = build_practice_laps(bundle, session, 20)
-    assert frame["lap_number"].tolist() == [2, 6]
-    assert frame["lap_time"].tolist() == [90, 92]
-    assert frame["stint_number"].tolist() == [1, 2]
-    assert frame["tyre_life"].tolist() == [9, 2]
+    assert frame["lap_number"].tolist() == [2, 3, 6]
+    assert frame["lap_time"].tolist() == [90, 89, 92]
+    assert frame["stint_number"].tolist() == [1, 1, 2]
+    assert frame["tyre_life"].tolist() == [9, 10, 2]
+    assert frame["lap_deleted"].tolist() == [False, True, False]
     assert frame["sector_1"].isna().all()
-    assert frame["fp_data_source"].tolist() == ["openf1", "openf1"]
+    assert frame["fp_data_source"].unique().tolist() == ["openf1"]
     assert frame["session"].unique().tolist() == ["FP1"]
     assert bundle == before
 
@@ -55,6 +56,7 @@ def test_reinstated_lap_is_restored(inputs):
                                    "message": "CAR 1 TIME 1:29.000 REINSTATED"})
     bundle["session_result"][0]["duration"] = 89
     assert 3 in build_practice_laps(bundle, session, 20)["lap_number"].tolist()
+    assert not build_practice_laps(bundle, session, 20).set_index("lap_number").loc[3,"lap_deleted"]
 
 
 def test_official_classification_rejects_an_unfiltered_invalid_fast_lap(inputs):

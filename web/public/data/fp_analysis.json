@@ -5,46 +5,46 @@
   "type": "fp_analysis",
   "qualifying_pace": {
     "ALB": {
-      "best_lap": 103.426,
-      "best_3_avg": 103.498,
-      "best_5_avg": 103.567,
-      "total_laps": 8,
+      "best_lap": 98.035,
+      "best_3_avg": 98.376,
+      "best_5_avg": 98.979,
+      "total_laps": 14,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
-      "gap_to_fastest": 8.135
+      "gap_to_fastest": 2.744
     },
     "ALO": {
       "best_lap": 97.235,
-      "best_3_avg": 97.712,
-      "best_5_avg": 98.009,
-      "total_laps": 19,
+      "best_3_avg": 97.424,
+      "best_5_avg": 97.742,
+      "total_laps": 22,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.944
     },
     "ANT": {
       "best_lap": 95.333,
-      "best_3_avg": 96.027,
-      "best_5_avg": 96.654,
-      "total_laps": 17,
+      "best_3_avg": 96.021,
+      "best_5_avg": 96.301,
+      "total_laps": 27,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 0.042
     },
     "BEA": {
       "best_lap": 96.536,
-      "best_3_avg": 96.963,
-      "best_5_avg": 97.382,
-      "total_laps": 18,
+      "best_3_avg": 96.939,
+      "best_5_avg": 97.229,
+      "total_laps": 25,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.245
     },
     "BOR": {
       "best_lap": 96.832,
-      "best_3_avg": 97.016,
-      "best_5_avg": 97.381,
-      "total_laps": 13,
+      "best_3_avg": 96.924,
+      "best_5_avg": 97.114,
+      "total_laps": 22,
       "best_lap_session": "FP2",
       "best_lap_compound": "MEDIUM",
       "gap_to_fastest": 1.541
@@ -53,7 +53,7 @@
       "best_lap": 98.422,
       "best_3_avg": 98.828,
       "best_5_avg": 99.056,
-      "total_laps": 19,
+      "total_laps": 20,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 3.131
@@ -61,8 +61,8 @@
     "COL": {
       "best_lap": 97.201,
       "best_3_avg": 97.776,
-      "best_5_avg": 98.709,
-      "total_laps": 28,
+      "best_5_avg": 98.664,
+      "total_laps": 34,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.91
@@ -71,142 +71,142 @@
       "best_lap": 96.84,
       "best_3_avg": 97.438,
       "best_5_avg": 97.797,
-      "total_laps": 24,
+      "total_laps": 27,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.549
     },
     "HAD": {
-      "best_lap": 96.411,
-      "best_3_avg": 97.859,
-      "best_5_avg": 99.438,
-      "total_laps": 17,
+      "best_lap": 96.079,
+      "best_3_avg": 96.208,
+      "best_5_avg": 96.406,
+      "total_laps": 25,
       "best_lap_session": "FP2",
-      "best_lap_compound": "MEDIUM",
-      "gap_to_fastest": 1.12
+      "best_lap_compound": "SOFT",
+      "gap_to_fastest": 0.788
     },
     "HAM": {
       "best_lap": 95.906,
-      "best_3_avg": 96.383,
-      "best_5_avg": 96.591,
-      "total_laps": 12,
+      "best_3_avg": 96.126,
+      "best_5_avg": 96.38,
+      "total_laps": 22,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 0.615
     },
     "HER": {
       "best_lap": 99.979,
-      "best_3_avg": 100.681,
-      "best_5_avg": 102.141,
-      "total_laps": 8,
+      "best_3_avg": 100.605,
+      "best_5_avg": 101.549,
+      "total_laps": 9,
       "best_lap_session": "FP1",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 4.688
     },
     "HUL": {
-      "best_lap": 97.43,
-      "best_3_avg": 97.825,
-      "best_5_avg": 98.126,
-      "total_laps": 16,
+      "best_lap": 97.04,
+      "best_3_avg": 97.465,
+      "best_5_avg": 97.695,
+      "total_laps": 22,
       "best_lap_session": "FP2",
-      "best_lap_compound": "MEDIUM",
-      "gap_to_fastest": 2.139
+      "best_lap_compound": "SOFT",
+      "gap_to_fastest": 1.749
     },
     "LAW": {
       "best_lap": 96.331,
-      "best_3_avg": 96.664,
-      "best_5_avg": 97.002,
-      "total_laps": 20,
+      "best_3_avg": 96.577,
+      "best_5_avg": 96.885,
+      "total_laps": 24,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.04
     },
     "LEC": {
       "best_lap": 95.291,
-      "best_3_avg": 95.951,
-      "best_5_avg": 96.249,
-      "total_laps": 21,
+      "best_3_avg": 95.831,
+      "best_5_avg": 96.127,
+      "total_laps": 30,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 0.0
     },
     "LIN": {
-      "best_lap": 96.959,
-      "best_3_avg": 96.998,
-      "best_5_avg": 97.145,
-      "total_laps": 24,
+      "best_lap": 96.734,
+      "best_3_avg": 96.888,
+      "best_5_avg": 96.98,
+      "total_laps": 28,
       "best_lap_session": "FP2",
-      "best_lap_compound": "MEDIUM",
-      "gap_to_fastest": 1.668
+      "best_lap_compound": "SOFT",
+      "gap_to_fastest": 1.443
     },
     "NOR": {
       "best_lap": 96.297,
       "best_3_avg": 96.46,
       "best_5_avg": 96.765,
-      "total_laps": 12,
+      "total_laps": 22,
       "best_lap_session": "FP1",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.006
     },
     "OCO": {
       "best_lap": 97.111,
-      "best_3_avg": 97.767,
-      "best_5_avg": 98.064,
-      "total_laps": 24,
+      "best_3_avg": 97.621,
+      "best_5_avg": 97.909,
+      "total_laps": 25,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.82
     },
     "PER": {
-      "best_lap": 99.036,
-      "best_3_avg": 99.282,
-      "best_5_avg": 100.596,
-      "total_laps": 9,
+      "best_lap": 98.934,
+      "best_3_avg": 99.085,
+      "best_5_avg": 99.521,
+      "total_laps": 10,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
-      "gap_to_fastest": 3.745
+      "gap_to_fastest": 3.643
     },
     "PIA": {
-      "best_lap": 96.387,
-      "best_3_avg": 96.724,
-      "best_5_avg": 97.012,
-      "total_laps": 15,
+      "best_lap": 96.029,
+      "best_3_avg": 96.401,
+      "best_5_avg": 96.714,
+      "total_laps": 22,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
-      "gap_to_fastest": 1.096
+      "gap_to_fastest": 0.738
     },
     "RUS": {
-      "best_lap": 96.035,
-      "best_3_avg": 96.4,
-      "best_5_avg": 96.669,
-      "total_laps": 14,
+      "best_lap": 95.793,
+      "best_3_avg": 96.069,
+      "best_5_avg": 96.377,
+      "total_laps": 19,
       "best_lap_session": "FP2",
-      "best_lap_compound": "MEDIUM",
-      "gap_to_fastest": 0.744
+      "best_lap_compound": "SOFT",
+      "gap_to_fastest": 0.502
     },
     "SAI": {
-      "best_lap": 98.446,
-      "best_3_avg": 98.781,
-      "best_5_avg": 100.493,
-      "total_laps": 11,
+      "best_lap": 97.701,
+      "best_3_avg": 98.331,
+      "best_5_avg": 98.648,
+      "total_laps": 16,
       "best_lap_session": "FP2",
-      "best_lap_compound": "MEDIUM",
-      "gap_to_fastest": 3.155
+      "best_lap_compound": "SOFT",
+      "gap_to_fastest": 2.41
     },
     "STR": {
       "best_lap": 97.269,
       "best_3_avg": 97.494,
       "best_5_avg": 97.791,
-      "total_laps": 20,
+      "total_laps": 25,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 1.978
     },
     "VER": {
       "best_lap": 95.48,
-      "best_3_avg": 95.85,
-      "best_5_avg": 96.434,
-      "total_laps": 25,
+      "best_3_avg": 95.758,
+      "best_5_avg": 95.998,
+      "total_laps": 28,
       "best_lap_session": "FP2",
       "best_lap_compound": "SOFT",
       "gap_to_fastest": 0.189
@@ -218,9 +218,9 @@
       {
         "id": "FP2",
         "session": "FP2",
-        "drivers": 18,
-        "clean_drivers": 16,
-        "partial_drivers": 2,
+        "drivers": 22,
+        "clean_drivers": 17,
+        "partial_drivers": 6,
         "compounds": [
           "HARD",
           "MEDIUM",
@@ -230,8 +230,8 @@
       {
         "id": "FP1",
         "session": "FP1",
-        "drivers": 13,
-        "clean_drivers": 9,
+        "drivers": 17,
+        "clean_drivers": 13,
         "partial_drivers": 5,
         "compounds": [
           "HARD",
@@ -248,10 +248,10 @@
             "stint": 1,
             "compound": "HARD",
             "quality": "interrupted",
-            "laps": 3,
-            "median_pace": 99.799,
-            "avg_pace": 100.333,
-            "interruptions": 2,
+            "laps": 4,
+            "median_pace": 99.518,
+            "avg_pace": 100.009,
+            "interruptions": 3,
             "lap_sequence": [
               {
                 "lap_number": 2,
@@ -282,6 +282,11 @@
                 "lap_number": 7,
                 "time": 168.94,
                 "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 99.035,
+                "selected": true
               }
             ]
           },
@@ -327,11 +332,36 @@
             "stint": 4,
             "compound": "SOFT",
             "quality": "clean",
-            "laps": 5,
-            "median_pace": 103.576,
-            "avg_pace": 103.566,
+            "laps": 10,
+            "median_pace": 103.385,
+            "avg_pace": 103.335,
             "interruptions": 0,
             "lap_sequence": [
+              {
+                "lap_number": 16,
+                "time": 102.716,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 102.666,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 102.892,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 103.574,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 103.669,
+                "selected": true
+              },
               {
                 "lap_number": 21,
                 "time": 103.068,
@@ -355,6 +385,183 @@
               {
                 "lap_number": 25,
                 "time": 104.204,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "HUL": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 100.098,
+            "avg_pace": 100.027,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 101.244,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 139.774,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 100.098,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 141.291,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 98.74,
+                "selected": true
+              },
+              {
+                "lap_number": 7,
+                "time": 143.285,
+                "selected": false
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "clean",
+            "laps": 6,
+            "median_pace": 102.653,
+            "avg_pace": 102.822,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 16,
+                "time": 101.742,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 102.093,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 102.301,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 103.005,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 103.471,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 104.317,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 97.924,
+            "avg_pace": 97.923,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 98.416,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 153.733,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 97.924,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 156.634,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 118.325,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 97.43,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "clean",
+            "laps": 7,
+            "median_pace": 103.29,
+            "avg_pace": 103.398,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 15,
+                "time": 103.808,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 102.982,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 103.796,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 103.144,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 103.709,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 103.29,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 103.058,
                 "selected": true
               }
             ]
@@ -560,15 +767,15 @@
             "stint": 4,
             "compound": "MEDIUM",
             "quality": "clean",
-            "laps": 7,
-            "median_pace": 102.35,
-            "avg_pace": 102.428,
+            "laps": 11,
+            "median_pace": 102.495,
+            "avg_pace": 102.524,
             "interruptions": 0,
             "lap_sequence": [
               {
                 "lap_number": 14,
                 "time": 101.442,
-                "selected": false
+                "selected": true
               },
               {
                 "lap_number": 15,
@@ -596,6 +803,16 @@
                 "selected": true
               },
               {
+                "lap_number": 20,
+                "time": 103.026,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 103.237,
+                "selected": true
+              },
+              {
                 "lap_number": 22,
                 "time": 103.025,
                 "selected": true
@@ -603,6 +820,11 @@
               {
                 "lap_number": 23,
                 "time": 103.066,
+                "selected": true
+              },
+              {
+                "lap_number": 24,
+                "time": 103.065,
                 "selected": true
               }
             ]
@@ -715,9 +937,9 @@
             "stint": 3,
             "compound": "SOFT",
             "quality": "clean",
-            "laps": 9,
+            "laps": 11,
             "median_pace": 101.537,
-            "avg_pace": 101.458,
+            "avg_pace": 101.481,
             "interruptions": 0,
             "lap_sequence": [
               {
@@ -733,6 +955,11 @@
               {
                 "lap_number": 14,
                 "time": 100.785,
+                "selected": true
+              },
+              {
+                "lap_number": 15,
+                "time": 101.457,
                 "selected": true
               },
               {
@@ -763,6 +990,11 @@
               {
                 "lap_number": 21,
                 "time": 101.401,
+                "selected": true
+              },
+              {
+                "lap_number": 22,
+                "time": 101.713,
                 "selected": true
               }
             ]
@@ -827,11 +1059,11 @@
             "session": "FP1",
             "stint": 4,
             "compound": "MEDIUM",
-            "quality": "interrupted",
-            "laps": 3,
-            "median_pace": 101.442,
-            "avg_pace": 101.384,
-            "interruptions": 1,
+            "quality": "clean",
+            "laps": 7,
+            "median_pace": 101.64,
+            "avg_pace": 101.53,
+            "interruptions": 0,
             "lap_sequence": [
               {
                 "lap_number": 18,
@@ -846,7 +1078,22 @@
               {
                 "lap_number": 20,
                 "time": 101.0,
-                "selected": false
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 101.818,
+                "selected": true
+              },
+              {
+                "lap_number": 22,
+                "time": 102.097,
+                "selected": true
+              },
+              {
+                "lap_number": 23,
+                "time": 101.64,
+                "selected": true
               },
               {
                 "lap_number": 24,
@@ -857,13 +1104,55 @@
           },
           {
             "session": "FP2",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 96.631,
+            "avg_pace": 96.881,
+            "interruptions": 3,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 97.502,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 142.437,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 96.631,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 168.856,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 120.903,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 96.51,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
             "stint": 3,
             "compound": "SOFT",
-            "quality": "clean",
-            "laps": 9,
-            "median_pace": 101.217,
-            "avg_pace": 101.359,
-            "interruptions": 1,
+            "quality": "partial",
+            "laps": 13,
+            "median_pace": 101.539,
+            "avg_pace": 101.508,
+            "interruptions": 2,
             "lap_sequence": [
               {
                 "lap_number": 13,
@@ -891,8 +1180,23 @@
                 "selected": true
               },
               {
+                "lap_number": 18,
+                "time": 102.086,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 102.075,
+                "selected": true
+              },
+              {
                 "lap_number": 20,
                 "time": 101.539,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 101.962,
                 "selected": true
               },
               {
@@ -906,9 +1210,19 @@
                 "selected": true
               },
               {
+                "lap_number": 24,
+                "time": 116.605,
+                "selected": false
+              },
+              {
                 "lap_number": 25,
                 "time": 126.652,
                 "selected": false
+              },
+              {
+                "lap_number": 26,
+                "time": 101.242,
+                "selected": true
               },
               {
                 "lap_number": 27,
@@ -926,10 +1240,10 @@
             "stint": 1,
             "compound": "MEDIUM",
             "quality": "interrupted",
-            "laps": 3,
-            "median_pace": 98.354,
-            "avg_pace": 98.775,
-            "interruptions": 2,
+            "laps": 4,
+            "median_pace": 98.073,
+            "avg_pace": 98.529,
+            "interruptions": 3,
             "lap_sequence": [
               {
                 "lap_number": 2,
@@ -960,6 +1274,11 @@
                 "lap_number": 7,
                 "time": 174.183,
                 "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 97.792,
+                "selected": true
               }
             ]
           },
@@ -996,6 +1315,48 @@
               {
                 "lap_number": 21,
                 "time": 101.469,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "clean",
+            "laps": 5,
+            "median_pace": 101.896,
+            "avg_pace": 101.872,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 16,
+                "time": 101.355,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 101.734,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 101.896,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 103.317,
+                "selected": false
+              },
+              {
+                "lap_number": 20,
+                "time": 102.433,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 101.94,
                 "selected": true
               }
             ]
@@ -1092,15 +1453,25 @@
             "session": "FP2",
             "stint": 4,
             "compound": "MEDIUM",
-            "quality": "clean",
-            "laps": 5,
-            "median_pace": 101.984,
-            "avg_pace": 102.104,
-            "interruptions": 1,
+            "quality": "partial",
+            "laps": 8,
+            "median_pace": 101.965,
+            "avg_pace": 102.134,
+            "interruptions": 2,
             "lap_sequence": [
+              {
+                "lap_number": 13,
+                "time": 101.947,
+                "selected": true
+              },
               {
                 "lap_number": 14,
                 "time": 101.88,
+                "selected": true
+              },
+              {
+                "lap_number": 15,
+                "time": 101.749,
                 "selected": true
               },
               {
@@ -1119,6 +1490,16 @@
                 "selected": true
               },
               {
+                "lap_number": 19,
+                "time": 109.659,
+                "selected": false
+              },
+              {
+                "lap_number": 20,
+                "time": 102.858,
+                "selected": true
+              },
+              {
                 "lap_number": 21,
                 "time": 105.497,
                 "selected": false
@@ -1126,6 +1507,223 @@
               {
                 "lap_number": 22,
                 "time": 101.802,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "LIN": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 4,
+            "median_pace": 99.37,
+            "avg_pace": 99.654,
+            "interruptions": 4,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 101.565,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 154.199,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 99.483,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 152.605,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 99.257,
+                "selected": true
+              },
+              {
+                "lap_number": 7,
+                "time": 133.394,
+                "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 120.855,
+                "selected": false
+              },
+              {
+                "lap_number": 9,
+                "time": 98.312,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 4,
+            "compound": "HARD",
+            "quality": "clean",
+            "laps": 5,
+            "median_pace": 102.971,
+            "avg_pace": 103.01,
+            "interruptions": 1,
+            "lap_sequence": [
+              {
+                "lap_number": 18,
+                "time": 102.536,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 102.707,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 102.971,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 110.309,
+                "selected": false
+              },
+              {
+                "lap_number": 22,
+                "time": 103.426,
+                "selected": true
+              },
+              {
+                "lap_number": 23,
+                "time": 103.409,
+                "selected": true
+              },
+              {
+                "lap_number": 24,
+                "time": 104.487,
+                "selected": false
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 97.172,
+            "avg_pace": 97.464,
+            "interruptions": 4,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 98.26,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 149.706,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 140.168,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 96.959,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 152.207,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 132.32,
+                "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 97.172,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "MEDIUM",
+            "quality": "clean",
+            "laps": 11,
+            "median_pace": 103.047,
+            "avg_pace": 103.051,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 17,
+                "time": 103.198,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 102.144,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 102.988,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 103.026,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 102.829,
+                "selected": true
+              },
+              {
+                "lap_number": 22,
+                "time": 103.047,
+                "selected": true
+              },
+              {
+                "lap_number": 23,
+                "time": 103.259,
+                "selected": true
+              },
+              {
+                "lap_number": 24,
+                "time": 103.559,
+                "selected": true
+              },
+              {
+                "lap_number": 25,
+                "time": 103.504,
+                "selected": true
+              },
+              {
+                "lap_number": 26,
+                "time": 103.22,
+                "selected": true
+              },
+              {
+                "lap_number": 27,
+                "time": 102.786,
                 "selected": true
               }
             ]
@@ -1190,10 +1788,10 @@
             "session": "FP1",
             "stint": 4,
             "compound": "SOFT",
-            "quality": "partial",
-            "laps": 4,
-            "median_pace": 102.174,
-            "avg_pace": 102.108,
+            "quality": "clean",
+            "laps": 6,
+            "median_pace": 102.163,
+            "avg_pace": 102.126,
             "interruptions": 0,
             "lap_sequence": [
               {
@@ -1204,6 +1802,16 @@
               {
                 "lap_number": 19,
                 "time": 101.769,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 102.085,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 102.241,
                 "selected": true
               },
               {
@@ -1222,10 +1830,10 @@
             "session": "FP2",
             "stint": 4,
             "compound": "MEDIUM",
-            "quality": "interrupted",
-            "laps": 3,
-            "median_pace": 101.398,
-            "avg_pace": 101.418,
+            "quality": "partial",
+            "laps": 9,
+            "median_pace": 101.504,
+            "avg_pace": 101.521,
             "interruptions": 3,
             "lap_sequence": [
               {
@@ -1234,9 +1842,19 @@
                 "selected": true
               },
               {
+                "lap_number": 12,
+                "time": 100.783,
+                "selected": true
+              },
+              {
+                "lap_number": 13,
+                "time": 103.348,
+                "selected": false
+              },
+              {
                 "lap_number": 14,
                 "time": 101.062,
-                "selected": false
+                "selected": true
               },
               {
                 "lap_number": 15,
@@ -1249,13 +1867,183 @@
                 "selected": false
               },
               {
+                "lap_number": 17,
+                "time": 101.504,
+                "selected": true
+              },
+              {
                 "lap_number": 18,
                 "time": 105.919,
                 "selected": false
               },
               {
+                "lap_number": 19,
+                "time": 102.229,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 101.978,
+                "selected": true
+              },
+              {
                 "lap_number": 21,
                 "time": 101.705,
+                "selected": true
+              },
+              {
+                "lap_number": 22,
+                "time": 101.88,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "ALO": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 99.408,
+            "avg_pace": 99.557,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 137.853,
+                "selected": false
+              },
+              {
+                "lap_number": 3,
+                "time": 100.353,
+                "selected": true
+              },
+              {
+                "lap_number": 4,
+                "time": 149.488,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 99.408,
+                "selected": true
+              },
+              {
+                "lap_number": 6,
+                "time": 177.229,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 98.91,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "partial",
+            "laps": 6,
+            "median_pace": 100.793,
+            "avg_pace": 99.992,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 13,
+                "time": 97.688,
+                "selected": true
+              },
+              {
+                "lap_number": 14,
+                "time": 187.751,
+                "selected": false
+              },
+              {
+                "lap_number": 15,
+                "time": 98.223,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 130.907,
+                "selected": false
+              },
+              {
+                "lap_number": 17,
+                "time": 101.143,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 101.212,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 100.444,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 101.244,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 3,
+            "compound": "HARD",
+            "quality": "clean",
+            "laps": 8,
+            "median_pace": 103.291,
+            "avg_pace": 103.268,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 16,
+                "time": 102.823,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 103.251,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 103.203,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 103.129,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 103.33,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 103.457,
+                "selected": true
+              },
+              {
+                "lap_number": 22,
+                "time": 103.564,
+                "selected": true
+              },
+              {
+                "lap_number": 23,
+                "time": 103.388,
                 "selected": true
               }
             ]
@@ -1310,96 +2098,35 @@
                 "selected": true
               }
             ]
-          }
-        ]
-      },
-      "LIN": {
-        "runs": [
-          {
-            "session": "FP1",
-            "stint": 1,
-            "compound": "HARD",
-            "quality": "interrupted",
-            "laps": 3,
-            "median_pace": 99.257,
-            "avg_pace": 99.017,
-            "interruptions": 3,
-            "lap_sequence": [
-              {
-                "lap_number": 3,
-                "time": 154.199,
-                "selected": false
-              },
-              {
-                "lap_number": 4,
-                "time": 99.483,
-                "selected": true
-              },
-              {
-                "lap_number": 5,
-                "time": 152.605,
-                "selected": false
-              },
-              {
-                "lap_number": 6,
-                "time": 99.257,
-                "selected": true
-              },
-              {
-                "lap_number": 7,
-                "time": 133.394,
-                "selected": false
-              },
-              {
-                "lap_number": 8,
-                "time": 120.855,
-                "selected": false
-              },
-              {
-                "lap_number": 9,
-                "time": 98.312,
-                "selected": true
-              }
-            ]
           },
           {
             "session": "FP1",
-            "stint": 4,
-            "compound": "HARD",
-            "quality": "clean",
-            "laps": 5,
-            "median_pace": 103.409,
-            "avg_pace": 103.4,
-            "interruptions": 1,
+            "stint": 3,
+            "compound": "SOFT",
+            "quality": "partial",
+            "laps": 4,
+            "median_pace": 101.479,
+            "avg_pace": 101.456,
+            "interruptions": 0,
             "lap_sequence": [
               {
+                "lap_number": 17,
+                "time": 101.568,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 101.39,
+                "selected": true
+              },
+              {
                 "lap_number": 19,
-                "time": 102.707,
+                "time": 101.111,
                 "selected": true
               },
               {
                 "lap_number": 20,
-                "time": 102.971,
-                "selected": true
-              },
-              {
-                "lap_number": 21,
-                "time": 110.309,
-                "selected": false
-              },
-              {
-                "lap_number": 22,
-                "time": 103.426,
-                "selected": true
-              },
-              {
-                "lap_number": 23,
-                "time": 103.409,
-                "selected": true
-              },
-              {
-                "lap_number": 24,
-                "time": 104.487,
+                "time": 101.756,
                 "selected": true
               }
             ]
@@ -1407,41 +2134,36 @@
           {
             "session": "FP2",
             "stint": 1,
-            "compound": "MEDIUM",
+            "compound": "HARD",
             "quality": "interrupted",
             "laps": 3,
-            "median_pace": 97.172,
-            "avg_pace": 97.464,
-            "interruptions": 3,
+            "median_pace": 97.261,
+            "avg_pace": 97.261,
+            "interruptions": 2,
             "lap_sequence": [
               {
                 "lap_number": 2,
-                "time": 98.26,
+                "time": 97.261,
                 "selected": true
               },
               {
                 "lap_number": 3,
-                "time": 149.706,
+                "time": 166.29,
                 "selected": false
               },
               {
-                "lap_number": 5,
-                "time": 96.959,
+                "lap_number": 4,
+                "time": 96.373,
                 "selected": true
               },
               {
+                "lap_number": 5,
+                "time": 173.518,
+                "selected": false
+              },
+              {
                 "lap_number": 6,
-                "time": 152.207,
-                "selected": false
-              },
-              {
-                "lap_number": 7,
-                "time": 132.32,
-                "selected": false
-              },
-              {
-                "lap_number": 8,
-                "time": 97.172,
+                "time": 98.15,
                 "selected": true
               }
             ]
@@ -1449,61 +2171,333 @@
           {
             "session": "FP2",
             "stint": 3,
-            "compound": "MEDIUM",
+            "compound": "HARD",
             "quality": "clean",
-            "laps": 10,
-            "median_pace": 103.036,
-            "avg_pace": 103.03,
-            "interruptions": 0,
+            "laps": 7,
+            "median_pace": 101.177,
+            "avg_pace": 101.152,
+            "interruptions": 1,
             "lap_sequence": [
               {
+                "lap_number": 14,
+                "time": 100.593,
+                "selected": true
+              },
+              {
+                "lap_number": 15,
+                "time": 100.776,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 101.177,
+                "selected": true
+              },
+              {
                 "lap_number": 17,
-                "time": 103.198,
+                "time": 101.028,
                 "selected": true
               },
               {
                 "lap_number": 18,
-                "time": 102.144,
+                "time": 101.354,
                 "selected": true
               },
               {
                 "lap_number": 19,
-                "time": 102.988,
+                "time": 101.835,
                 "selected": true
               },
               {
                 "lap_number": 20,
-                "time": 103.026,
+                "time": 103.584,
+                "selected": false
+              },
+              {
+                "lap_number": 21,
+                "time": 101.304,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "HAM": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 97.235,
+            "avg_pace": 97.693,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 99.009,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 178.99,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 97.235,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 196.066,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 96.835,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 4,
+            "compound": "SOFT",
+            "quality": "partial",
+            "laps": 4,
+            "median_pace": 101.508,
+            "avg_pace": 101.773,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 18,
+                "time": 102.718,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 101.615,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 101.356,
                 "selected": true
               },
               {
                 "lap_number": 21,
-                "time": 102.829,
+                "time": 101.402,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 1,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 97.026,
+            "avg_pace": 97.087,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 97.263,
+                "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 194.813,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 96.973,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 192.662,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 97.026,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 4,
+            "compound": "SOFT",
+            "quality": "partial",
+            "laps": 4,
+            "median_pace": 102.411,
+            "avg_pace": 102.38,
+            "interruptions": 2,
+            "lap_sequence": [
+              {
+                "lap_number": 15,
+                "time": 101.668,
+                "selected": true
+              },
+              {
+                "lap_number": 16,
+                "time": 102.184,
+                "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 100.951,
+                "selected": false
+              },
+              {
+                "lap_number": 18,
+                "time": 102.638,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 102.304,
+                "selected": false
+              },
+              {
+                "lap_number": 20,
+                "time": 103.032,
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "BOR": {
+        "runs": [
+          {
+            "session": "FP1",
+            "stint": 3,
+            "compound": "HARD",
+            "quality": "interrupted",
+            "laps": 3,
+            "median_pace": 98.144,
+            "avg_pace": 98.393,
+            "interruptions": 4,
+            "lap_sequence": [
+              {
+                "lap_number": 4,
+                "time": 99.027,
+                "selected": true
+              },
+              {
+                "lap_number": 5,
+                "time": 150.09,
+                "selected": false
+              },
+              {
+                "lap_number": 6,
+                "time": 100.818,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 138.683,
+                "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 98.009,
+                "selected": true
+              },
+              {
+                "lap_number": 9,
+                "time": 153.629,
+                "selected": false
+              },
+              {
+                "lap_number": 10,
+                "time": 98.144,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP1",
+            "stint": 6,
+            "compound": "SOFT",
+            "quality": "short",
+            "laps": 3,
+            "median_pace": 101.102,
+            "avg_pace": 100.998,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 19,
+                "time": 101.102,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 100.781,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 101.11,
+                "selected": true
+              }
+            ]
+          },
+          {
+            "session": "FP2",
+            "stint": 6,
+            "compound": "MEDIUM",
+            "quality": "clean",
+            "laps": 8,
+            "median_pace": 103.424,
+            "avg_pace": 103.138,
+            "interruptions": 0,
+            "lap_sequence": [
+              {
+                "lap_number": 17,
+                "time": 101.935,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 102.64,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 102.636,
+                "selected": true
+              },
+              {
+                "lap_number": 20,
+                "time": 103.387,
+                "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 103.577,
                 "selected": true
               },
               {
                 "lap_number": 22,
-                "time": 103.047,
+                "time": 103.692,
+                "selected": true
+              },
+              {
+                "lap_number": 23,
+                "time": 103.462,
                 "selected": true
               },
               {
                 "lap_number": 24,
-                "time": 103.559,
-                "selected": true
-              },
-              {
-                "lap_number": 25,
-                "time": 103.504,
-                "selected": true
-              },
-              {
-                "lap_number": 26,
-                "time": 103.22,
-                "selected": true
-              },
-              {
-                "lap_number": 27,
-                "time": 102.786,
+                "time": 103.772,
                 "selected": true
               }
             ]
@@ -1517,9 +2511,9 @@
             "stint": 3,
             "compound": "SOFT",
             "quality": "interrupted",
-            "laps": 3,
-            "median_pace": 100.206,
-            "avg_pace": 100.681,
+            "laps": 4,
+            "median_pace": 100.918,
+            "avg_pace": 100.918,
             "interruptions": 5,
             "lap_sequence": [
               {
@@ -1546,6 +2540,11 @@
                 "lap_number": 8,
                 "time": 138.241,
                 "selected": false
+              },
+              {
+                "lap_number": 9,
+                "time": 101.631,
+                "selected": true
               },
               {
                 "lap_number": 10,
@@ -1597,126 +2596,6 @@
               {
                 "lap_number": 19,
                 "time": 104.713,
-                "selected": true
-              }
-            ]
-          }
-        ]
-      },
-      "HUL": {
-        "runs": [
-          {
-            "session": "FP1",
-            "stint": 3,
-            "compound": "SOFT",
-            "quality": "partial",
-            "laps": 4,
-            "median_pace": 103.238,
-            "avg_pace": 103.134,
-            "interruptions": 0,
-            "lap_sequence": [
-              {
-                "lap_number": 16,
-                "time": 101.742,
-                "selected": true
-              },
-              {
-                "lap_number": 19,
-                "time": 103.005,
-                "selected": true
-              },
-              {
-                "lap_number": 20,
-                "time": 103.471,
-                "selected": true
-              },
-              {
-                "lap_number": 21,
-                "time": 104.317,
-                "selected": true
-              }
-            ]
-          },
-          {
-            "session": "FP2",
-            "stint": 1,
-            "compound": "MEDIUM",
-            "quality": "interrupted",
-            "laps": 3,
-            "median_pace": 97.924,
-            "avg_pace": 97.923,
-            "interruptions": 3,
-            "lap_sequence": [
-              {
-                "lap_number": 2,
-                "time": 98.416,
-                "selected": true
-              },
-              {
-                "lap_number": 3,
-                "time": 153.733,
-                "selected": false
-              },
-              {
-                "lap_number": 4,
-                "time": 97.924,
-                "selected": true
-              },
-              {
-                "lap_number": 5,
-                "time": 156.634,
-                "selected": false
-              },
-              {
-                "lap_number": 6,
-                "time": 118.325,
-                "selected": false
-              },
-              {
-                "lap_number": 7,
-                "time": 97.43,
-                "selected": true
-              }
-            ]
-          },
-          {
-            "session": "FP2",
-            "stint": 3,
-            "compound": "SOFT",
-            "quality": "clean",
-            "laps": 6,
-            "median_pace": 103.5,
-            "avg_pace": 103.455,
-            "interruptions": 0,
-            "lap_sequence": [
-              {
-                "lap_number": 15,
-                "time": 103.808,
-                "selected": true
-              },
-              {
-                "lap_number": 16,
-                "time": 102.982,
-                "selected": true
-              },
-              {
-                "lap_number": 17,
-                "time": 103.796,
-                "selected": true
-              },
-              {
-                "lap_number": 18,
-                "time": 103.144,
-                "selected": true
-              },
-              {
-                "lap_number": 19,
-                "time": 103.709,
-                "selected": true
-              },
-              {
-                "lap_number": 20,
-                "time": 103.29,
                 "selected": true
               }
             ]
@@ -1791,11 +2670,11 @@
             "session": "FP2",
             "stint": 2,
             "compound": "HARD",
-            "quality": "clean",
-            "laps": 9,
-            "median_pace": 102.436,
-            "avg_pace": 102.342,
-            "interruptions": 1,
+            "quality": "partial",
+            "laps": 10,
+            "median_pace": 102.394,
+            "avg_pace": 102.311,
+            "interruptions": 2,
             "lap_sequence": [
               {
                 "lap_number": 8,
@@ -1810,6 +2689,11 @@
               {
                 "lap_number": 10,
                 "time": 101.629,
+                "selected": true
+              },
+              {
+                "lap_number": 11,
+                "time": 102.038,
                 "selected": true
               },
               {
@@ -1833,6 +2717,11 @@
                 "selected": true
               },
               {
+                "lap_number": 16,
+                "time": 105.163,
+                "selected": false
+              },
+              {
                 "lap_number": 17,
                 "time": 102.353,
                 "selected": true
@@ -1854,15 +2743,30 @@
             "stint": 3,
             "compound": "SOFT",
             "quality": "clean",
-            "laps": 5,
-            "median_pace": 101.796,
-            "avg_pace": 101.851,
-            "interruptions": 0,
+            "laps": 7,
+            "median_pace": 101.674,
+            "avg_pace": 101.78,
+            "interruptions": 1,
             "lap_sequence": [
               {
                 "lap_number": 22,
                 "time": 101.674,
                 "selected": true
+              },
+              {
+                "lap_number": 23,
+                "time": 101.546,
+                "selected": true
+              },
+              {
+                "lap_number": 24,
+                "time": 101.66,
+                "selected": true
+              },
+              {
+                "lap_number": 25,
+                "time": 107.442,
+                "selected": false
               },
               {
                 "lap_number": 26,
@@ -1895,14 +2799,19 @@
             "stint": 3,
             "compound": "HARD",
             "quality": "clean",
-            "laps": 8,
+            "laps": 10,
             "median_pace": 103.196,
-            "avg_pace": 103.458,
+            "avg_pace": 103.429,
             "interruptions": 0,
             "lap_sequence": [
               {
                 "lap_number": 12,
                 "time": 103.485,
+                "selected": true
+              },
+              {
+                "lap_number": 13,
+                "time": 103.067,
                 "selected": true
               },
               {
@@ -1939,6 +2848,11 @@
                 "lap_number": 20,
                 "time": 103.18,
                 "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 103.563,
+                "selected": true
               }
             ]
           },
@@ -1950,12 +2864,17 @@
             "laps": 3,
             "median_pace": 97.952,
             "avg_pace": 98.114,
-            "interruptions": 1,
+            "interruptions": 2,
             "lap_sequence": [
               {
                 "lap_number": 2,
                 "time": 98.716,
                 "selected": true
+              },
+              {
+                "lap_number": 3,
+                "time": 168.952,
+                "selected": false
               },
               {
                 "lap_number": 4,
@@ -1979,9 +2898,9 @@
             "stint": 4,
             "compound": "SOFT",
             "quality": "clean",
-            "laps": 9,
-            "median_pace": 102.588,
-            "avg_pace": 102.89,
+            "laps": 10,
+            "median_pace": 102.66,
+            "avg_pace": 102.926,
             "interruptions": 0,
             "lap_sequence": [
               {
@@ -2020,6 +2939,11 @@
                 "selected": true
               },
               {
+                "lap_number": 22,
+                "time": 103.243,
+                "selected": true
+              },
+              {
                 "lap_number": 23,
                 "time": 104.261,
                 "selected": true
@@ -2027,109 +2951,6 @@
               {
                 "lap_number": 24,
                 "time": 103.741,
-                "selected": true
-              }
-            ]
-          }
-        ]
-      },
-      "ALO": {
-        "runs": [
-          {
-            "session": "FP1",
-            "stint": 3,
-            "compound": "SOFT",
-            "quality": "partial",
-            "laps": 6,
-            "median_pace": 100.793,
-            "avg_pace": 99.992,
-            "interruptions": 2,
-            "lap_sequence": [
-              {
-                "lap_number": 13,
-                "time": 97.688,
-                "selected": true
-              },
-              {
-                "lap_number": 14,
-                "time": 187.751,
-                "selected": false
-              },
-              {
-                "lap_number": 15,
-                "time": 98.223,
-                "selected": true
-              },
-              {
-                "lap_number": 16,
-                "time": 130.907,
-                "selected": false
-              },
-              {
-                "lap_number": 17,
-                "time": 101.143,
-                "selected": true
-              },
-              {
-                "lap_number": 18,
-                "time": 101.212,
-                "selected": true
-              },
-              {
-                "lap_number": 19,
-                "time": 100.444,
-                "selected": true
-              },
-              {
-                "lap_number": 20,
-                "time": 101.244,
-                "selected": true
-              }
-            ]
-          },
-          {
-            "session": "FP2",
-            "stint": 3,
-            "compound": "HARD",
-            "quality": "clean",
-            "laps": 7,
-            "median_pace": 103.33,
-            "avg_pace": 103.271,
-            "interruptions": 0,
-            "lap_sequence": [
-              {
-                "lap_number": 16,
-                "time": 102.823,
-                "selected": true
-              },
-              {
-                "lap_number": 18,
-                "time": 103.203,
-                "selected": true
-              },
-              {
-                "lap_number": 19,
-                "time": 103.129,
-                "selected": true
-              },
-              {
-                "lap_number": 20,
-                "time": 103.33,
-                "selected": true
-              },
-              {
-                "lap_number": 21,
-                "time": 103.457,
-                "selected": true
-              },
-              {
-                "lap_number": 22,
-                "time": 103.564,
-                "selected": true
-              },
-              {
-                "lap_number": 23,
-                "time": 103.388,
                 "selected": true
               }
             ]
@@ -2196,10 +3017,15 @@
             "compound": "HARD",
             "quality": "interrupted",
             "laps": 3,
-            "median_pace": 98.424,
-            "avg_pace": 98.372,
-            "interruptions": 2,
+            "median_pace": 98.447,
+            "avg_pace": 98.496,
+            "interruptions": 4,
             "lap_sequence": [
+              {
+                "lap_number": 2,
+                "time": 98.797,
+                "selected": true
+              },
               {
                 "lap_number": 3,
                 "time": 137.311,
@@ -2208,7 +3034,7 @@
               {
                 "lap_number": 4,
                 "time": 98.424,
-                "selected": true
+                "selected": false
               },
               {
                 "lap_number": 5,
@@ -2274,9 +3100,9 @@
             "stint": 3,
             "compound": "HARD",
             "quality": "clean",
-            "laps": 6,
-            "median_pace": 103.723,
-            "avg_pace": 103.582,
+            "laps": 7,
+            "median_pace": 103.766,
+            "avg_pace": 103.652,
             "interruptions": 1,
             "lap_sequence": [
               {
@@ -2313,6 +3139,11 @@
                 "lap_number": 24,
                 "time": 103.842,
                 "selected": true
+              },
+              {
+                "lap_number": 25,
+                "time": 104.073,
+                "selected": true
               }
             ]
           }
@@ -2324,11 +3155,11 @@
             "session": "FP1",
             "stint": 5,
             "compound": "HARD",
-            "quality": "short",
-            "laps": 3,
-            "median_pace": 102.004,
-            "avg_pace": 103.092,
-            "interruptions": 0,
+            "quality": "clean",
+            "laps": 4,
+            "median_pace": 101.987,
+            "avg_pace": 102.09,
+            "interruptions": 1,
             "lap_sequence": [
               {
                 "lap_number": 18,
@@ -2341,8 +3172,18 @@
                 "selected": true
               },
               {
+                "lap_number": 20,
+                "time": 101.969,
+                "selected": true
+              },
+              {
                 "lap_number": 21,
                 "time": 105.581,
+                "selected": false
+              },
+              {
+                "lap_number": 22,
+                "time": 102.698,
                 "selected": true
               }
             ]
@@ -2469,8 +3310,8 @@
             "quality": "clean",
             "laps": 6,
             "median_pace": 104.161,
-            "avg_pace": 104.131,
-            "interruptions": 0,
+            "avg_pace": 104.254,
+            "interruptions": 1,
             "lap_sequence": [
               {
                 "lap_number": 15,
@@ -2480,7 +3321,7 @@
               {
                 "lap_number": 16,
                 "time": 104.798,
-                "selected": true
+                "selected": false
               },
               {
                 "lap_number": 17,
@@ -2501,127 +3342,227 @@
                 "lap_number": 20,
                 "time": 104.25,
                 "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 105.538,
+                "selected": true
               }
             ]
           }
         ]
       },
-      "BOR": {
+      "ALB": {
         "runs": [
           {
-            "session": "FP1",
-            "stint": 6,
-            "compound": "SOFT",
-            "quality": "short",
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
             "laps": 3,
-            "median_pace": 101.102,
-            "avg_pace": 100.998,
-            "interruptions": 0,
+            "median_pace": 100.393,
+            "avg_pace": 99.767,
+            "interruptions": 4,
             "lap_sequence": [
               {
-                "lap_number": 19,
-                "time": 101.102,
+                "lap_number": 2,
+                "time": 100.691,
                 "selected": true
               },
               {
-                "lap_number": 20,
-                "time": 100.781,
+                "lap_number": 3,
+                "time": 161.716,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 129.236,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 98.218,
                 "selected": true
               },
               {
-                "lap_number": 21,
-                "time": 101.11,
+                "lap_number": 6,
+                "time": 158.652,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 128.042,
+                "selected": false
+              },
+              {
+                "lap_number": 8,
+                "time": 100.393,
                 "selected": true
               }
             ]
           },
           {
             "session": "FP2",
-            "stint": 6,
-            "compound": "MEDIUM",
+            "stint": 3,
+            "compound": "SOFT",
             "quality": "partial",
-            "laps": 4,
-            "median_pace": 103.482,
-            "avg_pace": 103.168,
-            "interruptions": 0,
+            "laps": 5,
+            "median_pace": 103.574,
+            "avg_pace": 103.567,
+            "interruptions": 4,
             "lap_sequence": [
               {
-                "lap_number": 17,
-                "time": 101.935,
+                "lap_number": 16,
+                "time": 103.426,
                 "selected": true
+              },
+              {
+                "lap_number": 17,
+                "time": 103.495,
+                "selected": true
+              },
+              {
+                "lap_number": 18,
+                "time": 103.574,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 109.201,
+                "selected": false
               },
               {
                 "lap_number": 20,
-                "time": 103.387,
-                "selected": true
+                "time": 104.328,
+                "selected": false
               },
               {
                 "lap_number": 21,
-                "time": 103.577,
+                "time": 106.191,
+                "selected": false
+              },
+              {
+                "lap_number": 22,
+                "time": 103.95,
+                "selected": false
+              },
+              {
+                "lap_number": 23,
+                "time": 103.618,
                 "selected": true
               },
               {
                 "lap_number": 24,
-                "time": 103.772,
+                "time": 103.721,
                 "selected": true
               }
             ]
           }
         ]
       },
-      "HAM": {
+      "SAI": {
         "runs": [
           {
-            "session": "FP1",
-            "stint": 4,
-            "compound": "SOFT",
-            "quality": "short",
+            "session": "FP2",
+            "stint": 1,
+            "compound": "MEDIUM",
+            "quality": "interrupted",
             "laps": 3,
-            "median_pace": 101.402,
-            "avg_pace": 101.458,
-            "interruptions": 0,
+            "median_pace": 99.052,
+            "avg_pace": 101.261,
+            "interruptions": 3,
             "lap_sequence": [
               {
-                "lap_number": 19,
-                "time": 101.615,
+                "lap_number": 2,
+                "time": 99.052,
                 "selected": true
               },
               {
-                "lap_number": 20,
-                "time": 101.356,
+                "lap_number": 3,
+                "time": 176.913,
+                "selected": false
+              },
+              {
+                "lap_number": 4,
+                "time": 112.457,
+                "selected": false
+              },
+              {
+                "lap_number": 5,
+                "time": 98.446,
                 "selected": true
               },
               {
-                "lap_number": 21,
-                "time": 101.402,
+                "lap_number": 6,
+                "time": 173.77,
+                "selected": false
+              },
+              {
+                "lap_number": 7,
+                "time": 106.284,
                 "selected": true
+              },
+              {
+                "lap_number": 8,
+                "time": 119.677,
+                "selected": false
               }
             ]
           },
           {
             "session": "FP2",
-            "stint": 4,
+            "stint": 3,
             "compound": "SOFT",
-            "quality": "short",
-            "laps": 3,
-            "median_pace": 101.668,
-            "avg_pace": 101.884,
+            "quality": "clean",
+            "laps": 8,
+            "median_pace": 103.763,
+            "avg_pace": 103.62,
             "interruptions": 0,
             "lap_sequence": [
               {
-                "lap_number": 15,
-                "time": 101.668,
+                "lap_number": 17,
+                "time": 102.809,
                 "selected": true
               },
               {
-                "lap_number": 17,
-                "time": 100.951,
+                "lap_number": 18,
+                "time": 102.981,
+                "selected": true
+              },
+              {
+                "lap_number": 19,
+                "time": 103.314,
                 "selected": true
               },
               {
                 "lap_number": 20,
-                "time": 103.032,
+                "time": 103.551,
                 "selected": true
+              },
+              {
+                "lap_number": 21,
+                "time": 103.975,
+                "selected": true
+              },
+              {
+                "lap_number": 22,
+                "time": 104.03,
+                "selected": true
+              },
+              {
+                "lap_number": 23,
+                "time": 103.997,
+                "selected": true
+              },
+              {
+                "lap_number": 24,
+                "time": 104.305,
+                "selected": true
+              },
+              {
+                "lap_number": 25,
+                "time": 105.057,
+                "selected": false
               }
             ]
           }
@@ -2709,113 +3650,6 @@
             ]
           }
         ]
-      },
-      "ALB": {
-        "runs": [
-          {
-            "session": "FP2",
-            "stint": 3,
-            "compound": "SOFT",
-            "quality": "partial",
-            "laps": 5,
-            "median_pace": 103.574,
-            "avg_pace": 103.567,
-            "interruptions": 3,
-            "lap_sequence": [
-              {
-                "lap_number": 16,
-                "time": 103.426,
-                "selected": true
-              },
-              {
-                "lap_number": 17,
-                "time": 103.495,
-                "selected": true
-              },
-              {
-                "lap_number": 18,
-                "time": 103.574,
-                "selected": true
-              },
-              {
-                "lap_number": 20,
-                "time": 104.328,
-                "selected": false
-              },
-              {
-                "lap_number": 21,
-                "time": 106.191,
-                "selected": false
-              },
-              {
-                "lap_number": 22,
-                "time": 103.95,
-                "selected": false
-              },
-              {
-                "lap_number": 23,
-                "time": 103.618,
-                "selected": true
-              },
-              {
-                "lap_number": 24,
-                "time": 103.721,
-                "selected": true
-              }
-            ]
-          }
-        ]
-      },
-      "SAI": {
-        "runs": [
-          {
-            "session": "FP2",
-            "stint": 3,
-            "compound": "SOFT",
-            "quality": "clean",
-            "laps": 6,
-            "median_pace": 103.774,
-            "avg_pace": 103.668,
-            "interruptions": 0,
-            "lap_sequence": [
-              {
-                "lap_number": 17,
-                "time": 102.809,
-                "selected": true
-              },
-              {
-                "lap_number": 19,
-                "time": 103.314,
-                "selected": true
-              },
-              {
-                "lap_number": 20,
-                "time": 103.551,
-                "selected": true
-              },
-              {
-                "lap_number": 22,
-                "time": 104.03,
-                "selected": true
-              },
-              {
-                "lap_number": 23,
-                "time": 103.997,
-                "selected": true
-              },
-              {
-                "lap_number": 24,
-                "time": 104.305,
-                "selected": true
-              },
-              {
-                "lap_number": 25,
-                "time": 105.057,
-                "selected": false
-              }
-            ]
-          }
-        ]
       }
     },
     "method": "same-session-all-compounds-per-run-median-v2"
@@ -2825,11 +3659,25 @@
       "MEDIUM": {
         "stints": [
           {
+            "stint": 6,
+            "session": "FP1",
+            "laps": 3,
+            "deg_rate": null,
+            "avg_pace": 98.875
+          },
+          {
+            "stint": 7,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 127.864
+          },
+          {
             "stint": 1,
             "session": "FP2",
             "laps": 3,
             "deg_rate": null,
-            "avg_pace": 128.042
+            "avg_pace": 98.218
           }
         ],
         "avg_degradation": null,
@@ -2841,9 +3689,9 @@
           {
             "stint": 2,
             "session": "FP2",
-            "laps": 2,
+            "laps": 3,
             "deg_rate": null,
-            "avg_pace": 118.347
+            "avg_pace": 98.035
           },
           {
             "stint": 3,
@@ -2864,9 +3712,9 @@
           {
             "stint": 1,
             "session": "FP1",
-            "laps": 2,
+            "laps": 3,
             "deg_rate": null,
-            "avg_pace": 99.408
+            "avg_pace": 98.91
           },
           {
             "stint": 2,
@@ -2892,7 +3740,7 @@
           {
             "stint": 2,
             "session": "FP2",
-            "laps": 4,
+            "laps": 2,
             "deg_rate": null,
             "avg_pace": 97.235
           }
@@ -2913,13 +3761,13 @@
           {
             "stint": 3,
             "session": "FP2",
-            "laps": 7,
-            "deg_rate": 0.127,
+            "laps": 8,
+            "deg_rate": 0.112,
             "avg_pace": 102.823
           }
         ],
-        "avg_degradation": 0.127,
-        "deg_laps": 7,
+        "avg_degradation": 0.112,
+        "deg_laps": 8,
         "deg_stints": 1
       }
     },
@@ -2941,6 +3789,13 @@
       "SOFT": {
         "stints": [
           {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 96.513
+          },
+          {
             "stint": 3,
             "session": "FP1",
             "laps": 1,
@@ -2950,8 +3805,8 @@
           {
             "stint": 4,
             "session": "FP1",
-            "laps": 4,
-            "deg_rate": null,
+            "laps": 6,
+            "deg_rate": 0.06,
             "avg_pace": 101.769
           },
           {
@@ -2962,12 +3817,19 @@
             "avg_pace": 95.333
           }
         ],
-        "avg_degradation": null,
-        "deg_laps": 0,
-        "deg_stints": 0
+        "avg_degradation": 0.06,
+        "deg_laps": 6,
+        "deg_stints": 1
       },
       "MEDIUM": {
         "stints": [
+          {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 96.91
+          },
           {
             "stint": 2,
             "session": "FP2",
@@ -2979,11 +3841,11 @@
             "stint": 4,
             "session": "FP2",
             "laps": 6,
-            "deg_rate": 0.274,
-            "avg_pace": 101.062
+            "deg_rate": 0.122,
+            "avg_pace": 100.783
           }
         ],
-        "avg_degradation": 0.274,
+        "avg_degradation": 0.122,
         "deg_laps": 6,
         "deg_stints": 1
       }
@@ -2994,9 +3856,9 @@
           {
             "stint": 1,
             "session": "FP1",
-            "laps": 3,
+            "laps": 4,
             "deg_rate": null,
-            "avg_pace": 99.236
+            "avg_pace": 99.035
           },
           {
             "stint": 3,
@@ -3015,9 +3877,9 @@
           {
             "stint": 2,
             "session": "FP1",
-            "laps": 2,
+            "laps": 4,
             "deg_rate": null,
-            "avg_pace": 97.665
+            "avg_pace": 97.591
           },
           {
             "stint": 3,
@@ -3029,13 +3891,13 @@
           {
             "stint": 4,
             "session": "FP2",
-            "laps": 5,
-            "deg_rate": 0.3,
-            "avg_pace": 103.068
+            "laps": 10,
+            "deg_rate": 0.171,
+            "avg_pace": 102.666
           }
         ],
-        "avg_degradation": 0.3,
-        "deg_laps": 5,
+        "avg_degradation": 0.171,
+        "deg_laps": 10,
         "deg_stints": 1
       },
       "MEDIUM": {
@@ -3059,7 +3921,7 @@
           {
             "stint": 3,
             "session": "FP1",
-            "laps": 2,
+            "laps": 4,
             "deg_rate": null,
             "avg_pace": 98.009
           }
@@ -3092,6 +3954,13 @@
             "avg_pace": 100.781
           },
           {
+            "stint": 4,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 96.946
+          },
+          {
             "stint": 5,
             "session": "FP2",
             "laps": 1,
@@ -3106,6 +3975,13 @@
       "MEDIUM": {
         "stints": [
           {
+            "stint": 1,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 97.574
+          },
+          {
             "stint": 2,
             "session": "FP2",
             "laps": 1,
@@ -3113,16 +3989,23 @@
             "avg_pace": 96.832
           },
           {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 97.841
+          },
+          {
             "stint": 6,
             "session": "FP2",
-            "laps": 4,
-            "deg_rate": null,
+            "laps": 8,
+            "deg_rate": 0.277,
             "avg_pace": 101.935
           }
         ],
-        "avg_degradation": null,
-        "deg_laps": 0,
-        "deg_stints": 0
+        "avg_degradation": 0.277,
+        "deg_laps": 8,
+        "deg_stints": 1
       }
     },
     "BOT": {
@@ -3180,19 +4063,26 @@
           {
             "stint": 4,
             "session": "FP2",
-            "laps": 6,
-            "deg_rate": 0.08,
+            "laps": 7,
+            "deg_rate": 0.214,
             "avg_pace": 103.428
           }
         ],
-        "avg_degradation": 0.08,
-        "deg_laps": 6,
+        "avg_degradation": 0.214,
+        "deg_laps": 7,
         "deg_stints": 1
       }
     },
     "COL": {
       "SOFT": {
         "stints": [
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 101.315
+          },
           {
             "stint": 4,
             "session": "FP1",
@@ -3210,13 +4100,13 @@
           {
             "stint": 3,
             "session": "FP2",
-            "laps": 5,
-            "deg_rate": 0.061,
+            "laps": 8,
+            "deg_rate": 0.012,
             "avg_pace": 101.541
           }
         ],
-        "avg_degradation": 0.061,
-        "deg_laps": 5,
+        "avg_degradation": 0.012,
+        "deg_laps": 8,
         "deg_stints": 1
       },
       "MEDIUM": {
@@ -3238,13 +4128,13 @@
           {
             "stint": 2,
             "session": "FP2",
-            "laps": 9,
-            "deg_rate": 0.112,
+            "laps": 11,
+            "deg_rate": 0.177,
             "avg_pace": 101.567
           }
         ],
-        "avg_degradation": 0.112,
-        "deg_laps": 9,
+        "avg_degradation": 0.177,
+        "deg_laps": 11,
         "deg_stints": 1
       }
     },
@@ -3261,13 +4151,13 @@
           {
             "stint": 3,
             "session": "FP1",
-            "laps": 8,
-            "deg_rate": 0.122,
+            "laps": 10,
+            "deg_rate": 0.11,
             "avg_pace": 102.739
           }
         ],
-        "avg_degradation": 0.122,
-        "deg_laps": 8,
+        "avg_degradation": 0.11,
+        "deg_laps": 10,
         "deg_stints": 1
       },
       "SOFT": {
@@ -3296,13 +4186,13 @@
           {
             "stint": 4,
             "session": "FP2",
-            "laps": 9,
-            "deg_rate": 0.196,
+            "laps": 10,
+            "deg_rate": 0.193,
             "avg_pace": 102.363
           }
         ],
-        "avg_degradation": 0.196,
-        "deg_laps": 9,
+        "avg_degradation": 0.193,
+        "deg_laps": 10,
         "deg_stints": 1
       },
       "MEDIUM": {
@@ -3310,7 +4200,7 @@
           {
             "stint": 1,
             "session": "FP2",
-            "laps": 4,
+            "laps": 3,
             "deg_rate": null,
             "avg_pace": 97.674
           }
@@ -3338,11 +4228,39 @@
       "SOFT": {
         "stints": [
           {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 96.918
+          },
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 96.49
+          },
+          {
             "stint": 4,
             "session": "FP1",
             "laps": 7,
             "deg_rate": -0.293,
             "avg_pace": 101.811
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 96.134
+          },
+          {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 96.079
           }
         ],
         "avg_degradation": -0.293,
@@ -3354,20 +4272,20 @@
           {
             "stint": 1,
             "session": "FP2",
-            "laps": 2,
+            "laps": 3,
             "deg_rate": null,
             "avg_pace": 96.411
           },
           {
             "stint": 4,
             "session": "FP2",
-            "laps": 6,
-            "deg_rate": 0.25,
-            "avg_pace": 101.802
+            "laps": 8,
+            "deg_rate": 0.384,
+            "avg_pace": 101.749
           }
         ],
-        "avg_degradation": 0.25,
-        "deg_laps": 6,
+        "avg_degradation": 0.384,
+        "deg_laps": 8,
         "deg_stints": 1
       }
     },
@@ -3377,7 +4295,7 @@
           {
             "stint": 1,
             "session": "FP1",
-            "laps": 4,
+            "laps": 3,
             "deg_rate": null,
             "avg_pace": 96.835
           }
@@ -3398,14 +4316,14 @@
           {
             "stint": 3,
             "session": "FP1",
-            "laps": 2,
+            "laps": 3,
             "deg_rate": null,
             "avg_pace": 96.555
           },
           {
             "stint": 4,
             "session": "FP1",
-            "laps": 3,
+            "laps": 4,
             "deg_rate": null,
             "avg_pace": 101.356
           },
@@ -3417,16 +4335,23 @@
             "avg_pace": 95.906
           },
           {
+            "stint": 3,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 95.917
+          },
+          {
             "stint": 4,
             "session": "FP2",
-            "laps": 3,
-            "deg_rate": null,
+            "laps": 5,
+            "deg_rate": 0.252,
             "avg_pace": 100.951
           }
         ],
-        "avg_degradation": null,
-        "deg_laps": 0,
-        "deg_stints": 0
+        "avg_degradation": 0.252,
+        "deg_laps": 5,
+        "deg_stints": 1
       },
       "HARD": {
         "stints": [
@@ -3436,6 +4361,13 @@
             "laps": 3,
             "deg_rate": null,
             "avg_pace": 96.973
+          },
+          {
+            "stint": 5,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 101.375
           }
         ],
         "avg_degradation": null,
@@ -3449,7 +4381,7 @@
           {
             "stint": 3,
             "session": "FP1",
-            "laps": 3,
+            "laps": 4,
             "deg_rate": null,
             "avg_pace": 99.979
           }
@@ -3479,7 +4411,7 @@
           {
             "stint": 1,
             "session": "FP1",
-            "laps": 4,
+            "laps": 3,
             "deg_rate": null,
             "avg_pace": 98.74
           }
@@ -3493,35 +4425,35 @@
           {
             "stint": 2,
             "session": "FP1",
-            "laps": 2,
+            "laps": 4,
             "deg_rate": null,
-            "avg_pace": 98.122
+            "avg_pace": 97.957
           },
           {
             "stint": 3,
             "session": "FP1",
-            "laps": 4,
-            "deg_rate": null,
+            "laps": 6,
+            "deg_rate": 0.541,
             "avg_pace": 101.742
           },
           {
             "stint": 2,
             "session": "FP2",
-            "laps": 2,
+            "laps": 3,
             "deg_rate": null,
-            "avg_pace": 135.431
+            "avg_pace": 97.04
           },
           {
             "stint": 3,
             "session": "FP2",
-            "laps": 6,
-            "deg_rate": 0.005,
+            "laps": 7,
+            "deg_rate": -0.026,
             "avg_pace": 102.982
           }
         ],
-        "avg_degradation": 0.005,
-        "deg_laps": 6,
-        "deg_stints": 1
+        "avg_degradation": 0.236,
+        "deg_laps": 13,
+        "deg_stints": 2
       },
       "MEDIUM": {
         "stints": [
@@ -3562,6 +4494,13 @@
       },
       "SOFT": {
         "stints": [
+          {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 97.048
+          },
           {
             "stint": 4,
             "session": "FP1",
@@ -3607,13 +4546,13 @@
           {
             "stint": 4,
             "session": "FP2",
-            "laps": 6,
-            "deg_rate": 0.197,
+            "laps": 11,
+            "deg_rate": 0.205,
             "avg_pace": 101.442
           }
         ],
-        "avg_degradation": 0.197,
-        "deg_laps": 6,
+        "avg_degradation": 0.205,
+        "deg_laps": 11,
         "deg_stints": 1
       }
     },
@@ -3630,14 +4569,14 @@
           {
             "stint": 4,
             "session": "FP1",
-            "laps": 4,
-            "deg_rate": null,
+            "laps": 7,
+            "deg_rate": 0.018,
             "avg_pace": 101.0
           }
         ],
-        "avg_degradation": null,
-        "deg_laps": 0,
-        "deg_stints": 0
+        "avg_degradation": 0.018,
+        "deg_laps": 7,
+        "deg_stints": 1
       },
       "SOFT": {
         "stints": [
@@ -3649,6 +4588,13 @@
             "avg_pace": 96.052
           },
           {
+            "stint": 3,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 96.149
+          },
+          {
             "stint": 2,
             "session": "FP2",
             "laps": 1,
@@ -3658,13 +4604,13 @@
           {
             "stint": 3,
             "session": "FP2",
-            "laps": 9,
-            "deg_rate": 0.157,
+            "laps": 13,
+            "deg_rate": 0.125,
             "avg_pace": 100.644
           }
         ],
-        "avg_degradation": 0.157,
-        "deg_laps": 9,
+        "avg_degradation": 0.125,
+        "deg_laps": 13,
         "deg_stints": 1
       },
       "HARD": {
@@ -3688,20 +4634,20 @@
           {
             "stint": 1,
             "session": "FP1",
-            "laps": 3,
+            "laps": 4,
             "deg_rate": null,
             "avg_pace": 98.312
           },
           {
             "stint": 4,
             "session": "FP1",
-            "laps": 6,
-            "deg_rate": 0.13,
-            "avg_pace": 102.707
+            "laps": 7,
+            "deg_rate": 0.31,
+            "avg_pace": 102.536
           }
         ],
-        "avg_degradation": 0.13,
-        "deg_laps": 6,
+        "avg_degradation": 0.31,
+        "deg_laps": 7,
         "deg_stints": 1
       },
       "SOFT": {
@@ -3723,9 +4669,9 @@
           {
             "stint": 2,
             "session": "FP2",
-            "laps": 3,
+            "laps": 4,
             "deg_rate": null,
-            "avg_pace": 96.971
+            "avg_pace": 96.734
           }
         ],
         "avg_degradation": null,
@@ -3744,13 +4690,13 @@
           {
             "stint": 3,
             "session": "FP2",
-            "laps": 10,
-            "deg_rate": 0.081,
+            "laps": 11,
+            "deg_rate": 0.083,
             "avg_pace": 102.144
           }
         ],
-        "avg_degradation": 0.081,
-        "deg_laps": 10,
+        "avg_degradation": 0.083,
+        "deg_laps": 11,
         "deg_stints": 1
       }
     },
@@ -3781,16 +4727,16 @@
           {
             "stint": 3,
             "session": "FP1",
-            "laps": 1,
+            "laps": 4,
             "deg_rate": null,
-            "avg_pace": 101.39
+            "avg_pace": 101.111
           },
           {
             "stint": 2,
             "session": "FP2",
-            "laps": 1,
+            "laps": 3,
             "deg_rate": null,
-            "avg_pace": 152.757
+            "avg_pace": 124.796
           },
           {
             "stint": 4,
@@ -3809,21 +4755,21 @@
           {
             "stint": 1,
             "session": "FP2",
-            "laps": 4,
+            "laps": 3,
             "deg_rate": null,
             "avg_pace": 96.373
           },
           {
             "stint": 3,
             "session": "FP2",
-            "laps": 2,
-            "deg_rate": null,
+            "laps": 6,
+            "deg_rate": 0.258,
             "avg_pace": 100.593
           }
         ],
-        "avg_degradation": null,
-        "deg_laps": 0,
-        "deg_stints": 0
+        "avg_degradation": 0.258,
+        "deg_laps": 6,
+        "deg_stints": 1
       }
     },
     "OCO": {
@@ -3843,6 +4789,13 @@
       },
       "SOFT": {
         "stints": [
+          {
+            "stint": 2,
+            "session": "FP1",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 97.856
+          },
           {
             "stint": 3,
             "session": "FP1",
@@ -3918,9 +4871,9 @@
           {
             "stint": 2,
             "session": "FP2",
-            "laps": 4,
+            "laps": 2,
             "deg_rate": null,
-            "avg_pace": 99.036
+            "avg_pace": 98.934
           },
           {
             "stint": 3,
@@ -3941,7 +4894,7 @@
           {
             "stint": 1,
             "session": "FP1",
-            "laps": 3,
+            "laps": 4,
             "deg_rate": null,
             "avg_pace": 97.518
           },
@@ -3969,28 +4922,28 @@
           {
             "stint": 2,
             "session": "FP2",
-            "laps": 3,
+            "laps": 4,
             "deg_rate": null,
-            "avg_pace": 96.387
+            "avg_pace": 96.029
           },
           {
             "stint": 3,
             "session": "FP2",
-            "laps": 2,
-            "deg_rate": null,
+            "laps": 5,
+            "deg_rate": 0.18,
             "avg_pace": 101.355
           }
         ],
-        "avg_degradation": null,
-        "deg_laps": 0,
-        "deg_stints": 0
+        "avg_degradation": 0.18,
+        "deg_laps": 5,
+        "deg_stints": 1
       },
       "HARD": {
         "stints": [
           {
             "stint": 1,
             "session": "FP2",
-            "laps": 3,
+            "laps": 2,
             "deg_rate": null,
             "avg_pace": 97.37
           },
@@ -4013,9 +4966,9 @@
           {
             "stint": 1,
             "session": "FP1",
-            "laps": 1,
+            "laps": 3,
             "deg_rate": null,
-            "avg_pace": 159.648
+            "avg_pace": 98.253
           },
           {
             "stint": 3,
@@ -4027,23 +4980,30 @@
           {
             "stint": 5,
             "session": "FP1",
-            "laps": 3,
-            "deg_rate": null,
+            "laps": 5,
+            "deg_rate": 0.563,
             "avg_pace": 101.69
           }
         ],
-        "avg_degradation": null,
-        "deg_laps": 0,
-        "deg_stints": 0
+        "avg_degradation": 0.563,
+        "deg_laps": 5,
+        "deg_stints": 1
       },
       "SOFT": {
         "stints": [
           {
             "stint": 4,
             "session": "FP1",
-            "laps": 3,
+            "laps": 4,
             "deg_rate": null,
             "avg_pace": 96.378
+          },
+          {
+            "stint": 2,
+            "session": "FP2",
+            "laps": 1,
+            "deg_rate": null,
+            "avg_pace": 95.793
           },
           {
             "stint": 3,
@@ -4085,21 +5045,21 @@
           {
             "stint": 6,
             "session": "FP1",
-            "laps": 1,
+            "laps": 2,
             "deg_rate": null,
             "avg_pace": 98.846
           },
           {
             "stint": 7,
             "session": "FP1",
-            "laps": 1,
+            "laps": 2,
             "deg_rate": null,
-            "avg_pace": 103.549
+            "avg_pace": 99.196
           },
           {
             "stint": 1,
             "session": "FP2",
-            "laps": 2,
+            "laps": 3,
             "deg_rate": null,
             "avg_pace": 98.446
           }
@@ -4113,20 +5073,20 @@
           {
             "stint": 2,
             "session": "FP2",
-            "laps": 3,
+            "laps": 4,
             "deg_rate": null,
-            "avg_pace": 136.63
+            "avg_pace": 97.701
           },
           {
             "stint": 3,
             "session": "FP2",
-            "laps": 7,
-            "deg_rate": 0.279,
+            "laps": 9,
+            "deg_rate": 0.282,
             "avg_pace": 102.809
           }
         ],
-        "avg_degradation": 0.279,
-        "deg_laps": 7,
+        "avg_degradation": 0.282,
+        "deg_laps": 9,
         "deg_stints": 1
       }
     },
@@ -4136,16 +5096,16 @@
           {
             "stint": 1,
             "session": "FP1",
-            "laps": 1,
+            "laps": 3,
             "deg_rate": null,
-            "avg_pace": 162.776
+            "avg_pace": 99.171
           },
           {
             "stint": 2,
             "session": "FP1",
-            "laps": 3,
+            "laps": 4,
             "deg_rate": null,
-            "avg_pace": 99.103
+            "avg_pace": 98.409
           },
           {
             "stint": 3,
@@ -4185,20 +5145,20 @@
           {
             "stint": 1,
             "session": "FP2",
-            "laps": 3,
+            "laps": 4,
             "deg_rate": null,
             "avg_pace": 98.244
           },
           {
             "stint": 3,
             "session": "FP2",
-            "laps": 6,
-            "deg_rate": 0.175,
+            "laps": 7,
+            "deg_rate": 0.171,
             "avg_pace": 103.12
           }
         ],
-        "avg_degradation": 0.175,
-        "deg_laps": 6,
+        "avg_degradation": 0.171,
+        "deg_laps": 7,
         "deg_stints": 1
       }
     },
@@ -4222,9 +5182,9 @@
           {
             "stint": 2,
             "session": "FP1",
-            "laps": 2,
+            "laps": 3,
             "deg_rate": null,
-            "avg_pace": 96.136
+            "avg_pace": 95.86
           },
           {
             "stint": 3,
@@ -4243,13 +5203,13 @@
           {
             "stint": 3,
             "session": "FP2",
-            "laps": 9,
-            "deg_rate": 0.121,
+            "laps": 11,
+            "deg_rate": 0.109,
             "avg_pace": 100.785
           }
         ],
-        "avg_degradation": 0.225,
-        "deg_laps": 14,
+        "avg_degradation": 0.204,
+        "deg_laps": 16,
         "deg_stints": 2
       },
       "MEDIUM": {
@@ -4271,126 +5231,126 @@
   "sectors": {
     "ALB": {
       "sector_1": {
-        "best": 27.383,
-        "avg": 31.705,
-        "median": 27.754
+        "best": 26.156,
+        "avg": 31.445,
+        "median": 27.617
       },
       "sector_2": {
-        "best": 40.612,
-        "avg": 45.53,
-        "median": 40.935
+        "best": 38.832,
+        "avg": 44.897,
+        "median": 40.899
       },
       "sector_3": {
-        "best": 35.103,
-        "avg": 38.655,
-        "median": 35.697
+        "best": 33.047,
+        "avg": 39.225,
+        "median": 35.446
       },
-      "theoretical_best": 103.098
+      "theoretical_best": 98.035
     },
     "ALO": {
       "sector_1": {
         "best": 26.008,
-        "avg": 33.57,
+        "avg": 33.039,
         "median": 27.552
       },
       "sector_2": {
         "best": 38.532,
-        "avg": 48.298,
+        "avg": 47.69,
         "median": 40.544
       },
       "sector_3": {
-        "best": 32.695,
-        "avg": 37.638,
-        "median": 35.06
+        "best": 32.577,
+        "avg": 37.466,
+        "median": 35.005
       },
-      "theoretical_best": 97.235
+      "theoretical_best": 97.117
     },
     "ANT": {
       "sector_1": {
         "best": 25.754,
-        "avg": 29.622,
-        "median": 27.056
+        "avg": 28.747,
+        "median": 27.047
       },
       "sector_2": {
         "best": 37.46,
-        "avg": 43.511,
-        "median": 40.074
+        "avg": 42.325,
+        "median": 40.186
       },
       "sector_3": {
         "best": 32.119,
-        "avg": 35.639,
-        "median": 34.282
+        "avg": 35.175,
+        "median": 34.376
       },
       "theoretical_best": 95.333
     },
     "BEA": {
       "sector_1": {
         "best": 25.86,
-        "avg": 33.836,
-        "median": 27.367
+        "avg": 32.944,
+        "median": 27.392
       },
       "sector_2": {
         "best": 38.216,
-        "avg": 46.384,
-        "median": 40.597
+        "avg": 45.703,
+        "median": 40.562
       },
       "sector_3": {
         "best": 32.386,
-        "avg": 37.22,
-        "median": 34.955
+        "avg": 37.048,
+        "median": 34.889
       },
       "theoretical_best": 96.462
     },
     "BOR": {
       "sector_1": {
         "best": 25.888,
-        "avg": 29.482,
-        "median": 27.178
+        "avg": 28.516,
+        "median": 27.141
       },
       "sector_2": {
         "best": 38.302,
-        "avg": 44.213,
-        "median": 40.032
+        "avg": 42.566,
+        "median": 39.902
       },
       "sector_3": {
         "best": 32.422,
-        "avg": 35.306,
-        "median": 33.989
+        "avg": 34.829,
+        "median": 33.993
       },
       "theoretical_best": 96.612
     },
     "BOT": {
       "sector_1": {
         "best": 26.447,
-        "avg": 29.272,
-        "median": 27.655
+        "avg": 29.211,
+        "median": 27.671
       },
       "sector_2": {
         "best": 38.918,
-        "avg": 44.411,
-        "median": 40.717
+        "avg": 44.285,
+        "median": 40.718
       },
       "sector_3": {
         "best": 33.035,
-        "avg": 38.175,
-        "median": 35.469
+        "avg": 38.099,
+        "median": 35.49
       },
       "theoretical_best": 98.4
     },
     "COL": {
       "sector_1": {
         "best": 26.174,
-        "avg": 29.503,
-        "median": 27.327
+        "avg": 29.128,
+        "median": 27.263
       },
       "sector_2": {
         "best": 38.484,
-        "avg": 43.286,
-        "median": 40.517
+        "avg": 42.893,
+        "median": 40.507
       },
       "sector_3": {
         "best": 32.543,
-        "avg": 35.881,
+        "avg": 35.784,
         "median": 34.735
       },
       "theoretical_best": 97.201
@@ -4398,586 +5358,594 @@
     "GAS": {
       "sector_1": {
         "best": 26.053,
-        "avg": 29.776,
+        "avg": 30.266,
         "median": 27.475
       },
       "sector_2": {
         "best": 38.43,
-        "avg": 43.991,
-        "median": 40.431
+        "avg": 44.39,
+        "median": 40.58
       },
       "sector_3": {
         "best": 32.357,
-        "avg": 36.361,
-        "median": 34.936
+        "avg": 36.632,
+        "median": 34.945
       },
       "theoretical_best": 96.84
     },
     "HAD": {
       "sector_1": {
-        "best": 25.892,
-        "avg": 30.823,
-        "median": 27.324
+        "best": 25.667,
+        "avg": 29.485,
+        "median": 27.189
       },
       "sector_2": {
-        "best": 38.184,
-        "avg": 43.989,
-        "median": 40.477
+        "best": 37.997,
+        "avg": 42.491,
+        "median": 40.312
       },
       "sector_3": {
-        "best": 32.335,
-        "avg": 36.68,
-        "median": 34.551
+        "best": 32.312,
+        "avg": 35.909,
+        "median": 34.487
       },
-      "theoretical_best": 96.411
+      "theoretical_best": 95.976
     },
     "HAM": {
       "sector_1": {
         "best": 25.662,
-        "avg": 36.806,
-        "median": 27.069
+        "avg": 33.169,
+        "median": 26.983
       },
       "sector_2": {
-        "best": 38.246,
-        "avg": 51.922,
-        "median": 40.142
+        "best": 38.092,
+        "avg": 47.487,
+        "median": 40.108
       },
       "sector_3": {
         "best": 31.998,
-        "avg": 37.101,
-        "median": 34.255
+        "avg": 35.936,
+        "median": 34.391
       },
-      "theoretical_best": 95.906
+      "theoretical_best": 95.752
     },
     "HER": {
       "sector_1": {
         "best": 26.778,
-        "avg": 32.667,
-        "median": 27.871
+        "avg": 32.256,
+        "median": 27.838
       },
       "sector_2": {
         "best": 39.438,
-        "avg": 47.218,
-        "median": 41.245
+        "avg": 46.691,
+        "median": 41.18
       },
       "sector_3": {
         "best": 33.489,
-        "avg": 39.561,
-        "median": 35.762
+        "avg": 39.226,
+        "median": 35.718
       },
       "theoretical_best": 99.705
     },
     "HUL": {
       "sector_1": {
-        "best": 26.249,
-        "avg": 31.653,
-        "median": 27.863
+        "best": 26.085,
+        "avg": 31.215,
+        "median": 27.796
       },
       "sector_2": {
-        "best": 38.691,
-        "avg": 45.641,
-        "median": 41.01
+        "best": 38.409,
+        "avg": 45.17,
+        "median": 40.962
       },
       "sector_3": {
         "best": 32.418,
-        "avg": 37.745,
-        "median": 34.587
+        "avg": 37.373,
+        "median": 34.483
       },
-      "theoretical_best": 97.358
+      "theoretical_best": 96.912
     },
     "LAW": {
       "sector_1": {
         "best": 25.91,
-        "avg": 30.24,
+        "avg": 29.804,
         "median": 27.279
       },
       "sector_2": {
         "best": 38.137,
-        "avg": 44.008,
-        "median": 40.194
+        "avg": 43.49,
+        "median": 40.296
       },
       "sector_3": {
         "best": 32.18,
-        "avg": 36.293,
-        "median": 34.629
+        "avg": 36.054,
+        "median": 34.66
       },
       "theoretical_best": 96.227
     },
     "LEC": {
       "sector_1": {
         "best": 25.63,
-        "avg": 29.447,
+        "avg": 29.084,
         "median": 26.93
       },
       "sector_2": {
         "best": 37.834,
-        "avg": 44.385,
-        "median": 39.971
+        "avg": 43.716,
+        "median": 40.146
       },
       "sector_3": {
         "best": 31.827,
-        "avg": 36.561,
-        "median": 34.203
+        "avg": 36.613,
+        "median": 34.384
       },
       "theoretical_best": 95.291
     },
     "LIN": {
       "sector_1": {
-        "best": 25.945,
-        "avg": 30.427,
-        "median": 27.502
+        "best": 25.872,
+        "avg": 30.273,
+        "median": 27.491
       },
       "sector_2": {
         "best": 38.302,
-        "avg": 44.229,
-        "median": 40.614
+        "avg": 43.866,
+        "median": 40.594
       },
       "sector_3": {
-        "best": 32.494,
-        "avg": 37.874,
-        "median": 35.099
+        "best": 32.395,
+        "avg": 37.919,
+        "median": 35.095
       },
-      "theoretical_best": 96.741
+      "theoretical_best": 96.569
     },
     "NOR": {
       "sector_1": {
-        "best": 25.868,
-        "avg": 34.198,
-        "median": 27.018
+        "best": 25.586,
+        "avg": 31.386,
+        "median": 27.002
       },
       "sector_2": {
-        "best": 38.011,
-        "avg": 49.857,
-        "median": 39.852
+        "best": 37.793,
+        "avg": 46.544,
+        "median": 39.865
       },
       "sector_3": {
         "best": 32.332,
-        "avg": 39.121,
-        "median": 34.121
+        "avg": 38.556,
+        "median": 34.338
       },
-      "theoretical_best": 96.211
+      "theoretical_best": 95.711
     },
     "OCO": {
       "sector_1": {
         "best": 25.961,
-        "avg": 30.744,
-        "median": 27.267
+        "avg": 30.607,
+        "median": 27.22
       },
       "sector_2": {
         "best": 38.336,
-        "avg": 45.876,
-        "median": 40.552
+        "avg": 45.663,
+        "median": 40.538
       },
       "sector_3": {
         "best": 32.667,
-        "avg": 37.565,
-        "median": 35.003
+        "avg": 37.421,
+        "median": 35.001
       },
       "theoretical_best": 96.964
     },
     "PER": {
       "sector_1": {
         "best": 26.503,
-        "avg": 32.423,
-        "median": 27.869
+        "avg": 32.054,
+        "median": 27.857
       },
       "sector_2": {
         "best": 39.09,
-        "avg": 47.181,
-        "median": 41.043
+        "avg": 46.676,
+        "median": 41.028
       },
       "sector_3": {
-        "best": 33.318,
-        "avg": 38.95,
-        "median": 35.62
+        "best": 33.317,
+        "avg": 38.598,
+        "median": 35.6
       },
-      "theoretical_best": 98.911
+      "theoretical_best": 98.91
     },
     "PIA": {
       "sector_1": {
-        "best": 25.768,
-        "avg": 32.333,
-        "median": 27.322
+        "best": 25.62,
+        "avg": 31.345,
+        "median": 27.294
       },
       "sector_2": {
-        "best": 38.15,
-        "avg": 46.228,
-        "median": 40.231
+        "best": 38.098,
+        "avg": 45.357,
+        "median": 40.054
       },
       "sector_3": {
-        "best": 32.469,
-        "avg": 38.673,
-        "median": 34.567
+        "best": 32.311,
+        "avg": 38.179,
+        "median": 34.521
       },
-      "theoretical_best": 96.387
+      "theoretical_best": 96.029
     },
     "RUS": {
       "sector_1": {
         "best": 25.616,
-        "avg": 32.008,
-        "median": 27.16
+        "avg": 31.176,
+        "median": 27.104
       },
       "sector_2": {
-        "best": 38.03,
-        "avg": 47.968,
+        "best": 37.934,
+        "avg": 46.448,
         "median": 40.268
       },
       "sector_3": {
         "best": 32.107,
-        "avg": 37.307,
-        "median": 34.631
+        "avg": 36.683,
+        "median": 34.361
       },
-      "theoretical_best": 95.753
+      "theoretical_best": 95.657
     },
     "SAI": {
       "sector_1": {
-        "best": 26.192,
-        "avg": 28.715,
-        "median": 27.476
+        "best": 26.034,
+        "avg": 29.909,
+        "median": 27.444
       },
       "sector_2": {
-        "best": 38.922,
-        "avg": 49.203,
-        "median": 41.037
+        "best": 38.741,
+        "avg": 48.926,
+        "median": 40.943
       },
       "sector_3": {
-        "best": 33.301,
-        "avg": 37.855,
-        "median": 35.595
+        "best": 32.926,
+        "avg": 38.195,
+        "median": 35.549
       },
-      "theoretical_best": 98.415
+      "theoretical_best": 97.701
     },
     "STR": {
       "sector_1": {
         "best": 26.186,
-        "avg": 32.346,
-        "median": 27.716
+        "avg": 31.623,
+        "median": 27.601
       },
       "sector_2": {
         "best": 38.548,
-        "avg": 45.248,
-        "median": 40.698
+        "avg": 44.457,
+        "median": 40.497
       },
       "sector_3": {
         "best": 32.504,
-        "avg": 37.769,
-        "median": 35.216
+        "avg": 37.176,
+        "median": 34.995
       },
       "theoretical_best": 97.238
     },
     "VER": {
       "sector_1": {
         "best": 25.571,
-        "avg": 30.093,
-        "median": 26.988
+        "avg": 29.782,
+        "median": 26.949
       },
       "sector_2": {
         "best": 37.931,
-        "avg": 43.108,
-        "median": 40.246
+        "avg": 42.811,
+        "median": 40.284
       },
       "sector_3": {
         "best": 31.936,
-        "avg": 35.431,
-        "median": 33.971
+        "avg": 35.271,
+        "median": 34.06
       },
       "theoretical_best": 95.438
     }
   },
   "consistency": {
     "ALB": {
-      "cv": 0.1489,
-      "std": 17.257,
-      "median_lap": 104.328,
-      "best_lap": 103.426,
-      "laps_within_102pct": 53.8,
-      "total_laps": 13
+      "cv": 0.176,
+      "std": 20.344,
+      "median_lap": 103.95,
+      "best_lap": 98.035,
+      "laps_within_102pct": 17.4,
+      "total_laps": 23
     },
     "ALO": {
-      "cv": 0.238,
-      "std": 28.444,
+      "cv": 0.2321,
+      "std": 27.432,
       "median_lap": 103.203,
       "best_lap": 97.235,
-      "laps_within_102pct": 20.7,
-      "total_laps": 29
+      "laps_within_102pct": 24.2,
+      "total_laps": 33
     },
     "ANT": {
-      "cv": 0.1686,
-      "std": 18.342,
-      "median_lap": 101.705,
+      "cv": 0.1467,
+      "std": 15.583,
+      "median_lap": 101.769,
       "best_lap": 95.333,
-      "laps_within_102pct": 19.0,
-      "total_laps": 21
+      "laps_within_102pct": 19.4,
+      "total_laps": 31
     },
     "BEA": {
-      "cv": 0.2347,
-      "std": 27.568,
-      "median_lap": 102.77,
+      "cv": 0.2295,
+      "std": 26.557,
+      "median_lap": 102.804,
       "best_lap": 96.536,
-      "laps_within_102pct": 19.2,
-      "total_laps": 26
+      "laps_within_102pct": 17.6,
+      "total_laps": 34
     },
     "BOR": {
-      "cv": 0.1727,
-      "std": 18.82,
-      "median_lap": 101.106,
+      "cv": 0.1481,
+      "std": 15.689,
+      "median_lap": 101.102,
       "best_lap": 96.832,
+      "laps_within_102pct": 36.0,
+      "total_laps": 25
+    },
+    "BOT": {
+      "cv": 0.1883,
+      "std": 21.012,
+      "median_lap": 104.073,
+      "best_lap": 98.422,
+      "laps_within_102pct": 29.2,
+      "total_laps": 24
+    },
+    "COL": {
+      "cv": 0.1822,
+      "std": 19.643,
+      "median_lap": 102.529,
+      "best_lap": 97.201,
+      "laps_within_102pct": 10.5,
+      "total_laps": 38
+    },
+    "GAS": {
+      "cv": 0.1884,
+      "std": 20.965,
+      "median_lap": 103.067,
+      "best_lap": 96.84,
+      "laps_within_102pct": 15.2,
+      "total_laps": 33
+    },
+    "HAD": {
+      "cv": 0.1849,
+      "std": 19.953,
+      "median_lap": 101.984,
+      "best_lap": 96.079,
+      "laps_within_102pct": 24.1,
+      "total_laps": 29
+    },
+    "HAM": {
+      "cv": 0.291,
+      "std": 33.932,
+      "median_lap": 101.388,
+      "best_lap": 95.906,
+      "laps_within_102pct": 32.1,
+      "total_laps": 28
+    },
+    "HER": {
+      "cv": 0.1836,
+      "std": 21.699,
+      "median_lap": 104.709,
+      "best_lap": 99.979,
+      "laps_within_102pct": 28.6,
+      "total_laps": 14
+    },
+    "HUL": {
+      "cv": 0.1712,
+      "std": 19.474,
+      "median_lap": 103.217,
+      "best_lap": 97.04,
+      "laps_within_102pct": 21.9,
+      "total_laps": 32
+    },
+    "LAW": {
+      "cv": 0.1782,
+      "std": 19.491,
+      "median_lap": 102.242,
+      "best_lap": 96.331,
+      "laps_within_102pct": 26.7,
+      "total_laps": 30
+    },
+    "LEC": {
+      "cv": 0.1786,
+      "std": 19.544,
+      "median_lap": 101.539,
+      "best_lap": 95.291,
+      "laps_within_102pct": 17.9,
+      "total_laps": 39
+    },
+    "LIN": {
+      "cv": 0.1709,
+      "std": 19.156,
+      "median_lap": 103.047,
+      "best_lap": 96.734,
+      "laps_within_102pct": 20.5,
+      "total_laps": 39
+    },
+    "NOR": {
+      "cv": 0.227,
+      "std": 26.442,
+      "median_lap": 101.329,
+      "best_lap": 96.297,
+      "laps_within_102pct": 25.0,
+      "total_laps": 32
+    },
+    "OCO": {
+      "cv": 0.206,
+      "std": 23.422,
+      "median_lap": 102.798,
+      "best_lap": 97.111,
+      "laps_within_102pct": 21.2,
+      "total_laps": 33
+    },
+    "PER": {
+      "cv": 0.1938,
+      "std": 22.733,
+      "median_lap": 104.405,
+      "best_lap": 98.934,
       "laps_within_102pct": 31.2,
       "total_laps": 16
     },
-    "BOT": {
-      "cv": 0.1915,
-      "std": 21.425,
-      "median_lap": 104.073,
-      "best_lap": 98.422,
-      "laps_within_102pct": 30.4,
-      "total_laps": 23
-    },
-    "COL": {
-      "cv": 0.1957,
-      "std": 21.271,
-      "median_lap": 102.65,
-      "best_lap": 97.201,
-      "laps_within_102pct": 12.5,
-      "total_laps": 32
-    },
-    "GAS": {
-      "cv": 0.1764,
-      "std": 19.43,
-      "median_lap": 102.739,
-      "best_lap": 96.84,
-      "laps_within_102pct": 17.2,
-      "total_laps": 29
-    },
-    "HAD": {
-      "cv": 0.2059,
-      "std": 22.954,
-      "median_lap": 102.35,
-      "best_lap": 96.411,
-      "laps_within_102pct": 10.0,
-      "total_laps": 20
-    },
-    "HAM": {
-      "cv": 0.3128,
-      "std": 39.354,
-      "median_lap": 101.508,
-      "best_lap": 95.906,
-      "laps_within_102pct": 33.3,
-      "total_laps": 18
-    },
-    "HER": {
-      "cv": 0.1843,
-      "std": 22.009,
-      "median_lap": 104.713,
-      "best_lap": 99.979,
-      "laps_within_102pct": 23.1,
-      "total_laps": 13
-    },
-    "HUL": {
-      "cv": 0.1762,
-      "std": 20.271,
-      "median_lap": 103.59,
-      "best_lap": 97.43,
-      "laps_within_102pct": 20.8,
-      "total_laps": 24
-    },
-    "LAW": {
-      "cv": 0.1868,
-      "std": 20.654,
-      "median_lap": 102.122,
-      "best_lap": 96.331,
-      "laps_within_102pct": 26.9,
-      "total_laps": 26
-    },
-    "LEC": {
-      "cv": 0.1978,
-      "std": 21.838,
-      "median_lap": 101.088,
-      "best_lap": 95.291,
-      "laps_within_102pct": 22.2,
-      "total_laps": 27
-    },
-    "LIN": {
-      "cv": 0.1738,
-      "std": 19.554,
-      "median_lap": 103.123,
-      "best_lap": 96.959,
-      "laps_within_102pct": 20.6,
-      "total_laps": 34
-    },
-    "NOR": {
-      "cv": 0.2492,
-      "std": 30.694,
-      "median_lap": 100.992,
-      "best_lap": 96.297,
-      "laps_within_102pct": 35.0,
-      "total_laps": 20
-    },
-    "OCO": {
-      "cv": 0.2068,
-      "std": 23.614,
-      "median_lap": 102.812,
-      "best_lap": 97.111,
-      "laps_within_102pct": 18.8,
-      "total_laps": 32
-    },
-    "PER": {
-      "cv": 0.1937,
-      "std": 22.96,
-      "median_lap": 104.449,
-      "best_lap": 99.036,
-      "laps_within_102pct": 26.7,
-      "total_laps": 15
-    },
     "PIA": {
-      "cv": 0.2061,
-      "std": 24.167,
-      "median_lap": 102.132,
-      "best_lap": 96.387,
-      "laps_within_102pct": 20.8,
-      "total_laps": 24
+      "cv": 0.2047,
+      "std": 23.512,
+      "median_lap": 101.94,
+      "best_lap": 96.029,
+      "laps_within_102pct": 21.2,
+      "total_laps": 33
     },
     "RUS": {
-      "cv": 0.2411,
-      "std": 28.278,
-      "median_lap": 102.305,
-      "best_lap": 96.035,
-      "laps_within_102pct": 25.0,
-      "total_laps": 20
+      "cv": 0.2268,
+      "std": 25.928,
+      "median_lap": 101.987,
+      "best_lap": 95.793,
+      "laps_within_102pct": 23.1,
+      "total_laps": 26
     },
     "SAI": {
-      "cv": 0.1905,
-      "std": 22.057,
-      "median_lap": 104.03,
-      "best_lap": 98.446,
-      "laps_within_102pct": 17.6,
-      "total_laps": 17
+      "cv": 0.2083,
+      "std": 24.379,
+      "median_lap": 104.013,
+      "best_lap": 97.701,
+      "laps_within_102pct": 20.8,
+      "total_laps": 24
     },
     "STR": {
-      "cv": 0.2057,
-      "std": 23.726,
-      "median_lap": 103.68,
+      "cv": 0.2,
+      "std": 22.646,
+      "median_lap": 103.135,
       "best_lap": 97.269,
-      "laps_within_102pct": 35.5,
-      "total_laps": 31
+      "laps_within_102pct": 38.9,
+      "total_laps": 36
     },
     "VER": {
-      "cv": 0.1702,
-      "std": 18.489,
-      "median_lap": 101.474,
+      "cv": 0.1657,
+      "std": 17.873,
+      "median_lap": 101.457,
       "best_lap": 95.48,
-      "laps_within_102pct": 12.5,
-      "total_laps": 32
+      "laps_within_102pct": 14.3,
+      "total_laps": 35
     }
   },
   "temperature": {
     "ALB": {
-      "correlation": 0.0,
+      "correlation": 0.118,
       "temp_type": "track_temperature",
-      "interpretation": "neutral"
+      "interpretation": "slower in heat"
     },
     "ALO": {
-      "correlation": 0.021,
+      "correlation": 0.017,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "ANT": {
-      "correlation": 0.325,
+      "correlation": 0.313,
       "temp_type": "track_temperature",
       "interpretation": "slower in heat"
     },
     "BEA": {
-      "correlation": 0.079,
-      "temp_type": "track_temperature",
-      "interpretation": "neutral"
-    },
-    "BOR": {
-      "correlation": 0.32,
-      "temp_type": "track_temperature",
-      "interpretation": "slower in heat"
-    },
-    "BOT": {
-      "correlation": -0.094,
-      "temp_type": "track_temperature",
-      "interpretation": "neutral"
-    },
-    "COL": {
-      "correlation": -0.016,
-      "temp_type": "track_temperature",
-      "interpretation": "neutral"
-    },
-    "GAS": {
       "correlation": 0.152,
       "temp_type": "track_temperature",
       "interpretation": "slower in heat"
     },
+    "BOR": {
+      "correlation": 0.33,
+      "temp_type": "track_temperature",
+      "interpretation": "slower in heat"
+    },
+    "BOT": {
+      "correlation": -0.082,
+      "temp_type": "track_temperature",
+      "interpretation": "neutral"
+    },
+    "COL": {
+      "correlation": -0.002,
+      "temp_type": "track_temperature",
+      "interpretation": "neutral"
+    },
+    "GAS": {
+      "correlation": 0.031,
+      "temp_type": "track_temperature",
+      "interpretation": "neutral"
+    },
     "HAD": {
-      "correlation": 0.023,
+      "correlation": 0.091,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "HAM": {
-      "correlation": -0.015,
+      "correlation": 0.1,
       "temp_type": "track_temperature",
-      "interpretation": "neutral"
+      "interpretation": "slower in heat"
     },
     "HUL": {
-      "correlation": -0.05,
+      "correlation": -0.008,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "LAW": {
-      "correlation": 0.183,
+      "correlation": 0.176,
       "temp_type": "track_temperature",
       "interpretation": "slower in heat"
     },
     "LEC": {
-      "correlation": 0.167,
+      "correlation": 0.069,
       "temp_type": "track_temperature",
-      "interpretation": "slower in heat"
+      "interpretation": "neutral"
     },
     "LIN": {
-      "correlation": -0.024,
+      "correlation": -0.056,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "NOR": {
-      "correlation": -0.017,
+      "correlation": 0.071,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "OCO": {
-      "correlation": 0.112,
+      "correlation": 0.089,
       "temp_type": "track_temperature",
-      "interpretation": "slower in heat"
+      "interpretation": "neutral"
     },
     "PIA": {
-      "correlation": 0.059,
+      "correlation": 0.089,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "RUS": {
-      "correlation": -0.021,
+      "correlation": -0.068,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     },
     "SAI": {
-      "correlation": -0.241,
+      "correlation": -0.045,
       "temp_type": "track_temperature",
-      "interpretation": "faster in heat"
+      "interpretation": "neutral"
     },
     "STR": {
-      "correlation": 0.192,
+      "correlation": 0.136,
       "temp_type": "track_temperature",
       "interpretation": "slower in heat"
     },
     "VER": {
-      "correlation": 0.036,
+      "correlation": 0.038,
       "temp_type": "track_temperature",
       "interpretation": "neutral"
     }
   },
   "session_evolution": {
+    "ALB": {
+      "sessions": {
+        "FP1": 98.875,
+        "FP2": 98.035
+      },
+      "improvement": 0.84,
+      "improved": true
+    },
     "ALO": {
       "sessions": {
         "FP1": 97.688,
@@ -4988,18 +5956,18 @@
     },
     "ANT": {
       "sessions": {
-        "FP1": 96.533,
+        "FP1": 96.513,
         "FP2": 95.333
       },
-      "improvement": 1.2,
+      "improvement": 1.18,
       "improved": true
     },
     "BEA": {
       "sessions": {
-        "FP1": 97.665,
+        "FP1": 97.591,
         "FP2": 96.536
       },
-      "improvement": 1.129,
+      "improvement": 1.055,
       "improved": true
     },
     "BOR": {
@@ -5036,10 +6004,10 @@
     },
     "HAD": {
       "sessions": {
-        "FP1": 97.79,
-        "FP2": 96.411
+        "FP1": 96.49,
+        "FP2": 96.079
       },
-      "improvement": 1.379,
+      "improvement": 0.411,
       "improved": true
     },
     "HAM": {
@@ -5052,18 +6020,18 @@
     },
     "HUL": {
       "sessions": {
-        "FP1": 98.122,
-        "FP2": 97.43
+        "FP1": 97.957,
+        "FP2": 97.04
       },
-      "improvement": 0.692,
+      "improvement": 0.917,
       "improved": true
     },
     "LAW": {
       "sessions": {
-        "FP1": 97.309,
+        "FP1": 97.048,
         "FP2": 96.331
       },
-      "improvement": 0.978,
+      "improvement": 0.717,
       "improved": true
     },
     "LEC": {
@@ -5077,9 +6045,9 @@
     "LIN": {
       "sessions": {
         "FP1": 97.063,
-        "FP2": 96.959
+        "FP2": 96.734
       },
-      "improvement": 0.104,
+      "improvement": 0.329,
       "improved": true
     },
     "NOR": {
@@ -5092,34 +6060,34 @@
     },
     "OCO": {
       "sessions": {
-        "FP1": 97.896,
+        "FP1": 97.856,
         "FP2": 97.111
       },
-      "improvement": 0.785,
+      "improvement": 0.745,
       "improved": true
     },
     "PIA": {
       "sessions": {
         "FP1": 96.786,
-        "FP2": 96.387
+        "FP2": 96.029
       },
-      "improvement": 0.399,
+      "improvement": 0.757,
       "improved": true
     },
     "RUS": {
       "sessions": {
         "FP1": 96.378,
-        "FP2": 96.035
+        "FP2": 95.793
       },
-      "improvement": 0.343,
+      "improvement": 0.585,
       "improved": true
     },
     "SAI": {
       "sessions": {
         "FP1": 98.846,
-        "FP2": 98.446
+        "FP2": 97.701
       },
-      "improvement": 0.4,
+      "improvement": 1.145,
       "improved": true
     },
     "STR": {
@@ -5132,10 +6100,10 @@
     },
     "VER": {
       "sessions": {
-        "FP1": 96.136,
+        "FP1": 95.86,
         "FP2": 95.48
       },
-      "improvement": 0.656,
+      "improvement": 0.38,
       "improved": true
     }
   },
@@ -5143,31 +6111,55 @@
     "ALB": {
       "stints": [
         {
-          "stint": 1,
-          "session": "FP2",
+          "stint": 6,
+          "session": "FP1",
           "compound": "MEDIUM",
           "total_laps": 3,
           "deg_laps": 3,
-          "first_lap_pace": 129.236,
-          "last_lap_pace": 128.042,
-          "avg_pace": 128.042,
-          "best_pace": 128.042,
+          "first_lap_pace": 99.375,
+          "last_lap_pace": 98.875,
+          "avg_pace": 98.875,
+          "best_pace": 98.875,
+          "degradation_rate": null
+        },
+        {
+          "stint": 1,
+          "session": "FP2",
+          "compound": "MEDIUM",
+          "total_laps": 7,
+          "deg_laps": 3,
+          "first_lap_pace": 100.691,
+          "last_lap_pace": 100.393,
+          "avg_pace": 99.305,
+          "best_pace": 98.218,
+          "degradation_rate": null
+        },
+        {
+          "stint": 2,
+          "session": "FP2",
+          "compound": "SOFT",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 118.347,
+          "last_lap_pace": 140.001,
+          "avg_pace": 98.035,
+          "best_pace": 98.035,
           "degradation_rate": null
         },
         {
           "stint": 3,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 8,
+          "total_laps": 9,
           "deg_laps": 7,
           "first_lap_pace": 103.426,
           "last_lap_pace": 103.721,
-          "avg_pace": 104.125,
+          "avg_pace": 104.76,
           "best_pace": 103.495,
           "degradation_rate": 0.075
         }
       ],
-      "total_stints": 2,
+      "total_stints": 4,
       "avg_degradation": 0.075
     },
     "ALO": {
@@ -5176,12 +6168,12 @@
           "stint": 1,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 5,
-          "deg_laps": 2,
+          "total_laps": 6,
+          "deg_laps": 3,
           "first_lap_pace": 137.853,
-          "last_lap_pace": 177.229,
-          "avg_pace": 99.88,
-          "best_pace": 99.408,
+          "last_lap_pace": 98.91,
+          "avg_pace": 99.557,
+          "best_pace": 98.91,
           "degradation_rate": null
         },
         {
@@ -5212,29 +6204,29 @@
           "stint": 2,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 4,
-          "deg_laps": 4,
+          "total_laps": 6,
+          "deg_laps": 2,
           "first_lap_pace": 97.235,
           "last_lap_pace": 129.289,
-          "avg_pace": 129.289,
-          "best_pace": 129.289,
+          "avg_pace": 97.349,
+          "best_pace": 97.349,
           "degradation_rate": null
         },
         {
           "stint": 3,
           "session": "FP2",
           "compound": "HARD",
-          "total_laps": 7,
-          "deg_laps": 7,
+          "total_laps": 8,
+          "deg_laps": 8,
           "first_lap_pace": 102.823,
           "last_lap_pace": 103.388,
-          "avg_pace": 103.345,
+          "avg_pace": 103.332,
           "best_pace": 103.129,
-          "degradation_rate": 0.127
+          "degradation_rate": 0.112
         }
       ],
       "total_stints": 5,
-      "avg_degradation": 0.337
+      "avg_degradation": 0.314
     },
     "ANT": {
       "stints": [
@@ -5254,29 +6246,29 @@
           "stint": 4,
           "session": "FP1",
           "compound": "SOFT",
-          "total_laps": 4,
-          "deg_laps": 4,
+          "total_laps": 6,
+          "deg_laps": 6,
           "first_lap_pace": 102.314,
           "last_lap_pace": 102.269,
-          "avg_pace": 102.039,
+          "avg_pace": 102.089,
           "best_pace": 101.769,
-          "degradation_rate": null
+          "degradation_rate": 0.06
         },
         {
           "stint": 4,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 6,
+          "total_laps": 12,
           "deg_laps": 6,
           "first_lap_pace": 101.151,
-          "last_lap_pace": 101.705,
-          "avg_pace": 103.343,
-          "best_pace": 101.062,
-          "degradation_rate": 0.274
+          "last_lap_pace": 101.88,
+          "avg_pace": 102.585,
+          "best_pace": 100.783,
+          "degradation_rate": 0.122
         }
       ],
       "total_stints": 3,
-      "avg_degradation": 0.274
+      "avg_degradation": 0.091
     },
     "BEA": {
       "stints": [
@@ -5284,12 +6276,24 @@
           "stint": 1,
           "session": "FP1",
           "compound": "HARD",
-          "total_laps": 6,
-          "deg_laps": 3,
+          "total_laps": 7,
+          "deg_laps": 4,
           "first_lap_pace": 101.965,
-          "last_lap_pace": 168.94,
-          "avg_pace": 99.518,
-          "best_pace": 99.236,
+          "last_lap_pace": 99.035,
+          "avg_pace": 99.357,
+          "best_pace": 99.035,
+          "degradation_rate": null
+        },
+        {
+          "stint": 2,
+          "session": "FP1",
+          "compound": "SOFT",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 97.591,
+          "last_lap_pace": 97.665,
+          "avg_pace": 97.665,
+          "best_pace": 97.665,
           "degradation_rate": null
         },
         {
@@ -5332,17 +6336,17 @@
           "stint": 4,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 5,
-          "deg_laps": 5,
-          "first_lap_pace": 103.068,
+          "total_laps": 10,
+          "deg_laps": 10,
+          "first_lap_pace": 102.716,
           "last_lap_pace": 104.204,
-          "avg_pace": 103.691,
-          "best_pace": 103.195,
-          "degradation_rate": 0.3
+          "avg_pace": 103.404,
+          "best_pace": 102.666,
+          "degradation_rate": 0.171
         }
       ],
-      "total_stints": 5,
-      "avg_degradation": 0.231
+      "total_stints": 6,
+      "avg_degradation": 0.168
     },
     "BOR": {
       "stints": [
@@ -5350,11 +6354,11 @@
           "stint": 3,
           "session": "FP1",
           "compound": "HARD",
-          "total_laps": 5,
-          "deg_laps": 2,
+          "total_laps": 7,
+          "deg_laps": 4,
           "first_lap_pace": 99.027,
-          "last_lap_pace": 153.629,
-          "avg_pace": 98.009,
+          "last_lap_pace": 98.144,
+          "avg_pace": 98.99,
           "best_pace": 98.009,
           "degradation_rate": null
         },
@@ -5374,17 +6378,17 @@
           "stint": 6,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 4,
-          "deg_laps": 4,
+          "total_laps": 8,
+          "deg_laps": 8,
           "first_lap_pace": 101.935,
           "last_lap_pace": 103.772,
-          "avg_pace": 103.579,
-          "best_pace": 103.387,
-          "degradation_rate": null
+          "avg_pace": 103.309,
+          "best_pace": 102.636,
+          "degradation_rate": 0.277
         }
       ],
       "total_stints": 3,
-      "avg_degradation": null
+      "avg_degradation": 0.277
     },
     "BOT": {
       "stints": [
@@ -5428,17 +6432,17 @@
           "stint": 4,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 6,
-          "deg_laps": 6,
+          "total_laps": 7,
+          "deg_laps": 7,
           "first_lap_pace": 103.428,
-          "last_lap_pace": 104.25,
-          "avg_pace": 104.272,
+          "last_lap_pace": 105.538,
+          "avg_pace": 104.483,
           "best_pace": 103.933,
-          "degradation_rate": 0.08
+          "degradation_rate": 0.214
         }
       ],
       "total_stints": 4,
-      "avg_degradation": 0.134
+      "avg_degradation": 0.208
     },
     "COL": {
       "stints": [
@@ -5482,29 +6486,29 @@
           "stint": 2,
           "session": "FP2",
           "compound": "HARD",
-          "total_laps": 10,
-          "deg_laps": 9,
+          "total_laps": 12,
+          "deg_laps": 11,
           "first_lap_pace": 102.436,
           "last_lap_pace": 102.931,
-          "avg_pace": 102.803,
+          "avg_pace": 102.948,
           "best_pace": 101.567,
-          "degradation_rate": 0.112
+          "degradation_rate": 0.177
         },
         {
           "stint": 3,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 5,
-          "deg_laps": 5,
+          "total_laps": 8,
+          "deg_laps": 8,
           "first_lap_pace": 101.674,
           "last_lap_pace": 102.095,
-          "avg_pace": 101.895,
+          "avg_pace": 102.604,
           "best_pace": 101.541,
-          "degradation_rate": 0.061
+          "degradation_rate": 0.012
         }
       ],
       "total_stints": 5,
-      "avg_degradation": 0.086
+      "avg_degradation": 0.097
     },
     "GAS": {
       "stints": [
@@ -5524,20 +6528,20 @@
           "stint": 3,
           "session": "FP1",
           "compound": "HARD",
-          "total_laps": 8,
-          "deg_laps": 8,
+          "total_laps": 10,
+          "deg_laps": 10,
           "first_lap_pace": 103.485,
-          "last_lap_pace": 103.18,
-          "avg_pace": 103.454,
+          "last_lap_pace": 103.563,
+          "avg_pace": 103.423,
           "best_pace": 102.739,
-          "degradation_rate": 0.122
+          "degradation_rate": 0.11
         },
         {
           "stint": 1,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 4,
-          "deg_laps": 4,
+          "total_laps": 5,
+          "deg_laps": 3,
           "first_lap_pace": 98.716,
           "last_lap_pace": 97.674,
           "avg_pace": 97.813,
@@ -5548,17 +6552,17 @@
           "stint": 4,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 9,
-          "deg_laps": 9,
+          "total_laps": 10,
+          "deg_laps": 10,
           "first_lap_pace": 102.588,
           "last_lap_pace": 103.741,
-          "avg_pace": 102.928,
+          "avg_pace": 102.963,
           "best_pace": 102.363,
-          "degradation_rate": 0.196
+          "degradation_rate": 0.193
         }
       ],
       "total_stints": 4,
-      "avg_degradation": 0.161
+      "avg_degradation": 0.152
     },
     "HAD": {
       "stints": [
@@ -5587,20 +6591,32 @@
           "degradation_rate": -0.293
         },
         {
+          "stint": 1,
+          "session": "FP2",
+          "compound": "MEDIUM",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 97.012,
+          "last_lap_pace": 96.411,
+          "avg_pace": 96.411,
+          "best_pace": 96.411,
+          "degradation_rate": null
+        },
+        {
           "stint": 4,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 6,
-          "deg_laps": 6,
-          "first_lap_pace": 101.88,
+          "total_laps": 10,
+          "deg_laps": 8,
+          "first_lap_pace": 101.947,
           "last_lap_pace": 101.802,
-          "avg_pace": 102.827,
-          "best_pace": 101.802,
-          "degradation_rate": 0.25
+          "avg_pace": 103.365,
+          "best_pace": 101.749,
+          "degradation_rate": 0.384
         }
       ],
-      "total_stints": 3,
-      "avg_degradation": -0.042
+      "total_stints": 4,
+      "avg_degradation": 0.068
     },
     "HAM": {
       "stints": [
@@ -5608,23 +6624,35 @@
           "stint": 1,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 4,
-          "deg_laps": 4,
-          "first_lap_pace": 178.99,
+          "total_laps": 5,
+          "deg_laps": 3,
+          "first_lap_pace": 99.009,
           "last_lap_pace": 96.835,
           "avg_pace": 97.035,
           "best_pace": 96.835,
           "degradation_rate": null
         },
         {
-          "stint": 4,
+          "stint": 3,
           "session": "FP1",
           "compound": "SOFT",
           "total_laps": 3,
           "deg_laps": 3,
-          "first_lap_pace": 101.615,
+          "first_lap_pace": 99.222,
+          "last_lap_pace": 96.555,
+          "avg_pace": 96.555,
+          "best_pace": 96.555,
+          "degradation_rate": null
+        },
+        {
+          "stint": 4,
+          "session": "FP1",
+          "compound": "SOFT",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 102.718,
           "last_lap_pace": 101.402,
-          "avg_pace": 101.379,
+          "avg_pace": 101.458,
           "best_pace": 101.356,
           "degradation_rate": null
         },
@@ -5632,11 +6660,11 @@
           "stint": 1,
           "session": "FP2",
           "compound": "HARD",
-          "total_laps": 3,
+          "total_laps": 5,
           "deg_laps": 3,
-          "first_lap_pace": 194.813,
-          "last_lap_pace": 192.662,
-          "avg_pace": 96.973,
+          "first_lap_pace": 97.263,
+          "last_lap_pace": 97.026,
+          "avg_pace": 96.999,
           "best_pace": 96.973,
           "degradation_rate": null
         },
@@ -5644,17 +6672,17 @@
           "stint": 4,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 3,
-          "deg_laps": 3,
+          "total_laps": 6,
+          "deg_laps": 5,
           "first_lap_pace": 101.668,
           "last_lap_pace": 103.032,
-          "avg_pace": 101.992,
+          "avg_pace": 102.222,
           "best_pace": 100.951,
-          "degradation_rate": null
+          "degradation_rate": 0.252
         }
       ],
-      "total_stints": 4,
-      "avg_degradation": null
+      "total_stints": 5,
+      "avg_degradation": 0.252
     },
     "HER": {
       "stints": [
@@ -5662,11 +6690,11 @@
           "stint": 3,
           "session": "FP1",
           "compound": "SOFT",
-          "total_laps": 8,
-          "deg_laps": 3,
+          "total_laps": 9,
+          "deg_laps": 4,
           "first_lap_pace": 101.857,
           "last_lap_pace": 99.979,
-          "avg_pace": 100.093,
+          "avg_pace": 100.605,
           "best_pace": 99.979,
           "degradation_rate": null
         },
@@ -5692,25 +6720,37 @@
           "stint": 1,
           "session": "FP1",
           "compound": "HARD",
+          "total_laps": 6,
+          "deg_laps": 3,
+          "first_lap_pace": 101.244,
+          "last_lap_pace": 143.285,
+          "avg_pace": 99.419,
+          "best_pace": 98.74,
+          "degradation_rate": null
+        },
+        {
+          "stint": 2,
+          "session": "FP1",
+          "compound": "SOFT",
           "total_laps": 4,
           "deg_laps": 4,
-          "first_lap_pace": 100.098,
-          "last_lap_pace": 143.285,
-          "avg_pace": 98.74,
-          "best_pace": 98.74,
+          "first_lap_pace": 97.957,
+          "last_lap_pace": 98.122,
+          "avg_pace": 98.122,
+          "best_pace": 98.122,
           "degradation_rate": null
         },
         {
           "stint": 3,
           "session": "FP1",
           "compound": "SOFT",
-          "total_laps": 4,
-          "deg_laps": 4,
+          "total_laps": 6,
+          "deg_laps": 6,
           "first_lap_pace": 101.742,
           "last_lap_pace": 104.317,
-          "avg_pace": 103.598,
-          "best_pace": 103.005,
-          "degradation_rate": null
+          "avg_pace": 103.037,
+          "best_pace": 102.093,
+          "degradation_rate": 0.541
         },
         {
           "stint": 1,
@@ -5725,20 +6765,32 @@
           "degradation_rate": null
         },
         {
+          "stint": 2,
+          "session": "FP2",
+          "compound": "SOFT",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 97.04,
+          "last_lap_pace": 135.431,
+          "avg_pace": 139.666,
+          "best_pace": 135.431,
+          "degradation_rate": null
+        },
+        {
           "stint": 3,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 6,
-          "deg_laps": 6,
+          "total_laps": 7,
+          "deg_laps": 7,
           "first_lap_pace": 103.808,
-          "last_lap_pace": 103.29,
-          "avg_pace": 103.384,
+          "last_lap_pace": 103.058,
+          "avg_pace": 103.33,
           "best_pace": 102.982,
-          "degradation_rate": 0.005
+          "degradation_rate": -0.026
         }
       ],
-      "total_stints": 4,
-      "avg_degradation": 0.005
+      "total_stints": 6,
+      "avg_degradation": 0.236
     },
     "LAW": {
       "stints": [
@@ -5794,17 +6846,17 @@
           "stint": 4,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 8,
-          "deg_laps": 6,
+          "total_laps": 11,
+          "deg_laps": 11,
           "first_lap_pace": 101.442,
-          "last_lap_pace": 103.066,
-          "avg_pace": 102.428,
+          "last_lap_pace": 103.065,
+          "avg_pace": 102.632,
           "best_pace": 101.813,
-          "degradation_rate": 0.197
+          "degradation_rate": 0.205
         }
       ],
       "total_stints": 5,
-      "avg_degradation": 0.197
+      "avg_degradation": 0.205
     },
     "LEC": {
       "stints": [
@@ -5824,23 +6876,23 @@
           "stint": 4,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 4,
-          "deg_laps": 4,
+          "total_laps": 7,
+          "deg_laps": 7,
           "first_lap_pace": 101.685,
           "last_lap_pace": 101.025,
-          "avg_pace": 101.156,
+          "avg_pace": 101.504,
           "best_pace": 101.0,
-          "degradation_rate": null
+          "degradation_rate": 0.018
         },
         {
           "stint": 1,
           "session": "FP2",
           "compound": "HARD",
-          "total_laps": 3,
+          "total_laps": 6,
           "deg_laps": 3,
-          "first_lap_pace": 96.631,
+          "first_lap_pace": 97.502,
           "last_lap_pace": 96.51,
-          "avg_pace": 96.51,
+          "avg_pace": 96.571,
           "best_pace": 96.51,
           "degradation_rate": null
         },
@@ -5848,17 +6900,17 @@
           "stint": 3,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 10,
-          "deg_laps": 9,
+          "total_laps": 15,
+          "deg_laps": 13,
           "first_lap_pace": 101.088,
           "last_lap_pace": 102.085,
-          "avg_pace": 101.393,
+          "avg_pace": 101.543,
           "best_pace": 100.644,
-          "degradation_rate": 0.157
+          "degradation_rate": 0.125
         }
       ],
       "total_stints": 4,
-      "avg_degradation": 0.157
+      "avg_degradation": 0.088
     },
     "LIN": {
       "stints": [
@@ -5866,9 +6918,9 @@
           "stint": 1,
           "session": "FP1",
           "compound": "HARD",
-          "total_laps": 7,
-          "deg_laps": 3,
-          "first_lap_pace": 154.199,
+          "total_laps": 8,
+          "deg_laps": 4,
+          "first_lap_pace": 101.565,
           "last_lap_pace": 98.312,
           "avg_pace": 99.017,
           "best_pace": 98.312,
@@ -5878,19 +6930,19 @@
           "stint": 4,
           "session": "FP1",
           "compound": "HARD",
-          "total_laps": 6,
-          "deg_laps": 6,
-          "first_lap_pace": 102.707,
+          "total_laps": 7,
+          "deg_laps": 7,
+          "first_lap_pace": 102.536,
           "last_lap_pace": 104.487,
-          "avg_pace": 104.92,
-          "best_pace": 102.971,
-          "degradation_rate": 0.13
+          "avg_pace": 104.551,
+          "best_pace": 102.707,
+          "degradation_rate": 0.31
         },
         {
           "stint": 1,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 6,
+          "total_laps": 7,
           "deg_laps": 3,
           "first_lap_pace": 98.26,
           "last_lap_pace": 97.172,
@@ -5902,9 +6954,9 @@
           "stint": 2,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 3,
-          "deg_laps": 3,
-          "first_lap_pace": 158.218,
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 96.734,
           "last_lap_pace": 96.971,
           "avg_pace": 96.971,
           "best_pace": 96.971,
@@ -5914,17 +6966,17 @@
           "stint": 3,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 10,
-          "deg_laps": 10,
+          "total_laps": 11,
+          "deg_laps": 11,
           "first_lap_pace": 103.198,
           "last_lap_pace": 102.786,
-          "avg_pace": 103.011,
+          "avg_pace": 103.036,
           "best_pace": 102.144,
-          "degradation_rate": 0.081
+          "degradation_rate": 0.083
         }
       ],
       "total_stints": 5,
-      "avg_degradation": 0.099
+      "avg_degradation": 0.171
     },
     "NOR": {
       "stints": [
@@ -5953,20 +7005,56 @@
           "degradation_rate": null
         },
         {
+          "stint": 3,
+          "session": "FP1",
+          "compound": "SOFT",
+          "total_laps": 4,
+          "deg_laps": 4,
+          "first_lap_pace": 101.568,
+          "last_lap_pace": 101.756,
+          "avg_pace": 101.419,
+          "best_pace": 101.111,
+          "degradation_rate": null
+        },
+        {
           "stint": 1,
           "session": "FP2",
           "compound": "HARD",
-          "total_laps": 4,
-          "deg_laps": 4,
+          "total_laps": 5,
+          "deg_laps": 3,
           "first_lap_pace": 97.261,
-          "last_lap_pace": 173.518,
-          "avg_pace": 96.373,
+          "last_lap_pace": 98.15,
+          "avg_pace": 97.262,
           "best_pace": 96.373,
           "degradation_rate": null
+        },
+        {
+          "stint": 2,
+          "session": "FP2",
+          "compound": "SOFT",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 129.181,
+          "last_lap_pace": 152.757,
+          "avg_pace": 124.796,
+          "best_pace": 124.796,
+          "degradation_rate": null
+        },
+        {
+          "stint": 3,
+          "session": "FP2",
+          "compound": "HARD",
+          "total_laps": 8,
+          "deg_laps": 6,
+          "first_lap_pace": 100.593,
+          "last_lap_pace": 101.304,
+          "avg_pace": 101.58,
+          "best_pace": 100.776,
+          "degradation_rate": 0.258
         }
       ],
-      "total_stints": 3,
-      "avg_degradation": null
+      "total_stints": 6,
+      "avg_degradation": 0.258
     },
     "OCO": {
       "stints": [
@@ -6040,9 +7128,9 @@
           "stint": 2,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 4,
-          "deg_laps": 4,
-          "first_lap_pace": 149.776,
+          "total_laps": 5,
+          "deg_laps": 2,
+          "first_lap_pace": 98.934,
           "last_lap_pace": 99.036,
           "avg_pace": 99.036,
           "best_pace": 99.036,
@@ -6070,11 +7158,11 @@
           "stint": 1,
           "session": "FP1",
           "compound": "MEDIUM",
-          "total_laps": 6,
-          "deg_laps": 3,
+          "total_laps": 7,
+          "deg_laps": 4,
           "first_lap_pace": 100.452,
-          "last_lap_pace": 174.183,
-          "avg_pace": 97.936,
+          "last_lap_pace": 97.792,
+          "avg_pace": 97.888,
           "best_pace": 97.518,
           "degradation_rate": null
         },
@@ -6106,9 +7194,9 @@
           "stint": 1,
           "session": "FP2",
           "compound": "HARD",
-          "total_laps": 3,
-          "deg_laps": 3,
-          "first_lap_pace": 143.579,
+          "total_laps": 6,
+          "deg_laps": 2,
+          "first_lap_pace": 98.091,
           "last_lap_pace": 97.37,
           "avg_pace": 97.37,
           "best_pace": 97.37,
@@ -6118,26 +7206,50 @@
           "stint": 2,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 3,
-          "deg_laps": 3,
+          "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 96.387,
-          "last_lap_pace": 129.439,
-          "avg_pace": 129.439,
-          "best_pace": 129.439,
+          "last_lap_pace": 96.029,
+          "avg_pace": 96.029,
+          "best_pace": 96.029,
           "degradation_rate": null
+        },
+        {
+          "stint": 3,
+          "session": "FP2",
+          "compound": "SOFT",
+          "total_laps": 6,
+          "deg_laps": 5,
+          "first_lap_pace": 101.355,
+          "last_lap_pace": 101.94,
+          "avg_pace": 102.264,
+          "best_pace": 101.734,
+          "degradation_rate": 0.18
         }
       ],
-      "total_stints": 5,
-      "avg_degradation": -0.206
+      "total_stints": 6,
+      "avg_degradation": -0.013
     },
     "RUS": {
       "stints": [
         {
+          "stint": 1,
+          "session": "FP1",
+          "compound": "HARD",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 99.301,
+          "last_lap_pace": 98.253,
+          "avg_pace": 98.253,
+          "best_pace": 98.253,
+          "degradation_rate": null
+        },
+        {
           "stint": 4,
           "session": "FP1",
           "compound": "SOFT",
-          "total_laps": 3,
-          "deg_laps": 3,
+          "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 96.889,
           "last_lap_pace": 96.378,
           "avg_pace": 96.378,
@@ -6148,13 +7260,13 @@
           "stint": 5,
           "session": "FP1",
           "compound": "HARD",
-          "total_laps": 3,
-          "deg_laps": 3,
+          "total_laps": 5,
+          "deg_laps": 5,
           "first_lap_pace": 102.004,
-          "last_lap_pace": 105.581,
-          "avg_pace": 103.636,
+          "last_lap_pace": 102.698,
+          "avg_pace": 102.984,
           "best_pace": 101.69,
-          "degradation_rate": null
+          "degradation_rate": 0.563
         },
         {
           "stint": 1,
@@ -6181,8 +7293,8 @@
           "degradation_rate": 0.496
         }
       ],
-      "total_stints": 4,
-      "avg_degradation": 0.496
+      "total_stints": 5,
+      "avg_degradation": 0.529
     },
     "SAI": {
       "stints": [
@@ -6190,11 +7302,11 @@
           "stint": 1,
           "session": "FP2",
           "compound": "MEDIUM",
-          "total_laps": 5,
-          "deg_laps": 2,
+          "total_laps": 7,
+          "deg_laps": 3,
           "first_lap_pace": 99.052,
           "last_lap_pace": 119.677,
-          "avg_pace": 98.446,
+          "avg_pace": 102.365,
           "best_pace": 98.446,
           "degradation_rate": null
         },
@@ -6202,42 +7314,54 @@
           "stint": 2,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 3,
-          "deg_laps": 3,
+          "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 150.476,
-          "last_lap_pace": 145.029,
-          "avg_pace": 140.829,
-          "best_pace": 136.63,
+          "last_lap_pace": 97.701,
+          "avg_pace": 97.701,
+          "best_pace": 97.701,
           "degradation_rate": null
         },
         {
           "stint": 3,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 7,
-          "deg_laps": 7,
+          "total_laps": 9,
+          "deg_laps": 9,
           "first_lap_pace": 102.809,
           "last_lap_pace": 105.057,
-          "avg_pace": 104.042,
-          "best_pace": 103.314,
-          "degradation_rate": 0.279
+          "avg_pace": 103.901,
+          "best_pace": 102.981,
+          "degradation_rate": 0.282
         }
       ],
       "total_stints": 3,
-      "avg_degradation": 0.279
+      "avg_degradation": 0.282
     },
     "STR": {
       "stints": [
         {
-          "stint": 2,
+          "stint": 1,
           "session": "FP1",
           "compound": "MEDIUM",
           "total_laps": 3,
           "deg_laps": 3,
+          "first_lap_pace": 100.508,
+          "last_lap_pace": 99.171,
+          "avg_pace": 99.171,
+          "best_pace": 99.171,
+          "degradation_rate": null
+        },
+        {
+          "stint": 2,
+          "session": "FP1",
+          "compound": "MEDIUM",
+          "total_laps": 4,
+          "deg_laps": 4,
           "first_lap_pace": 99.103,
-          "last_lap_pace": 119.869,
-          "avg_pace": 119.869,
-          "best_pace": 119.869,
+          "last_lap_pace": 98.409,
+          "avg_pace": 98.409,
+          "best_pace": 98.409,
           "degradation_rate": null
         },
         {
@@ -6256,9 +7380,9 @@
           "stint": 1,
           "session": "FP2",
           "compound": "HARD",
-          "total_laps": 6,
-          "deg_laps": 3,
-          "first_lap_pace": 137.311,
+          "total_laps": 7,
+          "deg_laps": 4,
+          "first_lap_pace": 98.797,
           "last_lap_pace": 98.244,
           "avg_pace": 98.372,
           "best_pace": 98.244,
@@ -6280,17 +7404,17 @@
           "stint": 3,
           "session": "FP2",
           "compound": "HARD",
-          "total_laps": 7,
-          "deg_laps": 6,
+          "total_laps": 8,
+          "deg_laps": 7,
           "first_lap_pace": 103.12,
-          "last_lap_pace": 103.842,
-          "avg_pace": 103.845,
+          "last_lap_pace": 104.073,
+          "avg_pace": 103.878,
           "best_pace": 103.15,
-          "degradation_rate": 0.175
+          "degradation_rate": 0.171
         }
       ],
-      "total_stints": 5,
-      "avg_degradation": 0.315
+      "total_stints": 6,
+      "avg_degradation": 0.301
     },
     "VER": {
       "stints": [
@@ -6305,6 +7429,18 @@
           "avg_pace": 99.084,
           "best_pace": 98.04,
           "degradation_rate": 0.066
+        },
+        {
+          "stint": 2,
+          "session": "FP1",
+          "compound": "SOFT",
+          "total_laps": 3,
+          "deg_laps": 3,
+          "first_lap_pace": 96.136,
+          "last_lap_pace": 95.86,
+          "avg_pace": 95.86,
+          "best_pace": 95.86,
+          "degradation_rate": null
         },
         {
           "stint": 3,
@@ -6334,17 +7470,17 @@
           "stint": 3,
           "session": "FP2",
           "compound": "SOFT",
-          "total_laps": 9,
-          "deg_laps": 9,
+          "total_laps": 11,
+          "deg_laps": 11,
           "first_lap_pace": 101.176,
-          "last_lap_pace": 101.401,
-          "avg_pace": 101.493,
+          "last_lap_pace": 101.713,
+          "avg_pace": 101.511,
           "best_pace": 100.785,
-          "degradation_rate": 0.121
+          "degradation_rate": 0.109
         }
       ],
-      "total_stints": 4,
-      "avg_degradation": 0.177
+      "total_stints": 5,
+      "avg_degradation": 0.166
     }
   },
   "sector_rankings": {
@@ -6352,14 +7488,26 @@
       {
         "driver_id": "VER",
         "best": 25.571,
-        "avg_best_3": 25.659,
+        "avg_best_3": 25.606,
         "gap": 0.0
+      },
+      {
+        "driver_id": "NOR",
+        "best": 25.586,
+        "avg_best_3": 25.718,
+        "gap": 0.015
       },
       {
         "driver_id": "RUS",
         "best": 25.616,
-        "avg_best_3": 25.753,
+        "avg_best_3": 25.685,
         "gap": 0.045
+      },
+      {
+        "driver_id": "PIA",
+        "best": 25.62,
+        "avg_best_3": 25.772,
+        "gap": 0.049
       },
       {
         "driver_id": "LEC",
@@ -6370,8 +7518,14 @@
       {
         "driver_id": "HAM",
         "best": 25.662,
-        "avg_best_3": 25.887,
+        "avg_best_3": 25.752,
         "gap": 0.091
+      },
+      {
+        "driver_id": "HAD",
+        "best": 25.667,
+        "avg_best_3": 25.771,
+        "gap": 0.096
       },
       {
         "driver_id": "ANT",
@@ -6380,34 +7534,22 @@
         "gap": 0.183
       },
       {
-        "driver_id": "PIA",
-        "best": 25.768,
-        "avg_best_3": 25.9,
-        "gap": 0.197
-      },
-      {
         "driver_id": "BEA",
         "best": 25.86,
-        "avg_best_3": 25.986,
+        "avg_best_3": 25.965,
         "gap": 0.289
       },
       {
-        "driver_id": "NOR",
-        "best": 25.868,
-        "avg_best_3": 25.888,
-        "gap": 0.297
+        "driver_id": "LIN",
+        "best": 25.872,
+        "avg_best_3": 25.944,
+        "gap": 0.301
       },
       {
         "driver_id": "BOR",
         "best": 25.888,
-        "avg_best_3": 25.963,
+        "avg_best_3": 25.935,
         "gap": 0.317
-      },
-      {
-        "driver_id": "HAD",
-        "best": 25.892,
-        "avg_best_3": 26.44,
-        "gap": 0.321
       },
       {
         "driver_id": "LAW",
@@ -6416,28 +7558,40 @@
         "gap": 0.339
       },
       {
-        "driver_id": "LIN",
-        "best": 25.945,
-        "avg_best_3": 25.993,
-        "gap": 0.374
-      },
-      {
         "driver_id": "OCO",
         "best": 25.961,
-        "avg_best_3": 26.122,
+        "avg_best_3": 26.097,
         "gap": 0.39
       },
       {
         "driver_id": "ALO",
         "best": 26.008,
-        "avg_best_3": 26.198,
+        "avg_best_3": 26.115,
         "gap": 0.437
+      },
+      {
+        "driver_id": "SAI",
+        "best": 26.034,
+        "avg_best_3": 26.147,
+        "gap": 0.463
       },
       {
         "driver_id": "GAS",
         "best": 26.053,
         "avg_best_3": 26.127,
         "gap": 0.482
+      },
+      {
+        "driver_id": "HUL",
+        "best": 26.085,
+        "avg_best_3": 26.213,
+        "gap": 0.514
+      },
+      {
+        "driver_id": "ALB",
+        "best": 26.156,
+        "avg_best_3": 26.276,
+        "gap": 0.585
       },
       {
         "driver_id": "COL",
@@ -6452,18 +7606,6 @@
         "gap": 0.615
       },
       {
-        "driver_id": "SAI",
-        "best": 26.192,
-        "avg_best_3": 26.225,
-        "gap": 0.621
-      },
-      {
-        "driver_id": "HUL",
-        "best": 26.249,
-        "avg_best_3": 26.37,
-        "gap": 0.678
-      },
-      {
         "driver_id": "BOT",
         "best": 26.447,
         "avg_best_3": 26.609,
@@ -6472,20 +7614,14 @@
       {
         "driver_id": "PER",
         "best": 26.503,
-        "avg_best_3": 26.712,
+        "avg_best_3": 26.591,
         "gap": 0.932
       },
       {
         "driver_id": "HER",
         "best": 26.778,
-        "avg_best_3": 27.236,
+        "avg_best_3": 26.944,
         "gap": 1.207
-      },
-      {
-        "driver_id": "ALB",
-        "best": 27.383,
-        "avg_best_3": 27.485,
-        "gap": 1.812
       }
     ],
     "sector_2": [
@@ -6496,46 +7632,52 @@
         "gap": 0.0
       },
       {
+        "driver_id": "NOR",
+        "best": 37.793,
+        "avg_best_3": 37.967,
+        "gap": 0.333
+      },
+      {
         "driver_id": "LEC",
         "best": 37.834,
-        "avg_best_3": 38.216,
+        "avg_best_3": 38.194,
         "gap": 0.374
       },
       {
         "driver_id": "VER",
         "best": 37.931,
-        "avg_best_3": 38.111,
+        "avg_best_3": 38.106,
         "gap": 0.471
       },
       {
-        "driver_id": "NOR",
-        "best": 38.011,
-        "avg_best_3": 38.103,
-        "gap": 0.551
+        "driver_id": "RUS",
+        "best": 37.934,
+        "avg_best_3": 38.025,
+        "gap": 0.474
       },
       {
-        "driver_id": "RUS",
-        "best": 38.03,
-        "avg_best_3": 38.087,
-        "gap": 0.57
+        "driver_id": "HAD",
+        "best": 37.997,
+        "avg_best_3": 38.091,
+        "gap": 0.537
+      },
+      {
+        "driver_id": "HAM",
+        "best": 38.092,
+        "avg_best_3": 38.256,
+        "gap": 0.632
+      },
+      {
+        "driver_id": "PIA",
+        "best": 38.098,
+        "avg_best_3": 38.161,
+        "gap": 0.638
       },
       {
         "driver_id": "LAW",
         "best": 38.137,
-        "avg_best_3": 38.31,
+        "avg_best_3": 38.278,
         "gap": 0.677
-      },
-      {
-        "driver_id": "PIA",
-        "best": 38.15,
-        "avg_best_3": 38.298,
-        "gap": 0.69
-      },
-      {
-        "driver_id": "HAD",
-        "best": 38.184,
-        "avg_best_3": 38.682,
-        "gap": 0.724
       },
       {
         "driver_id": "BEA",
@@ -6544,21 +7686,15 @@
         "gap": 0.756
       },
       {
-        "driver_id": "HAM",
-        "best": 38.246,
-        "avg_best_3": 38.371,
-        "gap": 0.786
-      },
-      {
         "driver_id": "BOR",
         "best": 38.302,
-        "avg_best_3": 38.469,
+        "avg_best_3": 38.376,
         "gap": 0.842
       },
       {
         "driver_id": "LIN",
         "best": 38.302,
-        "avg_best_3": 38.398,
+        "avg_best_3": 38.392,
         "gap": 0.842
       },
       {
@@ -6566,6 +7702,12 @@
         "best": 38.336,
         "avg_best_3": 38.539,
         "gap": 0.876
+      },
+      {
+        "driver_id": "HUL",
+        "best": 38.409,
+        "avg_best_3": 38.645,
+        "gap": 0.949
       },
       {
         "driver_id": "GAS",
@@ -6582,7 +7724,7 @@
       {
         "driver_id": "ALO",
         "best": 38.532,
-        "avg_best_3": 38.693,
+        "avg_best_3": 38.626,
         "gap": 1.072
       },
       {
@@ -6592,10 +7734,16 @@
         "gap": 1.088
       },
       {
-        "driver_id": "HUL",
-        "best": 38.691,
-        "avg_best_3": 38.878,
-        "gap": 1.231
+        "driver_id": "SAI",
+        "best": 38.741,
+        "avg_best_3": 38.877,
+        "gap": 1.281
+      },
+      {
+        "driver_id": "ALB",
+        "best": 38.832,
+        "avg_best_3": 38.901,
+        "gap": 1.372
       },
       {
         "driver_id": "BOT",
@@ -6604,15 +7752,9 @@
         "gap": 1.458
       },
       {
-        "driver_id": "SAI",
-        "best": 38.922,
-        "avg_best_3": 38.966,
-        "gap": 1.462
-      },
-      {
         "driver_id": "PER",
         "best": 39.09,
-        "avg_best_3": 39.115,
+        "avg_best_3": 39.1,
         "gap": 1.63
       },
       {
@@ -6620,62 +7762,62 @@
         "best": 39.438,
         "avg_best_3": 39.609,
         "gap": 1.978
-      },
-      {
-        "driver_id": "ALB",
-        "best": 40.612,
-        "avg_best_3": 40.702,
-        "gap": 3.152
       }
     ],
     "sector_3": [
       {
         "driver_id": "LEC",
         "best": 31.827,
-        "avg_best_3": 31.963,
+        "avg_best_3": 31.897,
         "gap": 0.0
       },
       {
         "driver_id": "VER",
         "best": 31.936,
-        "avg_best_3": 32.039,
+        "avg_best_3": 31.964,
         "gap": 0.109
       },
       {
         "driver_id": "HAM",
         "best": 31.998,
-        "avg_best_3": 32.081,
+        "avg_best_3": 32.047,
         "gap": 0.171
       },
       {
         "driver_id": "RUS",
         "best": 32.107,
-        "avg_best_3": 32.321,
+        "avg_best_3": 32.258,
         "gap": 0.28
       },
       {
         "driver_id": "ANT",
         "best": 32.119,
-        "avg_best_3": 32.347,
+        "avg_best_3": 32.229,
         "gap": 0.292
       },
       {
         "driver_id": "LAW",
         "best": 32.18,
-        "avg_best_3": 32.344,
+        "avg_best_3": 32.339,
         "gap": 0.353
+      },
+      {
+        "driver_id": "PIA",
+        "best": 32.311,
+        "avg_best_3": 32.433,
+        "gap": 0.484
+      },
+      {
+        "driver_id": "HAD",
+        "best": 32.312,
+        "avg_best_3": 32.323,
+        "gap": 0.485
       },
       {
         "driver_id": "NOR",
         "best": 32.332,
         "avg_best_3": 32.391,
         "gap": 0.505
-      },
-      {
-        "driver_id": "HAD",
-        "best": 32.335,
-        "avg_best_3": 32.737,
-        "gap": 0.508
       },
       {
         "driver_id": "GAS",
@@ -6686,13 +7828,19 @@
       {
         "driver_id": "BEA",
         "best": 32.386,
-        "avg_best_3": 32.588,
+        "avg_best_3": 32.552,
         "gap": 0.559
+      },
+      {
+        "driver_id": "LIN",
+        "best": 32.395,
+        "avg_best_3": 32.466,
+        "gap": 0.568
       },
       {
         "driver_id": "HUL",
         "best": 32.418,
-        "avg_best_3": 32.495,
+        "avg_best_3": 32.469,
         "gap": 0.591
       },
       {
@@ -6702,21 +7850,9 @@
         "gap": 0.595
       },
       {
-        "driver_id": "PIA",
-        "best": 32.469,
-        "avg_best_3": 32.509,
-        "gap": 0.642
-      },
-      {
-        "driver_id": "LIN",
-        "best": 32.494,
-        "avg_best_3": 32.522,
-        "gap": 0.667
-      },
-      {
         "driver_id": "STR",
         "best": 32.504,
-        "avg_best_3": 32.598,
+        "avg_best_3": 32.573,
         "gap": 0.677
       },
       {
@@ -6726,16 +7862,22 @@
         "gap": 0.716
       },
       {
+        "driver_id": "ALO",
+        "best": 32.577,
+        "avg_best_3": 32.668,
+        "gap": 0.75
+      },
+      {
         "driver_id": "OCO",
         "best": 32.667,
-        "avg_best_3": 32.77,
+        "avg_best_3": 32.733,
         "gap": 0.84
       },
       {
-        "driver_id": "ALO",
-        "best": 32.695,
-        "avg_best_3": 32.764,
-        "gap": 0.868
+        "driver_id": "SAI",
+        "best": 32.926,
+        "avg_best_3": 33.179,
+        "gap": 1.099
       },
       {
         "driver_id": "BOT",
@@ -6744,115 +7886,115 @@
         "gap": 1.208
       },
       {
-        "driver_id": "SAI",
-        "best": 33.301,
-        "avg_best_3": 33.384,
-        "gap": 1.474
+        "driver_id": "ALB",
+        "best": 33.047,
+        "avg_best_3": 33.128,
+        "gap": 1.22
       },
       {
         "driver_id": "PER",
-        "best": 33.318,
-        "avg_best_3": 33.429,
-        "gap": 1.491
+        "best": 33.317,
+        "avg_best_3": 33.34,
+        "gap": 1.49
       },
       {
         "driver_id": "HER",
         "best": 33.489,
         "avg_best_3": 33.835,
         "gap": 1.662
-      },
-      {
-        "driver_id": "ALB",
-        "best": 35.103,
-        "avg_best_3": 35.213,
-        "gap": 3.276
       }
     ]
   },
   "improvement_trajectory": {
     "ALB": {
       "sessions": {
+        "FP1": {
+          "first_run_avg": 127.982,
+          "last_run_avg": 127.864,
+          "improvement": 0.118,
+          "improved": true
+        },
         "FP2": {
-          "first_run_avg": 143.347,
+          "first_run_avg": 108.884,
           "last_run_avg": 103.562,
-          "improvement": 39.785,
+          "improvement": 5.322,
           "improved": true
         }
       },
-      "total_improvement": 39.785,
-      "avg_improvement_per_session": 39.785
+      "total_improvement": 5.44,
+      "avg_improvement_per_session": 2.72
     },
     "ALO": {
       "sessions": {
         "FP1": {
-          "first_run_avg": 116.416,
+          "first_run_avg": 99.557,
           "last_run_avg": 99.937,
-          "improvement": 16.48,
-          "improved": true
+          "improvement": -0.38,
+          "improved": false
         },
         "FP2": {
           "first_run_avg": 129.401,
-          "last_run_avg": 103.221,
-          "improvement": 26.18,
+          "last_run_avg": 103.194,
+          "improvement": 26.206,
           "improved": true
         }
       },
-      "total_improvement": 42.66,
-      "avg_improvement_per_session": 21.33
+      "total_improvement": 25.826,
+      "avg_improvement_per_session": 12.913
     },
     "ANT": {
       "sessions": {
         "FP1": {
           "first_run_avg": 97.813,
-          "last_run_avg": 102.039,
-          "improvement": -4.226,
+          "last_run_avg": 101.978,
+          "improvement": -4.165,
           "improved": false
         },
         "FP2": {
-          "first_run_avg": 96.216,
-          "last_run_avg": 101.388,
-          "improvement": -5.172,
+          "first_run_avg": 96.91,
+          "last_run_avg": 101.081,
+          "improvement": -4.171,
           "improved": false
         }
       },
-      "total_improvement": -9.398,
-      "avg_improvement_per_session": -4.699
+      "total_improvement": -8.336,
+      "avg_improvement_per_session": -4.168
     },
     "BEA": {
       "sessions": {
         "FP1": {
-          "first_run_avg": 120.858,
+          "first_run_avg": 99.357,
           "last_run_avg": 101.953,
-          "improvement": 18.904,
-          "improved": true
+          "improvement": -2.597,
+          "improved": false
         },
         "FP2": {
           "first_run_avg": 130.477,
-          "last_run_avg": 103.52,
-          "improvement": 26.957,
+          "last_run_avg": 102.875,
+          "improvement": 27.601,
           "improved": true
         }
       },
-      "total_improvement": 45.861,
-      "avg_improvement_per_session": 22.931
+      "total_improvement": 25.004,
+      "avg_improvement_per_session": 12.502
     },
     "BOR": {
       "sessions": {
         "FP1": {
-          "first_run_avg": 128.927,
+          "first_run_avg": 98.99,
           "last_run_avg": 100.946,
-          "improvement": 27.982,
-          "improved": true
+          "improvement": -1.955,
+          "improved": false
         },
         "FP2": {
-          "first_run_avg": 96.832,
-          "last_run_avg": 103.579,
-          "improvement": -6.747,
+          "first_run_avg": 97.574,
+          "last_run_avg": 102.888,
+          "improvement": -5.314,
           "improved": false
         }
       },
-      "total_improvement": 21.235,
-      "avg_improvement_per_session": 10.617
+      "total_improvement": -7.269,
+      "avg_improvement_per_session": -3.635
     },
     "BOT": {
       "sessions": {
@@ -6875,38 +8017,38 @@
     "COL": {
       "sessions": {
         "FP1": {
-          "first_run_avg": 135.803,
+          "first_run_avg": 101.315,
           "last_run_avg": 102.843,
-          "improvement": 32.96,
-          "improved": true
+          "improvement": -1.528,
+          "improved": false
         },
         "FP2": {
           "first_run_avg": 145.047,
-          "last_run_avg": 101.811,
-          "improvement": 43.237,
+          "last_run_avg": 101.582,
+          "improvement": 43.465,
           "improved": true
         }
       },
-      "total_improvement": 76.197,
-      "avg_improvement_per_session": 38.099
+      "total_improvement": 41.937,
+      "avg_improvement_per_session": 20.969
     },
     "GAS": {
       "sessions": {
         "FP1": {
           "first_run_avg": 133.325,
-          "last_run_avg": 102.967,
-          "improvement": 30.358,
+          "last_run_avg": 102.939,
+          "improvement": 30.386,
           "improved": true
         },
         "FP2": {
-          "first_run_avg": 121.668,
+          "first_run_avg": 121.526,
           "last_run_avg": 102.457,
-          "improvement": 19.211,
+          "improvement": 19.069,
           "improved": true
         }
       },
-      "total_improvement": 49.569,
-      "avg_improvement_per_session": 24.785
+      "total_improvement": 49.455,
+      "avg_improvement_per_session": 24.727
     },
     "HAD": {
       "sessions": {
@@ -6917,62 +8059,62 @@
           "improved": true
         },
         "FP2": {
-          "first_run_avg": 96.411,
-          "last_run_avg": 102.043,
-          "improvement": -5.632,
-          "improved": false
+          "first_run_avg": 135.322,
+          "last_run_avg": 101.81,
+          "improvement": 33.512,
+          "improved": true
         }
       },
-      "total_improvement": 10.57,
-      "avg_improvement_per_session": 5.285
+      "total_improvement": 49.714,
+      "avg_improvement_per_session": 24.857
     },
     "HAM": {
       "sessions": {
         "FP1": {
-          "first_run_avg": 130.045,
-          "last_run_avg": 101.379,
-          "improvement": 28.666,
+          "first_run_avg": 124.353,
+          "last_run_avg": 101.458,
+          "improvement": 22.896,
           "improved": true
         },
         "FP2": {
-          "first_run_avg": 144.817,
-          "last_run_avg": 101.992,
-          "improvement": 42.826,
+          "first_run_avg": 128.887,
+          "last_run_avg": 101.375,
+          "improvement": 27.512,
           "improved": true
         }
       },
-      "total_improvement": 71.492,
-      "avg_improvement_per_session": 35.746
+      "total_improvement": 50.408,
+      "avg_improvement_per_session": 25.204
     },
     "HER": {
       "sessions": {
         "FP1": {
-          "first_run_avg": 108.923,
+          "first_run_avg": 100.605,
           "last_run_avg": 104.669,
-          "improvement": 4.254,
-          "improved": true
+          "improvement": -4.064,
+          "improved": false
         }
       },
-      "total_improvement": 4.254,
-      "avg_improvement_per_session": 4.254
+      "total_improvement": -4.064,
+      "avg_improvement_per_session": -4.064
     },
     "HUL": {
       "sessions": {
         "FP1": {
-          "first_run_avg": 127.772,
-          "last_run_avg": 103.598,
-          "improvement": 24.174,
+          "first_run_avg": 112.871,
+          "last_run_avg": 102.466,
+          "improvement": 10.404,
           "improved": true
         },
         "FP2": {
           "first_run_avg": 104.56,
-          "last_run_avg": 103.139,
-          "improvement": 1.421,
+          "last_run_avg": 103.061,
+          "improvement": 1.498,
           "improved": true
         }
       },
-      "total_improvement": 25.595,
-      "avg_improvement_per_session": 12.797
+      "total_improvement": 11.902,
+      "avg_improvement_per_session": 5.951
     },
     "LAW": {
       "sessions": {
@@ -7001,21 +8143,21 @@
           "improved": false
         },
         "FP2": {
-          "first_run_avg": 132.683,
+          "first_run_avg": 104.681,
           "last_run_avg": 100.664,
-          "improvement": 32.019,
+          "improvement": 4.018,
           "improved": true
         }
       },
-      "total_improvement": 27.85,
-      "avg_improvement_per_session": 13.925
+      "total_improvement": -0.151,
+      "avg_improvement_per_session": -0.075
     },
     "LIN": {
       "sessions": {
         "FP1": {
           "first_run_avg": 99.017,
-          "last_run_avg": 103.269,
-          "improvement": -4.251,
+          "last_run_avg": 103.029,
+          "improvement": -4.012,
           "improved": false
         },
         "FP2": {
@@ -7025,26 +8167,26 @@
           "improved": true
         }
       },
-      "total_improvement": 1.98,
-      "avg_improvement_per_session": 0.99
+      "total_improvement": 2.219,
+      "avg_improvement_per_session": 1.11
     },
     "NOR": {
       "sessions": {
         "FP1": {
           "first_run_avg": 97.458,
-          "last_run_avg": 101.39,
-          "improvement": -3.932,
+          "last_run_avg": 101.419,
+          "improvement": -3.961,
           "improved": false
         },
         "FP2": {
-          "first_run_avg": 145.394,
+          "first_run_avg": 120.271,
           "last_run_avg": 100.148,
-          "improvement": 45.246,
+          "improvement": 20.123,
           "improved": true
         }
       },
-      "total_improvement": 41.314,
-      "avg_improvement_per_session": 20.657
+      "total_improvement": 16.162,
+      "avg_improvement_per_session": 8.081
     },
     "OCO": {
       "sessions": {
@@ -7079,27 +8221,27 @@
     "PIA": {
       "sessions": {
         "FP1": {
-          "first_run_avg": 117.108,
+          "first_run_avg": 97.888,
           "last_run_avg": 101.911,
-          "improvement": 15.197,
-          "improved": true
+          "improvement": -4.023,
+          "improved": false
         },
         "FP2": {
-          "first_run_avg": 108.832,
+          "first_run_avg": 109.779,
           "last_run_avg": 101.498,
-          "improvement": 7.334,
+          "improvement": 8.281,
           "improved": true
         }
       },
-      "total_improvement": 22.531,
-      "avg_improvement_per_session": 11.265
+      "total_improvement": 4.258,
+      "avg_improvement_per_session": 2.129
     },
     "RUS": {
       "sessions": {
         "FP1": {
-          "first_run_avg": 159.648,
-          "last_run_avg": 103.636,
-          "improvement": 56.012,
+          "first_run_avg": 128.951,
+          "last_run_avg": 102.119,
+          "improvement": 26.832,
           "improved": true
         },
         "FP2": {
@@ -7109,33 +8251,33 @@
           "improved": true
         }
       },
-      "total_improvement": 87.586,
-      "avg_improvement_per_session": 43.793
+      "total_improvement": 58.406,
+      "avg_improvement_per_session": 29.203
     },
     "SAI": {
       "sessions": {
         "FP1": {
-          "first_run_avg": 98.846,
-          "last_run_avg": 103.549,
-          "improvement": -4.703,
-          "improved": false
+          "first_run_avg": 156.674,
+          "last_run_avg": 99.196,
+          "improvement": 57.478,
+          "improved": true
         },
         "FP2": {
-          "first_run_avg": 110.193,
-          "last_run_avg": 103.621,
-          "improvement": 6.573,
+          "first_run_avg": 105.729,
+          "last_run_avg": 103.282,
+          "improvement": 2.447,
           "improved": true
         }
       },
-      "total_improvement": 1.87,
-      "avg_improvement_per_session": 0.935
+      "total_improvement": 59.925,
+      "avg_improvement_per_session": 29.963
     },
     "STR": {
       "sessions": {
         "FP1": {
-          "first_run_avg": 162.776,
+          "first_run_avg": 130.974,
           "last_run_avg": 99.189,
-          "improvement": 63.587,
+          "improvement": 31.784,
           "improved": true
         },
         "FP2": {
@@ -7145,8 +8287,8 @@
           "improved": false
         }
       },
-      "total_improvement": 58.427,
-      "avg_improvement_per_session": 29.214
+      "total_improvement": 26.624,
+      "avg_improvement_per_session": 13.312
     },
     "VER": {
       "sessions": {

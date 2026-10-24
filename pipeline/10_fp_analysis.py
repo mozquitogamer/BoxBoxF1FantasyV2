@@ -51,6 +51,7 @@ from pipeline.fp_long_runs import (
     LONG_RUN_MIN_RAW,
     extract_representative_long_runs,
     select_headline_long_run,
+    require_fp_lap_semantics,
 )
 from pipeline.fp_simulations import analyze_comparable_long_runs
 
@@ -72,11 +73,13 @@ def load_fp_laps(round_num: int) -> pd.DataFrame | None:
     for lap_file in sorted(round_dir.glob("all_laps_*.parquet")):
         try:
             df = pd.read_parquet(lap_file)
-            session = lap_file.stem.replace("all_laps_", "").upper()
-            df["session"] = session
-            all_laps.append(df)
         except Exception:
             continue
+        session = lap_file.stem.replace("all_laps_", "").upper()
+        if session.startswith("FP"):
+            require_fp_lap_semantics(df, source=lap_file)
+        df["session"] = session
+        all_laps.append(df)
 
     if not all_laps:
         return None

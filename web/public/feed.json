@@ -126,6 +126,13 @@
       "date_modified": "2026-10-24T00:00:00+00:00"
     },
     {
+      "id": "https://boxboxf1fantasy.com/changelog/",
+      "url": "https://boxboxf1fantasy.com/changelog/",
+      "title": "BoxBoxF1Fantasy Changelog 2026",
+      "summary": "Public release notes for BoxBoxF1Fantasy model updates, scoring fixes, data-quality improvements and feature releases. Latest: Deleted practice laps now inform pace predictions.",
+      "date_modified": "2026-10-24T00:00:00+00:00"
+    },
+    {
       "id": "https://boxboxf1fantasy.com/articles/",
       "url": "https://boxboxf1fantasy.com/articles/",
       "title": "F1 Fantasy Articles 2026",
@@ -347,13 +354,6 @@
       "url": "https://boxboxf1fantasy.com/tools/budget-builder/",
       "title": "F1 Fantasy Budget Builder",
       "summary": "Free F1 Fantasy budget builder: find the picks most likely to rise in price so your team value compounds, leaving more to spend on stars later in the season.",
-      "date_modified": "2026-10-18T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/accuracy/",
-      "url": "https://boxboxf1fantasy.com/accuracy/",
-      "title": "F1 Fantasy Prediction Accuracy 2026",
-      "summary": "Public BoxBoxF1Fantasy track record across 17 completed rounds: driver points MAE 11.8, constructor points MAE 18.8, and 90% CI coverage 80%.",
       "date_modified": "2026-10-18T00:00:00+00:00"
     }
   ]

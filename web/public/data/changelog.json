@@ -1,6 +1,15 @@
 {
   "entries": [
     {
+      "date": "2026-10-24",
+      "title": "Deleted practice laps now inform pace predictions",
+      "tags": ["fix", "model"],
+      "body": [
+        "Timed practice laps deleted for track limits now remain available as evidence of qualifying and race pace. Pit laps, disrupted laps and cooldown or traffic spikes are still filtered appropriately. Official qualifying classifications, points and confirmed starting grids continue to use the official results.",
+        "The practice features and models were rebuilt consistently, and Austin's predictions, long-run analysis and Monte Carlo estimates were refreshed. This restores pace evidence that had been lost for drivers with several deleted practice laps."
+      ]
+    },
+    {
       "date": "2026-09-24",
       "title": "Practice pace comparisons now show comparable evidence",
       "tags": ["fix", "feature"],

@@ -834,6 +834,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description='Train the weekend prediction models')
     parser.add_argument('--quali-input-mode', choices=['legacy_season_raw', 'aligned_event'],
                         default='legacy_season_raw')
+    parser.add_argument('--threads', type=int, default=-1,
+                        help='Worker threads for model training (-1 uses all CPUs)')
     args = parser.parse_args()
 
     print("=" * 70)
@@ -923,7 +925,7 @@ def main() -> None:
             tree_method="hist",
             objective="rank:pairwise",
             random_state=MODEL_RANDOM_STATE,
-            n_jobs=-1,
+            n_jobs=args.threads,
             verbosity=0,
         )
 
@@ -1044,7 +1046,7 @@ def main() -> None:
             tree_method="hist",
             objective="rank:pairwise",
             random_state=MODEL_RANDOM_STATE,
-            n_jobs=-1,
+            n_jobs=args.threads,
             verbosity=0,
         )
 
@@ -1266,7 +1268,7 @@ def main() -> None:
             max_depth=6,
             min_samples_leaf=5,
             random_state=MODEL_RANDOM_STATE,
-            n_jobs=-1,
+            n_jobs=args.threads,
         )
 
         X_fp = fp_df[fp_available].fillna(fp_df[fp_available].median())
@@ -1345,7 +1347,7 @@ def main() -> None:
                 tree_method="hist",
                 objective="rank:pairwise",
                 random_state=MODEL_RANDOM_STATE,
-                n_jobs=-1,
+                n_jobs=args.threads,
                 verbosity=0,
             )
 
@@ -1606,7 +1608,7 @@ def main() -> None:
         "fp_coverage": f"{fp_rows}/{len(df)} ({fp_rows/len(df):.1%})",
         "fp_stint_semantics_version": FP_STINT_SEMANTICS_VERSION,
         "fp_stint_semantics": (
-            "session+stint+compound; clean race compounds including SOFT; FP2>FP1>FP3 headline"
+            "timed deleted FP laps retained; session+stint+compound; clean race compounds including SOFT; FP2>FP1>FP3 headline"
         ),
         "qualifying_model": {
             "algorithm": "XGBRanker (rank:pairwise)",

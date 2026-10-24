@@ -8,7 +8,7 @@ For sprint weekends, only FP1 is available.
 For regular weekends, FP1, FP2, and FP3 are available.
 
 Processing steps:
-- Remove in/out laps, safety car laps, VSC laps, invalid laps
+- Remove in/out laps and disrupted laps; retain timed deleted FP laps for pace
 - Normalize tyre compounds
 - Add standardized driver/constructor IDs
 - Add session metadata (track, weather, year)
@@ -42,6 +42,8 @@ from config.settings import (
     fastf1_round,
 )
 
+
+from pipeline.fp_long_runs import FP_STINT_SEMANTICS_VERSION
 
 # -- ID Mapping ---------------------------------------------------------------
 
@@ -107,16 +109,16 @@ def normalize_compound(compound: Optional[str]) -> str:
 
 # -- Lap filtering -------------------------------------------------------------
 
-def clean_laps(laps_df: pd.DataFrame) -> pd.DataFrame:
+def clean_laps(laps_df: pd.DataFrame, *, include_deleted: bool = True) -> pd.DataFrame:
     """
-    Remove invalid laps from a FastF1 laps DataFrame.
+    Select usable timed laps; deletion alone does not invalidate FP pace.
 
     Removes:
     - In laps (pit entry)
     - Out laps (pit exit)
     - Safety car laps
     - Virtual safety car laps
-    - Laps flagged as deleted / invalid
+    - Deleted laps only when explicitly processing a non-practice session
     - Laps with no time recorded
     """
     df = laps_df.copy()
@@ -124,7 +126,7 @@ def clean_laps(laps_df: pd.DataFrame) -> pd.DataFrame:
 
     # Remove laps with no time
     if "LapTime" in df.columns:
-        df = df[df["LapTime"].notna()]
+        df = df[df["LapTime"].notna() & (df["LapTime"] > pd.Timedelta(0))]
 
     # Remove pit in/out laps
     if "PitInTime" in df.columns:
@@ -132,10 +134,11 @@ def clean_laps(laps_df: pd.DataFrame) -> pd.DataFrame:
     if "PitOutTime" in df.columns:
         df = df[df["PitOutTime"].isna()]
 
-    # Remove invalid / deleted laps
-    # FastF1 uses None when not deleted and True when deleted
-    if "Deleted" in df.columns:
-        df = df[df["Deleted"].isna() | (df["Deleted"] == False)]
+    # A deleted timed practice lap still describes the car's pace. Preserve
+    # the flag. Official classifications are loaded independently.
+    df["lap_deleted"] = df["Deleted"].eq(True) if "Deleted" in df else False
+    if not include_deleted:
+        df = df[~df["lap_deleted"]]
 
     # Remove safety car laps
     # TrackStatus is a composite string of flags: 1=Green, 2=Yellow, 4=SC, 5=Red, 6=VSC, 7=VSC Ending
@@ -143,8 +146,7 @@ def clean_laps(laps_df: pd.DataFrame) -> pd.DataFrame:
     if "TrackStatus" in df.columns:
         def is_clean_status(status):
             s = str(status)
-            # Remove green (1) and yellow (2) flags, check if SC(4)/Red(5)/VSC(6) remain
-            return "4" not in s and "5" not in s
+            return not any(flag in s for flag in ("4", "5", "6", "7"))
         df = df[df["TrackStatus"].apply(is_clean_status)]
 
     removed = initial_count - len(df)
@@ -181,8 +183,19 @@ def process_fp_session(
         print(f"    No lap data for {session_name}")
         return None
 
-    # Clean laps
-    df = clean_laps(laps)
+    return structure_practice_laps(
+        laps, session.weather_data, year, round_num, session_name,
+        driver_map, constructor_map,
+        track=session.event["EventName"] if hasattr(session, "event") else "",
+    )
+
+
+def structure_practice_laps(
+    laps, weather, year, round_num, session_name, driver_map, constructor_map, *, track="",
+) -> Optional[pd.DataFrame]:
+    """Apply the same policy to downloaded sessions and persisted raw parquets."""
+    is_practice = session_name.upper().startswith("FP")
+    df = clean_laps(laps, include_deleted=is_practice)
     if df.empty:
         print(f"    No valid laps remaining for {session_name}")
         return None
@@ -253,7 +266,6 @@ def process_fp_session(
         df["speed_st"] = df["SpeedST"]
 
     # Weather data
-    weather = session.weather_data
     if weather is not None and not weather.empty:
         df["track_temperature"] = weather["TrackTemp"].mean() if "TrackTemp" in weather.columns else None
         df["air_temperature"] = weather["AirTemp"].mean() if "AirTemp" in weather.columns else None
@@ -271,14 +283,16 @@ def process_fp_session(
     df["session"] = session_name
     df["year"] = year
     df["round"] = round_num
-    df["track"] = session.event["EventName"] if hasattr(session, "event") else ""
+    df["track"] = track
+    if is_practice:
+        df["fp_lap_semantics_version"] = FP_STINT_SEMANTICS_VERSION
 
     # Select final columns
     output_cols = [
         "driver_id", "constructor_id", "lap_time",
         "sector_1", "sector_2", "sector_3",
         "compound", "stint_number", "lap_number", "tyre_life",
-        "session", "track", "year", "round",
+        "session", "track", "year", "round", "lap_deleted", "fp_lap_semantics_version",
         "track_temperature", "air_temperature", "humidity", "wind_speed", "rainfall",
     ]
 

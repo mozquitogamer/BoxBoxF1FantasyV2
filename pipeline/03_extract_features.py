@@ -40,6 +40,7 @@ from config.tyre_deg import (
 )
 from pipeline.fp_long_runs import (
     FP_STINT_SEMANTICS_VERSION,
+    require_fp_lap_semantics,
     extract_representative_long_runs,
     select_headline_long_run,
     stint_group_columns,
@@ -384,6 +385,7 @@ def main() -> None:
     all_laps = []
     for fp_file in fp_files:
         df = pd.read_parquet(fp_file)
+        require_fp_lap_semantics(df, source=fp_file)
         print(f"  Loaded {fp_file.name}: {len(df)} laps, {df['driver_id'].nunique()} drivers")
         all_laps.append(df)
 

@@ -1,5 +1,5 @@
 {
-  "fp_stint_semantics_version": 3,
+  "fp_stint_semantics_version": 4,
   "quali_features": [
     "avg_corner_speed",
     "avg_lap_time",
