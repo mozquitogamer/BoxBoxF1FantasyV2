@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-23T21:07:38.470912+02:00",
+  "generated_at": "2026-10-24T07:38:25.179468+02:00",
   "manager": {
     "id": "v13",
     "name": "V13",
@@ -59,7 +59,7 @@
           "status": "provisional",
           "phase": "pre_fp",
           "archive": "web/public/data/predictions_round1_pre_fp.json",
-          "archive_sha256": "36a3979d1db828b40053dba5d87cd8b9f02b804160fdddb73b30a70e02ee1088",
+          "archive_sha256": "49084b8938223f5fb756a9e8d7eb5148ef70ea848a6ec3c0fef67add9ce6f405",
           "archive_reconstructed": true,
           "drivers": [
             "RUS",
@@ -93,7 +93,7 @@
           "status": "frozen_replay",
           "phase": "post_fp",
           "archive": "web/public/data/predictions_round1_post_fp.json",
-          "archive_sha256": "eefd68f850b6734db533550326735182662fc5450d441b500f2d18ae473d3a55",
+          "archive_sha256": "aa61e8c98e65d687581943cc224182bf258b6bbd90f9ffc1d77a1eba1d9b2d33",
           "archive_reconstructed": true,
           "drivers": [
             "RUS",
@@ -150,7 +150,7 @@
           "status": "provisional",
           "phase": "pre_fp",
           "archive": "web/public/data/predictions_round2_pre_fp.json",
-          "archive_sha256": "594dab616f391b14895412bc3adaa49d125313e85fa4e0aab7ef70946bb9663e",
+          "archive_sha256": "f268d9b23e36c445575a096fb9e99b46fe3696776ef409b44b04d0442cb07c51",
           "archive_reconstructed": true,
           "drivers": [
             "ANT",
@@ -184,7 +184,7 @@
           "status": "frozen_replay",
           "phase": "post_fp",
           "archive": "web/public/data/predictions_round2_post_fp.json",
-          "archive_sha256": "5c8a9e11485ea74381a7d472a00032589f4e53f5513a77b66f10e2d110dbcd66",
+          "archive_sha256": "ee1a91755cd646eec9647269966761384546b28fcfce3583ba874fb64d6d5dd6",
           "archive_reconstructed": true,
           "drivers": [
             "ANT",
@@ -241,7 +241,7 @@
           "status": "provisional",
           "phase": "pre_fp",
           "archive": "web/public/data/predictions_round3_pre_fp.json",
-          "archive_sha256": "a390e701e8162dbb30eea4a8cf2d631a51dc99c9f1688deb669f84577a496794",
+          "archive_sha256": "584e14437830b8326ce7589370e9774d2f8997a53594e89d6086a99580d35997",
           "archive_reconstructed": true,
           "drivers": [
             "ANT",
@@ -275,7 +275,7 @@
           "status": "frozen_replay",
           "phase": "post_fp",
           "archive": "web/public/data/predictions_round3_post_fp.json",
-          "archive_sha256": "dcd3310d9370f8d962c8503083c94ead2776fe0df990a2ff62dba8f0553949e0",
+          "archive_sha256": "3b0cfd2f13222bcbf459142d2ed0372859218b57a02bbc7194c173711405c9cc",
           "archive_reconstructed": true,
           "drivers": [
             "ANT",
@@ -331,7 +331,7 @@
           "status": "frozen_replay",
           "phase": "post_fp",
           "archive": "web/public/data/predictions_round6_post_fp.json",
-          "archive_sha256": "600b671663337f251433be907911a4102e0e4d035435ebcc7017e9d96337df0d",
+          "archive_sha256": "09e90d0a9b9a7704054be5267ca4ddfa4d144a1199e3c7efe58f47d44059387e",
           "archive_reconstructed": false,
           "drivers": [
             "ANT",
@@ -388,7 +388,7 @@
           "status": "provisional",
           "phase": "pre_fp",
           "archive": "web/public/data/predictions_round7_pre_fp.json",
-          "archive_sha256": "517b86d9d488a350acad747c6f8a35b18cdd8e0ef3f7b5c419cb3831be75c577",
+          "archive_sha256": "a687f084e0e937ea260ea2a988e4093f460503a87b273db66fbee89fddcc175c",
           "archive_reconstructed": false,
           "drivers": [
             "ANT",
@@ -422,7 +422,7 @@
           "status": "frozen_replay",
           "phase": "post_fp",
           "archive": "web/public/data/predictions_round7_post_fp.json",
-          "archive_sha256": "af39e387b2f6751a5becdc8a1c8e3bcccade9a039379ebfe075714cf000a2263",
+          "archive_sha256": "87cff6e7c70bcae9cf5a6a28ab9c698974eb1a863bbd4bbc0726edd9030dd982",
           "archive_reconstructed": false,
           "drivers": [
             "ANT",
@@ -480,7 +480,7 @@
           "status": "provisional",
           "phase": "pre_fp",
           "archive": "web/public/data/predictions_round8_pre_fp.json",
-          "archive_sha256": "4f1099add1dde08905df0de741f59784ff662a576a6e872f483d96a9059bcfad",
+          "archive_sha256": "2223a185f6af115e52b4dd8b8b27445d62fcbd027c3b9d75cafa1b135bba641b",
           "archive_reconstructed": false,
           "drivers": [
             "RUS",
@@ -514,7 +514,7 @@
           "status": "frozen_replay",
           "phase": "post_fp",
           "archive": "web/public/data/predictions_round8_post_fp.json",
-          "archive_sha256": "047ae68d476b4d7ad3bf3ec8dfeceaee1e86de6786271d4d469c53f95de51f64",
+          "archive_sha256": "64d090a1a5b5eb61a56ed2739f452c6a945624d1c15945602cbd06c779fa9752",
           "archive_reconstructed": false,
           "drivers": [
             "RUS",
@@ -572,7 +572,7 @@
           "status": "provisional",
           "phase": "pre_fp",
           "archive": "web/public/data/predictions_round9_pre_fp.json",
-          "archive_sha256": "fe9c03a094941030a4705a2fb69fc854524beea0f0ada91c09112fbf409ada15",
+          "archive_sha256": "84080efba1207d177d0236cb3f83cf614cdc34978716218d8def6d2f0fa463ae",
           "archive_reconstructed": false,
           "drivers": [
             "ANT",
@@ -606,7 +606,7 @@
           "status": "frozen_replay",
           "phase": "post_fp",
           "archive": "web/public/data/predictions_round9_post_fp.json",
-          "archive_sha256": "fff25ef5c3045b8ca3ad65cedc012a4d56b5cb010564649df1b7b438aa2c4058",
+          "archive_sha256": "82dc4d616054343e358d98ef075029b0b9f5b2b065ee595149741eeecd82fb12",
           "archive_reconstructed": false,
           "drivers": [
             "ANT",
@@ -663,7 +663,7 @@
           "status": "provisional",
           "phase": "pre_fp",
           "archive": "web/public/data/predictions_round10_pre_fp.json",
-          "archive_sha256": "95f61a9339886b5880e56aaeb447e4af517ba79e61a28d8c075a39804cef514a",
+          "archive_sha256": "59d143df35ab1d4b626ae5d22447ef78e138c701271c29f3c9099b1ca36e3097",
           "archive_reconstructed": false,
           "drivers": [
             "ANT",
@@ -697,7 +697,7 @@
           "status": "frozen_replay",
           "phase": "post_fp",
           "archive": "web/public/data/predictions_round10_post_fp.json",
-          "archive_sha256": "7e7ef33480cc1b7b4fb5b3f038e350b072718051a2689500adca131688e097cf",
+          "archive_sha256": "dc832b7861355f7f1245061129cf75b0c72501c558893f6d27de29e72e32107a",
           "archive_reconstructed": false,
           "drivers": [
             "ANT",
@@ -755,7 +755,7 @@
           "status": "provisional",
           "phase": "pre_fp",
           "archive": "web/public/data/predictions_round11_pre_fp.json",
-          "archive_sha256": "dc075dc19cc1fbfaecb42a8e10a991d293aa1913f3c51b05a9a60c17f436d7c1",
+          "archive_sha256": "6de37e3a121de199c8af4ee7131f76b8064b3ff8746d6f831bcc29a26f7b2c45",
           "archive_reconstructed": false,
           "drivers": [
             "VER",
@@ -789,7 +789,7 @@
           "status": "frozen_replay",
           "phase": "post_fp",
           "archive": "web/public/data/predictions_round11_post_fp.json",
-          "archive_sha256": "b975f79259264cf920e93e788340b3e64695878fbec1eb4247f75a52be8d6dcb",
+          "archive_sha256": "c7d46b32fb4a996871f1f582a9bc3da516291dbf8ffdfc4dd7ee570c0717ae5d",
           "archive_reconstructed": false,
           "drivers": [
             "HAM",
@@ -846,7 +846,7 @@
           "status": "provisional",
           "phase": "pre_fp",
           "archive": "web/public/data/predictions_round12_pre_fp.json",
-          "archive_sha256": "2d556664ee67e482de97257516c038e9f5669079842e18d973495fd984faab35",
+          "archive_sha256": "ef13d9b53df90fa070255468d1e04aa552f188b1c3ed16681d2fc1f1e5dba184",
           "archive_reconstructed": false,
           "drivers": [
             "ANT",
@@ -880,7 +880,7 @@
           "status": "frozen_replay",
           "phase": "post_fp",
           "archive": "web/public/data/predictions_round12_post_fp.json",
-          "archive_sha256": "53481c56d635b29e64687356c4c42260ce6f5f7712b78425ef4e70d11e9eccce",
+          "archive_sha256": "974ab67bebaa7aa503f21494b9071813de79aa907a6ce8b778ab8e346841c394",
           "archive_reconstructed": false,
           "drivers": [
             "HAM",
@@ -938,7 +938,7 @@
           "status": "provisional",
           "phase": "pre_fp",
           "archive": "web/public/data/predictions_round13_pre_fp.json",
-          "archive_sha256": "d30b34127b763b4bef9f9d638e6401f6819444a2b451bf844e3f240c650cd797",
+          "archive_sha256": "ccd13832cc31750eb01d94f2e683a6eda0632c717a170b4a48ed3ceaa742dd76",
           "archive_reconstructed": false,
           "drivers": [
             "HAM",
@@ -972,7 +972,7 @@
           "status": "frozen_replay",
           "phase": "post_fp",
           "archive": "web/public/data/predictions_round13_post_fp.json",
-          "archive_sha256": "afb9cb9f0ef42fc5629947106b1ae05f9a6a5c184bd7c05ab7cf35bde0f6aef8",
+          "archive_sha256": "f010fae21efe2c5662bdf10f1747ebe016051d89710d840aaf7e05f111050924",
           "archive_reconstructed": false,
           "drivers": [
             "HAM",
@@ -1027,7 +1027,7 @@
           "phase": "post_quali",
           "round": 13,
           "archive": "web/public/data/predictions_round13.json",
-          "archive_sha256": "efc2a71ec4f4fd3c5bfd5a18fea3bf55e359329ebdf57721579e7d858a6ae2b9",
+          "archive_sha256": "da37bc564ba27f82c4ecadb7652270e8ef0ee1f61440328ec2823b7295de52b3",
           "generated_at": "2026-07-25T22:06:20.359358+00:00",
           "points_basis": "projected_points_race",
           "banked_qualifying_driver": "HAM"
@@ -1855,41 +1855,45 @@
         "transfers": 2
       },
       "post_fp_final": {
-        "archive": "web/public/data/predictions_round19_pre_fp.json",
-        "archive_sha256": "61f678cfa5fba3c5f1b1a09ba6725c99fdcd822e8479aacb4818b8a7a76550e5",
-        "captain": "ANT",
+        "archive": "web/public/data/predictions_round19_post_fp_refresh_37a20196cbcc69f5.json",
+        "archive_sha256": "37a20196cbcc69f5f7f59a94c802dcd3c2d04c0b46fe927c3f515247175e9a89",
+        "captain": "VER",
         "changes": {
           "constructors_in": [],
           "constructors_out": [],
           "drivers_in": [
-            "LEC",
-            "PER"
+            "SAI",
+            "VER"
           ],
           "drivers_out": [
-            "COL",
-            "HAD"
+            "ANT",
+            "COL"
           ]
         },
         "chip": null,
         "chip_decision": {
-          "reason": "Only post-FP finals can play 3x.",
-          "result": "not_evaluated"
+          "current_selected_team_extra_points": 33.6,
+          "largest_remaining_priors_round": 23,
+          "largest_remaining_priors_top_two": 65.9,
+          "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast.",
+          "result": "save"
         },
         "constructors": [
-          "mercedes",
-          "ferrari"
+          "ferrari",
+          "mercedes"
         ],
-        "downside_risk": 60.5,
+        "correction_reason": "Automatic live forecast refresh: 2026-10-09T19:16:46.311814+00:00 (37a20196cbcc69f5).",
+        "downside_risk": 65.8,
         "drivers": [
-          "ANT",
-          "LEC",
-          "BOR",
+          "VER",
+          "HAD",
           "LIN",
-          "PER"
+          "SAI",
+          "BOR"
         ],
         "lock_deadline": "2026-10-10T13:00:00Z",
         "manager": "v13",
-        "phase": "pre_fp",
+        "phase": "post_fp",
         "policy": {
           "negative_p5_weight": 0.75,
           "policy_version": "horizon_budget_value_v2",
@@ -1898,35 +1902,38 @@
           "risk_profile": "medium_tolerance",
           "strategy": "budget_builder"
         },
-        "previous_decision": "data/v13/decisions/round18_post_fp_revision3.json",
-        "previous_decision_sha256": "081493a46d1e74104419a5c7262bb9dd484b9a1db10458ecc2162f7cb14d468c",
+        "previous_decision": "data/v13/decisions/round19_post_fp_revision2.json",
+        "previous_decision_sha256": "10ed7fd6c026d6615418bb80ff99cffa0061498e78d7594990581d90e4fabc19",
         "price_snapshot_after_round": 18,
-        "projected_points": 215.3,
-        "projected_price_gain": 2.2,
-        "published_at": "2026-10-06T14:12:59.906670+00:00",
+        "projected_points": 187.9,
+        "projected_price_gain": 2.5,
+        "published_at": "2026-10-09T19:17:17.558182+00:00",
         "race": "Singapore Grand Prix",
+        "revision": 3,
         "round": 19,
         "schema_version": 1,
         "second_boost": null,
-        "source_generated_at": "2026-10-06T14:12:17.561738+00:00",
-        "status": "provisional",
-        "team_cost": 132.7,
+        "source_generated_at": "2026-10-09T19:16:46.311814+00:00",
+        "status": "corrected_before_lock",
+        "supersedes": "data/v13/decisions/round19_post_fp_revision2.json",
+        "supersedes_sha256": "10ed7fd6c026d6615418bb80ff99cffa0061498e78d7594990581d90e4fabc19",
+        "team_cost": 130.3,
         "transfer_penalty": 0,
         "transfers": 2,
         "reasons": [
-          "The post-FP lineup projected 215.3 points.",
-          "It carried $2.2M of forecast price movement into the budget-first objective.",
-          "Its combined negative-P5 exposure was 60.5 under V13's medium-risk rule."
+          "The post-FP lineup projected 187.9 points.",
+          "It carried $2.5M of forecast price movement into the budget-first objective.",
+          "Its combined negative-P5 exposure was 65.8 under V13's medium-risk rule."
         ]
       },
       "final_fix": null,
-      "actual_points": 228.0,
-      "projected_points": 215.3,
-      "score_delta_vs_projection": 12.7,
-      "cumulative_points": 4074.0,
-      "budget_after": 134.4,
+      "actual_points": 255.0,
+      "projected_points": 187.9,
+      "score_delta_vs_projection": 67.1,
+      "cumulative_points": 4101.0,
+      "budget_after": 134.9,
       "free_transfers_next": 2,
-      "actual_captain": "ANT",
+      "actual_captain": "VER",
       "actual_second_boost": null
     }
   ],
@@ -1934,28 +1941,28 @@
     "status": "live",
     "through_round": 19,
     "race": "Singapore Grand Prix",
-    "round_points": 228.0,
-    "projected_points": 215.3,
-    "score_delta_vs_projection": 12.7,
-    "total_points": 4074.0,
-    "budget": 134.4,
-    "bank": 0.4
+    "round_points": 255.0,
+    "projected_points": 187.9,
+    "score_delta_vs_projection": 67.1,
+    "total_points": 4101.0,
+    "budget": 134.9,
+    "bank": 2.8
   },
   "current_state": {
     "as_of_round": 19,
     "drivers": [
-      "ANT",
-      "LEC",
-      "BOR",
+      "VER",
+      "HAD",
       "LIN",
-      "PER"
+      "SAI",
+      "BOR"
     ],
     "constructors": [
-      "mercedes",
-      "ferrari"
+      "ferrari",
+      "mercedes"
     ],
-    "budget": 134.4,
-    "bank": 0.4,
+    "budget": 134.9,
+    "bank": 2.8,
     "free_transfers": 2,
     "chips_remaining": [
       "3x_boost"
@@ -2038,21 +2045,21 @@
       "round": 20,
       "race": "United States Grand Prix",
       "phase": "post_fp",
-      "status": "frozen_before_lock",
-      "published_at": "2026-10-23T19:07:38.456062+00:00",
-      "source_generated_at": "2026-10-23T19:06:38.196048+00:00",
-      "lock_deadline": "2026-10-23T21:30:00Z",
-      "archive": "web/public/data/predictions_round20_post_fp.json",
-      "archive_sha256": "0d8a04ad962732609238b671eb4a2d62a34bd7087887e7cb50cb79d503c019d5",
-      "previous_decision": "data/v13/decisions/round20_pre_fp_revision2.json",
-      "previous_decision_sha256": "07aee6223ce5256a041e5d9c16bd330aa2d2664e9a540dfd6cb9b6260dc35b78",
+      "status": "corrected_before_lock",
+      "published_at": "2026-10-24T05:38:25.169468+00:00",
+      "source_generated_at": "2026-10-24T05:37:13.308782+00:00",
+      "lock_deadline": "2026-10-24T21:00:00Z",
+      "archive": "web/public/data/predictions_round20_post_fp_refresh_c77b5911e548b730.json",
+      "archive_sha256": "c77b5911e548b730e371dd355aee187780bb60a7ad7803d3199203599a34d272",
+      "previous_decision": "data/v13/decisions/round20_post_fp.json",
+      "previous_decision_sha256": "f3ed64baa49f7a78225a6283a68031f70343b465e3c208f35d72de3d18d7a5f2",
       "price_snapshot_after_round": 19,
       "drivers": [
-        "LEC",
         "ANT",
         "BOR",
         "LIN",
-        "PER"
+        "HAD",
+        "LAW"
       ],
       "constructors": [
         "mercedes",
@@ -2061,21 +2068,27 @@
       "captain": "ANT",
       "second_boost": null,
       "chip": null,
-      "projected_points": 232.2,
-      "projected_price_gain": 0.1,
-      "downside_risk": 52.2,
-      "team_cost": 134.0,
-      "transfers": 0,
+      "projected_points": 231.8,
+      "projected_price_gain": 1.2,
+      "downside_risk": 55.3,
+      "team_cost": 132.5,
+      "transfers": 2,
       "transfer_penalty": 0,
       "changes": {
-        "drivers_out": [],
-        "drivers_in": [],
+        "drivers_out": [
+          "SAI",
+          "VER"
+        ],
+        "drivers_in": [
+          "ANT",
+          "LAW"
+        ],
         "constructors_out": [],
         "constructors_in": []
       },
       "chip_decision": {
         "result": "save",
-        "current_selected_team_extra_points": 56.5,
+        "current_selected_team_extra_points": 48.3,
         "largest_remaining_priors_top_two": 66.7,
         "largest_remaining_priors_round": 23,
         "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast."
@@ -2087,7 +2100,11 @@
         "price_gain_weight": 4.354,
         "negative_p5_weight": 0.75,
         "price_value_method": "horizon curve × price reliability × points realisation"
-      }
+      },
+      "revision": 2,
+      "correction_reason": "Automatic live forecast refresh: 2026-10-24T05:37:13.308782+00:00 (c77b5911e548b730).",
+      "supersedes": "data/v13/decisions/round20_post_fp.json",
+      "supersedes_sha256": "f3ed64baa49f7a78225a6283a68031f70343b465e3c208f35d72de3d18d7a5f2"
     }
   },
   "labels": {

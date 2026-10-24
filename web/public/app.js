@@ -46,6 +46,9 @@ const RACE_FLAGS = {
 };
 
 // -- 2026 F1 Fantasy Lock Deadlines (UTC) --
+// R20-R25 checked against the official F1 session schedules on 2026-10-23.
+// https://www.formula1.com/en/racing/2026/{united-states,mexico,brazil,las-vegas,qatar,united-arab-emirates}
+// These are qualifying starts: Austin, Brazil and Qatar are NOT sprint weekends.
 // Lock deadline = start of QUALIFYING on normal weekends, or the start of the
 // SPRINT RACE on sprint weekends (standard F1 Fantasy sprint rule — the lock is
 // the sprint race, not sprint qualifying). Sprint rounds: 2, 6, 7, 11, 14, 19.
@@ -69,12 +72,12 @@ const LOCK_DEADLINES = [
     { round: 17, race: 'Azerbaijan Grand Prix',        lock: '2026-09-25T12:00:00Z', sprint: false },
     { round: 18, race: 'Bahrain Grand Prix in Malaysia', lock: '2026-10-03T08:00:00Z', sprint: false },
     { round: 19, race: 'Singapore Grand Prix',         lock: '2026-10-10T13:00:00Z', sprint: true  },
-    { round: 20, race: 'United States Grand Prix',     lock: '2026-10-23T21:30:00Z', sprint: false },
-    { round: 21, race: 'Mexican Grand Prix',           lock: '2026-10-31T20:00:00Z', sprint: false },
-    { round: 22, race: 'Brazilian Grand Prix',         lock: '2026-11-06T18:30:00Z', sprint: false },
+    { round: 20, race: 'United States Grand Prix',     lock: '2026-10-24T21:00:00Z', sprint: false },
+    { round: 21, race: 'Mexican Grand Prix',           lock: '2026-10-31T21:00:00Z', sprint: false },
+    { round: 22, race: 'Brazilian Grand Prix',         lock: '2026-11-07T18:00:00Z', sprint: false },
     { round: 23, race: 'Las Vegas Grand Prix',         lock: '2026-11-21T04:00:00Z', sprint: false },
-    { round: 24, race: 'Qatar Grand Prix',             lock: '2026-11-27T16:30:00Z', sprint: false },
-    { round: 25, race: 'Abu Dhabi Grand Prix',         lock: '2026-12-05T13:00:00Z', sprint: false },
+    { round: 24, race: 'Qatar Grand Prix',             lock: '2026-11-28T18:00:00Z', sprint: false },
+    { round: 25, race: 'Abu Dhabi Grand Prix',         lock: '2026-12-05T14:00:00Z', sprint: false },
 ];
 
 // -- State --
