@@ -126,6 +126,20 @@
       "date_modified": "2026-10-24T00:00:00+00:00"
     },
     {
+      "id": "https://boxboxf1fantasy.com/articles/",
+      "url": "https://boxboxf1fantasy.com/articles/",
+      "title": "F1 Fantasy Articles 2026",
+      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
+      "date_modified": "2026-10-24T00:00:00+00:00"
+    },
+    {
+      "id": "https://boxboxf1fantasy.com/articles/2026-round20-fp2-fantasy-briefing/",
+      "url": "https://boxboxf1fantasy.com/articles/2026-round20-fp2-fantasy-briefing/",
+      "title": "United States Grand Prix FP2 Fantasy briefing: what the simulations say",
+      "summary": "United States Grand Prix: the FP2 picture Our post-FP2 simulation for round 20 is now live. These are average Fantasy points across the simulations , using the practice data available so far. Qualifying and the race...",
+      "date_modified": "2026-10-24T00:00:00+00:00"
+    },
+    {
       "id": "https://boxboxf1fantasy.com/data/",
       "url": "https://boxboxf1fantasy.com/data/",
       "title": "BoxBoxF1Fantasy Public Data 2026",
@@ -340,20 +354,6 @@
       "url": "https://boxboxf1fantasy.com/accuracy/",
       "title": "F1 Fantasy Prediction Accuracy 2026",
       "summary": "Public BoxBoxF1Fantasy track record across 17 completed rounds: driver points MAE 11.8, constructor points MAE 18.8, and 90% CI coverage 80%.",
-      "date_modified": "2026-10-18T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/changelog/",
-      "url": "https://boxboxf1fantasy.com/changelog/",
-      "title": "BoxBoxF1Fantasy Changelog 2026",
-      "summary": "Public release notes for BoxBoxF1Fantasy model updates, scoring fixes, data-quality improvements and feature releases. Latest: Practice pace comparisons now show comparable evidence.",
-      "date_modified": "2026-10-18T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/articles/",
-      "url": "https://boxboxf1fantasy.com/articles/",
-      "title": "F1 Fantasy Articles 2026",
-      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
       "date_modified": "2026-10-18T00:00:00+00:00"
     }
   ]
