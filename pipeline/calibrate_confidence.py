@@ -1,8 +1,9 @@
 """
 Calibrate Monte Carlo confidence intervals against actual race results.
 
-Compares MC predictions (percentile forecasts) against actual fantasy point
-outcomes for all completed rounds. Computes:
+Compares eligible MC predictions (percentile forecasts) against actual fantasy
+point outcomes for completed rounds. The post-FP phase requires a timestamped
+forecast that predates team lock. Computes:
   1. Empirical coverage at each percentile level (P5-P95, P25-P75)
   2. Probability Integral Transform (PIT) histogram
   3. Noise multiplier to correct under/over-dispersion
@@ -37,6 +38,7 @@ from config.settings import (
     WEB_DATA_DIR,
     CANCELLED_ROUNDS_2026,
 )
+from pipeline.forecast_archive import load_lock_forecast
 
 VALID_PHASES = ("pre_fp", "post_fp", "post_quali")
 
@@ -44,19 +46,26 @@ VALID_PHASES = ("pre_fp", "post_fp", "post_quali")
 def load_mc_predictions(
     round_num: int, phase: str = "post_fp"
 ) -> pd.DataFrame | None:
-    """Load one frozen phase archive as a calibration frame.
+    """Load a phase archive as a calibration frame.
 
     Mutable ``data/predictions/roundN/monte_carlo_fantasy.parquet`` files are
     deliberately not accepted: a later post-quali or post-race rerun can replace
-    the distribution that was actually available at the Fantasy lock.
+    the distribution that was actually available at the Fantasy lock. Post-FP
+    selection is timestamp-verified; the other phases retain their frozen files.
     """
     if phase not in VALID_PHASES:
         raise ValueError(f"Invalid calibration phase: {phase!r}")
-    path = WEB_DATA_DIR / f"predictions_round{round_num}_{phase}.json"
-    if not path.exists():
-        return None
-    with open(path) as f:
-        payload = json.load(f)
+    if phase == "post_fp":
+        selected = load_lock_forecast(round_num, WEB_DATA_DIR)
+        if selected is None:
+            return None
+        payload, path = selected
+    else:
+        path = WEB_DATA_DIR / f"predictions_round{round_num}_{phase}.json"
+        if not path.exists():
+            return None
+        with open(path) as f:
+            payload = json.load(f)
     if payload.get("phase") != phase:
         raise ValueError(
             f"{path.name} is tagged {payload.get('phase')!r}, expected {phase!r}"
@@ -76,6 +85,8 @@ def load_mc_predictions(
             continue
         rows.append({
             "driver_abbrev": driver["driver_id"],
+            "asset_legacy_ids": tuple(driver.get("asset_legacy_ids", [])),
+            "constructor_id": driver.get("constructor"),
             "det_race_position": driver.get("predicted_finish"),
             "mc_total_mean": mean,
             "mc_total_std": driver.get("mc_total_std", 0.0),
@@ -217,16 +228,24 @@ def analyze_calibration(
 
         official_round = official_rounds.get(str(round_num), {})
         actual_pts_map = official_round.get("drivers", {})
+        actual_constructors = {d["driver_id"]: d.get("constructor") for d in actual["drivers"]}
         actual_race_pos = {d["driver_id"]: d.get("race_position") for d in actual["drivers"]}
         actual_quali_pos = {d["driver_id"]: d.get("quali_position") for d in actual["drivers"]}
         actual_dnf = {d["driver_id"]: d.get("is_dnf", False) for d in actual["drivers"]}
 
         for _, row in mc_df.iterrows():
             abbrev = row["driver_abbrev"]
-            if abbrev not in actual_pts_map:
+            score_id = abbrev
+            if score_id not in actual_pts_map:
+                score_id = next((
+                    alias for alias in row.get("asset_legacy_ids", ())
+                    if alias in actual_pts_map
+                    and actual_constructors.get(alias) == row.get("constructor_id")
+                ), None)
+            if score_id is None or score_id not in actual_pts_map:
                 continue
 
-            act_pts = actual_pts_map[abbrev]
+            act_pts = actual_pts_map[score_id]
             mc_dict = row.to_dict()
             empirical_pct = compute_empirical_percentile(mc_dict, act_pts)
 
@@ -253,7 +272,7 @@ def analyze_calibration(
                 "empirical_pct": empirical_pct,
                 "error": act_pts - row["mc_total_mean"],
                 "tier": tier,
-                "is_dnf": actual_dnf.get(abbrev, False),
+                "is_dnf": actual_dnf.get(score_id, False),
                 "det_position": det_pos,
                 "phase": phase,
                 "archive_reconstructed": bool(
@@ -480,14 +499,17 @@ def analyze_calibration(
         })
 
     # Build calibration output
+    archive_policy = (
+        "timestamp-verified pre-lock archives"
+        if phase == "post_fp" else "frozen phase archives"
+    )
+    archive_policy += "; reconstructed " + (
+        "included" if include_reconstructed else "excluded"
+    )
     calibration = {
         "phase": phase,
         "season": CURRENT_SEASON,
-        "archive_policy": (
-            "frozen phase archives; reconstructed excluded"
-            if not include_reconstructed
-            else "frozen phase archives; reconstructed included"
-        ),
+        "archive_policy": archive_policy,
         "noise_multiplier": round(noise_multiplier, 4),
         "bias_correction": round(overall_bias, 2) if bias_significant else 0.0,
         "n_rounds": n_rounds,

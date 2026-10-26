@@ -46,7 +46,7 @@ def test_p5_p95_multiplier_uses_central_90_percent_quantile() -> None:
     assert result < norm.ppf(0.975) / norm.ppf(0.90)
 
 
-def test_loader_reads_only_the_requested_frozen_phase(
+def test_loader_reads_only_prelock_evidence_from_requested_phase(
     tmp_path: Path, monkeypatch
 ) -> None:
     monkeypatch.setattr(calibration, "WEB_DATA_DIR", tmp_path)
@@ -54,6 +54,8 @@ def test_loader_reads_only_the_requested_frozen_phase(
         "round": 14,
         "phase": "post_fp",
         "reconstructed": False,
+        "generated_at": "2026-08-21T14:54:16Z",
+        "exported_at": "2026-08-21T14:54:17Z",
         "drivers": [_driver_payload()],
     }
     (tmp_path / "predictions_round14_post_fp.json").write_text(
@@ -116,6 +118,55 @@ def test_reconstructed_archives_are_excluded_by_default(monkeypatch) -> None:
     )
     assert included["n_rounds"] == 1
     assert included["phase"] == "post_fp"
+
+
+def test_calibration_counts_driver_after_asset_id_change(monkeypatch) -> None:
+    import pandas as pd
+
+    frame = pd.DataFrame([{
+        "driver_abbrev": "LAW_RED_BULL",
+        "asset_legacy_ids": ("LAW",),
+        "constructor_id": "red_bull",
+        "det_race_position": 8,
+        "mc_total_mean": 20.0,
+        "mc_total_std": 8.0,
+        "mc_total_median": 20.0,
+        "mc_total_p5": -5.0,
+        "mc_total_p25": 10.0,
+        "mc_total_p75": 30.0,
+        "mc_total_p95": 42.0,
+    }])
+    frame.attrs["reconstructed"] = False
+    monkeypatch.setattr(calibration, "load_official_fantasy_points", lambda: {
+        "15": {"drivers": {"LAW": 25}},
+    })
+    monkeypatch.setattr(calibration, "load_mc_predictions", lambda _round, phase: frame)
+    monkeypatch.setattr(calibration, "load_actual_results", lambda _round: {
+        "drivers": [{"driver_id": "LAW", "constructor": "red_bull", "is_dnf": False}],
+    })
+
+    result = calibration.analyze_calibration(phase="post_fp")
+    assert result["n_samples"] == 1
+    assert result["overall_bias"] == 5.0
+
+
+def test_calibration_rejects_legacy_alias_from_a_different_constructor(monkeypatch) -> None:
+    import pandas as pd
+
+    frame = pd.DataFrame([{
+        'driver_abbrev': 'LAW_RED_BULL',
+        'asset_legacy_ids': ('LAW',),
+        'constructor_id': 'red_bull',
+    }])
+    monkeypatch.setattr(calibration, 'load_mc_predictions', lambda _round, phase: frame)
+    monkeypatch.setattr(calibration, 'load_official_fantasy_points', lambda: {
+        '15': {'drivers': {'LAW': 25}},
+    })
+    monkeypatch.setattr(calibration, 'load_actual_results', lambda _round: {
+        'drivers': [{'driver_id': 'LAW', 'constructor': 'racing_bulls'}],
+    })
+
+    assert calibration.analyze_calibration(phase='post_fp') == {}
 
 
 def test_mc_loader_selects_strictly_earlier_cumulative_snapshot(

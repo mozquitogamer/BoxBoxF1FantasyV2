@@ -8,8 +8,10 @@ POINTS and the DRIVER ORDERING at the moment the team locks. It's the standard
 against which every modelling/simulation change should be measured.
 
 The F1 Fantasy team-lock deadline is BEFORE qualifying (or at the sprint-race
-start on sprint weekends), so the actionable forecast is the post-FP archive
-(`predictions_round{N}_post_fp.json`), falling back to pre-FP when no FP ran.
+start on sprint weekends), so the actionable forecast is the latest published
+post-FP archive from before the lock. A pre-FP archive is used only when there
+is no provable pre-lock post-FP forecast. Retrospectively backfilled archives
+are excluded even if their phase label says ``post_fp``.
 Official points come from data/seed/official_fantasy_points.json (reconciled to
 100% vs our computed actuals as of 2026-07-02).
 
@@ -37,11 +39,10 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config.settings import WEB_DATA_DIR, SEED_DIR
+from pipeline.forecast_archive import load_lock_forecast, load_prelock_forecast
 
-# Fallback order when a specific phase archive is missing.
+# Fallback order for retrospective or explicit canonical views only.
 PHASE_FALLBACK = {
-    "post_fp": ["post_fp", "pre_fp", "canonical"],
-    "pre_fp": ["pre_fp", "canonical"],
     "post_quali": ["post_quali", "post_fp", "pre_fp", "canonical"],
     "canonical": ["canonical"],
 }
@@ -64,13 +65,12 @@ def _pipe_module(name: str, filename: str):
 
 
 def reforecast_round(round_num: int, n_sims: int, seed: int) -> tuple[dict, dict] | None:
-    """Re-run 07 scoring + 08 MC IN-PROCESS on this round's frozen positions with
+    """Re-run 07 scoring + 08 MC IN-PROCESS on this round's current parquet with
     the CURRENT code, returning ({abbrev: {pred,p5,p95}}, {cid: {pred,p5,p95}}).
 
-    Isolates a scoring/MC change: the positions (06 output) are held fixed and
-    only 07/08 are re-executed, so an old-vs-new run gates the change leak-free.
-    Weather resolves to inactive for historical rounds (weather.json is for the
-    live round), keeping conditions constant. No files are written.
+    Diagnostic only: the position parquet and some scoring/MC priors are mutable
+    and may include information from after this round. This must not be used as
+    a chronological validation gate. No files are written.
     """
     import pandas as pd
     from config.settings import (PREDICTIONS_DIR, SPRINT_ROUNDS_2026,
@@ -168,29 +168,50 @@ def load_forecast(round_num: int, phase: str) -> tuple[dict, str | None]:
 
     Returns (data, resolved_phase) or ({}, None) if nothing is available.
     """
+    if phase == "post_fp":
+        selected = load_lock_forecast(round_num, WEB_DATA_DIR)
+        if selected is not None:
+            payload, path = selected
+            return payload, "lock" if path.name == f"predictions_round{round_num}.json" else "post_fp"
+        selected = load_prelock_forecast(round_num, WEB_DATA_DIR, phase="pre_fp")
+        if selected is not None:
+            return selected[0], "pre_fp"
+        return {}, None
+    if phase == "pre_fp":
+        selected = load_prelock_forecast(round_num, WEB_DATA_DIR, phase="pre_fp")
+        return (selected[0], "pre_fp") if selected is not None else ({}, None)
     for cand in PHASE_FALLBACK.get(phase, [phase]):
         p = _archive_path(round_num, cand)
         if p.exists():
             try:
                 with open(p) as f:
-                    return json.load(f), cand
+                    payload = json.load(f)
+                return payload, cand
             except (json.JSONDecodeError, OSError):
                 continue
     return {}, None
 
 
-def _driver_forecast_map(fc: dict) -> dict:
+def _driver_forecast_map(fc: dict, actual_constructors: dict | None = None) -> dict:
     """abbrev -> {pred, p5, p95} from a forecast archive."""
     out = {}
     for d in fc.get("drivers", []):
         key = d.get("driver_id") or d.get("driver_abbrev")
         if key is None:
             continue
-        out[key] = {
+        forecast = {
             "pred": d.get("expected_points", d.get("mc_total_mean")),
             "p5": d.get("mc_total_p5"),
             "p95": d.get("mc_total_p95"),
         }
+        out[key] = forecast
+        # Official points retained the driver's old abbreviation for some
+        # midseason asset IDs (e.g. LAW_RED_BULL -> LAW). The archive carries
+        # that identity explicitly; use it for scoring without guessing names.
+        for legacy_id in d.get("asset_legacy_ids", []):
+            if (actual_constructors is not None
+                    and actual_constructors.get(legacy_id) == d.get("constructor")):
+                out.setdefault(legacy_id, forecast)
     return out
 
 
@@ -262,7 +283,17 @@ def backtest_round(round_num: int, phase: str, official_round: dict,
         fc, resolved = load_forecast(round_num, phase)
         if not fc:
             return None
-        d_map, c_map = _driver_forecast_map(fc), _constructor_forecast_map(fc)
+        actual_path = WEB_DATA_DIR / f"actual_round{round_num}.json"
+        actual_constructors = {}
+        if actual_path.exists():
+            with open(actual_path, encoding="utf-8") as f:
+                actual_payload = json.load(f)
+            actual_constructors = {
+                d["driver_id"]: d.get("constructor")
+                for d in actual_payload.get("drivers", [])
+            }
+        d_map = _driver_forecast_map(fc, actual_constructors)
+        c_map = _constructor_forecast_map(fc)
     return {
         "round": round_num,
         "phase": resolved,
@@ -355,7 +386,7 @@ def main() -> None:
                     help="Show pre_fp vs post_fp side by side")
     ap.add_argument("--reforecast", action="store_true",
                     help="Re-run 07+08 on frozen positions with CURRENT code "
-                         "(leak-free gate for scoring/MC changes)")
+                         "(diagnostic only; mutable inputs can contain future results)")
     ap.add_argument("--sims", type=int, default=5000,
                     help="MC simulations per round in --reforecast mode (default 5000)")
     ap.add_argument("--seed", type=int, default=42, help="MC seed (default 42)")
@@ -368,6 +399,8 @@ def main() -> None:
         sys.exit(0)
 
     if args.reforecast:
+        print("WARNING: re-forecast mode is not a chronological validation gate; "
+              "current priors and parquets may contain later information.")
         print(f"Re-forecasting all completed rounds with current 07+08 code "
               f"({args.sims} sims, seed {args.seed})...")
         result = run(args.phase, official, reforecast=True,

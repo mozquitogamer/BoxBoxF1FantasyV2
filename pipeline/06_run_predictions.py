@@ -846,15 +846,21 @@ def _load_actual_sprint_grid(pred_df: pd.DataFrame, round_num: int, year: int) -
             if n > 0:
                 print(f"  Loaded sprint grid from sprint_results.csv: {n}/{len(pred_df)} drivers")
                 return True
+    # Reuse the downloader's cache; a stale default cache can hide a new session.
+    # Race-control messages let FastF1 derive the classification by SQ segment,
+    # respecting deleted laps instead of sorting every driver's overall best lap.
     # Method 2: FastF1 Sprint Shootout / Sprint Qualifying (official Position, else fastest-lap rank)
     try:
         import fastf1
+        from config.settings import FASTF1_CACHE_DIR
+        FASTF1_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        fastf1.Cache.enable_cache(str(FASTF1_CACHE_DIR))
         ff1_round = fastf1_round(round_num, year)
         abbrev_to_jolpica, _ = load_driver_id_maps()
         for sq_name in ["Sprint Shootout", "Sprint Qualifying", "SQ"]:
             try:
                 sq_session = fastf1.get_session(year, ff1_round, sq_name)
-                sq_session.load(laps=True, telemetry=False, weather=False, messages=False)
+                sq_session.load(laps=True, telemetry=False, weather=False, messages=True)
                 sq_results = sq_session.results
                 if sq_results is None or sq_results.empty:
                     continue
@@ -1481,7 +1487,7 @@ def run_predictions(
                         # Load laps too — Ergast doesn't expose sprint-quali results,
                         # so Position is often NaN even when timing data is available.
                         # We fall back to ranking by each driver's fastest lap.
-                        sq_session.load(laps=True, telemetry=False, weather=False, messages=False)
+                        sq_session.load(laps=True, telemetry=False, weather=False, messages=True)
                         sq_results = sq_session.results
                         if sq_results is not None and not sq_results.empty:
                             # Path A: official Position column populated
