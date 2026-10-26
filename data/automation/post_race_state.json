@@ -12,6 +12,12 @@
       "source_sha256": "dba0e25e43a808fb800a29bacb6ed55037b147531eb44bd4091df511cca5bf43",
       "completed_at": "2026-10-13T00:02:41.457699+00:00",
       "next_round": 20
+    },
+    "20": {
+      "race": "United States Grand Prix",
+      "source_sha256": "d4dbfb10a24915f54e14d142f3a12bfbdeaa61bad84e9b5c8876972f458ded55",
+      "completed_at": "2026-10-26T05:24:04.181733+00:00",
+      "next_round": 21
     }
   }
 }

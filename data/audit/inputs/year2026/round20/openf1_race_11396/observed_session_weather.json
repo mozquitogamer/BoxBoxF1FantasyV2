@@ -1,0 +1,32 @@
+[
+  {
+    "season": 2026,
+    "round": 20,
+    "session_name": "Q",
+    "n_samples": 60,
+    "was_wet": false,
+    "precip_minutes": 0,
+    "pct_session_wet": 0.0,
+    "track_temp_avg": 38.358333333333334,
+    "track_temp_min": 36.5,
+    "track_temp_max": 40.7,
+    "air_temp_avg": 29.65666666666667,
+    "humidity_avg": 38.84333333333333,
+    "wind_avg": 3.2216666666666662
+  },
+  {
+    "season": 2026,
+    "round": 20,
+    "session_name": "R",
+    "n_samples": 106,
+    "was_wet": false,
+    "precip_minutes": 0,
+    "pct_session_wet": 0.0,
+    "track_temp_avg": 35.866981132075466,
+    "track_temp_min": 34.1,
+    "track_temp_max": 37.8,
+    "air_temp_avg": 27.10377358490566,
+    "humidity_avg": 40.87830188679246,
+    "wind_avg": 2.026415094339623
+  }
+]
