@@ -1464,6 +1464,9 @@ def render_race_page(
             f'machine-learning models + 10,000-run Monte Carlo simulation.</p>'
         )
 
+    if pred.get('fp_coverage_note'):
+        intro += f'<p class="meta">{esc(pred["fp_coverage_note"])}</p>'
+
     cta = (
         '<div class="btnrow"><a class="cta" href="/stats/">View season points &amp; prices &rarr;</a>'
         '<a class="cta" href="/accuracy/" style="background:#1b212c;">Prediction accuracy &rarr;</a></div>'

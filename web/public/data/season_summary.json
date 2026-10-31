@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-10-31T15:03:05.762161+00:00",
+  "generated_at": "2026-10-31T20:07:48.704297+00:00",
   "rounds": [
     {
       "round": 1,
@@ -382,8 +382,8 @@
     "HIR_HAAS": {
       "name": "Ryo Hirakawa",
       "constructor": "haas",
-      "current_price": 10.1,
-      "starting_price": 10.1,
+      "current_price": 6.0,
+      "starting_price": 6.0,
       "price_change": 0.0,
       "price_trend": "stable"
     }

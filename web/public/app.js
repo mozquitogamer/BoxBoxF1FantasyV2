@@ -1445,6 +1445,7 @@ function renderPredictionContext() {
             <div class="prediction-context-heading"><strong>${escapeHtml(data.race)} · Round ${data.round}</strong>
                 <span class="prediction-phase">${escapeHtml(context.phase)}</span></div>
             <p>${escapeHtml(context.evidence)} Simulation run: ${escapeHtml(timeText)}.</p>
+            ${data.fp_coverage_note ? `<p class="prediction-context-notice">${escapeHtml(data.fp_coverage_note)}</p>` : ''}
             ${context.notice ? `<p class="prediction-context-notice">${escapeHtml(context.notice)}</p>` : ''}
         </div>`;
     }

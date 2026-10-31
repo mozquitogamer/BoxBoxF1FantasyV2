@@ -19,6 +19,7 @@ Output:
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Optional
@@ -32,6 +33,7 @@ from config.settings import (
     LAPS_DIR,
     FEATURES_DIR,
     MIN_LONG_RUN_LAPS,
+    SEED_DIR,
 )
 from config.tyre_deg import (
     MIN_CLEAN_LAPS as DEG_MIN_CLEAN_LAPS,
@@ -351,6 +353,67 @@ def extract_driver_features(
     return df
 
 
+def apply_practice_results(features, bundle, session_name, round_num, year):
+    """Use published best times without pretending a classification is lap data.
+
+    Repeatability, compounds, long runs, lap counts and confidence participation
+    remain based on actual lap records. This opt-in fallback is replaced by the
+    normal extractor once the complete lap feed becomes available.
+    """
+    from importlib import import_module
+    from datetime import datetime, timezone
+
+    files = [bundle / 'sessions.json', bundle / f'drivers_{session_name.lower()}.json',
+             bundle / f'session_result_{session_name.lower()}.json']
+    sessions, drivers, results = [json.loads(p.read_bytes()) for p in files]
+    session = next(s for s in sessions if s['session_name'] == f'Practice {session_name[-1]}')
+    race = next(r for r in json.loads((SEED_DIR / 'races.json').read_bytes())['races']
+                if r['round'] == round_num)
+    start = datetime.fromisoformat(session['date_start'])
+    end = datetime.fromisoformat(session['date_end'])
+    assert session['year'] == year and 0 <= (datetime.fromisoformat(race['date']).date() - start.date()).days <= 3
+    assert end < datetime.now(timezone.utc), 'Practice has not finished'
+    key = session['session_key']
+    assert all(r['session_key'] == key for r in drivers + results)
+    assert len({r['driver_number'] for r in results}) == len(results), 'Duplicate result driver'
+    assert len({r['driver_number'] for r in drivers}) == len(drivers), 'Duplicate roster driver'
+    driver_map, _ = import_module('pipeline.02_build_laps').load_id_mappings()
+    roster = {r['driver_number']: driver_map.get(r['name_acronym'], r['name_acronym']) for r in drivers}
+    # The source driver registry can lag a reserve substitution even when its
+    # result uses the correct number. Resolve missing entries only from our
+    # explicit current-round roster and independent number-to-driver mapping.
+    from config.driver_assets import active_driver_assets
+    active = {r['model_driver_id'] for r in active_driver_assets(round_num, year)}
+    for mapping in json.loads((SEED_DIR / 'driver_ids.json').read_bytes())['mappings']:
+        if mapping['jolpica'] in active:
+            roster.setdefault(mapping['openf1_num'], mapping['abbrev'])
+    updated = features.copy().set_index('driver_id')
+    for row in results:
+        best = row.get('duration')
+        if best is None:
+            continue  # No timed lap is missing evidence, never a slow lap.
+        assert isinstance(best, (int, float)) and np.isfinite(best) and best > 0
+        driver = roster[row['driver_number']]
+        assert driver in updated.index, f'No existing lap features for {driver}'
+        old = updated.at[driver, 'best_lap_time']
+        updated.at[driver, 'best_lap_time'] = min(old, best) if pd.notna(old) else best
+    best = updated['best_lap_time']
+    ranks = best.rank(method='min')
+    updated['pace_rank'] = ranks.fillna(ranks.max() + 1).astype(int)
+    updated['pace_delta_to_fastest'] = best - best.min()
+    updated['pace_delta_to_median'] = best - best.median()
+    updated['fp_sessions_included'] = updated['fp_sessions_included'].map(
+        lambda value: ','.join(sorted(set(str(value).split(',')) | {session_name})))
+    updated['fp_data_sources'] = updated['fp_data_sources'] + ',openf1_session_result'
+    updated['fp_coverage_note'] = (
+        f'{session_name} uses published best-lap results only; full lap data was unavailable. '
+        'Consistency, sectors, tyre and long-run evidence use the earlier practice sessions.'
+    )
+    root = Path(__file__).resolve().parents[1]
+    updated['fp_summary_sources'] = ','.join(p.resolve().relative_to(root).as_posix() for p in files)
+    return updated.reset_index()
+
+
 # -- Main ---------------------------------------------------------------------
 
 def main() -> None:
@@ -358,6 +421,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="BoxBoxF1Fantasy — Extract Features")
     parser.add_argument("--round", type=int, default=None,
                         help="Round number to process")
+    parser.add_argument('--fp-results-bundle', type=Path,
+                        help='Optional archived OpenF1 classification when full laps are unavailable')
+    parser.add_argument('--fp-results-session', choices=['FP1', 'FP2', 'FP3'], default='FP3')
     args, _ = parser.parse_known_args()
 
     print("=" * 60)
@@ -415,6 +481,12 @@ def main() -> None:
     # This is metadata, not a model feature. It lets training and inference
     # reject stale parquets produced with the old cross-session stint rules.
     features_df["fp_stint_semantics_version"] = FP_STINT_SEMANTICS_VERSION
+
+    if args.fp_results_bundle:
+        assert args.fp_results_session not in set(combined['session']), 'Full session laps already available'
+        features_df = apply_practice_results(features_df, args.fp_results_bundle,
+                                             args.fp_results_session, round_num, CURRENT_SEASON)
+        print(features_df['fp_coverage_note'].iloc[0])
 
     # Save
     output_dir = FEATURES_DIR / f"round{round_num}"

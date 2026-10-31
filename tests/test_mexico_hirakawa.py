@@ -21,7 +21,7 @@ def test_hirakawa_is_mexico_only_with_provisional_price():
         roster = {row['asset_id'] for row in active_driver_assets(round_num, year)}
         assert 'OCO' in roster and 'HIR_HAAS' not in roster
     prices, _ = load_fantasy_price_maps(round_num=21)
-    assert prices['HIR_HAAS'] == 10.1 and 'OCO' not in prices
+    assert prices['HIR_HAAS'] == 6.0 and 'OCO' not in prices
     for round_num in [22, 25]:
         future, _ = load_fantasy_price_maps(round_num=round_num)
         assert future['OCO'] == 10.1 and 'HIR_HAAS' not in future
@@ -82,7 +82,9 @@ def test_personal_session_count_is_excluded_from_training_features(tmp_path, mon
     folder.mkdir()
     pd.DataFrame({'driver_id': ['HIR'], 'fp_sessions_used': [2],
                   'driver_fp_sessions_used': [1], 'best_lap_time': [79.982],
+                  'fp_coverage_note': ['summary only'], 'fp_summary_sources': ['source.json'],
                   'fp_stint_semantics_version': [FP_STINT_SEMANTICS_VERSION]}).to_parquet(folder / 'features.parquet')
     loaded = builder.load_fp_features_for_round(2026, 21)
     assert 'driver_fp_sessions_used' not in loaded.columns
+    assert 'fp_coverage_note' not in loaded.columns and 'fp_summary_sources' not in loaded.columns
     assert loaded.iloc[0]['fp_sessions_used'] == 2

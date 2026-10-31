@@ -1647,6 +1647,10 @@ def run_predictions(
             if has_fp and "fp_data_sources" in fp_df.columns else []
         ),
         "sprint_grid_is_actual": bool(is_sprint and pred_df["sprint_grid_is_actual"].all()),
+        "fp_coverage_note": (
+            ' '.join(fp_df['fp_coverage_note'].dropna().unique())
+            if has_fp and 'fp_coverage_note' in fp_df.columns else None
+        ),
         "fp_sessions_included": (
             sorted({session.strip() for value in fp_df["fp_sessions_included"].dropna()
                     for session in str(value).split(",") if session.strip()})
@@ -1699,6 +1703,11 @@ def run_predictions(
                     'mc_calibration.json', 'dotd_overrides.json', 'grid_penalties.json',
                     'pace_overrides.json', 'overtakes.csv', 'pit_stop_priors.json']
     sources += [SEED_DIR / name for name in public_seeds]
+    if has_fp and 'fp_summary_sources' in fp_df.columns:
+        sources += [project_root / name for name in sorted({
+            name for value in fp_df['fp_summary_sources'].dropna()
+            for name in str(value).split(',') if name
+        })]
     if is_sprint and sprint_selection.path.exists():
         sources.append(sprint_selection.path)
     metadata['input_bundle'] = freeze_inference_bundle(project_root, metadata, inference_frames, sources)

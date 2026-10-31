@@ -119,6 +119,13 @@
       "date_modified": "2026-10-31T00:00:00+00:00"
     },
     {
+      "id": "https://boxboxf1fantasy.com/videos/",
+      "url": "https://boxboxf1fantasy.com/videos/",
+      "title": "F1 Fantasy Videos 2026",
+      "summary": "Latest BoxBoxF1Fantasy YouTube videos for F1 Fantasy race-week drafts, deadline strategy, top picks and data-backed team decisions. Latest: Mexican Grand Prix Final Thoughts - Get Ocon out NOW! F1 Fantasy 2026.",
+      "date_modified": "2026-10-31T00:00:00+00:00"
+    },
+    {
       "id": "https://boxboxf1fantasy.com/articles/",
       "url": "https://boxboxf1fantasy.com/articles/",
       "title": "F1 Fantasy Articles 2026",
@@ -138,13 +145,6 @@
       "title": "BoxBoxF1Fantasy Public Data 2026",
       "summary": "Public JSON endpoint index for BoxBoxF1Fantasy predictions, season summary, driver history, track data, weather, articles, videos and changelog.",
       "date_modified": "2026-10-31T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/videos/",
-      "url": "https://boxboxf1fantasy.com/videos/",
-      "title": "F1 Fantasy Videos 2026",
-      "summary": "Latest BoxBoxF1Fantasy YouTube videos for F1 Fantasy race-week drafts, deadline strategy, top picks and data-backed team decisions. Latest: Stop Chasing Budgets (Do THIS instead) - Early thoughts for the Mexico Grand Prix - F1 Fantasy 2026.",
-      "date_modified": "2026-10-28T00:00:00+00:00"
     },
     {
       "id": "https://boxboxf1fantasy.com/picks/united-states-gp-2026/",

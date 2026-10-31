@@ -187,6 +187,8 @@ def load_fp_features_for_round(
         "fp_sessions_included",
         "fp_data_sources",
         "driver_fp_sessions_used",
+        "fp_coverage_note",
+        "fp_summary_sources",
     }
     unexpected = sorted(
         c for c in df.columns

@@ -1524,7 +1524,7 @@
       }
     },
     "21": {
-      "note": "Round 21 roster and official purchase prices after Round 20; Hirakawa replaces Ocon from FP3 through race at provisional $10.1M, as approved by user.",
+      "note": "Round 21 roster and official purchase prices after Round 20; Hirakawa replaces Ocon from FP3 through race at user-supplied provisional $6.0M.",
       "availability": {
         "from_round": 21,
         "to_round": 21
@@ -1628,8 +1628,8 @@
           "starting_price": 5.0
         },
         "HIR_HAAS": {
-          "current_price": 10.1,
-          "starting_price": 10.1,
+          "current_price": 6.0,
+          "starting_price": 6.0,
           "model_driver_id": "hirakawa",
           "constructor_id": "haas",
           "availability": {
@@ -1637,7 +1637,7 @@
             "to_round": 21
           },
           "price_provisional": true,
-          "price_source": "Ocon seat price; user approved provisional price on 2026-10-31"
+          "price_source": "User supplied $6.0M on 2026-10-31; official feed still lists Ocon"
         }
       },
       "price_change_assumption": {

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-31T17:04:43.713585+02:00",
+  "generated_at": "2026-10-31T22:08:33.585280+02:00",
   "manager": {
     "id": "v13",
     "name": "V13",
@@ -2192,49 +2192,47 @@
       "race": "Mexican Grand Prix",
       "phase": "post_fp",
       "status": "corrected_before_lock",
-      "published_at": "2026-10-31T15:04:43.698139+00:00",
-      "source_generated_at": "2026-10-31T15:03:03.934216+00:00",
+      "published_at": "2026-10-31T20:08:33.534126+00:00",
+      "source_generated_at": "2026-10-31T20:07:48.370228+00:00",
       "lock_deadline": "2026-10-31T21:00:00Z",
-      "archive": "web/public/data/predictions_round21_post_fp_refresh_888c58b434cc9ec7.json",
-      "archive_sha256": "888c58b434cc9ec7ecc14c3b8d190e4917bda4174257c4f1df09e0f82f5ea419",
-      "previous_decision": "data/v13/decisions/round21_post_fp_revision4.json",
-      "previous_decision_sha256": "3fc0e529af96535c5377b74b7fac7168b16cfdae5ba8b60e8c231c88762e34a9",
+      "archive": "web/public/data/predictions_round21_post_fp_refresh_14781ab5f9859f90.json",
+      "archive_sha256": "14781ab5f9859f9087f901b40b0557dbd40ce3ba9456feb8073eaafbca324e85",
+      "previous_decision": "data/v13/decisions/round21_post_fp_revision5.json",
+      "previous_decision_sha256": "e83ff33ef33b1096668edeeb121fab67b09fea64c54d5da7fa96fd9e4d044276",
       "price_snapshot_after_round": 20,
       "drivers": [
         "LEC",
         "ANT",
         "BOR",
         "LIN",
-        "PER"
+        "STR"
       ],
       "constructors": [
         "mercedes",
         "ferrari"
       ],
-      "captain": "LEC",
+      "captain": "ANT",
       "second_boost": null,
       "chip": null,
-      "projected_points": 224.8,
-      "projected_price_gain": -0.5,
+      "projected_points": 229.9,
+      "projected_price_gain": -0.3,
       "downside_risk": 54.7,
       "team_cost": 134.3,
-      "transfers": 2,
+      "transfers": 1,
       "transfer_penalty": 0,
       "changes": {
         "drivers_out": [
-          "STR",
           "VER"
         ],
         "drivers_in": [
-          "ANT",
-          "PER"
+          "ANT"
         ],
         "constructors_out": [],
         "constructors_in": []
       },
       "chip_decision": {
         "result": "save",
-        "current_selected_team_extra_points": 58.8,
+        "current_selected_team_extra_points": 62.1,
         "largest_remaining_priors_top_two": 64.2,
         "largest_remaining_priors_round": 23,
         "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast."
@@ -2247,10 +2245,10 @@
         "negative_p5_weight": 0.75,
         "price_value_method": "horizon curve × price reliability × points realisation"
       },
-      "revision": 5,
-      "correction_reason": "Automatic live forecast refresh: 2026-10-31T15:03:03.934216+00:00 (888c58b434cc9ec7).",
-      "supersedes": "data/v13/decisions/round21_post_fp_revision4.json",
-      "supersedes_sha256": "3fc0e529af96535c5377b74b7fac7168b16cfdae5ba8b60e8c231c88762e34a9"
+      "revision": 6,
+      "correction_reason": "Automatic live forecast refresh: 2026-10-31T20:07:48.370228+00:00 (14781ab5f9859f90).",
+      "supersedes": "data/v13/decisions/round21_post_fp_revision5.json",
+      "supersedes_sha256": "e83ff33ef33b1096668edeeb121fab67b09fea64c54d5da7fa96fd9e4d044276"
     }
   },
   "labels": {
