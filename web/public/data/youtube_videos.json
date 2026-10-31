@@ -1,7 +1,14 @@
 {
-  "updated": "2026-10-30T16:42:55Z",
+  "updated": "2026-10-31T15:45:27Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "JwrQ2tvt0gU",
+      "title": "Mexican Grand Prix Final Thoughts - Get Ocon out NOW! F1 Fantasy 2026",
+      "published": "2026-10-31",
+      "thumbnail": "https://i.ytimg.com/vi/JwrQ2tvt0gU/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=JwrQ2tvt0gU"
+    },
     {
       "id": "15neXtW8g_I",
       "title": "Stop Chasing Budgets (Do THIS instead) - Early thoughts for the Mexico Grand Prix - F1 Fantasy 2026",
@@ -22,13 +29,6 @@
       "published": "2026-10-24",
       "thumbnail": "https://i.ytimg.com/vi/bnU-KMFV4zY/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=bnU-KMFV4zY"
-    },
-    {
-      "id": "shx5znPBZ48",
-      "title": "Ferrari + Mercedes is the way - FINAL THOUGHTS for the United States Grand Prix - F1 Fantasy 2026",
-      "published": "2026-10-24",
-      "thumbnail": "https://i.ytimg.com/vi/shx5znPBZ48/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=shx5znPBZ48"
     }
   ]
 }
