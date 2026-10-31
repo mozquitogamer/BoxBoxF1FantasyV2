@@ -54,5 +54,20 @@
     "LIN": {
       "places": 5
     }
+  },
+  "21": {
+    "_note": "Mexican GP post-FP2: penalties supplied by the user on 2026-10-31. Verstappen and Lawson receive one-place drops; Bortoleto receives five places; Bottas starts at the back. Qualifying points use the unpenalised classification.",
+    "VER": {
+      "places": 1
+    },
+    "LAW": {
+      "places": 1
+    },
+    "BOR": {
+      "places": 5
+    },
+    "BOT": {
+      "back_of_grid": true
+    }
   }
 }
