@@ -1,6 +1,23 @@
 {
   "articles": [
     {
+      "slug": "2026-round21-fp2-fantasy-briefing",
+      "title": "Mexican Grand Prix FP2 Fantasy briefing: what the simulations say",
+      "date": "2026-10-31",
+      "round": 21,
+      "tags": [
+        "analysis",
+        "FP2",
+        "predictions",
+        "fantasy"
+      ],
+      "content_html": "<h2>Mexican Grand Prix: the FP2 picture</h2>\n<p>\nOur post-FP2 simulation for round 21 is now live. These are <strong>average Fantasy points across the simulations</strong>, using the practice data available so far. Qualifying and the race have not happened; the numbers will change if new information arrives.\n</p>\n<h2>Leading drivers</h2>\n<ol>\n<li><strong>Kimi Antonelli</strong> — 30.1 expected points at £27.4m. The middle 90% of simulated outcomes runs from -3.2 to 50.0 points.</li>\n<li><strong>Charles Leclerc</strong> — 29.7 expected points at £24.4m. The middle 90% of simulated outcomes runs from -8.2 to 50.0 points.</li>\n<li><strong>Lando Norris</strong> — 23.1 expected points at £26.0m. The middle 90% of simulated outcomes runs from -12.2 to 48.0 points.</li>\n</ol>\n<p>\nThe wide ranges show why a high average is only part of the decision: a strong result and a difficult weekend are both possible.\n</p>\n<h2>Constructor watch</h2>\n<ul>\n<li><strong>Mercedes</strong> — 65.2 expected points; middle 90% from 27.6 to 93.0.</li>\n<li><strong>Ferrari</strong> — 58.4 expected points; middle 90% from 18.0 to 87.0.</li>\n</ul>\n<h2>A lower-cost option</h2>\n<p>\n<strong>Gabriel Bortoleto</strong> has the highest expected points among drivers priced at or below the field's median price: 4.8 points at £6.4m. That makes them a useful budget comparison, although the projection alone does not account for the rest of your team's balance.\n</p>\n<h2>Before locking your team</h2>\n<p>\nUse this as an early shortlist. Compare the current prices and uncertainty ranges on the <a href=\"/\">Drivers and Constructors pages</a>, then revisit the predictions if FP3 or other weekend information changes the outlook. The <a href=\"/data/predictions_round21_post_fp2.json\">FP2 simulation snapshot</a> behind this article is preserved. These are model estimates, not guaranteed scores.\n</p>",
+      "sources": [
+        "/data/predictions_round21_post_fp2.json",
+        "/methodology/"
+      ]
+    },
+    {
       "slug": "2026-round20-fp2-fantasy-briefing",
       "title": "United States Grand Prix FP2 Fantasy briefing: what the simulations say",
       "date": "2026-10-24",

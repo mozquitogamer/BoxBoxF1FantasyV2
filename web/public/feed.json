@@ -119,6 +119,20 @@
       "date_modified": "2026-10-31T00:00:00+00:00"
     },
     {
+      "id": "https://boxboxf1fantasy.com/articles/",
+      "url": "https://boxboxf1fantasy.com/articles/",
+      "title": "F1 Fantasy Articles 2026",
+      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
+      "date_modified": "2026-10-31T00:00:00+00:00"
+    },
+    {
+      "id": "https://boxboxf1fantasy.com/articles/2026-round21-fp2-fantasy-briefing/",
+      "url": "https://boxboxf1fantasy.com/articles/2026-round21-fp2-fantasy-briefing/",
+      "title": "Mexican Grand Prix FP2 Fantasy briefing: what the simulations say",
+      "summary": "Mexican Grand Prix: the FP2 picture Our post-FP2 simulation for round 21 is now live. These are average Fantasy points across the simulations , using the practice data available so far. Qualifying and the race have not...",
+      "date_modified": "2026-10-31T00:00:00+00:00"
+    },
+    {
       "id": "https://boxboxf1fantasy.com/data/",
       "url": "https://boxboxf1fantasy.com/data/",
       "title": "BoxBoxF1Fantasy Public Data 2026",
@@ -151,13 +165,6 @@
       "url": "https://boxboxf1fantasy.com/changelog/",
       "title": "BoxBoxF1Fantasy Changelog 2026",
       "summary": "Public release notes for BoxBoxF1Fantasy model updates, scoring fixes, data-quality improvements and feature releases. Latest: Deleted practice laps now inform pace predictions.",
-      "date_modified": "2026-10-24T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/articles/",
-      "url": "https://boxboxf1fantasy.com/articles/",
-      "title": "F1 Fantasy Articles 2026",
-      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
       "date_modified": "2026-10-24T00:00:00+00:00"
     },
     {
@@ -347,13 +354,6 @@
       "url": "https://boxboxf1fantasy.com/tools/team-compare/",
       "title": "F1 Fantasy Team Compare & Score Calculator",
       "summary": "Compare three manual F1 Fantasy teams for free, or up to three saved Pit Wall teams plus a manual alternative. Check points, budget, chips and downside.",
-      "date_modified": "2026-10-18T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/tools/transfer-planner/",
-      "url": "https://boxboxf1fantasy.com/tools/transfer-planner/",
-      "title": "F1 Fantasy Transfer Planner & Advisor",
-      "summary": "Free F1 Fantasy transfer tools: find your best one or two swaps this week, or plan transfers and chips across 2-5 upcoming rounds with a multi-week planner.",
       "date_modified": "2026-10-18T00:00:00+00:00"
     }
   ]
