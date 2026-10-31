@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-31T16:07:52.400839+02:00",
+  "generated_at": "2026-10-31T17:04:43.713585+02:00",
   "manager": {
     "id": "v13",
     "name": "V13",
@@ -2192,13 +2192,13 @@
       "race": "Mexican Grand Prix",
       "phase": "post_fp",
       "status": "corrected_before_lock",
-      "published_at": "2026-10-31T14:07:52.387837+00:00",
-      "source_generated_at": "2026-10-31T14:07:11.853313+00:00",
+      "published_at": "2026-10-31T15:04:43.698139+00:00",
+      "source_generated_at": "2026-10-31T15:03:03.934216+00:00",
       "lock_deadline": "2026-10-31T21:00:00Z",
-      "archive": "web/public/data/predictions_round21_post_fp_refresh_68c7385f04429c34.json",
-      "archive_sha256": "68c7385f04429c34acaec545f8055186afab7d11b9dbf8a7dd572b55a879f049",
-      "previous_decision": "data/v13/decisions/round21_post_fp_revision2.json",
-      "previous_decision_sha256": "97b05b3ef006550b1ebfef371a28f537c5cca04a59504a72520147c22c9a29e5",
+      "archive": "web/public/data/predictions_round21_post_fp_refresh_888c58b434cc9ec7.json",
+      "archive_sha256": "888c58b434cc9ec7ecc14c3b8d190e4917bda4174257c4f1df09e0f82f5ea419",
+      "previous_decision": "data/v13/decisions/round21_post_fp_revision4.json",
+      "previous_decision_sha256": "3fc0e529af96535c5377b74b7fac7168b16cfdae5ba8b60e8c231c88762e34a9",
       "price_snapshot_after_round": 20,
       "drivers": [
         "LEC",
@@ -2211,12 +2211,12 @@
         "mercedes",
         "ferrari"
       ],
-      "captain": "ANT",
+      "captain": "LEC",
       "second_boost": null,
       "chip": null,
-      "projected_points": 227.5,
-      "projected_price_gain": 0.1,
-      "downside_risk": 56.0,
+      "projected_points": 224.8,
+      "projected_price_gain": -0.5,
+      "downside_risk": 54.7,
       "team_cost": 134.3,
       "transfers": 2,
       "transfer_penalty": 0,
@@ -2234,7 +2234,7 @@
       },
       "chip_decision": {
         "result": "save",
-        "current_selected_team_extra_points": 59.5,
+        "current_selected_team_extra_points": 58.8,
         "largest_remaining_priors_top_two": 64.2,
         "largest_remaining_priors_round": 23,
         "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast."
@@ -2247,10 +2247,10 @@
         "negative_p5_weight": 0.75,
         "price_value_method": "horizon curve × price reliability × points realisation"
       },
-      "revision": 3,
-      "correction_reason": "Automatic live forecast refresh: 2026-10-31T14:07:11.853313+00:00 (68c7385f04429c34).",
-      "supersedes": "data/v13/decisions/round21_post_fp_revision2.json",
-      "supersedes_sha256": "97b05b3ef006550b1ebfef371a28f537c5cca04a59504a72520147c22c9a29e5"
+      "revision": 5,
+      "correction_reason": "Automatic live forecast refresh: 2026-10-31T15:03:03.934216+00:00 (888c58b434cc9ec7).",
+      "supersedes": "data/v13/decisions/round21_post_fp_revision4.json",
+      "supersedes_sha256": "3fc0e529af96535c5377b74b7fac7168b16cfdae5ba8b60e8c231c88762e34a9"
     }
   },
   "labels": {

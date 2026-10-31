@@ -2,7 +2,7 @@
   "site": "https://boxboxf1fantasy.com",
   "name": "BoxBoxF1Fantasy",
   "description": "Free F1 Fantasy 2026 predictions, race picks, lineup optimizer, transfer tools, strategy guides, public data and accuracy tracking.",
-  "generated_at": "2026-10-31T14:09:11.423756+00:00",
+  "generated_at": "2026-10-31T15:07:21.157726+00:00",
   "language": "en",
   "current_round": 21,
   "current_race": "Mexican Grand Prix",
@@ -242,26 +242,26 @@
       "type": "driver_hub"
     },
     {
-      "url": "https://boxboxf1fantasy.com/drivers/kimi-antonelli/",
-      "path": "/drivers/kimi-antonelli/",
-      "title": "Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Kimi Antonelli F1 Fantasy 2026 projection: 29.9 expected points for the Mexican GP, $27.4M price, value rating and confidence range.",
-      "h1": "Kimi Antonelli F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
       "url": "https://boxboxf1fantasy.com/drivers/charles-leclerc/",
       "path": "/drivers/charles-leclerc/",
       "title": "Charles Leclerc F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Charles Leclerc F1 Fantasy 2026 projection: 29.6 expected points for the Mexican GP, $24.4M price, value rating and confidence range.",
+      "description": "Charles Leclerc F1 Fantasy 2026 projection: 29.4 expected points for the Mexican GP, $24.4M price, value rating and confidence range.",
       "h1": "Charles Leclerc F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/kimi-antonelli/",
+      "path": "/drivers/kimi-antonelli/",
+      "title": "Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Kimi Antonelli F1 Fantasy 2026 projection: 29.4 expected points for the Mexican GP, $27.4M price, value rating and confidence range.",
+      "h1": "Kimi Antonelli F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/lando-norris/",
       "path": "/drivers/lando-norris/",
       "title": "Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Lando Norris F1 Fantasy 2026 projection: 22.9 expected points for the Mexican GP, $26.0M price, value rating and confidence range.",
+      "description": "Lando Norris F1 Fantasy 2026 projection: 23.0 expected points for the Mexican GP, $26.0M price, value rating and confidence range.",
       "h1": "Lando Norris F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -285,7 +285,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/lewis-hamilton/",
       "path": "/drivers/lewis-hamilton/",
       "title": "Lewis Hamilton F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Lewis Hamilton F1 Fantasy 2026 projection: 15.5 expected points for the Mexican GP, $24.7M price, value rating and confidence range.",
+      "description": "Lewis Hamilton F1 Fantasy 2026 projection: 15.4 expected points for the Mexican GP, $24.7M price, value rating and confidence range.",
       "h1": "Lewis Hamilton F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -293,7 +293,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/oscar-piastri/",
       "path": "/drivers/oscar-piastri/",
       "title": "Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Oscar Piastri F1 Fantasy 2026 projection: 13.3 expected points for the Mexican GP, $23.3M price, value rating and confidence range.",
+      "description": "Oscar Piastri F1 Fantasy 2026 projection: 13.1 expected points for the Mexican GP, $23.3M price, value rating and confidence range.",
       "h1": "Oscar Piastri F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -301,63 +301,63 @@
       "url": "https://boxboxf1fantasy.com/drivers/isack-hadjar/",
       "path": "/drivers/isack-hadjar/",
       "title": "Isack Hadjar F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Isack Hadjar F1 Fantasy 2026 projection: 11.5 expected points for the Mexican GP, $16.5M price, value rating and confidence range.",
+      "description": "Isack Hadjar F1 Fantasy 2026 projection: 11.3 expected points for the Mexican GP, $16.5M price, value rating and confidence range.",
       "h1": "Isack Hadjar F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/liam-lawson/",
-      "path": "/drivers/liam-lawson/",
-      "title": "Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Liam Lawson F1 Fantasy 2026 projection: 9.9 expected points for the Mexican GP, $10.5M price, value rating and confidence range.",
-      "h1": "Liam Lawson F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/",
       "path": "/drivers/gabriel-bortoleto/",
       "title": "Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Gabriel Bortoleto F1 Fantasy 2026 projection: 9.9 expected points for the Mexican GP, $6.4M price, value rating and confidence range.",
+      "description": "Gabriel Bortoleto F1 Fantasy 2026 projection: 10.2 expected points for the Mexican GP, $6.4M price, value rating and confidence range.",
       "h1": "Gabriel Bortoleto F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/liam-lawson/",
+      "path": "/drivers/liam-lawson/",
+      "title": "Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Liam Lawson F1 Fantasy 2026 projection: 9.7 expected points for the Mexican GP, $10.5M price, value rating and confidence range.",
+      "h1": "Liam Lawson F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/ryo-hirakawa/",
+      "path": "/drivers/ryo-hirakawa/",
+      "title": "Ryo Hirakawa F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Ryo Hirakawa F1 Fantasy 2026 projection: 7.8 expected points for the Mexican GP, $10.1M price, value rating and confidence range.",
+      "h1": "Ryo Hirakawa F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/arvid-lindblad/",
       "path": "/drivers/arvid-lindblad/",
       "title": "Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Arvid Lindblad F1 Fantasy 2026 projection: 7.3 expected points for the Mexican GP, $10.6M price, value rating and confidence range.",
+      "description": "Arvid Lindblad F1 Fantasy 2026 projection: 7.0 expected points for the Mexican GP, $10.6M price, value rating and confidence range.",
       "h1": "Arvid Lindblad F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/esteban-ocon/",
-      "path": "/drivers/esteban-ocon/",
-      "title": "Esteban Ocon F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Esteban Ocon F1 Fantasy 2026 projection: 3.9 expected points for the Mexican GP, $10.1M price, value rating and confidence range.",
-      "h1": "Esteban Ocon F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/carlos-sainz/",
-      "path": "/drivers/carlos-sainz/",
-      "title": "Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Carlos Sainz F1 Fantasy 2026 projection: 2.6 expected points for the Mexican GP, $8.2M price, value rating and confidence range.",
-      "h1": "Carlos Sainz F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/pierre-gasly/",
       "path": "/drivers/pierre-gasly/",
       "title": "Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Pierre Gasly F1 Fantasy 2026 projection: 2.4 expected points for the Mexican GP, $9.6M price, value rating and confidence range.",
+      "description": "Pierre Gasly F1 Fantasy 2026 projection: 2.3 expected points for the Mexican GP, $9.6M price, value rating and confidence range.",
       "h1": "Pierre Gasly F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/carlos-sainz/",
+      "path": "/drivers/carlos-sainz/",
+      "title": "Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Carlos Sainz F1 Fantasy 2026 projection: 1.9 expected points for the Mexican GP, $8.2M price, value rating and confidence range.",
+      "h1": "Carlos Sainz F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/franco-colapinto/",
       "path": "/drivers/franco-colapinto/",
       "title": "Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Franco Colapinto F1 Fantasy 2026 projection: 2.0 expected points for the Mexican GP, $8.2M price, value rating and confidence range.",
+      "description": "Franco Colapinto F1 Fantasy 2026 projection: 1.6 expected points for the Mexican GP, $8.2M price, value rating and confidence range.",
       "h1": "Franco Colapinto F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -365,7 +365,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/nico-hulkenberg/",
       "path": "/drivers/nico-hulkenberg/",
       "title": "Nico Hulkenberg F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Nico Hulkenberg F1 Fantasy 2026 projection: 1.8 expected points for the Mexican GP, $7.2M price, value rating and confidence range.",
+      "description": "Nico Hulkenberg F1 Fantasy 2026 projection: 1.3 expected points for the Mexican GP, $7.2M price, value rating and confidence range.",
       "h1": "Nico Hulkenberg F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -373,7 +373,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/oliver-bearman/",
       "path": "/drivers/oliver-bearman/",
       "title": "Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Oliver Bearman F1 Fantasy 2026 projection: 0.3 expected points for the Mexican GP, $6.2M price, value rating and confidence range.",
+      "description": "Oliver Bearman F1 Fantasy 2026 projection: -0.1 expected points for the Mexican GP, $6.2M price, value rating and confidence range.",
       "h1": "Oliver Bearman F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -381,7 +381,7 @@
       "url": "https://boxboxf1fantasy.com/drivers/alex-albon/",
       "path": "/drivers/alex-albon/",
       "title": "Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Alex Albon F1 Fantasy 2026 projection: -1.2 expected points for the Mexican GP, $4.0M price, value rating and confidence range.",
+      "description": "Alex Albon F1 Fantasy 2026 projection: -1.8 expected points for the Mexican GP, $4.0M price, value rating and confidence range.",
       "h1": "Alex Albon F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
@@ -389,32 +389,40 @@
       "url": "https://boxboxf1fantasy.com/drivers/sergio-perez/",
       "path": "/drivers/sergio-perez/",
       "title": "Sergio Perez F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Sergio Perez F1 Fantasy 2026 projection: -2.2 expected points for the Mexican GP, $3.0M price, value rating and confidence range.",
+      "description": "Sergio Perez F1 Fantasy 2026 projection: -2.7 expected points for the Mexican GP, $3.0M price, value rating and confidence range.",
       "h1": "Sergio Perez F1 Fantasy 2026",
-      "type": "driver_projection_page"
-    },
-    {
-      "url": "https://boxboxf1fantasy.com/drivers/lance-stroll/",
-      "path": "/drivers/lance-stroll/",
-      "title": "Lance Stroll F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Lance Stroll F1 Fantasy 2026 projection: -3.2 expected points for the Mexican GP, $3.0M price, value rating and confidence range.",
-      "h1": "Lance Stroll F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/valtteri-bottas/",
       "path": "/drivers/valtteri-bottas/",
       "title": "Valtteri Bottas F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Valtteri Bottas F1 Fantasy 2026 projection: -3.8 expected points for the Mexican GP, $3.0M price, value rating and confidence range.",
+      "description": "Valtteri Bottas F1 Fantasy 2026 projection: -3.2 expected points for the Mexican GP, $3.0M price, value rating and confidence range.",
       "h1": "Valtteri Bottas F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/lance-stroll/",
+      "path": "/drivers/lance-stroll/",
+      "title": "Lance Stroll F1 Fantasy 2026: Points, Price & Value | BoxBox",
+      "description": "Lance Stroll F1 Fantasy 2026 projection: -3.6 expected points for the Mexican GP, $3.0M price, value rating and confidence range.",
+      "h1": "Lance Stroll F1 Fantasy 2026",
       "type": "driver_projection_page"
     },
     {
       "url": "https://boxboxf1fantasy.com/drivers/fernando-alonso/",
       "path": "/drivers/fernando-alonso/",
       "title": "Fernando Alonso F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Fernando Alonso F1 Fantasy 2026 projection: -4.2 expected points for the Mexican GP, $6.0M price, value rating and confidence range.",
+      "description": "Fernando Alonso F1 Fantasy 2026 projection: -4.1 expected points for the Mexican GP, $6.0M price, value rating and confidence range.",
       "h1": "Fernando Alonso F1 Fantasy 2026",
+      "type": "driver_projection_page"
+    },
+    {
+      "url": "https://boxboxf1fantasy.com/drivers/esteban-ocon/",
+      "path": "/drivers/esteban-ocon/",
+      "title": "Esteban Ocon: current driver status | BoxBox",
+      "description": "Replaces Ocon for Mexico FP3, qualifying and race. $10.1M is a provisional seat price; the official Fantasy feed still lists Ocon.",
+      "h1": "Esteban Ocon",
       "type": "driver_projection_page"
     },
     {
@@ -429,7 +437,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/mercedes/",
       "path": "/constructors/mercedes/",
       "title": "Mercedes F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Mercedes F1 Fantasy 2026 constructor projection: 64.9 expected points for the Mexican GP, $34.0M price, pit-stop points and value rating.",
+      "description": "Mercedes F1 Fantasy 2026 constructor projection: 64.3 expected points for the Mexican GP, $34.0M price, pit-stop points and value rating.",
       "h1": "Mercedes F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -437,7 +445,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/ferrari/",
       "path": "/constructors/ferrari/",
       "title": "Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Ferrari F1 Fantasy 2026 constructor projection: 58.2 expected points for the Mexican GP, $28.5M price, pit-stop points and value rating.",
+      "description": "Ferrari F1 Fantasy 2026 constructor projection: 57.8 expected points for the Mexican GP, $28.5M price, pit-stop points and value rating.",
       "h1": "Ferrari F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -445,7 +453,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/mclaren/",
       "path": "/constructors/mclaren/",
       "title": "McLaren F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "McLaren F1 Fantasy 2026 constructor projection: 48.4 expected points for the Mexican GP, $32.7M price, pit-stop points and value rating.",
+      "description": "McLaren F1 Fantasy 2026 constructor projection: 48.2 expected points for the Mexican GP, $32.7M price, pit-stop points and value rating.",
       "h1": "McLaren F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -453,7 +461,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/red-bull/",
       "path": "/constructors/red-bull/",
       "title": "Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Red Bull F1 Fantasy 2026 constructor projection: 44.8 expected points for the Mexican GP, $33.0M price, pit-stop points and value rating.",
+      "description": "Red Bull F1 Fantasy 2026 constructor projection: 44.7 expected points for the Mexican GP, $33.0M price, pit-stop points and value rating.",
       "h1": "Red Bull F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -461,7 +469,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/racing-bulls/",
       "path": "/constructors/racing-bulls/",
       "title": "Racing Bulls F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Racing Bulls F1 Fantasy 2026 constructor projection: 27.6 expected points for the Mexican GP, $17.1M price, pit-stop points and value rating.",
+      "description": "Racing Bulls F1 Fantasy 2026 constructor projection: 27.4 expected points for the Mexican GP, $17.1M price, pit-stop points and value rating.",
       "h1": "Racing Bulls F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -469,7 +477,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/audi/",
       "path": "/constructors/audi/",
       "title": "Audi F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Audi F1 Fantasy 2026 constructor projection: 17.3 expected points for the Mexican GP, $11.0M price, pit-stop points and value rating.",
+      "description": "Audi F1 Fantasy 2026 constructor projection: 17.5 expected points for the Mexican GP, $11.0M price, pit-stop points and value rating.",
       "h1": "Audi F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -477,7 +485,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/alpine/",
       "path": "/constructors/alpine/",
       "title": "Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Alpine F1 Fantasy 2026 constructor projection: 10.8 expected points for the Mexican GP, $18.5M price, pit-stop points and value rating.",
+      "description": "Alpine F1 Fantasy 2026 constructor projection: 10.4 expected points for the Mexican GP, $18.5M price, pit-stop points and value rating.",
       "h1": "Alpine F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -485,7 +493,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/haas/",
       "path": "/constructors/haas/",
       "title": "Haas F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Haas F1 Fantasy 2026 constructor projection: 7.7 expected points for the Mexican GP, $12.6M price, pit-stop points and value rating.",
+      "description": "Haas F1 Fantasy 2026 constructor projection: 9.6 expected points for the Mexican GP, $12.6M price, pit-stop points and value rating.",
       "h1": "Haas F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -493,7 +501,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/williams/",
       "path": "/constructors/williams/",
       "title": "Williams F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Williams F1 Fantasy 2026 constructor projection: 4.3 expected points for the Mexican GP, $12.0M price, pit-stop points and value rating.",
+      "description": "Williams F1 Fantasy 2026 constructor projection: 3.4 expected points for the Mexican GP, $12.0M price, pit-stop points and value rating.",
       "h1": "Williams F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },
@@ -509,7 +517,7 @@
       "url": "https://boxboxf1fantasy.com/constructors/cadillac/",
       "path": "/constructors/cadillac/",
       "title": "Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox",
-      "description": "Cadillac F1 Fantasy 2026 constructor projection: -6.5 expected points for the Mexican GP, $3.0M price, pit-stop points and value rating.",
+      "description": "Cadillac F1 Fantasy 2026 constructor projection: -6.2 expected points for the Mexican GP, $3.0M price, pit-stop points and value rating.",
       "h1": "Cadillac F1 Fantasy Constructor 2026",
       "type": "constructor_projection_page"
     },

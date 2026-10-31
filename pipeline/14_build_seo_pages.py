@@ -2218,7 +2218,8 @@ def render_driver_page(
     race_url = f'/picks/{slugify(race)}/'
     cta = '<div class="btnrow"><a class="cta" href="/#drivers">See live driver cards &rarr;</a><a class="cta" href="/#optimizer" style="background:#1b212c;">Test in Optimizer &rarr;</a></div>'
     stats = (
-        '<table><tbody>'
+        (f'<p class="meta">{esc(driver["asset_note"])}</p>' if driver.get("asset_note") else '')
+        + '<table><tbody>'
         f'<tr><th>Current team</th><td><a href="{team_url}">{esc(team)}</a></td></tr>'
         f'<tr><th>Current price</th><td>${driver.get("current_price", 0):.1f}M</td></tr>'
         f'<tr><th>Expected points</th><td>{driver.get("expected_points", 0):.1f}</td></tr>'
@@ -5926,6 +5927,28 @@ def main() -> None:
         rel_paths.append(f"drivers/{slug}/")
         if current_lastmod:
             lastmods[f"drivers/{slug}/"] = current_lastmod
+
+    # Retain an outgoing driver's URL, but retire its stale current forecast.
+    # A later round with that driver active regenerates the normal page above.
+    for replacement in drivers_sorted:
+        outgoing_id = replacement.get("replaces_asset_id")
+        if not outgoing_id or outgoing_id in drivers_by_id or outgoing_id not in drivers_seed:
+            continue
+        name = _driver_name(drivers_seed[outgoing_id])
+        slug = plain_slug(name)
+        target = f'/drivers/{plain_slug(replacement["name"])}/'
+        title = f'{name}: current driver status | BoxBox'
+        note = replacement.get("asset_note", f'{replacement["name"]} replaces {name} for this round.')
+        body = (f'<h1>{esc(name)}</h1><p class="lede">{esc(note)}</p>'
+                f'<p>{esc(name)} is excluded from the current {esc(current.get("race", "race"))} predictions.</p>'
+                f'<p><a href="{target}">View {esc(replacement["name"])}\'s forecast &rarr;</a></p>')
+        out_dir = drivers_dir / slug
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "index.html").write_text(
+            page_head(title, note, f'{SITE}/drivers/{slug}/', '') + body + FOOTER, encoding="utf-8")
+        rel_paths.append(f'drivers/{slug}/')
+        if current_lastmod:
+            lastmods[f'drivers/{slug}/'] = current_lastmod
 
     constructors_dir = WEB / "constructors"
     constructors_dir.mkdir(parents=True, exist_ok=True)

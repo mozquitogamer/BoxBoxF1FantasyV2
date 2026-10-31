@@ -82,6 +82,32 @@ POST_R14_SUBSTITUTION_ASSETS: tuple[dict[str, Any], ...] = (
     },
 )
 
+# User-reported replacement for the remainder of Mexico, starting at FP3.
+# HIR_HAAS is an internal asset: the official game feed still lists Ocon.
+# Keep Hirakawa's own FP/history identity and never alias Ocon's results.
+MEXICO_R21_SUBSTITUTE: dict[str, Any] = {
+    "asset_id": "HIR_HAAS",
+    "driver_id": "HIR_HAAS",
+    "driver_abbrev": "HIR_HAAS",
+    "model_driver_id": "hirakawa",
+    "constructor_id": "haas",
+    "first_name": "Ryo",
+    "last_name": "Hirakawa",
+    "number": 50,
+    "availability": {"from_round": 21, "to_round": 21},
+    "effective_from_session": "FP3",
+    "replaces_asset_id": "OCO",
+    "legacy_asset_ids": [],
+    "confidence_multiplier": 0.68,
+    "mc_noise_multiplier": 1.35,
+    "asset_context": "substitute_cold_start_same_constructor",
+    "price_provisional": True,
+    "asset_note": (
+        "Replaces Ocon for Mexico FP3, qualifying and race. "
+        "$10.1M is a provisional seat price; the official Fantasy feed still lists Ocon."
+    ),
+}
+
 
 def _load_seed_drivers() -> list[dict[str, Any]]:
     with (SEED_DIR / "drivers.json").open(encoding="utf-8") as handle:
@@ -139,6 +165,9 @@ def active_driver_assets(
         return assets
 
     if int(round_num) >= 17:
+        if int(round_num) == 21:
+            assets = [row for row in assets if row["asset_id"] != "OCO"]
+            assets.append(copy.deepcopy(MEXICO_R21_SUBSTITUTE))
         if int(round_num) == 17:
             for row in assets:
                 if row["asset_id"] in {"HAD", "LAW"}:
@@ -168,6 +197,17 @@ def active_driver_asset_map(round_num: int, year: int = CURRENT_SEASON) -> dict[
             )
         result[model_id] = asset
     return result
+
+
+def known_driver_assets() -> list[dict[str, Any]]:
+    """All known identities, including reserves absent from older rounds.
+
+    This catalog is for historical lookup only; current lineup eligibility
+    must continue to use active_driver_assets.
+    """
+    return _base_assets() + [copy.deepcopy(row) for row in POST_R14_SUBSTITUTION_ASSETS] + [
+        copy.deepcopy(MEXICO_R21_SUBSTITUTE)
+    ]
 
 
 def active_constructor_driver_assets(
@@ -251,8 +291,13 @@ def roster_provenance(round_num: int, year: int = CURRENT_SEASON) -> dict[str, A
     """Metadata suitable for prediction/website sidecars and audit logs."""
     is_substitution = year == 2026 and 14 <= int(round_num) <= 16
     is_return = year == 2026 and int(round_num) == 17
+    is_mexico_substitution = year == 2026 and int(round_num) == 21
     source = (
-        OFFICIAL_ROSTER_SOURCE if is_substitution else
+        {"result": "User-reported Ocon replacement by Hirakawa from Mexico FP3 through the race",
+         "reported_at": "2026-10-31", "effective_from_session": "FP3",
+         "fantasy_asset_status": "internal_provisional",
+         "price_status": "user_approved_provisional_10.1M"}
+        if is_mexico_substitution else OFFICIAL_ROSTER_SOURCE if is_substitution else
         {"result": "Hadjar returns to Red Bull; Lawson returns to Racing Bulls; "
                    "Tsunoda inactive from R17", "reported_at": "2026-09-23"}
         if is_return else {"result": "canonical_seed_roster"}
@@ -260,7 +305,7 @@ def roster_provenance(round_num: int, year: int = CURRENT_SEASON) -> dict[str, A
     return {
         "round": int(round_num),
         "year": int(year),
-        "override_active": bool(is_substitution or is_return),
+        "override_active": bool(is_substitution or is_return or is_mexico_substitution),
         "source": copy.deepcopy(source),
         "active_assets": [
             {

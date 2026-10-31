@@ -1524,9 +1524,182 @@
       }
     },
     "21": {
-      "note": "Round 21 roster and official purchase prices after Round 20",
+      "note": "Round 21 roster and official purchase prices after Round 20; Hirakawa replaces Ocon from FP3 through race at provisional $10.1M, as approved by user.",
       "availability": {
         "from_round": 21,
+        "to_round": 21
+      },
+      "source": {
+        "url": "https://fantasy.formula1.com/feeds/drivers/19_en.json",
+        "accessed_at": "2026-10-26"
+      },
+      "inactive_driver_ids": [
+        "OCO"
+      ],
+      "drivers": {
+        "LAW": {
+          "current_price": 10.5,
+          "starting_price": 9.7,
+          "model_driver_id": "lawson",
+          "constructor_id": "racing_bulls",
+          "availability": {
+            "from_round": 18,
+            "to_round": null
+          }
+        },
+        "RUS": {
+          "current_price": 27.6,
+          "starting_price": 27.4
+        },
+        "VER": {
+          "current_price": 28.5,
+          "starting_price": 27.7
+        },
+        "NOR": {
+          "current_price": 26.0,
+          "starting_price": 27.2
+        },
+        "PIA": {
+          "current_price": 23.3,
+          "starting_price": 25.5
+        },
+        "ANT": {
+          "current_price": 27.4,
+          "starting_price": 23.2
+        },
+        "LEC": {
+          "current_price": 24.4,
+          "starting_price": 22.8
+        },
+        "HAM": {
+          "current_price": 24.7,
+          "starting_price": 22.5
+        },
+        "HAD": {
+          "current_price": 16.5,
+          "starting_price": 15.1
+        },
+        "GAS": {
+          "current_price": 9.6,
+          "starting_price": 12.0
+        },
+        "SAI": {
+          "current_price": 8.2,
+          "starting_price": 12.0
+        },
+        "ALB": {
+          "current_price": 4.0,
+          "starting_price": 10.5
+        },
+        "ALO": {
+          "current_price": 6.0,
+          "starting_price": 10.0
+        },
+        "BEA": {
+          "current_price": 6.2,
+          "starting_price": 7.4
+        },
+        "LIN": {
+          "current_price": 10.6,
+          "starting_price": 7.0
+        },
+        "COL": {
+          "current_price": 8.2,
+          "starting_price": 6.2
+        },
+        "STR": {
+          "current_price": 3.0,
+          "starting_price": 7.0
+        },
+        "BOR": {
+          "current_price": 6.4,
+          "starting_price": 6.5
+        },
+        "PER": {
+          "current_price": 3.0,
+          "starting_price": 7.0
+        },
+        "HUL": {
+          "current_price": 7.2,
+          "starting_price": 6.0
+        },
+        "BOT": {
+          "current_price": 3.0,
+          "starting_price": 5.0
+        },
+        "HIR_HAAS": {
+          "current_price": 10.1,
+          "starting_price": 10.1,
+          "model_driver_id": "hirakawa",
+          "constructor_id": "haas",
+          "availability": {
+            "from_round": 21,
+            "to_round": 21
+          },
+          "price_provisional": true,
+          "price_source": "Ocon seat price; user approved provisional price on 2026-10-31"
+        }
+      },
+      "price_change_assumption": {
+        "round": 21,
+        "driver_ids": [
+          "HAD",
+          "LAW"
+        ],
+        "history_from_round": 17,
+        "note": "Round 21 returning-driver price forecasts use the recorded scoring history from Round 17 onwards. F1 Fantasy has not published its substitution pricing rule."
+      },
+      "constructors": {
+        "mercedes": {
+          "current_price": 34.0,
+          "starting_price": 29.3
+        },
+        "mclaren": {
+          "current_price": 32.7,
+          "starting_price": 28.9
+        },
+        "red_bull": {
+          "current_price": 33.0,
+          "starting_price": 28.2
+        },
+        "ferrari": {
+          "current_price": 28.5,
+          "starting_price": 23.3
+        },
+        "alpine": {
+          "current_price": 18.5,
+          "starting_price": 12.5
+        },
+        "racing_bulls": {
+          "current_price": 17.1,
+          "starting_price": 6.3
+        },
+        "williams": {
+          "current_price": 12.0,
+          "starting_price": 12.0
+        },
+        "haas": {
+          "current_price": 12.6,
+          "starting_price": 8.0
+        },
+        "audi": {
+          "current_price": 11.0,
+          "starting_price": 5.5
+        },
+        "aston_martin": {
+          "current_price": 5.1,
+          "starting_price": 9.5
+        },
+        "cadillac": {
+          "current_price": 3.0,
+          "starting_price": 5.0
+        }
+      }
+    },
+    "22": {
+      "note": "Round 21 roster and official purchase prices after Round 20",
+      "availability": {
+        "from_round": 22,
         "to_round": null
       },
       "source": {

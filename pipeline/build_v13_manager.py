@@ -32,7 +32,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from config.settings import SEED_DIR, WEB_DATA_DIR
-from config.driver_assets import active_driver_assets
+from config.driver_assets import active_driver_assets, known_driver_assets
 from config.fantasy_prices import load_fantasy_price_data
 from pipeline import simulate_fantasy_season_strategies as season
 
@@ -156,7 +156,7 @@ def _official_driver_points(
     rows = official[str(round_num)]["drivers"]
     if asset_id in rows:
         return float(rows[asset_id])
-    for asset in active_driver_assets(14):
+    for asset in known_driver_assets():
         if asset["asset_id"] != asset_id and asset_id not in asset.get("legacy_asset_ids", []):
             continue
         candidates = [asset.get("model_driver_id"), *asset.get("legacy_asset_ids", [])]

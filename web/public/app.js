@@ -2463,11 +2463,12 @@ function driverCard(d, i) {
             <div class="driver-info">
                 <h3>${d.name}</h3>
                 <div class="driver-team" style="color:${team.color}">${team.name}</div>
-                <div class="card-cost" title="Current F1 Fantasy price">$${d.current_price.toFixed(1)}M</div>
+                <div class="card-cost" title="${d.price_provisional ? 'Provisional seat price; official replacement price pending' : 'Current F1 Fantasy price'}">$${d.current_price.toFixed(1)}M${d.price_provisional ? ' (provisional)' : ''}</div>
             </div>
             <div class="driver-number">${d.number}</div>
         </div>
         ${renderWeatherBadges()}
+        ${d.asset_note ? `<div class="grid-penalty-notice">${escapeHtml(d.asset_note)}</div>` : ''}
         ${gridPenalty ? `<div class="grid-penalty-notice" title="Known race-start penalty; qualifying fantasy points still use the qualifying result.">⚠ ${gridPenalty} · starts P${d.predicted_grid ?? 22}</div>` : ""}
 
         <div class="points-badge" title="Projected uses the predicted qualifying and finishing order, with expected overtakes and DNF risk. Simulation average is the mean of 10,000 simulated weekends. It can be higher or lower than projected; the P5–P95 range below shows uncertainty.">
@@ -2576,7 +2577,7 @@ function driverRow(d, i) {
         <td class="num">${d.confidence}%</td>
         <td class="num"><span class="risk-badge ${riskClass}">${d.risk}</span></td>
         <td class="num">${d.expected_overtakes}</td>
-        <td class="num">$${d.current_price.toFixed(1)}M</td>
+        <td class="num" title="${d.price_provisional ? 'Provisional seat price; official replacement price pending' : 'Current F1 Fantasy price'}">$${d.current_price.toFixed(1)}M${d.price_provisional ? ' (provisional)' : ''}</td>
         <td class="num" style="${pcColor}">${pcText}</td>
         <td class="num">${d.value_score.toFixed(2)}</td>
         <td class="num" style="color:var(--red, #ef4444)" title="Score below ${P} pts this round and the price takes its biggest drop (${fmtChg(tc.terrible)})">${terribleCell}</td>

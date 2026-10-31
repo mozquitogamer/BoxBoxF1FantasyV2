@@ -488,8 +488,9 @@ def calculate_confidence(
         scores += np.clip(lap_counts.values / 30.0, 0, 1) * 20
 
     # FP sessions (up to +10)
-    if "fp_sessions_used" in df.columns:
-        sessions = df["fp_sessions_used"].fillna(0)
+    session_column = "driver_fp_sessions_used" if "driver_fp_sessions_used" in df.columns else "fp_sessions_used"
+    if session_column in df.columns:
+        sessions = df[session_column].fillna(0)
         scores += np.clip(sessions.values / 3.0, 0, 1) * 10
 
     # Prior data richness: non-NaN Jolpica priors (up to +10)
@@ -1694,7 +1695,7 @@ def run_predictions(
     sources += [quali_path, race_model_used, TRAINED_DIR / 'feature_columns.json',
                 TRAINED_DIR / 'model_metadata.json', fp_model_path,
                 JOLPICA_MODEL_ROWS_DIR / 'all_model_rows.parquet', WEB_DATA_DIR / 'weather.json']
-    public_seeds = ['races.json', 'drivers.json', 'constructors.json', 'fantasy_prices.json',
+    public_seeds = ['races.json', 'drivers.json', 'driver_ids.json', 'constructors.json', 'fantasy_prices.json',
                     'mc_calibration.json', 'dotd_overrides.json', 'grid_penalties.json',
                     'pace_overrides.json', 'overtakes.csv', 'pit_stop_priors.json']
     sources += [SEED_DIR / name for name in public_seeds]

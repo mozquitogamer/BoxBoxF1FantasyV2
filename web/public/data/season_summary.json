@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-10-31T14:07:12.052314+00:00",
+  "generated_at": "2026-10-31T15:03:05.762161+00:00",
   "rounds": [
     {
       "round": 1,
@@ -315,14 +315,6 @@
       "price_change": -1.2,
       "price_trend": "down"
     },
-    "OCO": {
-      "name": "Esteban Ocon",
-      "constructor": "haas",
-      "current_price": 10.1,
-      "starting_price": 8.0,
-      "price_change": 2.1,
-      "price_trend": "up"
-    },
     "LIN": {
       "name": "Arvid Lindblad",
       "constructor": "racing_bulls",
@@ -386,6 +378,14 @@
       "starting_price": 5.0,
       "price_change": -2.0,
       "price_trend": "down"
+    },
+    "HIR_HAAS": {
+      "name": "Ryo Hirakawa",
+      "constructor": "haas",
+      "current_price": 10.1,
+      "starting_price": 10.1,
+      "price_change": 0.0,
+      "price_trend": "stable"
     }
   },
   "constructor_prices": {

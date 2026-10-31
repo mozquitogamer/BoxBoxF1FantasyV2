@@ -267,6 +267,10 @@ def extract_driver_features(
 
     for driver_id, group in all_laps.groupby("driver_id"):
         row = {"driver_id": driver_id}
+        # Personal participation is confidence metadata. The trained
+        # fp_sessions_used feature retains its existing weekend-wide meaning.
+        if "session" in group.columns:
+            row["driver_fp_sessions_used"] = group["session"].nunique()
 
         # Constructor
         if "constructor_id" in group.columns:

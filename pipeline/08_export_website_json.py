@@ -377,6 +377,9 @@ def build_predictions_json(round_num: int) -> dict | None:
             "name": f"{info.get('first_name', '')} {info.get('last_name', '')}".strip() or abbrev,
             "constructor": info.get("constructor_id", row.get("constructor_id", "")),
             "number": info.get("number", 0),
+            "asset_note": info.get("asset_note", ""),
+            "price_provisional": bool(info.get("price_provisional", False)),
+            "replaces_asset_id": info.get("replaces_asset_id"),
             "predicted_quali": int(row["predicted_quali_position"]),
             "predicted_grid": int(row.get(
                 "predicted_grid_position", row["predicted_quali_position"]
