@@ -18,6 +18,13 @@
         return QUALI_POSITION_POINTS[Number(position)] || 0;
     }
 
+    function bankedQualifyingPoints(driver) {
+        if (driver?.projected_points_quali != null && Number.isFinite(Number(driver.projected_points_quali))) {
+            return Number(driver.projected_points_quali);
+        }
+        return driver?.qualifying_status === 'DSQ' ? -5 : qualifyingPoints(driver?.predicted_quali);
+    }
+
     function racePoints({
         gridPosition,
         finishPosition,
@@ -78,7 +85,7 @@
         const shortfall = Math.max(0, incomingPrice - available);
         const multiplier = boosted ? 2 : 1;
 
-        const bankedQuali = qualifyingPoints(outDriver.predicted_quali);
+        const bankedQuali = bankedQualifyingPoints(outDriver);
         const holdTotal = bankedQuali + outgoingPoints.total * multiplier;
         const switchTotal = bankedQuali + incomingPoints.total * multiplier;
         const scenarioDelta = switchTotal - holdTotal;
@@ -126,7 +133,7 @@
             const quali = Number(driver.predicted_quali);
             const grid = Number(driver.predicted_grid ?? quali);
             const gridPenalty = gridPenaltyText(driver);
-            const qPoints = qualifyingPoints(quali);
+            const qPoints = bankedQualifyingPoints(driver);
             const projectedRace = projectedRacePoints(driver);
 
             doc.getElementById(`${prefix}Name`).textContent = driver.name;
@@ -136,7 +143,7 @@
                 ? `P${grid} · ${gridPenalty}`
                 : `P${grid}`;
             doc.getElementById(`${prefix}Facts`).innerHTML = `
-        <div><span>Qualifying</span><strong>P${quali} · ${qLabel}</strong></div>
+        <div><span>Qualifying</span><strong>${driver.qualifying_status === 'DSQ' ? 'DSQ' : `P${quali}`} · ${qLabel}</strong></div>
         <div><span>Race start</span><strong>${gridText}</strong></div>
         <div><span>Model finish</span><strong>P${driver.predicted_finish}</strong></div>
         <div><span>Projected race points</span><strong>${projectedRace.toFixed(1)}</strong></div>

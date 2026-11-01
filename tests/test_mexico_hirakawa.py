@@ -6,14 +6,14 @@ from config.driver_assets import active_driver_assets, active_constructor_driver
 from config.fantasy_prices import load_fantasy_price_maps
 
 
-def test_hirakawa_is_mexico_only_with_provisional_price():
+def test_hirakawa_is_mexico_only_with_confirmed_price():
     mexico = {row['asset_id']: row for row in active_driver_assets(21)}
     assert len(mexico) == 22
     assert 'OCO' not in mexico
     hir = mexico['HIR_HAAS']
     assert hir['model_driver_id'] == 'hirakawa'
     assert hir['effective_from_session'] == 'FP3'
-    assert hir['price_provisional']
+    assert not hir['price_provisional']
     assert hir['legacy_asset_ids'] == []
     assert hir['confidence_multiplier'] < 1 and hir['mc_noise_multiplier'] > 1
     assert set(active_constructor_driver_assets(21)['haas']) == {'BEA', 'HIR_HAAS'}
@@ -52,7 +52,7 @@ def test_export_and_simulation_resolve_the_replacement_to_haas():
         assert len(roster) == 22 and 'OCO' not in roster
         assert roster['HIR_HAAS']['constructor_id'] == 'haas'
         assert roster['HIR_HAAS']['first_name'] == 'Ryo'
-        assert roster['HIR_HAAS']['price_provisional']
+        assert not roster['HIR_HAAS']['price_provisional']
 
 
 def test_v13_reserve_has_no_historical_points_from_outgoing_driver():

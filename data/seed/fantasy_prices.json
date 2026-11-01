@@ -1524,7 +1524,7 @@
       }
     },
     "21": {
-      "note": "Round 21 roster and official purchase prices after Round 20; Hirakawa replaces Ocon from FP3 through race at user-supplied provisional $6.0M.",
+      "note": "Round 21 roster and official purchase prices after Round 20; Hirakawa replaces Ocon from FP3 through race at official $6.0M.",
       "availability": {
         "from_round": 21,
         "to_round": 21
@@ -1636,8 +1636,8 @@
             "from_round": 21,
             "to_round": 21
           },
-          "price_provisional": true,
-          "price_source": "User supplied $6.0M on 2026-10-31; official feed still lists Ocon"
+          "price_provisional": false,
+          "price_source": "Official Fantasy feed 19_en.json, PlayerId 11167, verified 2026-11-01"
         }
       },
       "price_change_assumption": {

@@ -381,6 +381,7 @@ def build_predictions_json(round_num: int) -> dict | None:
             "price_provisional": bool(info.get("price_provisional", False)),
             "replaces_asset_id": info.get("replaces_asset_id"),
             "predicted_quali": int(row["predicted_quali_position"]),
+            "qualifying_status": row.get("qualifying_status", "classified"),
             "predicted_grid": int(row.get(
                 "predicted_grid_position", row["predicted_quali_position"]
             )),
@@ -972,7 +973,7 @@ def main():
         # Re-exporting actuals must not make an old forecast look newly simulated.
         if metadata.get("round") == round_num and metadata.get("generated_at"):
             predictions["simulation_generated_at"] = metadata["generated_at"]
-        if (phase == "post_fp" and metadata.get("phase") == "post_fp"
+        if (phase in {"post_fp", "post_quali"} and metadata.get("phase") == phase
                 and metadata.get("round") == round_num):
             predictions["fp_sessions_included"] = metadata.get("fp_sessions_included", [])
             predictions["fp_data_sources"] = metadata.get("fp_data_sources", [])

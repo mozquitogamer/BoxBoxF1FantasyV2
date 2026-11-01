@@ -1,0 +1,13 @@
+const assert = require('node:assert/strict');
+const {compare} = require('../web/public/final-fix.js');
+const outgoing = {predicted_quali:22, qualifying_status:'DSQ', projected_points_quali:-5, projected_points_race:12, current_price:8};
+const incoming = {predicted_quali:1, projected_points_quali:10, projected_points_race:22, current_price:10};
+const result = compare({outDriver:outgoing, inDriver:incoming, bank:2, boosted:true, outgoingPoints:{total:12}, incomingPoints:{total:22}});
+assert.equal(result.bankedQuali,-5);
+assert.equal(result.holdTotal,19);
+assert.equal(result.switchTotal,39);
+assert.equal(result.modelHold,19);
+assert.equal(result.modelSwitch,39);
+assert.equal(result.modelDelta,20);
+assert.equal(result.affordable,true);
+console.log('Final Fix retains outgoing DSQ points for hold and switch.');

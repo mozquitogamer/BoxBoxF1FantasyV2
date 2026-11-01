@@ -534,6 +534,11 @@ def _load_actual_quali(
     otherwise. Used to detect post-FP vs post-quali phase and, when available,
     to feed actual quali positions into the race model.
     """
+    from config.post_quali import load_post_quali_results
+    official = load_post_quali_results(round_num, year)
+    if official:
+        return {did: row['position'] for did, row in official['drivers'].items()}
+
     # Method 1: normalized jolpica CSV
     norm_path = JOLPICA_MODEL_ROWS_DIR.parent / "normalized" / str(year) / "qualifying_results.csv"
     if norm_path.exists():
@@ -955,6 +960,7 @@ def build_race_grid_features(
     use_actual_quali: bool,
     grid_penalties: dict,
     jolpica_to_abbrev: dict[str, str],
+    official_grid: dict | None = None,
 ) -> pd.DataFrame:
     """Set race-model qualifying features and the separate penalised race grid."""
     result = pred_df.copy()
@@ -979,6 +985,8 @@ def build_race_grid_features(
     penalized_grid = apply_grid_penalties(
         unpenalized_grid, grid_abbrevs.tolist(), grid_penalties
     )
+    if use_actual_quali and official_grid:
+        penalized_grid = result['driver_id'].map(official_grid).astype(int).to_numpy()
     result["predicted_grid_position"] = penalized_grid
     result["grid_penalty_places"] = [
         int(grid_penalties.get(str(abbrev).upper(), {}).get("places", 0))
@@ -1116,6 +1124,7 @@ PREDICTION_COLUMNS = [
     "driver_number", "constructor_id", "asset_context",
     "asset_legacy_ids", "asset_confidence_multiplier", "asset_mc_noise_multiplier",
     "predicted_quali_position", "actual_quali_position",
+    "actual_quali_points", "actual_quali_is_dsq",
     "predicted_grid_position", "grid_penalty_places", "grid_back_of_grid",
     "predicted_race_position", "confidence",
     "predicted_quali_raw", "predicted_race_raw",
@@ -1292,6 +1301,8 @@ def run_predictions(
     # in post-quali phase and can use both the actual quali + race_model.
     # Otherwise we're in post-FP and should use race_model_fp.json if available.
     actual_quali_map = _load_actual_quali(year, round_num, abbrev_to_jolpica)
+    from config.post_quali import load_post_quali_results
+    official_quali = load_post_quali_results(round_num, year)
     is_post_quali = len(actual_quali_map) > 0
     # Preserve the actual qualifying classification as an explicit downstream
     # signal. The model's qualifying prediction remains available for phase
@@ -1299,6 +1310,11 @@ def run_predictions(
     pred_df["actual_quali_position"] = (
         pred_df["driver_id"].map(actual_quali_map) if is_post_quali else np.nan
     )
+    if official_quali:
+        pred_df['actual_quali_points'] = pred_df['driver_id'].map(
+            {did: row['points'] for did, row in official_quali['drivers'].items()})
+        pred_df['actual_quali_is_dsq'] = pred_df['driver_id'].map(
+            {did: row['status'] == 'DSQ' for did, row in official_quali['drivers'].items()})
 
     # Load feature column lists
     with open(feature_cols_path) as f:
@@ -1372,6 +1388,7 @@ def run_predictions(
         pred_df, actual_quali_map,
         is_post_quali and not use_fp_race_model,
         grid_penalties, jolpica_to_abbrev,
+        official_grid={did: row['grid'] for did, row in official_quali.get('drivers', {}).items()},
     )
 
     for col in race_feature_list:
@@ -1666,6 +1683,7 @@ def run_predictions(
         "quali_model_sha256_16": _file_sha256(quali_path),
         "race_model_sha256_16": _file_sha256(race_model_used),
         "grid_penalties": grid_penalties,
+        "official_qualifying": official_quali or None,
         "grid_anchor": {
             "candidate_weight": round(float(anchor_candidate_w), 4),
             "applied_weight": round(float(anchor_w), 4),
@@ -1693,16 +1711,17 @@ def run_predictions(
                     'config/fantasy_scoring.py', 'config/track_classifications.py',
                     'config/track_similarity.py', 'config/grid_penalties.py',
                     'config/circuit_priors.py', 'config/driver_assets.py',
-                    'config/fantasy_prices.py', 'config/seed_roster.py',
+                    'config/fantasy_prices.py', 'config/seed_roster.py', 'config/post_quali.py',
                     'config/pitstop_priors.py', 'config/team_driver_ratings.py', 'config/tyre_deg.py']
     sources = [project_root / name for name in source_names]
     sources += [quali_path, race_model_used, TRAINED_DIR / 'feature_columns.json',
                 TRAINED_DIR / 'model_metadata.json', fp_model_path,
                 JOLPICA_MODEL_ROWS_DIR / 'all_model_rows.parquet', WEB_DATA_DIR / 'weather.json']
     public_seeds = ['races.json', 'drivers.json', 'driver_ids.json', 'constructors.json', 'fantasy_prices.json',
-                    'mc_calibration.json', 'dotd_overrides.json', 'grid_penalties.json',
+                    'mc_calibration.json', 'dotd_overrides.json', 'grid_penalties.json', 'post_quali_results.json',
                     'pace_overrides.json', 'overtakes.csv', 'pit_stop_priors.json']
     sources += [SEED_DIR / name for name in public_seeds]
+    sources += [project_root / name for name in official_quali.get('source_files', [])]
     if has_fp and 'fp_summary_sources' in fp_df.columns:
         sources += [project_root / name for name in sorted({
             name for value in fp_df['fp_summary_sources'].dropna()

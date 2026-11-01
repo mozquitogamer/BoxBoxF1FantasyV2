@@ -101,10 +101,10 @@ MEXICO_R21_SUBSTITUTE: dict[str, Any] = {
     "confidence_multiplier": 0.68,
     "mc_noise_multiplier": 1.35,
     "asset_context": "substitute_cold_start_same_constructor",
-    "price_provisional": True,
+    "price_provisional": False,
     "asset_note": (
         "Replaces Ocon for Mexico FP3, qualifying and race. "
-        "$6.0M is the user-supplied provisional price; the official Fantasy feed still lists Ocon."
+        "$6.0M confirmed in the official Fantasy feed on 2026-11-01."
     ),
 }
 
@@ -295,8 +295,8 @@ def roster_provenance(round_num: int, year: int = CURRENT_SEASON) -> dict[str, A
     source = (
         {"result": "User-reported Ocon replacement by Hirakawa from Mexico FP3 through the race",
          "reported_at": "2026-10-31", "effective_from_session": "FP3",
-         "fantasy_asset_status": "internal_provisional",
-         "price_status": "user_supplied_provisional_6.0M"}
+         "fantasy_asset_status": "official_player_11167",
+         "price_status": "official_confirmed_6.0M"}
         if is_mexico_substitution else OFFICIAL_ROSTER_SOURCE if is_substitution else
         {"result": "Hadjar returns to Red Bull; Lawson returns to Racing Bulls; "
                    "Tsunoda inactive from R17", "reported_at": "2026-09-23"}

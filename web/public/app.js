@@ -2503,7 +2503,7 @@ function driverCard(d, i) {
 
         <div class="card-stats">
             <div class="stat" title="Predicted qualifying position">
-                <div class="stat-value">P${d.predicted_quali}</div>
+                <div class="stat-value">${d.qualifying_status === 'DSQ' ? 'DSQ' : `P${d.predicted_quali}`}</div>
                 <div class="stat-label">Quali</div>
             </div>
             <div class="stat" title="Predicted race finish position">
@@ -2573,7 +2573,7 @@ function driverRow(d, i) {
         <td><span class="team-dot" style="background:${team.color}"></span>${team.name}</td>
         <td class="num"><strong>${projectedPoints.toFixed(1)}</strong></td>
         <td class="num"><strong>${d.expected_points.toFixed(1)}</strong></td>
-        <td class="num">P${d.predicted_quali}</td>
+        <td class="num">${d.qualifying_status === 'DSQ' ? 'DSQ' : `P${d.predicted_quali}`}</td>
         <td class="num">P${d.predicted_finish}</td>
         <td class="num">${d.confidence}%</td>
         <td class="num"><span class="risk-badge ${riskClass}">${d.risk}</span></td>

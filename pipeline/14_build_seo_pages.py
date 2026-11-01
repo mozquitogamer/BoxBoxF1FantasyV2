@@ -97,6 +97,10 @@ def load_seed_json(name: str):
     return load_json(ROOT / "data" / "seed" / name)
 
 
+def qualifying_label(driver) -> str:
+    return 'DSQ' if driver.get('qualifying_status') == 'DSQ' else f"P{driver.get('predicted_quali', '-')}"
+
+
 def esc(x) -> str:
     return html.escape(str(x), quote=True)
 
@@ -488,7 +492,7 @@ def current_captain_picks_html(pred: dict) -> str:
         f'<td class="num">{(_pts(d) * 3):.1f}</td>'
         f'<td class="num">{d.get("mc_total_p5", 0):.1f}&ndash;{d.get("mc_total_p95", 0):.1f}</td>'
         f'<td class="num">{float(d.get("dnf_probability") or 0) * 100:.0f}%</td>'
-        f'<td class="num">P{d.get("predicted_quali", "-")}&rarr;P{d.get("predicted_finish", "-")}</td></tr>'
+        f'<td class="num">{qualifying_label(d)}&rarr;P{d.get("predicted_finish", "-")}</td></tr>'
         for d in drivers
     )
     leader = drivers[0]
@@ -525,7 +529,7 @@ def current_value_picks_html(pred: dict) -> str:
             f'<td class="num">${_price(d):.1f}M</td>'
             f'<td class="num">{_pts(d):.1f}</td>'
             f'<td class="num">{d.get("value_score", 0):.2f}</td>'
-            f'<td class="num">P{d.get("predicted_quali", "-")}&rarr;P{d.get("predicted_finish", "-")}</td></tr>'
+            f'<td class="num">{qualifying_label(d)}&rarr;P{d.get("predicted_finish", "-")}</td></tr>'
             for d in items
         )
 
@@ -843,7 +847,7 @@ def write_homepage_prediction_snapshot(current: dict) -> None:
             f'<div class="points-badge">{projected:.1f}<span class="points-label">projected</span>'
             f'<span class="points-adj"><span class="points-adj-val">{expected:.1f}</span><span class="points-adj-label">Sim. avg</span></span></div>'
             '<div class="card-stats">'
-            f'<div class="stat"><div class="stat-value">P{esc(d.get("predicted_quali", "-"))}</div><div class="stat-label">Quali</div></div>'
+            f'<div class="stat"><div class="stat-value">{qualifying_label(d)}</div><div class="stat-label">Quali</div></div>'
             f'<div class="stat"><div class="stat-value">P{esc(d.get("predicted_finish", "-"))}</div><div class="stat-label">Race</div></div>'
             f'<div class="stat"><div class="stat-value">{esc(d.get("confidence", "-"))}%</div><div class="stat-label">Confidence</div></div>'
             f'{range_html}</div></article>'
@@ -1382,7 +1386,7 @@ def render_race_page(
             f'<tr><td class="num">{i}</td><td><a href="{driver_url}">{esc(d["name"])}</a></td>'
             f'<td><a href="{team_url}">{esc(team)}</a></td>'
             f'<td class="num">${d.get("current_price",0):.1f}M</td>'
-            f'<td class="num">P{d.get("predicted_quali","-")}&rarr;P{d.get("predicted_finish","-")}</td>'
+            f'<td class="num">{qualifying_label(d)}&rarr;P{d.get("predicted_finish","-")}</td>'
             f'<td class="num">{d.get("expected_points",0):.1f}</td>'
             f'<td class="num">{d.get("value_score",0):.2f}</td></tr>'
         )
@@ -1705,7 +1709,7 @@ def render_future_race_page(pred: dict, horizon_generated_at: str = "") -> tuple
             f'<tr><td class="num">{i}</td><td><a href="{driver_url}">{esc(d["name"])}</a></td>'
             f'<td><a href="{constructor_url}">{esc(constructor_name)}</a></td>'
             f'<td class="num">${d.get("current_price", 0):.1f}M</td>'
-            f'<td class="num">P{d.get("predicted_quali", "-")}&rarr;P{d.get("predicted_finish", "-")}</td>'
+            f'<td class="num">{qualifying_label(d)}&rarr;P{d.get("predicted_finish", "-")}</td>'
             f'<td class="num">{d.get("expected_points", 0):.1f}</td>'
             f'<td class="num">{d.get("value_score", 0):.2f}</td></tr>'
         )
@@ -2121,7 +2125,7 @@ def render_drivers_hub(current: dict) -> str:
             f'<td class="num">${d.get("current_price", 0):.1f}M</td>'
             f'<td class="num">{d.get("expected_points", 0):.1f}</td>'
             f'<td class="num">{d.get("value_score", 0):.2f}</td>'
-            f'<td class="num">P{d.get("predicted_quali", "-")}&rarr;P{d.get("predicted_finish", "-")}</td></tr>'
+            f'<td class="num">{qualifying_label(d)}&rarr;P{d.get("predicted_finish", "-")}</td></tr>'
         )
 
     faqs = [
@@ -2228,7 +2232,7 @@ def render_driver_page(
         f'<tr><th>Expected points</th><td>{driver.get("expected_points", 0):.1f}</td></tr>'
         f'<tr><th>Projected points</th><td>{driver.get("projected_points", 0):.1f}</td></tr>'
         f'<tr><th>Value rating</th><td>{driver.get("value_score", 0):.2f} PPM (#{value_rank} of {len(value_order)})</td></tr>'
-        f'<tr><th>Predicted quali</th><td>P{driver.get("predicted_quali", "-")}</td></tr>'
+        f'<tr><th>Predicted quali</th><td>{qualifying_label(driver)}</td></tr>'
         f'<tr><th>Predicted finish</th><td>P{driver.get("predicted_finish", "-")}</td></tr>'
         f'<tr><th>90% confidence range</th><td>{floor:.1f} to {ceiling:.1f} pts</td></tr>'
         f'<tr><th>DNF probability</th><td>{dnf_pct:.0f}%</td></tr>'
@@ -2345,7 +2349,7 @@ def render_driver_page(
         f"<h1>{esc(name)} F1 Fantasy {YEAR}</h1>"
         f'<p class="lede">{esc(name)} is ranked #{rank} by expected F1 Fantasy points for the <strong>{esc(race)}</strong>, with a current projection of <strong>{driver.get("expected_points", 0):.1f} points</strong>.</p>'
         f'<p class="meta">{esc(phase_label.title())} forecast &middot; Price ${driver.get("current_price", 0):.1f}M &middot; '
-        f'<a href="{team_url}">{esc(team)}</a> &middot; predicted P{driver.get("predicted_quali", "-")} qualifying to P{driver.get("predicted_finish", "-")} race finish.</p>'
+        f'<a href="{team_url}">{esc(team)}</a> &middot; predicted {qualifying_label(driver)} qualifying to P{driver.get("predicted_finish", "-")} race finish.</p>'
         + cta
         + "<h2>Current projection</h2>"
         + stats
@@ -2354,7 +2358,7 @@ def render_driver_page(
         f'while the risk-adjusted simulation mean is {float(driver.get("expected_points", 0)):.1f}.</p>'
         + "<h2>Where the projection comes from</h2>"
         + scoring
-        + f'<p>The model expects {esc(name)} to move from P{driver.get("predicted_quali", "-")} in qualifying to '
+        + f'<p>The model expects {esc(name)} to move from {qualifying_label(driver)} in qualifying to '
         f'P{driver.get("predicted_finish", "-")} in the race, with {float(driver.get("expected_overtakes", 0)):.1f} expected overtakes. '
         'These are forecast components, not guaranteed scoring events.</p>'
         + "<h2>Risk and upside</h2>"
@@ -2528,7 +2532,7 @@ def render_constructor_page(
         f'{esc(driver.get("name", driver.get("driver_id", "Driver")))}</a></td>'
         f'<td class="num">${float(driver.get("current_price", 0)):.1f}M</td>'
         f'<td class="num">{float(driver.get("expected_points", 0)):.1f}</td>'
-        f'<td class="num">P{driver.get("predicted_quali", "-")}&rarr;P{driver.get("predicted_finish", "-")}</td>'
+        f'<td class="num">{qualifying_label(driver)}&rarr;P{driver.get("predicted_finish", "-")}</td>'
         f'<td class="num">{float(driver.get("dnf_probability", 0)) * 100:.0f}%</td></tr>'
         for driver in driver_objects if driver
     )

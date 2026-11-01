@@ -59,6 +59,20 @@ def test_reinstated_lap_is_restored(inputs):
     assert not build_practice_laps(bundle, session, 20).set_index("lap_number").loc[3,"lap_deleted"]
 
 
+def test_missing_registry_driver_keeps_real_practice_laps(inputs):
+    bundle, session = inputs
+    bundle['drivers'] = []
+    for kind in ['laps', 'stints', 'session_result']:
+        for row in bundle[kind]:
+            row['driver_number'] = 30
+    for row in bundle['race_control']:
+        row['message'] = row['message'].replace('CAR 1 ', 'CAR 30 ')
+    frame = build_practice_laps(bundle, session, 21)
+    assert frame['driver_id'].unique().tolist() == ['LAW']
+    assert frame['lap_time'].tolist() == [90, 89, 92]
+    assert frame['lap_deleted'].tolist() == [False, True, False]
+
+
 def test_official_classification_rejects_an_unfiltered_invalid_fast_lap(inputs):
     bundle, session = inputs
     bundle["race_control"] = []

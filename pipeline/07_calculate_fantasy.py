@@ -475,6 +475,8 @@ def calculate_driver_fantasy(
 
         # -- Qualifying points --
         quali_pts = calc_qualifying_points_driver(scoring_quali)
+        if pd.notna(row.get('actual_quali_points')):
+            quali_pts = float(row['actual_quali_points'])
 
         # -- Race points --
         race_position_pts = RACE_POSITION_POINTS.get(pred_race, 0)
@@ -565,6 +567,8 @@ def calculate_driver_fantasy(
             "model_driver_id": row.get("model_driver_id", driver_id),
             "asset_id": row.get("asset_id", driver_abbrev),
             "driver_abbrev": driver_abbrev,
+            "qualifying_status": "DSQ" if row.get('actual_quali_is_dsq', False) else "classified",
+            "qualifying_locked": pd.notna(row.get('actual_quali_position')),
             "driver_name": row.get("driver_name", ""),
             "constructor_id": constructor_id,
             "asset_context": row.get("asset_context", "canonical_season_asset"),
@@ -606,6 +610,10 @@ def calculate_constructor_fantasy(
 ) -> pd.DataFrame:
     """Calculate expected fantasy points for constructors."""
     _, constructor_prices = load_fantasy_prices(round_num)
+    from config.post_quali import load_post_quali_results
+    banked = (load_post_quali_results(round_num).get('constructors', {})
+              if 'qualifying_locked' in driver_fantasy and driver_fantasy['qualifying_locked'].all()
+              else {})
 
     with open(SEED_DIR / "constructors.json") as f:
         constructors = json.load(f)["constructors"]
@@ -642,6 +650,9 @@ def calculate_constructor_fantasy(
         else:
             quali_bonus = 0
         total_quali = combined_quali + quali_bonus
+        if cid in banked:
+            total_quali = banked[cid]
+            quali_bonus = total_quali - combined_quali
 
         # Race: combined race points from both drivers
         # Note: driver expected_race_pts already includes position change bonus,

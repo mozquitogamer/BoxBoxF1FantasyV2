@@ -39,6 +39,16 @@ def build_practice_laps(bundle: dict, session: dict, round_num: int) -> pd.DataF
     builder = importlib.import_module("pipeline.02_build_laps")
     driver_map, constructor_map = builder.load_id_mappings()
     drivers = {row["driver_number"]: row for row in bundle["drivers"]}
+    # The API roster may lose a driver after a later qualifying DSQ. Keep their
+    # real practice laps, resolving missing identities from the active roster.
+    from config.driver_assets import active_driver_assets
+    active = {row['model_driver_id']: row for row in active_driver_assets(round_num, session['year'])}
+    for mapping in json.loads((SEED_DIR / 'driver_ids.json').read_bytes())['mappings']:
+        asset = active.get(mapping['jolpica'])
+        if asset:
+            drivers.setdefault(mapping['openf1_num'], {
+                'name_acronym': mapping['abbrev'], 'team_name': asset['constructor_id'],
+            })
     deleted: dict[int, set[float]] = {}
     deleted_laps: set[tuple[int, int]] = set()
     for message in sorted(bundle["race_control"], key=lambda row: row["date"]):

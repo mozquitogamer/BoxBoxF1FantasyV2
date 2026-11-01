@@ -926,11 +926,14 @@ def calc_driver_fantasy_points_sim(
     sprint_fastest_lap: bool = False,
     sprint_dnf: bool = False,
     dnf_severity: float = DNF_EXPECTED_PENALTY_FACTOR,
+    quali_points_override: float | None = None,
 ) -> dict:
     """Calculate full fantasy points for a single driver in one simulation."""
 
     # Qualifying points
     quali_pts = QUALIFYING_POSITION_POINTS.get(quali_pos, 0)
+    if quali_points_override is not None:
+        quali_pts = float(quali_points_override)
 
     # Race points
     if is_dnf:
@@ -1045,6 +1048,7 @@ def run_simulations(
     # grid are known facts. Freeze both so the remaining uncertainty is race-only.
     fixed_quali_positions = None
     fixed_grid_positions = None
+    fixed_quali_points = None
     if "actual_quali_position" in pred_df.columns:
         actual_quali = pd.to_numeric(
             pred_df["actual_quali_position"], errors="coerce"
@@ -1055,6 +1059,8 @@ def run_simulations(
                 pred_df["predicted_grid_position"], errors="raise"
             ).astype(int).to_numpy()
             print("  Post-quali mode: actual qualifying and starting grid fixed across sims")
+            if 'actual_quali_points' in pred_df.columns and pred_df['actual_quali_points'].notna().all():
+                fixed_quali_points = pred_df['actual_quali_points'].to_numpy(dtype=float)
 
     # Manual DOTD overrides: map jolpica driver_id -> sim index -> forced prob.
     # In each sim, with this probability we assign DOTD to that driver directly
@@ -1399,6 +1405,7 @@ def run_simulations(
                 sprint_fastest_lap=(i == sprint_fl_idx) if is_sprint else False,
                 sprint_dnf=sprint_dnf_mask[i] if is_sprint else False,
                 dnf_severity=dnf_sev,
+                quali_points_override=fixed_quali_points[i] if fixed_quali_points is not None else None,
             )
 
             all_total_pts[sim, i] = result["total_pts"]
@@ -1580,7 +1587,8 @@ def run_simulations(
 def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
                            constructors_info: dict, constructor_prices: dict,
                            sim_arrays=None, pitstop_priors=None,
-                           n_sims=DEFAULT_SIMULATIONS, seed=DEFAULT_SEED) -> list[dict]:
+                           n_sims=DEFAULT_SIMULATIONS, seed=DEFAULT_SEED,
+                           banked_quali=None) -> list[dict]:
     """Aggregate driver MC results into constructor-level statistics.
 
     Constructor F1 Fantasy scoring (2026):
@@ -1663,6 +1671,9 @@ def aggregate_constructors(driver_results: list[dict], drivers_info: dict,
                 q1 = all_quali_pos[sim, d1_idx]
                 q2 = all_quali_pos[sim, d2_idx]
                 quali_bonus = calc_constructor_quali_bonus_from_positions(q1, q2)
+                if banked_quali and cid in banked_quali:
+                    quali_bonus = (banked_quali[cid] - sim_arrays['all_quali_pts'][sim, d1_idx]
+                                   - sim_arrays['all_quali_pts'][sim, d2_idx])
 
                 quali_bonus_arr[sim] = quali_bonus
                 constructor_pts[sim] = d1_pts + d2_pts + quali_bonus
@@ -2041,12 +2052,16 @@ def main() -> None:
     print(f"  Loaded pit stop priors for {len(pitstop_priors)} teams")
 
     # Aggregate constructors (per-iteration simulation with pit stops)
+    from config.post_quali import load_post_quali_results
+    banked_quali = (load_post_quali_results(args.round, args.year).get('constructors', {})
+                    if results['simulation_params']['qualifying_locked'] else {})
     constructor_results = aggregate_constructors(
         results["drivers"], drivers_info, constructors_info, constructor_prices,
         sim_arrays=results.get("_sim_arrays"),
         pitstop_priors=pitstop_priors,
         n_sims=args.simulations,
         seed=args.seed,
+        banked_quali=banked_quali,
     )
 
     from pipeline.prediction_replay import freeze_simulation_inputs
@@ -2061,6 +2076,7 @@ def main() -> None:
              'dotd_overrides': dotd_overrides, 'driver_prices': driver_prices,
              'constructor_prices': constructor_prices, 'drivers': drivers_info,
              'constructors': constructors_info, 'pitstop_priors': pitstop_priors,
+             'banked_quali': banked_quali,
              'overtake_history': load_overtake_history(),
              'mechanical_shares': load_mechanical_shares(pred_df['driver_id'].tolist()).tolist()})
         if simulation_path:
