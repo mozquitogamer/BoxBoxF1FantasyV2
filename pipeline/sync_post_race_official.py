@@ -168,11 +168,15 @@ def save_seeds(round_num, next_round, snapshot):
         for group, entries in snapshot['roster'].items():
             frozen = completed_overlay.setdefault(group, {})
             for asset_id, row in entries.items():
-                frozen[asset_id] = {**copy.deepcopy(prices[group][asset_id]), **frozen.get(asset_id, {}),
+                frozen[asset_id] = {**copy.deepcopy(prices[group].get(asset_id, {})), **frozen.get(asset_id, {}),
                                     'current_price': number(row['Value'], f'{asset_id} weekend price')}
         overrides[str(round_num)] = completed_overlay
         for group, entries in new_prices.items():
-            if set(entries) != set(prices[group]):
+            if group == 'drivers':
+                # A validated round roster may replace a canonical season asset.
+                prices[group] = {asset_id: copy.deepcopy(completed_overlay[group][asset_id])
+                                 for asset_id in entries}
+            elif set(entries) != set(prices[group]):
                 raise PendingData(f'{group} price assets need review')
             for asset_id, price in entries.items():
                 prices[group][asset_id]['current_price'] = price
@@ -182,7 +186,9 @@ def save_seeds(round_num, next_round, snapshot):
         candidates = [(int(key), value) for key, value in prices.get('round_overrides', {}).items()
                       if int(key) <= next_round]
         if candidates:
-            overlay = copy.deepcopy(max(candidates, key=lambda item: item[0])[1])
+            # Carry the validated completed roster, not a speculative future
+            # overlay that may still contain the outgoing driver.
+            overlay = copy.deepcopy(completed_overlay)
             overlay['availability'] = {'from_round': next_round, 'to_round': None}
             overlay['source'] = {'url': feed_url(next_round), 'accessed_at': now}
             for group in ['drivers', 'constructors']:
@@ -231,7 +237,8 @@ def reconcile_actuals(round_num):
     actual = calculator.calculate_actual_fantasy_points(round_num)
     if actual is None:
         raise PendingData('Computed actuals are missing')
-    assets = {a['asset_id'].split('_')[0]: a for a in active_driver_assets(round_num)}
+    assets = {key: a for a in active_driver_assets(round_num)
+              for key in {a['asset_id'], a['asset_id'].split('_')[0]}}
     corrections = []
     sprint_races = calculator.load_jolpica_json(CURRENT_SEASON, round_num, 'sprint.json') or {}
     sprint_results = sprint_races.get('MRData', {}).get('RaceTable', {}).get('Races', [])
@@ -254,7 +261,7 @@ def reconcile_actuals(round_num):
             sprint_overtakes = number(official.get('SprintPoints') or 0, 'sprint points') - base
             if sprint_overtakes < 0 or not float(sprint_overtakes).is_integer():
                 raise PendingData('Cannot reconcile official sprint breakdown')
-        corrections.append({'driver_id': asset['model_driver_id'], 'round': round_num,
+        corrections.append({'driver_id': asset['model_driver_id'], 'round': round_num, 'round_numbering': 'internal',
                             'overtakes_made': int(overtakes), 'positions_gained': max(0, driver['positions_gained']),
                             'positions_lost': max(0, -driver['positions_gained']), 'sprint_positions_gained': 0,
                             'sprint_positions_lost': 0, 'sprint_overtakes': int(sprint_overtakes)})
@@ -270,7 +277,8 @@ def reconcile_actuals(round_num):
         official = snapshot['roster']['constructors'][cid]
         members = [driver_map[constructor[key]] for key in ['driver_1', 'driver_2']]
         constructor['quali_points'] = sum(d['quali_points'] for d in members)
-        constructor['quali_bonus'] = number(official['QualifyingPoints'], 'constructor qualifying') - constructor['quali_points']
+        quali_dsq = sum(-5 for d in members if d.get('quali_no_time') or d.get('is_quali_dsq'))
+        constructor['quali_bonus'] = number(official['QualifyingPoints'], 'constructor qualifying') - constructor['quali_points'] - quali_dsq
         constructor['race_points'] = sum(d['race_points'] - d['dotd_points'] for d in members)
         # Constructor race DSQ penalties are already recorded by the calculator.
         dsq = sum(-20 for d in members if d.get('is_dsq'))
@@ -285,7 +293,9 @@ def reconcile_actuals(round_num):
     csv_path = SEED_DIR / 'overtakes.csv'
     with csv_path.open(newline='', encoding='utf-8') as handle:
         reader = csv.DictReader(handle)
-        fields = reader.fieldnames
+        fields = list(reader.fieldnames)
+        if "round_numbering" not in fields:
+            fields.append("round_numbering")
         rows = [row for row in reader if int(row['round']) != round_num]
     with csv_path.open('w', newline='', encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)

@@ -51,7 +51,8 @@ def load_race_results(year: int, round_num: int) -> dict | None:
     if not path.exists():
         return None
     with open(path) as f:
-        data = json.load(f)
+        from config.official_results import load_result_json
+        data = load_result_json(path)
     races = data.get("MRData", {}).get("RaceTable", {}).get("Races", [])
     return races[0] if races else None
 
@@ -62,7 +63,8 @@ def load_sprint_results(year: int, round_num: int) -> dict | None:
     if not path.exists():
         return None
     with open(path) as f:
-        data = json.load(f)
+        from config.official_results import load_result_json
+        data = load_result_json(path)
     races = data.get("MRData", {}).get("RaceTable", {}).get("Races", [])
     return races[0] if races else None
 
@@ -73,7 +75,8 @@ def load_pitstops(year: int, round_num: int) -> list[dict]:
     if not path.exists():
         return []
     with open(path) as f:
-        data = json.load(f)
+        from config.official_results import load_result_json
+        data = load_result_json(path)
     races = data.get("MRData", {}).get("RaceTable", {}).get("Races", [])
     if not races:
         return []
@@ -430,6 +433,9 @@ def run_post_race_analysis(round_num: int, year: int = CURRENT_SEASON) -> dict:
     jolpica_to_abbrev, abbrev_to_name = load_driver_map()
     constructor_names = load_constructor_map()
     driver_constructors = load_driver_constructors()
+    from config.driver_assets import active_driver_assets
+    driver_constructors.update({a["asset_id"].split("_")[0]: a["constructor_id"]
+                                for a in active_driver_assets(round_num, year)})
 
     # Load race info
     with open(SEED_DIR / "races.json") as f:

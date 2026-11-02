@@ -151,7 +151,8 @@ def load_jolpica_json(year: int, round_num: int, filename: str) -> Optional[dict
     if not path.exists():
         return None
     with open(path) as f:
-        return json.load(f)
+        from config.official_results import load_result_json
+        return load_result_json(path)
 
 
 def load_post_race_analysis(round_num: int) -> Optional[dict]:
@@ -220,7 +221,12 @@ def load_seed_overtakes(year: int, internal_round: int) -> tuple[dict, dict]:
     j2a = {m["jolpica"]: m["abbrev"] for m in ids["mappings"]}
 
     df = pd.read_csv(path)
-    df = df[df["round"] == seed_round].dropna(subset=["overtakes_made"])
+    if "round_numbering" in df.columns:
+        explicit = df[(df["round_numbering"] == "internal") & (df["round"] == internal_round)]
+        df = explicit if not explicit.empty else df[(df["round_numbering"] != "internal") & (df["round"] == seed_round)]
+    else:
+        df = df[df["round"] == seed_round]
+    df = df.dropna(subset=["overtakes_made"])
     if df.empty:
         return {}, {}
 
@@ -540,6 +546,8 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
     # -- Load qualifying --
     quali_data = load_jolpica_json(year, round_num, "qualifying.json")
     quali_map = parse_qualifying(quali_data) if quali_data else {}
+    from config.post_quali import load_post_quali_results
+    official_quali = load_post_quali_results(round_num, year).get("drivers", {})
 
     # -- Load pitstops --
     # Prefer OpenF1 stop_duration (actual stationary "wheels up" time, ~2-4s)
@@ -797,6 +805,7 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             "is_dnf": r["is_dnf"],
             "is_dsq": r["is_dsq"],
             "is_dns": r["is_dns"],
+            "is_quali_dsq": official_quali.get(jol_id, {}).get("status") == "DSQ",
             "quali_no_time": quali_no_time,   # NC in qualifying (no valid Q1 time)
             "sprint_is_dsq": sprint_is_dsq,   # disqualified from the sprint
             "is_fastest_lap": r["is_fastest_lap"],
@@ -925,12 +934,23 @@ def calculate_actual_fantasy_points(round_num: int, year: int = CURRENT_SEASON) 
             "sprint_points": combined_sprint if is_sprint else 0,
             "pitstop_points": pitstop_pts,
             "pitstop_points_source": pitstop_source,
+            "dsq_penalty": dsq_penalty,
             "total_points": total_constructor,
             "price": c_price,
             "ppm": c_ppm,
         }
 
         constructor_outputs.append(constructor_entry)
+
+    # Publish the active Fantasy identity while retaining personal abbreviations
+    # internally for overtakes, DOTD and constructor aggregation.
+    asset_ids = {a["asset_id"].split("_")[0]: a["asset_id"]
+                 for a in active_driver_assets(round_num, year)}
+    for driver in driver_outputs:
+        driver["driver_id"] = asset_ids.get(driver["driver_id"], driver["driver_id"])
+    for constructor in constructor_outputs:
+        for key in ("driver_1", "driver_2"):
+            constructor[key] = asset_ids.get(constructor[key], constructor[key])
 
     # Sort constructors by total points
     constructor_outputs.sort(key=lambda x: x["total_points"], reverse=True)

@@ -18,6 +18,12 @@
       "source_sha256": "d4dbfb10a24915f54e14d142f3a12bfbdeaa61bad84e9b5c8876972f458ded55",
       "completed_at": "2026-10-26T05:24:04.181733+00:00",
       "next_round": 21
+    },
+    "21": {
+      "race": "Mexican Grand Prix",
+      "source_sha256": "573e6297200a14c5cddc7ee7ee5bc722f4a4929836217401b491665786fbbd7d",
+      "completed_at": "2026-11-02T12:06:24.231923+00:00",
+      "next_round": 22
     }
   }
 }

@@ -83,7 +83,8 @@ POST_R14_SUBSTITUTION_ASSETS: tuple[dict[str, Any], ...] = (
 )
 
 # User-reported replacement for the remainder of Mexico, starting at FP3.
-# HIR_HAAS is an internal asset: the official game feed still lists Ocon.
+# The official Brazil feed retains Hirakawa; carry the current roster forward
+# until a later official entry confirms a change. HIR_HAAS is the stable asset.
 # Keep Hirakawa's own FP/history identity and never alias Ocon's results.
 MEXICO_R21_SUBSTITUTE: dict[str, Any] = {
     "asset_id": "HIR_HAAS",
@@ -94,7 +95,7 @@ MEXICO_R21_SUBSTITUTE: dict[str, Any] = {
     "first_name": "Ryo",
     "last_name": "Hirakawa",
     "number": 50,
-    "availability": {"from_round": 21, "to_round": 21},
+    "availability": {"from_round": 21, "to_round": None},
     "effective_from_session": "FP3",
     "replaces_asset_id": "OCO",
     "legacy_asset_ids": [],
@@ -104,7 +105,7 @@ MEXICO_R21_SUBSTITUTE: dict[str, Any] = {
     "price_provisional": False,
     "asset_note": (
         "Replaces Ocon for Mexico FP3, qualifying and race. "
-        "$6.0M confirmed in the official Fantasy feed on 2026-11-01."
+        "Official Brazil Fantasy feed retains Hirakawa at $6.6M on 2026-11-02."
     ),
 }
 
@@ -165,7 +166,7 @@ def active_driver_assets(
         return assets
 
     if int(round_num) >= 17:
-        if int(round_num) == 21:
+        if int(round_num) >= 21:
             assets = [row for row in assets if row["asset_id"] != "OCO"]
             assets.append(copy.deepcopy(MEXICO_R21_SUBSTITUTE))
         if int(round_num) == 17:
@@ -291,12 +292,13 @@ def roster_provenance(round_num: int, year: int = CURRENT_SEASON) -> dict[str, A
     """Metadata suitable for prediction/website sidecars and audit logs."""
     is_substitution = year == 2026 and 14 <= int(round_num) <= 16
     is_return = year == 2026 and int(round_num) == 17
-    is_mexico_substitution = year == 2026 and int(round_num) == 21
+    is_mexico_substitution = year == 2026 and int(round_num) >= 21
     source = (
         {"result": "User-reported Ocon replacement by Hirakawa from Mexico FP3 through the race",
          "reported_at": "2026-10-31", "effective_from_session": "FP3",
          "fantasy_asset_status": "official_player_11167",
-         "price_status": "official_confirmed_6.0M"}
+         "price_status": "official_confirmed_6.0M" if int(round_num) == 21 else "official_confirmed_6.6M",
+         "brazil_roster_source": "https://fantasy.formula1.com/feeds/drivers/20_en.json"}
         if is_mexico_substitution else OFFICIAL_ROSTER_SOURCE if is_substitution else
         {"result": "Hadjar returns to Red Bull; Lawson returns to Racing Bulls; "
                    "Tsunoda inactive from R17", "reported_at": "2026-09-23"}

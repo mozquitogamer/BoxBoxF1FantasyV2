@@ -1,0 +1,51 @@
+{
+  "2026:21": {
+    "date": "2026-11-01",
+    "source": "https://www.formula1.com/en/results/2026/races/1298/mexico/race-result",
+    "verified_at": "2026-11-02",
+    "reason": "Official final classification includes post-race penalties absent from Jolpica. Raw API responses remain unchanged.",
+    "order": [
+      "max_verstappen",
+      "hamilton",
+      "antonelli",
+      "leclerc",
+      "norris",
+      "russell",
+      "lawson",
+      "bortoleto",
+      "hadjar",
+      "hirakawa",
+      "albon",
+      "sainz",
+      "piastri",
+      "hulkenberg",
+      "colapinto",
+      "perez",
+      "gasly",
+      "arvid_lindblad",
+      "bearman",
+      "bottas",
+      "stroll",
+      "alonso"
+    ],
+    "times": {
+      "max_verstappen": "2:20:28.772",
+      "hamilton": "+0.799",
+      "antonelli": "+4.006",
+      "leclerc": "+10.707",
+      "norris": "+11.778",
+      "russell": "+12.263",
+      "lawson": "+20.899",
+      "bortoleto": "+22.041",
+      "hadjar": "+22.503",
+      "hirakawa": "+25.373",
+      "albon": "+27.562",
+      "sainz": "+28.638",
+      "piastri": "+29.475",
+      "hulkenberg": "+29.977",
+      "colapinto": "+30.204",
+      "perez": "+30.695",
+      "gasly": "+51.483"
+    }
+  }
+}

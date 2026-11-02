@@ -76,7 +76,7 @@ WMO_CODES = {
 
 def load_race_calendar() -> list[dict]:
     """Load 2026 race calendar."""
-    with open(SEED_DIR / "races.json") as f:
+    with open(SEED_DIR / "races.json", encoding="utf-8") as f:
         return json.load(f)["races"]
 
 

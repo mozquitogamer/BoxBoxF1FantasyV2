@@ -6,7 +6,7 @@ from config.driver_assets import active_driver_assets, active_constructor_driver
 from config.fantasy_prices import load_fantasy_price_maps
 
 
-def test_hirakawa_is_mexico_only_with_confirmed_price():
+def test_hirakawa_continues_in_brazil_with_confirmed_price():
     mexico = {row['asset_id']: row for row in active_driver_assets(21)}
     assert len(mexico) == 22
     assert 'OCO' not in mexico
@@ -17,15 +17,15 @@ def test_hirakawa_is_mexico_only_with_confirmed_price():
     assert hir['legacy_asset_ids'] == []
     assert hir['confidence_multiplier'] < 1 and hir['mc_noise_multiplier'] > 1
     assert set(active_constructor_driver_assets(21)['haas']) == {'BEA', 'HIR_HAAS'}
-    for round_num, year in [(20, 2026), (22, 2026), (25, 2026), (21, 2025)]:
+    for round_num, year in [(20, 2026), (21, 2025)]:
         roster = {row['asset_id'] for row in active_driver_assets(round_num, year)}
         assert 'OCO' in roster and 'HIR_HAAS' not in roster
     prices, _ = load_fantasy_price_maps(round_num=21)
     assert prices['HIR_HAAS'] == 6.0 and 'OCO' not in prices
     for round_num in [22, 25]:
         future, _ = load_fantasy_price_maps(round_num=round_num)
-        assert future['OCO'] == 10.1 and 'HIR_HAAS' not in future
-        assert {k:v for k,v in future.items() if k != 'OCO'} == {k:v for k,v in prices.items() if k != 'HIR_HAAS'}
+        assert future['HIR_HAAS'] == 6.6 and 'OCO' not in future
+        assert 'HIR_HAAS' in {a['asset_id'] for a in active_driver_assets(round_num)}
 
 
 def test_prediction_merge_uses_hirakawas_laps_and_identity():

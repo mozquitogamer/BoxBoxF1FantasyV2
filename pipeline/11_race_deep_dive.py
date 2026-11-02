@@ -792,6 +792,9 @@ def run_deep_dive(round_num: int, year: int = CURRENT_SEASON) -> None:
     # ── load reference data ──────────────────────────────────────────────
     abbrev_to_name, jolpica_to_abbrev = load_driver_map()
     driver_constructors = load_driver_constructors()
+    from config.driver_assets import active_driver_assets
+    driver_constructors.update({a["asset_id"].split("_")[0]: a["constructor_id"]
+                                for a in active_driver_assets(round_num, year)})
     race_info = load_race_info(round_num)
     race_name = race_info["name"] if race_info else f"Round {round_num}"
 

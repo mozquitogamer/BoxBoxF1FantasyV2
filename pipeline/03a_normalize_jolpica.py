@@ -40,7 +40,8 @@ from config.settings import (
 
 def read_json(path: Path) -> Dict[str, Any]:
     """Read a JSON file and return its contents."""
-    return json.loads(path.read_text(encoding="utf-8"))
+    from config.official_results import load_result_json
+    return load_result_json(path)
 
 
 def safe_get(d: Dict[str, Any], keys: List[str], default=None):

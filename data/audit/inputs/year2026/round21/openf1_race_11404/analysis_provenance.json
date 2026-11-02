@@ -1,0 +1,57 @@
+{
+  "source": "openf1",
+  "session_key": 11404,
+  "raw_laps": 1360,
+  "timed_laps": 1355,
+  "clean_laps": 1097,
+  "drivers": 22,
+  "neutralized_intervals": [
+    [
+      "2026-11-01T20:12:05+00:00",
+      "2026-11-01T20:14:53+00:00"
+    ],
+    [
+      "2026-11-01T21:04:06+00:00",
+      "2026-11-01T21:08:04+00:00"
+    ],
+    [
+      "2026-11-01T22:05:02+00:00",
+      "2026-11-01T22:11:50+00:00"
+    ]
+  ],
+  "missing_values": "Not inferred; optional telemetry remains missing.",
+  "sources": {
+    "sessions": {
+      "url": "https://api.openf1.org/v1/sessions?session_key=11404",
+      "sha256": "64a43a8b72eac12922f9bbd9cc64339423523fdd26d3dcea94a08f2301c6872c"
+    },
+    "drivers": {
+      "url": "https://api.openf1.org/v1/drivers?session_key=11404",
+      "sha256": "cdb9ced986e75f6582e8c732d5f14083d1b9dc5fd82d53f490e1180110004699"
+    },
+    "laps": {
+      "url": "https://api.openf1.org/v1/laps?session_key=11404",
+      "sha256": "a1c06770b362942f22d87a5d9248efa934c3b33cf9715a2e9806c3d4cfefc6c2"
+    },
+    "stints": {
+      "url": "https://api.openf1.org/v1/stints?session_key=11404",
+      "sha256": "9d684ec4cd13477c5b9de83eca3511be703a4b607e4d6ceee0396738dd978cea"
+    },
+    "race_control": {
+      "url": "https://api.openf1.org/v1/race_control?session_key=11404",
+      "sha256": "f5ca88e8381e9dee51883f3a50626090655a538189346313b01d381e4cd247de"
+    },
+    "position": {
+      "url": "https://api.openf1.org/v1/position?session_key=11404",
+      "sha256": "287c4b3fa8d77258be601a2b2713d2f750481f6f2914f735fb9004fef2ff55c0"
+    },
+    "weather": {
+      "url": "https://api.openf1.org/v1/weather?session_key=11404",
+      "sha256": "532bf918abeba3460b5521023e78469aae1d90229692691c744d33a60d3491b7"
+    },
+    "session_result": {
+      "url": "https://api.openf1.org/v1/session_result?session_key=11404",
+      "sha256": "2a2f4bec3de2416d2d6fb028120cfd86f8bbaf5b73d0b926c1ff73058660a1c6"
+    }
+  }
+}
