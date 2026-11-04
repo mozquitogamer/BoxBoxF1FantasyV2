@@ -1,7 +1,14 @@
 {
-  "updated": "2026-11-03T17:53:27Z",
+  "updated": "2026-11-04T18:01:42Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "rYemGPv28Vo",
+      "title": "Max 2x is the way + Kimi - Early thoughts for the Brazil Grand Prix - F1 Fantasy 2026",
+      "published": "2026-11-03",
+      "thumbnail": "https://i.ytimg.com/vi/rYemGPv28Vo/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=rYemGPv28Vo"
+    },
     {
       "id": "Q06cFQ1Ps2c",
       "title": "Mexico Grand Prix F1 Fantasy Live Stream + Q&A - F1 Fantasy Strategy, Tips, and Top Picks!",
@@ -22,13 +29,6 @@
       "published": "2026-10-28",
       "thumbnail": "https://i.ytimg.com/vi/15neXtW8g_I/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=15neXtW8g_I"
-    },
-    {
-      "id": "bnU-KMFV4zY",
-      "title": "United States Grand Prix F1 Fantasy Live Stream + Q&A - F1 Fantasy Strategy, Tips, and Top Picks!",
-      "published": "2026-10-24",
-      "thumbnail": "https://i.ytimg.com/vi/bnU-KMFV4zY/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=bnU-KMFV4zY"
     }
   ]
 }
