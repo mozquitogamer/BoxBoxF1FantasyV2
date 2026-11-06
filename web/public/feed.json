@@ -112,6 +112,20 @@
       "date_modified": "2026-11-06T00:00:00+00:00"
     },
     {
+      "id": "https://boxboxf1fantasy.com/articles/",
+      "url": "https://boxboxf1fantasy.com/articles/",
+      "title": "F1 Fantasy Articles 2026",
+      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
+      "date_modified": "2026-11-06T00:00:00+00:00"
+    },
+    {
+      "id": "https://boxboxf1fantasy.com/articles/2026-round22-fp2-fantasy-briefing/",
+      "url": "https://boxboxf1fantasy.com/articles/2026-round22-fp2-fantasy-briefing/",
+      "title": "Brazilian Grand Prix FP2 Fantasy briefing: what the simulations say",
+      "summary": "Brazilian Grand Prix: the FP2 picture Our post-FP2 simulation for round 22 is now live. These are average Fantasy points across the simulations , using the practice data available so far. Qualifying and the race have...",
+      "date_modified": "2026-11-06T00:00:00+00:00"
+    },
+    {
       "id": "https://boxboxf1fantasy.com/data/",
       "url": "https://boxboxf1fantasy.com/data/",
       "title": "BoxBoxF1Fantasy Public Data 2026",
@@ -138,13 +152,6 @@
       "title": "F1 Fantasy Prediction Accuracy 2026",
       "summary": "Public BoxBoxF1Fantasy track record across 19 completed rounds: driver points MAE 11.5, constructor points MAE 18.2, and 90% CI coverage 81%.",
       "date_modified": "2026-11-01T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/articles/",
-      "url": "https://boxboxf1fantasy.com/articles/",
-      "title": "F1 Fantasy Articles 2026",
-      "summary": "Race previews, recaps, F1 Fantasy strategy notes and longer-form BoxBoxF1Fantasy analysis.",
-      "date_modified": "2026-10-31T00:00:00+00:00"
     },
     {
       "id": "https://boxboxf1fantasy.com/articles/2026-round21-fp2-fantasy-briefing/",
@@ -347,13 +354,6 @@
       "url": "https://boxboxf1fantasy.com/tools/f1-fantasy-deadline/",
       "title": "F1 Fantasy Deadline 2026: Lock Times & Race Calendar",
       "summary": "F1 Fantasy 2026 deadline tracker: see each race lock time, sprint-weekend lock rule, next deadline and the full season deadline table.",
-      "date_modified": "2026-10-18T00:00:00+00:00"
-    },
-    {
-      "id": "https://boxboxf1fantasy.com/tools/team-compare/",
-      "url": "https://boxboxf1fantasy.com/tools/team-compare/",
-      "title": "F1 Fantasy Team Compare & Score Calculator",
-      "summary": "Compare three manual F1 Fantasy teams for free, or up to three saved Pit Wall teams plus a manual alternative. Check points, budget, chips and downside.",
       "date_modified": "2026-10-18T00:00:00+00:00"
     }
   ]
