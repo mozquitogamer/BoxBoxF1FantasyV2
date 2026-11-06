@@ -66,5 +66,11 @@
     "BOT": {
       "back_of_grid": true
     }
+  },
+  "22": {
+    "_note": "São Paulo GP, 2026-11-06: George Russell confirmed a five-place race-grid drop for a replacement internal combustion engine in a Mercedes team video, as reported by RacingNews365: https://racingnews365.com/george-russell-eyes-lewis-hamilton-heroics-as-brazil-grid-penalty-confirmed",
+    "RUS": {
+      "places": 5
+    }
   }
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-06T13:03:10.587726+02:00",
+  "generated_at": "2026-11-06T13:18:25.226827+02:00",
   "manager": {
     "id": "v13",
     "name": "V13",
@@ -2276,13 +2276,13 @@
       "race": "Brazilian Grand Prix",
       "phase": "pre_fp",
       "status": "corrected_provisional",
-      "published_at": "2026-11-06T11:03:10.575666+00:00",
-      "source_generated_at": "2026-11-06T11:02:41.581554+00:00",
+      "published_at": "2026-11-06T11:18:25.194669+00:00",
+      "source_generated_at": "2026-11-06T11:18:05.173395+00:00",
       "lock_deadline": "2026-11-07T18:00:00Z",
-      "archive": "web/public/data/predictions_round22_pre_fp_refresh_773cf48a0cb393b6.json",
-      "archive_sha256": "773cf48a0cb393b65ed33851d89b97d15aeb6360186e0b8fc4c994639af7efcd",
-      "previous_decision": "data/v13/decisions/round22_pre_fp_revision3.json",
-      "previous_decision_sha256": "decd3ae95a3fbef06961efae9b72a82ab2ed86aa8572b22d19816032ea25d93c",
+      "archive": "web/public/data/predictions_round22_pre_fp_refresh_624cd6732a06d42d.json",
+      "archive_sha256": "624cd6732a06d42de2d7844d677212e11d01729c84a4828d9bf90233e16df9f0",
+      "previous_decision": "data/v13/decisions/round22_pre_fp_revision4.json",
+      "previous_decision_sha256": "88a6b8a88b235e2edf6c432a7b56963257758c3c8fa0290eed5b885ba61dd9ba",
       "price_snapshot_after_round": 21,
       "drivers": [
         "ANT",
@@ -2298,7 +2298,7 @@
       "captain": "VER",
       "second_boost": null,
       "chip": null,
-      "projected_points": 189.0,
+      "projected_points": 191.2,
       "projected_price_gain": 1.1,
       "downside_risk": 77.1,
       "team_cost": 133.9,
@@ -2330,10 +2330,10 @@
         "negative_p5_weight": 0.75,
         "price_value_method": "horizon curve × price reliability × points realisation"
       },
-      "revision": 4,
-      "correction_reason": "Automatic live forecast refresh: 2026-11-06T11:02:41.581554+00:00 (773cf48a0cb393b6).",
-      "supersedes": "data/v13/decisions/round22_pre_fp_revision3.json",
-      "supersedes_sha256": "decd3ae95a3fbef06961efae9b72a82ab2ed86aa8572b22d19816032ea25d93c"
+      "revision": 5,
+      "correction_reason": "Automatic live forecast refresh: 2026-11-06T11:18:05.173395+00:00 (624cd6732a06d42d).",
+      "supersedes": "data/v13/decisions/round22_pre_fp_revision4.json",
+      "supersedes_sha256": "88a6b8a88b235e2edf6c432a7b56963257758c3c8fa0290eed5b885ba61dd9ba"
     },
     "post_fp_final": null
   },
