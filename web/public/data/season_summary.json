@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "generated_at": "2026-11-02T12:04:46.489875+00:00",
+  "generated_at": "2026-11-06T11:02:42.327886+00:00",
   "rounds": [
     {
       "round": 1,
@@ -379,13 +379,13 @@
       "price_change": -2.0,
       "price_trend": "down"
     },
-    "HIR_HAAS": {
-      "name": "Ryo Hirakawa",
+    "CAM": {
+      "name": "Rafael C\u00e2mara",
       "constructor": "haas",
-      "current_price": 6.6,
+      "current_price": 6.0,
       "starting_price": 6.0,
-      "price_change": 0.6,
-      "price_trend": "up"
+      "price_change": 0.0,
+      "price_trend": "stable"
     }
   },
   "constructor_prices": {

@@ -1750,17 +1750,18 @@
       }
     },
     "22": {
-      "note": "Round 22 roster and official purchase prices after Round 21",
+      "note": "Round 22 official purchase prices after Round 21; Câmara replaces inactive Hirakawa at $6.0M. The seat is provisional in later forecasts.",
       "availability": {
         "from_round": 22,
         "to_round": null
       },
       "source": {
         "url": "https://fantasy.formula1.com/feeds/drivers/20_en.json",
-        "accessed_at": "2026-11-02"
+        "accessed_at": "2026-11-06"
       },
       "inactive_driver_ids": [
-        "OCO"
+        "OCO",
+        "HIR_HAAS"
       ],
       "drivers": {
         "LAW": {
@@ -1853,17 +1854,17 @@
           "current_price": 3.0,
           "starting_price": 5.0
         },
-        "HIR_HAAS": {
-          "current_price": 6.6,
+        "CAM": {
+          "current_price": 6.0,
           "starting_price": 6.0,
-          "model_driver_id": "hirakawa",
+          "model_driver_id": "camara",
           "constructor_id": "haas",
           "availability": {
-            "from_round": 21,
-            "to_round": 21
+            "from_round": 22,
+            "to_round": 25
           },
           "price_provisional": false,
-          "price_source": "Official Fantasy feed 19_en.json, PlayerId 11167, verified 2026-11-01"
+          "price_source": "Official Fantasy feed 20_en.json, PlayerId 11205, verified 2026-11-06"
         }
       },
       "price_change_assumption": {

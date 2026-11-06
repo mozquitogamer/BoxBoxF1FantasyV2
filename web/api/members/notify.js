@@ -10,7 +10,7 @@ const {
 const { buildRecommendation } = require('../../lib/personalized-recommendations');
 const { resendRequest } = require('../../lib/email-subscriptions');
 const { activeSegmentContacts, ensurePitWallSegment } = require('../../lib/resend-segments');
-const { auditResendSegments, sendV13Broadcast } = require('../../lib/simulation-broadcast');
+const { auditResendSegments, brazilHaasUpdate, sendV13Broadcast } = require('../../lib/simulation-broadcast');
 const { syncOfficialLink } = require('./team');
 
 function inFilter(values) {
@@ -23,7 +23,8 @@ function phaseLabel(phase) {
 }
 
 function notificationEventKey(predictions) {
-    return `${predictions.season}:${predictions.round}:${predictions.phase}`;
+    const suffix = brazilHaasUpdate(predictions) ? ':haas-roster-update' : '';
+    return `${predictions.season}:${predictions.round}:${predictions.phase}${suffix}`;
 }
 
 function normalizedName(value) {
@@ -78,7 +79,7 @@ function officialTeamForRecommendation(snapshot, predictions, fallback) {
     };
 }
 
-function emailBody(profile, recommendation, origin) {
+function emailBody(profile, recommendation, origin, rosterNote) {
     const name = String(profile.display_name || '').trim();
     const greeting = name ? `Hi ${htmlEscape(name)},` : 'Hi there,';
     const move = recommendation.move;
@@ -108,6 +109,7 @@ function emailBody(profile, recommendation, origin) {
         <div style="border:1px solid #e4e7ec;border-top:0;border-radius:0 0 12px 12px;padding:22px 26px">
             <p>${greeting}</p>
             <p>The latest simulations are live. Against the team you saved, the model’s clearest action is:</p>
+            ${rosterNote ? '<p>' + htmlEscape(rosterNote) + '</p>' : ''}
             ${moveBlock}
             ${captainLine}
             ${budgetNote}
@@ -118,7 +120,7 @@ function emailBody(profile, recommendation, origin) {
         </div>
     </div>`;
     const text = `BoxBoxF1Fantasy Pit Wall — ${recommendation.race}\n\n${greeting.replace(/<[^>]+>/g, '')}\n\n${recommendation.headline}\n${recommendation.explanation}\n\n${recommendation.captain ? `2x check: ${recommendation.captain.name}\n` : ''}Projected team score: ${recommendation.projected_team_points.toFixed(1)} points.\n\n${recommendation.budget_note ? `Budget forecast note: ${recommendation.budget_note}\n\n` : ''}Open Transfer Advisor: ${url}\n\nThis is model-based guidance, not a guarantee. Sign in on the site to manage personalized simulation emails.`;
-    return { html, text, url };
+    return { html, text: rosterNote ? rosterNote + '\n\n' + text : text, url };
 }
 
 function genericPitWallEmail(predictions, origin) {
@@ -126,6 +128,7 @@ function genericPitWallEmail(predictions, origin) {
     const race = String(predictions.race || 'the next Grand Prix');
     const url = `${origin}/?utm_source=pit_wall_email&utm_medium=simulation_alert&utm_campaign=round_${Number(predictions.round)}_${encodeURIComponent(predictions.phase)}#drivers`;
     const budgetNote = String(predictions.price_change_assumption?.note || '');
+    const rosterNote = brazilHaasUpdate(predictions);
     const html = `<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#151922">
         <div style="background:#0a0d12;color:#fff;border-radius:12px 12px 0 0;padding:22px 26px;border-bottom:3px solid #e10600">
             <div style="font-size:13px;color:#aab4c3">BoxBox<span style="color:#e10600">F1</span>Fantasy · Pit Wall · R${Number(predictions.round)}</div>
@@ -134,13 +137,14 @@ function genericPitWallEmail(predictions, origin) {
         </div>
         <div style="border:1px solid #e4e7ec;border-top:0;border-radius:0 0 12px 12px;padding:22px 26px">
             <p>The latest projections are ready. Open the Pit Wall to review the updated driver and constructor outlook.</p>
+            ${rosterNote ? '<p>' + htmlEscape(rosterNote) + '</p>' : ''}
             ${budgetNote ? `<p style="background:#fff8e1;border-left:4px solid #d89b00;padding:12px 14px"><strong>Budget forecast note:</strong> ${htmlEscape(budgetNote)}</p>` : ''}
             <p><a href="${url}" style="display:inline-block;background:#e10600;color:#fff;text-decoration:none;padding:12px 17px;border-radius:7px;font-weight:700">Open the updated predictions</a></p>
             <p style="color:#667085;font-size:12px;line-height:1.5">You receive this because your address is on the active Pit Wall member list.</p>
         </div>
     </div>`;
     const text = `BoxBoxF1Fantasy Pit Wall — ${race}\n\nFresh ${phase} simulations are live.\n\n${budgetNote ? `Budget forecast note: ${budgetNote}\n\n` : ''}Open the updated predictions: ${url}\n`;
-    return { subject: `${race}: ${phase} simulations are live`, html, text };
+    return { subject: `${race}: ${phase} simulations are live`, html, text: rosterNote ? rosterNote + '\n\n' + text : text };
 }
 
 async function sendMissingPitWallContacts(event, predictions, origin, resendToken = null) {
@@ -198,11 +202,12 @@ async function sendMissingPitWallContacts(event, predictions, origin, resendToke
 async function getOrCreateEvent(predictions) {
     const generatedAt = predictions.generated_at || predictions.exported_at;
     if (!generatedAt) throw new Error('Predictions do not include generated_at');
-    // One member alert per season/round/phase. A new export timestamp, weather
-    // refresh, content deploy or code deploy must not create another email.
+    // Weather and export changes do not create alerts. A confirmed Brazil
+    // roster correction has its own stable event so prior alerts don't hide it.
     const eventKey = notificationEventKey(predictions);
+    const rosterFilter = brazilHaasUpdate(predictions) ? `&event_key=eq.${encodeURIComponent(eventKey)}` : '';
     const existing = await restRequest(
-        `notification_events?season=eq.${Number(predictions.season)}&round=eq.${Number(predictions.round)}&phase=eq.${encodeURIComponent(predictions.phase)}&select=id,event_key,status,created_at,payload&order=created_at.asc`,
+        `notification_events?season=eq.${Number(predictions.season)}&round=eq.${Number(predictions.round)}&phase=eq.${encodeURIComponent(predictions.phase)}${rosterFilter}&select=id,event_key,status,created_at,payload&order=created_at.asc`,
         { service: true },
     );
     if (existing?.length) {
@@ -397,7 +402,7 @@ module.exports = async function notify(req, res) {
             const recommendationId = recommendationRows?.[0]?.id || existing?.[0]?.id;
 
             try {
-                const content = emailBody(profile, recommendation, config.siteOrigin);
+                const content = emailBody(profile, recommendation, config.siteOrigin, brazilHaasUpdate(predictions));
                 const delivery = await resendRequest('/emails', process.env.RESEND_API_KEY, {
                     method: 'POST',
                     headers: {

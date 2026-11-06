@@ -6,7 +6,7 @@ from config.driver_assets import active_driver_assets, active_constructor_driver
 from config.fantasy_prices import load_fantasy_price_maps
 
 
-def test_hirakawa_continues_in_brazil_with_confirmed_price():
+def test_hirakawa_keeps_mexico_results_and_camara_takes_the_brazil_seat():
     mexico = {row['asset_id']: row for row in active_driver_assets(21)}
     assert len(mexico) == 22
     assert 'OCO' not in mexico
@@ -24,8 +24,27 @@ def test_hirakawa_continues_in_brazil_with_confirmed_price():
     assert prices['HIR_HAAS'] == 6.0 and 'OCO' not in prices
     for round_num in [22, 25]:
         future, _ = load_fantasy_price_maps(round_num=round_num)
-        assert future['HIR_HAAS'] == 6.6 and 'OCO' not in future
-        assert 'HIR_HAAS' in {a['asset_id'] for a in active_driver_assets(round_num)}
+        assert future['CAM'] == 6.0 and 'OCO' not in future and 'HIR_HAAS' not in future
+        assert set(active_constructor_driver_assets(round_num)['haas']) == {'BEA', 'CAM'}
+
+
+def test_camara_cold_start_releases_when_his_own_practice_arrives():
+    import numpy as np
+    predict = importlib.import_module('pipeline.06_run_predictions')
+    ids, _ = predict.load_driver_id_maps()
+    priors = pd.DataFrame({'driver_id': ['camara', 'bearman'], 'round': [22, 22]})
+    fp = pd.DataFrame({'driver_id': ['HIR', 'CAM', 'BEA'],
+                       'best_lap_time': [70.9, 71.1, 70.5]})
+    merged = predict.assemble_prediction_rows(priors, fp, ids, 22, 2026)
+    assert merged.loc[0, 'asset_id'] == 'CAM'
+    assert merged.loc[0, 'best_lap_time'] == 71.1
+    scores = np.array([25.0, *range(21, 0, -1)])
+    frame = pd.DataFrame({'cold_start_quali_rank': [18] + [None] * 21,
+                          'best_lap_time': [None] * 22})
+    result = predict.apply_cold_start_rank(frame, scores, 'quali')
+    assert sum(result > result[0]) == 17
+    frame.loc[0, 'best_lap_time'] = 71.1
+    np.testing.assert_array_equal(predict.apply_cold_start_rank(frame, scores, 'quali'), scores)
 
 
 def test_prediction_merge_uses_hirakawas_laps_and_identity():

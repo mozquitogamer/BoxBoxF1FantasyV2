@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-02T14:05:26.999435+02:00",
+  "generated_at": "2026-11-06T13:03:10.587726+02:00",
   "manager": {
     "id": "v13",
     "name": "V13",
@@ -2276,42 +2276,44 @@
       "race": "Brazilian Grand Prix",
       "phase": "pre_fp",
       "status": "corrected_provisional",
-      "published_at": "2026-11-02T12:05:26.985087+00:00",
-      "source_generated_at": "2026-11-02T12:04:46.177401+00:00",
+      "published_at": "2026-11-06T11:03:10.575666+00:00",
+      "source_generated_at": "2026-11-06T11:02:41.581554+00:00",
       "lock_deadline": "2026-11-07T18:00:00Z",
-      "archive": "web/public/data/predictions_round22_pre_fp_refresh_27a3a29110b3cae5.json",
-      "archive_sha256": "27a3a29110b3cae592a9c23de06778622ff16fed0051a11fe552c0540f3ac9a0",
-      "previous_decision": "data/v13/decisions/round22_pre_fp_revision2.json",
-      "previous_decision_sha256": "3754dae2d8468b9fe4dd87ac188eb593b5da0ecbf7543da4da2a23b7f2b2864e",
+      "archive": "web/public/data/predictions_round22_pre_fp_refresh_773cf48a0cb393b6.json",
+      "archive_sha256": "773cf48a0cb393b65ed33851d89b97d15aeb6360186e0b8fc4c994639af7efcd",
+      "previous_decision": "data/v13/decisions/round22_pre_fp_revision3.json",
+      "previous_decision_sha256": "decd3ae95a3fbef06961efae9b72a82ab2ed86aa8572b22d19816032ea25d93c",
       "price_snapshot_after_round": 21,
       "drivers": [
         "ANT",
-        "LEC",
-        "LAW",
+        "VER",
+        "PER",
         "BOR",
-        "PER"
+        "CAM"
       ],
       "constructors": [
         "mercedes",
         "ferrari"
       ],
-      "captain": "ANT",
+      "captain": "VER",
       "second_boost": null,
       "chip": null,
-      "projected_points": 207.6,
-      "projected_price_gain": 2.1,
-      "downside_risk": 66.2,
-      "team_cost": 134.9,
-      "transfers": 2,
+      "projected_points": 189.0,
+      "projected_price_gain": 1.1,
+      "downside_risk": 77.1,
+      "team_cost": 133.9,
+      "transfers": 3,
       "transfer_penalty": 0,
       "changes": {
         "drivers_out": [
+          "LEC",
           "LIN",
           "STR"
         ],
         "drivers_in": [
-          "LAW",
-          "PER"
+          "CAM",
+          "PER",
+          "VER"
         ],
         "constructors_out": [],
         "constructors_in": []
@@ -2328,10 +2330,10 @@
         "negative_p5_weight": 0.75,
         "price_value_method": "horizon curve × price reliability × points realisation"
       },
-      "revision": 3,
-      "correction_reason": "Automatic live forecast refresh: 2026-11-02T12:04:46.177401+00:00 (27a3a29110b3cae5).",
-      "supersedes": "data/v13/decisions/round22_pre_fp_revision2.json",
-      "supersedes_sha256": "3754dae2d8468b9fe4dd87ac188eb593b5da0ecbf7543da4da2a23b7f2b2864e"
+      "revision": 4,
+      "correction_reason": "Automatic live forecast refresh: 2026-11-06T11:02:41.581554+00:00 (773cf48a0cb393b6).",
+      "supersedes": "data/v13/decisions/round22_pre_fp_revision3.json",
+      "supersedes_sha256": "decd3ae95a3fbef06961efae9b72a82ab2ed86aa8572b22d19816032ea25d93c"
     },
     "post_fp_final": null
   },

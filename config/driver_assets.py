@@ -82,10 +82,7 @@ POST_R14_SUBSTITUTION_ASSETS: tuple[dict[str, Any], ...] = (
     },
 )
 
-# User-reported replacement for the remainder of Mexico, starting at FP3.
-# The official Brazil feed retains Hirakawa; carry the current roster forward
-# until a later official entry confirms a change. HIR_HAAS is the stable asset.
-# Keep Hirakawa's own FP/history identity and never alias Ocon's results.
+# Mexico-only replacement from FP3 onward, with a separate historical identity.
 MEXICO_R21_SUBSTITUTE: dict[str, Any] = {
     "asset_id": "HIR_HAAS",
     "driver_id": "HIR_HAAS",
@@ -95,7 +92,7 @@ MEXICO_R21_SUBSTITUTE: dict[str, Any] = {
     "first_name": "Ryo",
     "last_name": "Hirakawa",
     "number": 50,
-    "availability": {"from_round": 21, "to_round": None},
+    "availability": {"from_round": 21, "to_round": 21},
     "effective_from_session": "FP3",
     "replaces_asset_id": "OCO",
     "legacy_asset_ids": [],
@@ -103,10 +100,29 @@ MEXICO_R21_SUBSTITUTE: dict[str, Any] = {
     "mc_noise_multiplier": 1.35,
     "asset_context": "substitute_cold_start_same_constructor",
     "price_provisional": False,
-    "asset_note": (
-        "Replaces Ocon for Mexico FP3, qualifying and race. "
-        "Official Brazil Fantasy feed retains Hirakawa at $6.6M on 2026-11-02."
-    ),
+    "asset_note": "Replaces Ocon for Mexico FP3, qualifying and race.",
+}
+
+BRAZIL_R22_SUBSTITUTE: dict[str, Any] = {
+    "asset_id": "CAM",
+    "driver_id": "CAM",
+    "driver_abbrev": "CAM",
+    "model_driver_id": "camara",
+    "constructor_id": "haas",
+    "first_name": "Rafael",
+    "last_name": "Câmara",
+    "number": 51,
+    "availability": {"from_round": 22, "to_round": 25},
+    "replaces_asset_id": "HIR_HAAS",
+    "legacy_asset_ids": [],
+    "confidence_multiplier": 0.68,
+    "mc_noise_multiplier": 1.35,
+    "asset_context": "substitute_cold_start_same_constructor",
+    "price_provisional": False,
+    "asset_note": "Confirmed for Brazil. Later 2026 forecasts carry this seat provisionally.",
+    # One position behind the outgoing Brazil pre-practice forecast (P17/P18).
+    "cold_start_quali_rank": 18,
+    "cold_start_race_rank": 19,
 }
 
 
@@ -168,7 +184,8 @@ def active_driver_assets(
     if int(round_num) >= 17:
         if int(round_num) >= 21:
             assets = [row for row in assets if row["asset_id"] != "OCO"]
-            assets.append(copy.deepcopy(MEXICO_R21_SUBSTITUTE))
+            substitute = MEXICO_R21_SUBSTITUTE if int(round_num) == 21 else BRAZIL_R22_SUBSTITUTE
+            assets.append(copy.deepcopy(substitute))
         if int(round_num) == 17:
             for row in assets:
                 if row["asset_id"] in {"HAD", "LAW"}:
@@ -207,7 +224,7 @@ def known_driver_assets() -> list[dict[str, Any]]:
     must continue to use active_driver_assets.
     """
     return _base_assets() + [copy.deepcopy(row) for row in POST_R14_SUBSTITUTION_ASSETS] + [
-        copy.deepcopy(MEXICO_R21_SUBSTITUTE)
+        copy.deepcopy(MEXICO_R21_SUBSTITUTE), copy.deepcopy(BRAZIL_R22_SUBSTITUTE)
     ]
 
 
@@ -260,6 +277,9 @@ def apply_active_asset_context(
     out["asset_confidence_multiplier"] = [float(asset.get("confidence_multiplier", 1.0)) for asset in assets]
     out["asset_mc_noise_multiplier"] = [float(asset.get("mc_noise_multiplier", 1.0)) for asset in assets]
     out["asset_context"] = [asset.get("asset_context", "") for asset in assets]
+    for session in ("quali", "race"):
+        key = f"cold_start_{session}_rank"
+        out[key] = [asset.get(key) for asset in assets]
     out["asset_legacy_ids"] = [list(asset.get("legacy_asset_ids", [])) for asset in assets]
     out["driver_name"] = [
         f"{asset.get('first_name', '')} {asset.get('last_name', '')}".strip()
@@ -292,13 +312,19 @@ def roster_provenance(round_num: int, year: int = CURRENT_SEASON) -> dict[str, A
     """Metadata suitable for prediction/website sidecars and audit logs."""
     is_substitution = year == 2026 and 14 <= int(round_num) <= 16
     is_return = year == 2026 and int(round_num) == 17
-    is_mexico_substitution = year == 2026 and int(round_num) >= 21
+    is_mexico_substitution = year == 2026 and int(round_num) == 21
+    is_brazil_substitution = year == 2026 and 22 <= int(round_num) <= 25
     source = (
+        {"url": "https://haasf1team.com/index.php/news/team-statement-driver-update-0",
+         "fantasy_feed_url": "https://fantasy.formula1.com/feeds/drivers/20_en.json",
+         "fantasy_asset_status": "official_player_11205",
+         "price_status": "official_confirmed_6.0M_for_round_22",
+         "seat_status": "confirmed" if int(round_num) == 22 else "provisional"}
+        if is_brazil_substitution else
         {"result": "User-reported Ocon replacement by Hirakawa from Mexico FP3 through the race",
          "reported_at": "2026-10-31", "effective_from_session": "FP3",
          "fantasy_asset_status": "official_player_11167",
-         "price_status": "official_confirmed_6.0M" if int(round_num) == 21 else "official_confirmed_6.6M",
-         "brazil_roster_source": "https://fantasy.formula1.com/feeds/drivers/20_en.json"}
+         "price_status": "official_confirmed_6.0M"}
         if is_mexico_substitution else OFFICIAL_ROSTER_SOURCE if is_substitution else
         {"result": "Hadjar returns to Red Bull; Lawson returns to Racing Bulls; "
                    "Tsunoda inactive from R17", "reported_at": "2026-09-23"}
@@ -307,7 +333,7 @@ def roster_provenance(round_num: int, year: int = CURRENT_SEASON) -> dict[str, A
     return {
         "round": int(round_num),
         "year": int(year),
-        "override_active": bool(is_substitution or is_return or is_mexico_substitution),
+        "override_active": bool(is_substitution or is_return or is_mexico_substitution or is_brazil_substitution),
         "source": copy.deepcopy(source),
         "active_assets": [
             {

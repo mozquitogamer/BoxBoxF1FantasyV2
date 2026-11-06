@@ -21,8 +21,18 @@ function top(items, limit = 3) {
 }
 
 function broadcastName(predictions, resendToken = null) {
-    const base = `R${Number(predictions.round)} ${phaseLabel(predictions.phase)} simulation alert`;
+    const suffix = brazilHaasUpdate(predictions) ? ' · Haas roster update' : '';
+    const base = `R${Number(predictions.round)} ${phaseLabel(predictions.phase)} simulation alert${suffix}`;
     return resendToken ? `${base} · resend ${resendToken}` : base;
+}
+
+function brazilHaasUpdate(predictions) {
+    if (Number(predictions.season) !== 2026 || Number(predictions.round) !== 22
+        || predictions.phase !== 'pre_fp'
+        || !predictions.drivers?.some(driver => driver.driver_id === 'CAM' && driver.replaces_asset_id === 'HIR_HAAS')) {
+        return '';
+    }
+    return 'If Ryō Hirakawa is on your Fantasy team, transfer him out before qualifying. He is inactive for Brazil. Rafael Câmara takes the Haas seat and is available at $6.0M.';
 }
 
 function buildBroadcast(predictions, siteOrigin, resendToken = null, v13Decision = null) {
@@ -33,6 +43,7 @@ function buildBroadcast(predictions, siteOrigin, resendToken = null, v13Decision
     const drivers = top(predictions.drivers);
     const constructors = top(predictions.constructors);
     const budgetNote = String(predictions.price_change_assumption?.note || '');
+    const rosterNote = brazilHaasUpdate(predictions);
     const url = `${siteOrigin}/?utm_source=email&utm_medium=simulation_alert&utm_campaign=round_${round}_${phase}#drivers`;
     const driverRows = drivers.map(driver => (
         `<li><strong>${htmlEscape(driver.name || driver.driver_id || 'Driver')}</strong>`
@@ -59,6 +70,7 @@ function buildBroadcast(predictions, siteOrigin, resendToken = null, v13Decision
       <p style="margin:0;color:#c7d0dc">${htmlEscape(race)} · ${htmlEscape(phaseName)}</p>
     </div>
     <div style="padding:22px 26px">
+      ${rosterNote ? '<p style="margin:0 0 20px"><strong>Haas roster update.</strong> ' + htmlEscape(rosterNote) + '</p>' : ''}
       ${v13Html}
       <h2 style="font-size:17px;margin:0 0 8px">Top driver projections</h2>
       <ol style="padding-left:22px;line-height:1.8;margin:0 0 20px">${driverRows}</ol>
@@ -79,9 +91,9 @@ function buildBroadcast(predictions, siteOrigin, resendToken = null, v13Decision
     const text = `BoxBoxF1Fantasy — ${race}\n${phaseName} simulations are live.\n\n${v13Text}Top driver projections\n${driverText}\n\nTop constructors\n${constructorText}\n\n${budgetNote ? `Budget forecast note: ${budgetNote}\n\n` : ''}Open the updated predictions: ${url}\nUnsubscribe: ${UNSUBSCRIBE_URL}\n`;
     return {
         name: broadcastName(predictions, resendToken),
-        subject: `${race} simulations updated — ${phaseName}`,
+        subject: rosterNote ? 'Brazil simulations updated — replace Hirakawa' : `${race} simulations updated — ${phaseName}`,
         html,
-        text,
+        text: rosterNote ? rosterNote + '\n\n' + text : text,
     };
 }
 
@@ -183,6 +195,7 @@ module.exports = {
     activeContactCount,
     auditResendSegments,
     broadcastName,
+    brazilHaasUpdate,
     buildBroadcast,
     existingBroadcast,
     phaseLabel,

@@ -954,6 +954,23 @@ def assemble_prediction_rows(
     return pred_df
 
 
+def apply_cold_start_rank(frame: pd.DataFrame, scores: np.ndarray, session: str) -> np.ndarray:
+    """Use a conservative score from the field until the rookie has pace data."""
+    target_ranks = frame[f"cold_start_{session}_rank"]
+    if "best_lap_time" in frame:
+        target_ranks = target_ranks.where(frame["best_lap_time"].isna())
+    if "actual_quali_position" in frame:
+        target_ranks = target_ranks.where(frame["actual_quali_position"].isna())
+    if not target_ranks.notna().any():
+        return scores
+    scores = scores.astype(float, copy=True)
+    for index in np.flatnonzero(target_ranks.notna().to_numpy()):
+        rank = int(target_ranks.iloc[index])
+        peers = np.sort(np.delete(scores, index))[::-1]
+        scores[index] = (peers[rank - 2] + peers[rank - 1]) / 2
+    return scores
+
+
 def build_race_grid_features(
     pred_df: pd.DataFrame,
     actual_quali_map: dict[str, int],
@@ -1367,6 +1384,7 @@ def run_predictions(
     fp_blend = FP_QUALI_BLEND_TUNABLES
     quali_raw, blend_evidence = blend_qualifying_scores(
         pred_df, quali_raw, target_circuit, is_sprint)
+    quali_raw = apply_cold_start_rank(pred_df, quali_raw, "quali")
     fp_pace_driver_count = blend_evidence['driver_count']
     fp_quali_blend_applied = blend_evidence['applied']
     print(f"  FP-pace qualifying blend: applied={fp_quali_blend_applied}, "
@@ -1436,6 +1454,7 @@ def run_predictions(
               f"FP pace={fp_pace_driver_count}/{fp_blend['min_drivers_with_pace']})")
 
     # Ranking model: higher score = better position (P1). Rank descending.
+    race_raw = apply_cold_start_rank(pred_df, race_raw, "race")
     race_ranks = pd.Series(-race_raw).rank(method="first").astype(int)
     pred_df["predicted_race_position"] = race_ranks.values
     pred_df["predicted_race_raw"] = race_raw
