@@ -1,8 +1,8 @@
 {
   "year": 2026,
   "current_round": 22,
-  "horizon": 3,
-  "generated_at": "2026-11-06T11:02:48.071456+00:00",
+  "horizon": 5,
+  "generated_at": "2026-11-06T20:34:04.104252+00:00",
   "rounds": {
     "23": {
       "round": 23,
