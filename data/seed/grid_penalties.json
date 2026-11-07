@@ -68,9 +68,17 @@
     }
   },
   "22": {
-    "_note": "São Paulo GP, 2026-11-06: George Russell confirmed a five-place race-grid drop for a replacement internal combustion engine in a Mercedes team video, as reported by RacingNews365: https://racingnews365.com/george-russell-eyes-lewis-hamilton-heroics-as-brazil-grid-penalty-confirmed",
+    "_note": "Brazilian GP update supplied by the user on 2026-11-07. Russell receives five places; Verstappen starts at the back of the grid. Hamilton is provisionally modelled with five places, with ten places still possible. Qualifying scoring continues to use the unpenalised classification.",
     "RUS": {
       "places": 5
+    },
+    "VER": {
+      "back_of_grid": true
+    },
+    "HAM": {
+      "places": 5,
+      "provisional": true,
+      "possible_places": 10
     }
   }
 }

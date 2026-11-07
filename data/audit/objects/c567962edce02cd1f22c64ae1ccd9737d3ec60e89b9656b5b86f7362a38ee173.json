@@ -1,0 +1,342 @@
+{
+  "round": 22,
+  "race": "Brazilian Grand Prix",
+  "circuit": "S\u00e3o Paulo",
+  "race_date": "2026-11-08",
+  "is_sprint_weekend": false,
+  "location": {
+    "latitude": -23.7014,
+    "longitude": -46.6969,
+    "timezone": "America/Sao_Paulo"
+  },
+  "forecast_window": {
+    "start": "2026-11-06",
+    "end": "2026-11-08"
+  },
+  "overall_rain_risk": "HIGH",
+  "max_rain_probability": 98,
+  "daily": [
+    {
+      "date": "2026-11-06",
+      "temp_max": 26.4,
+      "temp_min": 19.0,
+      "precip_probability_max": 100,
+      "precip_sum_mm": 12.5,
+      "wind_max_kmh": 12.1,
+      "weather_description": "Moderate rain showers",
+      "weather_category": "rain",
+      "weather_icon": "\ud83c\udf27\ufe0f",
+      "weather_code": 81,
+      "rain_risk": "HIGH"
+    },
+    {
+      "date": "2026-11-07",
+      "temp_max": 29.1,
+      "temp_min": 18.9,
+      "precip_probability_max": 82,
+      "precip_sum_mm": 5.2,
+      "wind_max_kmh": 22.7,
+      "weather_description": "Thunderstorm",
+      "weather_category": "thunderstorm",
+      "weather_icon": "\u26a1",
+      "weather_code": 95,
+      "rain_risk": "HIGH"
+    },
+    {
+      "date": "2026-11-08",
+      "temp_max": 20.6,
+      "temp_min": 14.7,
+      "precip_probability_max": 100,
+      "precip_sum_mm": 11.5,
+      "wind_max_kmh": 18.3,
+      "weather_description": "Slight rain showers",
+      "weather_category": "rain",
+      "weather_icon": "\ud83c\udf27\ufe0f",
+      "weather_code": 80,
+      "rain_risk": "HIGH"
+    }
+  ],
+  "sessions": [
+    {
+      "name": "FP1",
+      "day_label": "Friday",
+      "date": "2026-11-06",
+      "rain_probability": 79,
+      "rain_risk": "HIGH",
+      "avg_temp": 24.8,
+      "avg_wind": 2.1,
+      "total_precip_mm": 0.9,
+      "weather_description": "Overcast",
+      "weather_category": "overcast",
+      "weather_icon": "\u2601\ufe0f",
+      "hourly": [
+        {
+          "hour": 10,
+          "temp": 23.0,
+          "humidity": 76,
+          "precip_prob": 47,
+          "precip_mm": 0.3,
+          "windspeed": 1.5,
+          "windgusts": 16.6,
+          "weather_code": 51
+        },
+        {
+          "hour": 11,
+          "temp": 24.3,
+          "humidity": 70,
+          "precip_prob": 55,
+          "precip_mm": 0.0,
+          "windspeed": 4.1,
+          "windgusts": 15.8,
+          "weather_code": 3
+        },
+        {
+          "hour": 12,
+          "temp": 25.3,
+          "humidity": 67,
+          "precip_prob": 65,
+          "precip_mm": 0.0,
+          "windspeed": 0.4,
+          "windgusts": 16.2,
+          "weather_code": 2
+        },
+        {
+          "hour": 13,
+          "temp": 26.4,
+          "humidity": 65,
+          "precip_prob": 79,
+          "precip_mm": 0.6,
+          "windspeed": 2.3,
+          "windgusts": 20.9,
+          "weather_code": 53
+        }
+      ]
+    },
+    {
+      "name": "FP2",
+      "day_label": "Friday",
+      "date": "2026-11-06",
+      "rain_probability": 98,
+      "rain_risk": "HIGH",
+      "avg_temp": 22.6,
+      "avg_wind": 11.2,
+      "total_precip_mm": 1.6,
+      "weather_description": "Light drizzle",
+      "weather_category": "drizzle",
+      "weather_icon": "\ud83c\udf26\ufe0f",
+      "hourly": [
+        {
+          "hour": 14,
+          "temp": 24.3,
+          "humidity": 76,
+          "precip_prob": 94,
+          "precip_mm": 1.1,
+          "windspeed": 10.8,
+          "windgusts": 27.4,
+          "weather_code": 55
+        },
+        {
+          "hour": 15,
+          "temp": 22.7,
+          "humidity": 83,
+          "precip_prob": 98,
+          "precip_mm": 0.4,
+          "windspeed": 12.1,
+          "windgusts": 31.3,
+          "weather_code": 51
+        },
+        {
+          "hour": 16,
+          "temp": 22.3,
+          "humidity": 83,
+          "precip_prob": 82,
+          "precip_mm": 0.1,
+          "windspeed": 11.3,
+          "windgusts": 31.3,
+          "weather_code": 51
+        },
+        {
+          "hour": 17,
+          "temp": 21.2,
+          "humidity": 88,
+          "precip_prob": 54,
+          "precip_mm": 0.0,
+          "windspeed": 10.7,
+          "windgusts": 27.4,
+          "weather_code": 3
+        }
+      ]
+    },
+    {
+      "name": "FP3",
+      "day_label": "Saturday",
+      "date": "2026-11-07",
+      "rain_probability": 51,
+      "rain_risk": "MEDIUM",
+      "avg_temp": 28.1,
+      "avg_wind": 17.5,
+      "total_precip_mm": 1.0,
+      "weather_description": "Light drizzle",
+      "weather_category": "drizzle",
+      "weather_icon": "\ud83c\udf26\ufe0f",
+      "hourly": [
+        {
+          "hour": 10,
+          "temp": 28.2,
+          "humidity": 64,
+          "precip_prob": 8,
+          "precip_mm": 0.0,
+          "windspeed": 14.0,
+          "windgusts": 33.8,
+          "weather_code": 1
+        },
+        {
+          "hour": 11,
+          "temp": 28.6,
+          "humidity": 58,
+          "precip_prob": 20,
+          "precip_mm": 0.2,
+          "windspeed": 16.6,
+          "windgusts": 38.9,
+          "weather_code": 51
+        },
+        {
+          "hour": 12,
+          "temp": 28.7,
+          "humidity": 58,
+          "precip_prob": 33,
+          "precip_mm": 0.3,
+          "windspeed": 16.6,
+          "windgusts": 48.2,
+          "weather_code": 51
+        },
+        {
+          "hour": 13,
+          "temp": 26.8,
+          "humidity": 67,
+          "precip_prob": 51,
+          "precip_mm": 0.5,
+          "windspeed": 22.7,
+          "windgusts": 55.8,
+          "weather_code": 95
+        }
+      ]
+    },
+    {
+      "name": "Qualifying",
+      "day_label": "Saturday",
+      "date": "2026-11-07",
+      "rain_probability": 82,
+      "rain_risk": "HIGH",
+      "avg_temp": 24.4,
+      "avg_wind": 15.6,
+      "total_precip_mm": 2.6,
+      "weather_description": "Slight rain showers",
+      "weather_category": "rain",
+      "weather_icon": "\ud83c\udf27\ufe0f",
+      "hourly": [
+        {
+          "hour": 14,
+          "temp": 24.4,
+          "humidity": 80,
+          "precip_prob": 71,
+          "precip_mm": 1.0,
+          "windspeed": 17.7,
+          "windgusts": 55.1,
+          "weather_code": 95
+        },
+        {
+          "hour": 15,
+          "temp": 23.5,
+          "humidity": 89,
+          "precip_prob": 82,
+          "precip_mm": 1.4,
+          "windspeed": 17.7,
+          "windgusts": 37.8,
+          "weather_code": 80
+        },
+        {
+          "hour": 16,
+          "temp": 24.6,
+          "humidity": 83,
+          "precip_prob": 78,
+          "precip_mm": 0.2,
+          "windspeed": 13.9,
+          "windgusts": 43.6,
+          "weather_code": 51
+        },
+        {
+          "hour": 17,
+          "temp": 24.9,
+          "humidity": 81,
+          "precip_prob": 66,
+          "precip_mm": 0.0,
+          "windspeed": 13.1,
+          "windgusts": 32.4,
+          "weather_code": 3
+        }
+      ]
+    },
+    {
+      "name": "Race",
+      "day_label": "Sunday",
+      "date": "2026-11-08",
+      "rain_probability": 95,
+      "rain_risk": "HIGH",
+      "avg_temp": 15.9,
+      "avg_wind": 17.2,
+      "total_precip_mm": 0.8,
+      "weather_description": "Light drizzle",
+      "weather_category": "drizzle",
+      "weather_icon": "\ud83c\udf26\ufe0f",
+      "hourly": [
+        {
+          "hour": 13,
+          "temp": 16.0,
+          "humidity": 85,
+          "precip_prob": 95,
+          "precip_mm": 0.2,
+          "windspeed": 17.4,
+          "windgusts": 40.7,
+          "weather_code": 51
+        },
+        {
+          "hour": 14,
+          "temp": 16.1,
+          "humidity": 83,
+          "precip_prob": 88,
+          "precip_mm": 0.2,
+          "windspeed": 17.0,
+          "windgusts": 40.3,
+          "weather_code": 51
+        },
+        {
+          "hour": 15,
+          "temp": 15.7,
+          "humidity": 83,
+          "precip_prob": 82,
+          "precip_mm": 0.2,
+          "windspeed": 17.4,
+          "windgusts": 38.9,
+          "weather_code": 51
+        },
+        {
+          "hour": 16,
+          "temp": 15.7,
+          "humidity": 83,
+          "precip_prob": 79,
+          "precip_mm": 0.2,
+          "windspeed": 17.2,
+          "windgusts": 38.9,
+          "weather_code": 51
+        }
+      ]
+    }
+  ],
+  "last_updated": "2026-11-07T12:07:46Z",
+  "next_update": "2026-11-07T18:07:46Z",
+  "data_source": "Open-Meteo (open-meteo.com)",
+  "forecast_snapshot_id": "2026-11-07T12-07-46.391589Z",
+  "forecast_retrieved_at": "2026-11-07T12:07:46.391589+00:00",
+  "forecast_archive_path": "data/forecasts/weather/year2026/round22/2026-11-07T12-07-46.391589Z_open_meteo.json"
+}
