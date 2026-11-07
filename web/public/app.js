@@ -984,9 +984,6 @@ function renderV13() {
         panel?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         window.setTimeout(() => panel?.querySelector('input[name="email"]')?.focus(), 450);
     });
-    root.querySelector('.v13-membership-button')?.addEventListener('click', () => {
-        if (typeof gtag === 'function') gtag('event', 'pit_wall_join_click', { location: 'v13_tab', price_usd: 5 });
-    });
     root.querySelector('#v13MemberToolsButton')?.addEventListener('click', () => {
         switchTab('optimizer');
         document.querySelector('.mode-btn[data-mode="transfers"]')?.click();
@@ -1577,11 +1574,15 @@ const GA_TAB_TITLES = {
     changelog: 'Changelog', about: 'About',
 };
 function trackTabView(tabName) {
+    if (window.BoxBoxAnalytics) {
+        window.BoxBoxAnalytics.trackTabView(tabName);
+        return;
+    }
     if (typeof gtag !== 'function') return;  // GA blocked / not loaded — skip silently
     const label = GA_TAB_TITLES[tabName] || tabName;
     gtag('event', 'page_view', {
         page_title: `${label} | BoxBoxF1Fantasy`,
-        page_location: `${location.origin}/${tabName}`,
+        page_location: `${location.origin}/${tabName}/`,
     });
 }
 

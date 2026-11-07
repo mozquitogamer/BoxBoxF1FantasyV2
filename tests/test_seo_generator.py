@@ -67,7 +67,7 @@ def test_retained_pages_get_current_shared_terms_without_changing_content(monkey
     assert updated.startswith('<main>Archived driver analysis</main>\n')
     assert seo.ENGAGEMENT_BLOCK in updated
     assert '<footer class="footer">Links</footer>' in updated
-    assert '/engagement.js?v=18' in updated
+    assert '/engagement.js?v=19' in updated
     assert unrelated.read_text(encoding="utf-8") == "<main>Other page</main>"
     seo.refresh_retained_engagement_blocks()
     assert page.read_text(encoding="utf-8") == updated

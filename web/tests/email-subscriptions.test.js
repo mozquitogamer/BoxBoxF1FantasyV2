@@ -264,6 +264,7 @@ test('confirm handler adds a verified address to the alert segment', async () =>
         assert.equal(res.headers.Location, '/?v13=confirmed#beatbot');
         assert.ok(Array.isArray(res.headers['Set-Cookie']));
         assert.match(res.headers['Set-Cookie'][0], /^__Host-boxbox_beat_v13_session=/);
+        assert.ok(res.headers['Set-Cookie'].some(cookie => cookie.startsWith('__Host-boxbox_signup_success=1;')));
         const resendCalls = calls.filter(call => call.url.startsWith('https://api.resend.com'));
         assert.ok(resendCalls.length >= 1);
         const contactCall = resendCalls.find(call => call.url === 'https://api.resend.com/contacts');
@@ -271,6 +272,11 @@ test('confirm handler adds a verified address to the alert segment', async () =>
         const payload = JSON.parse(contactCall.options.body);
         assert.equal(payload.email, 'fan@example.com');
         assert.deepEqual(payload.segments, [{ id: 'segment_test' }]);
+
+        const retried = mockResponse();
+        await confirmHandler(req, retried);
+        assert.equal(retried.statusCode, 303);
+        assert.equal(retried.headers['Set-Cookie'].some(cookie => cookie.startsWith('__Host-boxbox_signup_success=')), false);
     } finally {
         global.fetch = originalFetch;
         restoreEnv();

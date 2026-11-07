@@ -41,12 +41,16 @@ async function cancelScheduledReminder(providerMessageId, config) {
     }
 }
 
-function successResponse(res, entry) {
+function successResponse(res, entry, newConfirmation) {
     // Use the entry helper's canonical secret precedence. Passing the
     // subscription secret explicitly would mint unreadable sessions whenever
     // BEAT_V13_SESSION_SECRET is configured separately in production.
     const sessionCookie = beatV13SessionCookie(entry.id);
-    res.setHeader('Set-Cookie', [sessionCookie, beatV13BrowserCookie()]);
+    const cookies = [sessionCookie, beatV13BrowserCookie()];
+    if (newConfirmation) {
+        cookies.push('__Host-boxbox_signup_success=1; Path=/; Max-Age=300; Secure; SameSite=Lax');
+    }
+    res.setHeader('Set-Cookie', cookies);
     res.setHeader('Location', CONFIRMED_URL);
     // Keep a useful no-JavaScript fallback body; browsers follow the redirect
     // and the main site shows the same wording in its accessible confirmation
@@ -184,6 +188,7 @@ module.exports = async function confirm(req, res) {
             await cancelScheduledReminder(entry.reminder_provider_id, config);
         }
 
+        let newConfirmation = false;
         if (entry.status !== 'confirmed') {
             const segmentId = await ensureBeatV13Segment();
             const encodedEmail = encodeURIComponent(subscription.email);
@@ -211,7 +216,8 @@ module.exports = async function confirm(req, res) {
                 }
             }
 
-            const confirmed = await confirmBeatV13Entry(entry.id);
+            const confirmed = await confirmBeatV13Entry(entry.id, new Date(), { onlyNew: true });
+            newConfirmation = Boolean(confirmed);
             if (!confirmed) {
                 const retried = await findBeatV13Entry(subscription.email);
                 if (!retried || retried.status !== 'confirmed') {
@@ -220,7 +226,7 @@ module.exports = async function confirm(req, res) {
             }
         }
 
-        return successResponse(res, { ...entry, id: entry.id });
+        return successResponse(res, { ...entry, id: entry.id }, newConfirmation);
     } catch (error) {
         console.error('Could not confirm subscription:', error.message);
         return res.status(502).send(htmlPage(

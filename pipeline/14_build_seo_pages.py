@@ -874,12 +874,11 @@ def write_homepage_adsense_head() -> None:
 
 
 # GA4 snippet. Plain (non-f) string so the JS braces survive. Unlike the SPA,
-# each static page is a real distinct URL, so we let gtag fire its automatic
-# page_view per page (no send_page_view:false) - they show up directly in GA's
-# Pages report. googletagmanager/google-analytics are allowed by the site CSP.
+# each static page is a real distinct URL. site-init records its view immediately
+# and sanitizes campaign URLs for both static pages and the app.
 GA_SNIPPET = """<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-T3HS76FJ7W"></script>
-<script src="/site-init.js?v=1" data-ga-mode="page"></script>"""
+<script src="/site-init.js?v=2" data-ga-mode="page"></script>"""
 
 
 def page_head(
@@ -975,7 +974,7 @@ def write_homepage_registration_deadline() -> None:
 
 
 ENGAGEMENT_BLOCK = """<div class="engagement-shell">
-<section class="email-updates-panel" id="emailUpdatesPanel" aria-labelledby="emailUpdatesTitle" hidden>
+<section class="email-updates-panel" id="emailUpdatesPanel" data-registration-location="beat_v13" aria-labelledby="emailUpdatesTitle" hidden>
   <div class="email-updates-copy">
     <span class="email-updates-eyebrow">Beat V13 &middot; Free email entry</span>
     <h2 id="emailUpdatesTitle">Take your shot at the bot</h2>
@@ -1017,7 +1016,7 @@ FOOTER = f"""</main>
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
-<script src="/engagement.js?v=18"></script>
+<script src="/engagement.js?v=19"></script>
 </body>
 </html>
 """
@@ -1035,7 +1034,7 @@ def refresh_retained_engagement_blocks() -> None:
             continue
         updated = pattern.sub(lambda _: ENGAGEMENT_BLOCK + "\n", original)
         updated = re.sub(r'<script src="/engagement\.js\?v=\d+"></script>',
-                         '<script src="/engagement.js?v=18"></script>', updated)
+                         '<script src="/engagement.js?v=19"></script>', updated)
         if updated != original:
             path.write_text(updated, encoding="utf-8")
 

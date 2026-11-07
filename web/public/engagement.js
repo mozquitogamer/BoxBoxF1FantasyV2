@@ -130,7 +130,8 @@ window.BoxBoxFreeAccess = Object.freeze({
     }
 
     async function initEmailUpdates(config) {
-        const panel = document.querySelector('[data-registration-location="beat_v13"]');
+        const panel = document.querySelector('[data-registration-location="beat_v13"]')
+            || document.getElementById('emailUpdatesPanel');
         const form = panel?.querySelector('.email-updates-form');
         const status = panel?.querySelector('.email-updates-status');
         const submit = form?.querySelector('button[type="submit"]');
@@ -191,7 +192,7 @@ window.BoxBoxFreeAccess = Object.freeze({
                     body: JSON.stringify({ email, consent, website }),
                 });
                 const result = await response.json().catch(() => ({}));
-                if (!response.ok) throw new Error(result.message || 'Sign-up could not be started.');
+                if (!response.ok || result.ok !== true) throw new Error(result.message || 'Sign-up could not be started.');
 
                 form.reset();
                 setStatus(
@@ -204,7 +205,12 @@ window.BoxBoxFreeAccess = Object.freeze({
                 } else {
                     window.BoxBoxFreeAccess.showRegistrationPending(result.message, form);
                 }
-                track('beat_v13_registration_started', { location: 'beat_v13' });
+                if (!website) {
+                    track(result.access_email_sent ? 'beat_v13_access_requested' : 'beat_v13_registration_started', {
+                        location: panel.dataset.registrationLocation || 'beat_v13',
+                        entry_status: result.entry_status,
+                    });
+                }
             } catch (error) {
                 setStatus(
                     status,

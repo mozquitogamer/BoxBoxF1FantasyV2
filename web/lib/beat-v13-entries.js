@@ -235,10 +235,10 @@ async function markBeatV13ConfirmationSent(entryId, providerId, sentAt = new Dat
     });
 }
 
-async function confirmBeatV13Entry(entryId, now = new Date()) {
+async function confirmBeatV13Entry(entryId, now = new Date(), { onlyNew = false } = {}) {
     const existing = await findBeatV13EntryById(entryId);
     if (!existing) return null;
-    if (existing.status === 'confirmed') return existing;
+    if (existing.status === 'confirmed') return onlyNew ? null : existing;
     if (existing.status !== 'pending') return null;
     return updateBeatV13Entry(entryId, {
         status: 'confirmed',

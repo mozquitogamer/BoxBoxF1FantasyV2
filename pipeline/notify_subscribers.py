@@ -61,7 +61,8 @@ def build_broadcast(
 
     query = urlencode({
         "utm_source": "email",
-        "utm_medium": "simulation_alert",
+        "utm_medium": "email",
+        "utm_content": "simulation_alert",
         "utm_campaign": f"round_{round_number}_{phase}",
     })
     predictions_url = f"{site_origin.rstrip('/')}/?{query}#drivers"

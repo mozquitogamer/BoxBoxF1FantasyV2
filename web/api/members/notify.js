@@ -99,7 +99,7 @@ function emailBody(profile, recommendation, origin, rosterNote) {
         ? `<p style="background:#fff8e1;border-left:4px solid #d89b00;padding:12px 14px"><strong>Budget forecast note:</strong> ${htmlEscape(recommendation.budget_note)}</p>`
         : '';
     const lineup = `${recommendation.lineup.drivers.join(', ')} · ${recommendation.lineup.constructors.join(', ')}`;
-    const url = `${origin}/?utm_source=pit_wall_email&utm_medium=personalized_sim_alert&utm_campaign=round_${recommendation.round}_${recommendation.phase}#optimizer`;
+    const url = `${origin}/?utm_source=pit_wall_email&utm_medium=email&utm_content=personalized_sim_alert&utm_campaign=round_${recommendation.round}_${recommendation.phase}#optimizer`;
     const html = `<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#151922">
         <div style="background:#0a0d12;color:#fff;border-radius:12px 12px 0 0;padding:22px 26px;border-bottom:3px solid #e10600">
             <div style="font-size:13px;color:#aab4c3">BoxBox<span style="color:#e10600">F1</span>Fantasy · Pit Wall · R${recommendation.round}</div>
@@ -126,7 +126,7 @@ function emailBody(profile, recommendation, origin, rosterNote) {
 function genericPitWallEmail(predictions, origin) {
     const phase = phaseLabel(predictions.phase);
     const race = String(predictions.race || 'the next Grand Prix');
-    const url = `${origin}/?utm_source=pit_wall_email&utm_medium=simulation_alert&utm_campaign=round_${Number(predictions.round)}_${encodeURIComponent(predictions.phase)}#drivers`;
+    const url = `${origin}/?utm_source=pit_wall_email&utm_medium=email&utm_content=simulation_alert&utm_campaign=round_${Number(predictions.round)}_${encodeURIComponent(predictions.phase)}#drivers`;
     const budgetNote = String(predictions.price_change_assumption?.note || '');
     const rosterNote = brazilHaasUpdate(predictions);
     const html = `<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#151922">
