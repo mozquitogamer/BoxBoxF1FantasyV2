@@ -9,6 +9,9 @@ function checkV13(webRoot) {
     const predictions = read('predictions.json');
     if (predictions.reconstructed || !['pre_fp', 'post_fp'].includes(predictions.phase)) return;
     const manager = read('v13_manager.json');
+    // Post-race settlement advances the manager before the next forecast is
+    // published. The completed race's normal team must stay frozen then.
+    if (Number(manager.current_state?.as_of_round) >= Number(predictions.round)) return;
     const decision = manager.current_state?.[predictions.phase === 'pre_fp' ? 'early_thoughts' : 'post_fp_final'];
     assert.ok(decision, 'V13 has no choice for the current simulation');
     assert.equal(decision.round, predictions.round, 'V13 round is stale');

@@ -32,6 +32,10 @@ try {
     fs.writeFileSync(path.join(data, 'forecast.json'), JSON.stringify({ ...predictions, different: true })); save();
     assert.throws(() => checkV13(web), /proof does not match/);
     predictions.phase = 'post_quali'; save(); checkV13(web);
+    predictions.phase = 'post_fp';
+    manager.current_state.as_of_round = 22;
+    manager.current_state.post_fp_final = null;
+    save(); checkV13(web); // Completed round may roll forward to the next race.
     console.log('V13 deployment freshness checks passed');
 } finally {
     for (const name of ['forecast.json', 'predictions.json', 'v13_manager.json']) fs.unlinkSync(path.join(data, name));
