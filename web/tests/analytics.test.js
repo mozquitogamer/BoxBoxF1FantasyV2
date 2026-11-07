@@ -57,6 +57,7 @@ test('records the landing view before app loading and deduplicates initializatio
     assert.equal(page.events()[1][2].page_location, 'https://boxboxf1fantasy.com/constructors/');
     assert.equal(page.events()[1][2].page_referrer, page.events()[0][2].page_location);
     assert.equal(page.context.dataLayer.find(args => args[0] === 'config')[2].send_page_view, false);
+    assert.equal(page.context.dataLayer.find(args => args[0] === 'config')[2].page_location, page.events()[0][2].page_location);
 });
 
 test('static pages use the canonical slash and retain their real title', () => {

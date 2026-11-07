@@ -53,6 +53,7 @@ window.setTimeout(() => {
         };
         // Automatic engagement and form events inherit the current screen.
         window.gtag('set', fields);
+        if (firstView) window.gtag('config', measurementId, { ...fields, send_page_view: false });
         window.gtag('event', 'page_view', { ...fields, screen_name: screen });
         previousLocation = pageLocation;
         firstView = false;
@@ -66,7 +67,6 @@ window.setTimeout(() => {
 
     window.BoxBoxAnalytics = Object.freeze({ trackTabView });
     window.gtag('js', new Date());
-    window.gtag('config', measurementId, { send_page_view: false });
     if (mode === 'spa') {
         const tab = location.hash.slice(1);
         trackTabView(Object.hasOwn(titles, tab) ? tab : 'drivers');
