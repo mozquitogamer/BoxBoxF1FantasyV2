@@ -580,6 +580,7 @@ def calculate_driver_fantasy(
             "predicted_grid_position": pred_grid,
             "grid_penalty_places": int(row.get("grid_penalty_places", 0)),
             "grid_back_of_grid": bool(row.get("grid_back_of_grid", False)),
+            "grid_back_of_grid_order": int(row.get("grid_back_of_grid_order", 0)),
             "predicted_race_position": pred_race,
             "confidence": confidence,
             "expected_quali_pts": round(quali_pts, 1),

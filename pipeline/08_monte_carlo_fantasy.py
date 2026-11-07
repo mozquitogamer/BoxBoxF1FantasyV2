@@ -1039,6 +1039,10 @@ def run_simulations(
             value = pred_df.iloc[idx]["grid_back_of_grid"]
             if pd.notna(value) and bool(value):
                 rule["back_of_grid"] = True
+        if rule.get("back_of_grid") and "grid_back_of_grid_order" in pred_df.columns:
+            value = pred_df.iloc[idx]["grid_back_of_grid_order"]
+            if pd.notna(value) and int(value) > 0:
+                rule["back_of_grid_order"] = int(value)
         if rule:
             grid_penalty_rules[str(abbrev).upper()] = rule
     if grid_penalty_rules:

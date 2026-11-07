@@ -115,37 +115,37 @@
       "race": "Brazilian Grand Prix",
       "phase": "post_fp",
       "status": "corrected_before_lock",
-      "published_at": "2026-11-07T15:05:36.501759+00:00",
-      "source_generated_at": "2026-11-07T14:58:25.185660+00:00",
-      "selection_context_sha256": "f361260df79ebd658035fc23a3dd32552e4fbe5a609ceffd7975e876048f9b28",
+      "published_at": "2026-11-07T15:25:04.767183+00:00",
+      "source_generated_at": "2026-11-07T15:25:01.795270+00:00",
+      "selection_context_sha256": "1113d8f17b09c4f51f3245d7f72b46e30719d1f8108a1201bbe257b602cafcec",
       "lock_deadline": "2026-11-07T18:00:00Z",
-      "archive": "web/public/data/predictions_round22_post_fp_refresh_17d12a577cbca3d0.json",
-      "archive_sha256": "17d12a577cbca3d005d6d59bcf5a37a6c3d3513e2c76e63650210e194df81561",
-      "previous_decision": "data/v13/decisions/round22_post_fp_revision4.json",
-      "previous_decision_sha256": "9b4ad7f949eb2e0489ba043f9c50c94e747e17f164ada05a2ca0499e751f598d",
+      "archive": "web/public/data/predictions_round22_post_fp_refresh_68a77d1f82f76834.json",
+      "archive_sha256": "68a77d1f82f76834f50a67364bf35523ab2cc25d07bee58614b74d076835463b",
+      "previous_decision": "data/v13/decisions/round22_post_fp_revision5.json",
+      "previous_decision_sha256": "407191ac1e9ab2a24134411ce1741cdb5f71800d959d5861c15a94883d689626",
       "price_snapshot_after_round": 21,
       "drivers": [
         "VER",
         "ANT",
-        "CAM",
         "PER",
+        "CAM",
         "BOR"
       ],
       "constructors": [
-        "red_bull",
-        "mercedes"
+        "mercedes",
+        "ferrari"
       ],
       "captain": "VER",
       "second_boost": "ANT",
       "chip": "3x_boost",
-      "projected_points": 322.2,
-      "projected_points_gross": 332.2,
+      "projected_points": 329.8,
+      "projected_points_gross": 329.8,
       "points_basis": "net_after_transfers",
       "projected_price_gain": 1.3,
       "downside_risk": 75.5,
-      "team_cost": 138.4,
-      "transfers": 4,
-      "transfer_penalty": 10,
+      "team_cost": 133.9,
+      "transfers": 3,
+      "transfer_penalty": 0,
       "changes": {
         "drivers_out": [
           "HIR_HAAS",
@@ -157,16 +157,12 @@
           "PER",
           "VER"
         ],
-        "constructors_out": [
-          "ferrari"
-        ],
-        "constructors_in": [
-          "red_bull"
-        ]
+        "constructors_out": [],
+        "constructors_in": []
       },
       "chip_decision": {
         "result": "play",
-        "current_selected_team_extra_points": 74.9,
+        "current_selected_team_extra_points": 73.1,
         "largest_remaining_priors_top_two": 65.9,
         "largest_remaining_priors_round": 23,
         "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast."
@@ -179,13 +175,13 @@
         "negative_p5_weight": 0.75,
         "price_value_method": "horizon curve × price reliability × points realisation"
       },
-      "revision": 5,
-      "correction_reason": "Automatic live forecast refresh: 2026-11-07T14:58:25.185660+00:00 (17d12a577cbca3d0; state f361260df79ebd65).",
-      "supersedes": "data/v13/decisions/round22_post_fp_revision4.json",
-      "supersedes_sha256": "9b4ad7f949eb2e0489ba043f9c50c94e747e17f164ada05a2ca0499e751f598d"
+      "revision": 6,
+      "correction_reason": "Automatic live forecast refresh: 2026-11-07T15:25:01.795270+00:00 (68a77d1f82f76834; state 1113d8f17b09c4f5).",
+      "supersedes": "data/v13/decisions/round22_post_fp_revision5.json",
+      "supersedes_sha256": "407191ac1e9ab2a24134411ce1741cdb5f71800d959d5861c15a94883d689626"
     }
   },
-  "generated_at": "2026-11-07T17:05:36.521548+02:00",
+  "generated_at": "2026-11-07T17:25:04.785174+02:00",
   "labels": {
     "constructors": {
       "alpine": "Alpine",

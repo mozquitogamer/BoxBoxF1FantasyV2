@@ -297,8 +297,9 @@ def load_grid_penalties(round_num: int) -> dict:
 
     Reads ``data/seed/grid_penalties.json`` keyed by round and driver
     abbreviation. Each rule supports ``places`` (a positive grid drop) or
-    ``back_of_grid``. The qualifying forecast remains unchanged; consumers use
-    these rules to construct a separate race starting grid.
+    ``back_of_grid``. Optional positive ``back_of_grid_order`` fixes the relative
+    order of back-of-grid starters (lower first). The qualifying forecast remains
+    unchanged; consumers use these rules to construct a separate race starting grid.
     """
     import json
     path = SEED_DIR / "grid_penalties.json"
@@ -324,6 +325,13 @@ def load_grid_penalties(round_num: int) -> dict:
             places = 0
         if places:
             clean["places"] = places
+        if clean.get("back_of_grid"):
+            try:
+                back_order = max(0, int(rule.get("back_of_grid_order", 0)))
+            except (TypeError, ValueError):
+                back_order = 0
+            if back_order:
+                clean["back_of_grid_order"] = back_order
         if clean:
             out[str(abbrev).upper()] = clean
     return out

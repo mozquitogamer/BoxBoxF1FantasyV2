@@ -1013,6 +1013,10 @@ def build_race_grid_features(
         bool(grid_penalties.get(str(abbrev).upper(), {}).get("back_of_grid", False))
         for abbrev in grid_abbrevs
     ]
+    result["grid_back_of_grid_order"] = [
+        int(grid_penalties.get(str(abbrev).upper(), {}).get("back_of_grid_order", 0))
+        for abbrev in grid_abbrevs
+    ]
     result["grid_penalty"] = penalized_grid - unpenalized_grid
     result["grid"] = penalized_grid
 
@@ -1143,6 +1147,7 @@ PREDICTION_COLUMNS = [
     "predicted_quali_position", "actual_quali_position",
     "actual_quali_points", "actual_quali_is_dsq",
     "predicted_grid_position", "grid_penalty_places", "grid_back_of_grid",
+    "grid_back_of_grid_order",
     "predicted_race_position", "confidence",
     "predicted_quali_raw", "predicted_race_raw",
 ]

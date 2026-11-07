@@ -407,6 +407,7 @@ def build_predictions_json(round_num: int) -> dict | None:
             )),
             "grid_penalty_places": int(row.get("grid_penalty_places", 0)),
             "grid_back_of_grid": bool(row.get("grid_back_of_grid", False)),
+            "grid_back_of_grid_order": int(row.get("grid_back_of_grid_order", 0)),
             "predicted_finish": int(row["predicted_race_position"]),
             # projected_points = deterministic total (score if the predicted finishing
             # order holds). expected_points is overwritten below with the risk-adjusted

@@ -68,15 +68,25 @@
     }
   },
   "22": {
-    "_note": "Brazilian GP update supplied by the user on 2026-11-07. Russell receives five places; Verstappen starts at the back of the grid. Hamilton receives ten places, superseding the provisional five-place assumption. Qualifying scoring continues to use the unpenalised classification.",
+    "_note": "Brazilian GP update supplied by the user on 2026-11-07. Russell receives five places; Hamilton and Leclerc receive ten places each. Verstappen and Perez receive 30 places and start at the back, with Max P21 and Checo P22 assumed for this forecast. This back-row order is a user-supplied assumption, not an official starting grid. Qualifying scoring continues to use the unpenalised classification.",
     "RUS": {
       "places": 5
     },
     "VER": {
-      "back_of_grid": true
+      "places": 30,
+      "back_of_grid": true,
+      "back_of_grid_order": 1
     },
     "HAM": {
       "places": 10
+    },
+    "LEC": {
+      "places": 10
+    },
+    "PER": {
+      "places": 30,
+      "back_of_grid": true,
+      "back_of_grid_order": 2
     }
   }
 }

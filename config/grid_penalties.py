@@ -16,6 +16,8 @@ def apply_grid_penalties(
 
     ``places`` moves a driver down from their supplied qualifying position.
     ``back_of_grid`` reserves the final available slot. Penalized slots are
+    ordered by qualifying unless ``back_of_grid_order`` explicitly fixes their
+    relative order (lower first). Penalized slots are
     reserved first, then all other drivers fill the gaps in qualifying order.
     This mirrors the practical effect of multiple penalties: a +10 driver whose
     target is already occupied by a back-of-grid driver takes the nearest open
@@ -49,8 +51,14 @@ def apply_grid_penalties(
         idx for idx in order
         if bool(normalized_rules.get(abbrevs[idx], {}).get("back_of_grid", False))
     ]
-    # Fill from the last slot upward in reverse qualifying order so the better
-    # qualifier remains ahead when multiple drivers must start at the back.
+    # An explicit forecast assumption can fix the relative back-row order even
+    # when a simulated qualifying result reverses those drivers.
+    back_indices.sort(key=lambda idx: (
+        int(normalized_rules.get(abbrevs[idx], {}).get("back_of_grid_order", 0))
+        or n_drivers + 1,
+        base_position[idx],
+    ))
+    # Fill from the last slot upward, preserving the resolved back-row order.
     for idx in reversed(back_indices):
         slot = next(pos for pos in range(n_drivers, 0, -1) if slots[pos] is None)
         slots[slot] = idx

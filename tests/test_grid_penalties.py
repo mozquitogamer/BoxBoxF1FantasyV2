@@ -4,6 +4,7 @@ import importlib
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from config.grid_penalties import apply_grid_penalties
 from config.settings import load_grid_penalties
@@ -87,9 +88,24 @@ def test_round20_us_gp_penalties_preserve_a_unique_grid():
         assert grid[QUALIFYING_ORDER.index("BOR")] == 22
 
 
-def test_round20_mc_scores_qualifying_separately_and_samples_overtakes_from_penalised_grid(monkeypatch):
+def test_round22_assumed_back_row_is_fixed_even_when_perez_outqualifies_max():
+    rules = load_grid_penalties(22)
+    assert rules["HAM"]["places"] == rules["LEC"]["places"] == 10
+    assert rules["VER"]["places"] == rules["PER"]["places"] == 30
+    assert rules["RUS"]["places"] == 5
+    rng = np.random.default_rng(22)
+    for _ in range(1000):
+        positions = rng.permutation(np.arange(1, 23))
+        grid = apply_grid_penalties(positions, QUALIFYING_ORDER, rules)
+        assert sorted(grid.tolist()) == list(range(1, 23))
+        assert grid[QUALIFYING_ORDER.index("VER")] == 21
+        assert grid[QUALIFYING_ORDER.index("PER")] == 22
+
+
+@pytest.mark.parametrize("round_num", [20, 22])
+def test_mc_scores_qualifying_separately_and_samples_overtakes_from_penalised_grid(monkeypatch, round_num):
     mc = importlib.import_module("pipeline.08_monte_carlo_fantasy")
-    rules = load_grid_penalties(20)
+    rules = load_grid_penalties(round_num)
     n = len(QUALIFYING_ORDER)
     positions = np.arange(1, n + 1)
     rows = pd.DataFrame({
@@ -103,6 +119,7 @@ def test_round20_mc_scores_qualifying_separately_and_samples_overtakes_from_pena
         "predicted_race_raw": -positions.astype(float),
         "grid_penalty_places": [rules.get(driver, {}).get("places", 0) for driver in QUALIFYING_ORDER],
         "grid_back_of_grid": [rules.get(driver, {}).get("back_of_grid", False) for driver in QUALIFYING_ORDER],
+        "grid_back_of_grid_order": [rules.get(driver, {}).get("back_of_grid_order", 0) for driver in QUALIFYING_ORDER],
     })
     points = pd.DataFrame({"driver_abbrev": QUALIFYING_ORDER, "dnf_probability": [0.0] * n})
     monkeypatch.setattr(mc, "load_overtake_history", lambda: {})
@@ -122,7 +139,11 @@ def test_round20_mc_scores_qualifying_separately_and_samples_overtakes_from_pena
     assert len(seen_grids) == 100
     for qualifying, grid, quali_points in zip(arrays["all_quali_pos"], seen_grids, arrays["all_quali_pts"]):
         assert np.array_equal(grid, apply_grid_penalties(qualifying, QUALIFYING_ORDER, rules))
-        assert grid[QUALIFYING_ORDER.index("BOR")] == 22
+        if round_num == 20:
+            assert grid[QUALIFYING_ORDER.index("BOR")] == 22
+        else:
+            assert grid[QUALIFYING_ORDER.index("VER")] == 21
+            assert grid[QUALIFYING_ORDER.index("PER")] == 22
         assert sorted(grid.tolist()) == positions.tolist()
         assert quali_points.tolist() == [fantasy.calc_qualifying_points_driver(int(position)) for position in qualifying]
     assert fantasy.estimate_overtakes(22, 11) > fantasy.estimate_overtakes(13, 11)
