@@ -13,3 +13,17 @@ assert.match(html, /Provisional until team lock/);
 const history = vm.runInContext(`v13RoundHistory({round: 21, race: 'Mexico', provenance: 'corrected_replay', post_fp_final: {drivers: [], constructors: []}}, false)`, sandbox);
 assert.match(history, /Corrected replay/);
 console.log('V13 boost badges, provisional choice and correction labels passed');
+
+const fs = require('node:fs');
+const path = require('node:path');
+const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, '../web/public/data/v13_manager.json'), 'utf8'));
+fixture.live_status.status = 'corrected_replay';
+fixture.live_status.through_round = 21;
+const root = { innerHTML: '', querySelector: () => null, querySelectorAll: () => [] };
+sandbox.document.getElementById = id => id === 'v13Root' ? root : null;
+sandbox.URLSearchParams = URLSearchParams;
+sandbox.__V13fixture = fixture;
+vm.runInContext('v13Data = __V13fixture; renderV13Leaderboard = () => {}; renderV13();', sandbox);
+assert.match(root.innerHTML, /through R21/);
+assert.doesNotMatch(root.innerHTML, /through R13<\/span>/);
+console.log('Corrected season scoreboard shows the settled round');

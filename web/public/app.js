@@ -867,7 +867,7 @@ function renderV13() {
                 </div>
             </div>
             <div class="v13-scoreboard">
-                <div><small>Full-season score</small><strong>${displayedScore.toLocaleString()}</strong><span>${liveStatus.status === 'live' ? `through R${Number(liveStatus.through_round)}` : `through R${replay.end_round}`}</span></div>
+                <div><small>Full-season score</small><strong>${displayedScore.toLocaleString()}</strong><span>through R${Number(liveStatus.through_round || replay.end_round)}</span></div>
                 <div><small>Team value</small><strong>$${displayedBudget.toFixed(1)}M</strong><span>+$${(displayedBudget - 100).toFixed(1)}M built</span></div>
                 <div><small>Prize pool</small><strong>$${competition.prizes_usd.reduce((a, b) => a + b, 0)}</strong><span>$100 · $50 · $30</span></div>
             </div>
