@@ -1,7 +1,21 @@
 {
-  "updated": "2026-11-06T17:31:30Z",
+  "updated": "2026-11-07T16:29:52Z",
   "channel_url": "https://www.youtube.com/@BoxBoxF1Fantasy",
   "videos": [
+    {
+      "id": "0JTsLGaOWrs",
+      "title": "URGENT Penalties for Brazilian GP Update - F1 Fantasy 2026",
+      "published": "2026-11-07",
+      "thumbnail": "https://i.ytimg.com/vi/0JTsLGaOWrs/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=0JTsLGaOWrs"
+    },
+    {
+      "id": "gHLhEm0Hm4Q",
+      "title": "Mclaren conundrum (differential plays for rank) Final Thoughts: Brazil Grand Prix - F1 Fantasy 2026",
+      "published": "2026-11-07",
+      "thumbnail": "https://i.ytimg.com/vi/gHLhEm0Hm4Q/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=gHLhEm0Hm4Q"
+    },
     {
       "id": "rYemGPv28Vo",
       "title": "Max 2x is the way + Kimi - Early thoughts for the Brazil Grand Prix - F1 Fantasy 2026",
@@ -15,20 +29,6 @@
       "published": "2026-11-01",
       "thumbnail": "https://i.ytimg.com/vi/Q06cFQ1Ps2c/hqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=Q06cFQ1Ps2c"
-    },
-    {
-      "id": "JwrQ2tvt0gU",
-      "title": "Mexican Grand Prix Final Thoughts - Get Ocon out NOW! F1 Fantasy 2026",
-      "published": "2026-10-31",
-      "thumbnail": "https://i.ytimg.com/vi/JwrQ2tvt0gU/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=JwrQ2tvt0gU"
-    },
-    {
-      "id": "15neXtW8g_I",
-      "title": "Stop Chasing Budgets (Do THIS instead) - Early thoughts for the Mexico Grand Prix - F1 Fantasy 2026",
-      "published": "2026-10-28",
-      "thumbnail": "https://i.ytimg.com/vi/15neXtW8g_I/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=15neXtW8g_I"
     }
   ]
 }
