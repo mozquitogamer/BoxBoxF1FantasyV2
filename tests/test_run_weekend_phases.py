@@ -66,17 +66,10 @@ def test_v13_publishes_with_prediction_phases_and_rolls_after_race():
     post_fp_names = _step_names("post_fp")
     post_race_names = _step_names("post_race")
 
-    pre_fp_step = RUN_WEEKEND.PHASES["pre_fp_predict"]["steps"][
-        pre_fp_names.index("publish_v13_decision.py")
-    ]
-    assert pre_fp_step[1] == ["--round", "{round}", "--phase", "pre_fp", "--refresh-live"]
-    assert pre_fp_step[2] == {"non_fatal": True}
-
-    post_fp_step = RUN_WEEKEND.PHASES["post_fp"]["steps"][
-        post_fp_names.index("publish_v13_decision.py")
-    ]
-    assert post_fp_step[1] == ["--round", "{round}", "--phase", "post_fp", "--refresh-live"]
-    assert post_fp_step[2] == {"non_fatal": True}
+    for phase, names in (("pre_fp_predict", pre_fp_names), ("post_fp", post_fp_names)):
+        assert names.index("predict_horizon.py") < names.index("08_export_website_json.py")
+        export = next(step for step in RUN_WEEKEND.PHASES[phase]["steps"] if step[0] == "08_export_website_json.py")
+        assert len(export) == 2  # Export includes a mandatory V13 refresh.
 
     assert post_race_names.index("08_export_website_json.py") < post_race_names.index(
         "build_v13_manager.py"
@@ -84,17 +77,13 @@ def test_v13_publishes_with_prediction_phases_and_rolls_after_race():
     post_race_step = RUN_WEEKEND.PHASES["post_race"]["steps"][
         post_race_names.index("build_v13_manager.py")
     ]
-    assert post_race_step[2] == {"non_fatal": True}
+    assert len(post_race_step) == 2
 
 
-def test_v13_page_steps_do_not_block_core_weekend_outputs():
-    for phase, script in (
-        ("pre_fp_predict", "publish_v13_decision.py"),
-        ("post_fp", "publish_v13_decision.py"),
-        ("post_race", "build_v13_manager.py"),
-    ):
-        step = next(row for row in RUN_WEEKEND.PHASES[phase]["steps"] if row[0] == script)
-        assert step[2].get("non_fatal") is True
+def test_seo_remains_optional_but_v13_settlement_is_required():
+    steps = RUN_WEEKEND.PHASES["post_race"]["steps"]
+    assert next(s for s in steps if s[0] == "14_build_seo_pages.py")[2]["non_fatal"]
+    assert len(next(s for s in steps if s[0] == "build_v13_manager.py")) == 2
 
 
 def test_fp_and_quali_share_prediction_steps_in_the_same_order():

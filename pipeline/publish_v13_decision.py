@@ -56,6 +56,16 @@ def _record_sha256(value: dict[str, Any]) -> str:
     return hashlib.sha256(_canonical_bytes(value)).hexdigest()
 
 
+def _selection_context_sha256(public: dict[str, Any], round_num: int) -> str:
+    current = public["current_state"]
+    state = {key: current.get(key) for key in (
+        "as_of_round", "drivers", "constructors", "budget", "bank", "free_transfers",
+        "chips_remaining", "chips_used",
+    )}
+    return _record_sha256({"state": state, "policy": v13.live_policy(round_num), "decision_version": "net_projection_v1",
+                           "horizon": _record_sha256(v13._load_json(HORIZON_PATH)) if HORIZON_PATH.exists() else None})
+
+
 def _parse_time(value: str) -> datetime:
     parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     if parsed.tzinfo is None:
@@ -368,6 +378,7 @@ def _decision(
         "status": "provisional" if phase == "pre_fp" else "frozen_before_lock",
         "published_at": datetime.now(timezone.utc).isoformat(),
         "source_generated_at": archive_payload["generated_at"],
+        "selection_context_sha256": _selection_context_sha256(public, round_num),
         "lock_deadline": _lock_deadline(round_num),
         "archive": round_data.archive_path,
         "archive_sha256": v13._sha256(archive),
@@ -379,7 +390,9 @@ def _decision(
         "captain": candidate.captain,
         "second_boost": candidate.second_captain,
         "chip": chip,
-        "projected_points": candidate.projected_points,
+        "projected_points": round(candidate.projected_points - candidate.transfer_penalty, 2),
+        "projected_points_gross": candidate.projected_points,
+        "points_basis": "net_after_transfers",
         "projected_price_gain": candidate.projected_gain,
         "downside_risk": candidate.downside_risk,
         "team_cost": candidate.cost,
@@ -480,6 +493,7 @@ def publish_correction(
     superseded = v13._load_json(superseded_path)
     revision = int(superseded.get("revision", 1)) + 1
     decision = _decision(round_num, phase, public, archive_override)
+    decision["selection_context_sha256"] = _selection_context_sha256(public, round_num)
     decision.update(
         {
             "revision": revision,
@@ -516,7 +530,9 @@ def publish_live(round_num: int, phase: str) -> dict[str, Any]:
     active_archive = ROOT / active["archive"]
     if not v13._archive_sha256_matches(active_archive, active["archive_sha256"]):
         raise RuntimeError("Active V13 decision's frozen source archive has changed")
-    if live == v13._load_json(active_archive):
+    context_hash = _selection_context_sha256(public, round_num)
+    if (live == v13._load_json(active_archive)
+            and active.get("selection_context_sha256") == context_hash):
         return active
     generated_at = _parse_time(live["generated_at"])
     if generated_at >= _parse_time(_lock_deadline(round_num)):
@@ -533,7 +549,7 @@ def publish_live(round_num: int, phase: str) -> dict[str, Any]:
             f.write(live_bytes)
     return publish_correction(
         round_num, phase,
-        f"Automatic live forecast refresh: {live['generated_at']} ({digest[:16]}).",
+        f"Automatic live forecast refresh: {live['generated_at']} ({digest[:16]}; state {context_hash[:16]}).",
         str(snapshot.relative_to(ROOT)).replace("\\", "/"),
     )
 

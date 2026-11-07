@@ -1,0 +1,10 @@
+{
+  "fantasy_prices.json": {
+    "path": "data/v13/replays/2026-11-07T14-45-33Z/fantasy_prices.json",
+    "sha256": "a6320afd49efbb4ec30c9096606a6aec1c7b56f7cc5ce35b862f74f47ca4518b"
+  },
+  "official_fantasy_points.json": {
+    "path": "data/v13/replays/2026-11-07T14-45-33Z/official_fantasy_points.json",
+    "sha256": "43d86d8a9f19103485681144f959761cfbadfd09558a50d22d93c66a5fe6e505"
+  }
+}

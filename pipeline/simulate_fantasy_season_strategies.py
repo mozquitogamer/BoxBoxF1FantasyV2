@@ -197,7 +197,12 @@ def _expected_price_change(
     return clamp_price_change(price, change)
 
 
-def load_rounds(through_round: int | None = None) -> list[RoundInputs]:
+def load_rounds(
+    through_round: int | None = None,
+    *,
+    archive_paths: dict[int, Path] | None = None,
+    prefer_archive_prices: set[int] | None = None,
+) -> list[RoundInputs]:
     official = _load_json(SEED_DIR / "official_fantasy_points.json")["rounds"]
     prices = _load_json(SEED_DIR / "fantasy_prices.json")["price_history"]
     track_data = _load_json(WEB_DATA_DIR / "track_data.json")
@@ -221,7 +226,9 @@ def load_rounds(through_round: int | None = None) -> list[RoundInputs]:
         prior_price_key = "0" if round_index == 0 else str(completed_rounds[round_index - 1])
         opening = prices[prior_price_key]
         closing = prices[str(round_num)]
-        archive = WEB_DATA_DIR / f"predictions_round{round_num}_post_fp.json"
+        archive = (archive_paths or {}).get(
+            round_num, WEB_DATA_DIR / f"predictions_round{round_num}_post_fp.json"
+        )
         payload = _load_json(archive)
         if payload.get("phase") != "post_fp":
             raise ValueError(f"{archive.name} is not a post_fp archive")
@@ -245,7 +252,10 @@ def load_rounds(through_round: int | None = None) -> list[RoundInputs]:
             raise KeyError(f"R{round_num} has no official points for {asset_id}")
 
         def driver_open_price(asset_id: str) -> float:
-            value = opening["drivers"].get(asset_id)
+            value = (driver_rows[asset_id].get("current_price")
+                     if round_num in (prefer_archive_prices or set()) else None)
+            if value is None:
+                value = opening["drivers"].get(asset_id)
             if value is None:
                 value = driver_rows[asset_id].get("current_price")
             if value is None:
@@ -292,7 +302,9 @@ def load_rounds(through_round: int | None = None) -> list[RoundInputs]:
         )
         driver_prices = np.array([driver_open_price(key) for key in driver_ids])
         constructor_prices = np.array(
-            [float(opening["constructors"][key]) for key in constructor_ids]
+            [float(constructor_rows[key].get("current_price", opening["constructors"][key]))
+             if round_num in (prefer_archive_prices or set())
+             else float(opening["constructors"][key]) for key in constructor_ids]
         )
         driver_gain = np.array(
             [

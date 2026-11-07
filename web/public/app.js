@@ -578,11 +578,13 @@ function v13Name(id, type = 'driver') {
     return labels[id] || id;
 }
 
-function v13Pills(ids, type = 'driver', captain = null) {
+function v13Pills(ids, type = 'driver', captain = null, chip = null, secondBoost = null) {
     return (ids || []).map(id => {
-        const boosted = id === captain;
+        const multiplier = id === captain ? (chip === '3x_boost' ? 3 : 2)
+            : chip === '3x_boost' && id === secondBoost ? 2 : 1;
+        const boosted = multiplier > 1;
         return `<span class="v13-asset-pill ${type}${boosted ? ' boosted' : ''}">
-            ${v13Escape(v13Name(id, type))}${boosted ? '<b>2x</b>' : ''}
+            ${v13Escape(v13Name(id, type))}${boosted ? `<b>${multiplier}x</b>` : ''}
         </span>`;
     }).join('');
 }
@@ -595,10 +597,14 @@ function v13SnapshotCard(title, snapshot, emptyText) {
         </article>`;
     }
     const chip = snapshot.chip ? `<span class="v13-chip">${v13Escape(v13ChipLabel(snapshot.chip))}</span>` : '';
-    const phaseLabel = {
+    const beforeLock = Date.now() < Date.parse(snapshot.lock_deadline || '')
+        && snapshot.round === v13Data?.current_state?.next_round;
+    const phaseLabel = beforeLock ? 'Provisional until team lock' : {
         provisional: 'Provisional',
         frozen_before_lock: 'Frozen before lock',
         frozen_replay: 'Frozen replay',
+        retrospective_correction: 'Corrected replay',
+        corrected_before_lock: 'Saved pre-lock choice',
     }[snapshot.status] || (snapshot.phase === 'pre_fp' ? 'Provisional' : 'Frozen');
     const changes = snapshot.changes || {};
     const driverMove = (changes.drivers_out || []).length
@@ -610,7 +616,7 @@ function v13SnapshotCard(title, snapshot, emptyText) {
     const moveText = [driverMove, constructorMove].filter(Boolean).join(' · ');
     return `<article class="v13-snapshot">
         <div class="v13-snapshot-heading"><span>${v13Escape(title)}</span><em>${phaseLabel}</em></div>
-        <div class="v13-asset-row">${v13Pills(snapshot.drivers, 'driver', snapshot.captain)}</div>
+        <div class="v13-asset-row">${v13Pills(snapshot.drivers, 'driver', snapshot.captain, snapshot.chip, snapshot.second_boost)}</div>
         <div class="v13-asset-row constructors">${v13Pills(snapshot.constructors, 'constructor')}${chip}</div>
         ${moveText ? `<p class="v13-move-line"><strong>Move:</strong> ${v13Escape(moveText)}${snapshot.transfer_penalty ? ` · −${Number(snapshot.transfer_penalty)} pts` : ''}</p>` : ''}
         <div class="v13-snapshot-metrics">
@@ -627,6 +633,8 @@ function v13RoundHistory(round, isLatest) {
     const early = round.early_thoughts;
     const provenance = round.provenance === 'reconstructed'
         ? 'Reconstructed'
+        : round.provenance === 'corrected_replay'
+            ? 'Corrected replay'
         : round.provenance === 'live'
             ? 'Live challenge record'
             : 'Archived live forecast';
@@ -677,13 +685,14 @@ function v13LiveResultCard(round) {
     const delta = Number(round.score_delta_vs_projection ?? (actual - projected));
     const budget = Number(round.budget_after || 0);
     const deltaText = delta >= 0 ? `+${delta.toFixed(1)}` : `−${Math.abs(delta).toFixed(1)}`;
+    const corrected = round.provenance === 'corrected_replay';
     return `<section class="v13-section v13-live-result" aria-labelledby="v13LiveResultTitle">
         <div class="v13-section-heading">
-            <div><span>Latest live result</span><h2 id="v13LiveResultTitle">R${Number(round.round)}: ${v13Escape(round.race)}</h2></div>
-            <em>Official score recorded</em>
+            <div><span>${corrected ? 'Latest recalculated result' : 'Latest live result'}</span><h2 id="v13LiveResultTitle">R${Number(round.round)}: ${v13Escape(round.race)}</h2></div>
+            <em>${corrected ? 'Scored using official results' : 'Official score recorded'}</em>
         </div>
         <div class="v13-live-result-grid">
-            ${v13SnapshotCard('What V13 went with', final, 'The final team snapshot is unavailable.')}
+            ${v13SnapshotCard(corrected ? 'Recalculated post-practice choice' : 'What V13 went with', final, 'The final team snapshot is unavailable.')}
             <div class="v13-live-result-score">
                 <div class="v13-live-result-metrics">
                     <span><small>Bot score</small><strong>${actual.toFixed(0)}</strong></span>
@@ -693,7 +702,7 @@ function v13LiveResultCard(round) {
                     <span><small>Team value</small><strong>$${budget.toFixed(1)}M</strong></span>
                     <span><small>Next transfers</small><strong>${Number(round.free_transfers_next || 0)}</strong></span>
                 </div>
-                <p>V13 scored the five drivers and two constructors shown at left, then applied the captain multiplier and transfer penalty exactly as locked.</p>
+                <p>${corrected ? 'This retrospective correction uses the saved practice forecast, official points, captain multiplier and transfer penalty. Earlier published decisions remain in the audit history.' : 'V13 scored the five drivers and two constructors shown at left, then applied the captain multiplier and transfer penalty exactly as locked.'}</p>
             </div>
         </div>
     </section>`;
@@ -883,8 +892,8 @@ function renderV13() {
         </section>
 
         <div class="v13-replay-warning">
-            <strong>${latestLive ? `Live challenge record through R${Number(liveStatus.through_round)}` : 'Research replay, not a prospective claim.'}</strong>
-            <span>${latestLive ? `R1–R${replay.end_round} remains the research replay; R${Number(liveStatus.through_round)} is now scored from the locked V13 team and official results.` : v13Escape(replay.disclaimer)}</span>
+            <strong>${v13Data.historical_correction ? `History corrected through R${Number(v13Data.historical_correction.through_round)}` : latestLive ? `Live challenge record through R${Number(liveStatus.through_round)}` : 'Research replay, not a prospective claim.'}</strong>
+            <span>${v13Data.historical_correction ? v13Escape(v13Data.historical_correction.note) : latestLive ? `R1–R${replay.end_round} remains the research replay; R${Number(liveStatus.through_round)} is now scored from the locked V13 team and official results.` : v13Escape(replay.disclaimer)}</span>
         </div>
 
         ${latestLive ? v13LiveResultCard(latestLive) : ''}
@@ -921,7 +930,7 @@ function renderV13() {
                     <span><small>Chip remaining</small><strong>${v13Escape(v13ChipLabel(current.chips_remaining?.[0]))}</strong></span>
                 </div>
             </div>
-            <p class="v13-rules-note">This is V13's carried team. The Early Thoughts lineup above is provisional; this state changes only when the post-FP final team freezes. Transfer rule: V13 receives two free transfers every round. One unused transfer can roll over, so the next round can have three, but the bank can never drop below two or rise above three. Policy v${v13Escape(v13Data.manager.policy_version)}.</p>
+            <p class="v13-rules-note">This is V13's carried team. Every new pre-lock simulation can revise the proposed drivers, constructors, boost and chip. The latest valid choice at team lock is scored, then the held team and budget roll forward after the race. Transfer rule: V13 receives two free transfers every round. One unused transfer can roll over, so the next round can have three, but the bank can never drop below two or rise above three. Policy v${v13Escape(v13Data.manager.policy_version)}.</p>
             <div class="v13-chip-ledger">${usedChips}</div>
         </section>
 
@@ -940,7 +949,7 @@ function renderV13() {
         </section>
 
         <section class="v13-section" id="v13History">
-            <div class="v13-section-heading"><div><span>Transparent record</span><h2>${latestLive ? `The replay plus live record through R${Number(liveStatus.through_round)}` : `The complete R1–R${replay.end_round} replay`}</h2></div><em>FP for teams · Qualifying for Final Fix</em></div>
+            <div class="v13-section-heading"><div><span>Transparent record</span><h2>${latestLive ? `${v13Data.historical_correction ? 'Corrected history and live rounds' : 'The replay plus live record'} through R${Number(liveStatus.through_round)}` : `The complete R1–R${replay.end_round} replay`}</h2></div><em>FP for teams · Qualifying for Final Fix</em></div>
             <div class="v13-history">${allRounds.map((round, index) => v13RoundHistory(round, index === allRounds.length - 1)).join('')}</div>
         </section>
 

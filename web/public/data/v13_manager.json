@@ -1,1049 +1,242 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-11-06T22:34:38.813397+02:00",
-  "manager": {
-    "id": "v13",
-    "name": "V13",
-    "tagline": "Budget-aware. Medium-risk. Transparent at every decision.",
-    "strategy": "budget_builder",
-    "risk_profile": "medium_tolerance",
-    "policy_version": "2026.3",
-    "policy": {
-      "team_selection_phase": "post_fp",
-      "early_thoughts_phase": "pre_fp",
-      "price_gain_weight": 3.765,
-      "price_gain_method": "Horizon-aware budget curve discounted for forecast reliability and realised conversion into future points.",
-      "research_replay_price_gain_weight": 20.0,
-      "negative_p5_weight": 0.75,
-      "free_transfers_per_round": 2,
-      "max_free_transfers_after_rollover": 3,
-      "final_fix_basis": "qualifying_locked_projected_race_points",
-      "three_x_timing": "At post-FP lock, play only when the selected team's extra 3x value is at least the largest remaining priors-only top-two driver forecast; otherwise save it."
-    }
-  },
   "competition": {
-    "status": "registration_open",
-    "scoring_basis": "full_2026_official_season_total",
-    "registration_open": true,
-    "registration_deadline_round": 23,
-    "registration_deadline_race": "Las Vegas Grand Prix",
-    "registration_deadline_at": "2026-11-21T04:00:00Z",
-    "registration_window": "Registration is open now and closes at the F1 Fantasy team-lock deadline for Round 23, the third-last race: 21 November 2026 at 04:00 UTC.",
+    "eligibility_note": "Entry is free. The registration email must be confirmed before the Round 23 team lock. Final score verification and payout terms apply.",
     "evidence": "Confirm an email address before the deadline. After the season, submit one official F1 Fantasy team and its full-season score screenshot; a private league remains available as a verification fallback.",
     "prizes_usd": [
       100,
       50,
       30
     ],
-    "eligibility_note": "Entry is free. The registration email must be confirmed before the Round 23 team lock. Final score verification and payout terms apply."
+    "registration_deadline_at": "2026-11-21T04:00:00Z",
+    "registration_deadline_race": "Las Vegas Grand Prix",
+    "registration_deadline_round": 23,
+    "registration_open": true,
+    "registration_window": "Registration is open now and closes at the F1 Fantasy team-lock deadline for Round 23, the third-last race: 21 November 2026 at 04:00 UTC.",
+    "scoring_basis": "full_2026_official_season_total",
+    "status": "registration_open"
   },
-  "research_replay": {
-    "label": "R1-R13 research replay",
-    "disclaimer": "Full-season counterfactual. R1-R3 forecasts were reconstructed, and the V13 policy was selected after the underlying experiments.",
-    "start_round": 1,
-    "end_round": 13,
-    "base_points_before_final_fix": 2572.0,
-    "final_fix_adjustment": 22.0,
-    "total_points": 2594.0,
-    "final_budget": 125.3,
-    "final_bank": 1.3,
-    "genuine_archive_points_before_final_fix": 1784.0,
-    "rounds": [
-      {
-        "round": 1,
-        "race": "Australian Grand Prix",
-        "provenance": "reconstructed",
-        "early_thoughts": {
-          "round": 1,
-          "race": "Australian Grand Prix",
-          "status": "provisional",
-          "phase": "pre_fp",
-          "archive": "web/public/data/predictions_round1_pre_fp.json",
-          "archive_sha256": "49084b8938223f5fb756a9e8d7eb5148ef70ea848a6ec3c0fef67add9ce6f405",
-          "archive_reconstructed": true,
-          "drivers": [
-            "RUS",
-            "OCO",
-            "LIN",
-            "COL",
-            "BOR"
-          ],
-          "constructors": [
-            "mercedes",
-            "williams"
-          ],
-          "captain": "RUS",
-          "second_boost": null,
-          "projected_points": 220.3,
-          "projected_price_gain": 3.2,
-          "downside_risk": 35.0,
-          "transfers": 0,
-          "transfer_penalty": 0,
-          "team_cost": 96.4,
-          "policy": {
-            "policy_version": "horizon_budget_value_v2",
-            "strategy": "budget_builder",
-            "risk_profile": "medium_tolerance",
-            "price_gain_weight": 4.642,
-            "negative_p5_weight": 0.75,
-            "price_value_method": "horizon curve × price reliability × points realisation"
-          }
-        },
-        "post_fp_final": {
-          "status": "frozen_replay",
-          "phase": "post_fp",
-          "archive": "web/public/data/predictions_round1_post_fp.json",
-          "archive_sha256": "aa61e8c98e65d687581943cc224182bf258b6bbd90f9ffc1d77a1eba1d9b2d33",
-          "archive_reconstructed": true,
-          "drivers": [
-            "RUS",
-            "OCO",
-            "LIN",
-            "COL",
-            "BOR"
-          ],
-          "constructors": [
-            "mercedes",
-            "haas"
-          ],
-          "persistent_drivers": [
-            "RUS",
-            "OCO",
-            "LIN",
-            "COL",
-            "BOR"
-          ],
-          "persistent_constructors": [
-            "mercedes",
-            "haas"
-          ],
-          "captain": "RUS",
-          "second_boost": null,
-          "chip": null,
-          "transfers": 0,
-          "transfer_penalty": 0,
-          "projected_points": 225.3,
-          "projected_price_gain": 2.8,
-          "downside_risk": 17.5,
-          "team_cost": 92.4,
-          "budget_before": 100.0,
-          "bank_after_transfers": 7.6,
-          "reasons": [
-            "The post-FP lineup projected 225.3 points.",
-            "It carried $2.8M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 17.5 under V13's medium-risk rule."
-          ]
-        },
-        "final_fix": null,
-        "actual_points": 251.0,
-        "cumulative_points": 251.0,
-        "budget_after": 103.4,
-        "free_transfers_next": 2
+  "current_state": {
+    "as_of_round": 21,
+    "drivers": [
+      "ANT",
+      "LEC",
+      "LIN",
+      "BOR",
+      "HIR_HAAS"
+    ],
+    "constructors": [
+      "mercedes",
+      "ferrari"
+    ],
+    "budget": 138.6,
+    "bank": 1.2,
+    "free_transfers": 3,
+    "chips_remaining": [
+      "3x_boost"
+    ],
+    "chips_used": {
+      "autopilot": 12,
+      "final_fix": 13,
+      "limitless": 8,
+      "no_negative": 10,
+      "wild_card": 7
+    },
+    "next_round": 22,
+    "early_thoughts": {
+      "archive": "web/public/data/predictions_round22_pre_fp_refresh_624cd6732a06d42d.json",
+      "archive_sha256": "624cd6732a06d42de2d7844d677212e11d01729c84a4828d9bf90233e16df9f0",
+      "captain": "VER",
+      "changes": {
+        "constructors_in": [],
+        "constructors_out": [],
+        "drivers_in": [
+          "CAM",
+          "PER",
+          "VER"
+        ],
+        "drivers_out": [
+          "LEC",
+          "LIN",
+          "STR"
+        ]
       },
-      {
-        "round": 2,
-        "race": "Chinese Grand Prix",
-        "provenance": "reconstructed",
-        "early_thoughts": {
-          "round": 2,
-          "race": "Chinese Grand Prix",
-          "status": "provisional",
-          "phase": "pre_fp",
-          "archive": "web/public/data/predictions_round2_pre_fp.json",
-          "archive_sha256": "f268d9b23e36c445575a096fb9e99b46fe3696776ef409b44b04d0442cb07c51",
-          "archive_reconstructed": true,
-          "drivers": [
-            "ANT",
-            "OCO",
-            "LIN",
-            "COL",
-            "BOR"
-          ],
-          "constructors": [
-            "mercedes",
-            "alpine"
-          ],
-          "captain": "ANT",
-          "second_boost": null,
-          "projected_points": 317.5,
-          "projected_price_gain": 3.6,
-          "downside_risk": 25.5,
-          "transfers": 2,
-          "transfer_penalty": 0,
-          "team_cost": 96.7,
-          "policy": {
-            "policy_version": "horizon_budget_value_v2",
-            "strategy": "budget_builder",
-            "risk_profile": "medium_tolerance",
-            "price_gain_weight": 4.642,
-            "negative_p5_weight": 0.75,
-            "price_value_method": "horizon curve × price reliability × points realisation"
-          }
-        },
-        "post_fp_final": {
-          "status": "frozen_replay",
-          "phase": "post_fp",
-          "archive": "web/public/data/predictions_round2_post_fp.json",
-          "archive_sha256": "ee1a91755cd646eec9647269966761384546b28fcfce3583ba874fb64d6d5dd6",
-          "archive_reconstructed": true,
-          "drivers": [
-            "ANT",
-            "OCO",
-            "LIN",
-            "COL",
-            "BOR"
-          ],
-          "constructors": [
-            "mercedes",
-            "alpine"
-          ],
-          "persistent_drivers": [
-            "ANT",
-            "OCO",
-            "LIN",
-            "COL",
-            "BOR"
-          ],
-          "persistent_constructors": [
-            "mercedes",
-            "alpine"
-          ],
-          "captain": "ANT",
-          "second_boost": null,
-          "chip": null,
-          "transfers": 2,
-          "transfer_penalty": 0,
-          "projected_points": 316.3,
-          "projected_price_gain": 3.6,
-          "downside_risk": 27.5,
-          "team_cost": 96.7,
-          "budget_before": 103.4,
-          "bank_after_transfers": 6.7,
-          "reasons": [
-            "The post-FP lineup projected 316.3 points.",
-            "It carried $3.6M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 27.5 under V13's medium-risk rule."
-          ]
-        },
-        "final_fix": null,
-        "actual_points": 331.0,
-        "cumulative_points": 582.0,
-        "budget_after": 103.4,
-        "free_transfers_next": 2
+      "chip": null,
+      "chip_decision": {
+        "reason": "Only post-FP finals can play 3x.",
+        "result": "not_evaluated"
       },
-      {
-        "round": 3,
-        "race": "Japanese Grand Prix",
-        "provenance": "reconstructed",
-        "early_thoughts": {
-          "round": 3,
-          "race": "Japanese Grand Prix",
-          "status": "provisional",
-          "phase": "pre_fp",
-          "archive": "web/public/data/predictions_round3_pre_fp.json",
-          "archive_sha256": "584e14437830b8326ce7589370e9774d2f8997a53594e89d6086a99580d35997",
-          "archive_reconstructed": true,
-          "drivers": [
-            "ANT",
-            "SAI",
-            "OCO",
-            "LIN",
-            "COL"
-          ],
-          "constructors": [
-            "mercedes",
-            "alpine"
-          ],
-          "captain": "ANT",
-          "second_boost": null,
-          "projected_points": 229.3,
-          "projected_price_gain": 3.2,
-          "downside_risk": 25.5,
-          "transfers": 1,
-          "transfer_penalty": 0,
-          "team_cost": 102.5,
-          "policy": {
-            "policy_version": "horizon_budget_value_v2",
-            "strategy": "budget_builder",
-            "risk_profile": "medium_tolerance",
-            "price_gain_weight": 4.642,
-            "negative_p5_weight": 0.75,
-            "price_value_method": "horizon curve × price reliability × points realisation"
-          }
-        },
-        "post_fp_final": {
-          "status": "frozen_replay",
-          "phase": "post_fp",
-          "archive": "web/public/data/predictions_round3_post_fp.json",
-          "archive_sha256": "3b0cfd2f13222bcbf459142d2ed0372859218b57a02bbc7194c173711405c9cc",
-          "archive_reconstructed": true,
-          "drivers": [
-            "ANT",
-            "SAI",
-            "OCO",
-            "LIN",
-            "COL"
-          ],
-          "constructors": [
-            "mercedes",
-            "haas"
-          ],
-          "persistent_drivers": [
-            "ANT",
-            "SAI",
-            "OCO",
-            "LIN",
-            "COL"
-          ],
-          "persistent_constructors": [
-            "mercedes",
-            "haas"
-          ],
-          "captain": "ANT",
-          "second_boost": null,
-          "chip": null,
-          "transfers": 2,
-          "transfer_penalty": 0,
-          "projected_points": 231.3,
-          "projected_price_gain": 3.2,
-          "downside_risk": 17.5,
-          "team_cost": 97.4,
-          "budget_before": 103.4,
-          "bank_after_transfers": 6.0,
-          "reasons": [
-            "The post-FP lineup projected 231.3 points.",
-            "It carried $3.2M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 17.5 under V13's medium-risk rule."
-          ]
-        },
-        "final_fix": null,
-        "actual_points": 206.0,
-        "cumulative_points": 788.0,
-        "budget_after": 106.2,
-        "free_transfers_next": 2
+      "constructors": [
+        "mercedes",
+        "ferrari"
+      ],
+      "correction_reason": "Automatic live forecast refresh: 2026-11-06T11:18:05.173395+00:00 (624cd6732a06d42d).",
+      "downside_risk": 77.1,
+      "drivers": [
+        "ANT",
+        "VER",
+        "PER",
+        "BOR",
+        "CAM"
+      ],
+      "lock_deadline": "2026-11-07T18:00:00Z",
+      "manager": "v13",
+      "phase": "pre_fp",
+      "policy": {
+        "negative_p5_weight": 0.75,
+        "policy_version": "horizon_budget_value_v2",
+        "price_gain_weight": 3.765,
+        "price_value_method": "horizon curve × price reliability × points realisation",
+        "risk_profile": "medium_tolerance",
+        "strategy": "budget_builder"
       },
-      {
-        "round": 6,
-        "race": "Miami Grand Prix",
-        "provenance": "genuine_archive",
-        "early_thoughts": null,
-        "post_fp_final": {
-          "status": "frozen_replay",
-          "phase": "post_fp",
-          "archive": "web/public/data/predictions_round6_post_fp.json",
-          "archive_sha256": "09e90d0a9b9a7704054be5267ca4ddfa4d144a1199e3c7efe58f47d44059387e",
-          "archive_reconstructed": false,
-          "drivers": [
-            "ANT",
-            "LEC",
-            "OCO",
-            "LIN",
-            "LAW"
-          ],
-          "constructors": [
-            "ferrari",
-            "haas"
-          ],
-          "persistent_drivers": [
-            "ANT",
-            "LEC",
-            "OCO",
-            "LIN",
-            "LAW"
-          ],
-          "persistent_constructors": [
-            "ferrari",
-            "haas"
-          ],
-          "captain": "ANT",
-          "second_boost": null,
-          "chip": null,
-          "transfers": 3,
-          "transfer_penalty": 10,
-          "projected_points": 367.1,
-          "projected_price_gain": 3.3,
-          "downside_risk": 0.0,
-          "team_cost": 105.4,
-          "budget_before": 106.2,
-          "bank_after_transfers": 0.8,
-          "reasons": [
-            "The post-FP lineup projected 367.1 points after a 10-point transfer penalty.",
-            "It carried $3.3M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 0.0 under V13's medium-risk rule."
-          ]
-        },
-        "final_fix": null,
-        "actual_points": 179.0,
-        "cumulative_points": 967.0,
-        "budget_after": 108.3,
-        "free_transfers_next": 2
+      "previous_decision": "data/v13/decisions/round22_pre_fp_revision4.json",
+      "previous_decision_sha256": "88a6b8a88b235e2edf6c432a7b56963257758c3c8fa0290eed5b885ba61dd9ba",
+      "price_snapshot_after_round": 21,
+      "projected_points": 191.2,
+      "projected_price_gain": 1.1,
+      "published_at": "2026-11-06T11:18:25.194669+00:00",
+      "race": "Brazilian Grand Prix",
+      "revision": 5,
+      "round": 22,
+      "schema_version": 1,
+      "second_boost": null,
+      "source_generated_at": "2026-11-06T11:18:05.173395+00:00",
+      "status": "corrected_provisional",
+      "supersedes": "data/v13/decisions/round22_pre_fp_revision4.json",
+      "supersedes_sha256": "88a6b8a88b235e2edf6c432a7b56963257758c3c8fa0290eed5b885ba61dd9ba",
+      "team_cost": 133.9,
+      "transfer_penalty": 0,
+      "transfers": 3
+    },
+    "post_fp_final": {
+      "schema_version": 1,
+      "manager": "v13",
+      "round": 22,
+      "race": "Brazilian Grand Prix",
+      "phase": "post_fp",
+      "status": "corrected_before_lock",
+      "published_at": "2026-11-07T15:05:36.501759+00:00",
+      "source_generated_at": "2026-11-07T14:58:25.185660+00:00",
+      "selection_context_sha256": "f361260df79ebd658035fc23a3dd32552e4fbe5a609ceffd7975e876048f9b28",
+      "lock_deadline": "2026-11-07T18:00:00Z",
+      "archive": "web/public/data/predictions_round22_post_fp_refresh_17d12a577cbca3d0.json",
+      "archive_sha256": "17d12a577cbca3d005d6d59bcf5a37a6c3d3513e2c76e63650210e194df81561",
+      "previous_decision": "data/v13/decisions/round22_post_fp_revision4.json",
+      "previous_decision_sha256": "9b4ad7f949eb2e0489ba043f9c50c94e747e17f164ada05a2ca0499e751f598d",
+      "price_snapshot_after_round": 21,
+      "drivers": [
+        "VER",
+        "ANT",
+        "CAM",
+        "PER",
+        "BOR"
+      ],
+      "constructors": [
+        "red_bull",
+        "mercedes"
+      ],
+      "captain": "VER",
+      "second_boost": "ANT",
+      "chip": "3x_boost",
+      "projected_points": 322.2,
+      "projected_points_gross": 332.2,
+      "points_basis": "net_after_transfers",
+      "projected_price_gain": 1.3,
+      "downside_risk": 75.5,
+      "team_cost": 138.4,
+      "transfers": 4,
+      "transfer_penalty": 10,
+      "changes": {
+        "drivers_out": [
+          "HIR_HAAS",
+          "LEC",
+          "LIN"
+        ],
+        "drivers_in": [
+          "CAM",
+          "PER",
+          "VER"
+        ],
+        "constructors_out": [
+          "ferrari"
+        ],
+        "constructors_in": [
+          "red_bull"
+        ]
       },
-      {
-        "round": 7,
-        "race": "Canadian Grand Prix",
-        "provenance": "genuine_archive",
-        "early_thoughts": {
-          "round": 7,
-          "race": "Canadian Grand Prix",
-          "status": "provisional",
-          "phase": "pre_fp",
-          "archive": "web/public/data/predictions_round7_pre_fp.json",
-          "archive_sha256": "a687f084e0e937ea260ea2a988e4093f460503a87b273db66fbee89fddcc175c",
-          "archive_reconstructed": false,
-          "drivers": [
-            "ANT",
-            "ALB",
-            "OCO",
-            "COL",
-            "BOR"
-          ],
-          "constructors": [
-            "mercedes",
-            "williams"
-          ],
-          "captain": "ANT",
-          "second_boost": null,
-          "projected_points": 308.8,
-          "projected_price_gain": 3.6,
-          "downside_risk": 23.0,
-          "transfers": 5,
-          "transfer_penalty": 0,
-          "team_cost": 102.0,
-          "policy": {
-            "policy_version": "horizon_budget_value_v2",
-            "strategy": "budget_builder",
-            "risk_profile": "medium_tolerance",
-            "price_gain_weight": 4.642,
-            "negative_p5_weight": 0.75,
-            "price_value_method": "horizon curve × price reliability × points realisation"
-          }
-        },
-        "post_fp_final": {
-          "status": "frozen_replay",
-          "phase": "post_fp",
-          "archive": "web/public/data/predictions_round7_post_fp.json",
-          "archive_sha256": "87cff6e7c70bcae9cf5a6a28ab9c698974eb1a863bbd4bbc0726edd9030dd982",
-          "archive_reconstructed": false,
-          "drivers": [
-            "ANT",
-            "HAM",
-            "COL",
-            "BOR",
-            "PER"
-          ],
-          "constructors": [
-            "mercedes",
-            "racing_bulls"
-          ],
-          "persistent_drivers": [
-            "ANT",
-            "HAM",
-            "COL",
-            "BOR",
-            "PER"
-          ],
-          "persistent_constructors": [
-            "mercedes",
-            "racing_bulls"
-          ],
-          "captain": "ANT",
-          "second_boost": null,
-          "chip": "wild_card",
-          "transfers": 6,
-          "transfer_penalty": 0,
-          "projected_points": 317.2,
-          "projected_price_gain": 2.7,
-          "downside_risk": 29.0,
-          "team_cost": 108.1,
-          "budget_before": 108.3,
-          "bank_after_transfers": 0.2,
-          "reasons": [
-            "The post-FP lineup projected 317.2 points.",
-            "It carried $2.7M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 29.0 under V13's medium-risk rule.",
-            "V13 played Wild Card under the frozen research chip policy."
-          ]
-        },
-        "final_fix": null,
-        "actual_points": 283.0,
-        "cumulative_points": 1250.0,
-        "budget_after": 109.8,
-        "free_transfers_next": 2
+      "chip_decision": {
+        "result": "play",
+        "current_selected_team_extra_points": 74.9,
+        "largest_remaining_priors_top_two": 65.9,
+        "largest_remaining_priors_round": 23,
+        "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast."
       },
-      {
-        "round": 8,
-        "race": "Monaco Grand Prix",
-        "provenance": "genuine_archive",
-        "early_thoughts": {
-          "round": 8,
-          "race": "Monaco Grand Prix",
-          "status": "provisional",
-          "phase": "pre_fp",
-          "archive": "web/public/data/predictions_round8_pre_fp.json",
-          "archive_sha256": "2223a185f6af115e52b4dd8b8b27445d62fcbd027c3b9d75cafa1b135bba641b",
-          "archive_reconstructed": false,
-          "drivers": [
-            "RUS",
-            "PIA",
-            "ANT",
-            "LEC",
-            "HAM"
-          ],
-          "constructors": [
-            "mercedes",
-            "ferrari"
-          ],
-          "captain": "ANT",
-          "second_boost": null,
-          "projected_points": 290.9,
-          "projected_price_gain": 1.1,
-          "downside_risk": 3.0,
-          "transfers": 4,
-          "transfer_penalty": 0,
-          "team_cost": 181.5,
-          "policy": {
-            "policy_version": "horizon_budget_value_v2",
-            "strategy": "budget_builder",
-            "risk_profile": "medium_tolerance",
-            "price_gain_weight": 4.642,
-            "negative_p5_weight": 0.75,
-            "price_value_method": "horizon curve × price reliability × points realisation"
-          }
-        },
-        "post_fp_final": {
-          "status": "frozen_replay",
-          "phase": "post_fp",
-          "archive": "web/public/data/predictions_round8_post_fp.json",
-          "archive_sha256": "64d090a1a5b5eb61a56ed2739f452c6a945624d1c15945602cbd06c779fa9752",
-          "archive_reconstructed": false,
-          "drivers": [
-            "RUS",
-            "PIA",
-            "ANT",
-            "LEC",
-            "HAM"
-          ],
-          "constructors": [
-            "mercedes",
-            "ferrari"
-          ],
-          "persistent_drivers": [
-            "ANT",
-            "HAM",
-            "COL",
-            "BOR",
-            "PER"
-          ],
-          "persistent_constructors": [
-            "mercedes",
-            "racing_bulls"
-          ],
-          "captain": "LEC",
-          "second_boost": null,
-          "chip": "limitless",
-          "transfers": 0,
-          "transfer_penalty": 0,
-          "projected_points": 310.6,
-          "projected_price_gain": 1.3,
-          "downside_risk": 6.0,
-          "team_cost": 181.5,
-          "budget_before": 109.8,
-          "bank_after_transfers": 0.2,
-          "reasons": [
-            "The post-FP lineup projected 310.6 points.",
-            "It carried $1.3M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 6.0 under V13's medium-risk rule.",
-            "V13 played Limitless under the frozen research chip policy."
-          ]
-        },
-        "final_fix": null,
-        "actual_points": 171.0,
-        "cumulative_points": 1421.0,
-        "budget_after": 111.9,
-        "free_transfers_next": 2
+      "policy": {
+        "policy_version": "horizon_budget_value_v2",
+        "strategy": "budget_builder",
+        "risk_profile": "medium_tolerance",
+        "price_gain_weight": 3.765,
+        "negative_p5_weight": 0.75,
+        "price_value_method": "horizon curve × price reliability × points realisation"
       },
-      {
-        "round": 9,
-        "race": "Spanish Grand Prix",
-        "provenance": "genuine_archive",
-        "early_thoughts": {
-          "round": 9,
-          "race": "Spanish Grand Prix",
-          "status": "provisional",
-          "phase": "pre_fp",
-          "archive": "web/public/data/predictions_round9_pre_fp.json",
-          "archive_sha256": "84080efba1207d177d0236cb3f83cf614cdc34978716218d8def6d2f0fa463ae",
-          "archive_reconstructed": false,
-          "drivers": [
-            "ANT",
-            "GAS",
-            "COL",
-            "BOR",
-            "HUL"
-          ],
-          "constructors": [
-            "mercedes",
-            "ferrari"
-          ],
-          "captain": "ANT",
-          "second_boost": null,
-          "projected_points": 241.9,
-          "projected_price_gain": 2.1,
-          "downside_risk": 33.0,
-          "transfers": 3,
-          "transfer_penalty": 10,
-          "team_cost": 111.0,
-          "policy": {
-            "policy_version": "horizon_budget_value_v2",
-            "strategy": "budget_builder",
-            "risk_profile": "medium_tolerance",
-            "price_gain_weight": 4.642,
-            "negative_p5_weight": 0.75,
-            "price_value_method": "horizon curve × price reliability × points realisation"
-          }
-        },
-        "post_fp_final": {
-          "status": "frozen_replay",
-          "phase": "post_fp",
-          "archive": "web/public/data/predictions_round9_post_fp.json",
-          "archive_sha256": "82dc4d616054343e358d98ef075029b0b9f5b2b065ee595149741eeecd82fb12",
-          "archive_reconstructed": false,
-          "drivers": [
-            "ANT",
-            "HAM",
-            "OCO",
-            "COL",
-            "BOR"
-          ],
-          "constructors": [
-            "mercedes",
-            "audi"
-          ],
-          "persistent_drivers": [
-            "ANT",
-            "HAM",
-            "OCO",
-            "COL",
-            "BOR"
-          ],
-          "persistent_constructors": [
-            "mercedes",
-            "audi"
-          ],
-          "captain": "ANT",
-          "second_boost": null,
-          "chip": null,
-          "transfers": 2,
-          "transfer_penalty": 0,
-          "projected_points": 196.1,
-          "projected_price_gain": 1.7,
-          "downside_risk": 7.5,
-          "team_cost": 108.9,
-          "budget_before": 111.9,
-          "bank_after_transfers": 3.0,
-          "reasons": [
-            "The post-FP lineup projected 196.1 points.",
-            "It carried $1.7M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 7.5 under V13's medium-risk rule."
-          ]
-        },
-        "final_fix": null,
-        "actual_points": 113.0,
-        "cumulative_points": 1534.0,
-        "budget_after": 114.4,
-        "free_transfers_next": 2
-      },
-      {
-        "round": 10,
-        "race": "Austrian Grand Prix",
-        "provenance": "genuine_archive",
-        "early_thoughts": {
-          "round": 10,
-          "race": "Austrian Grand Prix",
-          "status": "provisional",
-          "phase": "pre_fp",
-          "archive": "web/public/data/predictions_round10_pre_fp.json",
-          "archive_sha256": "59d143df35ab1d4b626ae5d22447ef78e138c701271c29f3c9099b1ca36e3097",
-          "archive_reconstructed": false,
-          "drivers": [
-            "ANT",
-            "HAM",
-            "OCO",
-            "LIN",
-            "BOR"
-          ],
-          "constructors": [
-            "mercedes",
-            "racing_bulls"
-          ],
-          "captain": "ANT",
-          "second_boost": null,
-          "projected_points": 206.3,
-          "projected_price_gain": 1.9,
-          "downside_risk": 27.7,
-          "transfers": 2,
-          "transfer_penalty": 0,
-          "team_cost": 113.1,
-          "policy": {
-            "policy_version": "horizon_budget_value_v2",
-            "strategy": "budget_builder",
-            "risk_profile": "medium_tolerance",
-            "price_gain_weight": 4.641,
-            "negative_p5_weight": 0.75,
-            "price_value_method": "horizon curve × price reliability × points realisation"
-          }
-        },
-        "post_fp_final": {
-          "status": "frozen_replay",
-          "phase": "post_fp",
-          "archive": "web/public/data/predictions_round10_post_fp.json",
-          "archive_sha256": "dc832b7861355f7f1245061129cf75b0c72501c558893f6d27de29e72e32107a",
-          "archive_reconstructed": false,
-          "drivers": [
-            "ANT",
-            "HAM",
-            "OCO",
-            "LIN",
-            "BOR"
-          ],
-          "constructors": [
-            "mercedes",
-            "racing_bulls"
-          ],
-          "persistent_drivers": [
-            "ANT",
-            "HAM",
-            "OCO",
-            "LIN",
-            "BOR"
-          ],
-          "persistent_constructors": [
-            "mercedes",
-            "racing_bulls"
-          ],
-          "captain": "ANT",
-          "second_boost": null,
-          "chip": "no_negative",
-          "transfers": 2,
-          "transfer_penalty": 0,
-          "projected_points": 199.8,
-          "projected_price_gain": 1.9,
-          "downside_risk": 24.4,
-          "team_cost": 113.1,
-          "budget_before": 114.4,
-          "bank_after_transfers": 1.3,
-          "reasons": [
-            "The post-FP lineup projected 199.8 points.",
-            "It carried $1.9M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 24.4 under V13's medium-risk rule.",
-            "V13 played No Negative under the frozen research chip policy."
-          ]
-        },
-        "final_fix": null,
-        "actual_points": 238.0,
-        "cumulative_points": 1772.0,
-        "budget_after": 116.3,
-        "free_transfers_next": 2
-      },
-      {
-        "round": 11,
-        "race": "British Grand Prix",
-        "provenance": "genuine_archive",
-        "early_thoughts": {
-          "round": 11,
-          "race": "British Grand Prix",
-          "status": "provisional",
-          "phase": "pre_fp",
-          "archive": "web/public/data/predictions_round11_pre_fp.json",
-          "archive_sha256": "6de37e3a121de199c8af4ee7131f76b8064b3ff8746d6f831bcc29a26f7b2c45",
-          "archive_reconstructed": false,
-          "drivers": [
-            "VER",
-            "HAM",
-            "LIN",
-            "LAW",
-            "BOR"
-          ],
-          "constructors": [
-            "mercedes",
-            "racing_bulls"
-          ],
-          "captain": "VER",
-          "second_boost": null,
-          "projected_points": 230.7,
-          "projected_price_gain": 2.3,
-          "downside_risk": 51.5,
-          "transfers": 2,
-          "transfer_penalty": 0,
-          "team_cost": 116.3,
-          "policy": {
-            "policy_version": "horizon_budget_value_v2",
-            "strategy": "budget_builder",
-            "risk_profile": "medium_tolerance",
-            "price_gain_weight": 4.64,
-            "negative_p5_weight": 0.75,
-            "price_value_method": "horizon curve × price reliability × points realisation"
-          }
-        },
-        "post_fp_final": {
-          "status": "frozen_replay",
-          "phase": "post_fp",
-          "archive": "web/public/data/predictions_round11_post_fp.json",
-          "archive_sha256": "c7d46b32fb4a996871f1f582a9bc3da516291dbf8ffdfc4dd7ee570c0717ae5d",
-          "archive_reconstructed": false,
-          "drivers": [
-            "HAM",
-            "OCO",
-            "LIN",
-            "COL",
-            "BOR"
-          ],
-          "constructors": [
-            "mercedes",
-            "ferrari"
-          ],
-          "persistent_drivers": [
-            "HAM",
-            "OCO",
-            "LIN",
-            "COL",
-            "BOR"
-          ],
-          "persistent_constructors": [
-            "mercedes",
-            "ferrari"
-          ],
-          "captain": "HAM",
-          "second_boost": null,
-          "chip": null,
-          "transfers": 2,
-          "transfer_penalty": 0,
-          "projected_points": 248.3,
-          "projected_price_gain": 1.7,
-          "downside_risk": 44.1,
-          "team_cost": 114.0,
-          "budget_before": 116.3,
-          "bank_after_transfers": 2.3,
-          "reasons": [
-            "The post-FP lineup projected 248.3 points.",
-            "It carried $1.7M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 44.1 under V13's medium-risk rule."
-          ]
-        },
-        "final_fix": null,
-        "actual_points": 330.0,
-        "cumulative_points": 2102.0,
-        "budget_after": 119.2,
-        "free_transfers_next": 2
-      },
-      {
-        "round": 12,
-        "race": "Belgian Grand Prix",
-        "provenance": "genuine_archive",
-        "early_thoughts": {
-          "round": 12,
-          "race": "Belgian Grand Prix",
-          "status": "provisional",
-          "phase": "pre_fp",
-          "archive": "web/public/data/predictions_round12_pre_fp.json",
-          "archive_sha256": "ef13d9b53df90fa070255468d1e04aa552f188b1c3ed16681d2fc1f1e5dba184",
-          "archive_reconstructed": false,
-          "drivers": [
-            "ANT",
-            "OCO",
-            "LIN",
-            "COL",
-            "BOR"
-          ],
-          "constructors": [
-            "mercedes",
-            "ferrari"
-          ],
-          "captain": "ANT",
-          "second_boost": null,
-          "projected_points": 159.0,
-          "projected_price_gain": 2.7,
-          "downside_risk": 77.4,
-          "transfers": 1,
-          "transfer_penalty": 0,
-          "team_cost": 117.4,
-          "policy": {
-            "policy_version": "horizon_budget_value_v2",
-            "strategy": "budget_builder",
-            "risk_profile": "medium_tolerance",
-            "price_gain_weight": 4.639,
-            "negative_p5_weight": 0.75,
-            "price_value_method": "horizon curve × price reliability × points realisation"
-          }
-        },
-        "post_fp_final": {
-          "status": "frozen_replay",
-          "phase": "post_fp",
-          "archive": "web/public/data/predictions_round12_post_fp.json",
-          "archive_sha256": "974ab67bebaa7aa503f21494b9071813de79aa907a6ce8b778ab8e346841c394",
-          "archive_reconstructed": false,
-          "drivers": [
-            "HAM",
-            "HAD",
-            "LIN",
-            "COL",
-            "BOR"
-          ],
-          "constructors": [
-            "red_bull",
-            "ferrari"
-          ],
-          "persistent_drivers": [
-            "HAM",
-            "HAD",
-            "LIN",
-            "COL",
-            "BOR"
-          ],
-          "persistent_constructors": [
-            "red_bull",
-            "ferrari"
-          ],
-          "captain": "HAD",
-          "second_boost": null,
-          "chip": "autopilot",
-          "transfers": 2,
-          "transfer_penalty": 0,
-          "projected_points": 225.5,
-          "projected_price_gain": 2.7,
-          "downside_risk": 67.0,
-          "team_cost": 118.2,
-          "budget_before": 119.2,
-          "bank_after_transfers": 1.0,
-          "reasons": [
-            "The post-FP lineup projected 225.5 points.",
-            "It carried $2.7M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 67.0 under V13's medium-risk rule.",
-            "V13 played Autopilot under the frozen research chip policy."
-          ]
-        },
-        "final_fix": null,
-        "actual_points": 269.0,
-        "cumulative_points": 2371.0,
-        "budget_after": 122.3,
-        "free_transfers_next": 2
-      },
-      {
-        "round": 13,
-        "race": "Hungarian Grand Prix",
-        "provenance": "genuine_archive",
-        "early_thoughts": {
-          "round": 13,
-          "race": "Hungarian Grand Prix",
-          "status": "provisional",
-          "phase": "pre_fp",
-          "archive": "web/public/data/predictions_round13_pre_fp.json",
-          "archive_sha256": "ccd13832cc31750eb01d94f2e683a6eda0632c717a170b4a48ed3ceaa742dd76",
-          "archive_reconstructed": false,
-          "drivers": [
-            "HAM",
-            "HAD",
-            "LIN",
-            "LAW",
-            "BOR"
-          ],
-          "constructors": [
-            "mercedes",
-            "ferrari"
-          ],
-          "captain": "HAM",
-          "second_boost": null,
-          "projected_points": 173.1,
-          "projected_price_gain": 2.3,
-          "downside_risk": 67.0,
-          "transfers": 2,
-          "transfer_penalty": 0,
-          "team_cost": 121.7,
-          "policy": {
-            "policy_version": "horizon_budget_value_v2",
-            "strategy": "budget_builder",
-            "risk_profile": "medium_tolerance",
-            "price_gain_weight": 4.636,
-            "negative_p5_weight": 0.75,
-            "price_value_method": "horizon curve × price reliability × points realisation"
-          }
-        },
-        "post_fp_final": {
-          "status": "frozen_replay",
-          "phase": "post_fp",
-          "archive": "web/public/data/predictions_round13_post_fp.json",
-          "archive_sha256": "f010fae21efe2c5662bdf10f1747ebe016051d89710d840aaf7e05f111050924",
-          "archive_reconstructed": false,
-          "drivers": [
-            "HAM",
-            "HAD",
-            "LIN",
-            "LAW",
-            "BOR"
-          ],
-          "constructors": [
-            "mclaren",
-            "ferrari"
-          ],
-          "persistent_drivers": [
-            "HAM",
-            "HAD",
-            "LIN",
-            "LAW",
-            "BOR"
-          ],
-          "persistent_constructors": [
-            "mclaren",
-            "ferrari"
-          ],
-          "captain": "HAM",
-          "second_boost": null,
-          "chip": null,
-          "transfers": 2,
-          "transfer_penalty": 0,
-          "projected_points": 187.0,
-          "projected_price_gain": 1.9,
-          "downside_risk": 65.0,
-          "team_cost": 120.1,
-          "budget_before": 122.3,
-          "bank_after_transfers": 2.2,
-          "reasons": [
-            "The post-FP lineup projected 187.0 points.",
-            "It carried $1.9M of forecast price movement into the budget-first objective.",
-            "Its combined negative-P5 exposure was 65.0 under V13's medium-risk rule."
-          ]
-        },
-        "final_fix": {
-          "outgoing": "HAM",
-          "incoming": "NOR",
-          "outgoing_name": "Lewis Hamilton",
-          "incoming_name": "Lando Norris",
-          "projected_gain": 3.4,
-          "bank_before": 2.2,
-          "bank_after": 1.3,
-          "boost_transferred": true,
-          "actual_gain": 22.0,
-          "status": "played",
-          "phase": "post_quali",
-          "round": 13,
-          "archive": "web/public/data/predictions_round13.json",
-          "archive_sha256": "da37bc564ba27f82c4ecadb7652270e8ef0ee1f61440328ec2823b7295de52b3",
-          "generated_at": "2026-07-25T22:06:20.359358+00:00",
-          "points_basis": "projected_points_race",
-          "banked_qualifying_driver": "HAM"
-        },
-        "actual_points": 223.0,
-        "cumulative_points": 2594.0,
-        "budget_after": 125.3,
-        "free_transfers_next": 2
-      }
-    ]
+      "revision": 5,
+      "correction_reason": "Automatic live forecast refresh: 2026-11-07T14:58:25.185660+00:00 (17d12a577cbca3d0; state f361260df79ebd65).",
+      "supersedes": "data/v13/decisions/round22_post_fp_revision4.json",
+      "supersedes_sha256": "9b4ad7f949eb2e0489ba043f9c50c94e747e17f164ada05a2ca0499e751f598d"
+    }
+  },
+  "generated_at": "2026-11-07T17:05:36.521548+02:00",
+  "labels": {
+    "constructors": {
+      "alpine": "Alpine",
+      "aston_martin": "Aston Martin",
+      "audi": "Audi",
+      "cadillac": "Cadillac",
+      "ferrari": "Ferrari",
+      "haas": "Haas",
+      "mclaren": "McLaren",
+      "mercedes": "Mercedes",
+      "racing_bulls": "Racing Bulls",
+      "red_bull": "Red Bull",
+      "williams": "Williams"
+    },
+    "drivers": {
+      "ALB": "Alex Albon",
+      "ALO": "Fernando Alonso",
+      "ANT": "Kimi Antonelli",
+      "BEA": "Oliver Bearman",
+      "BOR": "Gabriel Bortoleto",
+      "BOT": "Valtteri Bottas",
+      "COL": "Franco Colapinto",
+      "GAS": "Pierre Gasly",
+      "HAD": "Isack Hadjar",
+      "HAM": "Lewis Hamilton",
+      "HUL": "Nico Hulkenberg",
+      "LAW": "Liam Lawson",
+      "LEC": "Charles Leclerc",
+      "LIN": "Arvid Lindblad",
+      "NOR": "Lando Norris",
+      "OCO": "Esteban Ocon",
+      "PER": "Sergio Perez",
+      "PIA": "Oscar Piastri",
+      "RUS": "George Russell",
+      "SAI": "Carlos Sainz",
+      "STR": "Lance Stroll",
+      "VER": "Max Verstappen",
+      "LAW_RED_BULL": "Liam Lawson",
+      "TSU_RACING_BULLS": "Yuki Tsunoda",
+      "HIR_HAAS": "Ryo Hirakawa",
+      "CAM": "Rafael Câmara"
+    }
   },
   "live_history": [
     {
-      "round": 14,
-      "race": "Dutch Grand Prix",
-      "provenance": "live",
+      "actual_captain": "HAM",
+      "actual_points": 246.0,
+      "actual_second_boost": null,
+      "bank_after": 0.4,
+      "budget_after": 127.3,
+      "cumulative_points": 2840.0,
       "early_thoughts": {
         "archive": "web/public/data/predictions_round14_pre_fp_availability_corrected.json",
         "archive_sha256": "a59e02c5080f9feb0ecc37f1825e13b6fe333cdf0559877a6fa4aef1029d73d3",
@@ -1108,30 +301,20 @@
         "transfer_penalty": 10,
         "transfers": 3
       },
+      "final_fix": null,
+      "free_transfers_next": 2,
       "post_fp_final": {
-        "archive": "web/public/data/predictions_round14_post_fp.json",
-        "archive_sha256": "2822e3c8c0dfcdfa606f55ee033175101fbe9fdb661b2c5bff798bf3b34c076c",
+        "archive": "web/public/data/v13_sources/round14_512175ae0fd122af.json",
+        "archive_sha256": "512175ae0fd122afc4c49c13dd0270721753c9b84a45ef6159208b07fdc4283a",
+        "budget_before": 125.6,
         "captain": "HAM",
-        "changes": {
-          "constructors_in": [],
-          "constructors_out": [],
-          "drivers_in": [
-            "HAM",
-            "HUL",
-            "LEC"
-          ],
-          "drivers_out": [
-            "HAD",
-            "LAW",
-            "NOR"
-          ]
-        },
         "chip": null,
         "chip_decision": {
-          "current_selected_team_extra_points": 53.0,
+          "current_selected_team_extra_points": 48.6,
+          "horizon_sha256": "6065b40ede1738e915dc47152a4b13ca7a56baa59b489f91d0c3b5b41751743a",
           "largest_remaining_priors_round": 18,
           "largest_remaining_priors_top_two": 92.6,
-          "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast.",
+          "reason": "Archived pre-lock horizon comparison",
           "result": "save"
         },
         "constructors": [
@@ -1146,50 +329,55 @@
           "BOR",
           "HUL"
         ],
+        "fp_sessions_included": [],
         "lock_deadline": "2026-08-22T10:00:00Z",
-        "manager": "v13",
+        "persistent_constructors": [
+          "mclaren",
+          "ferrari"
+        ],
+        "persistent_drivers": [
+          "LEC",
+          "HAM",
+          "LIN",
+          "BOR",
+          "HUL"
+        ],
         "phase": "post_fp",
         "policy": {
           "negative_p5_weight": 0.75,
-          "price_gain_weight": 20.0,
+          "policy_version": "horizon_budget_value_v2",
+          "price_gain_weight": 4.632,
+          "price_value_method": "horizon curve × price reliability × points realisation",
           "risk_profile": "medium_tolerance",
           "strategy": "budget_builder"
         },
-        "previous_decision": "data/v13/decisions/round14_pre_fp_revision6.json",
-        "previous_decision_sha256": "cf8b1386017bbac65ed74d1556c0044577e170a776d6e9828a64c9357ddfa5f2",
-        "price_snapshot_after_round": 13,
-        "projected_points": 221.6,
+        "projected_points": 202.9,
         "projected_price_gain": 1.6,
-        "published_at": "2026-08-21T15:52:22.437515+00:00",
         "race": "Dutch Grand Prix",
         "round": 14,
-        "schema_version": 1,
         "second_boost": null,
-        "source_generated_at": "2026-08-21T14:54:16.934088+00:00",
-        "status": "frozen_before_lock",
+        "source_generated_at": "2026-08-21T15:48:55.929450+00:00",
+        "source_quality": "pre_lock",
+        "status": "retrospective_correction",
         "team_cost": 125.2,
         "transfer_penalty": 10,
         "transfers": 3,
-        "reasons": [
-          "The post-FP lineup projected 221.6 points after a 10-point transfer penalty.",
-          "It carried $1.6M of forecast price movement into the budget-first objective.",
-          "Its combined negative-P5 exposure was 58.0 under V13's medium-risk rule."
-        ]
+        "projected_points_gross": 212.9,
+        "points_basis": "net_after_transfers"
       },
-      "final_fix": null,
-      "actual_points": 246.0,
-      "projected_points": 221.6,
-      "score_delta_vs_projection": 24.4,
-      "cumulative_points": 2840.0,
-      "budget_after": 127.0,
-      "free_transfers_next": 2,
-      "actual_captain": "HAM",
-      "actual_second_boost": null
+      "projected_points": 202.9,
+      "provenance": "corrected_replay",
+      "race": "Dutch Grand Prix",
+      "round": 14,
+      "score_delta_vs_projection": 43.1
     },
     {
-      "round": 15,
-      "race": "Italian Grand Prix",
-      "provenance": "live",
+      "actual_captain": "ANT",
+      "actual_points": 358.0,
+      "actual_second_boost": null,
+      "bank_after": 0.7,
+      "budget_after": 129.5,
+      "cumulative_points": 3198.0,
       "early_thoughts": {
         "archive": "web/public/data/predictions_round15_pre_fp.json",
         "archive_sha256": "f994b78ef700d056924e165bc88bb9390fe27d586bc3b923597f9095a7d81fe4",
@@ -1258,39 +446,26 @@
         "transfer_penalty": 10,
         "transfers": 3
       },
+      "final_fix": null,
+      "free_transfers_next": 2,
       "post_fp_final": {
-        "archive": "web/public/data/predictions_round15_post_fp.json",
-        "archive_sha256": "9634176542be13dfb1378401cbc560ad1f043c6d5223227b246cc0143f1f0822",
+        "archive": "web/public/data/v13_sources/round15_a6581a22e747090b.json",
+        "archive_sha256": "a6581a22e747090bd7e4a48738280acfda1c3e4959abc97714e21f30018e11bc",
+        "budget_before": 127.3,
         "captain": "ANT",
-        "changes": {
-          "constructors_in": [
-            "mercedes"
-          ],
-          "constructors_out": [
-            "mclaren"
-          ],
-          "drivers_in": [
-            "ALB",
-            "ANT"
-          ],
-          "drivers_out": [
-            "BOR",
-            "HAM"
-          ]
-        },
         "chip": null,
         "chip_decision": {
           "current_selected_team_extra_points": 68.8,
+          "horizon_sha256": "1c7d0774b5ec173a76f7cc7126a4d035eba828ea83b4bb444d9f82d75de6b560",
           "largest_remaining_priors_round": 18,
           "largest_remaining_priors_top_two": 96.5,
-          "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast.",
+          "reason": "Archived pre-lock horizon comparison",
           "result": "save"
         },
         "constructors": [
           "mercedes",
           "ferrari"
         ],
-        "correction_reason": "Replace premature FP2 freeze with verified FP3 lock-time forecast; include confirmed Antonelli and Albon back-of-grid penalties.",
         "downside_risk": 67.2,
         "drivers": [
           "ANT",
@@ -1299,55 +474,55 @@
           "LIN",
           "HUL"
         ],
+        "fp_sessions_included": [],
         "lock_deadline": "2026-09-05T14:00:00Z",
-        "manager": "v13",
+        "persistent_constructors": [
+          "mercedes",
+          "ferrari"
+        ],
+        "persistent_drivers": [
+          "ANT",
+          "LEC",
+          "ALB",
+          "LIN",
+          "HUL"
+        ],
         "phase": "post_fp",
         "policy": {
           "negative_p5_weight": 0.75,
           "policy_version": "horizon_budget_value_v2",
-          "price_gain_weight": 4.611,
+          "price_gain_weight": 4.624,
           "price_value_method": "horizon curve × price reliability × points realisation",
           "risk_profile": "medium_tolerance",
           "strategy": "budget_builder"
         },
-        "previous_decision": "data/v13/decisions/round15_post_fp.json",
-        "previous_decision_sha256": "6e47419a6951f0b18487e788c348ce8be192ec3e90706d08989c379afc701ebe",
-        "price_snapshot_after_round": 14,
-        "projected_points": 273.0,
+        "projected_points": 263.0,
         "projected_price_gain": 1.4,
-        "published_at": "2026-09-05T12:46:46.233246+00:00",
         "race": "Italian Grand Prix",
-        "revision": 2,
         "round": 15,
-        "schema_version": 1,
         "second_boost": null,
         "source_generated_at": "2026-09-05T12:46:28.389522+00:00",
-        "status": "corrected_before_lock",
-        "supersedes": "data/v13/decisions/round15_post_fp.json",
-        "supersedes_sha256": "6e47419a6951f0b18487e788c348ce8be192ec3e90706d08989c379afc701ebe",
+        "source_quality": "pre_lock",
+        "status": "retrospective_correction",
         "team_cost": 126.6,
         "transfer_penalty": 10,
         "transfers": 3,
-        "reasons": [
-          "The post-FP lineup projected 273.0 points after a 10-point transfer penalty.",
-          "It carried $1.4M of forecast price movement into the budget-first objective.",
-          "Its combined negative-P5 exposure was 67.2 under V13's medium-risk rule."
-        ]
+        "projected_points_gross": 273.0,
+        "points_basis": "net_after_transfers"
       },
-      "final_fix": null,
-      "actual_points": 358.0,
-      "projected_points": 273.0,
-      "score_delta_vs_projection": 85.0,
-      "cumulative_points": 3198.0,
-      "budget_after": 129.2,
-      "free_transfers_next": 2,
-      "actual_captain": "ANT",
-      "actual_second_boost": null
+      "projected_points": 263.0,
+      "provenance": "corrected_replay",
+      "race": "Italian Grand Prix",
+      "round": 15,
+      "score_delta_vs_projection": 95.0
     },
     {
-      "round": 16,
-      "race": "Spanish Grand Prix (Madrid)",
-      "provenance": "live",
+      "actual_captain": "ANT",
+      "actual_points": 187.0,
+      "actual_second_boost": null,
+      "bank_after": 0.9,
+      "budget_after": 131.5,
+      "cumulative_points": 3385.0,
       "early_thoughts": {
         "archive": "web/public/data/predictions_round16_pre_fp.json",
         "archive_sha256": "f6b9f13f4229804f4c7ffde60f260855fc747e2d2b616b824b16fdd77c084f40",
@@ -1412,88 +587,83 @@
         "transfer_penalty": 0,
         "transfers": 2
       },
+      "final_fix": null,
+      "free_transfers_next": 2,
       "post_fp_final": {
-        "archive": "web/public/data/predictions_round16_post_fp.json",
-        "archive_sha256": "6a8b68c00ce41be8d923d8f0dcb0a278a7bac01ab69250db5b0f2e76e385ba83",
+        "archive": "web/public/data/v13_sources/round16_ad6bef1651738b8d.json",
+        "archive_sha256": "ad6bef1651738b8d59e19b188c20b227ea31981ea72ddc89e5c1c06ed4928f3f",
+        "budget_before": 129.5,
         "captain": "ANT",
-        "changes": {
-          "constructors_in": [],
-          "constructors_out": [],
-          "drivers_in": [
-            "HAM",
-            "PER"
-          ],
-          "drivers_out": [
-            "ALB",
-            "LEC"
-          ]
-        },
         "chip": null,
         "chip_decision": {
-          "current_selected_team_extra_points": 49.6,
+          "current_selected_team_extra_points": 52.5,
+          "horizon_sha256": "edc60576459a7ba7e1a5f6336e6c5f3bcfd14bd61c4ff254a384a84e670358a3",
           "largest_remaining_priors_round": 18,
-          "largest_remaining_priors_top_two": 95.6,
-          "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast.",
+          "largest_remaining_priors_top_two": 97.4,
+          "reason": "Archived pre-lock horizon comparison",
           "result": "save"
         },
         "constructors": [
           "mercedes",
           "ferrari"
         ],
-        "downside_risk": 59.4,
+        "downside_risk": 63.0,
         "drivers": [
+          "NOR",
           "ANT",
-          "HAM",
-          "HUL",
           "LIN",
-          "PER"
+          "PER",
+          "HUL"
         ],
+        "fp_sessions_included": [],
         "lock_deadline": "2026-09-12T14:00:00Z",
-        "manager": "v13",
+        "persistent_constructors": [
+          "mercedes",
+          "ferrari"
+        ],
+        "persistent_drivers": [
+          "NOR",
+          "ANT",
+          "LIN",
+          "PER",
+          "HUL"
+        ],
         "phase": "post_fp",
         "policy": {
           "negative_p5_weight": 0.75,
           "policy_version": "horizon_budget_value_v2",
-          "price_gain_weight": 4.588,
+          "price_gain_weight": 4.611,
           "price_value_method": "horizon curve × price reliability × points realisation",
           "risk_profile": "medium_tolerance",
           "strategy": "budget_builder"
         },
-        "previous_decision": "data/v13/decisions/round16_pre_fp_revision2.json",
-        "previous_decision_sha256": "7ca3fdc8b802b9af6c5d11807e3f7b3655fbf571c52e28b7124cc12699d78c69",
-        "price_snapshot_after_round": 15,
-        "projected_points": 211.7,
-        "projected_price_gain": 2.4,
-        "published_at": "2026-09-11T13:12:48.645525+00:00",
+        "projected_points": 206.2,
+        "projected_price_gain": 2.6,
         "race": "Spanish Grand Prix (Madrid)",
         "round": 16,
-        "schema_version": 1,
         "second_boost": null,
-        "source_generated_at": "2026-09-11T13:11:27.403222+00:00",
-        "status": "frozen_before_lock",
-        "team_cost": 127.1,
+        "source_generated_at": "2026-09-12T12:31:39.283972+00:00",
+        "source_quality": "pre_lock",
+        "status": "retrospective_correction",
+        "team_cost": 128.6,
         "transfer_penalty": 0,
         "transfers": 2,
-        "reasons": [
-          "The post-FP lineup projected 211.7 points.",
-          "It carried $2.4M of forecast price movement into the budget-first objective.",
-          "Its combined negative-P5 exposure was 59.4 under V13's medium-risk rule."
-        ]
+        "projected_points_gross": 206.2,
+        "points_basis": "net_after_transfers"
       },
-      "final_fix": null,
-      "actual_points": 151.0,
-      "projected_points": 211.7,
-      "score_delta_vs_projection": -60.7,
-      "cumulative_points": 3349.0,
-      "budget_after": 130.6,
-      "free_transfers_next": 2,
-      "actual_captain": "ANT",
-      "actual_second_boost": null
+      "projected_points": 206.2,
+      "provenance": "corrected_replay",
+      "race": "Spanish Grand Prix (Madrid)",
+      "round": 16,
+      "score_delta_vs_projection": -19.2
     },
     {
-      "round": 17,
-      "race": "Azerbaijan Grand Prix",
-      "provenance": "live",
+      "actual_captain": "ANT",
+      "actual_points": 196.0,
+      "actual_second_boost": null,
+      "bank_after": 2.3,
+      "budget_after": 133.6,
+      "cumulative_points": 3581.0,
       "early_thoughts": {
         "archive": "web/public/data/predictions_round17_pre_fp_corrected.json",
         "archive_sha256": "0f013e9701ccc616d01b7c0eb687afeed1e9c2dad64668cb8bfd390093759800",
@@ -1558,92 +728,83 @@
         "transfer_penalty": 0,
         "transfers": 2
       },
+      "final_fix": null,
+      "free_transfers_next": 2,
       "post_fp_final": {
-        "archive": "web/public/data/predictions_round17_post_fp2.json",
-        "archive_sha256": "d3c414083d8e3b8b8990fe3e0c60022b73158577f0c3f545747b3e1a86df70d5",
+        "archive": "web/public/data/v13_sources/round17_d4e67cebac1d009c.json",
+        "archive_sha256": "d4e67cebac1d009c39c8327c90ca606ec42ba2a360d94fb72ce2c37ae4787ec4",
+        "budget_before": 131.5,
         "captain": "ANT",
-        "changes": {
-          "constructors_in": [],
-          "constructors_out": [],
-          "drivers_in": [
-            "HAD",
-            "LAW"
-          ],
-          "drivers_out": [
-            "HAM",
-            "PER"
-          ]
-        },
         "chip": null,
         "chip_decision": {
-          "current_selected_team_extra_points": 40.9,
+          "current_selected_team_extra_points": 41.1,
+          "horizon_sha256": "d827a4323951f051c9c33ea4cf55627a66eb95e3c7a225be4b1af6d9b654da2b",
           "largest_remaining_priors_round": 18,
-          "largest_remaining_priors_top_two": 96.5,
-          "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast.",
+          "largest_remaining_priors_top_two": 93.8,
+          "reason": "Archived pre-lock horizon comparison",
           "result": "save"
         },
         "constructors": [
           "mercedes",
-          "ferrari"
+          "mclaren"
         ],
-        "correction_reason": "Refresh before lock with Azerbaijan FP2 telemetry and updated post-FP simulations",
-        "downside_risk": 67.8,
+        "downside_risk": 68.0,
         "drivers": [
           "ANT",
           "HAD",
-          "LAW",
           "LIN",
+          "LAW",
           "HUL"
         ],
+        "fp_sessions_included": [],
         "lock_deadline": "2026-09-25T12:00:00Z",
-        "manager": "v13",
+        "persistent_constructors": [
+          "mercedes",
+          "mclaren"
+        ],
+        "persistent_drivers": [
+          "ANT",
+          "HAD",
+          "LIN",
+          "LAW",
+          "HUL"
+        ],
         "phase": "post_fp",
         "policy": {
           "negative_p5_weight": 0.75,
           "policy_version": "horizon_budget_value_v2",
-          "price_gain_weight": 4.547,
+          "price_gain_weight": 4.588,
           "price_value_method": "horizon curve × price reliability × points realisation",
           "risk_profile": "medium_tolerance",
           "strategy": "budget_builder"
         },
-        "previous_decision": "data/v13/decisions/round17_post_fp_revision2.json",
-        "previous_decision_sha256": "2be21dddcabadd13c326851903218899d33fd81e61b6a1b732ba16263190d36a",
-        "price_snapshot_after_round": 16,
-        "projected_points": 189.7,
-        "projected_price_gain": 1.1,
-        "published_at": "2026-09-24T13:38:05.428584+00:00",
+        "projected_points": 195.6,
+        "projected_price_gain": 2.5,
         "race": "Azerbaijan Grand Prix",
-        "revision": 3,
         "round": 17,
-        "schema_version": 1,
         "second_boost": null,
-        "source_generated_at": "2026-09-24T13:36:48.489162+00:00",
-        "status": "corrected_before_lock",
-        "supersedes": "data/v13/decisions/round17_post_fp_revision2.json",
-        "supersedes_sha256": "2be21dddcabadd13c326851903218899d33fd81e61b6a1b732ba16263190d36a",
-        "team_cost": 124.8,
-        "transfer_penalty": 0,
-        "transfers": 2,
-        "reasons": [
-          "The post-FP lineup projected 189.7 points.",
-          "It carried $1.1M of forecast price movement into the budget-first objective.",
-          "Its combined negative-P5 exposure was 67.8 under V13's medium-risk rule."
-        ]
+        "source_generated_at": "2026-09-25T11:25:19.697296+00:00",
+        "source_quality": "pre_lock",
+        "status": "retrospective_correction",
+        "team_cost": 129.2,
+        "transfer_penalty": 10,
+        "transfers": 3,
+        "projected_points_gross": 205.6,
+        "points_basis": "net_after_transfers"
       },
-      "final_fix": null,
-      "actual_points": 250.0,
-      "projected_points": 189.7,
-      "score_delta_vs_projection": 60.3,
-      "cumulative_points": 3599.0,
-      "budget_after": 132.5,
-      "free_transfers_next": 2,
-      "actual_captain": "ANT",
-      "actual_second_boost": null
+      "projected_points": 195.6,
+      "provenance": "corrected_replay",
+      "race": "Azerbaijan Grand Prix",
+      "round": 17,
+      "score_delta_vs_projection": 0.4
     },
     {
-      "round": 18,
-      "race": "Bahrain Grand Prix in Malaysia",
-      "provenance": "live",
+      "actual_captain": "ANT",
+      "actual_points": 279.0,
+      "actual_second_boost": null,
+      "bank_after": 1.5,
+      "budget_after": 135.4,
+      "cumulative_points": 3860.0,
       "early_thoughts": {
         "archive": "web/public/data/predictions_round18_pre_fp_corrected.json",
         "archive_sha256": "659b59ed9aa8380d81316e597dee498119941d421d009078ea0fb586bf88a15f",
@@ -1708,45 +869,51 @@
         "transfer_penalty": 0,
         "transfers": 2
       },
+      "final_fix": null,
+      "free_transfers_next": 2,
       "post_fp_final": {
-        "archive": "web/public/data/predictions_round18_post_fp_refresh_b6460e4f22104b35.json",
-        "archive_sha256": "b6460e4f22104b3557464af2d0ecf24a9ff3fb66929fb6cc2b1f4d0b25d37c1b",
+        "archive": "web/public/data/v13_sources/round18_fbe28a6ec43a2b9d.json",
+        "archive_sha256": "fbe28a6ec43a2b9db1f807363e92ef5e315e6373a3099cb4d2e19669291179ce",
+        "budget_before": 133.6,
         "captain": "ANT",
-        "changes": {
-          "constructors_in": [],
-          "constructors_out": [],
-          "drivers_in": [
-            "BOR",
-            "COL"
-          ],
-          "drivers_out": [
-            "HUL",
-            "LAW"
-          ]
-        },
         "chip": null,
         "chip_decision": {
           "current_selected_team_extra_points": 47.9,
+          "horizon_sha256": "af79f73ac702e6e12d7a60568dcf151bf5d957674c18e5db618b5e8bfc4149d7",
           "largest_remaining_priors_round": 19,
           "largest_remaining_priors_top_two": 92.6,
-          "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast.",
+          "reason": "Archived pre-lock horizon comparison",
           "result": "save"
         },
         "constructors": [
           "mercedes",
-          "ferrari"
+          "red_bull"
         ],
-        "correction_reason": "Automatic live forecast refresh: 2026-10-03T06:11:06.453382+00:00 (b6460e4f22104b35).",
-        "downside_risk": 63.2,
+        "downside_risk": 68.4,
         "drivers": [
           "ANT",
-          "LIN",
           "HAD",
+          "LIN",
           "COL",
-          "BOR"
+          "HUL"
+        ],
+        "fp_sessions_included": [
+          "FP1",
+          "FP2",
+          "FP3"
         ],
         "lock_deadline": "2026-10-03T08:00:00Z",
-        "manager": "v13",
+        "persistent_constructors": [
+          "mercedes",
+          "red_bull"
+        ],
+        "persistent_drivers": [
+          "ANT",
+          "HAD",
+          "LIN",
+          "COL",
+          "HUL"
+        ],
         "phase": "post_fp",
         "policy": {
           "negative_p5_weight": 0.75,
@@ -1756,44 +923,33 @@
           "risk_profile": "medium_tolerance",
           "strategy": "budget_builder"
         },
-        "previous_decision": "data/v13/decisions/round18_post_fp_revision2.json",
-        "previous_decision_sha256": "d71a230edb752658d51527f050a58c5c2af7af9df9001e5080b1588e534b734f",
-        "price_snapshot_after_round": 17,
-        "projected_points": 226.1,
-        "projected_price_gain": 0.3,
-        "published_at": "2026-10-03T06:12:00.922229+00:00",
+        "projected_points": 225.7,
+        "projected_price_gain": 1.4,
         "race": "Bahrain Grand Prix in Malaysia",
-        "revision": 3,
         "round": 18,
-        "schema_version": 1,
         "second_boost": null,
         "source_generated_at": "2026-10-03T06:11:06.453382+00:00",
-        "status": "corrected_before_lock",
-        "supersedes": "data/v13/decisions/round18_post_fp_revision2.json",
-        "supersedes_sha256": "d71a230edb752658d51527f050a58c5c2af7af9df9001e5080b1588e534b734f",
-        "team_cost": 130.4,
+        "source_quality": "pre_lock",
+        "status": "retrospective_correction",
+        "team_cost": 132.1,
         "transfer_penalty": 0,
         "transfers": 2,
-        "reasons": [
-          "The post-FP lineup projected 226.1 points.",
-          "It carried $0.3M of forecast price movement into the budget-first objective.",
-          "Its combined negative-P5 exposure was 63.2 under V13's medium-risk rule."
-        ]
+        "projected_points_gross": 225.7,
+        "points_basis": "net_after_transfers"
       },
-      "final_fix": null,
-      "actual_points": 247.0,
-      "projected_points": 226.1,
-      "score_delta_vs_projection": 20.9,
-      "cumulative_points": 3846.0,
-      "budget_after": 133.1,
-      "free_transfers_next": 2,
-      "actual_captain": "ANT",
-      "actual_second_boost": null
+      "projected_points": 225.7,
+      "provenance": "corrected_replay",
+      "race": "Bahrain Grand Prix in Malaysia",
+      "round": 18,
+      "score_delta_vs_projection": 53.3
     },
     {
-      "round": 19,
-      "race": "Singapore Grand Prix",
-      "provenance": "live",
+      "actual_captain": "ANT",
+      "actual_points": 216.0,
+      "actual_second_boost": null,
+      "bank_after": 4.2,
+      "budget_after": 137.0,
+      "cumulative_points": 4076.0,
       "early_thoughts": {
         "archive": "web/public/data/predictions_round19_pre_fp.json",
         "archive_sha256": "61f678cfa5fba3c5f1b1a09ba6725c99fdcd822e8479aacb4818b8a7a76550e5",
@@ -1854,45 +1010,49 @@
         "transfer_penalty": 0,
         "transfers": 2
       },
+      "final_fix": null,
+      "free_transfers_next": 2,
       "post_fp_final": {
-        "archive": "web/public/data/predictions_round19_post_fp_refresh_37a20196cbcc69f5.json",
-        "archive_sha256": "37a20196cbcc69f5f7f59a94c802dcd3c2d04c0b46fe927c3f515247175e9a89",
-        "captain": "VER",
-        "changes": {
-          "constructors_in": [],
-          "constructors_out": [],
-          "drivers_in": [
-            "SAI",
-            "VER"
-          ],
-          "drivers_out": [
-            "ANT",
-            "COL"
-          ]
-        },
+        "archive": "web/public/data/v13_sources/round19_778ffcfee4f7b20f.json",
+        "archive_sha256": "778ffcfee4f7b20fde50671e97866c05833d58142a75239526985298e7de0400",
+        "budget_before": 135.4,
+        "captain": "ANT",
         "chip": null,
         "chip_decision": {
-          "current_selected_team_extra_points": 33.6,
+          "current_selected_team_extra_points": 30.4,
+          "horizon_sha256": "b4b2acded4adb260fe107e734690168a831af946c54afe918f8eacec67d6fff2",
           "largest_remaining_priors_round": 23,
           "largest_remaining_priors_top_two": 65.9,
-          "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast.",
+          "reason": "Archived pre-lock horizon comparison",
           "result": "save"
         },
         "constructors": [
-          "ferrari",
-          "mercedes"
+          "mercedes",
+          "ferrari"
         ],
-        "correction_reason": "Automatic live forecast refresh: 2026-10-09T19:16:46.311814+00:00 (37a20196cbcc69f5).",
-        "downside_risk": 65.8,
+        "downside_risk": 65.9,
         "drivers": [
-          "VER",
+          "ANT",
           "HAD",
-          "LIN",
           "SAI",
-          "BOR"
+          "LIN",
+          "COL"
+        ],
+        "fp_sessions_included": [
+          "FP1"
         ],
         "lock_deadline": "2026-10-10T13:00:00Z",
-        "manager": "v13",
+        "persistent_constructors": [
+          "mercedes",
+          "ferrari"
+        ],
+        "persistent_drivers": [
+          "ANT",
+          "HAD",
+          "SAI",
+          "LIN",
+          "COL"
+        ],
         "phase": "post_fp",
         "policy": {
           "negative_p5_weight": 0.75,
@@ -1902,44 +1062,33 @@
           "risk_profile": "medium_tolerance",
           "strategy": "budget_builder"
         },
-        "previous_decision": "data/v13/decisions/round19_post_fp_revision2.json",
-        "previous_decision_sha256": "10ed7fd6c026d6615418bb80ff99cffa0061498e78d7594990581d90e4fabc19",
-        "price_snapshot_after_round": 18,
-        "projected_points": 187.9,
-        "projected_price_gain": 2.5,
-        "published_at": "2026-10-09T19:17:17.558182+00:00",
+        "projected_points": 180.5,
+        "projected_price_gain": 1.6,
         "race": "Singapore Grand Prix",
-        "revision": 3,
         "round": 19,
-        "schema_version": 1,
         "second_boost": null,
         "source_generated_at": "2026-10-09T19:16:46.311814+00:00",
-        "status": "corrected_before_lock",
-        "supersedes": "data/v13/decisions/round19_post_fp_revision2.json",
-        "supersedes_sha256": "10ed7fd6c026d6615418bb80ff99cffa0061498e78d7594990581d90e4fabc19",
-        "team_cost": 130.3,
+        "source_quality": "pre_lock",
+        "status": "retrospective_correction",
+        "team_cost": 131.2,
         "transfer_penalty": 0,
         "transfers": 2,
-        "reasons": [
-          "The post-FP lineup projected 187.9 points.",
-          "It carried $2.5M of forecast price movement into the budget-first objective.",
-          "Its combined negative-P5 exposure was 65.8 under V13's medium-risk rule."
-        ]
+        "projected_points_gross": 180.5,
+        "points_basis": "net_after_transfers"
       },
-      "final_fix": null,
-      "actual_points": 255.0,
-      "projected_points": 187.9,
-      "score_delta_vs_projection": 67.1,
-      "cumulative_points": 4101.0,
-      "budget_after": 134.9,
-      "free_transfers_next": 2,
-      "actual_captain": "VER",
-      "actual_second_boost": null
+      "projected_points": 180.5,
+      "provenance": "corrected_replay",
+      "race": "Singapore Grand Prix",
+      "round": 19,
+      "score_delta_vs_projection": 35.5
     },
     {
-      "round": 20,
-      "race": "United States Grand Prix",
-      "provenance": "live",
+      "actual_captain": "LEC",
+      "actual_points": 305.0,
+      "actual_second_boost": null,
+      "bank_after": 0.0,
+      "budget_after": 138.5,
+      "cumulative_points": 4381.0,
       "early_thoughts": {
         "archive": "web/public/data/predictions_round20_pre_fp_refresh_70ca271ec635f924.json",
         "archive_sha256": "70ca271ec635f9246f106b9164c669685139fc66b4b8f8027866aa735b142975",
@@ -2004,45 +1153,51 @@
         "transfer_penalty": 0,
         "transfers": 2
       },
+      "final_fix": null,
+      "free_transfers_next": 2,
       "post_fp_final": {
-        "archive": "web/public/data/predictions_round20_post_fp_refresh_9e0e4caa6f998849.json",
-        "archive_sha256": "9e0e4caa6f998849477e9a5c4ee8f7584eeb99ad040d768d8b458f850831adbe",
+        "archive": "web/public/data/v13_sources/round20_2eed406d343677e9.json",
+        "archive_sha256": "2eed406d343677e9a279543c23a81a0cf073da805ce64e5a27fa66569541d665",
+        "budget_before": 137.0,
         "captain": "LEC",
-        "changes": {
-          "constructors_in": [],
-          "constructors_out": [],
-          "drivers_in": [
-            "LEC",
-            "STR"
-          ],
-          "drivers_out": [
-            "HAD",
-            "SAI"
-          ]
-        },
         "chip": null,
         "chip_decision": {
-          "current_selected_team_extra_points": 57.6,
+          "current_selected_team_extra_points": 53.8,
+          "horizon_sha256": "d1ac9626b689bfef427d79f4b51bc0d6c372fe55cfa9ffbbb351b5f5ada233e7",
           "largest_remaining_priors_round": 22,
           "largest_remaining_priors_top_two": 64.2,
-          "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast.",
+          "reason": "Archived pre-lock horizon comparison",
           "result": "save"
         },
         "constructors": [
-          "ferrari",
-          "mercedes"
+          "mercedes",
+          "ferrari"
         ],
-        "correction_reason": "Automatic live forecast refresh: 2026-10-24T19:40:42.861895+00:00 (9e0e4caa6f998849).",
-        "downside_risk": 63.7,
+        "downside_risk": 54.2,
         "drivers": [
+          "ANT",
           "LEC",
-          "VER",
-          "BOR",
           "LIN",
-          "STR"
+          "BOR",
+          "HUL"
+        ],
+        "fp_sessions_included": [
+          "FP1",
+          "FP2",
+          "FP3"
         ],
         "lock_deadline": "2026-10-24T21:00:00Z",
-        "manager": "v13",
+        "persistent_constructors": [
+          "mercedes",
+          "ferrari"
+        ],
+        "persistent_drivers": [
+          "ANT",
+          "LEC",
+          "LIN",
+          "BOR",
+          "HUL"
+        ],
         "phase": "post_fp",
         "policy": {
           "negative_p5_weight": 0.75,
@@ -2052,44 +1207,33 @@
           "risk_profile": "medium_tolerance",
           "strategy": "budget_builder"
         },
-        "previous_decision": "data/v13/decisions/round20_post_fp_revision2.json",
-        "previous_decision_sha256": "d6f11dd6c9ac6a17c667fb7708b2d3603fb0064849ce5f8db8829c595a1e16ae",
-        "price_snapshot_after_round": 19,
-        "projected_points": 236.8,
-        "projected_price_gain": 0.9,
-        "published_at": "2026-10-24T19:42:06.369888+00:00",
+        "projected_points": 231.0,
+        "projected_price_gain": 1.3,
         "race": "United States Grand Prix",
-        "revision": 3,
         "round": 20,
-        "schema_version": 1,
         "second_boost": null,
         "source_generated_at": "2026-10-24T19:40:42.861895+00:00",
-        "status": "corrected_before_lock",
-        "supersedes": "data/v13/decisions/round20_post_fp_revision2.json",
-        "supersedes_sha256": "d6f11dd6c9ac6a17c667fb7708b2d3603fb0064849ce5f8db8829c595a1e16ae",
-        "team_cost": 134.5,
-        "transfer_penalty": 0,
-        "transfers": 2,
-        "reasons": [
-          "The post-FP lineup projected 236.8 points.",
-          "It carried $0.9M of forecast price movement into the budget-first objective.",
-          "Its combined negative-P5 exposure was 63.7 under V13's medium-risk rule."
-        ]
+        "source_quality": "pre_lock",
+        "status": "retrospective_correction",
+        "team_cost": 137.0,
+        "transfer_penalty": 10,
+        "transfers": 3,
+        "projected_points_gross": 241.0,
+        "points_basis": "net_after_transfers"
       },
-      "final_fix": null,
-      "actual_points": 311.0,
-      "projected_points": 236.8,
-      "score_delta_vs_projection": 74.2,
-      "cumulative_points": 4412.0,
-      "budget_after": 135.8,
-      "free_transfers_next": 2,
-      "actual_captain": "LEC",
-      "actual_second_boost": null
+      "projected_points": 231.0,
+      "provenance": "corrected_replay",
+      "race": "United States Grand Prix",
+      "round": 20,
+      "score_delta_vs_projection": 74.0
     },
     {
-      "round": 21,
-      "race": "Mexican Grand Prix",
-      "provenance": "live",
+      "actual_captain": "ANT",
+      "actual_points": 206.0,
+      "actual_second_boost": null,
+      "bank_after": 1.2,
+      "budget_after": 138.6,
+      "cumulative_points": 4587.0,
       "early_thoughts": {
         "archive": "web/public/data/predictions_round21_pre_fp.json",
         "archive_sha256": "1087e27f65c3d2df7081814f2d3156611c72812a80930407c1f21d92aa4e85fe",
@@ -2150,43 +1294,51 @@
         "transfer_penalty": 0,
         "transfers": 2
       },
+      "final_fix": null,
+      "free_transfers_next": 3,
       "post_fp_final": {
-        "archive": "web/public/data/predictions_round21_post_fp_refresh_14781ab5f9859f90.json",
-        "archive_sha256": "14781ab5f9859f9087f901b40b0557dbd40ce3ba9456feb8073eaafbca324e85",
+        "archive": "web/public/data/v13_sources/round21_5aff5bccb8c53de0.json",
+        "archive_sha256": "5aff5bccb8c53de0b4afae3ff8fcf0897325ff92348d0f02885be760aa30dccd",
+        "budget_before": 138.5,
         "captain": "ANT",
-        "changes": {
-          "constructors_in": [],
-          "constructors_out": [],
-          "drivers_in": [
-            "ANT"
-          ],
-          "drivers_out": [
-            "VER"
-          ]
-        },
         "chip": null,
         "chip_decision": {
           "current_selected_team_extra_points": 62.1,
+          "horizon_sha256": "29344d8bb9a2014575336ac07df8994068b5865c8db0dbe8f743f3b7f9249306",
           "largest_remaining_priors_round": 23,
           "largest_remaining_priors_top_two": 64.2,
-          "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast.",
+          "reason": "Archived pre-lock horizon comparison",
           "result": "save"
         },
         "constructors": [
           "mercedes",
           "ferrari"
         ],
-        "correction_reason": "Automatic live forecast refresh: 2026-10-31T20:07:48.370228+00:00 (14781ab5f9859f90).",
-        "downside_risk": 54.7,
+        "downside_risk": 52.9,
         "drivers": [
-          "LEC",
           "ANT",
-          "BOR",
+          "LEC",
           "LIN",
-          "STR"
+          "BOR",
+          "HIR_HAAS"
+        ],
+        "fp_sessions_included": [
+          "FP1",
+          "FP2",
+          "FP3"
         ],
         "lock_deadline": "2026-10-31T21:00:00Z",
-        "manager": "v13",
+        "persistent_constructors": [
+          "mercedes",
+          "ferrari"
+        ],
+        "persistent_drivers": [
+          "ANT",
+          "LEC",
+          "LIN",
+          "BOR",
+          "HIR_HAAS"
+        ],
         "phase": "post_fp",
         "policy": {
           "negative_p5_weight": 0.75,
@@ -2196,253 +1348,1213 @@
           "risk_profile": "medium_tolerance",
           "strategy": "budget_builder"
         },
-        "previous_decision": "data/v13/decisions/round21_post_fp_revision5.json",
-        "previous_decision_sha256": "e83ff33ef33b1096668edeeb121fab67b09fea64c54d5da7fa96fd9e4d044276",
-        "price_snapshot_after_round": 20,
-        "projected_points": 229.9,
-        "projected_price_gain": -0.3,
-        "published_at": "2026-10-31T20:08:33.534126+00:00",
+        "projected_points": 242.0,
+        "projected_price_gain": 0.3,
         "race": "Mexican Grand Prix",
-        "revision": 6,
         "round": 21,
-        "schema_version": 1,
         "second_boost": null,
         "source_generated_at": "2026-10-31T20:07:48.370228+00:00",
-        "status": "corrected_before_lock",
-        "supersedes": "data/v13/decisions/round21_post_fp_revision5.json",
-        "supersedes_sha256": "e83ff33ef33b1096668edeeb121fab67b09fea64c54d5da7fa96fd9e4d044276",
-        "team_cost": 134.3,
+        "source_quality": "pre_lock",
+        "status": "retrospective_correction",
+        "team_cost": 137.3,
         "transfer_penalty": 0,
         "transfers": 1,
-        "reasons": [
-          "The post-FP lineup projected 229.9 points.",
-          "It carried $-0.3M of forecast price movement into the budget-first objective.",
-          "Its combined negative-P5 exposure was 54.7 under V13's medium-risk rule."
-        ]
+        "projected_points_gross": 242.0,
+        "points_basis": "net_after_transfers"
       },
-      "final_fix": null,
-      "actual_points": 170.0,
-      "projected_points": 229.9,
-      "score_delta_vs_projection": -59.9,
-      "cumulative_points": 4582.0,
-      "budget_after": 135.3,
-      "free_transfers_next": 3,
-      "actual_captain": "ANT",
-      "actual_second_boost": null
+      "projected_points": 242.0,
+      "provenance": "corrected_replay",
+      "race": "Mexican Grand Prix",
+      "round": 21,
+      "score_delta_vs_projection": -36.0
     }
   ],
   "live_status": {
-    "status": "live",
+    "status": "corrected_replay",
     "through_round": 21,
     "race": "Mexican Grand Prix",
-    "round_points": 170.0,
-    "projected_points": 229.9,
-    "score_delta_vs_projection": -59.9,
-    "total_points": 4582.0,
-    "budget": 135.3,
-    "bank": 1.5
+    "round_points": 206.0,
+    "projected_points": 242.0,
+    "score_delta_vs_projection": -36.0,
+    "total_points": 4587.0,
+    "budget": 138.6,
+    "bank": 1.2
   },
-  "current_state": {
-    "as_of_round": 21,
-    "drivers": [
-      "LEC",
-      "ANT",
-      "BOR",
-      "LIN",
-      "STR"
-    ],
-    "constructors": [
-      "mercedes",
-      "ferrari"
-    ],
-    "budget": 135.3,
-    "bank": 1.5,
-    "free_transfers": 3,
-    "chips_remaining": [
-      "3x_boost"
-    ],
-    "chips_used": {
-      "wild_card": 7,
-      "limitless": 8,
-      "no_negative": 10,
-      "autopilot": 12,
-      "final_fix": 13
+  "manager": {
+    "id": "v13",
+    "name": "V13",
+    "policy": {
+      "early_thoughts_phase": "pre_fp",
+      "final_fix_basis": "qualifying_locked_projected_race_points",
+      "free_transfers_per_round": 2,
+      "max_free_transfers_after_rollover": 3,
+      "negative_p5_weight": 0.75,
+      "price_gain_method": "Horizon-aware budget curve discounted for forecast reliability and realised conversion into future points.",
+      "price_gain_weight": 3.765,
+      "research_replay_price_gain_weight": 20.0,
+      "team_selection_phase": "post_fp",
+      "three_x_timing": "At post-FP lock, play only when the selected team's extra 3x value is at least the largest remaining priors-only top-two driver forecast; otherwise save it."
     },
-    "next_round": 22,
-    "early_thoughts": {
-      "schema_version": 1,
-      "manager": "v13",
-      "round": 22,
-      "race": "Brazilian Grand Prix",
-      "phase": "pre_fp",
-      "status": "corrected_provisional",
-      "published_at": "2026-11-06T11:18:25.194669+00:00",
-      "source_generated_at": "2026-11-06T11:18:05.173395+00:00",
-      "lock_deadline": "2026-11-07T18:00:00Z",
-      "archive": "web/public/data/predictions_round22_pre_fp_refresh_624cd6732a06d42d.json",
-      "archive_sha256": "624cd6732a06d42de2d7844d677212e11d01729c84a4828d9bf90233e16df9f0",
-      "previous_decision": "data/v13/decisions/round22_pre_fp_revision4.json",
-      "previous_decision_sha256": "88a6b8a88b235e2edf6c432a7b56963257758c3c8fa0290eed5b885ba61dd9ba",
-      "price_snapshot_after_round": 21,
-      "drivers": [
-        "ANT",
-        "VER",
-        "PER",
-        "BOR",
-        "CAM"
-      ],
-      "constructors": [
-        "mercedes",
-        "ferrari"
-      ],
-      "captain": "VER",
-      "second_boost": null,
-      "chip": null,
-      "projected_points": 191.2,
-      "projected_price_gain": 1.1,
-      "downside_risk": 77.1,
-      "team_cost": 133.9,
-      "transfers": 3,
-      "transfer_penalty": 0,
-      "changes": {
-        "drivers_out": [
-          "LEC",
-          "LIN",
-          "STR"
-        ],
-        "drivers_in": [
-          "CAM",
-          "PER",
-          "VER"
-        ],
-        "constructors_out": [],
-        "constructors_in": []
+    "policy_version": "2026.3",
+    "risk_profile": "medium_tolerance",
+    "strategy": "budget_builder",
+    "tagline": "Budget-aware. Medium-risk. Transparent at every decision."
+  },
+  "research_replay": {
+    "base_points_before_final_fix": 2572.0,
+    "disclaimer": "Retrospective correction using the latest saved pre-lock practice forecasts. R1–R3 are reconstructed; R6 has no verifiable pre-lock forecast. Older session coverage is not fully recorded.",
+    "end_round": 13,
+    "final_bank": 1.3,
+    "final_budget": 125.6,
+    "final_fix_adjustment": 22.0,
+    "genuine_archive_points_before_final_fix": 1605.0,
+    "label": "R1-R13 research replay",
+    "rounds": [
+      {
+        "actual_captain": "RUS",
+        "actual_points": 251.0,
+        "actual_second_boost": null,
+        "bank_after": 7.6,
+        "budget_after": 103.4,
+        "cumulative_points": 251.0,
+        "early_thoughts": {
+          "archive": "web/public/data/predictions_round1_pre_fp.json",
+          "archive_reconstructed": true,
+          "archive_sha256": "49084b8938223f5fb756a9e8d7eb5148ef70ea848a6ec3c0fef67add9ce6f405",
+          "captain": "RUS",
+          "constructors": [
+            "mercedes",
+            "williams"
+          ],
+          "downside_risk": 35.0,
+          "drivers": [
+            "RUS",
+            "OCO",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "phase": "pre_fp",
+          "policy": {
+            "negative_p5_weight": 0.75,
+            "policy_version": "horizon_budget_value_v2",
+            "price_gain_weight": 4.642,
+            "price_value_method": "horizon curve × price reliability × points realisation",
+            "risk_profile": "medium_tolerance",
+            "strategy": "budget_builder"
+          },
+          "projected_points": 220.3,
+          "projected_price_gain": 3.2,
+          "race": "Australian Grand Prix",
+          "round": 1,
+          "second_boost": null,
+          "status": "provisional",
+          "team_cost": 96.4,
+          "transfer_penalty": 0,
+          "transfers": 0
+        },
+        "final_fix": null,
+        "free_transfers_next": 2,
+        "post_fp_final": {
+          "archive": "web/public/data/v13_sources/round1_9125539864761bc7.json",
+          "archive_sha256": "9125539864761bc7f8edbc3a574d055ac016ca34272a66fef1b9080b8678ae24",
+          "budget_before": 100.0,
+          "captain": "RUS",
+          "chip": null,
+          "chip_decision": {
+            "reason": "Original V13 research chip timing retained",
+            "result": "research_policy"
+          },
+          "constructors": [
+            "mercedes",
+            "haas"
+          ],
+          "downside_risk": 17.5,
+          "drivers": [
+            "RUS",
+            "OCO",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "fp_sessions_included": [],
+          "lock_deadline": "2026-03-07T05:00:00Z",
+          "persistent_constructors": [
+            "mercedes",
+            "haas"
+          ],
+          "persistent_drivers": [
+            "RUS",
+            "OCO",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "phase": "post_fp",
+          "policy": {
+            "price_gain_weight": 20.0
+          },
+          "projected_points": 225.3,
+          "projected_price_gain": 2.8,
+          "race": "Australian Grand Prix",
+          "round": 1,
+          "second_boost": null,
+          "source_generated_at": "2026-05-16T05:09:27.239831+00:00",
+          "source_quality": "reconstructed",
+          "status": "retrospective_correction",
+          "team_cost": 92.4,
+          "transfer_penalty": 0,
+          "transfers": 0,
+          "projected_points_gross": 225.3,
+          "points_basis": "net_after_transfers"
+        },
+        "projected_points": 225.3,
+        "provenance": "reconstructed",
+        "race": "Australian Grand Prix",
+        "round": 1,
+        "score_delta_vs_projection": 25.7
       },
-      "chip_decision": {
-        "result": "not_evaluated",
-        "reason": "Only post-FP finals can play 3x."
+      {
+        "actual_captain": "ANT",
+        "actual_points": 331.0,
+        "actual_second_boost": null,
+        "bank_after": 6.7,
+        "budget_after": 103.4,
+        "cumulative_points": 582.0,
+        "early_thoughts": {
+          "archive": "web/public/data/predictions_round2_pre_fp.json",
+          "archive_reconstructed": true,
+          "archive_sha256": "f268d9b23e36c445575a096fb9e99b46fe3696776ef409b44b04d0442cb07c51",
+          "captain": "ANT",
+          "constructors": [
+            "mercedes",
+            "alpine"
+          ],
+          "downside_risk": 25.5,
+          "drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "phase": "pre_fp",
+          "policy": {
+            "negative_p5_weight": 0.75,
+            "policy_version": "horizon_budget_value_v2",
+            "price_gain_weight": 4.642,
+            "price_value_method": "horizon curve × price reliability × points realisation",
+            "risk_profile": "medium_tolerance",
+            "strategy": "budget_builder"
+          },
+          "projected_points": 317.5,
+          "projected_price_gain": 3.6,
+          "race": "Chinese Grand Prix",
+          "round": 2,
+          "second_boost": null,
+          "status": "provisional",
+          "team_cost": 96.7,
+          "transfer_penalty": 0,
+          "transfers": 2
+        },
+        "final_fix": null,
+        "free_transfers_next": 2,
+        "post_fp_final": {
+          "archive": "web/public/data/v13_sources/round2_c64fca697b7371e4.json",
+          "archive_sha256": "c64fca697b7371e404c84d93afd173f06f3a8772db0ed38bfe007a01e44ea061",
+          "budget_before": 103.4,
+          "captain": "ANT",
+          "chip": null,
+          "chip_decision": {
+            "reason": "Original V13 research chip timing retained",
+            "result": "research_policy"
+          },
+          "constructors": [
+            "mercedes",
+            "alpine"
+          ],
+          "downside_risk": 27.5,
+          "drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "fp_sessions_included": [],
+          "lock_deadline": "2026-03-13T07:30:00Z",
+          "persistent_constructors": [
+            "mercedes",
+            "alpine"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "phase": "post_fp",
+          "policy": {
+            "price_gain_weight": 20.0
+          },
+          "projected_points": 316.3,
+          "projected_price_gain": 3.6,
+          "race": "Chinese Grand Prix",
+          "round": 2,
+          "second_boost": null,
+          "source_generated_at": "2026-05-16T05:11:53.556691+00:00",
+          "source_quality": "reconstructed",
+          "status": "retrospective_correction",
+          "team_cost": 96.7,
+          "transfer_penalty": 0,
+          "transfers": 2,
+          "projected_points_gross": 316.3,
+          "points_basis": "net_after_transfers"
+        },
+        "projected_points": 316.3,
+        "provenance": "reconstructed",
+        "race": "Chinese Grand Prix",
+        "round": 2,
+        "score_delta_vs_projection": 14.7
       },
-      "policy": {
-        "policy_version": "horizon_budget_value_v2",
-        "strategy": "budget_builder",
-        "risk_profile": "medium_tolerance",
-        "price_gain_weight": 3.765,
-        "negative_p5_weight": 0.75,
-        "price_value_method": "horizon curve × price reliability × points realisation"
+      {
+        "actual_captain": "ANT",
+        "actual_points": 206.0,
+        "actual_second_boost": null,
+        "bank_after": 6.0,
+        "budget_after": 106.2,
+        "cumulative_points": 788.0,
+        "early_thoughts": {
+          "archive": "web/public/data/predictions_round3_pre_fp.json",
+          "archive_reconstructed": true,
+          "archive_sha256": "584e14437830b8326ce7589370e9774d2f8997a53594e89d6086a99580d35997",
+          "captain": "ANT",
+          "constructors": [
+            "mercedes",
+            "alpine"
+          ],
+          "downside_risk": 25.5,
+          "drivers": [
+            "ANT",
+            "SAI",
+            "OCO",
+            "LIN",
+            "COL"
+          ],
+          "phase": "pre_fp",
+          "policy": {
+            "negative_p5_weight": 0.75,
+            "policy_version": "horizon_budget_value_v2",
+            "price_gain_weight": 4.642,
+            "price_value_method": "horizon curve × price reliability × points realisation",
+            "risk_profile": "medium_tolerance",
+            "strategy": "budget_builder"
+          },
+          "projected_points": 229.3,
+          "projected_price_gain": 3.2,
+          "race": "Japanese Grand Prix",
+          "round": 3,
+          "second_boost": null,
+          "status": "provisional",
+          "team_cost": 102.5,
+          "transfer_penalty": 0,
+          "transfers": 1
+        },
+        "final_fix": null,
+        "free_transfers_next": 2,
+        "post_fp_final": {
+          "archive": "web/public/data/v13_sources/round3_2ba73413c7fccd63.json",
+          "archive_sha256": "2ba73413c7fccd63765b580db4d102f4a1cbd820d92894db5c231fd6887260c6",
+          "budget_before": 103.4,
+          "captain": "ANT",
+          "chip": null,
+          "chip_decision": {
+            "reason": "Original V13 research chip timing retained",
+            "result": "research_policy"
+          },
+          "constructors": [
+            "mercedes",
+            "haas"
+          ],
+          "downside_risk": 17.5,
+          "drivers": [
+            "ANT",
+            "SAI",
+            "OCO",
+            "LIN",
+            "COL"
+          ],
+          "fp_sessions_included": [],
+          "lock_deadline": "2026-03-28T06:00:00Z",
+          "persistent_constructors": [
+            "mercedes",
+            "haas"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "SAI",
+            "OCO",
+            "LIN",
+            "COL"
+          ],
+          "phase": "post_fp",
+          "policy": {
+            "price_gain_weight": 20.0
+          },
+          "projected_points": 231.3,
+          "projected_price_gain": 3.2,
+          "race": "Japanese Grand Prix",
+          "round": 3,
+          "second_boost": null,
+          "source_generated_at": "2026-05-16T05:06:33.065896+00:00",
+          "source_quality": "reconstructed",
+          "status": "retrospective_correction",
+          "team_cost": 97.4,
+          "transfer_penalty": 0,
+          "transfers": 2,
+          "projected_points_gross": 231.3,
+          "points_basis": "net_after_transfers"
+        },
+        "projected_points": 231.3,
+        "provenance": "reconstructed",
+        "race": "Japanese Grand Prix",
+        "round": 3,
+        "score_delta_vs_projection": -25.3
       },
-      "revision": 5,
-      "correction_reason": "Automatic live forecast refresh: 2026-11-06T11:18:05.173395+00:00 (624cd6732a06d42d).",
-      "supersedes": "data/v13/decisions/round22_pre_fp_revision4.json",
-      "supersedes_sha256": "88a6b8a88b235e2edf6c432a7b56963257758c3c8fa0290eed5b885ba61dd9ba"
-    },
-    "post_fp_final": {
-      "schema_version": 1,
-      "manager": "v13",
-      "round": 22,
-      "race": "Brazilian Grand Prix",
-      "phase": "post_fp",
-      "status": "frozen_before_lock",
-      "published_at": "2026-11-06T20:34:38.797779+00:00",
-      "source_generated_at": "2026-11-06T20:33:54.935058+00:00",
-      "lock_deadline": "2026-11-07T18:00:00Z",
-      "archive": "web/public/data/predictions_round22_post_fp.json",
-      "archive_sha256": "8b9c6dc4df80a86e9cdfdc77139c90e57566fef28da31f94c147675003ef5424",
-      "previous_decision": "data/v13/decisions/round22_pre_fp_revision5.json",
-      "previous_decision_sha256": "efd8e3f6a31fb2a70ce5b4dfa9460dbb99959980d9064ce7a0e005855d147fb9",
-      "price_snapshot_after_round": 21,
-      "drivers": [
-        "ANT",
-        "VER",
-        "CAM",
-        "PER",
-        "BOR"
-      ],
-      "constructors": [
-        "mercedes",
-        "ferrari"
-      ],
-      "captain": "ANT",
-      "second_boost": null,
-      "chip": null,
-      "projected_points": 196.9,
-      "projected_price_gain": 1.1,
-      "downside_risk": 75.5,
-      "team_cost": 133.9,
-      "transfers": 3,
-      "transfer_penalty": 0,
-      "changes": {
-        "drivers_out": [
-          "LEC",
-          "LIN",
-          "STR"
-        ],
-        "drivers_in": [
-          "CAM",
-          "PER",
-          "VER"
-        ],
-        "constructors_out": [],
-        "constructors_in": []
+      {
+        "actual_captain": "ANT",
+        "actual_points": 179.0,
+        "actual_second_boost": null,
+        "bank_after": 0.8,
+        "budget_after": 108.3,
+        "cumulative_points": 967.0,
+        "early_thoughts": null,
+        "final_fix": null,
+        "free_transfers_next": 2,
+        "post_fp_final": {
+          "archive": "web/public/data/v13_sources/round6_8c2a26a875d9ff78.json",
+          "archive_sha256": "8c2a26a875d9ff7826ba415e463c687b4c409f314f1c46e0b3c6b7d2c39f2e72",
+          "budget_before": 106.2,
+          "captain": "ANT",
+          "chip": null,
+          "chip_decision": {
+            "reason": "Original V13 research chip timing retained",
+            "result": "research_policy"
+          },
+          "constructors": [
+            "ferrari",
+            "haas"
+          ],
+          "downside_risk": 0.0,
+          "drivers": [
+            "ANT",
+            "LEC",
+            "OCO",
+            "LIN",
+            "LAW"
+          ],
+          "fp_sessions_included": [],
+          "lock_deadline": "2026-05-01T21:30:00Z",
+          "persistent_constructors": [
+            "ferrari",
+            "haas"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "LEC",
+            "OCO",
+            "LIN",
+            "LAW"
+          ],
+          "phase": "post_fp",
+          "policy": {
+            "price_gain_weight": 20.0
+          },
+          "projected_points": 357.1,
+          "projected_price_gain": 3.3,
+          "race": "Miami Grand Prix",
+          "round": 6,
+          "second_boost": null,
+          "source_generated_at": "2026-05-19T06:17:38.768048+00:00",
+          "source_quality": "unverified_pre_lock_research",
+          "status": "retrospective_correction",
+          "team_cost": 105.4,
+          "transfer_penalty": 10,
+          "transfers": 3,
+          "projected_points_gross": 367.1,
+          "points_basis": "net_after_transfers"
+        },
+        "projected_points": 357.1,
+        "provenance": "corrected_replay",
+        "race": "Miami Grand Prix",
+        "round": 6,
+        "score_delta_vs_projection": -178.1
       },
-      "chip_decision": {
-        "result": "save",
-        "current_selected_team_extra_points": 51.1,
-        "largest_remaining_priors_top_two": 65.9,
-        "largest_remaining_priors_round": 23,
-        "policy": "Play when current post-FP extra 3x value meets or exceeds the largest remaining priors-only top-two driver forecast."
+      {
+        "actual_captain": "ANT",
+        "actual_points": 283.0,
+        "actual_second_boost": null,
+        "bank_after": 0.2,
+        "budget_after": 109.8,
+        "cumulative_points": 1250.0,
+        "early_thoughts": {
+          "archive": "web/public/data/predictions_round7_pre_fp.json",
+          "archive_reconstructed": false,
+          "archive_sha256": "a687f084e0e937ea260ea2a988e4093f460503a87b273db66fbee89fddcc175c",
+          "captain": "ANT",
+          "constructors": [
+            "mercedes",
+            "williams"
+          ],
+          "downside_risk": 23.0,
+          "drivers": [
+            "ANT",
+            "ALB",
+            "OCO",
+            "COL",
+            "BOR"
+          ],
+          "phase": "pre_fp",
+          "policy": {
+            "negative_p5_weight": 0.75,
+            "policy_version": "horizon_budget_value_v2",
+            "price_gain_weight": 4.642,
+            "price_value_method": "horizon curve × price reliability × points realisation",
+            "risk_profile": "medium_tolerance",
+            "strategy": "budget_builder"
+          },
+          "projected_points": 308.8,
+          "projected_price_gain": 3.6,
+          "race": "Canadian Grand Prix",
+          "round": 7,
+          "second_boost": null,
+          "status": "provisional",
+          "team_cost": 102.0,
+          "transfer_penalty": 0,
+          "transfers": 5
+        },
+        "final_fix": null,
+        "free_transfers_next": 2,
+        "post_fp_final": {
+          "archive": "web/public/data/v13_sources/round7_a5ffc008496944c7.json",
+          "archive_sha256": "a5ffc008496944c76cd80d6e9d23ada1f6192ff01068ba2e027ba8b868346aec",
+          "budget_before": 108.3,
+          "captain": "ANT",
+          "chip": "wild_card",
+          "chip_decision": {
+            "reason": "Original V13 research chip timing retained",
+            "result": "research_policy"
+          },
+          "constructors": [
+            "mercedes",
+            "racing_bulls"
+          ],
+          "downside_risk": 29.0,
+          "drivers": [
+            "ANT",
+            "HAM",
+            "COL",
+            "BOR",
+            "PER"
+          ],
+          "fp_sessions_included": [],
+          "lock_deadline": "2026-05-23T16:00:00Z",
+          "persistent_constructors": [
+            "mercedes",
+            "racing_bulls"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "HAM",
+            "COL",
+            "BOR",
+            "PER"
+          ],
+          "phase": "post_fp",
+          "policy": {
+            "price_gain_weight": 20.0
+          },
+          "projected_points": 317.2,
+          "projected_price_gain": 2.7,
+          "race": "Canadian Grand Prix",
+          "round": 7,
+          "second_boost": null,
+          "source_generated_at": "2026-05-23T09:52:58.099048+00:00",
+          "source_quality": "pre_lock",
+          "status": "retrospective_correction",
+          "team_cost": 108.1,
+          "transfer_penalty": 0,
+          "transfers": 6,
+          "projected_points_gross": 317.2,
+          "points_basis": "net_after_transfers"
+        },
+        "projected_points": 317.2,
+        "provenance": "corrected_replay",
+        "race": "Canadian Grand Prix",
+        "round": 7,
+        "score_delta_vs_projection": -34.2
       },
-      "policy": {
-        "policy_version": "horizon_budget_value_v2",
-        "strategy": "budget_builder",
-        "risk_profile": "medium_tolerance",
-        "price_gain_weight": 3.765,
-        "negative_p5_weight": 0.75,
-        "price_value_method": "horizon curve × price reliability × points realisation"
+      {
+        "actual_captain": "LEC",
+        "actual_points": 171.0,
+        "actual_second_boost": null,
+        "bank_after": 0.2,
+        "budget_after": 111.9,
+        "cumulative_points": 1421.0,
+        "early_thoughts": {
+          "archive": "web/public/data/predictions_round8_pre_fp.json",
+          "archive_reconstructed": false,
+          "archive_sha256": "2223a185f6af115e52b4dd8b8b27445d62fcbd027c3b9d75cafa1b135bba641b",
+          "captain": "ANT",
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "downside_risk": 3.0,
+          "drivers": [
+            "RUS",
+            "PIA",
+            "ANT",
+            "LEC",
+            "HAM"
+          ],
+          "phase": "pre_fp",
+          "policy": {
+            "negative_p5_weight": 0.75,
+            "policy_version": "horizon_budget_value_v2",
+            "price_gain_weight": 4.642,
+            "price_value_method": "horizon curve × price reliability × points realisation",
+            "risk_profile": "medium_tolerance",
+            "strategy": "budget_builder"
+          },
+          "projected_points": 290.9,
+          "projected_price_gain": 1.1,
+          "race": "Monaco Grand Prix",
+          "round": 8,
+          "second_boost": null,
+          "status": "provisional",
+          "team_cost": 181.5,
+          "transfer_penalty": 0,
+          "transfers": 4
+        },
+        "final_fix": null,
+        "free_transfers_next": 2,
+        "post_fp_final": {
+          "archive": "web/public/data/v13_sources/round8_1bddca0b3c6e7674.json",
+          "archive_sha256": "1bddca0b3c6e7674aa5f0c75470b9425dc267d81d7b301889f231ab9aa535ddb",
+          "budget_before": 109.8,
+          "captain": "LEC",
+          "chip": "limitless",
+          "chip_decision": {
+            "reason": "Original V13 research chip timing retained",
+            "result": "research_policy"
+          },
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "downside_risk": 6.0,
+          "drivers": [
+            "RUS",
+            "PIA",
+            "ANT",
+            "LEC",
+            "HAM"
+          ],
+          "fp_sessions_included": [],
+          "lock_deadline": "2026-06-06T14:00:00Z",
+          "persistent_constructors": [
+            "mercedes",
+            "racing_bulls"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "HAM",
+            "COL",
+            "BOR",
+            "PER"
+          ],
+          "phase": "post_fp",
+          "policy": {
+            "price_gain_weight": 20.0
+          },
+          "projected_points": 310.6,
+          "projected_price_gain": 1.3,
+          "race": "Monaco Grand Prix",
+          "round": 8,
+          "second_boost": null,
+          "source_generated_at": "2026-06-06T12:13:58.542175+00:00",
+          "source_quality": "pre_lock",
+          "status": "retrospective_correction",
+          "team_cost": 181.5,
+          "transfer_penalty": 0,
+          "transfers": 0,
+          "projected_points_gross": 310.6,
+          "points_basis": "net_after_transfers"
+        },
+        "projected_points": 310.6,
+        "provenance": "corrected_replay",
+        "race": "Monaco Grand Prix",
+        "round": 8,
+        "score_delta_vs_projection": -139.6
+      },
+      {
+        "actual_captain": "ANT",
+        "actual_points": 113.0,
+        "actual_second_boost": null,
+        "bank_after": 3.0,
+        "budget_after": 114.4,
+        "cumulative_points": 1534.0,
+        "early_thoughts": {
+          "archive": "web/public/data/predictions_round9_pre_fp.json",
+          "archive_reconstructed": false,
+          "archive_sha256": "84080efba1207d177d0236cb3f83cf614cdc34978716218d8def6d2f0fa463ae",
+          "captain": "ANT",
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "downside_risk": 33.0,
+          "drivers": [
+            "ANT",
+            "GAS",
+            "COL",
+            "BOR",
+            "HUL"
+          ],
+          "phase": "pre_fp",
+          "policy": {
+            "negative_p5_weight": 0.75,
+            "policy_version": "horizon_budget_value_v2",
+            "price_gain_weight": 4.642,
+            "price_value_method": "horizon curve × price reliability × points realisation",
+            "risk_profile": "medium_tolerance",
+            "strategy": "budget_builder"
+          },
+          "projected_points": 241.9,
+          "projected_price_gain": 2.1,
+          "race": "Spanish Grand Prix",
+          "round": 9,
+          "second_boost": null,
+          "status": "provisional",
+          "team_cost": 111.0,
+          "transfer_penalty": 10,
+          "transfers": 3
+        },
+        "final_fix": null,
+        "free_transfers_next": 2,
+        "post_fp_final": {
+          "archive": "web/public/data/v13_sources/round9_3cfe9861c96a0010.json",
+          "archive_sha256": "3cfe9861c96a0010879d5223b9ffc778c3f6ee8bd7738b6ffe37a376d1e01e9c",
+          "budget_before": 111.9,
+          "captain": "ANT",
+          "chip": null,
+          "chip_decision": {
+            "reason": "Original V13 research chip timing retained",
+            "result": "research_policy"
+          },
+          "constructors": [
+            "mercedes",
+            "audi"
+          ],
+          "downside_risk": 7.5,
+          "drivers": [
+            "ANT",
+            "HAM",
+            "OCO",
+            "COL",
+            "BOR"
+          ],
+          "fp_sessions_included": [],
+          "lock_deadline": "2026-06-13T13:00:00Z",
+          "persistent_constructors": [
+            "mercedes",
+            "audi"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "HAM",
+            "OCO",
+            "COL",
+            "BOR"
+          ],
+          "phase": "post_fp",
+          "policy": {
+            "price_gain_weight": 20.0
+          },
+          "projected_points": 196.1,
+          "projected_price_gain": 1.7,
+          "race": "Spanish Grand Prix",
+          "round": 9,
+          "second_boost": null,
+          "source_generated_at": "2026-06-12T22:48:06.676081+00:00",
+          "source_quality": "pre_lock",
+          "status": "retrospective_correction",
+          "team_cost": 108.9,
+          "transfer_penalty": 0,
+          "transfers": 2,
+          "projected_points_gross": 196.1,
+          "points_basis": "net_after_transfers"
+        },
+        "projected_points": 196.1,
+        "provenance": "corrected_replay",
+        "race": "Spanish Grand Prix",
+        "round": 9,
+        "score_delta_vs_projection": -83.1
+      },
+      {
+        "actual_captain": "ANT",
+        "actual_points": 238.0,
+        "actual_second_boost": null,
+        "bank_after": 1.3,
+        "budget_after": 116.3,
+        "cumulative_points": 1772.0,
+        "early_thoughts": {
+          "archive": "web/public/data/predictions_round10_pre_fp.json",
+          "archive_reconstructed": false,
+          "archive_sha256": "59d143df35ab1d4b626ae5d22447ef78e138c701271c29f3c9099b1ca36e3097",
+          "captain": "ANT",
+          "constructors": [
+            "mercedes",
+            "racing_bulls"
+          ],
+          "downside_risk": 27.7,
+          "drivers": [
+            "ANT",
+            "HAM",
+            "OCO",
+            "LIN",
+            "BOR"
+          ],
+          "phase": "pre_fp",
+          "policy": {
+            "negative_p5_weight": 0.75,
+            "policy_version": "horizon_budget_value_v2",
+            "price_gain_weight": 4.641,
+            "price_value_method": "horizon curve × price reliability × points realisation",
+            "risk_profile": "medium_tolerance",
+            "strategy": "budget_builder"
+          },
+          "projected_points": 206.3,
+          "projected_price_gain": 1.9,
+          "race": "Austrian Grand Prix",
+          "round": 10,
+          "second_boost": null,
+          "status": "provisional",
+          "team_cost": 113.1,
+          "transfer_penalty": 0,
+          "transfers": 2
+        },
+        "final_fix": null,
+        "free_transfers_next": 2,
+        "post_fp_final": {
+          "archive": "web/public/data/v13_sources/round10_0669346b777cb309.json",
+          "archive_sha256": "0669346b777cb309fc0327f8809415346ccebd9a7f32c4bb153f19bfcec99f21",
+          "budget_before": 114.4,
+          "captain": "ANT",
+          "chip": "no_negative",
+          "chip_decision": {
+            "reason": "Original V13 research chip timing retained",
+            "result": "research_policy"
+          },
+          "constructors": [
+            "mercedes",
+            "racing_bulls"
+          ],
+          "downside_risk": 29.4,
+          "drivers": [
+            "ANT",
+            "HAM",
+            "OCO",
+            "LIN",
+            "BOR"
+          ],
+          "fp_sessions_included": [],
+          "lock_deadline": "2026-06-26T14:30:00Z",
+          "persistent_constructors": [
+            "mercedes",
+            "racing_bulls"
+          ],
+          "persistent_drivers": [
+            "ANT",
+            "HAM",
+            "OCO",
+            "LIN",
+            "BOR"
+          ],
+          "phase": "post_fp",
+          "policy": {
+            "price_gain_weight": 20.0
+          },
+          "projected_points": 195.8,
+          "projected_price_gain": 1.9,
+          "race": "Austrian Grand Prix",
+          "round": 10,
+          "second_boost": null,
+          "source_generated_at": "2026-06-26T13:21:06.137031+00:00",
+          "source_quality": "pre_lock",
+          "status": "retrospective_correction",
+          "team_cost": 113.1,
+          "transfer_penalty": 0,
+          "transfers": 2,
+          "projected_points_gross": 195.8,
+          "points_basis": "net_after_transfers"
+        },
+        "projected_points": 195.8,
+        "provenance": "corrected_replay",
+        "race": "Austrian Grand Prix",
+        "round": 10,
+        "score_delta_vs_projection": 42.2
+      },
+      {
+        "actual_captain": "HAM",
+        "actual_points": 330.0,
+        "actual_second_boost": null,
+        "bank_after": 2.3,
+        "budget_after": 119.2,
+        "cumulative_points": 2102.0,
+        "early_thoughts": {
+          "archive": "web/public/data/predictions_round11_pre_fp.json",
+          "archive_reconstructed": false,
+          "archive_sha256": "6de37e3a121de199c8af4ee7131f76b8064b3ff8746d6f831bcc29a26f7b2c45",
+          "captain": "VER",
+          "constructors": [
+            "mercedes",
+            "racing_bulls"
+          ],
+          "downside_risk": 51.5,
+          "drivers": [
+            "VER",
+            "HAM",
+            "LIN",
+            "LAW",
+            "BOR"
+          ],
+          "phase": "pre_fp",
+          "policy": {
+            "negative_p5_weight": 0.75,
+            "policy_version": "horizon_budget_value_v2",
+            "price_gain_weight": 4.64,
+            "price_value_method": "horizon curve × price reliability × points realisation",
+            "risk_profile": "medium_tolerance",
+            "strategy": "budget_builder"
+          },
+          "projected_points": 230.7,
+          "projected_price_gain": 2.3,
+          "race": "British Grand Prix",
+          "round": 11,
+          "second_boost": null,
+          "status": "provisional",
+          "team_cost": 116.3,
+          "transfer_penalty": 0,
+          "transfers": 2
+        },
+        "final_fix": null,
+        "free_transfers_next": 2,
+        "post_fp_final": {
+          "archive": "web/public/data/v13_sources/round11_78925fdc18be50a4.json",
+          "archive_sha256": "78925fdc18be50a4706e16197cb8356651a5e8fc1876b2cc3a7cb1e8ba65ea93",
+          "budget_before": 116.3,
+          "captain": "HAM",
+          "chip": null,
+          "chip_decision": {
+            "reason": "Original V13 research chip timing retained",
+            "result": "research_policy"
+          },
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "downside_risk": 44.1,
+          "drivers": [
+            "HAM",
+            "OCO",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "fp_sessions_included": [],
+          "lock_deadline": "2026-07-04T11:00:00Z",
+          "persistent_constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "HAM",
+            "OCO",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "phase": "post_fp",
+          "policy": {
+            "price_gain_weight": 20.0
+          },
+          "projected_points": 248.3,
+          "projected_price_gain": 1.7,
+          "race": "British Grand Prix",
+          "round": 11,
+          "second_boost": null,
+          "source_generated_at": "2026-07-04T06:44:20.567749+00:00",
+          "source_quality": "pre_lock",
+          "status": "retrospective_correction",
+          "team_cost": 114.0,
+          "transfer_penalty": 0,
+          "transfers": 2,
+          "projected_points_gross": 248.3,
+          "points_basis": "net_after_transfers"
+        },
+        "projected_points": 248.3,
+        "provenance": "corrected_replay",
+        "race": "British Grand Prix",
+        "round": 11,
+        "score_delta_vs_projection": 81.7
+      },
+      {
+        "actual_captain": "HAD",
+        "actual_points": 269.0,
+        "actual_second_boost": null,
+        "bank_after": 1.0,
+        "budget_after": 122.3,
+        "cumulative_points": 2371.0,
+        "early_thoughts": {
+          "archive": "web/public/data/predictions_round12_pre_fp.json",
+          "archive_reconstructed": false,
+          "archive_sha256": "ef13d9b53df90fa070255468d1e04aa552f188b1c3ed16681d2fc1f1e5dba184",
+          "captain": "ANT",
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "downside_risk": 77.4,
+          "drivers": [
+            "ANT",
+            "OCO",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "phase": "pre_fp",
+          "policy": {
+            "negative_p5_weight": 0.75,
+            "policy_version": "horizon_budget_value_v2",
+            "price_gain_weight": 4.639,
+            "price_value_method": "horizon curve × price reliability × points realisation",
+            "risk_profile": "medium_tolerance",
+            "strategy": "budget_builder"
+          },
+          "projected_points": 159.0,
+          "projected_price_gain": 2.7,
+          "race": "Belgian Grand Prix",
+          "round": 12,
+          "second_boost": null,
+          "status": "provisional",
+          "team_cost": 117.4,
+          "transfer_penalty": 0,
+          "transfers": 1
+        },
+        "final_fix": null,
+        "free_transfers_next": 2,
+        "post_fp_final": {
+          "archive": "web/public/data/v13_sources/round12_2211863948b2218c.json",
+          "archive_sha256": "2211863948b2218c4ab4b6627eaebce7c3389033f8b1e884b4998468eb143408",
+          "budget_before": 119.2,
+          "captain": "HAD",
+          "chip": "autopilot",
+          "chip_decision": {
+            "reason": "Original V13 research chip timing retained",
+            "result": "research_policy"
+          },
+          "constructors": [
+            "red_bull",
+            "ferrari"
+          ],
+          "downside_risk": 67.0,
+          "drivers": [
+            "HAM",
+            "HAD",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "fp_sessions_included": [],
+          "lock_deadline": "2026-07-18T14:00:00Z",
+          "persistent_constructors": [
+            "red_bull",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "HAM",
+            "HAD",
+            "LIN",
+            "COL",
+            "BOR"
+          ],
+          "phase": "post_fp",
+          "policy": {
+            "price_gain_weight": 20.0
+          },
+          "projected_points": 225.5,
+          "projected_price_gain": 2.7,
+          "race": "Belgian Grand Prix",
+          "round": 12,
+          "second_boost": null,
+          "source_generated_at": "2026-07-18T13:49:58.961751+00:00",
+          "source_quality": "pre_lock",
+          "status": "retrospective_correction",
+          "team_cost": 118.2,
+          "transfer_penalty": 0,
+          "transfers": 2,
+          "projected_points_gross": 225.5,
+          "points_basis": "net_after_transfers"
+        },
+        "projected_points": 225.5,
+        "provenance": "corrected_replay",
+        "race": "Belgian Grand Prix",
+        "round": 12,
+        "score_delta_vs_projection": 43.5
+      },
+      {
+        "actual_captain": "NOR",
+        "actual_points": 223.0,
+        "actual_second_boost": null,
+        "bank_after": 1.3,
+        "budget_after": 125.6,
+        "cumulative_points": 2594.0,
+        "early_thoughts": {
+          "archive": "web/public/data/predictions_round13_pre_fp.json",
+          "archive_reconstructed": false,
+          "archive_sha256": "ccd13832cc31750eb01d94f2e683a6eda0632c717a170b4a48ed3ceaa742dd76",
+          "captain": "HAM",
+          "constructors": [
+            "mercedes",
+            "ferrari"
+          ],
+          "downside_risk": 67.0,
+          "drivers": [
+            "HAM",
+            "HAD",
+            "LIN",
+            "LAW",
+            "BOR"
+          ],
+          "phase": "pre_fp",
+          "policy": {
+            "negative_p5_weight": 0.75,
+            "policy_version": "horizon_budget_value_v2",
+            "price_gain_weight": 4.636,
+            "price_value_method": "horizon curve × price reliability × points realisation",
+            "risk_profile": "medium_tolerance",
+            "strategy": "budget_builder"
+          },
+          "projected_points": 173.1,
+          "projected_price_gain": 2.3,
+          "race": "Hungarian Grand Prix",
+          "round": 13,
+          "second_boost": null,
+          "status": "provisional",
+          "team_cost": 121.7,
+          "transfer_penalty": 0,
+          "transfers": 2
+        },
+        "final_fix": {
+          "actual_gain": 22.0,
+          "archive": "web/public/data/predictions_round13.json",
+          "archive_sha256": "efc2a71ec4f4fd3c5bfd5a18fea3bf55e359329ebdf57721579e7d858a6ae2b9",
+          "bank_after": 1.3,
+          "bank_before": 2.2,
+          "banked_qualifying_driver": "HAM",
+          "boost_transferred": true,
+          "generated_at": "2026-07-25T22:06:20.359358+00:00",
+          "incoming": "NOR",
+          "incoming_name": "Lando Norris",
+          "outgoing": "HAM",
+          "outgoing_name": "Lewis Hamilton",
+          "phase": "post_quali",
+          "points_basis": "projected_points_race",
+          "projected_gain": 3.4,
+          "round": 13,
+          "status": "played"
+        },
+        "free_transfers_next": 2,
+        "post_fp_final": {
+          "archive": "web/public/data/v13_sources/round13_4050a1968e7b1f13.json",
+          "archive_sha256": "4050a1968e7b1f138492445cf409ad1b8769471566bee7ae7ee5715dd770bcce",
+          "budget_before": 122.3,
+          "captain": "HAM",
+          "chip": null,
+          "chip_decision": {
+            "reason": "Original V13 research chip timing retained",
+            "result": "research_policy"
+          },
+          "constructors": [
+            "mclaren",
+            "ferrari"
+          ],
+          "downside_risk": 65.0,
+          "drivers": [
+            "HAM",
+            "HAD",
+            "LIN",
+            "LAW",
+            "BOR"
+          ],
+          "fp_sessions_included": [],
+          "lock_deadline": "2026-07-25T14:00:00Z",
+          "persistent_constructors": [
+            "mclaren",
+            "ferrari"
+          ],
+          "persistent_drivers": [
+            "NOR",
+            "HAD",
+            "LIN",
+            "LAW",
+            "BOR"
+          ],
+          "phase": "post_fp",
+          "policy": {
+            "price_gain_weight": 20.0
+          },
+          "projected_points": 187.0,
+          "projected_price_gain": 1.9,
+          "race": "Hungarian Grand Prix",
+          "round": 13,
+          "second_boost": null,
+          "source_generated_at": "2026-07-25T12:12:18.279691+00:00",
+          "source_quality": "pre_lock",
+          "status": "retrospective_correction",
+          "team_cost": 120.1,
+          "transfer_penalty": 0,
+          "transfers": 2,
+          "projected_points_gross": 187.0,
+          "points_basis": "net_after_transfers"
+        },
+        "projected_points": 187.0,
+        "provenance": "corrected_replay",
+        "race": "Hungarian Grand Prix",
+        "round": 13,
+        "score_delta_vs_projection": 36.0
       }
-    }
+    ],
+    "start_round": 1,
+    "total_points": 2594.0
   },
-  "labels": {
-    "drivers": {
-      "RUS": "George Russell",
-      "VER": "Max Verstappen",
-      "NOR": "Lando Norris",
-      "PIA": "Oscar Piastri",
-      "ANT": "Kimi Antonelli",
-      "LEC": "Charles Leclerc",
-      "HAM": "Lewis Hamilton",
-      "HAD": "Isack Hadjar",
-      "GAS": "Pierre Gasly",
-      "SAI": "Carlos Sainz",
-      "ALB": "Alex Albon",
-      "ALO": "Fernando Alonso",
-      "BEA": "Oliver Bearman",
-      "OCO": "Esteban Ocon",
-      "LIN": "Arvid Lindblad",
-      "COL": "Franco Colapinto",
-      "LAW": "Liam Lawson",
-      "STR": "Lance Stroll",
-      "BOR": "Gabriel Bortoleto",
-      "PER": "Sergio Perez",
-      "HUL": "Nico Hulkenberg",
-      "BOT": "Valtteri Bottas"
-    },
-    "constructors": {
-      "mercedes": "Mercedes",
-      "red_bull": "Red Bull",
-      "mclaren": "McLaren",
-      "ferrari": "Ferrari",
-      "alpine": "Alpine",
-      "williams": "Williams",
-      "aston_martin": "Aston Martin",
-      "haas": "Haas",
-      "racing_bulls": "Racing Bulls",
-      "audi": "Audi",
-      "cadillac": "Cadillac"
-    }
-  },
+  "schema_version": 1,
   "source": {
     "experiment": "data/experiments/season_risk_tolerance_with_chips_2026.json",
     "experiment_sha256": "d62b8b2545965d1cf7633e1e0186d0c3d422f0b277c7dd8fc01be2366b19e09d",
+    "live_decisions": [
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
     "official_points_rounds": [
       1,
       2,
@@ -2464,15 +2576,205 @@
       20,
       21
     ],
-    "live_decisions": [
-      14,
-      15,
-      16,
-      17,
-      18,
-      19,
-      20,
-      21
-    ]
+    "active_replay": {
+      "path": "data/v13/replays/2026-11-07T14-45-33Z/ledger.json",
+      "sha256": "3cd6c832808354a43dbfe01e905e0d2f7e9991008e1f88bc4b92be5585965337"
+    }
+  },
+  "historical_correction": {
+    "generated_at": "2026-11-07T14:46:47.131780+00:00",
+    "through_round": 21,
+    "ledger": "data/v13/replays/2026-11-07T14-45-33Z/ledger.json",
+    "sha256": "3cd6c832808354a43dbfe01e905e0d2f7e9991008e1f88bc4b92be5585965337",
+    "sources": {
+      "1": {
+        "archive": "web/public/data/v13_sources/round1_9125539864761bc7.json",
+        "archive_sha256": "9125539864761bc7f8edbc3a574d055ac016ca34272a66fef1b9080b8678ae24",
+        "generated_at": "2026-05-16T05:09:27.239831+00:00",
+        "quality": "reconstructed",
+        "sessions": [],
+        "source": "web/public/data/predictions_round1_post_fp.json",
+        "source_sha256": "eefd68f850b6734db533550326735182662fc5450d441b500f2d18ae473d3a55"
+      },
+      "2": {
+        "archive": "web/public/data/v13_sources/round2_c64fca697b7371e4.json",
+        "archive_sha256": "c64fca697b7371e404c84d93afd173f06f3a8772db0ed38bfe007a01e44ea061",
+        "generated_at": "2026-05-16T05:11:53.556691+00:00",
+        "quality": "reconstructed",
+        "sessions": [],
+        "source": "web/public/data/predictions_round2_post_fp.json",
+        "source_sha256": "5c8a9e11485ea74381a7d472a00032589f4e53f5513a77b66f10e2d110dbcd66"
+      },
+      "3": {
+        "archive": "web/public/data/v13_sources/round3_2ba73413c7fccd63.json",
+        "archive_sha256": "2ba73413c7fccd63765b580db4d102f4a1cbd820d92894db5c231fd6887260c6",
+        "generated_at": "2026-05-16T05:06:33.065896+00:00",
+        "quality": "reconstructed",
+        "sessions": [],
+        "source": "web/public/data/predictions_round3_post_fp.json",
+        "source_sha256": "dcd3310d9370f8d962c8503083c94ead2776fe0df990a2ff62dba8f0553949e0"
+      },
+      "6": {
+        "archive": "web/public/data/v13_sources/round6_8c2a26a875d9ff78.json",
+        "archive_sha256": "8c2a26a875d9ff7826ba415e463c687b4c409f314f1c46e0b3c6b7d2c39f2e72",
+        "generated_at": "2026-05-19T06:17:38.768048+00:00",
+        "quality": "unverified_pre_lock_research",
+        "sessions": [],
+        "source": "web/public/data/predictions_round6_post_fp.json",
+        "source_sha256": "600b671663337f251433be907911a4102e0e4d035435ebcc7017e9d96337df0d"
+      },
+      "7": {
+        "archive": "web/public/data/v13_sources/round7_a5ffc008496944c7.json",
+        "archive_sha256": "a5ffc008496944c76cd80d6e9d23ada1f6192ff01068ba2e027ba8b868346aec",
+        "generated_at": "2026-05-23T09:52:58.099048+00:00",
+        "quality": "pre_lock",
+        "sessions": [],
+        "source": "data/audit/snapshots/round7/2026-05-23T09-52-58Z_post_fp.json",
+        "source_sha256": "b7474c51f6e957e4a2b5ca9fd22b7901ecf83e0657f3f480d2856588b2bc34d3"
+      },
+      "8": {
+        "archive": "web/public/data/v13_sources/round8_1bddca0b3c6e7674.json",
+        "archive_sha256": "1bddca0b3c6e7674aa5f0c75470b9425dc267d81d7b301889f231ab9aa535ddb",
+        "generated_at": "2026-06-06T12:13:58.542175+00:00",
+        "quality": "pre_lock",
+        "sessions": [],
+        "source": "data/audit/snapshots/round8/2026-06-06T12-13-58Z_post_fp.json",
+        "source_sha256": "cfb672fd63f7faa914260a08196cc5e5776e00a7f05e6447ab47833d9b281f74"
+      },
+      "9": {
+        "archive": "web/public/data/v13_sources/round9_3cfe9861c96a0010.json",
+        "archive_sha256": "3cfe9861c96a0010879d5223b9ffc778c3f6ee8bd7738b6ffe37a376d1e01e9c",
+        "generated_at": "2026-06-12T22:48:06.676081+00:00",
+        "quality": "pre_lock",
+        "sessions": [],
+        "source": "data/audit/snapshots/round9/2026-06-12T22-48-06Z_post_fp.json",
+        "source_sha256": "4165b7d4d58b9205fbe7e94d35f240dbfef9c6d6751c526a6f4b9e54af4b4ff0"
+      },
+      "10": {
+        "archive": "web/public/data/v13_sources/round10_0669346b777cb309.json",
+        "archive_sha256": "0669346b777cb309fc0327f8809415346ccebd9a7f32c4bb153f19bfcec99f21",
+        "generated_at": "2026-06-26T13:21:06.137031+00:00",
+        "quality": "pre_lock",
+        "sessions": [],
+        "source": "data/audit/snapshots/round10/2026-06-26T13-21-06Z_post_fp.json",
+        "source_sha256": "ae0f8f3d8a6bef53d164830087c0e137181a2a4b4d74e25ace30d63f6ae570ee"
+      },
+      "11": {
+        "archive": "web/public/data/v13_sources/round11_78925fdc18be50a4.json",
+        "archive_sha256": "78925fdc18be50a4706e16197cb8356651a5e8fc1876b2cc3a7cb1e8ba65ea93",
+        "generated_at": "2026-07-04T06:44:20.567749+00:00",
+        "quality": "pre_lock",
+        "sessions": [],
+        "source": "data/audit/snapshots/round11/2026-07-04T06-44-20Z_post_fp.json",
+        "source_sha256": "584ca08e8be17108a1d249710cad4a77ee440d3c334797fd8bc626f8d78e91f8"
+      },
+      "12": {
+        "archive": "web/public/data/v13_sources/round12_2211863948b2218c.json",
+        "archive_sha256": "2211863948b2218c4ab4b6627eaebce7c3389033f8b1e884b4998468eb143408",
+        "generated_at": "2026-07-18T13:49:58.961751+00:00",
+        "quality": "pre_lock",
+        "sessions": [],
+        "source": "data/audit/snapshots/round12/2026-07-18T13-49-59Z_post_fp.json",
+        "source_sha256": "c151b307244f2c52ce948d434d85195d308b27481336fe961be17e56911247b9"
+      },
+      "13": {
+        "archive": "web/public/data/v13_sources/round13_4050a1968e7b1f13.json",
+        "archive_sha256": "4050a1968e7b1f138492445cf409ad1b8769471566bee7ae7ee5715dd770bcce",
+        "generated_at": "2026-07-25T12:12:18.279691+00:00",
+        "quality": "pre_lock",
+        "sessions": [],
+        "source": "data/audit/snapshots/round13/2026-07-25T12-12-18Z_post_fp.json",
+        "source_sha256": "d81a3b3807336d2cf7155e64a5399fecad80aa51977fd04f79070a90b86de4e3"
+      },
+      "14": {
+        "archive": "web/public/data/v13_sources/round14_512175ae0fd122af.json",
+        "archive_sha256": "512175ae0fd122afc4c49c13dd0270721753c9b84a45ef6159208b07fdc4283a",
+        "generated_at": "2026-08-21T15:48:55.929450+00:00",
+        "quality": "pre_lock",
+        "sessions": [],
+        "source": "data/audit/snapshots/round14/2026-08-21T15-48-55Z_post_fp.json",
+        "source_sha256": "38afb2fb529bea0fccd1546b40d366936fa52df414eb8ee771271d4aa7650f6e"
+      },
+      "15": {
+        "archive": "web/public/data/v13_sources/round15_a6581a22e747090b.json",
+        "archive_sha256": "a6581a22e747090bd7e4a48738280acfda1c3e4959abc97714e21f30018e11bc",
+        "generated_at": "2026-09-05T12:46:28.389522+00:00",
+        "quality": "pre_lock",
+        "sessions": [],
+        "source": "data/audit/snapshots/round15/2026-09-05T12-46-28Z_post_fp.json",
+        "source_sha256": "5697f3b1567f2f2bd2cc254d1b3fac9293a1005d5479ef3d7fd325bdcf00ebd9"
+      },
+      "16": {
+        "archive": "web/public/data/v13_sources/round16_ad6bef1651738b8d.json",
+        "archive_sha256": "ad6bef1651738b8d59e19b188c20b227ea31981ea72ddc89e5c1c06ed4928f3f",
+        "generated_at": "2026-09-12T12:31:39.283972+00:00",
+        "quality": "pre_lock",
+        "sessions": [],
+        "source": "data/audit/snapshots/round16/2026-09-12T12-31-39Z_post_fp.json",
+        "source_sha256": "03528aca849b136f513c32afc4bda8c28154febc609773e4a550ba3b755cbd02"
+      },
+      "17": {
+        "archive": "web/public/data/v13_sources/round17_d4e67cebac1d009c.json",
+        "archive_sha256": "d4e67cebac1d009c39c8327c90ca606ec42ba2a360d94fb72ce2c37ae4787ec4",
+        "generated_at": "2026-09-25T11:25:19.697296+00:00",
+        "quality": "pre_lock",
+        "sessions": [],
+        "source": "data/audit/snapshots/round17/2026-09-25T11-25-19Z_post_fp.json",
+        "source_sha256": "fa7715b8f9d199f8265fa07e8385ff9baabd2b4e35916d85d449bc9c035db31c"
+      },
+      "18": {
+        "archive": "web/public/data/v13_sources/round18_fbe28a6ec43a2b9d.json",
+        "archive_sha256": "fbe28a6ec43a2b9db1f807363e92ef5e315e6373a3099cb4d2e19669291179ce",
+        "generated_at": "2026-10-03T06:11:06.453382+00:00",
+        "quality": "pre_lock",
+        "sessions": [
+          "FP1",
+          "FP2",
+          "FP3"
+        ],
+        "source": "data/audit/snapshots/round18/2026-10-03T06-11-06Z_post_fp.json",
+        "source_sha256": "695e36920902117c6c5f2954a68a933b813b4b4f8c0841c477a8d5118377c2cf"
+      },
+      "19": {
+        "archive": "web/public/data/v13_sources/round19_778ffcfee4f7b20f.json",
+        "archive_sha256": "778ffcfee4f7b20fde50671e97866c05833d58142a75239526985298e7de0400",
+        "generated_at": "2026-10-09T19:16:46.311814+00:00",
+        "quality": "pre_lock",
+        "sessions": [
+          "FP1"
+        ],
+        "source": "web/public/data/predictions_round19.json",
+        "source_sha256": "37a20196cbcc69f5f7f59a94c802dcd3c2d04c0b46fe927c3f515247175e9a89"
+      },
+      "20": {
+        "archive": "web/public/data/v13_sources/round20_2eed406d343677e9.json",
+        "archive_sha256": "2eed406d343677e9a279543c23a81a0cf073da805ce64e5a27fa66569541d665",
+        "generated_at": "2026-10-24T19:40:42.861895+00:00",
+        "quality": "pre_lock",
+        "sessions": [
+          "FP1",
+          "FP2",
+          "FP3"
+        ],
+        "source": "data/audit/snapshots/round20/2026-10-24T19-40-43Z_post_fp.json",
+        "source_sha256": "64fc97e797585fa02ef25a7de4c2ef804d5a8dcdefe214889afdb5b9e62ff063"
+      },
+      "21": {
+        "archive": "web/public/data/v13_sources/round21_5aff5bccb8c53de0.json",
+        "archive_sha256": "5aff5bccb8c53de0b4afae3ff8fcf0897325ff92348d0f02885be760aa30dccd",
+        "generated_at": "2026-10-31T20:07:48.370228+00:00",
+        "quality": "pre_lock",
+        "sessions": [
+          "FP1",
+          "FP2",
+          "FP3"
+        ],
+        "source": "data/audit/snapshots/round21/2026-10-31T20-07-48Z_post_fp.json",
+        "source_sha256": "9e7559a9e3b07b3df192dedf156b9f5664af8e5e8eacfe3f2360860d39827241"
+      }
+    },
+    "previous_total_points": 4582.0,
+    "previous_budget": 135.3,
+    "note": "History recalculated from archived practice forecasts. Earlier published decisions are retained. R1–R3 remain reconstructed research; R6 lacks a verifiable pre-lock forecast. FP3 coverage is only claimed where recorded."
   }
 }

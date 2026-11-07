@@ -28,7 +28,7 @@ def test_missing_closing_snapshot_fails_instead_of_using_latest(monkeypatch):
 
 
 def test_monza_budget_and_madrid_affordability():
-    payload = v13.build_payload()
+    payload = v13.build_payload(use_correction=False)
     history = {row["round"]: row for row in payload["live_history"]}
     assert history[14]["budget_after"] == 127.0
     assert history[15]["budget_after"] == 129.2
@@ -50,7 +50,7 @@ def test_missing_held_asset_price_stops_settlement(monkeypatch):
 
     monkeypatch.setattr(v13, "_price_after_round", without_antonelli)
     with pytest.raises(ValueError, match="closing price for ANT"):
-        v13.build_payload()
+        v13.build_payload(use_correction=False)
 
 
 def test_over_budget_locked_team_stops_settlement(monkeypatch):
@@ -64,4 +64,4 @@ def test_over_budget_locked_team_stops_settlement(monkeypatch):
 
     monkeypatch.setattr(v13, "_live_decision", too_expensive)
     with pytest.raises(ValueError, match="locked team exceeds its budget"):
-        v13.build_payload()
+        v13.build_payload(use_correction=False)

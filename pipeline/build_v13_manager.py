@@ -802,7 +802,11 @@ def _live_decision(round_num: int, phase: str) -> dict[str, Any] | None:
     return decision
 
 
-def build_payload() -> dict[str, Any]:
+def build_payload(*, use_correction: bool = True) -> dict[str, Any]:
+    # A retrospective repair is a new ledger, never an edit to the old choices.
+    from pipeline.replay_v13_history import ACTIVE_PATH, build_corrected_payload
+    if use_correction and ACTIVE_PATH.exists():
+        return build_corrected_payload()
     experiment = _load_json(EXPERIMENT_PATH)
     manager = _v13_manager(experiment)
     driver_names, constructor_names = _names()

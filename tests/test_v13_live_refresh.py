@@ -33,6 +33,7 @@ def workspace(tmp_path, monkeypatch):
     monkeypatch.setattr(publisher, "WEB_DATA_DIR", data)
     monkeypatch.setattr(publisher, "DECISION_DIR", decisions)
     monkeypatch.setattr(publisher, "PUBLIC_PATH", public)
+    monkeypatch.setattr(publisher, "HORIZON_PATH", data / "horizon_projections.json")
     monkeypatch.setattr(publisher.v13, "main", lambda: None)
     monkeypatch.setattr(publisher.v13, "build_payload", lambda: {"current_state": {"next_round": 18}})
     monkeypatch.setattr(publisher, "_lock_deadline", lambda _: "2026-10-03T08:00:00Z")
@@ -123,3 +124,16 @@ def test_refresh_rejects_a_tampered_revision_source(workspace):
     with pytest.raises(RuntimeError, match="frozen source archive has changed"):
         publisher.publish_live(18, "post_fp")
     assert len(list(decisions.glob("*revision*.json"))) == 1
+
+
+def test_corrected_budget_reselects_even_when_forecast_is_unchanged(workspace, monkeypatch):
+    _, _, _, decisions, public = workspace
+    state = {"current_state": {"next_round": 18, "budget": 130}}
+    monkeypatch.setattr(publisher.v13, "build_payload", lambda: state)
+    first = publisher.publish_live(18, "post_fp")
+    state["current_state"]["budget"] = 125
+    public.write_text(json.dumps(state), encoding="utf-8")
+    second = publisher.publish_live(18, "post_fp")
+    assert second["revision"] == first["revision"] + 1
+    assert second["selection_context_sha256"] != first["selection_context_sha256"]
+    assert len(list(decisions.glob("*revision*.json"))) == 2

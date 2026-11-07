@@ -151,7 +151,8 @@ def test_actual_chip_scoring() -> None:
 
 
 def test_v2_chip_policy_uses_track_risk_and_real_lineup_churn() -> None:
-    rounds = sim.load_rounds()
+    # The V2 chip policy was defined on the fixed R1–R13 research experiment.
+    rounds = sim.load_rounds(through_round=13)
     baseline = sim.simulate(rounds, strategy="max_points", chip_schedule={})
     schedule, _ = sim.choose_chip_schedule_v2(
         rounds,

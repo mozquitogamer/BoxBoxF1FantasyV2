@@ -6,7 +6,7 @@ from pipeline import publish_v13_decision as publish
 
 
 def test_v13_replay_preserves_full_season_score_and_provenance() -> None:
-    payload = v13.build_payload()
+    payload = v13.build_payload(use_correction=False)
     replay = payload["research_replay"]
 
     assert replay["base_points_before_final_fix"] == 2572.0
@@ -22,7 +22,7 @@ def test_v13_replay_preserves_full_season_score_and_provenance() -> None:
 
 
 def test_v13_uses_only_qualifying_locked_data_for_final_fix() -> None:
-    payload = v13.build_payload()
+    payload = v13.build_payload(use_correction=False)
     round_13 = payload["research_replay"]["rounds"][-1]
     final_fix = round_13["final_fix"]
 
@@ -70,7 +70,7 @@ def test_publishing_an_existing_decision_is_idempotent(tmp_path, monkeypatch) ->
     path = v13.DECISION_DIR / "round14_pre_fp.json"
     before = path.read_bytes()
     public_path = tmp_path / "v13_manager.json"
-    public_path.write_text(json.dumps(v13.build_payload()), encoding="utf-8")
+    public_path.write_text(json.dumps(v13.build_payload(use_correction=False)), encoding="utf-8")
     monkeypatch.setattr(publish, "PUBLIC_PATH", public_path)
     monkeypatch.setattr(v13, "main", lambda: None)
     decision = publish.publish(14, "pre_fp")
@@ -86,7 +86,7 @@ def test_live_price_gain_value_is_horizon_aware_and_calibrated() -> None:
 
 
 def test_live_madrid_policy_respects_corrected_budget() -> None:
-    public = v13.build_payload()
+    public = v13.build_payload(use_correction=False)
     history = {row["round"]: row for row in public["live_history"]}
     monza = history[15]
     prior_budget = history[14]["budget_after"]
@@ -116,7 +116,7 @@ def test_live_madrid_policy_respects_corrected_budget() -> None:
 
 
 def test_public_manager_distinguishes_live_policy_from_replay_policy() -> None:
-    payload = v13.build_payload()
+    payload = v13.build_payload(use_correction=False)
 
     assert payload["manager"]["policy_version"] == "2026.3"
     assert payload["manager"]["policy"]["price_gain_weight"] == round(

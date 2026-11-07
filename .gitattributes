@@ -9,3 +9,5 @@ data/audit/snapshots/**/*.json -text
 data/audit/objects/** -text
 data/audit/inputs/** -text
 data/forecasts/weather/** -text
+data/v13/replays/** -text
+web/public/data/v13_sources/** -text

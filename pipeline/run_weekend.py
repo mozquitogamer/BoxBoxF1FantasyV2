@@ -130,17 +130,9 @@ PHASES = {
             ("03a_normalize_jolpica.py", ["--all"]),
             ("03b_build_jolpica_features.py", ["--all"]),
             *PREDICTION_STEPS,
-            ("08_export_website_json.py", ["--round", "{round}", "--phase", "pre_fp"]),
-            # P9: refresh ML projections for the next 5 rounds so the
-            # multi-week planner sees fresh future-round data alongside the
-            # updated current-round predictions. Non-fatal if it fails — the
-            # planner falls back to the affinity heuristic.
             HORIZON_STEP,
-            # Freeze the Beat V13 early-thoughts decision from the freshly
-            # exported pre-FP archive. The publisher rebuilds the public live
-            # state first. Keep this non-fatal so a page-only issue cannot stop
-            # the core prediction/export weekend flow.
-            ("publish_v13_decision.py", ["--round", "{round}", "--phase", "pre_fp", "--refresh-live"], {"non_fatal": True}),
+            ("08_export_website_json.py", ["--round", "{round}", "--phase", "pre_fp"]),
+            # Export includes the required V13 refresh.
             # SEO: regenerate the static /picks/ race landing pages from the
             # freshly exported JSON. Non-fatal — a failure won't abort the weekend.
             SEO_STEP,
@@ -150,9 +142,8 @@ PHASES = {
         "description": "After free practice - generate predictions from FP data",
         "steps": [
             *FP_PREDICTION_STEPS,
-            ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_fp"]),
             HORIZON_STEP,
-            ("publish_v13_decision.py", ["--round", "{round}", "--phase", "post_fp", "--refresh-live"], {"non_fatal": True}),
+            ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_fp"]),
             SEO_STEP,
         ],
     },
@@ -191,7 +182,7 @@ PHASES = {
             ("08_export_website_json.py", ["--round", "{round}", "--actuals-only"]),
             # Official points and prices now exist, so roll V13's live score,
             # budget and next-round state forward automatically.
-            ("build_v13_manager.py", [], {"non_fatal": True}),
+            ("build_v13_manager.py", []),
             SEO_STEP,
         ],
     },

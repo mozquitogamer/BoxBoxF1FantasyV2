@@ -81,6 +81,26 @@ def _normalise_asset_legacy_ids(value) -> list[str]:
     return [str(value)]
 
 
+def refresh_v13_after_export(round_num: int, phase: str, *, reconstructed: bool = False):
+    """A newly published actionable simulation must carry its V13 decision."""
+    if reconstructed or phase not in {"pre_fp", "post_fp"}:
+        return None
+    from config.settings import is_race_completed
+    from pipeline import publish_v13_decision as publisher
+    if is_race_completed(round_num):
+        return None
+    live = json.loads((WEB_DATA_DIR / "predictions.json").read_text(encoding="utf-8"))
+    if live.get("round") != round_num or live.get("phase") != phase:
+        return None
+    if publisher._parse_time(live["generated_at"]) >= publisher._parse_time(publisher._lock_deadline(round_num)):
+        return None
+    # Deliberately fail the export if this fails: a stale choice cannot ship.
+    decision = publisher.publish_live(round_num, phase)
+    if decision.get("source_generated_at") != live["generated_at"]:
+        raise RuntimeError("V13 did not refresh to the exported simulation")
+    return decision
+
+
 def detect_phase(round_num: int, year: int = CURRENT_SEASON) -> str:
     """Detect which pipeline phase produced the current predictions.
 
@@ -1096,6 +1116,11 @@ def main():
     (WEB_DATA_DIR / 'accuracy_prelock.json').write_text(
         json.dumps(accuracy, separators=(',', ':')), encoding='utf-8')
     print(f"  Accuracy: {len(accuracy['rounds'])} complete pre-lock forecasts")
+
+    if not args.actuals_only:
+        decision = refresh_v13_after_export(round_num, phase, reconstructed=args.reconstructed)
+        if decision:
+            print(f"  V13 refreshed -> {decision['source_generated_at']}")
 
     print(f"\nAll data exported to {WEB_DATA_DIR}")
     print("=" * 70)

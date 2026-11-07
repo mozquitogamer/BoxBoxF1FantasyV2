@@ -92,7 +92,7 @@ Run the normal priors-only pipeline, then freeze the public early team:
 
 ```text
 python pipeline/run_weekend.py --phase pre_fp_predict --round N
-python pipeline/publish_v13_decision.py --round N --phase pre_fp
+python pipeline/publish_v13_decision.py --round N --phase pre_fp --refresh-live
 ```
 
 This snapshot is provisional. It can be discussed in videos and remains
@@ -105,11 +105,14 @@ and freeze V13's official team:
 
 ```text
 python pipeline/run_weekend.py --phase post_fp --round N
-python pipeline/publish_v13_decision.py --round N --phase post_fp
+python pipeline/publish_v13_decision.py --round N --phase post_fp --refresh-live
 ```
 
 The publisher refuses an archive whose generation timestamp is at or after the
-configured lock deadline. The final record is immutable once written.
+configured lock deadline. Each saved record is immutable. Every later pre-lock
+simulation must append a fresh decision when its forecast, held team, budget,
+chip state or horizon changes. The latest valid pre-lock choice counts; an early
+choice does not bind the next one. Drivers, constructors, boost and chip may change.
 
 V13 has only 3x Boost remaining. At each post-FP deadline, it compares the
 extra 3x value of its selected top two drivers with the largest remaining
@@ -214,3 +217,41 @@ Resend and `SUBSCRIPTION_SIGNING_SECRET` values, plus
 HttpOnly entrant session and falls back to `SUBSCRIPTION_SIGNING_SECRET` when
 omitted. Do not run the migration from the browser or expose any of these
 values in public JavaScript.
+
+
+## Automatic refresh and the 7 November history repair
+
+Every standalone `08_export_website_json.py` export of an actionable pre-FP or
+post-FP simulation now refreshes V13. Refresh failure fails the export. The
+weekend runner updates the future-round horizon before export, and post-race
+V13 settlement is required. Vercel's build also rejects a simulation whose V13
+choice comes from a different forecast or exceeds its available budget.
+
+The choice records include the held-team, budget, transfers, chip state, policy
+and horizon fingerprint. Correcting the previous round's state therefore causes
+a fresh choice even if the current simulation itself has not changed.
+
+`pipeline/replay_v13_history.py` replays choices chronologically from saved
+forecasts; it never trains today's model on completed weekends. The active
+correction points to an immutable ledger under `data/v13/replays/`, and every
+input forecast is retained under `web/public/data/v13_sources/`. Original
+forecasts and decision records remain untouched. The public total, bank, owned
+team, free transfers and remaining chips continue from this corrected ledger.
+
+The original research chip-policy dates (Wild Card R7, Limitless R8, No Negative
+R10 and Autopilot R12) are retained. Final Fix is recomputed from trustworthy
+qualifying-locked projected race points. From R14, 3x timing is reevaluated using
+the horizon that was actually archived before that weekend's lock; future race
+results and today's horizon are excluded. Official results and closing prices
+are used only to settle each chosen team before moving to the next round.
+
+R1–R3 remain reconstructed research. R6 has no verifiable pre-lock forecast and
+retains its explicitly labelled research input. Older archives do not all record
+practice-session coverage, so a post-FP label alone is not proof of FP3. Where
+recorded, the replay selects the latest pre-lock practice simulation; Sprint
+weekends use their actionable practice forecast. Brazil currently uses FP1/FP2
+and must refresh again when the next simulation is published.
+
+The missing Singapore post-FP decision records and their forecast source were
+recovered byte-for-byte from the local audit files and checked against the
+already-published decision and stored forecast hashes.

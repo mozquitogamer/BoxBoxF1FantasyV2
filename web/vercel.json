@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "",
+  "buildCommand": "node scripts/check-v13-current.js",
+  "outputDirectory": "public",
   "installCommand": "",
   "framework": null,
   "trailingSlash": true,

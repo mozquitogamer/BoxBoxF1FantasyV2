@@ -2,6 +2,18 @@
   "entries": [
     {
       "date": "2026-11-07",
+      "title": "V13 now refreshes with every simulation; history recalculated",
+      "tags": [
+        "fix"
+      ],
+      "body": [
+        "Every new pre-lock simulation now refreshes V13’s drivers, constructors, boost and chip. A failed refresh stops publishing, and deployment checks prevent a simulation from going live with an older V13 choice. Each superseded decision remains in the audit history. Displayed forecasts now deduct paid-transfer penalties.",
+        "The completed season was replayed from the latest saved pre-lock practice forecasts, carrying each chosen team, bank, transfers and chips into the next round. The corrected total through Mexico is 4,587 points with $138.6M spending power. The previous displayed figures were 4,582 points and $135.3M.",
+        "This is a retrospective correction. R1–R3 remain reconstructed research, R6 has no verifiable pre-lock forecast, and older archives do not all record practice-session coverage. The replay does not claim FP3 evidence where it cannot be verified."
+      ]
+    },
+    {
+      "date": "2026-11-07",
       "title": "Brazil simulations updated for grid penalties",
       "tags": [
         "model"
