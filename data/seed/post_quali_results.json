@@ -185,6 +185,190 @@
         "aston_martin": -1.0,
         "cadillac": -1.0
       }
+    },
+    "22": {
+      "year": 2026,
+      "round": 22,
+      "note": "FIA final qualifying classification Doc 50 and provisional starting grid Doc 51, published 7 November. Banked qualifying points from the official Fantasy feed. Hamilton starts P20 after a 75-place/back-of-grid penalty; Verstappen P21 and Perez P22.",
+      "sources": [
+        "https://www.fia.com/system/files/decision-document/2026_sao_paulo_grand_prix_-_final_qualifying_classification.pdf",
+        "https://www.fia.com/system/files/decision-document/2026_sao_paulo_grand_prix_-_provisional_starting_grid.pdf",
+        "https://fantasy.formula1.com/feeds/drivers/20_en.json"
+      ],
+      "source_files": [
+        "data/audit/inputs/year2026/round22/official_quali_20261108/final_qualifying.pdf",
+        "data/audit/inputs/year2026/round22/official_quali_20261108/official_fantasy.json",
+        "data/audit/inputs/year2026/round22/official_quali_20261108/starting_grid.pdf"
+      ],
+      "drivers": {
+        "norris": {
+          "asset_id": "NOR",
+          "position": 1,
+          "status": "classified",
+          "grid": 1,
+          "points": 10.0
+        },
+        "russell": {
+          "asset_id": "RUS",
+          "position": 2,
+          "status": "classified",
+          "grid": 7,
+          "points": 9.0
+        },
+        "antonelli": {
+          "asset_id": "ANT",
+          "position": 3,
+          "status": "classified",
+          "grid": 2,
+          "points": 8.0
+        },
+        "leclerc": {
+          "asset_id": "LEC",
+          "position": 4,
+          "status": "classified",
+          "grid": 14,
+          "points": 7.0
+        },
+        "lawson": {
+          "asset_id": "LAW",
+          "position": 5,
+          "status": "classified",
+          "grid": 3,
+          "points": 6.0
+        },
+        "hulkenberg": {
+          "asset_id": "HUL",
+          "position": 6,
+          "status": "classified",
+          "grid": 4,
+          "points": 5.0
+        },
+        "hadjar": {
+          "asset_id": "HAD",
+          "position": 7,
+          "status": "classified",
+          "grid": 5,
+          "points": 4.0
+        },
+        "bearman": {
+          "asset_id": "BEA",
+          "position": 8,
+          "status": "classified",
+          "grid": 6,
+          "points": 3.0
+        },
+        "alonso": {
+          "asset_id": "ALO",
+          "position": 9,
+          "status": "classified",
+          "grid": 8,
+          "points": 2.0
+        },
+        "albon": {
+          "asset_id": "ALB",
+          "position": 10,
+          "status": "classified",
+          "grid": 9,
+          "points": 1.0
+        },
+        "hamilton": {
+          "asset_id": "HAM",
+          "position": 11,
+          "status": "classified",
+          "grid": 20,
+          "points": 0.0
+        },
+        "piastri": {
+          "asset_id": "PIA",
+          "position": 12,
+          "status": "classified",
+          "grid": 10,
+          "points": 0.0
+        },
+        "camara": {
+          "asset_id": "CAM",
+          "position": 13,
+          "status": "classified",
+          "grid": 11,
+          "points": 0.0
+        },
+        "arvid_lindblad": {
+          "asset_id": "LIN",
+          "position": 14,
+          "status": "classified",
+          "grid": 12,
+          "points": 0.0
+        },
+        "sainz": {
+          "asset_id": "SAI",
+          "position": 15,
+          "status": "classified",
+          "grid": 13,
+          "points": 0.0
+        },
+        "max_verstappen": {
+          "asset_id": "VER",
+          "position": 16,
+          "status": "classified",
+          "grid": 21,
+          "points": 0.0
+        },
+        "colapinto": {
+          "asset_id": "COL",
+          "position": 17,
+          "status": "classified",
+          "grid": 15,
+          "points": 0.0
+        },
+        "gasly": {
+          "asset_id": "GAS",
+          "position": 18,
+          "status": "classified",
+          "grid": 16,
+          "points": 0.0
+        },
+        "stroll": {
+          "asset_id": "STR",
+          "position": 19,
+          "status": "classified",
+          "grid": 17,
+          "points": 0.0
+        },
+        "bottas": {
+          "asset_id": "BOT",
+          "position": 20,
+          "status": "classified",
+          "grid": 18,
+          "points": 0.0
+        },
+        "perez": {
+          "asset_id": "PER",
+          "position": 21,
+          "status": "classified",
+          "grid": 22,
+          "points": 0.0
+        },
+        "bortoleto": {
+          "asset_id": "BOR",
+          "position": 22,
+          "status": "classified",
+          "grid": 19,
+          "points": 0.0
+        }
+      },
+      "constructors": {
+        "mercedes": 27.0,
+        "red_bull": 9.0,
+        "mclaren": 15.0,
+        "ferrari": 12.0,
+        "alpine": -1.0,
+        "racing_bulls": 11.0,
+        "haas": 8.0,
+        "williams": 6.0,
+        "audi": 10.0,
+        "aston_martin": 7.0,
+        "cadillac": -1.0
+      }
     }
   }
 }

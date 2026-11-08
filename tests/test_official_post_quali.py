@@ -24,7 +24,21 @@ def test_official_mexico_grid_and_disqualification():
     assert result.loc['lawson','predicted_grid_position'] == 22
     assert result.loc['max_verstappen','quali_position'] == 4
     assert result.loc['max_verstappen','predicted_grid_position'] == 5
-    assert load_post_quali_results(22) == {}
+    assert load_post_quali_results(23) == {}
+
+
+def test_official_brazil_grid_preserves_unpenalized_qualifying_points():
+    official = load_post_quali_results(22)
+    drivers = official['drivers']
+    assert len(drivers) == 22 and len(official['constructors']) == 11
+    assert (drivers['russell']['position'], drivers['russell']['grid'],
+            drivers['russell']['points']) == (2, 7, 9)
+    assert (drivers['leclerc']['position'], drivers['leclerc']['grid'],
+            drivers['leclerc']['points']) == (4, 14, 7)
+    assert drivers['hamilton']['grid'] == 20
+    assert drivers['max_verstappen']['grid'] == 21
+    assert drivers['perez']['grid'] == 22
+    assert drivers['camara']['grid'] == 11
 
 
 def test_dsq_and_constructor_points_are_fixed_in_every_simulation(monkeypatch):

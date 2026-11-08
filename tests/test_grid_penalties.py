@@ -88,9 +88,10 @@ def test_round20_us_gp_penalties_preserve_a_unique_grid():
         assert grid[QUALIFYING_ORDER.index("BOR")] == 22
 
 
-def test_round22_assumed_back_row_is_fixed_even_when_perez_outqualifies_max():
+def test_round22_published_back_of_grid_order_is_fixed():
     rules = load_grid_penalties(22)
-    assert rules["HAM"]["places"] == rules["LEC"]["places"] == 10
+    assert rules["HAM"]["places"] == 75
+    assert rules["LEC"]["places"] == 10
     assert rules["VER"]["places"] == rules["PER"]["places"] == 30
     assert rules["RUS"]["places"] == 5
     rng = np.random.default_rng(22)
@@ -98,6 +99,7 @@ def test_round22_assumed_back_row_is_fixed_even_when_perez_outqualifies_max():
         positions = rng.permutation(np.arange(1, 23))
         grid = apply_grid_penalties(positions, QUALIFYING_ORDER, rules)
         assert sorted(grid.tolist()) == list(range(1, 23))
+        assert grid[QUALIFYING_ORDER.index("HAM")] == 20
         assert grid[QUALIFYING_ORDER.index("VER")] == 21
         assert grid[QUALIFYING_ORDER.index("PER")] == 22
 
