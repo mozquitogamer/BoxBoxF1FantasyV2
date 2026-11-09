@@ -499,7 +499,12 @@ def test_methodology_and_about_publish_trust_correction_and_schema_signals():
     assert '<a href="/contact/">Questions or corrections? Get in touch.</a>' in about_html
     assert "Corrections and accountability" in about_html
     assert "Editorial authorship" in about_html
-    assert "rather than attributed to a fictional individual contributor" in about_html
+    assert (
+        "<p>Articles and guides on BoxBoxF1Fantasy are written by Quintin Engelbrecht. "
+        "FP2 briefings are generated automatically from session data and reviewed by Quintin before they stay live, "
+        "and race pages, tables, rankings and scorecards are generated from the site's versioned prediction and result data. "
+        "Quintin is responsible for everything published here, including corrections and disclosures.</p>"
+    ) in about_html
     assert "Why is BoxBoxF1Fantasy listed as the author?" in about_html
     assert "/methodology/" in about_html
     assert '"@type": "Organization"' in about_html
@@ -581,6 +586,29 @@ def test_belgian_model_briefing_is_dated_sourced_and_phase_honest():
     assert '"@type": "ImageObject"' in html
     assert 'src="/images/belgian-gp-2026-fantasy-forecast.png"' in html
     assert 'loading="lazy"' in html
+
+
+def test_automated_fp2_briefing_credits_brand_and_reviewer():
+    html = seo.render_article_page({
+        "slug": "2027-round7-fp2-fantasy-briefing",
+        "title": "Test Grand Prix FP2 Fantasy briefing",
+        "date": "2027-05-15",
+        "tags": ["FP2"],
+    })
+
+    assert (
+        '<p class="byline"><a href="/about/" rel="author">BoxBoxF1Fantasy</a> &middot; '
+        'Automated FP2 briefing, reviewed by Quintin Engelbrecht &middot; 2027-05-15'
+    ) in html
+    ld_match = re.search(r'<script type="application/ld\+json">\s*(.*?)\s*</script>', html, re.DOTALL)
+    assert ld_match is not None
+    schema = next(obj for obj in json.loads(ld_match.group(1)) if obj.get("@type") == "Article")
+    assert schema["author"]["@type"] == "Organization"
+    assert schema["author"]["name"] == "BoxBoxF1Fantasy"
+    assert schema["author"]["url"] == "https://boxboxf1fantasy.com/about/"
+    assert schema["publisher"]["@type"] == "Organization"
+    assert schema["publisher"]["name"] == "BoxBoxF1Fantasy"
+    assert schema["datePublished"] == "2027-05-15"
 
 
 def test_midseason_report_is_original_dated_sourced_and_shareable():
