@@ -69,3 +69,8 @@ data/experiments/**/*.log
 # Private car/circuit research: telemetry, models and prospective trial bundles.
 # Never exported to the website or staged as prediction archives.
 data/research/car_circuit/
+outputs/
+.pipeline-venv/
+.vercel/
+.codex-remote-attachments/
+*.log
