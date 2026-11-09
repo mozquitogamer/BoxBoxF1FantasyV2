@@ -177,7 +177,7 @@ def publisher_ld() -> dict:
 
 
 def editorial_author_ld() -> dict:
-    """Public brand author for generated race pages and methodology."""
+    """Public brand author for automated briefings, generated race pages and methodology."""
     author = publisher_ld()
     author["url"] = f"{SITE}/about/"
     author["description"] = (
@@ -191,15 +191,17 @@ def personal_author_ld() -> dict:
 
 
 def byline_html(
-    include_methodology: bool = True, *, author: str = "BoxBoxF1Fantasy", metadata: str = "",
+    include_methodology: bool = True, *, author: str = "BoxBoxF1Fantasy",
+    metadata: str = "", show_by: bool = True,
 ) -> str:
     method = (
         ' &middot; <a href="/methodology/">How this analysis is made</a>'
         if include_methodology else ""
     )
     details = f" &middot; {metadata}" if metadata else ""
+    prefix = "By " if show_by else ""
     return (
-        f'<p class="byline">By <a href="/about/" rel="author">{esc(author)}</a>'
+        f'<p class="byline">{prefix}<a href="/about/" rel="author">{esc(author)}</a>'
         f'{details}{method}</p>'
     )
 
@@ -3051,6 +3053,8 @@ def _article_meta_description(article: dict) -> str:
 def render_article_page(article: dict) -> str:
     """Crawlable long-form article page from web/public/data/articles.json."""
     slug = plain_slug(article.get("slug") or article.get("title") or "article")
+    # build_articles.py preserves the FP2 publisher's filename stem as the slug.
+    automated_fp2 = re.fullmatch(r"\d{4}-round\d+-fp2-fantasy-briefing", slug) is not None
     canonical = f"{SITE}/articles/{slug}/"
     article_title = clean_legacy_text(article.get("title", "F1 Fantasy Article"))
     seo_title = clean_legacy_text(article.get("seo_title", article_title))
@@ -3064,7 +3068,12 @@ def render_article_page(article: dict) -> str:
     title = f"{seo_title} | BoxBoxF1Fantasy"
     content = clean_legacy_text(article.get("content_html", ""))
     tag_html = " ".join(f'<span class="tag">{esc(t)}</span>' for t in tags)
-    byline_metadata = " &middot; ".join(part for part in (esc(published), tag_html) if part)
+    review_credit = (
+        f"Automated FP2 briefing, reviewed by {esc(PERSONAL_AUTHOR_NAME)}" if automated_fp2 else ""
+    )
+    byline_metadata = " &middot; ".join(
+        part for part in (review_credit, esc(published), tag_html) if part
+    )
 
     article_text = re.sub(r"<[^>]+>", " ", content)
     article_word_count = len(re.findall(r"\b[\w'-]+\b", html.unescape(article_text)))
@@ -3073,7 +3082,7 @@ def render_article_page(article: dict) -> str:
         "datePublished": published,
         "dateModified": clean_legacy_text(article.get("modified", published)),
         "mainEntityOfPage": canonical,
-        "author": personal_author_ld(),
+        "author": editorial_author_ld() if automated_fp2 else personal_author_ld(),
         "publisher": publisher_ld(),
         "isAccessibleForFree": True,
         "about": ["F1 Fantasy", "Fantasy sports strategy", "Formula 1"] + tags[:5],
@@ -3105,7 +3114,11 @@ def render_article_page(article: dict) -> str:
     body = (
         '<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/articles/">Articles</a> &rsaquo; Article</p>'
         f"<h1>{esc(article_title)}</h1>"
-        + byline_html(author=PERSONAL_AUTHOR_NAME, metadata=byline_metadata)
+        + byline_html(
+            author="BoxBoxF1Fantasy" if automated_fp2 else PERSONAL_AUTHOR_NAME,
+            metadata=byline_metadata,
+            show_by=not automated_fp2,
+        )
         + '<div class="article-body">'
         + content
         + "</div>"
@@ -5613,7 +5626,10 @@ STATIC_PAGES = [
             '<p><strong>The public predictions and tools remain free with no login.</strong> Pit Wall is a separate, optional $5/month membership purchased through <a href="https://ko-fi.com/boxboxf1fantasy/tiers" rel="noopener">Ko-fi</a>. Members create a password once using the exact email used on Ko-fi, then sign in normally to remember and sync an official F1 Fantasy team and receive personalized suggestions when new simulations arrive.</p>'
             "<h2>Editorial authorship</h2>"
             '<p><strong>Quintin Engelbrecht is the founder and maintainer of BoxBoxF1Fantasy.</strong> This independent F1 Fantasy project brings together the prediction pipeline, public tools and race analysis. Questions and corrections reach Quintin through the contact email below.</p>'
-            '<p>Analysis, guides and generated race pages carry the <strong>BoxBoxF1Fantasy</strong> byline because they are published and maintained as part of this independent project rather than attributed to a fictional individual contributor. Recurring tables, rankings and scorecards are generated programmatically from the site\'s versioned prediction and result data. Longer explanations are assembled around those outputs, sources and documented model behavior. The site maintainer is responsible for the final published pages, corrections and disclosures.</p>'
+            "<p>Articles and guides on BoxBoxF1Fantasy are written by Quintin Engelbrecht. "
+            "FP2 briefings are generated automatically from session data and reviewed by Quintin before they stay live, "
+            "and race pages, tables, rankings and scorecards are generated from the site's versioned prediction and result data. "
+            "Quintin is responsible for everything published here, including corrections and disclosures.</p>"
             '<p>Each editorial byline links here for ownership and contact context and to the <a href="/methodology/">Methodology</a> for the production process, data layers, uncertainty and limitations.</p>'
             '<p>Generated rankings are model outputs, not eyewitness reporting. The evidence behind an analysis should identify its race and forecast phase, distinguish official results from estimates, and explain material limitations. Readers can check those claims against the linked race data and public accuracy record, and report a mismatch for correction. A new forecast is not a retrospective edit to an earlier prediction.</p>'
             "<h2>How to use it</h2>"
