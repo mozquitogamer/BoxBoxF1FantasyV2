@@ -125,11 +125,21 @@ def load_sprint_laps(year: int, round_num: int) -> pd.DataFrame | None:
 
 
 def load_race_laps(year: int, round_num: int) -> pd.DataFrame | None:
-    """Load race lap data from FastF1 parquet."""
+    """Load race laps from FastF1 or the cached OpenF1 race."""
     path = FASTF1_RAW_DIR / f"year{year}" / f"round{round_num}" / "race.parquet"
-    if not path.exists():
+    if path.exists():
+        return _load_laps_parquet(path)
+    from pipeline.openf1_race_laps import load_openf1_race_laps
+
+    laps = load_openf1_race_laps(year, round_num)
+    if laps is None:
         return None
-    return _load_laps_parquet(path)
+    usable = laps["IsAccurate"] & laps["TrackStatus"].eq("1")
+    usable &= laps["PitInTime"].isna() & laps["PitOutTime"].isna()
+    return laps.loc[usable].rename(columns={
+        "LapTime_seconds": "lap_time", "Driver": "driver_id",
+        "Compound": "compound", "Stint": "stint", "LapNumber": "lap_number",
+    })
 
 
 def load_driver_map() -> tuple[dict, dict]:
@@ -474,9 +484,11 @@ def run_post_race_analysis(round_num: int, year: int = CURRENT_SEASON) -> dict:
     }
     print(f"  {len(team_pitstops)} teams with pit stop data")
 
-    # 3. Race pace analysis (from FastF1 laps)
+    # 3. Race pace analysis
     print("[3] Analyzing race pace...")
     laps_df = load_race_laps(year, round_num)
+    if laps_df is not None and "lap_source" in laps_df.attrs:
+        output["lap_source"] = laps_df.attrs["lap_source"]
     pace_data = analyze_race_pace(laps_df)
     output["race_pace"] = pace_data
     print(f"  {len(pace_data)} drivers with pace data")

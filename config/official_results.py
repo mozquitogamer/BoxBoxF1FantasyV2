@@ -9,12 +9,13 @@ from config.settings import SEED_DIR
 def load_result_json(path):
     path = Path(path)
     data = json.loads(path.read_text(encoding="utf-8"))
-    # Jolpica introduced a different ID for the reserve's race debut.
-    # Keep the model identity used by his practice and qualifying evidence.
+    # Keep the model identities used by practice and qualifying evidence.
+    aliases = {"ryo_hirakawa": "hirakawa", "rafael_camara": "camara"}
+
     def normalize(value):
         if isinstance(value, dict):
-            return {key: ("hirakawa" if key == "driverId" and item == "ryo_hirakawa"
-                          else normalize(item)) for key, item in value.items()}
+            return {key: (aliases.get(item, item) if key == "driverId" else normalize(item))
+                    for key, item in value.items()}
         if isinstance(value, list):
             return [normalize(item) for item in value]
         return value

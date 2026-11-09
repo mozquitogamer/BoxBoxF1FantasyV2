@@ -1,6 +1,6 @@
 {
   "season": 2026,
-  "last_updated": "2026-11-02",
+  "last_updated": "2026-11-09",
   "description": "Official F1 Fantasy points per round. These override pipeline-calculated actuals for price change predictions.",
   "rounds": {
     "1": {
@@ -765,6 +765,47 @@
         "audi": 23.0,
         "aston_martin": -38.0,
         "cadillac": 0.0
+      }
+    },
+    "22": {
+      "race": "Brazilian Grand Prix",
+      "source": "https://fantasy.formula1.com/feeds/drivers/20_en.json",
+      "drivers": {
+        "RUS": 31.0,
+        "VER": 65.0,
+        "NOR": 36.0,
+        "PIA": 17.0,
+        "ANT": 26.0,
+        "LEC": 26.0,
+        "HAM": 26.0,
+        "HAD": 25.0,
+        "GAS": 8.0,
+        "SAI": -2.0,
+        "ALB": -2.0,
+        "ALO": 2.0,
+        "BEA": -3.0,
+        "LIN": 18.0,
+        "COL": 8.0,
+        "LAW": 11.0,
+        "STR": -17.0,
+        "BOR": 8.0,
+        "PER": 6.0,
+        "HUL": 4.0,
+        "BOT": -20.0,
+        "CAM": -9.0
+      },
+      "constructors": {
+        "mercedes": 72.0,
+        "red_bull": 90.0,
+        "mclaren": 63.0,
+        "ferrari": 62.0,
+        "alpine": 17.0,
+        "racing_bulls": 44.0,
+        "haas": -5.0,
+        "williams": 3.0,
+        "audi": 32.0,
+        "aston_martin": -5.0,
+        "cadillac": -15.0
       }
     }
   }

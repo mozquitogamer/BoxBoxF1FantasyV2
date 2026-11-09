@@ -44,6 +44,7 @@ from config.settings import (
     SEED_DIR,
     WEB_DATA_DIR,
 )
+from pipeline.openf1_race_laps import load_openf1_race_laps
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -70,9 +71,13 @@ TEAM_COLORS = {
 # ---------------------------------------------------------------------------
 
 def load_race_laps(year: int, round_num: int) -> pd.DataFrame | None:
-    """Load race lap data from FastF1 parquet."""
+    """Load FastF1 laps or fall back to the cached OpenF1 race."""
     path = FASTF1_RAW_DIR / f"year{year}" / f"round{round_num}" / "race.parquet"
     if not path.exists():
+        openf1_laps = load_openf1_race_laps(year, round_num)
+        if openf1_laps is not None:
+            print(f"  Loaded {len(openf1_laps)} completed laps from OpenF1")
+            return openf1_laps
         print(f"  ERROR: race.parquet not found at {path}")
         return None
     try:
@@ -876,6 +881,8 @@ def run_deep_dive(round_num: int, year: int = CURRENT_SEASON) -> None:
         "undercut_overcut": undercut,
         "team_summary": team_summary,
     }
+    if "lap_source" in raw_df.attrs:
+        output["lap_source"] = raw_df.attrs["lap_source"]
 
     # ── save JSON ────────────────────────────────────────────────────────
     out_dir = PREDICTIONS_DIR / f"round{round_num}"

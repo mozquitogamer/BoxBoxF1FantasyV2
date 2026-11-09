@@ -116,6 +116,12 @@
           "circuit_id": "rodriguez",
           "points": 49.0,
           "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 65.0,
+          "is_dnf": false
         }
       ]
     },
@@ -233,6 +239,12 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 13.0,
+          "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 31.0,
           "is_dnf": false
         }
       ]
@@ -352,6 +364,12 @@
           "circuit_id": "rodriguez",
           "points": 24.0,
           "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 26.0,
+          "is_dnf": false
         }
       ]
     },
@@ -469,6 +487,12 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 20.0,
+          "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 26.0,
           "is_dnf": false
         }
       ]
@@ -588,6 +612,12 @@
           "circuit_id": "rodriguez",
           "points": 38.0,
           "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 26.0,
+          "is_dnf": false
         }
       ]
     },
@@ -705,6 +735,12 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 18.0,
+          "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 36.0,
           "is_dnf": false
         }
       ]
@@ -824,6 +860,12 @@
           "circuit_id": "rodriguez",
           "points": -15.0,
           "is_dnf": true
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": -3.0,
+          "is_dnf": false
         }
       ]
     },
@@ -942,6 +984,12 @@
           "circuit_id": "rodriguez",
           "points": -14.0,
           "is_dnf": true
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 18.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1060,6 +1108,12 @@
           "circuit_id": "rodriguez",
           "points": 11.0,
           "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 8.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1177,6 +1231,12 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": -1.0,
+          "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 8.0,
           "is_dnf": false
         }
       ]
@@ -1408,6 +1468,12 @@
           "circuit_id": "rodriguez",
           "points": 7.0,
           "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": -2.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1525,6 +1591,12 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 11.0,
+          "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": -2.0,
           "is_dnf": false
         }
       ]
@@ -1644,6 +1716,12 @@
           "circuit_id": "rodriguez",
           "points": 1.0,
           "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 8.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1761,6 +1839,12 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 27.0,
+          "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 11.0,
           "is_dnf": false
         }
       ]
@@ -1880,6 +1964,12 @@
           "circuit_id": "rodriguez",
           "points": 17.0,
           "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 6.0,
+          "is_dnf": false
         }
       ]
     },
@@ -1979,6 +2069,12 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 19.0,
+          "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 25.0,
           "is_dnf": false
         }
       ]
@@ -2098,6 +2194,12 @@
           "circuit_id": "rodriguez",
           "points": -19.0,
           "is_dnf": true
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 2.0,
+          "is_dnf": false
         }
       ]
     },
@@ -2215,6 +2317,12 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 7.0,
+          "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 17.0,
           "is_dnf": false
         }
       ]
@@ -2334,6 +2442,12 @@
           "circuit_id": "rodriguez",
           "points": -16.0,
           "is_dnf": true
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": -20.0,
+          "is_dnf": false
         }
       ]
     },
@@ -2451,6 +2565,12 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 2.0,
+          "is_dnf": false
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 4.0,
           "is_dnf": false
         }
       ]
@@ -2570,6 +2690,12 @@
           "circuit_id": "rodriguez",
           "points": -20.0,
           "is_dnf": true
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": -17.0,
+          "is_dnf": true
         }
       ]
     },
@@ -2601,6 +2727,16 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 16.0,
+          "is_dnf": false
+        }
+      ]
+    },
+    "CAM": {
+      "rounds": [
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": -9.0,
           "is_dnf": false
         }
       ]
@@ -2703,6 +2839,11 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 52.0
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 72.0
         }
       ]
     },
@@ -2802,6 +2943,11 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 73.0
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 62.0
         }
       ]
     },
@@ -2901,6 +3047,11 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 78.0
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 90.0
         }
       ]
     },
@@ -3000,6 +3151,11 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 23.0
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 44.0
         }
       ]
     },
@@ -3099,6 +3255,11 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 4.0
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": -5.0
         }
       ]
     },
@@ -3198,6 +3359,11 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 10.0
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 17.0
         }
       ]
     },
@@ -3297,6 +3463,11 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 36.0
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 3.0
         }
       ]
     },
@@ -3396,6 +3567,11 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 32.0
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 63.0
         }
       ]
     },
@@ -3495,6 +3671,11 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 23.0
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": 32.0
         }
       ]
     },
@@ -3594,6 +3775,11 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": 0.0
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": -15.0
         }
       ]
     },
@@ -3693,6 +3879,11 @@
           "round": 21,
           "circuit_id": "rodriguez",
           "points": -38.0
+        },
+        {
+          "round": 22,
+          "circuit_id": "interlagos",
+          "points": -5.0
         }
       ]
     }
