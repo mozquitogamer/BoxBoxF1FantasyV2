@@ -1009,10 +1009,23 @@ ENGAGEMENT_BLOCK = """<div class="engagement-shell">
 </div>""".replace("{registration_deadline}", esc(registration_deadline_text()))
 
 
+FOOTER_NAV = (
+    '<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a>'
+    ' &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a>'
+    ' &middot; <a href="/stats/">Points &amp; Prices</a> &middot; <a href="/accuracy/">Accuracy</a>'
+    ' &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a>'
+    ' &middot; <a href="/articles/">Articles</a> &middot; <a href="/data/">Data</a>'
+    ' &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a>'
+    ' &middot; <a href="/about/">About</a> &middot; <a href="/contact/">Contact</a>'
+    ' &middot; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a>'
+    ' &middot; <a href="/disclaimer/">Disclaimer</a> &middot; <a href="/methodology/">Methodology</a></p>'
+)
+
+
 FOOTER = f"""</main>
 {ENGAGEMENT_BLOCK}
 <footer class="footer"><div class="wrap">
-<p class="footnav"><a href="/">Predictions &amp; Tools</a> &middot; <a href="/picks/">Race Picks</a> &middot; <a href="/drivers/">Drivers</a> &middot; <a href="/constructors/">Constructors</a> &middot; <a href="/stats/">Points &amp; Prices</a> &middot; <a href="/accuracy/">Accuracy</a> &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/videos/">Videos</a> &middot; <a href="/articles/">Articles</a> &middot; <a href="/data/">Data</a> &middot; <a href="/guides/">Guides</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/methodology/">Methodology</a> &middot; <a href="/about/">About</a> &middot; <a href="/privacy/">Privacy</a></p>
+{FOOTER_NAV}
 <p><a href="/">BoxBoxF1Fantasy</a> &mdash; free, data-driven F1 Fantasy predictions, a lineup optimizer and transfer tools for the {YEAR} season. Predictions are for entertainment only; Formula 1 is unpredictable.</p>
 <p>Not affiliated with Formula 1, the FIA, or any F1 team or driver.</p>
 </div></footer>
@@ -1020,6 +1033,17 @@ FOOTER = f"""</main>
 </body>
 </html>
 """
+
+
+def refresh_retained_footer_links() -> None:
+    """Update the navigation on generated pages retained from earlier rounds."""
+    pattern = re.compile(rb'(<footer class="footer"><div class="wrap">\s*)<p class="footnav">[^\r\n]*</p>')
+    footer_nav = FOOTER_NAV.encode("utf-8")
+    for path in WEB.rglob("*.html"):
+        original = path.read_bytes()
+        updated = pattern.sub(lambda match: match[1] + footer_nav, original, count=1)
+        if updated != original:
+            path.write_bytes(updated)
 
 
 # --------------------------------------------------------------------------- #
@@ -5705,6 +5729,67 @@ STATIC_PAGES = [
 ]
 
 
+LEGAL_CONTENT_LASTMOD = "2026-11-09"
+
+LEGAL_PAGES = [
+    {
+        "slug": "contact",
+        "crumb_self": "Contact",
+        "title": "Contact | BoxBox F1 Fantasy",
+        "desc": "Contact Quintin Engelbrecht about BoxBox F1 Fantasy for questions, corrections, bug reports or partnership enquiries.",
+        "h1": "Contact",
+        "lastmod": LEGAL_CONTENT_LASTMOD,
+        "intro": '<p class="lede">BoxBox F1 Fantasy is built and run by Quintin Engelbrecht. For questions, corrections, bug reports or partnership enquiries, email the address below. I read every message and usually reply within a few days.</p>',
+        "body": (
+            f'<p><a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a></p>'
+            '<p><a href="https://x.com/BoxBoxF1Fantasy">Follow on X</a></p>'
+            "<p>If you've spotted a data error in a prediction, include the race, the driver or constructor, and what looks wrong. It helps me fix it faster.</p>"
+        ),
+    },
+    {
+        "slug": "terms",
+        "crumb_self": "Terms of Use",
+        "title": "Terms of Use | BoxBox F1 Fantasy",
+        "desc": "Terms for using BoxBox F1 Fantasy predictions, tools, articles and accounts.",
+        "h1": "Terms of Use",
+        "lastmod": LEGAL_CONTENT_LASTMOD,
+        "intro": '<p class="meta">Last updated: 9 November 2026</p>',
+        "body": (
+            "<h2>Using this site</h2>"
+            "<p>BoxBox F1 Fantasy provides free predictions, tools and articles for the F1 Fantasy game. By using the site you agree to these terms. If you don't agree, please don't use the site.</p>"
+            "<h2>No guarantees</h2>"
+            "<p>Predictions, projections and recommendations are estimates produced by a statistical model and editorial judgement. They are provided for entertainment and information only and may be wrong. You are responsible for your own fantasy team decisions.</p>"
+            "<h2>Not betting advice</h2>"
+            "<p>Nothing on this site is betting, gambling or financial advice. Do not use it as the basis for wagers.</p>"
+            "<h2>Accounts and memberships</h2>"
+            "<p>Some features need an account. You're responsible for keeping your sign-in details secure. We may suspend accounts that abuse the site, scrape it heavily or try to interfere with how it works.</p>"
+            "<h2>Content and copyright</h2>"
+            "<p>The site's text, design, code and original data outputs belong to BoxBox F1 Fantasy. You may share links and short quotes with credit. Please don't republish whole pages or bulk-copy the data without permission.</p>"
+            "<h2>Third-party services</h2>"
+            '<p>The site uses third-party services such as Google Analytics and advertising partners. Their use of data is covered by their own policies and by our <a href="/privacy/">Privacy Policy</a>.</p>'
+            "<h2>Changes</h2>"
+            "<p>These terms may be updated. The date at the top shows the latest version.</p>"
+            "<h2>Contact</h2>"
+            f'<p>Questions about these terms: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>'
+        ),
+    },
+    {
+        "slug": "disclaimer",
+        "crumb_self": "Disclaimer",
+        "title": "Disclaimer | BoxBox F1 Fantasy",
+        "desc": "BoxBox F1 Fantasy's independent fan project disclaimer, prediction limitations and advertising disclosure.",
+        "h1": "Disclaimer",
+        "lastmod": LEGAL_CONTENT_LASTMOD,
+        "intro": '<p class="lede">BoxBox F1 Fantasy is an independent fan project. It is not affiliated with, endorsed by or connected to Formula 1, the FIA, Formula One Management, the official F1 Fantasy game, or any Formula 1 team or driver. F1, FORMULA ONE, FORMULA 1 and related marks are trademarks of Formula One Licensing B.V.</p>',
+        "body": (
+            "<p>Predictions are generated by a statistical model and can be wrong. Driver and constructor prices, scoring rules and game mechanics are set by the official game and can change at any time; always check the official game before making transfers.</p>"
+            "<p>Nothing on this site is betting, gambling or financial advice.</p>"
+            "<p>Some pages may show advertising. Advertisers do not influence predictions or recommendations.</p>"
+        ),
+    },
+]
+
+
 # --------------------------------------------------------------------------- #
 # main
 # --------------------------------------------------------------------------- #
@@ -6147,24 +6232,29 @@ def main() -> None:
     })
 
     # --- static trust/compliance pages ---
-    for page in STATIC_PAGES:
-        out_dir = WEB / page["slug"]
-        out_dir.mkdir(parents=True, exist_ok=True)
-        (out_dir / "index.html").write_text(render_static_page(page), encoding="utf-8")
-        rel_paths.append(f"{page['slug']}/")
-        static_lastmod = source_date(page.get("lastmod"))
-        if static_lastmod:
-            lastmods[f"{page['slug']}/"] = static_lastmod
+    legal_paths = []
+    for pages, paths in ((STATIC_PAGES, rel_paths), (LEGAL_PAGES, legal_paths)):
+        for page in pages:
+            rel_path = f"{page['slug']}/"
+            out_dir = WEB / page["slug"]
+            out_dir.mkdir(parents=True, exist_ok=True)
+            (out_dir / "index.html").write_text(render_static_page(page), encoding="utf-8")
+            paths.append(rel_path)
+            static_lastmod = source_date(page.get("lastmod"))
+            if static_lastmod:
+                lastmods[rel_path] = static_lastmod
 
     refresh_retained_engagement_blocks()
+    refresh_retained_footer_links()
 
-    for path in rel_paths:
+    sitemap_paths = rel_paths + legal_paths
+    for path in sitemap_paths:
         lastmods[path] = max(lastmods.get(path, SEO_CONTENT_LASTMOD), SEO_CONTENT_LASTMOD)
     for item in feed_items:
         rel_path = item["url"].removeprefix(f"{SITE}/")
         item_lastmod = lastmods.get(rel_path, SEO_CONTENT_LASTMOD)
         item["updated"] = datetime.fromisoformat(item_lastmod).replace(tzinfo=timezone.utc)
-    write_sitemap(rel_paths, lastmods, news_sitemap_items(articles_sorted))
+    write_sitemap(sitemap_paths, lastmods, news_sitemap_items(articles_sorted))
     write_robots()
     write_webmanifest()
     write_trust_files()
@@ -6178,8 +6268,8 @@ def main() -> None:
 
     print(f"[14_build_seo_pages] wrote {written} prediction race page(s) + {future_written} future outlook page(s) + {calendar_written} calendar watchlist page(s) + {len(drivers_sorted)} driver page(s) "
           f"+ {len(constructors_sorted)} constructor page(s) + points-and-prices page + {len(GUIDES)} guide(s) "
-          f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
-          f"+ sitemap.xml ({len(rel_paths)} URLs) "
+          f"+ {len(TOOLS)} tool page(s) + {len(articles_sorted)} article page(s) + {len(STATIC_PAGES) + len(LEGAL_PAGES)} static page(s) + accuracy page + changelog page + videos page + data page + 6 hubs "
+          f"+ sitemap.xml ({len(sitemap_paths)} URLs) "
           "+ homepage prediction snapshot + robots.txt + site.webmanifest + humans.txt + security.txt + IndexNow key + predictions.schema.json + search-index.json + openapi.json + .well-known discovery + llms.txt + llms-full.txt + feeds")
 
 
