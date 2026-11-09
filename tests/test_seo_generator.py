@@ -10,6 +10,12 @@ seo = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(seo)
 
+PERSONAL_AUTHOR = {
+    "@type": "Person",
+    "name": "Quintin Engelbrecht",
+    "url": "https://boxboxf1fantasy.com/about/",
+}
+
 
 def current_predictions():
     return {
@@ -129,13 +135,16 @@ def test_guide_modified_date_uses_controlled_content_date():
     assert seo.guide_article_ld(guide, "https://example.com/guide/")["dateModified"] == seo.SEO_CONTENT_LASTMOD
 
 
-def test_guides_publish_visible_brand_byline_and_author_profile():
+def test_guides_publish_visible_personal_byline_and_author_profile():
     guide = seo.GUIDES[0]
     html = seo.render_content_page(guide, race_week_predictions())
 
-    assert 'By <a href="/about/" rel="author">BoxBoxF1Fantasy</a>' in html
+    assert '</h1><p class="byline">By <a href="/about/" rel="author">Quintin Engelbrecht</a>' in html
     assert 'href="/methodology/">How this analysis is made</a>' in html
-    assert seo.guide_article_ld(guide, "https://example.com/guide/")["author"]["url"] == "https://boxboxf1fantasy.com/about/"
+    schema = seo.guide_article_ld(guide, "https://example.com/guide/")
+    assert schema["author"] == PERSONAL_AUTHOR
+    assert schema["publisher"]["@type"] == "Organization"
+    assert schema["publisher"]["name"] == "BoxBoxF1Fantasy"
 
 
 def test_current_race_page_is_phase_honest_and_explains_autopilot():
@@ -483,6 +492,11 @@ def test_methodology_and_about_publish_trust_correction_and_schema_signals():
     assert '"url": "https://boxboxf1fantasy.com/about/"' in methodology_html
     assert f'"dateModified": "{seo.SEO_CONTENT_LASTMOD}"' in methodology_html
     assert '"@type": "FAQPage"' in methodology_html
+    assert '<!-- AUTHOR BIO: owner to review wording -->' in about_html
+    assert about_html.index("Who runs BoxBox F1 Fantasy") < about_html.index('<p class="lede">')
+    assert '<a href="/accuracy/">accuracy page</a>' in about_html
+    assert '<a href="/methodology/">methodology page</a>' in about_html
+    assert '<a href="/contact/">Questions or corrections? Get in touch.</a>' in about_html
     assert "Corrections and accountability" in about_html
     assert "Editorial authorship" in about_html
     assert "rather than attributed to a fictional individual contributor" in about_html
@@ -543,9 +557,17 @@ def test_belgian_model_briefing_is_dated_sourced_and_phase_honest():
     html = seo.render_article_page(briefing)
 
     assert "Belgian GP F1 Fantasy: Why Max Leads" in html
-    assert 'By <a href="/about/" rel="author">BoxBoxF1Fantasy</a>' in html
+    assert (
+        '</h1><p class="byline">By <a href="/about/" rel="author">Quintin Engelbrecht</a> &middot; 2026-07-13'
+        in html
+    )
     assert 'href="/methodology/">How this analysis is made</a>' in html
-    assert '"url": "https://boxboxf1fantasy.com/about/"' in html
+    ld_match = re.search(r'<script type="application/ld\+json">\s*(.*?)\s*</script>', html, re.DOTALL)
+    assert ld_match is not None
+    schema = next(obj for obj in json.loads(ld_match.group(1)) if obj.get("@type") == "Article")
+    assert schema["author"] == PERSONAL_AUTHOR
+    assert schema["publisher"]["@type"] == "Organization"
+    assert schema["publisher"]["name"] == "BoxBoxF1Fantasy"
     assert "dated <strong>pre-practice briefing</strong>" in html
     assert "The short answer is upside, not certainty" in html
     assert "Weather is moving faster than the model" in html

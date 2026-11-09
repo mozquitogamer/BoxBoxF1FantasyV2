@@ -44,6 +44,7 @@ PICKS = WEB / "picks"
 SITE = "https://boxboxf1fantasy.com"
 YEAR = 2026
 CONTACT_EMAIL = "boxboxf1fantasy@gmail.com"
+PERSONAL_AUTHOR_NAME = "Quintin Engelbrecht"
 INDEXNOW_KEY = "779753a5fbbf054b3ea496085a0ce1e4"
 # Bump only when generated page templates, metadata, structured data or links
 # receive a significant site-wide content change.
@@ -176,7 +177,7 @@ def publisher_ld() -> dict:
 
 
 def editorial_author_ld() -> dict:
-    """Public brand-author profile used wherever an editorial byline is expected."""
+    """Public brand author for generated race pages and methodology."""
     author = publisher_ld()
     author["url"] = f"{SITE}/about/"
     author["description"] = (
@@ -185,14 +186,21 @@ def editorial_author_ld() -> dict:
     return author
 
 
-def byline_html(include_methodology: bool = True) -> str:
+def personal_author_ld() -> dict:
+    return {"@type": "Person", "name": PERSONAL_AUTHOR_NAME, "url": f"{SITE}/about/"}
+
+
+def byline_html(
+    include_methodology: bool = True, *, author: str = "BoxBoxF1Fantasy", metadata: str = "",
+) -> str:
     method = (
         ' &middot; <a href="/methodology/">How this analysis is made</a>'
         if include_methodology else ""
     )
+    details = f" &middot; {metadata}" if metadata else ""
     return (
-        '<p class="byline">By <a href="/about/" rel="author">BoxBoxF1Fantasy</a>'
-        f'{method}</p>'
+        f'<p class="byline">By <a href="/about/" rel="author">{esc(author)}</a>'
+        f'{details}{method}</p>'
     )
 
 
@@ -3056,6 +3064,7 @@ def render_article_page(article: dict) -> str:
     title = f"{seo_title} | BoxBoxF1Fantasy"
     content = clean_legacy_text(article.get("content_html", ""))
     tag_html = " ".join(f'<span class="tag">{esc(t)}</span>' for t in tags)
+    byline_metadata = " &middot; ".join(part for part in (esc(published), tag_html) if part)
 
     article_text = re.sub(r"<[^>]+>", " ", content)
     article_word_count = len(re.findall(r"\b[\w'-]+\b", html.unescape(article_text)))
@@ -3064,7 +3073,7 @@ def render_article_page(article: dict) -> str:
         "datePublished": published,
         "dateModified": clean_legacy_text(article.get("modified", published)),
         "mainEntityOfPage": canonical,
-        "author": editorial_author_ld(),
+        "author": personal_author_ld(),
         "publisher": publisher_ld(),
         "isAccessibleForFree": True,
         "about": ["F1 Fantasy", "Fantasy sports strategy", "Formula 1"] + tags[:5],
@@ -3096,9 +3105,8 @@ def render_article_page(article: dict) -> str:
     body = (
         '<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/articles/">Articles</a> &rsaquo; Article</p>'
         f"<h1>{esc(article_title)}</h1>"
-        + byline_html()
-        + f'<p class="meta">{esc(published)}{(" &middot; " + tag_html) if tag_html else ""}</p>'
-        '<div class="article-body">'
+        + byline_html(author=PERSONAL_AUTHOR_NAME, metadata=byline_metadata)
+        + '<div class="article-body">'
         + content
         + "</div>"
         '<div class="btnrow"><a class="cta" href="/#articles">Open interactive Articles tab &rarr;</a></div>'
@@ -4791,7 +4799,7 @@ def guide_article_ld(item: dict, canonical: str) -> dict:
         "url": canonical,
         "mainEntityOfPage": canonical,
         "inLanguage": "en",
-        "author": editorial_author_ld(),
+        "author": personal_author_ld(),
         "publisher": publisher_ld(),
         "about": ["F1 Fantasy", "Formula 1", "Fantasy sports strategy"],
         "dateModified": item.get("lastmod", SEO_CONTENT_LASTMOD),
@@ -4890,7 +4898,7 @@ def render_content_page(item: dict, current: dict | None = None) -> str:
     body = (
         f'<p class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/{base}/">{esc(crumb)}</a> &rsaquo; {esc(item["crumb_self"])}</p>'
         f'<h1>{esc(item["h1"])}</h1>'
-        + (byline_html() if base == "guides" else "")
+        + (byline_html(author=PERSONAL_AUTHOR_NAME) if base == "guides" else "")
         + item["intro"] + cta + dynamic + item["body"] + faq_section + cta
     )
     return page_head(item["title"], item["desc"], canonical, ld_block(ld_objs)) + body + FOOTER
@@ -5587,7 +5595,16 @@ STATIC_PAGES = [
         "h1": "About BoxBoxF1Fantasy",
         "lastmod": SEO_CONTENT_LASTMOD,
         "schema_type": "AboutPage",
-        "intro": '<p class="lede">BoxBoxF1Fantasy is a free, independent F1 Fantasy prediction site built to help players make better driver, constructor, transfer and chip decisions.</p>',
+        "intro": (
+            '<!-- AUTHOR BIO: owner to review wording -->'
+            '<section aria-labelledby="author-bio-heading">'
+            '<h2 id="author-bio-heading">Who runs BoxBox F1 Fantasy</h2>'
+            '<p>BoxBox F1 Fantasy is built and run by Quintin Engelbrecht, a programmer and long-time Formula 1 follower based in Mozambique. I started the site in 2026 to give F1 Fantasy players free, data-driven predictions with a public accuracy record.</p>'
+            '<p>The predictions come from a machine-learning model trained on historical race data and live session timing. Each race weekend the pipeline updates after practice and qualifying, and every forecast is scored against the real results on the <a href="/accuracy/">accuracy page</a>. You can read how the model works on the <a href="/methodology/">methodology page</a>.</p>'
+            '<p><a href="/contact/">Questions or corrections? Get in touch.</a></p>'
+            '</section>'
+            '<p class="lede">BoxBoxF1Fantasy is a free, independent F1 Fantasy prediction site built to help players make better driver, constructor, transfer and chip decisions.</p>'
+        ),
         "body": (
             "<h2>What the site does</h2>"
             "<p>BoxBox publishes current-round F1 Fantasy projections for every driver and constructor, race-week pick summaries, a lineup optimizer, Team Compare, transfer tools, budget/value signals, and an accuracy record for completed rounds. The goal is to turn a large amount of race, practice, price and reliability data into decisions a fantasy player can inspect rather than a single unexplained pick.</p>"
