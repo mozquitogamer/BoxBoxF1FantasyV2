@@ -24,6 +24,12 @@
       "source_sha256": "573e6297200a14c5cddc7ee7ee5bc722f4a4929836217401b491665786fbbd7d",
       "completed_at": "2026-11-02T12:06:24.231923+00:00",
       "next_round": 22
+    },
+    "22": {
+      "race": "Brazilian Grand Prix",
+      "source_sha256": "1ce759c88f6a0635ecc6ff5a7f16e35d687f0664f26e06b53fad8e8f5988aa2c",
+      "completed_at": "2026-11-09T21:01:36.170818+00:00",
+      "next_round": 23
     }
   }
 }

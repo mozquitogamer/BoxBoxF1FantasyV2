@@ -252,15 +252,15 @@
     },
     "22": {
       "red_bull": 5,
-      "mclaren": 5,
       "mercedes": 5,
+      "mclaren": 5,
       "ferrari": 5,
       "racing_bulls": 10,
       "audi": 15,
       "alpine": 2,
       "williams": 2,
-      "haas": 2,
       "aston_martin": 5,
+      "haas": 2,
       "cadillac": 0
     }
   }

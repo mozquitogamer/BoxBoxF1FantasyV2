@@ -42,21 +42,31 @@
     },
     "next_round": 23,
     "early_thoughts": {
-      "schema_version": 1,
-      "manager": "v13",
-      "round": 23,
-      "race": "Las Vegas Grand Prix",
-      "phase": "pre_fp",
-      "status": "provisional",
-      "published_at": "2026-11-09T07:30:18.364533+00:00",
-      "source_generated_at": "2026-11-09T07:12:38.633259+00:00",
-      "selection_context_sha256": "cc8efc5e2151f028bc62e6906880f5d6af0b6f6aa36865848cc5d0f5257a07f3",
-      "lock_deadline": "2026-11-21T04:00:00Z",
       "archive": "web/public/data/predictions_round23_pre_fp.json",
       "archive_sha256": "e334d3029b22451a1059ef8c387fa33a4015632af3ef388feb483e3973481ab2",
-      "previous_decision": "data/v13/decisions/round22_post_fp_revision8.json",
-      "previous_decision_sha256": "93f969436cf38f267e2c9a4fcc65e6dc923b712f3bd01f5d662c9dd13061b228",
-      "price_snapshot_after_round": 22,
+      "captain": "ANT",
+      "changes": {
+        "constructors_in": [],
+        "constructors_out": [],
+        "drivers_in": [
+          "ANT",
+          "LAW"
+        ],
+        "drivers_out": [
+          "CAM",
+          "VER"
+        ]
+      },
+      "chip": null,
+      "chip_decision": {
+        "reason": "Only post-FP finals can play 3x.",
+        "result": "not_evaluated"
+      },
+      "constructors": [
+        "mercedes",
+        "ferrari"
+      ],
+      "downside_risk": 62.0,
       "drivers": [
         "ANT",
         "LEC",
@@ -64,49 +74,39 @@
         "BOR",
         "PER"
       ],
-      "constructors": [
-        "mercedes",
-        "ferrari"
-      ],
-      "captain": "ANT",
-      "second_boost": null,
-      "chip": null,
+      "lock_deadline": "2026-11-21T04:00:00Z",
+      "manager": "v13",
+      "phase": "pre_fp",
+      "points_basis": "net_after_transfers",
+      "policy": {
+        "negative_p5_weight": 0.75,
+        "policy_version": "horizon_budget_value_v2",
+        "price_gain_weight": 3.114,
+        "price_value_method": "horizon curve × price reliability × points realisation",
+        "risk_profile": "medium_tolerance",
+        "strategy": "budget_builder"
+      },
+      "previous_decision": "data/v13/decisions/round22_post_fp_revision8.json",
+      "previous_decision_sha256": "93f969436cf38f267e2c9a4fcc65e6dc923b712f3bd01f5d662c9dd13061b228",
+      "price_snapshot_after_round": 22,
       "projected_points": 204.2,
       "projected_points_gross": 204.2,
-      "points_basis": "net_after_transfers",
       "projected_price_gain": 1.9,
-      "downside_risk": 62.0,
+      "published_at": "2026-11-09T07:30:18.364533+00:00",
+      "race": "Las Vegas Grand Prix",
+      "round": 23,
+      "schema_version": 1,
+      "second_boost": null,
+      "selection_context_sha256": "cc8efc5e2151f028bc62e6906880f5d6af0b6f6aa36865848cc5d0f5257a07f3",
+      "source_generated_at": "2026-11-09T07:12:38.633259+00:00",
+      "status": "provisional",
       "team_cost": 137.4,
-      "transfers": 2,
       "transfer_penalty": 0,
-      "changes": {
-        "drivers_out": [
-          "CAM",
-          "VER"
-        ],
-        "drivers_in": [
-          "ANT",
-          "LAW"
-        ],
-        "constructors_out": [],
-        "constructors_in": []
-      },
-      "chip_decision": {
-        "result": "not_evaluated",
-        "reason": "Only post-FP finals can play 3x."
-      },
-      "policy": {
-        "policy_version": "horizon_budget_value_v2",
-        "strategy": "budget_builder",
-        "risk_profile": "medium_tolerance",
-        "price_gain_weight": 3.114,
-        "negative_p5_weight": 0.75,
-        "price_value_method": "horizon curve × price reliability × points realisation"
-      }
+      "transfers": 2
     },
     "post_fp_final": null
   },
-  "generated_at": "2026-11-09T09:30:18.374534+02:00",
+  "generated_at": "2026-11-09T21:01:28.551932+00:00",
   "labels": {
     "constructors": {
       "alpine": "Alpine",
