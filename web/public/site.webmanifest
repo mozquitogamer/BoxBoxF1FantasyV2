@@ -73,7 +73,7 @@
       "name": "Lineup Optimizer",
       "short_name": "Optimizer",
       "description": "Open the F1 Fantasy lineup optimizer.",
-      "url": "/tools/lineup-optimizer/?utm_source=web_app_manifest",
+      "url": "/tools/best-f1-fantasy-team/?utm_source=web_app_manifest",
       "icons": [
         {
           "src": "/logo.png",
