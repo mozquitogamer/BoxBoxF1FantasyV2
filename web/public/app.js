@@ -837,6 +837,7 @@ function renderV13() {
     if (!root) return;
     if (!v13Data?.research_replay) {
         root.innerHTML = '<p class="no-data">The V13 record is not available yet.</p>';
+        root.hidden = false;
         return;
     }
 
@@ -969,6 +970,7 @@ function renderV13() {
         </section>
     `;
 
+    root.hidden = false;
     const registrationPanel = document.querySelector('#tab-beatbot [data-email-updates]');
     if (registrationPanel) root.querySelector('.v13-hero')?.appendChild(registrationPanel);
     renderV13Leaderboard();
@@ -1443,7 +1445,10 @@ function renderPredictionContext() {
     document.getElementById('raceName').textContent = data.race;
     document.getElementById('raceMeta').textContent =
         `Round ${data.round} · ${data.season}${data.is_sprint_weekend ? ' · Sprint Weekend' : ''} · ${context.status}`;
-    document.getElementById('generatedAt').textContent = `${context.phase} · Simulation run: ${timeText}`;
+    document.getElementById('raceBadge').classList.remove('hidden');
+    const generatedAt = document.getElementById('generatedAt');
+    generatedAt.textContent = `${context.phase} · Simulation run: ${timeText}`;
+    generatedAt.hidden = false;
     for (const id of ['driverPredictionContext', 'constructorPredictionContext']) {
         const el = document.getElementById(id);
         if (!el) continue;
@@ -1454,6 +1459,7 @@ function renderPredictionContext() {
             ${data.fp_coverage_note ? `<p class="prediction-context-notice">${escapeHtml(data.fp_coverage_note)}</p>` : ''}
             ${context.notice ? `<p class="prediction-context-notice">${escapeHtml(context.notice)}</p>` : ''}
         </div>`;
+        el.hidden = false;
     }
 }
 
@@ -2175,6 +2181,7 @@ function renderHero() {
             </div>
         </div>
     `;
+    hero.classList.remove('hidden');
 }
 
 function heroCard(label, driver, type) {
@@ -2198,6 +2205,7 @@ function renderWeather() {
     if (!el) return;
     if (!weatherData || !weatherData.sessions) {
         el.innerHTML = '';
+        el.hidden = true;
         return;
     }
 
@@ -2302,6 +2310,7 @@ function renderWeather() {
             <div class="weather-source">Data: ${w.data_source || 'Open-Meteo'}</div>
         </div>
     `;
+    el.hidden = false;
 }
 
 // Renders a visual MC band only when a scenario is active for this driver.
@@ -2616,6 +2625,7 @@ function renderConstructors() {
     const upgradeBanner = renderUpgradeBanner();
     grid.innerHTML = upgradeBanner + constructors.map((c, i) => constructorCard(c, i)).join('');
 
+    grid.classList.remove('hidden');
     renderPitstopPanel();
 }
 
@@ -3505,6 +3515,7 @@ function renderLockGrid() {
     });
 
     grid.innerHTML = html;
+    grid.classList.remove('hidden');
 
     // Click handlers: left click = lock, right click = exclude
     grid.querySelectorAll('.lock-chip').forEach(chip => {
@@ -3873,6 +3884,7 @@ function runBudgetValueCalculator() {
     if (!resultEl) return;
     if (!budgetValueData) {
         resultEl.innerHTML = '<div class="optimizer-warning">The budget-value calibration is not available yet.</div>';
+        resultEl.hidden = false;
         return;
     }
 
@@ -3929,6 +3941,7 @@ function runBudgetValueCalculator() {
         <p class="budget-value-frontier">${thresholdText}</p>
         <p class="hint">Experimental 2026 calibration through round ${budgetValueData.updated_after_round}. The smooth value is an option estimate, not guaranteed scoring.</p>
     `;
+    resultEl.hidden = false;
 }
 
 // -- Lineup Optimizer --
@@ -4806,6 +4819,7 @@ function renderMyTeamGrid() {
         }
     }
     grid.innerHTML = html;
+    grid.classList.remove('hidden');
 
     // Seed budget inputs from team cost until the user edits them. After that,
     // slot changes must not erase bank/unspent budget that was typed manually.
@@ -4839,6 +4853,7 @@ function renderMyTeamGrid() {
     const mwGrid = document.getElementById('myTeamGridMW');
     if (mwGrid) {
         mwGrid.innerHTML = html;
+        mwGrid.classList.remove('hidden');
         attachGridHandlers(mwGrid);
     }
 }
@@ -5486,6 +5501,7 @@ function renderTeamCompareGrid() {
         </div>`;
     }).join('');
     grid.innerHTML = `${sourcePicker}<div class="team-compare-editors">${editors || '<p class="hint">Choose at least two sources above.</p>'}</div>`;
+    grid.classList.remove('hidden');
     compareTeams.forEach((teamState, teamIdx) => {
         if (!(teamState.source === 'saved' || teamState.readonly || teamState.expired)) return;
         grid.querySelectorAll(`.compare-slot[data-team="${teamIdx}"]`).forEach(slot => {
@@ -5809,6 +5825,7 @@ function renderTargetTeamGrid() {
         }
     }
     grid.innerHTML = html;
+    grid.classList.remove('hidden');
 
     // Attach handlers
     attachTargetGridHandlers(grid);
@@ -9207,6 +9224,10 @@ function renderSeason() {
         }
     }
 
+    document.querySelectorAll('#tab-season .season-section[hidden]').forEach(section => {
+        if (section.lastElementChild?.firstElementChild) section.hidden = false;
+    });
+
     // Populate post-race round selector
     populatePostRaceSelector();
 }
@@ -9230,6 +9251,7 @@ function populatePostRaceSelector() {
             opt.textContent = `Round ${r.round}: ${r.name}${label}`;
             selector.appendChild(opt);
         });
+    selector.closest('.controls')?.classList.remove('hidden');
 }
 
 // ============================================================
@@ -9278,6 +9300,8 @@ function renderH2H() {
         selB.addEventListener('change', updateH2HComparison);
         h2hInitialized = true;
         updateH2HComparison();
+        selA.closest('.h2h-selectors')?.classList.remove('hidden');
+        document.getElementById('h2hComparison').hidden = false;
     }
 }
 
@@ -10054,6 +10078,7 @@ function initDeepDiveTab() {
         .map(r => ({ round: r.round, name: r.name || r.race_name || `Round ${r.round}` }));
     if (!rounds.length) {
         sel.innerHTML = '<option>No race data yet</option>';
+        sel.closest('.round-selector')?.classList.remove('hidden');
         return;
     }
     rounds.forEach(r => {
@@ -10063,6 +10088,7 @@ function initDeepDiveTab() {
         sel.appendChild(opt);
     });
     sel.value = rounds[rounds.length - 1].round;
+    sel.closest('.round-selector')?.classList.remove('hidden');
     sel.addEventListener('change', () => renderDeepDive(parseInt(sel.value)));
     renderDeepDive(parseInt(sel.value));
 }
@@ -10071,6 +10097,7 @@ async function renderDeepDive(roundNum) {
     const el = document.getElementById('deepdiveContent');
     if (!el) return;
     el.innerHTML = '<p class="no-data">Loading deep dive data...</p>';
+    el.hidden = false;
 
     const chartLoad = ensureChartJs();
     const dd = await loadDeepDiveData(roundNum);

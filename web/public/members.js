@@ -223,6 +223,7 @@
         <div class="pit-wall-links"><button type="button" class="pit-wall-text-button" id="pitWallResetPassword">Create or reset password</button><a href="https://ko-fi.com/boxboxf1fantasy/tiers" target="_blank" rel="noopener">See Pit Wall benefits on Ko-fi</a><a href="/#beatbot">Beat V13 entry is free</a></div>
         <p class="pit-wall-status${message ? ' success' : ''}" id="pitWallStatus" role="status" aria-live="polite">${escapeHtml(message)}</p>`;
 
+        panel.hidden = false;
         panel.querySelector('#pitWallSignInForm')?.addEventListener('submit', async event => {
             event.preventDefault();
             const form = event.currentTarget;

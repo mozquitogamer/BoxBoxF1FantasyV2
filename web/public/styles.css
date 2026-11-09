@@ -4813,6 +4813,13 @@ body.v13-popup-open { overflow: hidden; }
     .race-flag { font-size: 18px; }
     .countdown-timer { font-size: 1rem; }
     .header-right #pitWallAccountButton { grid-column: 1 / -1; justify-self: center; }
+    /* Reserve the existing badge and account rows while their contents load. */
+    .js-enabled body:has(#driverLiveRegion.is-hydrating) .header-right {
+        grid-template-rows: minmax(61px, auto) minmax(33.5px, auto);
+    }
+    .js-enabled body:has(#driverLiveRegion.is-hydrating) .header-right #pitWallAccountButton {
+        grid-row: 2;
+    }
     .main { padding-top: 12px; }
     .roster-price-banner { margin-bottom: 10px; padding: 8px 12px; font-size: .8rem; }
     .seo-intro { margin-bottom: 8px; text-align: left; padding: 0; }
