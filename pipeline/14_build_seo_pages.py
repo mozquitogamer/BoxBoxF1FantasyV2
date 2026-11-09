@@ -54,6 +54,7 @@ INDEXNOW_KEY = "779753a5fbbf054b3ea496085a0ce1e4"
 # receive a significant site-wide content change.
 SEO_CONTENT_LASTMOD = "2026-10-18"
 LINEUP_CONTENT_LASTMOD = "2026-07-13"
+REDIRECTED_TOOL_SLUGS = {"lineup-optimizer", "budget-builder"}
 
 TOP_DRIVERS = 10      # rows in the "top picks" table
 VALUE_DRIVERS = 6     # rows in the "best value" table
@@ -2129,7 +2130,7 @@ def render_index(entries: list, current: dict | None = None, weather: dict | Non
         "<strong>Post-qualifying</strong> pages can use the actual grid but are normally retrospective because the team deadline has passed.</p>"
         + "<h2>How to use the rankings</h2>"
         + '<p>Expected points are the risk-adjusted simulation mean, while PPM measures value per $million. Read both alongside the 90% confidence range, DNF probability, price and forecast phase. '
-        'Use the <a href="/tools/lineup-optimizer/">Optimizer</a> for a legal team within your budget and <a href="/tools/team-compare/">Team Compare</a> when choosing between drafts.</p>'
+        'Use the <a href="/tools/best-f1-fantasy-team/">Optimizer</a> for a legal team within your budget and <a href="/tools/team-compare/">Team Compare</a> when choosing between drafts.</p>'
         + "<h2>F1 Fantasy race-picks FAQ</h2>"
         + _faq_html(faqs)
     )
@@ -2220,7 +2221,7 @@ def render_drivers_hub(current: dict) -> str:
         "The qualifying-to-race column shows the predicted movement that can create positions-gained or positions-lost scoring. Open any driver for their 90% range, DNF risk, scoring components and recent fantasy form.</p>"
         + "<h2>Expected points versus value</h2>"
         + '<p>The highest-scoring driver is not automatically the best roster decision. Premium drivers offer more raw upside, while cheaper high-PPM drivers can release budget for constructors or a stronger boosted driver. '
-        'Use the <a href="/tools/lineup-optimizer/">Optimizer</a> to evaluate the complete seven-asset team rather than selecting each slot independently.</p>'
+        'Use the <a href="/tools/best-f1-fantasy-team/">Optimizer</a> to evaluate the complete seven-asset team rather than selecting each slot independently.</p>'
         + "<h2>F1 Fantasy driver FAQ</h2>"
         + _faq_html(faqs)
     )
@@ -2488,7 +2489,7 @@ def render_constructors_hub(current: dict) -> str:
         "<strong>PPM</strong> measures expected points per $million. Open a team profile for both driver projections, qualifying and race components, the 90% interval and recent constructor form.</p>"
         + "<h2>Why constructors change the best lineup</h2>"
         + '<p>Each constructor combines two cars plus teamwork and pit-stop scoring, so the best pair cannot be chosen from driver rankings alone. A cheaper high-value constructor may free enough budget for a premium driver; a premium constructor can offer more raw points across both cars. '
-        'Use the <a href="/tools/lineup-optimizer/">Optimizer</a> or <a href="/tools/team-compare/">Team Compare</a> to judge the full seven-asset roster.</p>'
+        'Use the <a href="/tools/best-f1-fantasy-team/">Optimizer</a> or <a href="/tools/team-compare/">Team Compare</a> to judge the full seven-asset roster.</p>'
         + "<h2>F1 Fantasy constructor FAQ</h2>"
         + _faq_html(faqs)
     )
@@ -4269,7 +4270,7 @@ def write_webmanifest() -> None:
                 "name": "Lineup Optimizer",
                 "short_name": "Optimizer",
                 "description": "Open the F1 Fantasy lineup optimizer.",
-                "url": "/tools/lineup-optimizer/?utm_source=web_app_manifest",
+                "url": "/tools/best-f1-fantasy-team/?utm_source=web_app_manifest",
                 "icons": [{"src": "/logo.png", "sizes": "96x96", "type": "image/png"}],
             },
             {
@@ -4525,10 +4526,8 @@ def write_llms_txt(rel_paths: list[str]) -> None:
         "- F1 Fantasy value picks: https://boxboxf1fantasy.com/tools/f1-fantasy-value-picks/",
         "- F1 Fantasy price changes: https://boxboxf1fantasy.com/tools/f1-fantasy-price-changes/",
         "- F1 Fantasy DNF risk: https://boxboxf1fantasy.com/tools/f1-fantasy-dnf-risk/",
-        "- Lineup optimizer: https://boxboxf1fantasy.com/tools/lineup-optimizer/",
         "- Team compare: https://boxboxf1fantasy.com/tools/team-compare/",
         "- Transfer planner: https://boxboxf1fantasy.com/tools/transfer-planner/",
-        "- Budget builder: https://boxboxf1fantasy.com/tools/budget-builder/",
         "- Points calculator: https://boxboxf1fantasy.com/tools/points-calculator/",
         "",
         "Crawler policy:",
@@ -5005,7 +5004,7 @@ def render_list_hub(base, crumb, hub, items, current: dict | None = None) -> str
         current_html = (
             f'<div class="callout"><strong>Current round: {esc(race)}.</strong> '
             f'<a href="/picks/{slugify(race)}/">Read the race-week picks</a>, '
-            '<a href="/tools/lineup-optimizer/">build an optimized lineup</a>, or '
+            '<a href="/tools/best-f1-fantasy-team/">build an optimized lineup</a>, or '
             '<a href="/tools/team-compare/">compare manual or saved teams</a> before lock.</div>'
         )
     faq_section = (f'<h2>F1 Fantasy {esc(crumb.lower())} FAQ</h2>{_faq_html(faqs)}') if faqs else ""
@@ -5088,7 +5087,7 @@ GUIDES_HUB = {
         "<h2>Use guides together with current race data</h2>"
         '<p>Rules and strategy are the stable layer; race-week projections are the changing layer. Check the '
         '<a href="/picks/">current race picks</a> after practice, review confidence ranges and DNF risk, then use the '
-        '<a href="/tools/lineup-optimizer/">Optimizer</a> with your real budget near the lock deadline.</p>'
+        '<a href="/tools/best-f1-fantasy-team/">Optimizer</a> with your real budget near the lock deadline.</p>'
     ),
     "faqs": [
         ("Which F1 Fantasy guide should a beginner read first?",
@@ -5106,10 +5105,10 @@ TOOLS_HUB = {
     "intro": '<p class="lede">A free toolkit for F1 Fantasy, powered by machine-learning predictions and a 10,000-run race simulation &mdash; build the best lineup, plan transfers, grow your budget and check projected points.</p>',
     "body": (
         "<h2>Choose a tool for the decision you need to make</h2>"
-        '<ul><li><strong>Starting from scratch:</strong> use the <a href="/tools/lineup-optimizer/">Lineup Optimizer</a> to search every legal team within your budget.</li>'
+        '<ul><li><strong>Starting from scratch:</strong> use the <a href="/tools/best-f1-fantasy-team/">Lineup Optimizer</a> to search every legal team within your budget.</li>'
         '<li><strong>Choosing between drafts:</strong> use <a href="/tools/team-compare/">Team Compare</a> for manual or saved lineups, including expected points, downside, budget and projected price gain.</li>'
         '<li><strong>Improving an existing team:</strong> use the <a href="/tools/transfer-planner/">Transfer Planner</a> to compare swaps and multi-round plans.</li>'
-        '<li><strong>Growing team value:</strong> combine the <a href="/tools/budget-builder/">Budget Builder</a> with the <a href="/tools/f1-fantasy-price-changes/">price-change outlook</a>.</li>'
+        '<li><strong>Growing team value:</strong> combine the Budget Builder strategy in the optimizer with the <a href="/tools/f1-fantasy-price-changes/">price-change outlook</a>.</li>'
         '<li><strong>Checking one assumption:</strong> inspect <a href="/tools/f1-fantasy-predictions/">projections</a>, '
         '<a href="/tools/f1-fantasy-value-picks/">value picks</a>, <a href="/tools/f1-fantasy-dnf-risk/">DNF risk</a> or the '
         '<a href="/tools/f1-fantasy-deadline/">deadline calendar</a> directly.</li></ul>'
@@ -5337,7 +5336,7 @@ TOOLS = [
             "<li>Run the optimizer, then compare two or three realistic teams in Team Compare before locking in.</li></ul>"
             "<h2>What to check before deadline</h2>"
             "<p>Before the lock deadline, review updated practice or qualifying information, DNF risk, price-change brackets, and whether a chip changes the best lineup. A team that was best pre-practice may not still be best after fresh weekend data arrives.</p>"
-            '<div class="callout">For race-specific suggestions, start with the <a href="/picks/">Race Picks</a> page. For the mathematically best legal lineup, use the <a href="/tools/lineup-optimizer/">Lineup Optimizer</a>.</div>'
+            '<div class="callout">For race-specific suggestions, start with the <a href="/picks/">Race Picks</a> page. Use the optimizer below to find the highest-scoring legal lineup.</div>'
         ),
         "faqs": [
             ("What is the best F1 Fantasy team this week?",
@@ -5448,7 +5447,7 @@ TOOLS = [
             "<p>Budget growth compounds. Catching a few early risers can leave you with enough extra team value to afford stronger premium drivers or constructors later in the season. Avoiding likely fallers protects the spending power you already have.</p>"
             "<h2>Use it with transfers</h2>"
             "<p>Do not chase price rises blindly. A budget pick still needs to fit your score plan, transfer plan and chip timing. Use the watchlist alongside the Optimizer, Team Compare and Transfer Planner before making a move.</p>"
-            '<div class="callout">For the underlying projection details, open the live driver and constructor cards. For budget-first teams, use the <a href="/tools/budget-builder/">Budget Builder</a>.</div>'
+            '<div class="callout">For the underlying projection details, open the live driver and constructor cards. For budget-first teams, use the Budget Builder strategy in <a href="/tools/best-f1-fantasy-team/">Best Team</a>.</div>'
         ),
         "faqs": [
             ("Who is likely to rise in price in F1 Fantasy?",
@@ -5681,7 +5680,7 @@ STATIC_PAGES = [
             '<p>Each editorial byline links here for ownership and contact context and to the <a href="/methodology/">Methodology</a> for the production process, data layers, uncertainty and limitations.</p>'
             '<p>Generated rankings are model outputs, not eyewitness reporting. The evidence behind an analysis should identify its race and forecast phase, distinguish official results from estimates, and explain material limitations. Readers can check those claims against the linked race data and public accuracy record, and report a mismatch for correction. A new forecast is not a retrospective edit to an earlier prediction.</p>'
             "<h2>How to use it</h2>"
-            '<p>Start with the <a href="/">live predictions</a>, then use the <a href="/tools/lineup-optimizer/">Optimizer</a> or <a href="/tools/team-compare/">Team Compare</a> when you need to turn those projections into an actual team. The <a href="/picks/">race-pick pages</a> give a quicker written summary for each Grand Prix, while the <a href="/guides/">guides</a> explain scoring, chips and strategy.</p>'
+            '<p>Start with the <a href="/">live predictions</a>, then use the <a href="/tools/best-f1-fantasy-team/">Optimizer</a> or <a href="/tools/team-compare/">Team Compare</a> when you need to turn those projections into an actual team. The <a href="/picks/">race-pick pages</a> give a quicker written summary for each Grand Prix, while the <a href="/guides/">guides</a> explain scoring, chips and strategy.</p>'
             "<h2>How the predictions are produced</h2>"
             '<p>The site combines historical race results and reliability, current-season form, circuit characteristics, F1 practice telemetry when available, weather context and fantasy scoring rules. Ranking models estimate qualifying and race positions; deterministic scoring and a 10,000-run simulation convert those positions into fantasy projections and confidence ranges. The public <a href="/methodology/">prediction methodology</a> explains the process, update phases, safeguards and limitations without publishing proprietary tuning values.</p>'
             "<h2>Transparency commitments</h2>"
@@ -5755,7 +5754,7 @@ STATIC_PAGES = [
             "<li>Upgrades, penalties, strategic calls, safety cars and incidents can invalidate the expected order.</li><li>Fan-voted Driver of the Day and exact overtake counts are inherently difficult to predict.</li>"
             "<li>Fantasy prices and rules can change; the official game remains the final authority.</li></ul>"
             "<h2>Using the outputs responsibly</h2>"
-            '<p>Use expected points as one input, then inspect the confidence range, DNF probability, value, phase and budget effect. Compare complete teams in <a href="/tools/team-compare/">Team Compare</a> or the <a href="/tools/lineup-optimizer/">Optimizer</a>. The site is independent, informational and intended for entertainment.</p>'
+            '<p>Use expected points as one input, then inspect the confidence range, DNF probability, value, phase and budget effect. Compare complete teams in <a href="/tools/team-compare/">Team Compare</a> or the <a href="/tools/best-f1-fantasy-team/">Optimizer</a>. The site is independent, informational and intended for entertainment.</p>'
         ),
         "faq_heading": "Prediction methodology FAQ",
         "faqs": [
@@ -6183,6 +6182,9 @@ def main() -> None:
             d = out_base / it["slug"]
             d.mkdir(parents=True, exist_ok=True)
             (d / "index.html").write_text(render_content_page(it, current), encoding="utf-8")
+        if base == "tools":
+            # Keep the legacy pages on disk, but list their destination only.
+            items = [it for it in items if it["slug"] not in REDIRECTED_TOOL_SLUGS]
         (out_base / "index.html").write_text(render_list_hub(base, crumb, hub, items, current), encoding="utf-8")
         rel_paths.append(f"{base}/")
         rel_paths += [f"{base}/{it['slug']}/" for it in items]
@@ -6190,7 +6192,7 @@ def main() -> None:
             current_tool_slugs = {
                 "f1-fantasy-predictions", "best-f1-fantasy-team", "f1-fantasy-captain-picks",
                 "f1-fantasy-value-picks", "f1-fantasy-price-changes", "f1-fantasy-dnf-risk",
-                "lineup-optimizer", "points-calculator",
+                "points-calculator",
             }
             for it in items:
                 if it["slug"] in current_tool_slugs:

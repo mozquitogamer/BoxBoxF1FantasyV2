@@ -5,6 +5,18 @@
   "installCommand": "",
   "framework": null,
   "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/tools/lineup-optimizer/",
+      "destination": "/tools/best-f1-fantasy-team/",
+      "permanent": true
+    },
+    {
+      "source": "/tools/budget-builder/",
+      "destination": "/tools/best-f1-fantasy-team/",
+      "permanent": true
+    }
+  ],
   "functions": {
     "api/members/notify.js": { "maxDuration": 60 },
     "api/email/status.js": { "maxDuration": 30 }

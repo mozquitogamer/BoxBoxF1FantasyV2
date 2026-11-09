@@ -91,13 +91,6 @@
       "date_modified": "2026-11-09T00:00:00+00:00"
     },
     {
-      "id": "https://boxboxf1fantasy.com/tools/lineup-optimizer/",
-      "url": "https://boxboxf1fantasy.com/tools/lineup-optimizer/",
-      "title": "Free F1 Fantasy Team Optimizer 2026",
-      "summary": "Free F1 Fantasy optimizer checking 1.4 million legal teams within your budget using ML projections, chips, locks, exclusions and four strategies.",
-      "date_modified": "2026-11-09T00:00:00+00:00"
-    },
-    {
       "id": "https://boxboxf1fantasy.com/tools/points-calculator/",
       "url": "https://boxboxf1fantasy.com/tools/points-calculator/",
       "title": "F1 Fantasy Points Calculator & Predictions",
@@ -354,6 +347,13 @@
       "url": "https://boxboxf1fantasy.com/tools/f1-fantasy-deadline/",
       "title": "F1 Fantasy Deadline 2026: Lock Times & Race Calendar",
       "summary": "F1 Fantasy 2026 deadline tracker: see each race lock time, sprint-weekend lock rule, next deadline and the full season deadline table.",
+      "date_modified": "2026-10-18T00:00:00+00:00"
+    },
+    {
+      "id": "https://boxboxf1fantasy.com/tools/team-compare/",
+      "url": "https://boxboxf1fantasy.com/tools/team-compare/",
+      "title": "F1 Fantasy Team Compare & Score Calculator",
+      "summary": "Compare three manual F1 Fantasy teams for free, or up to three saved Pit Wall teams plus a manual alternative. Check points, budget, chips and downside.",
       "date_modified": "2026-10-18T00:00:00+00:00"
     }
   ]
