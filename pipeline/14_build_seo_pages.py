@@ -45,6 +45,10 @@ SITE = "https://boxboxf1fantasy.com"
 YEAR = 2026
 CONTACT_EMAIL = "boxboxf1fantasy@gmail.com"
 PERSONAL_AUTHOR_NAME = "Quintin Engelbrecht"
+# build_articles.py preserves the FP2 publisher's filename stem as the slug.
+FP2_BRIEFING_SLUG = re.compile(r"(\d{4})-round(\d+)-fp2-fantasy-briefing")
+INDEX_ROBOTS_META = '<meta name="robots" content="index, follow, max-image-preview:large">'
+NOINDEX_ROBOTS_META = '<meta name="robots" content="noindex, follow">'
 INDEXNOW_KEY = "779753a5fbbf054b3ea496085a0ce1e4"
 # Bump only when generated page templates, metadata, structured data or links
 # receive a significant site-wide content change.
@@ -913,7 +917,7 @@ def page_head(
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <link rel="canonical" href="{canonical}">
-<meta name="robots" content="index, follow, max-image-preview:large">
+{INDEX_ROBOTS_META}
 <meta name="theme-color" content="#0a0d12">
 <meta property="og:type" content="{esc(og_type)}">
 <meta property="og:site_name" content="BoxBoxF1Fantasy">
@@ -3053,8 +3057,7 @@ def _article_meta_description(article: dict) -> str:
 def render_article_page(article: dict) -> str:
     """Crawlable long-form article page from web/public/data/articles.json."""
     slug = plain_slug(article.get("slug") or article.get("title") or "article")
-    # build_articles.py preserves the FP2 publisher's filename stem as the slug.
-    automated_fp2 = re.fullmatch(r"\d{4}-round\d+-fp2-fantasy-briefing", slug) is not None
+    automated_fp2 = FP2_BRIEFING_SLUG.fullmatch(slug) is not None
     canonical = f"{SITE}/articles/{slug}/"
     article_title = clean_legacy_text(article.get("title", "F1 Fantasy Article"))
     seo_title = clean_legacy_text(article.get("seo_title", article_title))
@@ -3841,6 +3844,51 @@ def write_prediction_schema() -> None:
         json.dumps(predictions_json_schema(), ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+
+
+def apply_index_policy(
+    calendar: dict, picks_entries: list[tuple], build_date: date,
+) -> set[str]:
+    """Set robots metadata on generated and retained pages, and return sitemap exclusions."""
+    rounds = [r for r in calendar.get("rounds", []) if not r.get("cancelled")]
+    race_dates = {
+        r["round"]: race_date for r in rounds if (race_date := source_date(r.get("date")))
+    }
+    # Use calendar names for retained picks and actual output slugs for freshly rendered pages.
+    picks_rounds = {slugify(r["name"]): r["round"] for r in rounds}
+    picks_rounds.update({slug: round_number for slug, _, _, round_number, _ in picks_entries})
+    # Calendar dates and the UTC build date are both YYYY-MM-DD. Race day itself stays indexed.
+    past_rounds = {rn for rn, race_date in race_dates.items() if race_date < build_date.isoformat()}
+
+    index_meta = INDEX_ROBOTS_META.encode("utf-8")
+    noindex_meta = NOINDEX_ROBOTS_META.encode("utf-8")
+    noindex_paths = set()
+    for section in ("drivers", "constructors", "picks", "articles"):
+        for page in (WEB / section).glob("*/index.html"):
+            slug = page.parent.name
+            if section in ("drivers", "constructors"):
+                noindex = True
+            else:
+                if section == "picks":
+                    rn = picks_rounds.get(slug)
+                else:
+                    briefing = FP2_BRIEFING_SLUG.fullmatch(slug)
+                    if not briefing or int(briefing[1]) != calendar.get("season"):
+                        continue
+                    rn = int(briefing[2])
+                if rn not in race_dates:
+                    continue
+                noindex = rn in past_rounds
+
+            original = page.read_bytes()
+            if noindex:
+                noindex_paths.add(f"{section}/{slug}/")
+                updated = original.replace(index_meta, noindex_meta, 1)
+            else:
+                updated = original.replace(noindex_meta, index_meta, 1)
+            if updated != original:
+                page.write_bytes(updated)
+    return noindex_paths
 
 
 def news_sitemap_items(articles: list[dict], today: date | None = None) -> dict[str, dict]:
@@ -5898,6 +5946,7 @@ def assemble_race_page(
 
 
 def main() -> None:
+    now = datetime.now(timezone.utc)
     season = load_json(DATA / "season_summary.json")
     current = load_json(DATA / "predictions.json")
     current_weather = load_json(DATA / "weather.json") or {}
@@ -5993,9 +6042,8 @@ def main() -> None:
     if pick_lastmods:
         lastmods["picks/"] = max(pick_lastmods)
 
-    # all sitemap URLs (relative): home + picks + drivers + constructors + guides + tools
+    # Full discovery list, including pages excluded from the sitemap.
     rel_paths = ["", "picks/"] + [f"picks/{e[0]}/" for e in entries]
-    now = datetime.now(timezone.utc)
     feed_entries = [e for e in entries if e[4] in {"current", "future", "result"}]
     feed_entries.sort(key=lambda e: (e[4] != "current", e[3]))
     feed_items = [
@@ -6280,14 +6328,15 @@ def main() -> None:
     refresh_retained_engagement_blocks()
     refresh_retained_footer_links()
 
-    sitemap_paths = rel_paths + legal_paths
-    for path in sitemap_paths:
+    for path in rel_paths + legal_paths:
         lastmods[path] = max(lastmods.get(path, SEO_CONTENT_LASTMOD), SEO_CONTENT_LASTMOD)
     for item in feed_items:
         rel_path = item["url"].removeprefix(f"{SITE}/")
         item_lastmod = lastmods.get(rel_path, SEO_CONTENT_LASTMOD)
         item["updated"] = datetime.fromisoformat(item_lastmod).replace(tzinfo=timezone.utc)
-    write_sitemap(sitemap_paths, lastmods, news_sitemap_items(articles_sorted))
+    noindex_paths = apply_index_policy(season, entries, now.date())
+    sitemap_paths = [path for path in rel_paths + legal_paths if path not in noindex_paths]
+    write_sitemap(sitemap_paths, lastmods, news_sitemap_items(articles_sorted, now.date()))
     write_robots()
     write_webmanifest()
     write_trust_files()

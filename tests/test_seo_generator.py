@@ -3,6 +3,8 @@ import json
 import re
 from pathlib import Path
 
+import pytest
+
 
 SCRIPT = Path(__file__).resolve().parents[1] / "pipeline" / "14_build_seo_pages.py"
 SPEC = importlib.util.spec_from_file_location("build_seo_pages", SCRIPT)
@@ -635,6 +637,48 @@ def test_midseason_report_is_original_dated_sourced_and_shareable():
     assert '"wordCount":' in html
     assert '"https://boxboxf1fantasy.com/stats/"' in html
     assert '"https://boxboxf1fantasy.com/data/driver_history.json"' in html
+
+
+@pytest.mark.parametrize(
+    ("build_date", "noindex"),
+    [
+        (seo.date(2026, 11, 7), False),
+        (seo.date(2026, 11, 8), False),
+        (seo.date(2026, 11, 9), True),
+    ],
+    ids=["future-race", "race-day", "past-race"],
+)
+def test_index_policy_uses_race_date_for_picks_and_fp2_briefings(tmp_path, monkeypatch, build_date, noindex):
+    monkeypatch.setattr(seo, "WEB", tmp_path)
+    calendar = {"season": 2026, "rounds": [
+        {"round": 22, "name": "Test Grand Prix", "date": "2026-11-08"},
+    ]}
+    entries = [("rendered-test-gp-2026", "Test Grand Prix", "2026-11-06", 22, "current")]
+    dated = {
+        "picks/test-gp-2026/",
+        "picks/rendered-test-gp-2026/",
+        "articles/2026-round22-fp2-fantasy-briefing/",
+    }
+    profiles = {"drivers/retained-driver/", "constructors/team/"}
+    unchanged = {
+        "drivers/", "constructors/", "picks/", "articles/", "articles/test-gp-recap/",
+        "articles/2025-round22-fp2-fantasy-briefing/",
+    }
+    page_html = (
+        f"<head>{seo.INDEX_ROBOTS_META}<title>Page</title></head>"
+        '<body><a href="/picks/">Race picks</a></body>'
+    )
+    for rel_path in dated | profiles | unchanged:
+        page = tmp_path / rel_path / "index.html"
+        page.parent.mkdir(parents=True, exist_ok=True)
+        page.write_text(page_html, encoding="utf-8")
+
+    excluded = profiles | (dated if noindex else set())
+    assert seo.apply_index_policy(calendar, entries, build_date) == excluded
+    for rel_path in dated | profiles | unchanged:
+        page = tmp_path / rel_path / "index.html"
+        expected = page_html.replace(seo.INDEX_ROBOTS_META, seo.NOINDEX_ROBOTS_META) if rel_path in excluded else page_html
+        assert page.read_text(encoding="utf-8") == expected
 
 
 def test_news_sitemap_metadata_only_includes_articles_from_last_two_days(tmp_path, monkeypatch):
