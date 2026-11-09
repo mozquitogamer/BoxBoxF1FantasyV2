@@ -40,7 +40,7 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="manifest" href="/site.webmanifest">
-    <link rel="stylesheet" href="styles.css?v=44">
+    <link rel="stylesheet" href="styles.css?v=45">
     <link rel="stylesheet" href="engagement.css?v=11">
     <link rel="stylesheet" href="scenarios.css?v=3">
     <link rel="stylesheet" href="weather.css?v=2">
@@ -341,10 +341,10 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <div class="race-badge" id="raceBadge">
+                    <div class="race-badge hidden" id="raceBadge">
                         <span class="race-flag" id="raceFlag"></span>
                         <div>
-                            <div class="race-name" id="raceName">Loading...</div>
+                            <div class="race-name" id="raceName"></div>
                             <div class="race-meta" id="raceMeta"></div>
                         </div>
                     </div>
@@ -403,9 +403,9 @@
                 </section>
 
                 <div class="driver-live-region is-hydrating" id="driverLiveRegion">
-                <div id="driverPredictionContext" aria-live="polite"></div>
+                <div id="driverPredictionContext" aria-live="polite" hidden></div>
                 <!-- Hero Section -->
-                <div class="hero" id="heroSection">
+                <div class="hero hidden" id="heroSection">
                     <!-- JS will populate this -->
                 </div>
 
@@ -432,7 +432,7 @@
                 </section>
 
                 <!-- Weather Forecast -->
-                <div id="weatherSection">
+                <div id="weatherSection" hidden>
                     <!-- JS will populate this -->
                 </div>
 
@@ -533,7 +533,7 @@
 
             <!-- Constructors Tab -->
             <section class="tab-content" id="tab-constructors">
-                <div id="constructorPredictionContext" aria-live="polite"></div>
+                <div id="constructorPredictionContext" aria-live="polite" hidden></div>
                 <div class="controls">
                     <div class="control-group">
                         <label>Sort by</label>
@@ -553,11 +553,11 @@
                         <span class="pitstop-panel-hint">Stationary (wheels-up) times • click to collapse</span>
                     </summary>
                     <div id="pitstopPanelBody">
-                        <p class="no-data">Pit-stop analysis compares each constructor’s stationary stop times. <a href="/constructors/">Browse constructor profiles and scoring context</a> while the detailed table loads.</p>
+                        <p class="no-data">Pit-stop analysis compares each constructor’s stationary stop times. <a href="/constructors/">Browse constructor profiles and scoring context</a>.</p>
                     </div>
                 </details>
 
-                <div class="constructor-grid" id="constructorCards"></div>
+                <div class="constructor-grid hidden" id="constructorCards"></div>
             </section>
 
             <!-- Optimizer Tab -->
@@ -589,9 +589,7 @@
                         <div><span class="pit-wall-workspace-kicker">Pit Wall workspace</span><h3>Saved teams, budgets and chips</h3><p>Choose a saved team to review it, compare it with the others, or edit it in Transfer Advisor.</p></div>
                         <div class="pit-wall-workspace-actions"><button type="button" class="btn-primary" id="pitWallEditTeam">Edit selected team in Transfer Advisor</button><button type="button" class="share-team-btn" id="pitWallCompareWorkspace">Compare teams</button></div>
                     </div>
-                    <aside class="pit-wall-panel pit-wall-workspace-panel" id="pitWallMemberPanel" aria-label="Pit Wall saved team">
-                        <p class="pit-wall-loading">Checking Pit Wall sign-in…</p>
-                    </aside>
+                    <aside class="pit-wall-panel pit-wall-workspace-panel" id="pitWallMemberPanel" aria-label="Pit Wall saved team" hidden></aside>
                 </div>
 
                 <!-- Fresh lineup mode controls -->
@@ -661,7 +659,7 @@
                     <div class="my-team-section">
                         <h3>My Current Team</h3>
                         <p class="hint">Select your current 5 drivers and 2 constructors. Click a slot to change it.</p>
-                        <div class="my-team-grid" id="myTeamGrid"></div>
+                        <div class="my-team-grid hidden" id="myTeamGrid"></div>
                         <div class="my-team-controls">
                             <div class="control-group">
                                 <label>Total Spending Power ($M)</label>
@@ -762,7 +760,7 @@
                             </div>
                             <button class="btn-primary" id="runBudgetCalculator">Compare Points and Budget</button>
                         </div>
-                        <div id="budgetCalcResult" class="budget-value-result"></div>
+                        <div id="budgetCalcResult" class="budget-value-result" hidden></div>
                     </div>
                 </div>
 
@@ -783,7 +781,7 @@
                     <div class="my-team-section">
                         <h3>Multi-Week Transfer Planner</h3>
                         <p class="hint">Compare transfer and chip plans across the next 2–5 rounds. Future scores use ML horizon forecasts where available and a track-affinity fallback otherwise.</p>
-                        <div class="my-team-grid" id="myTeamGridMW"></div>
+                        <div class="my-team-grid hidden" id="myTeamGridMW"></div>
                         <div class="my-team-controls">
                             <div class="control-group">
                                 <label>Available Budget ($M)</label>
@@ -835,7 +833,7 @@
                                         <option value="strict">Strict — force convergence at point cost</option>
                                     </select>
                                 </div>
-                                <div class="my-team-grid" id="myTeamGridTarget"></div>
+                                <div class="my-team-grid hidden" id="myTeamGridTarget"></div>
                             </div>
                         </div>
                         <div class="mw-chips-section" style="margin-top:12px;">
@@ -867,7 +865,7 @@
                         </details>
                     </div>
 
-                    <div class="ff-shell">
+                    <div class="ff-shell hidden" id="finalFixShell">
                         <div class="ff-status" id="finalFixStatus"></div>
 
                         <div class="ff-top-controls">
@@ -992,7 +990,7 @@
                             <button class="btn-primary" id="runTeamCompare">Compare Teams</button>
                             <button class="share-team-btn" id="clearTeamCompare" type="button">Clear</button>
                         </div>
-                        <div class="team-compare-grid" id="teamCompareGrid"></div>
+                        <div class="team-compare-grid hidden" id="teamCompareGrid"></div>
                         <div id="teamCompareResult" class="team-compare-result hidden"></div>
                     </div>
                 </div>
@@ -1000,7 +998,7 @@
                 <div class="optimizer-constraints">
                     <h3>Optional Lock / Exclude Rules</h3>
                     <p class="hint optimizer-constraints-warning"><strong>This does not fill “My Current Team.”</strong> In Transfer Advisor, select your seven team slots above first. Then left-click here to protect a current pick from being transferred, or right-click to exclude a possible replacement.</p>
-                    <div class="lock-grid" id="lockGrid"></div>
+                    <div class="lock-grid hidden" id="lockGrid"></div>
                 </div>
 
                 <div class="optimizer-result hidden" id="optimizerResult">
@@ -1024,12 +1022,7 @@
                     <div class="email-updates-copy"><span class="email-updates-eyebrow">Free 2026 challenge entry</span><h2 id="v13RegistrationTitleTop">Put your real team on the grid</h2><p>Confirm your email before <span id="v13RegistrationDeadline">Round 23 Las Vegas GP team lock on 21 November 2026 at 04:00 UTC</span>. Follow V13 and the optional public-league benchmark now, then submit your official full-season score after Abu Dhabi.</p></div>
                     <form class="email-updates-form" novalidate><div class="email-updates-fields"><label class="sr-only" for="v13RegistrationEmail">Email address</label><input id="v13RegistrationEmail" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required><button type="submit">Enter / access</button></div><div class="email-updates-honeypot" aria-hidden="true"><label>Website <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div><label class="email-updates-consent"><input name="consent" type="checkbox" required><span>Register me for Beat V13 and send me V13, simulation and competition updates. If I am already confirmed, email me a secure dashboard access link. I can unsubscribe at any time.</span></label><p class="email-updates-privacy">Already entered? Use the same email to get a fresh access link &middot; No Pit Wall membership required &middot; <a href="/privacy/">Privacy</a></p><p class="email-updates-status" role="status" aria-live="polite"></p></form>
                 </section>
-                <div class="v13-root" id="v13Root" aria-live="polite">
-                    <div class="v13-loading">
-                        <span class="v13-loading-mark" aria-hidden="true">V13</span>
-                        <p>Loading the manager record&hellip;</p>
-                    </div>
-                </div>
+                <div class="v13-root" id="v13Root" aria-live="polite" hidden></div>
             </section>
 
             <!-- Analysis Tab -->
@@ -1051,14 +1044,14 @@
 
                 <!-- Post-Race Panel -->
                 <div class="analysis-panel" id="panel-postrace">
-                    <div class="controls">
+                    <div class="controls hidden">
                         <div class="control-group">
                             <label>Round</label>
                             <select id="postRaceRound"></select>
                         </div>
                     </div>
                     <div id="postRaceContent">
-                        <p class="no-data">Select a completed round to compare the forecast with the result. <a href="/accuracy/">View the public accuracy record</a> and <a href="/articles/">read the race reviews</a>.</p>
+                        <p class="no-data">Compare forecasts with completed race results. <a href="/accuracy/">View the public accuracy record</a> and <a href="/articles/">read the race reviews</a>.</p>
                     </div>
                 </div>
             </section>
@@ -1071,32 +1064,32 @@
 
                 <div class="season-sections">
                     <!-- Calendar/Results -->
-                    <div class="season-section">
+                    <div class="season-section" hidden>
                         <h3>Race Calendar & Results</h3>
                         <div id="seasonCalendar"></div>
                     </div>
 
                     <!-- Championship Standings -->
-                    <div class="season-section">
+                    <div class="season-section" hidden>
                         <h3>Championship Standings</h3>
                         <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:12px;">Official F1 World Championship points based on race and sprint results.</p>
                         <div id="championshipStandings"></div>
                     </div>
 
                     <!-- Fantasy Standings -->
-                    <div class="season-section">
+                    <div class="season-section" hidden>
                         <h3>Fantasy Points Standings</h3>
                         <div id="fantasyStandings"></div>
                     </div>
 
                     <!-- Price Tracker -->
-                    <div class="season-section">
+                    <div class="season-section" hidden>
                         <h3>Driver Price Tracker</h3>
                         <div id="priceTracker"></div>
                     </div>
 
                     <!-- Constructor Price Tracker -->
-                    <div class="season-section">
+                    <div class="season-section" hidden>
                         <h3>Constructor Price Tracker</h3>
                         <div id="constructorPriceTracker"></div>
                     </div>
@@ -1109,7 +1102,7 @@
                     <h2>Head-to-Head Matchup</h2>
                     <p>Compare any two drivers side-by-side. See who to pick based on predictions, value, and historical performance.</p>
                 </div>
-                <div class="h2h-selectors">
+                <div class="h2h-selectors hidden">
                     <div class="h2h-selector-group">
                         <label>Driver A</label>
                         <select id="h2hDriverA"></select>
@@ -1120,7 +1113,7 @@
                         <select id="h2hDriverB"></select>
                     </div>
                 </div>
-                <div id="h2hComparison"></div>
+                <div id="h2hComparison" hidden></div>
             </section>
 
             <!-- Accuracy Tab -->
@@ -1133,7 +1126,7 @@
                     </div>
                 </div>
                 <div id="accuracyContent">
-                    <p class="no-data">Explore prediction errors and uncertainty coverage by round. <a href="/accuracy/">Open the public accuracy record</a> while the interactive charts load.</p>
+                    <p class="no-data">Explore prediction errors and uncertainty coverage by round. <a href="/accuracy/">Open the public accuracy record</a>.</p>
                 </div>
             </section>
 
@@ -1142,14 +1135,12 @@
                 <div class="deepdive-header">
                     <h2>Race Deep Dive</h2>
                     <p>Detailed post-race telemetry analysis with fuel-corrected pace, sector breakdowns, and tyre degradation.</p>
-                    <div class="round-selector">
+                    <div class="round-selector hidden">
                         <label>Select Round:</label>
                         <select id="deepdiveRoundSelect"></select>
                     </div>
                 </div>
-                <div id="deepdiveContent">
-                    <p class="no-data">Select a round to view deep dive analysis...</p>
-                </div>
+                <div id="deepdiveContent" hidden></div>
             </section>
 
             <!-- Videos Tab -->
@@ -1317,7 +1308,7 @@
                     </div>
 
                     <div class="about-footer">
-                        <p class="generated-at" id="generatedAt"></p>
+                        <p class="generated-at" id="generatedAt" hidden></p>
                     </div>
                 </div>
             </section>
@@ -1398,12 +1389,12 @@
     <script src="scenarios.js?v=3"></script>
     <script src="team-state.js?v=3"></script>
     <script src="long-run-explorer.js?v=3"></script>
-    <script src="final-fix.js?v=3"></script>
+    <script src="final-fix.js?v=4"></script>
     <script src="optimizer-scoring.js?v=1"></script>
     <script src="prediction-context.js?v=2"></script>
     <script src="weather-context.js?v=1"></script>
-    <script src="app.js?v=173"></script>
-    <script src="members.js?v=27"></script>
+    <script src="app.js?v=174"></script>
+    <script src="members.js?v=28"></script>
     <script src="engagement.js?v=19"></script>
 </body>
 </html>

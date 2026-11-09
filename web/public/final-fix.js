@@ -334,6 +334,7 @@
             );
             doc.getElementById('runFinalFixCompare')?.addEventListener('click', calculateFinalFixComparison);
             calculateFinalFixComparison();
+            doc.getElementById('finalFixShell')?.classList.remove('hidden');
         }
 
         setupFinalFixTool();
