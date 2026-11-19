@@ -52,6 +52,7 @@ from pipeline.audit import (
 from pipeline.prediction_sanity import print_report as _sanity_report
 from pipeline.prospective_holdout import freeze_phase_archive
 from pipeline.forecast_archive import build_accuracy_prelock_index
+from pipeline.form_blend import apply_form_blend
 from config.fantasy_prices import (
     current_price_mismatches,
     load_fantasy_price_data,
@@ -990,6 +991,11 @@ def main():
         # Tag the payload with phase + reconstruction info
         predictions["phase"] = phase
         predictions["exported_at"] = datetime.now(timezone.utc).isoformat()
+        # Recency-form blend (pipeline/form_blend.py). Runs before any file is
+        # written so the live file, phase archives, audit snapshot and V13 all
+        # carry the same published numbers. Pre-FP and post-FP only.
+        form_blend = apply_form_blend(predictions, round_num, phase)
+        print(f"  Form blend: {form_blend}")
         metadata = load_prediction_metadata(round_num) or {}
         # Re-exporting actuals must not make an old forecast look newly simulated.
         if metadata.get("round") == round_num and metadata.get("generated_at"):
