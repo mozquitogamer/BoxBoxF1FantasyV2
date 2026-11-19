@@ -1,0 +1,322 @@
+"""
+BoxBoxF1Fantasy -Automated Weekend Pipeline Runner
+
+Detects the current race weekend and runs the appropriate pipeline phase.
+
+Phases:
+  pre_fp     -Prepare for the weekend: download historical data, train models
+  post_fp    -After free practice: build laps, extract features, run predictions
+  post_quali -After qualifying: re-run predictions with quali data
+  post_race  -After the race: download results, compute actuals, analyze
+
+Usage:
+    python pipeline/run_weekend.py --phase post_fp
+    python pipeline/run_weekend.py --phase post_race --round 3
+    python pipeline/run_weekend.py --phase post_fp --dry-run
+"""
+
+import argparse
+import json
+import subprocess
+import sys
+import time
+from datetime import datetime, timedelta
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PIPELINE_DIR = PROJECT_ROOT / "pipeline"
+
+sys.path.insert(0, str(PROJECT_ROOT))
+from config.settings import CURRENT_SEASON, CANCELLED_ROUNDS_2026, SEED_DIR
+
+
+def detect_current_round():
+    """Auto-detect the current/next race round based on today's date."""
+    with open(SEED_DIR / "races.json") as f:
+        races = json.load(f)["races"]
+
+    today = datetime.now().date()
+
+    # Find the current or next race
+    for race in races:
+        if race.get("cancelled"):
+            continue
+        race_date = datetime.strptime(race["date"], "%Y-%m-%d").date()
+        # Race weekend window: 4 days before race to 1 day after
+        if today <= race_date + timedelta(days=1):
+            return race["round"], race["name"]
+
+    # If all races have passed, return the last one
+    active = [r for r in races if not r.get("cancelled")]
+    if active:
+        return active[-1]["round"], active[-1]["name"]
+    return None, None
+
+
+def run_step(script_name, args_list, step_num, total, dry_run=False, non_fatal=False):
+    """Run a pipeline script as subprocess.
+
+    Return whether the step succeeded. The caller decides whether a failure
+    should stop the pipeline; non_fatal only controls the displayed severity.
+    """
+    script_path = PIPELINE_DIR / script_name
+    if not script_path.exists():
+        level = "WARN" if non_fatal else "FAIL"
+        print(f"  [{level}] Script not found: {script_path}")
+        return False
+
+    cmd = [sys.executable, str(script_path)] + args_list
+    cmd_str = " ".join(cmd)
+
+    tag = " (optional)" if non_fatal else ""
+    print(f"\n  [{step_num}/{total}] {script_name}{tag} {' '.join(args_list)}")
+
+    if dry_run:
+        print(f"         -> {cmd_str}")
+        return True
+
+    start = time.time()
+    try:
+        result = subprocess.run(cmd, cwd=str(PROJECT_ROOT), check=False)
+        elapsed = time.time() - start
+        if result.returncode == 0:
+            print(f"         [OK] Done ({elapsed:.1f}s)")
+            return True
+        else:
+            level = "WARN" if non_fatal else "FAIL"
+            print(f"         [{level}] Failed (exit code {result.returncode}, {elapsed:.1f}s)")
+            return False
+    except Exception as e:
+        level = "WARN" if non_fatal else "FAIL"
+        print(f"         [{level}] Error: {e}")
+        return False
+
+
+# Shared steps keep the prediction phases aligned.
+CURRENT_DOWNLOAD = ("01_download_data.py", ["--mode", "current", "--round", "{round}"])
+PREDICTION_STEPS = [
+    ("06_run_predictions.py", ["--round", "{round}"]),
+    ("07_calculate_fantasy.py", ["--round", "{round}"]),
+    ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),
+]
+FP_PREDICTION_STEPS = [
+    CURRENT_DOWNLOAD,
+    ("02_build_laps.py", ["--round", "{round}"]),
+    ("03_extract_features.py", ["--round", "{round}"]),
+    *PREDICTION_STEPS,
+    ("10_fp_analysis.py", ["--round", "{round}"]),
+]
+HORIZON_STEP = ("predict_horizon.py", ["--current-round", "{round}", "--horizon", "5"], {"non_fatal": True})
+SEO_STEP = ("14_build_seo_pages.py", [], {"non_fatal": True})
+
+
+# Phase definitions
+PHASES = {
+    "pre_fp": {
+        "description": "Prepare for race weekend - download historical data and train models",
+        "steps": [
+            ("01_download_data.py", ["--mode", "historical", "--start-year", "2020", "--end-year", "2025"]),
+            ("03a_normalize_jolpica.py", ["--all"]),
+            ("03b_build_jolpica_features.py", ["--all"]),
+            ("04_build_model_inputs.py", ["--exclude-after", "{year}:{round}"]),
+            ("05_train_models.py", []),
+        ],
+    },
+    "pre_fp_predict": {
+        "description": "Pre-FP predictions for upcoming round using priors only (no FP telemetry)",
+        "steps": [
+            CURRENT_DOWNLOAD,
+            ("03a_normalize_jolpica.py", ["--all"]),
+            ("03b_build_jolpica_features.py", ["--all"]),
+            *PREDICTION_STEPS,
+            ("08_export_website_json.py", ["--round", "{round}", "--phase", "pre_fp"]),
+            # P9: refresh ML projections for the next 5 rounds so the
+            # multi-week planner sees fresh future-round data alongside the
+            # updated current-round predictions. Non-fatal if it fails — the
+            # planner falls back to the affinity heuristic.
+            HORIZON_STEP,
+            # Freeze the Beat V13 early-thoughts decision from the freshly
+            # exported pre-FP archive. The publisher rebuilds the public live
+            # state first. Keep this non-fatal so a page-only issue cannot stop
+            # the core prediction/export weekend flow.
+            ("publish_v13_decision.py", ["--round", "{round}", "--phase", "pre_fp", "--refresh-live"], {"non_fatal": True}),
+            # SEO: regenerate the static /picks/ race landing pages from the
+            # freshly exported JSON. Non-fatal — a failure won't abort the weekend.
+            SEO_STEP,
+        ],
+    },
+    "post_fp": {
+        "description": "After free practice - generate predictions from FP data",
+        "steps": [
+            *FP_PREDICTION_STEPS,
+            ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_fp"]),
+            HORIZON_STEP,
+            ("publish_v13_decision.py", ["--round", "{round}", "--phase", "post_fp", "--refresh-live"], {"non_fatal": True}),
+            SEO_STEP,
+        ],
+    },
+    "post_quali": {
+        "description": "After qualifying - re-run predictions with updated data",
+        "steps": [
+            *FP_PREDICTION_STEPS,
+            ("08_export_website_json.py", ["--round", "{round}", "--phase", "post_quali"]),
+            HORIZON_STEP,
+            SEO_STEP,
+        ],
+    },
+    "post_race": {
+        "description": "After the race - download results, compute actuals, analyze accuracy",
+        "steps": [
+            ("01_download_data.py", ["--mode", "current", "--round", "{round}"]),
+            ("sync_post_race_official.py", ["--round", "{round}"]),
+            # Persist the completed session's weather before the next retrain.
+            ("03c_extract_session_weather.py", ["--year", "{year}", "--round", "{round}"], {"non_fatal": True}),
+            ("09_post_race_analysis.py", ["--round", "{round}"]),
+            ("11_race_deep_dive.py", ["--round", "{round}"], {"non_fatal": True}),
+            # Keep the FastF1 detector as a diagnostic/fallback first. OpenF1 then
+            # backs it up and writes the canonical file consumed by actual scoring.
+            # Reversing these two steps silently overwrites OpenF1 overtakes and
+            # removes its pit-stop block.
+            ("12_count_overtakes.py", ["--round", "{round}"], {"non_fatal": True}),
+            ("13_fetch_openf1_overtakes.py", ["--year", str(CURRENT_SEASON), "--round", "{round}"], {"non_fatal": True}),
+            # Format pit-stop stationary times before scoring/export when OpenF1
+            # has published them. This formatter is cache-only and remains safe
+            # to rerun when stop_duration arrives later.
+            ("13_fetch_pitstop_stationary.py", ["--year", str(CURRENT_SEASON), "--round", "{round}"]),
+            # Score actuals only after the canonical overtake/pit file is final.
+            # This avoids a second run producing different totals from the first.
+            ("11_actual_fantasy_points.py", ["--round", "{round}"]),
+            ("sync_post_race_official.py", ["--round", "{round}", "--reconcile-actuals"]),
+            ("08_export_website_json.py", ["--round", "{round}", "--actuals-only"]),
+            # Official points and prices now exist, so roll V13's live score,
+            # budget and next-round state forward automatically.
+            ("build_v13_manager.py", [], {"non_fatal": True}),
+            SEO_STEP,
+        ],
+    },
+}
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(
+        description="BoxBoxF1Fantasy -Automated Weekend Pipeline Runner",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Phases:
+  pre_fp           Prepare for the weekend (download historical, train models)
+  pre_fp_predict   Pre-FP predictions using priors only (no FP telemetry yet)
+  post_fp          After free practice (build laps, extract features, predict)
+  post_quali       After qualifying (re-run predictions with updated data)
+  post_race        After the race (actuals, analysis, overtakes)
+
+Examples:
+  python pipeline/run_weekend.py --phase pre_fp_predict --round 7
+  python pipeline/run_weekend.py --phase post_fp --round 7
+  python pipeline/run_weekend.py --phase post_race --round 6
+  python pipeline/run_weekend.py --phase post_fp --dry-run
+        """,
+    )
+    parser.add_argument("--phase", required=True, choices=list(PHASES.keys()),
+                        help="Pipeline phase to run")
+    parser.add_argument("--round", type=int, default=None,
+                        help="Round number (auto-detected if not provided)")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Show what would run without executing")
+    args = parser.parse_args(argv)
+
+    phase = PHASES[args.phase]
+
+    # Detect or use provided round
+    round_num = args.round
+    race_name = None
+    if round_num is None:
+        round_num, race_name = detect_current_round()
+        if round_num is None:
+            print("Could not auto-detect current round. Use --round N.")
+            sys.exit(1)
+        print(f"Auto-detected: Round {round_num} - {race_name}")
+    else:
+        # Load race name
+        with open(SEED_DIR / "races.json") as f:
+            races = json.load(f)["races"]
+        match = [r for r in races if r["round"] == round_num]
+        race_name = match[0]["name"] if match else f"Round {round_num}"
+
+    if round_num in CANCELLED_ROUNDS_2026:
+        print(f"Round {round_num} is cancelled. Aborting.")
+        sys.exit(1)
+
+    # Check models for prediction phases
+    if args.phase in ("post_fp", "post_quali"):
+        models_dir = PROJECT_ROOT / "models" / "trained"
+        required = ["quali_model.json", "race_model.json"]
+        missing = [m for m in required if not (models_dir / m).exists()]
+        if missing:
+            print(f"\n  WARNING: Missing trained models: {', '.join(missing)}")
+            print("  Run: python pipeline/run_weekend.py --phase pre_fp")
+            sys.exit(1)
+
+    # Header
+    mode = "DRY RUN" if args.dry_run else "EXECUTING"
+    print(f"\n{'=' * 60}")
+    print(f"  BoxBoxF1Fantasy Pipeline Runner - {mode}")
+    print(f"  Phase: {args.phase}")
+    print(f"  Round: {round_num} - {race_name}")
+    print(f"  {phase['description']}")
+    print(f"{'=' * 60}")
+
+    steps = phase["steps"]
+    total = len(steps)
+    results = []
+    start_total = time.time()
+
+    for i, step in enumerate(steps, 1):
+        # Steps are (script, args) or (script, args, options_dict)
+        if len(step) == 3:
+            script, step_args, opts = step
+        else:
+            script, step_args = step
+            opts = {}
+        non_fatal = bool(opts.get("non_fatal", False))
+        # Replace {round} and {year} placeholders
+        resolved_args = [a.replace("{round}", str(round_num)).replace("{year}", str(CURRENT_SEASON)) for a in step_args]
+        success = run_step(script, resolved_args, i, total, dry_run=args.dry_run, non_fatal=non_fatal)
+        results.append((script, success, non_fatal))
+        if not success and not non_fatal and not args.dry_run:
+            print(f"\n  Pipeline stopped at step {i}. Fix the issue and re-run.")
+            break
+
+    elapsed = time.time() - start_total
+
+    # Summary
+    print(f"\n{'=' * 60}")
+    print(f"  Summary")
+    print(f"{'=' * 60}")
+    for script, success, non_fatal in results:
+        status = "[OK]" if success else "[WARN]" if non_fatal else "[FAIL]"
+        print(f"  {status} {script}")
+
+    successes = sum(1 for _, success, _ in results if success)
+    optional_warnings = sum(1 for _, success, non_fatal in results if not success and non_fatal)
+    required_failed = any(not success and not non_fatal for _, success, non_fatal in results)
+    print(f"\n  {successes}/{len(results)} steps completed", end="")
+    if optional_warnings:
+        print(f"; {optional_warnings} optional warning(s)", end="")
+    if not args.dry_run:
+        print(f" ({elapsed:.1f}s)")
+    else:
+        print(" (dry run)")
+
+    if not required_failed and not args.dry_run:
+        if args.phase in ("post_fp", "post_quali"):
+            print(f"\n  [OK] Website data updated! Check web/public/data/predictions.json")
+        elif args.phase == "pre_fp_predict":
+            print(f"\n  [OK] Pre-FP predictions ready (priors only). Check web/public/data/predictions.json")
+        elif args.phase == "post_race":
+            print(f"\n  [OK] Post-race analysis complete! Check web/public/data/")
+
+    return 1 if required_failed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

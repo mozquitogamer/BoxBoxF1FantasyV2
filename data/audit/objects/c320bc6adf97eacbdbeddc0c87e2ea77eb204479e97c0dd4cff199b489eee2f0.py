@@ -1,0 +1,246 @@
+"""
+Build articles JSON from Markdown files in /articles folder.
+
+Each .md file should have YAML-like frontmatter:
+---
+title: My Article Title
+date: 2026-03-16
+round: 1
+tags: preview, analysis
+---
+
+Article body in Markdown here...
+
+Run: python pipeline/build_articles.py
+Output: web/public/data/articles.json
+"""
+
+import json
+import re
+from html import escape
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+ARTICLES_DIR = ROOT / "articles"
+OUT_PATH = ROOT / "web" / "public" / "data" / "articles.json"
+LATEST_PATH = ROOT / "web" / "public" / "data" / "latest_article.json"
+
+
+def parse_frontmatter(text: str) -> tuple[dict, str]:
+    """Extract YAML-like frontmatter and body from markdown text."""
+    meta = {}
+    body = text
+    m = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)", text, re.DOTALL)
+    if m:
+        for line in m.group(1).strip().splitlines():
+            if ":" in line:
+                key, val = line.split(":", 1)
+                meta[key.strip()] = val.strip()
+        body = m.group(2)
+    return meta, body
+
+
+def md_to_html(md: str) -> str:
+    """Simple Markdown to HTML converter (no dependencies)."""
+    lines = md.split("\n")
+    html_lines = []
+    in_ul = False
+    in_ol = False
+    in_blockquote = False
+    in_p = False
+
+    def inline(text):
+        protected = []
+
+        def protect(value: str) -> str:
+            token = f"\x00BB{len(protected)}\x00"
+            protected.append((token, value))
+            return token
+
+        # Protect constructs whose labels/URLs may legitimately contain emphasis characters.
+        text = re.sub(
+            r"`(.+?)`",
+            lambda m: protect(f"<code>{escape(m.group(1))}</code>"),
+            text,
+        )
+        text = re.sub(
+            r"!\[([^\]]*)\]\(([^)]+)\)",
+            lambda m: protect(
+                f'<img src="{escape(m.group(2), quote=True)}" alt="{escape(m.group(1), quote=True)}" '
+                'width="1200" height="630" loading="lazy" decoding="async">'
+            ),
+            text,
+        )
+        text = re.sub(
+            r"\[([^\]]+)\]\(([^)]+)\)",
+            lambda m: protect(
+                f'<a href="{escape(m.group(2), quote=True)}">{escape(m.group(1))}</a>'
+            ),
+            text,
+        )
+        # Bold
+        text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+        text = re.sub(r"(?<!\w)__(.+?)__(?!\w)", r"<strong>\1</strong>", text)
+        # Italic
+        text = re.sub(r"\*(.+?)\*", r"<em>\1</em>", text)
+        text = re.sub(r"(?<!\w)_(.+?)_(?!\w)", r"<em>\1</em>", text)
+        for token, value in protected:
+            text = text.replace(token, value)
+        return text
+
+    def close_lists():
+        nonlocal in_ul, in_ol
+        result = []
+        if in_ul:
+            result.append("</ul>")
+            in_ul = False
+        if in_ol:
+            result.append("</ol>")
+            in_ol = False
+        return result
+
+    def close_p():
+        nonlocal in_p
+        if in_p:
+            in_p = False
+            return ["</p>"]
+        return []
+
+    for line in lines:
+        stripped = line.strip()
+
+        # Empty line
+        if not stripped:
+            html_lines.extend(close_p())
+            html_lines.extend(close_lists())
+            if in_blockquote:
+                html_lines.append("</blockquote>")
+                in_blockquote = False
+            continue
+
+        # Headers
+        hm = re.match(r"^(#{1,6})\s+(.+)$", stripped)
+        if hm:
+            html_lines.extend(close_p())
+            html_lines.extend(close_lists())
+            level = len(hm.group(1))
+            html_lines.append(f"<h{level}>{inline(hm.group(2))}</h{level}>")
+            continue
+
+        # Blockquote
+        if stripped.startswith("> "):
+            html_lines.extend(close_p())
+            html_lines.extend(close_lists())
+            if not in_blockquote:
+                html_lines.append("<blockquote>")
+                in_blockquote = True
+            html_lines.append(f"<p>{inline(stripped[2:])}</p>")
+            continue
+
+        # Unordered list
+        um = re.match(r"^[-*+]\s+(.+)$", stripped)
+        if um:
+            html_lines.extend(close_p())
+            if not in_ul:
+                html_lines.extend(close_lists())
+                html_lines.append("<ul>")
+                in_ul = True
+            html_lines.append(f"<li>{inline(um.group(1))}</li>")
+            continue
+
+        # Ordered list
+        om = re.match(r"^\d+\.\s+(.+)$", stripped)
+        if om:
+            html_lines.extend(close_p())
+            if not in_ol:
+                html_lines.extend(close_lists())
+                html_lines.append("<ol>")
+                in_ol = True
+            html_lines.append(f"<li>{inline(om.group(1))}</li>")
+            continue
+
+        # Horizontal rule
+        if re.match(r"^[-*_]{3,}$", stripped):
+            html_lines.extend(close_p())
+            html_lines.extend(close_lists())
+            html_lines.append("<hr>")
+            continue
+
+        # Regular paragraph
+        if not in_p:
+            html_lines.append("<p>")
+            in_p = True
+            html_lines.append(inline(stripped))
+        else:
+            html_lines.append(" " + inline(stripped))
+
+    # Close any open tags
+    html_lines.extend(close_p())
+    html_lines.extend(close_lists())
+    if in_blockquote:
+        html_lines.append("</blockquote>")
+
+    return "\n".join(html_lines)
+
+
+def build():
+    if not ARTICLES_DIR.exists():
+        ARTICLES_DIR.mkdir(parents=True)
+
+    existing_articles = []
+    if OUT_PATH.exists():
+        try:
+            existing_articles = json.loads(OUT_PATH.read_text(encoding="utf-8")).get("articles", [])
+        except (json.JSONDecodeError, OSError):
+            existing_articles = []
+
+    articles = []
+    for md_file in sorted(ARTICLES_DIR.glob("*.md")):
+        text = md_file.read_text(encoding="utf-8")
+        meta, body = parse_frontmatter(text)
+
+        tags = [t.strip() for t in meta.get("tags", "").split(",") if t.strip()]
+        sources = [source.strip() for source in meta.get("sources", "").split(",") if source.strip()]
+        image = meta.get("image", "").strip()
+        image_alt = meta.get("image_alt", "").strip()
+        round_num = None
+        if "round" in meta:
+            try:
+                round_num = int(meta["round"])
+            except ValueError:
+                pass
+
+        article = {
+            "slug": md_file.stem,
+            "title": meta.get("title", md_file.stem.replace("-", " ").replace("_", " ").title()),
+            "date": meta.get("date", ""),
+            "round": round_num,
+            "tags": tags,
+            "content_html": md_to_html(body.strip()),
+        }
+        if meta.get("seo_title", "").strip():
+            article["seo_title"] = meta["seo_title"].strip()
+        if sources:
+            article["sources"] = sources
+        if image:
+            article["image"] = image
+            article["image_alt"] = image_alt or article["title"]
+        articles.append(article)
+
+    generated_slugs = {article["slug"] for article in articles}
+    articles.extend(
+        article for article in existing_articles
+        if article.get("slug") not in generated_slugs
+    )
+    articles.sort(key=lambda article: article.get("date", ""), reverse=True)
+
+    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OUT_PATH.write_text(json.dumps({"articles": articles}, indent=2, ensure_ascii=False), encoding="utf-8")
+    latest = ({key: articles[0].get(key) for key in ("slug", "title", "date", "round")}
+              if articles else {})
+    LATEST_PATH.write_text(json.dumps(latest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"Built {len(articles)} article(s) -> {OUT_PATH}")
+
+
+if __name__ == "__main__":
+    build()

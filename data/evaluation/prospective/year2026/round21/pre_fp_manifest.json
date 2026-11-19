@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "season": 2026,
+  "round": 21,
+  "phase": "pre_fp",
+  "frozen_at": "2026-10-26T05:22:43.142862+00:00",
+  "archive_source": "web/public/data/predictions_round21_pre_fp.json",
+  "archive_sha256": "1087e27f65c3d2df7081814f2d3156611c72812a80930407c1f21d92aa4e85fe",
+  "archive_exported_at": "2026-10-26T05:22:43.113604+00:00",
+  "archive_generated_at": "2026-10-26T05:22:43.102356+00:00",
+  "reconstructed": false,
+  "model_identity": {
+    "quali_model_sha256_16": "e0e6f8541f58a521",
+    "race_model_sha256_16": "659cc4761aa72224",
+    "race_model_used": "race_model_fp.json",
+    "race_model_algorithm": "xgboost"
+  },
+  "weather_snapshot": {
+    "snapshot_id": "2026-10-26T05-22-01.814315Z",
+    "retrieved_at": "2026-10-26T05:22:01.814315+00:00",
+    "archive_path": "data/forecasts/weather/year2026/round21/2026-10-26T05-22-01.814315Z_open_meteo.json"
+  }
+}
