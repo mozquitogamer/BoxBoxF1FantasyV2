@@ -90,5 +90,24 @@
       "back_of_grid": true,
       "back_of_grid_order": 3
     }
+  },
+  "23": {
+    "_note": "Las Vegas GP, 2026-11-20. FIA stewards' decisions 16–20 confirm Piastri (ICE), Antonelli (ICE), Sainz (turbocharger), Stroll (energy store and control electronics), and Bearman (ICE, turbocharger, exhaust, and MGU-K). Bearman's 35-place penalty puts him at the back under Article B2.5.4b.iv. Source: https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2026-2072/event/Las%20Vegas%20Grand%20Prix",
+    "PIA": {
+      "places": 10
+    },
+    "ANT": {
+      "places": 5
+    },
+    "SAI": {
+      "places": 10
+    },
+    "STR": {
+      "places": 10
+    },
+    "BEA": {
+      "places": 35,
+      "back_of_grid": true
+    }
   }
 }

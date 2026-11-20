@@ -104,7 +104,32 @@ def test_round22_published_back_of_grid_order_is_fixed():
         assert grid[QUALIFYING_ORDER.index("PER")] == 22
 
 
-@pytest.mark.parametrize("round_num", [20, 22])
+def test_round23_grid_resolves_tail_drops_in_temporary_position_order():
+    rules = load_grid_penalties(23)
+    assert rules == {
+        "PIA": {"places": 10},
+        "ANT": {"places": 5},
+        "SAI": {"places": 10},
+        "STR": {"places": 10},
+        "BEA": {"places": 35, "back_of_grid": True},
+    }
+    # Reverse the input rows to distinguish qualifying order from input order.
+    drivers = QUALIFYING_ORDER[::-1]
+    positions = np.arange(22, 0, -1)
+    grid = apply_grid_penalties(positions, drivers, rules)
+    by_driver = dict(zip(drivers, grid))
+    assert sorted(grid.tolist()) == list(range(1, 23))
+    assert [by_driver[driver] for driver in ("ANT", "PIA", "SAI", "STR", "BEA")] == [6, 18, 20, 21, 22]
+
+
+def test_equal_temporary_positions_give_the_lower_qualifier_the_penalty_slot():
+    drivers = ["A", "B", "C", "D", "E"]
+    positions = [3, 1, 2, 4, 5]
+    grid = apply_grid_penalties(positions, drivers, {"A": {"places": 1}, "B": {"places": 3}})
+    assert grid.tolist() == [4, 3, 1, 2, 5]
+
+
+@pytest.mark.parametrize("round_num", [20, 22, 23])
 def test_mc_scores_qualifying_separately_and_samples_overtakes_from_penalised_grid(monkeypatch, round_num):
     mc = importlib.import_module("pipeline.08_monte_carlo_fantasy")
     rules = load_grid_penalties(round_num)
@@ -143,9 +168,11 @@ def test_mc_scores_qualifying_separately_and_samples_overtakes_from_penalised_gr
         assert np.array_equal(grid, apply_grid_penalties(qualifying, QUALIFYING_ORDER, rules))
         if round_num == 20:
             assert grid[QUALIFYING_ORDER.index("BOR")] == 22
-        else:
+        elif round_num == 22:
             assert grid[QUALIFYING_ORDER.index("VER")] == 21
             assert grid[QUALIFYING_ORDER.index("PER")] == 22
+        else:
+            assert grid[QUALIFYING_ORDER.index("BEA")] == 22
         assert sorted(grid.tolist()) == positions.tolist()
         assert quali_points.tolist() == [fantasy.calc_qualifying_points_driver(int(position)) for position in qualifying]
     assert fantasy.estimate_overtakes(22, 11) > fantasy.estimate_overtakes(13, 11)

@@ -14,14 +14,11 @@ def apply_grid_penalties(
 ) -> np.ndarray:
     """Return a unique starting grid after applying per-driver penalties.
 
-    ``places`` moves a driver down from their supplied qualifying position.
-    ``back_of_grid`` reserves the final available slot. Penalized slots are
-    ordered by qualifying unless ``back_of_grid_order`` explicitly fixes their
-    relative order (lower first). Penalized slots are
-    reserved first, then all other drivers fill the gaps in qualifying order.
-    This mirrors the practical effect of multiple penalties: a +10 driver whose
-    target is already occupied by a back-of-grid driver takes the nearest open
-    slot ahead (for example STR P21 while HAD is fixed P22).
+    Numeric drops use temporary positions per FIA Article B2.5.4b. The
+    lower qualifier keeps the slot on a tie. Unpenalized drivers fill the
+    gaps in qualifying order, then empty slots are closed up.
+    ``back_of_grid`` drivers go behind that group in qualifying order unless
+    ``back_of_grid_order`` explicitly sets their relative order (lower first).
     """
     if len(qualifying_positions) != len(driver_abbrevs):
         raise ValueError("qualifying_positions and driver_abbrevs must have equal length")
@@ -43,10 +40,6 @@ def apply_grid_penalties(
     abbrevs = [str(a).upper() for a in driver_abbrevs]
     normalized_rules = {str(k).upper(): v for k, v in penalties.items()}
 
-    slots: list[int | None] = [None] * (n_drivers + 1)
-    placed: set[int] = set()
-
-    # Back-of-grid instructions have first claim on the final slots.
     back_indices = [
         idx for idx in order
         if bool(normalized_rules.get(abbrevs[idx], {}).get("back_of_grid", False))
@@ -58,18 +51,8 @@ def apply_grid_penalties(
         or n_drivers + 1,
         base_position[idx],
     ))
-    # Fill from the last slot upward, preserving the resolved back-row order.
-    for idx in reversed(back_indices):
-        slot = next(pos for pos in range(n_drivers, 0, -1) if slots[pos] is None)
-        slots[slot] = idx
-        placed.add(idx)
-
-    # Process the deepest numeric penalties first. If the requested target is
-    # occupied, use the closest open slot ahead. A driver can legitimately end
-    # up ahead of their unpenalized position when another penalized driver has
-    # already claimed the only slot behind them (for example a sampled STR P22
-    # with HAD fixed at the back).
-    numeric: list[tuple[int, int]] = []
+    placed = set(back_indices)
+    numeric: list[tuple[int, int, int]] = []
     for idx in order:
         if idx in placed:
             continue
@@ -79,29 +62,23 @@ def apply_grid_penalties(
         except (TypeError, ValueError):
             places = 0
         if places:
-            desired = min(n_drivers, base_position[idx] + places)
-            numeric.append((desired, idx))
+            rank = base_position[idx]
+            numeric.append((rank + places, rank, idx))
+            placed.add(idx)
 
-    for desired, idx in sorted(numeric, reverse=True):
-        candidates = [pos for pos in range(desired, 0, -1) if slots[pos] is None]
-        if not candidates:
-            candidates = [pos for pos in range(desired + 1, n_drivers + 1) if slots[pos] is None]
-        if not candidates:
-            raise ValueError(f"No grid slot available for {abbrevs[idx]}")
-        slots[candidates[0]] = idx
-        placed.add(idx)
+    slots: dict[int, int] = {}
+    for slot, _, idx in sorted(numeric, reverse=True):
+        while slot in slots:
+            slot -= 1
+        slots[slot] = idx
 
-    # Everyone else advances into the unreserved slots without changing their
-    # relative qualifying order.
-    open_slots = [pos for pos in range(1, n_drivers + 1) if slots[pos] is None]
+    open_slots = (pos for pos in range(1, n_drivers + 1) if pos not in slots)
     unplaced = [idx for idx in order if idx not in placed]
     for slot, idx in zip(open_slots, unplaced):
         slots[slot] = idx
 
+    grid_order = [idx for _, idx in sorted(slots.items())] + back_indices
     output = np.empty(n_drivers, dtype=int)
-    for slot in range(1, n_drivers + 1):
-        idx = slots[slot]
-        if idx is None:
-            raise ValueError("Grid construction left an empty slot")
+    for slot, idx in enumerate(grid_order, start=1):
         output[idx] = slot
     return output
