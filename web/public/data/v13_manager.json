@@ -42,21 +42,30 @@
     },
     "next_round": 23,
     "early_thoughts": {
-      "schema_version": 1,
-      "manager": "v13",
-      "round": 23,
-      "race": "Las Vegas Grand Prix",
-      "phase": "pre_fp",
-      "status": "corrected_provisional",
-      "published_at": "2026-11-20T06:24:23.645580+00:00",
-      "source_generated_at": "2026-11-20T06:24:06.442959+00:00",
-      "selection_context_sha256": "90a8803a672585a0f82ac2a0f04b96f0326b62108b6d7669806aa9fece0434f3",
-      "lock_deadline": "2026-11-21T04:00:00Z",
       "archive": "web/public/data/predictions_round23_pre_fp_refresh_c2d11e2425038690.json",
       "archive_sha256": "c2d11e2425038690bcc2d94224e0569fcc7c3b8225066d7261bdb8ee74df30e8",
-      "previous_decision": "data/v13/decisions/round23_pre_fp_revision3.json",
-      "previous_decision_sha256": "d48bb05959b9e7e8b35a3bf2002dd3fce5baf2d3e38fae6cc0b1eafb6bb6cdcf",
-      "price_snapshot_after_round": 22,
+      "captain": "VER",
+      "changes": {
+        "constructors_in": [],
+        "constructors_out": [],
+        "drivers_in": [
+          "LAW"
+        ],
+        "drivers_out": [
+          "CAM"
+        ]
+      },
+      "chip": null,
+      "chip_decision": {
+        "reason": "Only post-FP finals can play 3x.",
+        "result": "not_evaluated"
+      },
+      "constructors": [
+        "mercedes",
+        "ferrari"
+      ],
+      "correction_reason": "Automatic live forecast refresh: 2026-11-20T06:24:06.442959+00:00 (c2d11e2425038690; state 90a8803a672585a0).",
+      "downside_risk": 40.5,
       "drivers": [
         "VER",
         "LEC",
@@ -64,27 +73,85 @@
         "BOR",
         "PER"
       ],
+      "lock_deadline": "2026-11-21T04:00:00Z",
+      "manager": "v13",
+      "phase": "pre_fp",
+      "points_basis": "net_after_transfers",
+      "policy": {
+        "negative_p5_weight": 0.75,
+        "policy_version": "horizon_budget_value_v2",
+        "price_gain_weight": 3.114,
+        "price_value_method": "horizon curve × price reliability × points realisation",
+        "risk_profile": "medium_tolerance",
+        "strategy": "budget_builder"
+      },
+      "previous_decision": "data/v13/decisions/round23_pre_fp_revision3.json",
+      "previous_decision_sha256": "d48bb05959b9e7e8b35a3bf2002dd3fce5baf2d3e38fae6cc0b1eafb6bb6cdcf",
+      "price_snapshot_after_round": 22,
+      "projected_points": 242.5,
+      "projected_points_gross": 242.5,
+      "projected_price_gain": 2.1,
+      "published_at": "2026-11-20T06:24:23.645580+00:00",
+      "race": "Las Vegas Grand Prix",
+      "revision": 4,
+      "round": 23,
+      "schema_version": 1,
+      "second_boost": null,
+      "selection_context_sha256": "90a8803a672585a0f82ac2a0f04b96f0326b62108b6d7669806aa9fece0434f3",
+      "source_generated_at": "2026-11-20T06:24:06.442959+00:00",
+      "status": "corrected_provisional",
+      "supersedes": "data/v13/decisions/round23_pre_fp_revision3.json",
+      "supersedes_sha256": "d48bb05959b9e7e8b35a3bf2002dd3fce5baf2d3e38fae6cc0b1eafb6bb6cdcf",
+      "team_cost": 138.9,
+      "transfer_penalty": 0,
+      "transfers": 1
+    },
+    "post_fp_final": {
+      "schema_version": 1,
+      "manager": "v13",
+      "round": 23,
+      "race": "Las Vegas Grand Prix",
+      "phase": "post_fp",
+      "status": "frozen_before_lock",
+      "published_at": "2026-11-21T02:15:18.280831+00:00",
+      "source_generated_at": "2026-11-21T02:15:04.758282+00:00",
+      "selection_context_sha256": "0e607e793b5dcc0787a0a71d292e9be00bfbea789ac01b543c3f44221dc7c84f",
+      "lock_deadline": "2026-11-21T04:00:00Z",
+      "archive": "web/public/data/predictions_round23_post_fp.json",
+      "archive_sha256": "7baf8cde63dfaf7fcd57f300b3751fb695236e258ec024820b833840eb77fcdc",
+      "previous_decision": "data/v13/decisions/round23_pre_fp_revision4.json",
+      "previous_decision_sha256": "8969241dda51245b572322c194eb5aa745ffcf5ceb669dfb30a52558854c4ca0",
+      "price_snapshot_after_round": 22,
+      "drivers": [
+        "ANT",
+        "VER",
+        "LIN",
+        "PER",
+        "BOR"
+      ],
       "constructors": [
         "mercedes",
         "ferrari"
       ],
-      "captain": "VER",
+      "captain": "ANT",
       "second_boost": null,
       "chip": null,
-      "projected_points": 242.5,
-      "projected_points_gross": 242.5,
+      "projected_points": 242.4,
+      "projected_points_gross": 242.4,
       "points_basis": "net_after_transfers",
-      "projected_price_gain": 2.1,
-      "downside_risk": 40.5,
-      "team_cost": 138.9,
-      "transfers": 1,
+      "projected_price_gain": 0.9,
+      "downside_risk": 48.9,
+      "team_cost": 139.2,
+      "transfers": 2,
       "transfer_penalty": 0,
       "changes": {
         "drivers_out": [
-          "CAM"
+          "CAM",
+          "LEC"
         ],
         "drivers_in": [
-          "LAW"
+          "ANT",
+          "LIN"
         ],
         "constructors_out": [],
         "constructors_in": []
@@ -100,15 +167,10 @@
         "price_gain_weight": 3.114,
         "negative_p5_weight": 0.75,
         "price_value_method": "horizon curve × price reliability × points realisation"
-      },
-      "revision": 4,
-      "correction_reason": "Automatic live forecast refresh: 2026-11-20T06:24:06.442959+00:00 (c2d11e2425038690; state 90a8803a672585a0).",
-      "supersedes": "data/v13/decisions/round23_pre_fp_revision3.json",
-      "supersedes_sha256": "d48bb05959b9e7e8b35a3bf2002dd3fce5baf2d3e38fae6cc0b1eafb6bb6cdcf"
-    },
-    "post_fp_final": null
+      }
+    }
   },
-  "generated_at": "2026-11-20T08:24:23.665581+02:00",
+  "generated_at": "2026-11-21T04:15:18.328833+02:00",
   "labels": {
     "constructors": {
       "alpine": "Alpine",
