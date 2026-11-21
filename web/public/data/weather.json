@@ -33,9 +33,9 @@
       "date": "2026-11-20",
       "temp_max": 15.2,
       "temp_min": 6.8,
-      "precip_probability_max": 13,
+      "precip_probability_max": 6,
       "precip_sum_mm": 0.0,
-      "wind_max_kmh": 24.0,
+      "wind_max_kmh": 22.2,
       "weather_description": "Overcast",
       "weather_category": "overcast",
       "weather_icon": "\u2601\ufe0f",
@@ -45,10 +45,10 @@
     {
       "date": "2026-11-21",
       "temp_max": 15.0,
-      "temp_min": 3.1,
+      "temp_min": 3.5,
       "precip_probability_max": 0,
       "precip_sum_mm": 0.0,
-      "wind_max_kmh": 12.0,
+      "wind_max_kmh": 15.2,
       "weather_description": "Overcast",
       "weather_category": "overcast",
       "weather_icon": "\u2601\ufe0f",
@@ -228,8 +228,8 @@
       "date": "2026-11-20",
       "rain_probability": 3,
       "rain_risk": "NONE",
-      "avg_temp": 14.2,
-      "avg_wind": 6.5,
+      "avg_temp": 14.4,
+      "avg_wind": 6.8,
       "total_precip_mm": 0.0,
       "weather_description": "Clear sky",
       "weather_category": "clear",
@@ -267,13 +267,13 @@
         },
         {
           "hour": 17,
-          "temp": 12.4,
-          "humidity": 32,
+          "temp": 13.0,
+          "humidity": 31,
           "precip_prob": 3,
           "precip_mm": 0.0,
-          "windspeed": 8.5,
+          "windspeed": 9.5,
           "windgusts": 13.7,
-          "weather_code": 2
+          "weather_code": 1
         }
       ]
     },
@@ -284,7 +284,7 @@
       "rain_probability": 0,
       "rain_risk": "NONE",
       "avg_temp": 14.6,
-      "avg_wind": 5.5,
+      "avg_wind": 5.2,
       "total_precip_mm": 0.0,
       "weather_description": "Clear sky",
       "weather_category": "clear",
@@ -292,12 +292,12 @@
       "hourly": [
         {
           "hour": 13,
-          "temp": 14.8,
+          "temp": 14.7,
           "humidity": 19,
           "precip_prob": 0,
           "precip_mm": 0.0,
-          "windspeed": 5.9,
-          "windgusts": 5.8,
+          "windspeed": 4.3,
+          "windgusts": 4.3,
           "weather_code": 0
         },
         {
@@ -333,10 +333,10 @@
       ]
     }
   ],
-  "last_updated": "2026-11-21T02:13:57Z",
-  "next_update": "2026-11-21T08:13:57Z",
+  "last_updated": "2026-11-21T04:52:15Z",
+  "next_update": "2026-11-21T10:52:15Z",
   "data_source": "Open-Meteo (open-meteo.com)",
-  "forecast_snapshot_id": "2026-11-21T02-13-57.363662Z",
-  "forecast_retrieved_at": "2026-11-21T02:13:57.363662+00:00",
-  "forecast_archive_path": "data/forecasts/weather/year2026/round23/2026-11-21T02-13-57.363662Z_open_meteo.json"
+  "forecast_snapshot_id": "2026-11-21T04-52-15.030455Z",
+  "forecast_retrieved_at": "2026-11-21T04:52:15.030455+00:00",
+  "forecast_archive_path": "data/forecasts/weather/year2026/round23/2026-11-21T04-52-15.030455Z_open_meteo.json"
 }
