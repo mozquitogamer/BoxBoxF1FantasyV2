@@ -1,7 +1,7 @@
 {
   "_comment": "MANUALLY-recorded official F1 Fantasy PIT-STOP points per constructor per round (bracket points + fastest-stop bonus; race-fastest-lap NOT included). Round keys are INTERNAL (cancelled R4/R5 skipped; Miami=R6). Filled through R14 from official Fantasy totals. 0 = scored nothing.",
   "season": 2026,
-  "last_updated": "2026-11-09",
+  "last_updated": "2026-11-22",
   "rounds": {
     "1": {
       "mercedes": 15,
@@ -262,6 +262,19 @@
       "aston_martin": 5,
       "haas": 2,
       "cadillac": 0
+    },
+    "23": {
+      "mclaren": 0,
+      "red_bull": 5,
+      "mercedes": 2,
+      "alpine": 0,
+      "aston_martin": 5,
+      "ferrari": 2,
+      "audi": 5,
+      "haas": 0,
+      "racing_bulls": 10,
+      "williams": 0,
+      "cadillac": 2
     }
   }
 }

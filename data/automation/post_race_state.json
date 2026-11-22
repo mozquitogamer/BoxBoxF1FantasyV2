@@ -30,6 +30,12 @@
       "source_sha256": "1ce759c88f6a0635ecc6ff5a7f16e35d687f0664f26e06b53fad8e8f5988aa2c",
       "completed_at": "2026-11-09T21:01:36.170818+00:00",
       "next_round": 23
+    },
+    "23": {
+      "race": "Las Vegas Grand Prix",
+      "source_sha256": "80f504a0b0a0f479103803d29ead26135f843ecb4a1a65180f5343b4a9602265",
+      "completed_at": "2026-11-22T18:19:39.403199+00:00",
+      "next_round": 24
     }
   }
 }

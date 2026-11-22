@@ -1,71 +1,71 @@
 {
   "season": 2026,
-  "last_updated": "2026-11-09",
-  "price_after_round": 22,
+  "last_updated": "2026-11-22",
+  "price_after_round": 23,
   "currency": "USD_millions",
   "drivers": {
     "RUS": {
-      "current_price": 27.2,
+      "current_price": 27.1,
       "starting_price": 27.4
     },
     "VER": {
-      "current_price": 29.1,
+      "current_price": 29.4,
       "starting_price": 27.7
     },
     "NOR": {
-      "current_price": 26.0,
+      "current_price": 26.3,
       "starting_price": 27.2
     },
     "PIA": {
-      "current_price": 22.7,
+      "current_price": 22.8,
       "starting_price": 25.5
     },
     "ANT": {
-      "current_price": 27.6,
+      "current_price": 27.7,
       "starting_price": 23.2
     },
     "LEC": {
-      "current_price": 25.0,
+      "current_price": 24.9,
       "starting_price": 22.8
     },
     "HAM": {
-      "current_price": 25.1,
+      "current_price": 25.4,
       "starting_price": 22.5
     },
     "HAD": {
-      "current_price": 16.5,
+      "current_price": 16.7,
       "starting_price": 15.1
     },
     "GAS": {
-      "current_price": 8.4,
+      "current_price": 9.0,
       "starting_price": 12.0
     },
     "SAI": {
-      "current_price": 7.8,
+      "current_price": 8.4,
       "starting_price": 12.0
     },
     "ALB": {
-      "current_price": 4.4,
+      "current_price": 3.8,
       "starting_price": 10.5
     },
     "ALO": {
-      "current_price": 4.8,
+      "current_price": 4.2,
       "starting_price": 10.0
     },
     "BEA": {
-      "current_price": 5.0,
+      "current_price": 4.4,
       "starting_price": 7.4
     },
     "LIN": {
-      "current_price": 9.4,
+      "current_price": 8.8,
       "starting_price": 7.0
     },
     "COL": {
-      "current_price": 7.0,
+      "current_price": 7.6,
       "starting_price": 6.2
     },
     "LAW": {
-      "current_price": 11.7,
+      "current_price": 12.3,
       "starting_price": 9.7,
       "model_driver_id": "lawson",
       "constructor_id": "racing_bulls",
@@ -79,15 +79,15 @@
       "starting_price": 7.0
     },
     "BOR": {
-      "current_price": 6.4,
+      "current_price": 7.0,
       "starting_price": 6.5
     },
     "PER": {
-      "current_price": 3.6,
+      "current_price": 3.0,
       "starting_price": 7.0
     },
     "HUL": {
-      "current_price": 7.2,
+      "current_price": 7.0,
       "starting_price": 6.0
     },
     "BOT": {
@@ -95,7 +95,7 @@
       "starting_price": 5.0
     },
     "CAM": {
-      "current_price": 5.4,
+      "current_price": 4.8,
       "starting_price": 6.0,
       "model_driver_id": "camara",
       "constructor_id": "haas",
@@ -113,39 +113,39 @@
       "starting_price": 29.3
     },
     "mclaren": {
-      "current_price": 33.3,
+      "current_price": 33.6,
       "starting_price": 28.9
     },
     "red_bull": {
-      "current_price": 33.6,
+      "current_price": 33.9,
       "starting_price": 28.2
     },
     "ferrari": {
-      "current_price": 29.1,
+      "current_price": 29.4,
       "starting_price": 23.3
     },
     "alpine": {
-      "current_price": 17.6,
+      "current_price": 18.2,
       "starting_price": 12.5
     },
     "williams": {
-      "current_price": 13.2,
+      "current_price": 13.8,
       "starting_price": 12.0
     },
     "aston_martin": {
-      "current_price": 3.9,
+      "current_price": 3.3,
       "starting_price": 9.5
     },
     "haas": {
-      "current_price": 12.2,
+      "current_price": 12.0,
       "starting_price": 8.0
     },
     "racing_bulls": {
-      "current_price": 18.3,
+      "current_price": 18.9,
       "starting_price": 6.3
     },
     "audi": {
-      "current_price": 12.2,
+      "current_price": 12.8,
       "starting_price": 5.5
     },
     "cadillac": {
@@ -998,6 +998,45 @@
         "audi": 12.2,
         "haas": 12.2,
         "aston_martin": 3.9,
+        "cadillac": 3.0
+      }
+    },
+    "23": {
+      "drivers": {
+        "RUS": 27.1,
+        "VER": 29.4,
+        "NOR": 26.3,
+        "PIA": 22.8,
+        "ANT": 27.7,
+        "LEC": 24.9,
+        "HAM": 25.4,
+        "HAD": 16.7,
+        "GAS": 9.0,
+        "SAI": 8.4,
+        "ALB": 3.8,
+        "ALO": 4.2,
+        "BEA": 4.4,
+        "LIN": 8.8,
+        "COL": 7.6,
+        "LAW": 12.3,
+        "STR": 3.0,
+        "BOR": 7.0,
+        "PER": 3.0,
+        "HUL": 7.0,
+        "BOT": 3.0,
+        "CAM": 4.8
+      },
+      "constructors": {
+        "mercedes": 34.0,
+        "red_bull": 33.9,
+        "mclaren": 33.6,
+        "ferrari": 29.4,
+        "racing_bulls": 18.9,
+        "alpine": 18.2,
+        "williams": 13.8,
+        "audi": 12.8,
+        "haas": 12.0,
+        "aston_martin": 3.3,
         "cadillac": 3.0
       }
     }
@@ -1966,7 +2005,7 @@
       "note": "Round 23 roster and official purchase prices after Round 22",
       "availability": {
         "from_round": 23,
-        "to_round": null
+        "to_round": 23
       },
       "source": {
         "url": "https://fantasy.formula1.com/feeds/drivers/21_en.json",
@@ -2128,6 +2167,180 @@
         },
         "aston_martin": {
           "current_price": 3.9,
+          "starting_price": 9.5
+        },
+        "cadillac": {
+          "current_price": 3.0,
+          "starting_price": 5.0
+        }
+      }
+    },
+    "24": {
+      "note": "Round 24 roster and official purchase prices after Round 23",
+      "availability": {
+        "from_round": 24,
+        "to_round": null
+      },
+      "source": {
+        "url": "https://fantasy.formula1.com/feeds/drivers/22_en.json",
+        "accessed_at": "2026-11-22"
+      },
+      "inactive_driver_ids": [
+        "OCO",
+        "HIR_HAAS"
+      ],
+      "drivers": {
+        "LAW": {
+          "current_price": 12.3,
+          "starting_price": 9.7,
+          "model_driver_id": "lawson",
+          "constructor_id": "racing_bulls",
+          "availability": {
+            "from_round": 18,
+            "to_round": null
+          }
+        },
+        "RUS": {
+          "current_price": 27.1,
+          "starting_price": 27.4
+        },
+        "VER": {
+          "current_price": 29.4,
+          "starting_price": 27.7
+        },
+        "NOR": {
+          "current_price": 26.3,
+          "starting_price": 27.2
+        },
+        "PIA": {
+          "current_price": 22.8,
+          "starting_price": 25.5
+        },
+        "ANT": {
+          "current_price": 27.7,
+          "starting_price": 23.2
+        },
+        "LEC": {
+          "current_price": 24.9,
+          "starting_price": 22.8
+        },
+        "HAM": {
+          "current_price": 25.4,
+          "starting_price": 22.5
+        },
+        "HAD": {
+          "current_price": 16.7,
+          "starting_price": 15.1
+        },
+        "GAS": {
+          "current_price": 9.0,
+          "starting_price": 12.0
+        },
+        "SAI": {
+          "current_price": 8.4,
+          "starting_price": 12.0
+        },
+        "ALB": {
+          "current_price": 3.8,
+          "starting_price": 10.5
+        },
+        "ALO": {
+          "current_price": 4.2,
+          "starting_price": 10.0
+        },
+        "BEA": {
+          "current_price": 4.4,
+          "starting_price": 7.4
+        },
+        "LIN": {
+          "current_price": 8.8,
+          "starting_price": 7.0
+        },
+        "COL": {
+          "current_price": 7.6,
+          "starting_price": 6.2
+        },
+        "STR": {
+          "current_price": 3.0,
+          "starting_price": 7.0
+        },
+        "BOR": {
+          "current_price": 7.0,
+          "starting_price": 6.5
+        },
+        "PER": {
+          "current_price": 3.0,
+          "starting_price": 7.0
+        },
+        "HUL": {
+          "current_price": 7.0,
+          "starting_price": 6.0
+        },
+        "BOT": {
+          "current_price": 3.0,
+          "starting_price": 5.0
+        },
+        "CAM": {
+          "current_price": 4.8,
+          "starting_price": 6.0,
+          "model_driver_id": "camara",
+          "constructor_id": "haas",
+          "availability": {
+            "from_round": 22,
+            "to_round": 25
+          },
+          "price_provisional": false,
+          "price_source": "Official Fantasy feed 20_en.json, PlayerId 11205, verified 2026-11-06"
+        }
+      },
+      "price_change_assumption": {
+        "round": 24,
+        "driver_ids": [
+          "HAD",
+          "LAW"
+        ],
+        "history_from_round": 17,
+        "note": "Round 24 returning-driver price forecasts use the recorded scoring history from Round 17 onwards. F1 Fantasy has not published its substitution pricing rule."
+      },
+      "constructors": {
+        "mercedes": {
+          "current_price": 34.0,
+          "starting_price": 29.3
+        },
+        "mclaren": {
+          "current_price": 33.6,
+          "starting_price": 28.9
+        },
+        "red_bull": {
+          "current_price": 33.9,
+          "starting_price": 28.2
+        },
+        "ferrari": {
+          "current_price": 29.4,
+          "starting_price": 23.3
+        },
+        "alpine": {
+          "current_price": 18.2,
+          "starting_price": 12.5
+        },
+        "racing_bulls": {
+          "current_price": 18.9,
+          "starting_price": 6.3
+        },
+        "williams": {
+          "current_price": 13.8,
+          "starting_price": 12.0
+        },
+        "haas": {
+          "current_price": 12.0,
+          "starting_price": 8.0
+        },
+        "audi": {
+          "current_price": 12.8,
+          "starting_price": 5.5
+        },
+        "aston_martin": {
+          "current_price": 3.3,
           "starting_price": 9.5
         },
         "cadillac": {
