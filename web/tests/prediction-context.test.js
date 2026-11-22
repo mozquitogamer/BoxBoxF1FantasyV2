@@ -38,8 +38,9 @@ test('passing the Fantasy deadline does not label a pre-race forecast complete',
 test('both tabs and a mismatched weather widget preserve their race identities', () => {
     const { sandbox } = require('../../tests/app_js_harness');
     const elements = new Map();
+    const mockElement = sandbox.document.getElementById;
     sandbox.document.getElementById = id => {
-        if (!elements.has(id)) elements.set(id, { textContent: '', innerHTML: '' });
+        if (!elements.has(id)) elements.set(id, mockElement(id));
         return elements.get(id);
     };
     sandbox.__forecast = forecast;

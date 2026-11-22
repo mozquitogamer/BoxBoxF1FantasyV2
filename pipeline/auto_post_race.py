@@ -18,7 +18,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from config.settings import CURRENT_SEASON, SEED_DIR, WEB_DATA_DIR, PREDICTIONS_DIR, fastf1_round
-from pipeline.sync_post_race_official import fetch_json, feed_url, validated_snapshot, PendingData, write_json
+from pipeline.sync_post_race_official import (
+    fetch_json, feed_url, validate_results, validated_snapshot, PendingData, write_json,
+)
 
 STATE_PATH = ROOT / 'data/automation/post_race_state.json'
 
@@ -27,19 +29,6 @@ def candidate_races(calendar, now):
     cutoff = (now - timedelta(days=7)).date().isoformat()
     return sorted([race for race in calendar if not race.get('cancelled')
                    and cutoff <= race['date'] <= now.date().isoformat()], key=lambda race: race['date'], reverse=True)
-
-
-def validate_results(payload, race):
-    results = payload.get('MRData', {}).get('RaceTable', {}).get('Races', [])
-    if not results:
-        raise PendingData(f"R{race['round']} results are pending")
-    result = results[0]
-    if len(results) != 1 or result.get('date') != race['date'] or str(result.get('round')) != str(fastf1_round(race['round'])):
-        raise ValueError('Results do not match the requested calendar event')
-    rows = result.get('Results', [])
-    if len(rows) != 22 or len({row['Driver']['driverId'] for row in rows}) != 22:
-        raise PendingData('Full race classification is pending')
-    return result
 
 
 def validate_outputs(round_num):

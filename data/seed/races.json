@@ -27,7 +27,7 @@
     {"round": 20, "name": "United States Grand Prix", "circuit": "Austin", "date": "2026-10-25", "sprint": false, "cancelled": false},
     {"round": 21, "name": "Mexican Grand Prix", "circuit": "Mexico City", "date": "2026-11-01", "sprint": false, "cancelled": false},
     {"round": 22, "name": "Brazilian Grand Prix", "circuit": "São Paulo", "date": "2026-11-08", "sprint": false, "cancelled": false},
-    {"round": 23, "name": "Las Vegas Grand Prix", "circuit": "Las Vegas", "date": "2026-11-21", "sprint": false, "cancelled": false},
+    {"round": 23, "name": "Las Vegas Grand Prix", "circuit": "Las Vegas", "date": "2026-11-21", "results_date_utc": "2026-11-22", "sprint": false, "cancelled": false},
     {"round": 24, "name": "Qatar Grand Prix", "circuit": "Lusail", "date": "2026-11-29", "sprint": false, "cancelled": false},
     {"round": 25, "name": "Abu Dhabi Grand Prix", "circuit": "Yas Marina", "date": "2026-12-06", "sprint": false, "cancelled": false}
   ]

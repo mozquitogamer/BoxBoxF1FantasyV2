@@ -32,6 +32,21 @@ class PendingData(ValueError):
     """Results, complete official scoring, or the next price feed is pending."""
 
 
+def validate_results(payload, race):
+    results = payload.get('MRData', {}).get('RaceTable', {}).get('Races', [])
+    if not results:
+        raise PendingData(f"R{race['round']} results are pending")
+    result = results[0]
+    expected_date = race.get('results_date_utc', race['date'])
+    if (len(results) != 1 or result.get('date') != expected_date
+            or str(result.get('round')) != str(fastf1_round(race['round']))):
+        raise ValueError('Results do not match the requested calendar event')
+    rows = result.get('Results', [])
+    if len(rows) != 22 or len({row['Driver']['driverId'] for row in rows}) != 22:
+        raise PendingData('Full race classification is pending')
+    return result
+
+
 def fetch_json(url):
     request = urllib.request.Request(url, headers={'User-Agent': 'BoxBoxF1Fantasy/1.0'})
     for attempt in range(5):
@@ -324,9 +339,7 @@ def main():
     calendar = json.loads((SEED_DIR / 'races.json').read_text(encoding='utf-8'))['races']
     race = next(r for r in calendar if r['round'] == args.round and not r.get('cancelled'))
     results_path = ROOT / 'data/raw/jolpica' / f'year{CURRENT_SEASON}' / f'round{args.round}' / 'results.json'
-    results = json.loads(results_path.read_text(encoding='utf-8'))['MRData']['RaceTable']['Races']
-    if len(results) != 1 or results[0].get('date') != race['date'] or len(results[0].get('Results', [])) != 22:
-        raise PendingData('Complete race results for the requested calendar event are pending')
+    validate_results(json.loads(results_path.read_text(encoding='utf-8')), race)
     next_race = next((r for r in calendar if r['round'] > args.round and not r.get('cancelled')), None)
     previous = [r for r in calendar if r['round'] < args.round and not r.get('cancelled')]
     snapshot = validated_snapshot(args.round, race, fetch_json(feed_url(args.round)),

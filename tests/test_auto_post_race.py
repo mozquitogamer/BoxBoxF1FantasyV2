@@ -31,6 +31,13 @@ def test_results_must_match_calendar_and_have_full_classification():
     bad['MRData']['RaceTable']['Races'][0]['date'] = '2026-09-26'
     with pytest.raises(ValueError, match='calendar'):
         automatic.validate_results(bad, race)
+    utc_race = {**race, 'round': 23, 'date': '2026-11-21', 'results_date_utc': '2026-11-22'}
+    utc_payload = copy.deepcopy(payload)
+    utc_payload['MRData']['RaceTable']['Races'][0].update(date='2026-11-22', round='21')
+    assert automatic.validate_results(utc_payload, utc_race)['date'] == '2026-11-22'
+    utc_payload['MRData']['RaceTable']['Races'][0]['round'] = '20'
+    with pytest.raises(ValueError, match='calendar'):
+        automatic.validate_results(utc_payload, utc_race)
     with pytest.raises(sync.PendingData):
         automatic.validate_results({'MRData': {'RaceTable': {'Races': []}}}, race)
     payload['MRData']['RaceTable']['Races'][0]['Results'].pop()
