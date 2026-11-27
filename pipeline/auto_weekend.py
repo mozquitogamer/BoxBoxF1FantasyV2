@@ -11,18 +11,21 @@ import json
 import os
 import sys
 import urllib.error
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from config.settings import CURRENT_SEASON, SEED_DIR, WEB_DATA_DIR, PREDICTIONS_DIR, FASTF1_RAW_DIR
+from config.settings import CURRENT_SEASON, SEED_DIR, WEB_DATA_DIR, PREDICTIONS_DIR, FASTF1_RAW_DIR, RAW_DIR
 from pipeline import auto_post_race
 from pipeline.sync_post_race_official import PendingData, fetch_json, write_json
 
 STATE_PATH = ROOT / 'data/automation/weekend_state.json'
 SESSION_CODES = {'Practice 1': 'FP1', 'Practice 2': 'FP2', 'Practice 3': 'FP3',
                  'Sprint Qualifying': 'SQ', 'Qualifying': 'Qualifying', 'Race': 'Race'}
+PRACTICE_CODES = ('FP1', 'FP2', 'FP3')
+OPENF1 = 'https://api.openf1.org/v1'
 
 
 def instant(value):
@@ -54,6 +57,7 @@ def event_for(race, session, finish):
     delay = timedelta(hours=24) if code == 'Race' else timedelta(minutes=35)
     return {'key': f'{CURRENT_SEASON}:{race["round"]}:{code}', 'round': race['round'],
             'race': race['name'], 'session': code, 'session_key': session['session_key'], 'phase': phase,
+            'meeting_key': session['meeting_key'],
             'finished_at': finish.isoformat(), 'due_at': (finish + delay).isoformat()}
 
 
@@ -105,7 +109,7 @@ def load_control(session_key):
     # Free OpenF1 access starts after the live-data window. A delayed session
     # can still be in that window when its original scheduled end has passed.
     try:
-        return fetch_json(f'https://api.openf1.org/v1/race_control?session_key={session_key}&category=SessionStatus')
+        return fetch_json(f'{OPENF1}/race_control?session_key={session_key}&category=SessionStatus')
     except urllib.error.HTTPError as exc:
         if exc.code in (401, 403):
             return []
@@ -118,7 +122,12 @@ def plan(now):
                datetime.fromisoformat(race['date']).date() <= now.date() + timedelta(days=4)
                for race in calendar):
         return None
-    sessions = fetch_json(f'https://api.openf1.org/v1/sessions?year={CURRENT_SEASON}')
+    try:
+        sessions = fetch_json(f'{OPENF1}/sessions?year={CURRENT_SEASON}')
+    except urllib.error.HTTPError as exc:
+        if exc.code in (401, 403):
+            raise PendingData('OpenF1 session schedule is temporarily unavailable') from exc
+        raise
     if not isinstance(sessions, list) or not sessions:
         raise PendingData('Session schedule is unavailable')
     return select_due(calendar, sessions, read_json(STATE_PATH, {}),
@@ -151,6 +160,50 @@ def load_script(name):
     return module
 
 
+def expected_practice(event):
+    code = event.get('session')
+    return PRACTICE_CODES[:PRACTICE_CODES.index(code) + 1] if code in PRACTICE_CODES else ()
+
+
+def recover_practice(event, missing):
+    meeting_key = event.get('meeting_key')
+    if meeting_key is None:
+        raise PendingData(f'{", ".join(missing)} telemetry is not available yet')
+    try:
+        sessions = fetch_json(f'{OPENF1}/sessions?meeting_key={meeting_key}')
+        bundle_dir = RAW_DIR / 'openf1' / f'year{CURRENT_SEASON}' / f'round{event["round"]}' / 'practice'
+        write_json(bundle_dir / 'sessions.json', sessions)
+        for code in missing:
+            matches = [row for row in sessions if SESSION_CODES.get(row.get('session_name')) == code
+                       and row.get('meeting_key') == meeting_key and not row.get('is_cancelled')]
+            if len(matches) != 1:
+                raise PendingData(f'{code} session is missing from OpenF1')
+            session = matches[0]
+            key = session['session_key']
+            if code == event['session'] and key != event['session_key']:
+                raise ValueError('OpenF1 practice session does not match the selected event')
+            bundle = {name: fetch_json(f'{OPENF1}/{name}?session_key={key}')
+                      for name in ('race_control', 'session_result', 'laps', 'drivers', 'stints', 'weather')}
+            lap_numbers = defaultdict(set)
+            for lap in bundle['laps']:
+                lap_numbers[lap['driver_number']].add(lap['lap_number'])
+            results = bundle['session_result']
+            if (not confirmed_finish(session, bundle['race_control'])
+                    or len({row['driver_number'] for row in results}) != 22
+                    or any(not isinstance(row.get('number_of_laps'), int)
+                           or len(lap_numbers[row['driver_number']]) < row['number_of_laps']
+                           for row in results)):
+                raise PendingData(f'Complete {code} timing and classification are pending')
+            for name, rows in bundle.items():
+                write_json(bundle_dir / f'{name}_{code.lower()}.json', rows)
+            auto_post_race.run('import_openf1_fp.py', '--round', event['round'],
+                               '--session', code, '--session-key', key, '--bundle', bundle_dir)
+    except urllib.error.HTTPError as exc:
+        if exc.code in (401, 403):
+            raise PendingData('OpenF1 practice timing is temporarily unavailable') from exc
+        raise
+
+
 def require_session(event):
     """A downloader process can succeed while its upstream data is still missing."""
     code = event.get('session')
@@ -160,10 +213,15 @@ def require_session(event):
     from config.settings import FASTF1_CACHE_DIR, fastf1_round
     FASTF1_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     fastf1.Cache.enable_cache(str(FASTF1_CACHE_DIR), force_renew=True)
-    if not load_script('01_download_data.py').download_fastf1_session(
-            CURRENT_SEASON, event['round'], code,
-            FASTF1_RAW_DIR / f'year{CURRENT_SEASON}' / f'round{event["round"]}'):
-        raise PendingData(f'{code} telemetry is not available yet')
+    download = load_script('01_download_data.py').download_fastf1_session
+    output = FASTF1_RAW_DIR / f'year{CURRENT_SEASON}' / f'round{event["round"]}'
+    practice = expected_practice(event)
+    missing = [name for name in (practice or (code,))
+               if not download(CURRENT_SEASON, event['round'], name, output)]
+    if missing:
+        if not practice:
+            raise PendingData(f'{code} telemetry is not available yet')
+        recover_practice(event, missing)
     if code == 'Qualifying':
         session = fastf1.get_session(CURRENT_SEASON, fastf1_round(event['round']), 'Qualifying')
         session.load(laps=False, telemetry=False, weather=False, messages=False)
@@ -182,8 +240,8 @@ def validate_forecast(event, started):
             or len({row['driver_id'] for row in payload['drivers']}) != 22
             or len({row['constructor_id'] for row in payload['constructors']}) != 11):
         raise ValueError('Fresh complete forecast was not generated')
-    if (event.get('session') or '').startswith('FP') and event['session'] not in metadata.get('fp_sessions_included', []):
-        raise PendingData('New practice telemetry has not reached the forecast')
+    if not set(expected_practice(event)).issubset(metadata.get('fp_sessions_included', [])):
+        raise PendingData('Complete practice telemetry has not reached the forecast')
     if event.get('session') == 'SQ' and not metadata.get('sprint_grid_is_actual'):
         raise PendingData('Sprint qualifying grid has not reached the forecast')
     if event['phase'] == 'post_quali' and not (payload.get('final_fix') or {}).get('qualifying_locked'):

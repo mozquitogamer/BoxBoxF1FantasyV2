@@ -42,21 +42,31 @@
     },
     "next_round": 24,
     "early_thoughts": {
-      "schema_version": 1,
-      "manager": "v13",
-      "round": 24,
-      "race": "Qatar Grand Prix",
-      "phase": "pre_fp",
-      "status": "provisional",
-      "published_at": "2026-11-22T18:19:31.882028+00:00",
-      "source_generated_at": "2026-11-22T18:19:31.468024+00:00",
-      "selection_context_sha256": "c396cb7f22e2f55af46697d2b38707d9c5c5ecafcea62d037d0577da00c71681",
-      "lock_deadline": "2026-11-28T18:00:00Z",
       "archive": "web/public/data/predictions_round24_pre_fp.json",
       "archive_sha256": "614ccedc7a7c9d665058f31613ae45f18b17525f99aece65f0ae19a8e9445dbe",
-      "previous_decision": "data/v13/decisions/round23_post_fp.json",
-      "previous_decision_sha256": "81c900b256712859650c6d2d2704fd0ef7bfcc94039a63afca49d93196da3ca8",
-      "price_snapshot_after_round": 23,
+      "captain": "VER",
+      "changes": {
+        "constructors_in": [],
+        "constructors_out": [],
+        "drivers_in": [
+          "ALO",
+          "SAI"
+        ],
+        "drivers_out": [
+          "LIN",
+          "PER"
+        ]
+      },
+      "chip": null,
+      "chip_decision": {
+        "reason": "Only post-FP finals can play 3x.",
+        "result": "not_evaluated"
+      },
+      "constructors": [
+        "mercedes",
+        "ferrari"
+      ],
+      "downside_risk": 44.6,
       "drivers": [
         "ANT",
         "VER",
@@ -64,32 +74,87 @@
         "ALO",
         "SAI"
       ],
+      "lock_deadline": "2026-11-28T18:00:00Z",
+      "manager": "v13",
+      "phase": "pre_fp",
+      "points_basis": "net_after_transfers",
+      "policy": {
+        "negative_p5_weight": 0.75,
+        "policy_version": "horizon_budget_value_v2",
+        "price_gain_weight": 1.979,
+        "price_value_method": "horizon curve × price reliability × points realisation",
+        "risk_profile": "medium_tolerance",
+        "strategy": "budget_builder"
+      },
+      "previous_decision": "data/v13/decisions/round23_post_fp.json",
+      "previous_decision_sha256": "81c900b256712859650c6d2d2704fd0ef7bfcc94039a63afca49d93196da3ca8",
+      "price_snapshot_after_round": 23,
+      "projected_points": 253.0,
+      "projected_points_gross": 253.0,
+      "projected_price_gain": 2.7,
+      "published_at": "2026-11-22T18:19:31.882028+00:00",
+      "race": "Qatar Grand Prix",
+      "round": 24,
+      "schema_version": 1,
+      "second_boost": null,
+      "selection_context_sha256": "c396cb7f22e2f55af46697d2b38707d9c5c5ecafcea62d037d0577da00c71681",
+      "source_generated_at": "2026-11-22T18:19:31.468024+00:00",
+      "status": "provisional",
+      "team_cost": 140.1,
+      "transfer_penalty": 0,
+      "transfers": 2
+    },
+    "post_fp_final": {
+      "schema_version": 1,
+      "manager": "v13",
+      "round": 24,
+      "race": "Qatar Grand Prix",
+      "phase": "post_fp",
+      "status": "frozen_before_lock",
+      "published_at": "2026-11-27T19:24:38.170362+00:00",
+      "source_generated_at": "2026-11-27T19:24:27.325933+00:00",
+      "selection_context_sha256": "c39a93e0cd36d142df94c4380d3a422394c947d646d93d44bfc02aa6560a684a",
+      "lock_deadline": "2026-11-28T18:00:00Z",
+      "archive": "web/public/data/predictions_round24_post_fp.json",
+      "archive_sha256": "93da32780b86ce64c937b7d2a3a9c66dcee53dce22f9a646f6e448d00ff4009f",
+      "previous_decision": "data/v13/decisions/round24_pre_fp.json",
+      "previous_decision_sha256": "995b9e782bf8cbe2edc300bba711797abf38d3afc8493b73d8408302356b44b3",
+      "price_snapshot_after_round": 23,
+      "drivers": [
+        "VER",
+        "ANT",
+        "ALO",
+        "BOR",
+        "PER"
+      ],
       "constructors": [
-        "mercedes",
-        "ferrari"
+        "red_bull",
+        "mercedes"
       ],
       "captain": "VER",
       "second_boost": null,
       "chip": null,
-      "projected_points": 253.0,
-      "projected_points_gross": 253.0,
+      "projected_points": 247.5,
+      "projected_points_gross": 247.5,
       "points_basis": "net_after_transfers",
-      "projected_price_gain": 2.7,
-      "downside_risk": 44.6,
-      "team_cost": 140.1,
+      "projected_price_gain": 1.9,
+      "downside_risk": 60.3,
+      "team_cost": 139.2,
       "transfers": 2,
       "transfer_penalty": 0,
       "changes": {
         "drivers_out": [
-          "LIN",
-          "PER"
+          "LIN"
         ],
         "drivers_in": [
-          "ALO",
-          "SAI"
+          "ALO"
         ],
-        "constructors_out": [],
-        "constructors_in": []
+        "constructors_out": [
+          "ferrari"
+        ],
+        "constructors_in": [
+          "red_bull"
+        ]
       },
       "chip_decision": {
         "result": "not_evaluated",
@@ -103,10 +168,9 @@
         "negative_p5_weight": 0.75,
         "price_value_method": "horizon curve × price reliability × points realisation"
       }
-    },
-    "post_fp_final": null
+    }
   },
-  "generated_at": "2026-11-22T18:19:31.884038+00:00",
+  "generated_at": "2026-11-27T21:24:38.188126+02:00",
   "labels": {
     "constructors": {
       "alpine": "Alpine",

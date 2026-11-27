@@ -36,6 +36,11 @@ def build_practice_laps(bundle: dict, session: dict, round_num: int) -> pd.DataF
     for records in bundle.values():
         if any(record.get("session_key") != session_key for record in records):
             raise ValueError("OpenF1 bundle mixes session keys")
+    session_end = max(
+        (pd.Timestamp(row["date"]) for row in bundle["race_control"]
+         if row.get("category") == "SessionStatus" and row.get("message") == "SESSION FINISHED"),
+        default=pd.Timestamp(session["date_end"]),
+    )
     builder = importlib.import_module("pipeline.02_build_laps")
     driver_map, constructor_map = builder.load_id_mappings()
     drivers = {row["driver_number"]: row for row in bundle["drivers"]}
@@ -110,7 +115,7 @@ def build_practice_laps(bundle: dict, session: dict, round_num: int) -> pd.DataF
             continue
         start = pd.Timestamp(lap["date_start"]).as_unit("ns")
         end = start + pd.to_timedelta(float(duration), unit="s")
-        if start > pd.Timestamp(session["date_end"]):
+        if start > session_end:
             continue
         if any(start < flag_end and end > flag_start for flag_start, flag_end in excluded_intervals):
             continue

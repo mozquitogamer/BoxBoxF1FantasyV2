@@ -160,6 +160,11 @@ def test_new_practice_sq_qualifying_and_weather_evidence_is_required(tmp_path, m
     event, started, payload, metadata, save = setup_files(tmp_path, monkeypatch)
     with pytest.raises(PendingData, match='practice'):
         automatic.validate_forecast({**event, 'session': 'FP2'}, started)
+    save(metadata={**metadata, 'fp_sessions_included': ['FP2']})
+    with pytest.raises(PendingData, match='practice'):
+        automatic.validate_forecast({**event, 'session': 'FP2'}, started)
+    save(metadata={**metadata, 'fp_sessions_included': ['FP1', 'FP2']})
+    automatic.validate_forecast({**event, 'session': 'FP2'}, started)
     with pytest.raises(PendingData, match='Sprint'):
         automatic.validate_forecast({**event, 'session': 'SQ'}, started)
     save(metadata={**metadata, 'sprint_grid_is_actual': True})
@@ -248,6 +253,26 @@ def test_provider_live_window_is_retried_without_running_pipeline(monkeypatch):
         raise urllib.error.HTTPError(url, 401, 'Live data requires access', {}, None)
     monkeypatch.setattr(automatic, 'fetch_json', live)
     assert automatic.load_control(123) == []
+
+
+def test_openf1_recovery_imports_each_missing_complete_practice(tmp_path, monkeypatch):
+    rows = [session(), session('Practice 2', 2), session('Practice 3', 3)]
+    classification = [{'driver_number': car, 'number_of_laps': 1} for car in range(1, 23)]
+    laps = [{'driver_number': car, 'lap_number': 1} for car in range(1, 23)]
+    feeds = {'sessions': rows, 'race_control': control(), 'session_result': classification,
+             'laps': laps, 'drivers': [], 'stints': [], 'weather': []}
+    monkeypatch.setattr(automatic, 'RAW_DIR', tmp_path)
+    monkeypatch.setattr(automatic, 'fetch_json', lambda url: feeds[url.split('/')[-1].split('?')[0]])
+    calls = []
+    monkeypatch.setattr(automatic.auto_post_race, 'run', lambda *args: calls.append(args))
+    event = automatic.event_for(RACE, rows[2], FINISH)
+    automatic.recover_practice(event, ['FP1', 'FP2', 'FP3'])
+    assert [call[4:7:2] for call in calls] == [('FP1', 1), ('FP2', 2), ('FP3', 3)]
+    calls.clear()
+    laps.pop()
+    with pytest.raises(PendingData, match='Complete FP3'):
+        automatic.recover_practice(event, ['FP3'])
+    assert not calls
 
 
 def test_planner_imports_with_all_third_party_packages_disabled():

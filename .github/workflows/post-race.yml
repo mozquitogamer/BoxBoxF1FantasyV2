@@ -90,8 +90,8 @@ jobs:
             fi
             args+=(--round "$REQUESTED_ROUND")
           fi
-          python -I -S pipeline/auto_weekend.py --plan "${args[@]}"
-          result=$?
+          result=0
+          python -I -S pipeline/auto_weekend.py --plan "${args[@]}" || result=$?
           if [[ "$result" == 75 ]]; then
             echo 'due=false' >> "$GITHUB_OUTPUT"
             echo 'Session timing feed pending; the next schedule check will retry.' >> "$GITHUB_STEP_SUMMARY"
@@ -124,8 +124,8 @@ jobs:
           set -uo pipefail
           args=(--phase "$REQUESTED_PHASE")
           if [[ -n "$REQUESTED_ROUND" ]]; then args+=(--round "$REQUESTED_ROUND"); fi
-          python pipeline/auto_weekend.py "${args[@]}"
-          result=$?
+          result=0
+          python pipeline/auto_weekend.py "${args[@]}" || result=$?
           if [[ "$result" == 75 ]]; then
             echo 'ready=false' >> "$GITHUB_OUTPUT"
             echo 'Session/results data pending; nothing published. The next check retries.' >> "$GITHUB_STEP_SUMMARY"
@@ -140,7 +140,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          for path in data/seed data/automation data/processed/jolpica/model_rows data/processed/weather data/audit data/evaluation/prospective data/v13 web/public; do
+          for path in data/seed data/automation data/processed/jolpica/model_rows data/processed/weather data/forecasts/weather data/audit data/evaluation/prospective data/v13 web/public; do
             if [[ -e "$path" ]]; then git add -- "$path"; fi
           done
           if git diff --cached --quiet; then

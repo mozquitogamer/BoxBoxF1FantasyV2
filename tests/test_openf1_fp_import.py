@@ -59,6 +59,16 @@ def test_reinstated_lap_is_restored(inputs):
     assert not build_practice_laps(bundle, session, 20).set_index("lap_number").loc[3,"lap_deleted"]
 
 
+def test_delayed_finish_keeps_laps_after_the_scheduled_end(inputs):
+    bundle, session = inputs
+    session["date_end"] = "2026-10-23T17:42:00Z"
+    bundle["race_control"].append({
+        "session_key": 123, "category": "SessionStatus", "message": "SESSION FINISHED",
+        "date": "2026-10-23T17:45:00Z",
+    })
+    assert build_practice_laps(bundle, session, 20)["lap_number"].tolist() == [2, 3, 6]
+
+
 def test_missing_registry_driver_keeps_real_practice_laps(inputs):
     bundle, session = inputs
     bundle['drivers'] = []

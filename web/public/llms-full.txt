@@ -1,6 +1,6 @@
 # BoxBoxF1Fantasy - Full Site Summary for LLMs and Agents
 
-Last updated: 2026-11-22
+Last updated: 2026-11-27
 Canonical site: https://boxboxf1fantasy.com/
 Primary language: English
 Season covered: 2026 F1 Fantasy
@@ -45,7 +45,7 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 ## Current round context
 - Current round: 24
 - Race: Qatar Grand Prix
-- Prediction file generated: 2026-11-22
+- Prediction file generated: 2026-11-27
 - Compact AI answer summary: https://boxboxf1fantasy.com/data/ai-summary.json
 - Current predictions JSON: https://boxboxf1fantasy.com/data/predictions.json
 - Predictions JSON Schema: https://boxboxf1fantasy.com/data/predictions.schema.json
@@ -66,26 +66,26 @@ The site is not affiliated with Formula 1, the FIA, F1 Fantasy, any F1 team, or 
 - Weather JSON: https://boxboxf1fantasy.com/data/weather.json
 
 ## Current top projected drivers
-- Max Verstappen: 39.2 expected points, $29.4M, PPM 1.33
-- Kimi Antonelli: 32.6 expected points, $27.7M, PPM 1.18
-- Lando Norris: 26.8 expected points, $26.3M, PPM 1.02
-- Lewis Hamilton: 25.7 expected points, $25.4M, PPM 1.01
-- Charles Leclerc: 24.1 expected points, $24.9M, PPM 0.97
-- Oscar Piastri: 20.4 expected points, $22.8M, PPM 0.89
-- George Russell: 19.9 expected points, $27.1M, PPM 0.73
-- Isack Hadjar: 14.7 expected points, $16.7M, PPM 0.88
-- Liam Lawson: 10.2 expected points, $12.3M, PPM 0.83
-- Pierre Gasly: 6.5 expected points, $9.0M, PPM 0.72
+- Max Verstappen: 39.0 expected points, $29.4M, PPM 1.33
+- Kimi Antonelli: 30.9 expected points, $27.7M, PPM 1.12
+- Lando Norris: 26.0 expected points, $26.3M, PPM 0.99
+- Charles Leclerc: 22.1 expected points, $24.9M, PPM 0.89
+- Oscar Piastri: 21.7 expected points, $22.8M, PPM 0.95
+- Lewis Hamilton: 21.4 expected points, $25.4M, PPM 0.84
+- George Russell: 18.4 expected points, $27.1M, PPM 0.68
+- Isack Hadjar: 16.2 expected points, $16.7M, PPM 0.97
+- Liam Lawson: 9.1 expected points, $12.3M, PPM 0.74
+- Carlos Sainz: 5.3 expected points, $8.4M, PPM 0.63
 
 ## Current top projected constructors
-- Mercedes: 67.2 expected points, $34.0M, PPM 1.98
-- Red Bull: 63.1 expected points, $33.9M, PPM 1.86
-- Ferrari: 60.8 expected points, $29.4M, PPM 2.07
-- McLaren: 59.1 expected points, $33.6M, PPM 1.76
-- Racing Bulls: 28.5 expected points, $18.9M, PPM 1.51
-- Audi: 20.8 expected points, $12.8M, PPM 1.62
-- Alpine: 16.8 expected points, $18.2M, PPM 0.92
-- Williams: 9.6 expected points, $13.8M, PPM 0.70
+- Red Bull: 65.3 expected points, $33.9M, PPM 1.93
+- Mercedes: 64.2 expected points, $34.0M, PPM 1.89
+- McLaren: 59.7 expected points, $33.6M, PPM 1.78
+- Ferrari: 54.8 expected points, $29.4M, PPM 1.86
+- Racing Bulls: 25.7 expected points, $18.9M, PPM 1.36
+- Audi: 18.7 expected points, $12.8M, PPM 1.46
+- Alpine: 13.7 expected points, $18.2M, PPM 0.75
+- Haas: 8.3 expected points, $12.0M, PPM 0.69
 
 ## Tools and what they do
 - F1 Fantasy predictions: current driver and constructor projections with confidence ranges and price/value signals.
@@ -139,40 +139,40 @@ Use cautious language. Say the site publishes model-based projections, confidenc
 - F1 Fantasy Chinese GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/chinese-gp-2026/ - F1 Fantasy Chinese GP 2026 results: Kimi Antonelli led drivers with 68 points. See every driver and constructor score plus the archived forecast review.
 - F1 Fantasy Australian GP 2026 Results & Review | BoxBox: https://boxboxf1fantasy.com/picks/australian-gp-2026/ - F1 Fantasy Australian GP 2026 results: Max Verstappen led drivers with 50 points. See every driver and constructor score plus the archived forecast review.
 - F1 Fantasy Drivers 2026: Points, Prices & Value | BoxBox: https://boxboxf1fantasy.com/drivers/ - Current F1 Fantasy 2026 driver projections: expected points, prices, value ratings, predicted qualifying and race finish for every driver.
-- Max Verstappen F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/max-verstappen/ - Max Verstappen F1 Fantasy 2026 projection: 39.2 expected points for the Qatar GP, $29.4M price, value rating and confidence range.
-- Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/kimi-antonelli/ - Kimi Antonelli F1 Fantasy 2026 projection: 32.6 expected points for the Qatar GP, $27.7M price, value rating and confidence range.
-- Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lando-norris/ - Lando Norris F1 Fantasy 2026 projection: 26.8 expected points for the Qatar GP, $26.3M price, value rating and confidence range.
-- Lewis Hamilton F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lewis-hamilton/ - Lewis Hamilton F1 Fantasy 2026 projection: 25.7 expected points for the Qatar GP, $25.4M price, value rating and confidence range.
-- Charles Leclerc F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/charles-leclerc/ - Charles Leclerc F1 Fantasy 2026 projection: 24.1 expected points for the Qatar GP, $24.9M price, value rating and confidence range.
-- Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oscar-piastri/ - Oscar Piastri F1 Fantasy 2026 projection: 20.4 expected points for the Qatar GP, $22.8M price, value rating and confidence range.
-- George Russell F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/george-russell/ - George Russell F1 Fantasy 2026 projection: 19.9 expected points for the Qatar GP, $27.1M price, value rating and confidence range.
-- Isack Hadjar F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/isack-hadjar/ - Isack Hadjar F1 Fantasy 2026 projection: 14.7 expected points for the Qatar GP, $16.7M price, value rating and confidence range.
-- Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/liam-lawson/ - Liam Lawson F1 Fantasy 2026 projection: 10.2 expected points for the Qatar GP, $12.3M price, value rating and confidence range.
-- Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/pierre-gasly/ - Pierre Gasly F1 Fantasy 2026 projection: 6.5 expected points for the Qatar GP, $9.0M price, value rating and confidence range.
-- Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/carlos-sainz/ - Carlos Sainz F1 Fantasy 2026 projection: 6.5 expected points for the Qatar GP, $8.4M price, value rating and confidence range.
-- Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/arvid-lindblad/ - Arvid Lindblad F1 Fantasy 2026 projection: 6.2 expected points for the Qatar GP, $8.8M price, value rating and confidence range.
-- Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/ - Gabriel Bortoleto F1 Fantasy 2026 projection: 6.1 expected points for the Qatar GP, $7.0M price, value rating and confidence range.
-- Nico Hulkenberg F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/nico-hulkenberg/ - Nico Hulkenberg F1 Fantasy 2026 projection: 5.6 expected points for the Qatar GP, $7.0M price, value rating and confidence range.
-- Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/franco-colapinto/ - Franco Colapinto F1 Fantasy 2026 projection: 3.5 expected points for the Qatar GP, $7.6M price, value rating and confidence range.
-- Fernando Alonso F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/fernando-alonso/ - Fernando Alonso F1 Fantasy 2026 projection: 1.4 expected points for the Qatar GP, $4.2M price, value rating and confidence range.
-- Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oliver-bearman/ - Oliver Bearman F1 Fantasy 2026 projection: 1.2 expected points for the Qatar GP, $4.4M price, value rating and confidence range.
-- Rafael Câmara F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/rafael-camara/ - Rafael Câmara F1 Fantasy 2026 projection: 0.8 expected points for the Qatar GP, $4.8M price, value rating and confidence range.
-- Sergio Perez F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/sergio-perez/ - Sergio Perez F1 Fantasy 2026 projection: -0.3 expected points for the Qatar GP, $3.0M price, value rating and confidence range.
-- Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/alex-albon/ - Alex Albon F1 Fantasy 2026 projection: -2.5 expected points for the Qatar GP, $3.8M price, value rating and confidence range.
-- Lance Stroll F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lance-stroll/ - Lance Stroll F1 Fantasy 2026 projection: -2.6 expected points for the Qatar GP, $3.0M price, value rating and confidence range.
-- Valtteri Bottas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/valtteri-bottas/ - Valtteri Bottas F1 Fantasy 2026 projection: -5.2 expected points for the Qatar GP, $3.0M price, value rating and confidence range.
+- Max Verstappen F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/max-verstappen/ - Max Verstappen F1 Fantasy 2026 projection: 39.0 expected points for the Qatar GP, $29.4M price, value rating and confidence range.
+- Kimi Antonelli F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/kimi-antonelli/ - Kimi Antonelli F1 Fantasy 2026 projection: 30.9 expected points for the Qatar GP, $27.7M price, value rating and confidence range.
+- Lando Norris F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lando-norris/ - Lando Norris F1 Fantasy 2026 projection: 26.0 expected points for the Qatar GP, $26.3M price, value rating and confidence range.
+- Charles Leclerc F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/charles-leclerc/ - Charles Leclerc F1 Fantasy 2026 projection: 22.1 expected points for the Qatar GP, $24.9M price, value rating and confidence range.
+- Oscar Piastri F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oscar-piastri/ - Oscar Piastri F1 Fantasy 2026 projection: 21.7 expected points for the Qatar GP, $22.8M price, value rating and confidence range.
+- Lewis Hamilton F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lewis-hamilton/ - Lewis Hamilton F1 Fantasy 2026 projection: 21.4 expected points for the Qatar GP, $25.4M price, value rating and confidence range.
+- George Russell F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/george-russell/ - George Russell F1 Fantasy 2026 projection: 18.4 expected points for the Qatar GP, $27.1M price, value rating and confidence range.
+- Isack Hadjar F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/isack-hadjar/ - Isack Hadjar F1 Fantasy 2026 projection: 16.2 expected points for the Qatar GP, $16.7M price, value rating and confidence range.
+- Liam Lawson F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/liam-lawson/ - Liam Lawson F1 Fantasy 2026 projection: 9.1 expected points for the Qatar GP, $12.3M price, value rating and confidence range.
+- Carlos Sainz F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/carlos-sainz/ - Carlos Sainz F1 Fantasy 2026 projection: 5.3 expected points for the Qatar GP, $8.4M price, value rating and confidence range.
+- Pierre Gasly F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/pierre-gasly/ - Pierre Gasly F1 Fantasy 2026 projection: 5.2 expected points for the Qatar GP, $9.0M price, value rating and confidence range.
+- Nico Hulkenberg F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/nico-hulkenberg/ - Nico Hulkenberg F1 Fantasy 2026 projection: 4.9 expected points for the Qatar GP, $7.0M price, value rating and confidence range.
+- Gabriel Bortoleto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/gabriel-bortoleto/ - Gabriel Bortoleto F1 Fantasy 2026 projection: 4.6 expected points for the Qatar GP, $7.0M price, value rating and confidence range.
+- Arvid Lindblad F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/arvid-lindblad/ - Arvid Lindblad F1 Fantasy 2026 projection: 4.1 expected points for the Qatar GP, $8.8M price, value rating and confidence range.
+- Fernando Alonso F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/fernando-alonso/ - Fernando Alonso F1 Fantasy 2026 projection: 3.8 expected points for the Qatar GP, $4.2M price, value rating and confidence range.
+- Franco Colapinto F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/franco-colapinto/ - Franco Colapinto F1 Fantasy 2026 projection: 2.0 expected points for the Qatar GP, $7.6M price, value rating and confidence range.
+- Oliver Bearman F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/oliver-bearman/ - Oliver Bearman F1 Fantasy 2026 projection: 1.8 expected points for the Qatar GP, $4.4M price, value rating and confidence range.
+- Rafael Câmara F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/rafael-camara/ - Rafael Câmara F1 Fantasy 2026 projection: 1.0 expected points for the Qatar GP, $4.8M price, value rating and confidence range.
+- Sergio Perez F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/sergio-perez/ - Sergio Perez F1 Fantasy 2026 projection: 0.7 expected points for the Qatar GP, $3.0M price, value rating and confidence range.
+- Lance Stroll F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/lance-stroll/ - Lance Stroll F1 Fantasy 2026 projection: -2.2 expected points for the Qatar GP, $3.0M price, value rating and confidence range.
+- Alex Albon F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/alex-albon/ - Alex Albon F1 Fantasy 2026 projection: -3.0 expected points for the Qatar GP, $3.8M price, value rating and confidence range.
+- Valtteri Bottas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/drivers/valtteri-bottas/ - Valtteri Bottas F1 Fantasy 2026 projection: -4.9 expected points for the Qatar GP, $3.0M price, value rating and confidence range.
 - F1 Fantasy Constructors 2026: Points & Value | BoxBox: https://boxboxf1fantasy.com/constructors/ - Current F1 Fantasy 2026 constructor projections: expected points, prices, pit-stop points, value ratings and risk for every constructor.
-- Mercedes F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mercedes/ - Mercedes F1 Fantasy 2026 constructor projection: 67.2 expected points for the Qatar GP, $34.0M price, pit-stop points and value rating.
-- Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/red-bull/ - Red Bull F1 Fantasy 2026 constructor projection: 63.1 expected points for the Qatar GP, $33.9M price, pit-stop points and value rating.
-- Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/ferrari/ - Ferrari F1 Fantasy 2026 constructor projection: 60.8 expected points for the Qatar GP, $29.4M price, pit-stop points and value rating.
-- McLaren F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mclaren/ - McLaren F1 Fantasy 2026 constructor projection: 59.1 expected points for the Qatar GP, $33.6M price, pit-stop points and value rating.
-- Racing Bulls F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/racing-bulls/ - Racing Bulls F1 Fantasy 2026 constructor projection: 28.5 expected points for the Qatar GP, $18.9M price, pit-stop points and value rating.
-- Audi F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/audi/ - Audi F1 Fantasy 2026 constructor projection: 20.8 expected points for the Qatar GP, $12.8M price, pit-stop points and value rating.
-- Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/alpine/ - Alpine F1 Fantasy 2026 constructor projection: 16.8 expected points for the Qatar GP, $18.2M price, pit-stop points and value rating.
-- Williams F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/williams/ - Williams F1 Fantasy 2026 constructor projection: 9.6 expected points for the Qatar GP, $13.8M price, pit-stop points and value rating.
-- Haas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/haas/ - Haas F1 Fantasy 2026 constructor projection: 8.7 expected points for the Qatar GP, $12.0M price, pit-stop points and value rating.
-- Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/aston-martin/ - Aston Martin F1 Fantasy 2026 constructor projection: 2.3 expected points for the Qatar GP, $3.3M price, pit-stop points and value rating.
-- Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/cadillac/ - Cadillac F1 Fantasy 2026 constructor projection: -5.9 expected points for the Qatar GP, $3.0M price, pit-stop points and value rating.
+- Red Bull F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/red-bull/ - Red Bull F1 Fantasy 2026 constructor projection: 65.3 expected points for the Qatar GP, $33.9M price, pit-stop points and value rating.
+- Mercedes F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mercedes/ - Mercedes F1 Fantasy 2026 constructor projection: 64.2 expected points for the Qatar GP, $34.0M price, pit-stop points and value rating.
+- McLaren F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/mclaren/ - McLaren F1 Fantasy 2026 constructor projection: 59.7 expected points for the Qatar GP, $33.6M price, pit-stop points and value rating.
+- Ferrari F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/ferrari/ - Ferrari F1 Fantasy 2026 constructor projection: 54.8 expected points for the Qatar GP, $29.4M price, pit-stop points and value rating.
+- Racing Bulls F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/racing-bulls/ - Racing Bulls F1 Fantasy 2026 constructor projection: 25.7 expected points for the Qatar GP, $18.9M price, pit-stop points and value rating.
+- Audi F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/audi/ - Audi F1 Fantasy 2026 constructor projection: 18.7 expected points for the Qatar GP, $12.8M price, pit-stop points and value rating.
+- Alpine F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/alpine/ - Alpine F1 Fantasy 2026 constructor projection: 13.7 expected points for the Qatar GP, $18.2M price, pit-stop points and value rating.
+- Haas F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/haas/ - Haas F1 Fantasy 2026 constructor projection: 8.3 expected points for the Qatar GP, $12.0M price, pit-stop points and value rating.
+- Williams F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/williams/ - Williams F1 Fantasy 2026 constructor projection: 7.7 expected points for the Qatar GP, $13.8M price, pit-stop points and value rating.
+- Aston Martin F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/aston-martin/ - Aston Martin F1 Fantasy 2026 constructor projection: 4.3 expected points for the Qatar GP, $3.3M price, pit-stop points and value rating.
+- Cadillac F1 Fantasy 2026: Points, Price & Value | BoxBox: https://boxboxf1fantasy.com/constructors/cadillac/ - Cadillac F1 Fantasy 2026 constructor projection: -4.6 expected points for the Qatar GP, $3.0M price, pit-stop points and value rating.
 - F1 Fantasy Points & Price Tracker 2026 | BoxBox: https://boxboxf1fantasy.com/stats/ - F1 Fantasy 2026 driver and constructor points, current prices, season changes, points per race and last-three form, updated after each Grand Prix.
 - F1 Fantasy Guides 2026: Scoring, Strategy & Chips | BoxBox: https://boxboxf1fantasy.com/guides/ - Free F1 Fantasy 2026 guides: how scoring works, how to win, chips explained, drivers vs constructors, and a beginner's how-to-play walkthrough.
 - How F1 Fantasy Scoring Works (2026) | BoxBox: https://boxboxf1fantasy.com/guides/how-f1-fantasy-scoring-works/ - F1 Fantasy 2026 scoring explained: qualifying, race and sprint points, overtakes, bonuses, DNF penalties, constructors and pit stops.
