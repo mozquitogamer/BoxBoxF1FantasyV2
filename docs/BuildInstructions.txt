@@ -1,4 +1,7 @@
-Build BoxBoxF1Fantasy v2 from scratch
+Historical BoxBoxF1Fantasy v2 build brief
+
+For current commands, session checks and deployment, use OPERATIONS_GUIDE.md.
+The release pipeline uses validated source data for production forecasts.
 
 You are an expert Python data engineer and machine learning engineer.
 
@@ -643,7 +646,7 @@ Testing Requirements
 
 You must:
 
-Generate dummy data if APIs fail and clearly state that dummy data is being used.
+Use synthetic data in isolated tests. Production forecasts require verified data.
 
 Run the entire pipeline
 
@@ -655,7 +658,7 @@ Final Goal
 
 The system must allow the user to run:
 
-python publish_weekend.py
+python pipeline/run_weekend.py --phase post_fp --round N
 
 and produce:
 
@@ -676,5 +679,3 @@ Seed JSON files
 Output JSON
 
 I already have the website setup more or less. Once the pipeline is complete, we will work on the website integration.
-
-Now ask me questions to resolve any issues before we get started. Once you feel ready, ask me if you can begin building the project. 

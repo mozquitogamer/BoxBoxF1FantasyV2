@@ -9,7 +9,7 @@ F1 Fantasy prediction pipeline and website for the 2026 season. Predicts qualify
 - **ML:** XGBoost ranking models (LambdaMART) for qualifying and race position prediction
 - **Frontend:** Vanilla JS, no framework, static JSON data, hosted on Vercel
 - **Deployment:** `git push` to GitHub → Vercel auto-deploys
-- **Sprint rounds 2026:** 2, 6, 7, 11, 14, 18
+- **Sprint rounds 2026:** 2, 6, 7, 11, 14, 19
 - **Cancelled rounds 2026:** 4, 5
 
 ## Project Structure
@@ -38,7 +38,8 @@ BoxBoxF1FantasyV2/
 │   ├── calibrate_confidence.py      # CI calibration: MC predictions vs actuals
 │   ├── backfill_fp_history.py       # One-off: extract historical (2022-2025) FP features into training
 │   ├── sweep_fp_blend.py            # Leak-free walk-forward sweep of the FP-quali blend weight
-│   ├── run_weekend.py              # Orchestrator: detects phase, runs pipeline
+│   ├── run_weekend.py              # Local phase command and ordered pipeline
+│   ├── auto_weekend.py             # Session checks, practice fallback and scheduled updates
 │   ├── predict_horizon.py          # Priors-only ML predictions for upcoming rounds (multi-week planner input)
 │   ├── weather_forecast.py         # Open-Meteo weather forecasts
 │   ├── feature_engineering.py      # Cross-layer engineered features
@@ -186,42 +187,20 @@ APIs (FastF1, Jolpica, OpenF1, Open-Meteo)
 ## Running the Pipeline
 
 ```bash
-# Full weekend automation — pick the right phase for what's happened on track:
-python pipeline/run_weekend.py --phase pre_fp_predict --round N   # Before FP1 — priors-only predictions
-python pipeline/run_weekend.py --phase post_fp        --round N   # FP1 (sprint) or FP1+FP2+FP3 (regular) done
-python pipeline/run_weekend.py --phase post_quali     --round N   # Sat/Sun qualifying done
-python pipeline/run_weekend.py --phase post_race      --round N   # race done
-
-# What pre_fp_predict runs (priors only, before any FP telemetry):
-#   01_download_data → 03a_normalize_jolpica → 03b_build_jolpica_features →
-#   06_run_predictions → 07_calculate_fantasy → 08_monte_carlo_fantasy →
-#   08_export_website_json → predict_horizon (optional, non-fatal)
-# (06_run_predictions falls back to "priors only" path when no FP features exist;
-# Layer-2 telemetry features are NaN and XGBoost handles them natively.)
-#
-# What post_fp / post_quali runs:
-#   01_download_data → 02_build_laps → 03_extract_features →
-#   06_run_predictions → 07_calculate_fantasy → 08_monte_carlo_fantasy →
-#   10_fp_analysis → 08_export_website_json → predict_horizon (optional, non-fatal)
-#
-# What post_race runs:
-#   01_download_data → 09_post_race_analysis → 11_actual_fantasy_points →
-#   11_race_deep_dive → 12_count_overtakes → 13_fetch_openf1_overtakes →
-#   13_fetch_pitstop_stationary → 08_export_website_json
-# (Jolpica/Ergast typically publishes results within a few hours of the race;
-# if results.json is empty, wait and re-run.)
-
-# Or individual steps:
-python pipeline/01_download_data.py --round N
-python pipeline/03_extract_features.py --round N
-python pipeline/06_run_predictions.py --round N
-python pipeline/07_calculate_fantasy.py --round N
-python pipeline/08_monte_carlo_fantasy.py --round N
-python pipeline/08_export_website_json.py --round N
-
-# Calibration (run after adding actual results for completed rounds)
-python pipeline/calibrate_confidence.py
+python pipeline/run_weekend.py --phase pre_fp_predict --round N
+python pipeline/auto_weekend.py --phase post_fp --round N --plan
+python pipeline/run_weekend.py --phase post_fp --round N
+python pipeline/run_weekend.py --phase post_quali --round N
+python pipeline/auto_weekend.py --phase post_race --round N
 ```
+
+Use the internal round from `data/seed/races.json` (Qatar is 24 in 2026).
+The local post-practice command and the scheduled workflow share session
+checks and the OpenF1 fallback for missing FastF1 practice. Exit 75 means
+the required data is pending. Preview command order with
+`run_weekend.py --dry-run` or check live session timing with
+`auto_weekend.py --plan`. The [operations guide](docs/OPERATIONS_GUIDE.md)
+includes the [manual publishing checklist](docs/OPERATIONS_GUIDE.md#manual-publishing-checklist).
 
 ## Seed Data Updates
 
@@ -239,7 +218,7 @@ Before each round, update `data/seed/fantasy_prices.json` with current F1 Fantas
 
 | Task | How |
 |------|-----|
-| Add a new round's predictions | `python pipeline/run_weekend.py --round N` then `python pipeline/08_export_website_json.py --round N` |
+| Add a new round's predictions | `python pipeline/run_weekend.py --phase post_fp --round N` after a confirmed session finish, or `pre_fp_predict` before practice |
 | Update prices | Edit `data/seed/fantasy_prices.json`, add entry to `price_history` |
 | Retrain models | `python pipeline/05_train_models.py` (uses all historical data) |
 | Add official fantasy points | Edit `data/seed/official_fantasy_points.json`, run export |

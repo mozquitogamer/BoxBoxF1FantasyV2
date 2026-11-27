@@ -1,14 +1,17 @@
 # Pipeline tool inventory
 
-Use `pipeline/run_weekend.py --phase PHASE --round N` for a race weekend. Its
-`PHASES` map is the source of step order. Run it with `--dry-run` to see the
-current commands. The [operations guide](OPERATIONS_GUIDE.md) covers timing and
-seed updates. This inventory separates routine code from tools kept for
-specific maintenance or reproducible research.
+Use `pipeline/run_weekend.py --phase post_fp --round N` to build a local
+post-practice update. It shares the session checks and fallback used by
+`pipeline/auto_weekend.py` and GitHub Actions. The runner's `PHASES` map is the
+source of step order. Use `run_weekend.py --dry-run` to list commands and
+`auto_weekend.py --phase post_fp --round N --plan` to check which session is
+available. The [operations guide](OPERATIONS_GUIDE.md) covers setup, validation
+and publishing.
 
 | Status | Tools | Inputs and purpose |
 |---|---|---|
 | Weekend runner | `run_weekend.py`; numbered `01`–`14` scripts used by its `PHASES`; `predict_horizon.py`, `publish_v13_decision.py`, `build_v13_manager.py` | Raw API/cache data, seed files, models, and current-round artifacts. Produces predictions, actuals, web JSON, and generated pages. The runner chooses the order. |
+| Session scheduling and recovery | `auto_weekend.py`, `auto_post_race.py`, `import_openf1_fp.py` | Match the OpenF1 schedule to internal rounds, verify session data, recover completed practice when FastF1 is unavailable, validate exports, and record successful updates. |
 | Production helpers | `audit.py`, `feature_engineering.py`, `fp_long_runs.py`, `prediction_sanity.py`, `prospective_holdout.py`, `16_build_seo_charts.py` | Imported by prediction, export, FP analysis, or SEO generation. Keep beside those callers. |
 | Scheduled jobs | `weather_forecast.py`, `youtube_videos.py`, `15_submit_indexnow.py` | Forecast API, YouTube RSS, and generated sitemap respectively. Called by `.github/workflows/`; IndexNow runs after a relevant publish. |
 | Operator tools | `12_official_fantasy_points.py`, `reconcile_official_points.py`, `calibrate_confidence.py`, `build_articles.py`, `apply_upgrades.py`, `pit_wall_weekly_preview.py`, `notify_subscribers.py`, `configure_adsense.py` | Official/seed data, completed-round actuals, article Markdown, dashboard upgrade settings, or public prediction JSON. Run for the corresponding update, audit, preview, or account setup. `apply_upgrades.py` also has dashboard callers. |
@@ -26,6 +29,6 @@ without retraining:
 python pipeline/research/run_oat_sweep.py weight --summary-only
 ```
 
-`publish_weekend.py` at the project root is a compatibility entry point for
-older operator commands. New commands should name the phase explicitly through
-`pipeline/run_weekend.py`.
+`publish_weekend.py` is a compatibility entry point that defaults to
+`post_fp` and uses the same checks. Use the explicit
+`pipeline/run_weekend.py` command in new instructions.

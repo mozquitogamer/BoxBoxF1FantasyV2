@@ -265,7 +265,10 @@ Visual representations of the pipeline, feature architecture, scoring, and the r
 
 ## 2. Race Weekend Workflow
 
-The pipeline has 5 named phases. Operators run them via `pipeline/run_weekend.py --phase {phase} --round N`.
+The pipeline has five named phases. The local runner executes an explicit
+phase. The scheduled workflow selects due sessions, and both paths use the
+same checks for forecast phases. Follow the commands in the
+[operations guide](OPERATIONS_GUIDE.md).
 
 ```
                       RACE WEEKEND TIMELINE — REGULAR & SPRINT
@@ -298,23 +301,25 @@ The pipeline has 5 named phases. Operators run them via `pipeline/run_weekend.py
     └──────────────────────────────────────────────────────────┘
                              │
                              ▼
-    FRIDAY (sprint weekend) or SATURDAY MORNING (regular)
+    AFTER EACH CONFIRMED PRACTICE FINISH
     ┌──────────────────────────────────────────────────────────┐
     │  REGULAR WEEKEND: FP1 (Fri) → FP2 (Fri) → FP3 (Sat)       │
     │  SPRINT WEEKEND:  FP1 (Fri) → Sprint Quali (Fri) →        │
     │                   Sprint (Sat) → Quali (Sat)              │
     │                                                           │
-    │  Wait ~30 min after final FP session                      │
+    │  Scheduled run due 35 min after confirmed finish          │
+    │  Manual run checks readiness immediately                  │
     │                                                           │
     │  PHASE: post_fp                                           │
     │                                                           │
+    │  Recover missing FastF1 practice via OpenF1               │
     │  01_download → 02_build_laps → 03_extract_features        │
+    │      → refresh weather                                   │
     │      → 06_predict (uses race_model_fp.json)               │
+    │      → validate phase and practice coverage               │
     │      → 07_fantasy → 08_mc → 10_fp_analysis → 08_export    │
     │                                                           │
-    │  Confidence: ~85-95%                                      │
-    │  ⚠️ MUST PUBLISH BEFORE QUALIFYING LOCK                   │
-    │     (Sat for regular, Sat or Fri for sprint)              │
+    │  Publish the actionable forecast before Fantasy lock      │
     └──────────────────────────────────────────────────────────┘
                              │
                              ▼
@@ -336,37 +341,27 @@ The pipeline has 5 named phases. Operators run them via `pipeline/run_weekend.py
     ┌──────────────────────────────────────────────────────────┐
     │  RACE                                                     │
     │                                                           │
-    │  Wait ~1h for FastF1, ~3-5h for Jolpica                   │
+    │  Scheduled settlement due 24h after confirmed finish    │
     │                                                           │
-    │  Pre-step: update data/seed/overtakes.csv with official   │
-    │            F1 Fantasy overtake counts                     │
+    │  Verify official classification, Fantasy totals, prices   │
     │                                                           │
     │  PHASE: post_race                                         │
     │                                                           │
     │  01_download (race results)                               │
     │      → 09_post_race (predicted vs actual)                 │
-    │      → 11_actual_fantasy (real fantasy points,            │
-    │           applies overtakes.csv override)                 │
     │      → 11_race_deep_dive (detailed race analysis)         │
     │      → 12_count_overtakes (FastF1 detection)              │
     │      → 13_fetch_openf1_overtakes (OpenF1 detection)       │
     │      → 13_fetch_pitstop_stationary                        │
-    │      → 08_export                                          │
-    │                                                           │
-    │  Post-step (manual):                                      │
-    │   • Update data/seed/fantasy_prices.json                  │
-    │   • Update data/seed/official_fantasy_points.json         │
-    │   • Update data/seed/dotd_winners.json                    │
-    │   • Re-run 08_export to push seed updates                 │
-    │   • Run calibrate_confidence.py if 3+ rounds done         │
+    │      → 11_actual_fantasy and official reconciliation      │
+    │      → 08_export → V13 settlement and next forecast       │
     │                                                           │
     │  git push → Vercel auto-deploys                           │
     └──────────────────────────────────────────────────────────┘
 
     JOLPICA LAG
-    ─ If results.json returns "Races": [] after race, FastF1-derived
-      analyses (race pace, tyre, overtakes, FP analysis) still
-      populate. Re-run --phase post_race later when Jolpica catches up.
+    ─ If results.json returns "Races": [] after the race, the verified
+      settlement waits for the official classification.
 ```
 
 ---

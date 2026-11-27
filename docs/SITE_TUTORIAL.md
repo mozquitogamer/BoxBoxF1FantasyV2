@@ -355,7 +355,7 @@ This section is gold for retention — it pre-empts the exact things that make n
 >
 > **Wide confidence intervals are honest, not noisy.** A range of '8 to 53 points' reflects real F1 chaos — a midfielder genuinely *could* score either. The model says so instead of faking precision.
 >
-> **Predictions shift across the weekend.** Pre-practice it's running on history — about 65% confidence. Once practice data lands it sharpens to ~90%. The big thing to know: **your fantasy deadline is *before* qualifying**, so the after-practice numbers are the ones you actually pick teams on. We lean those hard on real practice pace — and not just one hot lap, but a driver's *consistent* pace across their best laps — because that's what's genuinely predictive of where they'll qualify. The post-qualifying update you'll see later is for interest; by then the deadline's gone.
+> **Predictions shift across the weekend.** The pre-practice forecast draws on history. The practice updates add each completed session as timing data arrives. Check the forecast label before the Fantasy deadline. On a regular weekend the final practice update includes FP3. On a sprint weekend, the FP1 update is the one to use before sprint qualifying locks your team.
 >
 > **A predicted P2 sometimes outscores the predicted winner.** Looks wrong, isn't. The winner might be carrying higher retirement risk — which drags down their *expected* points — or the runner-up is a strong Driver-of-the-Day pick. The card is scoring risk and bonuses, not just track position.
 >
@@ -380,7 +380,7 @@ This section is gold for retention — it pre-empts the exact things that make n
 >
 > **Early in the week — Monday to Thursday.** Predictions are up early, on history alone. I open the **Multi-Week Planner**, set it to three rounds, and look at the heatmap. I'm not transferring yet — I'm spotting which races are coming and whether I should *bank* this week's transfer for a bigger move later. If I have a dream team in mind, I switch on Target mode and check the feasibility card.
 >
-> **Friday or Saturday, after practice.** This is the big one. Confidence jumps to ~90% once practice data lands. I check the **Analysis** tab for free-practice pace — anyone surprisingly fast or slow? Then I go to the **Transfer Advisor**, lock the drivers I'm keeping, and find my best one or two moves. I read the efficiency line religiously — if an extra transfer doesn't clear the minus-ten hit, I don't take it.
+> **Friday or Saturday, after practice.** I check which sessions the forecast includes, then open the **Analysis** tab for practice pace. In the **Transfer Advisor**, I lock the drivers I'm keeping and compare the moves. If an extra transfer doesn't clear its ten-point cost, I skip it.
 >
 > **The deadline is the start of qualifying — don't miss it.** There's a lock-deadline countdown right in the header. Get your team in before it hits zero.
 >
@@ -418,7 +418,7 @@ This section is gold for retention — it pre-empts the exact things that make n
 **Reading a driver card:**
 - Two numbers, "X proj · Y risk-adj": **projected** = the score if the predicted order holds (the "if it goes to plan" number, and the default sort); **risk-adjusted** = the average across the 10,000 sims. General optimizer modes can use Projected, Balanced, or Risk-adjusted; Final Fix always uses Projected. A safe front-runner's risk-adj sits *below* projected; a low-floor/high-ceiling midfielder's can sit *above* it — that's the sims pricing in retirements and chaos, not a bug.
 - The range (90% CI) = where they land in 90% of simulations. **Wide = gamble, narrow = safe. Wide is honest, not broken.**
-- Confidence: ~65% = history only (early), ~90% = practice data in, ~95% = post-qualifying.
+- The forecast label tells you which sessions are included. Confidence varies by driver and available evidence.
 
 **The habits that win:**
 1. **Sort by PPM** to find underpriced value — build around it.

@@ -8,6 +8,13 @@ Official qualifying classifications, qualifying Fantasy points, actual sprint gr
 
 ## Consistency and recovery
 
+For a live weekend, run the guarded `post_fp` phase described in the
+[operations guide](OPERATIONS_GUIDE.md#6-phase-post_fp). The workflow recovers
+missing FastF1 practice with OpenF1 and checks the selected session's coverage
+before scoring. It stores the downloaded fallback bundle under
+`data/raw/openf1/yearYYYY/roundN/practice/`. The importer keeps valid laps
+through the recorded finish when it runs past the scheduled end.
+
 The existing feature/model semantics version advances from 3 to 4. Processed practice laps carry `fp_lap_semantics_version=4`; feature extraction rejects stale or unstamped lap populations. Feature parquets and trained model manifests carry `fp_stint_semantics_version=4`, retaining the existing downstream compatibility guard.
 
 `python pipeline/rebuild_fp_pace.py --output outputs/<review>/staged` rebuilds the existing event coverage from persisted raw FastF1 parquets or archived `data/audit/inputs/yearYYYY/roundN/openf1_fpN_KEY/` bundles. It writes staged features, current-season laps and a report. Any failed event prevents declaring the rebuild complete; `--only-events YEAR:ROUND` retries selected events and updates the report.

@@ -98,7 +98,7 @@ PREDICTION_STEPS = [
     ("weather_forecast.py", ["--round", "{round}"]),
     ("06_run_predictions.py", ["--round", "{round}"]),
     ("07_calculate_fantasy.py", ["--round", "{round}"]),
-    ("08_monte_carlo_fantasy.py", ["--round", "{round}"]),
+    ("08_monte_carlo_fantasy.py", ["--round", "{round}", "--no-website-update"]),
 ]
 FP_PREDICTION_STEPS = [
     CURRENT_DOWNLOAD,
@@ -216,8 +216,6 @@ Examples:
                         help="Show what would run without executing")
     args = parser.parse_args(argv)
 
-    phase = PHASES[args.phase]
-
     # Detect or use provided round
     round_num = args.round
     race_name = None
@@ -229,7 +227,7 @@ Examples:
         print(f"Auto-detected: Round {round_num} - {race_name}")
     else:
         # Load race name
-        with open(SEED_DIR / "races.json") as f:
+        with open(SEED_DIR / "races.json", encoding="utf-8") as f:
             races = json.load(f)["races"]
         match = [r for r in races if r["round"] == round_num]
         race_name = match[0]["name"] if match else f"Round {round_num}"
@@ -238,21 +236,37 @@ Examples:
         print(f"Round {round_num} is cancelled. Aborting.")
         sys.exit(1)
 
+    if not args.dry_run and args.phase in ("post_fp", "post_quali"):
+        from pipeline import auto_weekend
+        from pipeline.sync_post_race_official import PendingData
+        try:
+            event = auto_weekend.manual_event(args.phase, round_num)
+            print(f"Confirmed session: {event['session']} ({event['finished_at']})", flush=True)
+            auto_weekend.execute(event)
+        except PendingData as exc:
+            print(f"PENDING: {exc}. Retry when the source data is available.", file=sys.stderr)
+            return 75
+        return 0
+    return run_phase(args.phase, round_num, race_name, dry_run=args.dry_run)
+
+
+def run_phase(phase_name, round_num, race_name, *, dry_run=False, after_prediction=None):
+    phase = PHASES[phase_name]
     # Check models for prediction phases
-    if args.phase in ("post_fp", "post_quali"):
+    if phase_name in ("post_fp", "post_quali"):
         models_dir = PROJECT_ROOT / "models" / "trained"
         required = ["quali_model.json", "race_model.json"]
         missing = [m for m in required if not (models_dir / m).exists()]
         if missing:
             print(f"\n  WARNING: Missing trained models: {', '.join(missing)}")
             print("  Run: python pipeline/run_weekend.py --phase pre_fp")
-            sys.exit(1)
+            return 1
 
     # Header
-    mode = "DRY RUN" if args.dry_run else "EXECUTING"
+    mode = "DRY RUN" if dry_run else "EXECUTING"
     print(f"\n{'=' * 60}")
     print(f"  BoxBoxF1Fantasy Pipeline Runner - {mode}")
-    print(f"  Phase: {args.phase}")
+    print(f"  Phase: {phase_name}")
     print(f"  Round: {round_num} - {race_name}")
     print(f"  {phase['description']}")
     print(f"{'=' * 60}")
@@ -272,9 +286,11 @@ Examples:
         non_fatal = bool(opts.get("non_fatal", False))
         # Replace {round} and {year} placeholders
         resolved_args = [a.replace("{round}", str(round_num)).replace("{year}", str(CURRENT_SEASON)) for a in step_args]
-        success = run_step(script, resolved_args, i, total, dry_run=args.dry_run, non_fatal=non_fatal)
+        success = run_step(script, resolved_args, i, total, dry_run=dry_run, non_fatal=non_fatal)
         results.append((script, success, non_fatal))
-        if not success and not non_fatal and not args.dry_run:
+        if success and script == "06_run_predictions.py" and after_prediction is not None:
+            after_prediction()
+        if not success and not non_fatal and not dry_run:
             print(f"\n  Pipeline stopped at step {i}. Fix the issue and re-run.")
             break
 
@@ -294,17 +310,15 @@ Examples:
     print(f"\n  {successes}/{len(results)} steps completed", end="")
     if optional_warnings:
         print(f"; {optional_warnings} optional warning(s)", end="")
-    if not args.dry_run:
+    if not dry_run:
         print(f" ({elapsed:.1f}s)")
     else:
         print(" (dry run)")
 
-    if not required_failed and not args.dry_run:
-        if args.phase in ("post_fp", "post_quali"):
-            print(f"\n  [OK] Website data updated! Check web/public/data/predictions.json")
-        elif args.phase == "pre_fp_predict":
+    if not required_failed and not dry_run:
+        if phase_name == "pre_fp_predict":
             print(f"\n  [OK] Pre-FP predictions ready (priors only). Check web/public/data/predictions.json")
-        elif args.phase == "post_race":
+        elif phase_name == "post_race":
             print(f"\n  [OK] Post-race analysis complete! Check web/public/data/")
 
     return 1 if required_failed else 0

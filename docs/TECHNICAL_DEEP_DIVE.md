@@ -98,7 +98,7 @@ For end-user UI documentation, see [USER_GUIDE.md](USER_GUIDE.md). For a narrate
 └─────────────────────────────────────────────────┘
 ```
 
-The pipeline is a **directed sequence of numbered Python scripts** (01 through 13) plus a few unnumbered utilities. Each script reads from upstream artifacts (parquets, JSON) and writes to downstream artifacts. Nothing in the pipeline is interactive at runtime — `pipeline/run_weekend.py` orchestrates the right subset of scripts for each weekend phase.
+The numbered pipeline scripts read and write Parquet or JSON artifacts. `pipeline/run_weekend.py` defines the phase order and runs local commands. `pipeline/auto_weekend.py` shares session readiness and forecast validation between local and GitHub runs. Use the [operations guide](OPERATIONS_GUIDE.md) for current commands and deployment.
 
 ---
 
@@ -202,7 +202,7 @@ BoxBoxF1FantasyV2/
 - **What:** Lap-by-lap timing data from FP1, FP2, FP3, Qualifying, Sprint Qualifying, Sprint Race, and Race sessions. Also race results when available.
 - **Why:** Free practice is the only real-world data we have *before* qualifying. Tells us the actual pace of each car this weekend.
 - **Coverage:** Lap times, sector times (3 sectors), tyre compound, pit in/out flags, deleted-lap flags, weather conditions.
-- **Latency:** ~30 minutes after session ends.
+- **Availability:** Timing availability and account requirements depend on the session. A practice run can recover missing FastF1 sessions from OpenF1.
 - **Calendar quirk:** FastF1's 2026 calendar omits cancelled rounds (Bahrain R4, Saudi R5). Always use `fastf1_round(internal_round, year)` from `config/settings.py` before any `fastf1.get_session(...)` call.
 - **Limitations:** Teams sandbag in FP. Mitigated partially by emphasizing consistency, long-run pace, and compound-relative deltas.
 
@@ -215,9 +215,11 @@ BoxBoxF1FantasyV2/
 - **Calendar quirk:** Same as FastF1 — Jolpica/Ergast also omits cancelled rounds. The `download_jolpica_round` function in `01_download_data.py` translates internal → API numbering at the request URL while preserving internal numbering in file paths.
 - **Latency:** Race results typically publish within a few hours of the chequered flag, but sprint sometimes lags longer. Sprint Qualifying Position/Q1-Q3 fields are NOT exposed (see §6 Sprint Model).
 
-### OpenF1 API (Overtake Counts)
+### OpenF1 API (Session Timing, Practice Recovery and Overtakes)
 
 - **What:** Position-tracking data from official F1 timing.
+- **Session readiness:** The runner matches the OpenF1 race to the internal calendar by local event date and uses the meeting and session IDs. Recorded finish messages govern readiness.
+- **Practice recovery:** `import_openf1_fp.py` converts completed laps, stints, race-control messages and weather into the common practice schema. The runner checks raw lap coverage against the session classification before import. The importer applies the [practice lap policy](FP_DELETED_LAP_POLICY.md) and keeps valid laps through the recorded finish if the session overruns.
 - **Why:** Overtakes = +1 fantasy point each. Important and hard to predict.
 - **Coverage:** Per-driver overtake counts per session.
 - **Latency:** ~1-2 hours after race.

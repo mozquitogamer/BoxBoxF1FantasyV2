@@ -1833,7 +1833,7 @@ def print_summary(results: dict, constructor_results: list[dict]) -> None:
 
 
 def save_outputs(results: dict, constructor_results: list[dict],
-                 round_num: int, driver_prices: dict) -> None:
+                 round_num: int, driver_prices: dict, *, update_website: bool = True) -> None:
     """Save Monte Carlo results to disk."""
     pred_dir = PREDICTIONS_DIR / f"round{round_num}"
     pred_dir.mkdir(parents=True, exist_ok=True)
@@ -1864,8 +1864,8 @@ def save_outputs(results: dict, constructor_results: list[dict],
     drivers_df.to_parquet(parquet_path, index=False)
     print(f"  Saved -> {parquet_path}")
 
-    # Update web predictions.json with MC data
-    update_web_predictions(round_num, results, constructor_results)
+    if update_website:
+        update_web_predictions(round_num, results, constructor_results)
 
 
 def update_web_predictions(round_num: int, results: dict,
@@ -1957,6 +1957,8 @@ def main() -> None:
                         help=f"Random seed (default: {DEFAULT_SEED})")
     parser.add_argument("--force", action="store_true",
                         help="Override the race-completed guard (overwrite existing MC outputs)")
+    parser.add_argument("--no-website-update", action="store_true",
+                        help="Save simulation outputs for the website exporter")
     args = parser.parse_args()
 
     if args.round in CANCELLED_ROUNDS_2026:
@@ -2093,7 +2095,8 @@ def main() -> None:
 
     # Display and save
     print_summary(results, constructor_results)
-    save_outputs(results, constructor_results, args.round, driver_prices)
+    save_outputs(results, constructor_results, args.round, driver_prices,
+                 update_website=not args.no_website_update)
 
     print(f"\n{'=' * 90}")
     print("Done.")

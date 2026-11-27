@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       phase:
-        description: 'Automatic schedule, or a manual pipeline (bypasses the delay)'
+        description: 'Automatic schedule or a manual pipeline using a confirmed session finish'
         required: true
         default: auto
         type: choice
@@ -26,8 +26,12 @@ on:
       - 'pipeline/bootstrap_result_history.py'
       - 'pipeline/run_weekend.py'
       - 'pipeline/06_run_predictions.py'
+      - 'pipeline/08_monte_carlo_fantasy.py'
       - 'pipeline/08_export_website_json.py'
+      - 'pipeline/import_openf1_fp.py'
       - 'tests/test_auto_weekend.py'
+      - 'tests/test_openf1_fp_import.py'
+      - 'tests/test_run_weekend_phases.py'
       - 'tests/test_prediction_archive_immutability.py'
       - 'web/public/prediction-context.js'
 
@@ -52,7 +56,7 @@ jobs:
       - run: python -m pip install -r requirements.txt pytest
       - name: Verify schedule and publishing contracts
         run: |
-          python -m pytest tests/test_auto_weekend.py tests/test_auto_post_race.py tests/test_run_weekend_phases.py tests/test_prediction_archive_immutability.py tests/test_fantasy_prices.py tests/test_post_race_classification.py -q
+          python -m pytest tests/test_auto_weekend.py tests/test_auto_post_race.py tests/test_run_weekend_phases.py tests/test_openf1_fp_import.py tests/test_prediction_archive_immutability.py tests/test_fantasy_prices.py tests/test_post_race_classification.py -q
           node --test web/tests/prediction-context.test.js
       - name: Check the live schedule without running a pipeline
         run: python -I -S pipeline/auto_weekend.py --plan
@@ -114,7 +118,7 @@ jobs:
       - name: Check publishing contracts
         if: steps.plan.outputs.due == 'true'
         run: |
-          python -m pytest tests/test_auto_weekend.py tests/test_auto_post_race.py tests/test_run_weekend_phases.py tests/test_prediction_archive_immutability.py tests/test_fantasy_prices.py tests/test_post_race_classification.py -q
+          python -m pytest tests/test_auto_weekend.py tests/test_auto_post_race.py tests/test_run_weekend_phases.py tests/test_openf1_fp_import.py tests/test_prediction_archive_immutability.py tests/test_fantasy_prices.py tests/test_post_race_classification.py -q
           node --test web/tests/prediction-context.test.js
       - name: Run the due or manually requested update
         if: steps.plan.outputs.due == 'true'

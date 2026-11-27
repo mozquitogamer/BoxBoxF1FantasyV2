@@ -116,12 +116,7 @@ def load_control(session_key):
         raise
 
 
-def plan(now):
-    calendar = read_json(SEED_DIR / 'races.json', {})['races']
-    if not any(not race.get('cancelled') and now.date() - timedelta(days=7) <=
-               datetime.fromisoformat(race['date']).date() <= now.date() + timedelta(days=4)
-               for race in calendar):
-        return None
+def session_schedule():
     try:
         sessions = fetch_json(f'{OPENF1}/sessions?year={CURRENT_SEASON}')
     except urllib.error.HTTPError as exc:
@@ -130,16 +125,27 @@ def plan(now):
         raise
     if not isinstance(sessions, list) or not sessions:
         raise PendingData('Session schedule is unavailable')
+    return sessions
+
+
+def plan(now):
+    calendar = read_json(SEED_DIR / 'races.json', {})['races']
+    if not any(not race.get('cancelled') and now.date() - timedelta(days=7) <=
+               datetime.fromisoformat(race['date']).date() <= now.date() + timedelta(days=4)
+               for race in calendar):
+        return None
+    sessions = session_schedule()
     return select_due(calendar, sessions, read_json(STATE_PATH, {}),
                       read_json(auto_post_race.STATE_PATH, {}),
                       read_json(WEB_DATA_DIR / 'predictions.json', {}).get('round', 0), now,
                       load_control)
 
 
-def manual_event(phase, round_num):
+def manual_event(phase, round_num, now=None):
+    now = now or datetime.now(timezone.utc)
     calendar = read_json(SEED_DIR / 'races.json', {})['races']
     if phase == 'post_race' and round_num is None:
-        candidates = auto_post_race.candidate_races(calendar, datetime.now(timezone.utc))
+        candidates = auto_post_race.candidate_races(calendar, now)
         if not candidates:
             raise ValueError('No recent race; enter an internal calendar round')
         round_num = candidates[0]['round']
@@ -148,8 +154,25 @@ def manual_event(phase, round_num):
     race = next((r for r in calendar if r['round'] == round_num and not r.get('cancelled')), None)
     if race is None:
         raise ValueError('Unknown or cancelled round')
-    return {'round': round_num, 'phase': phase, 'race': race['name'], 'manual': True,
-            'session': 'Qualifying' if phase == 'post_quali' else None}
+    if phase == 'post_race':
+        return {'round': round_num, 'phase': phase, 'race': race['name'], 'manual': True}
+
+    sessions = [row for row in session_schedule() if not row.get('is_cancelled')]
+    races = [row for row in sessions if row['session_name'] == 'Race' and local_date(row) == race['date']]
+    if len(races) != 1:
+        raise PendingData('The race weekend has no unique timing schedule yet')
+    if now >= instant(races[0]['date_start']):
+        raise ValueError('Session forecasts close when the race starts')
+    codes = PRACTICE_CODES + ('SQ',) if phase == 'post_fp' else ('Qualifying',)
+    started = [row for row in sessions if row['meeting_key'] == races[0]['meeting_key']
+               and SESSION_CODES.get(row['session_name']) in codes and instant(row['date_start']) <= now]
+    if not started:
+        raise PendingData(f'No {phase} session has started for round {round_num}')
+    session = max(started, key=lambda row: instant(row['date_start']))
+    finish = confirmed_finish(session, load_control(session['session_key']))
+    if finish is None or finish > now:
+        raise PendingData(f'{session["session_name"]} has no confirmed finish yet')
+    return {**event_for(race, session, finish), 'manual': True}
 
 
 def load_script(name):
@@ -162,6 +185,8 @@ def load_script(name):
 
 def expected_practice(event):
     code = event.get('session')
+    if code == 'SQ':
+        return ('FP1',)
     return PRACTICE_CODES[:PRACTICE_CODES.index(code) + 1] if code in PRACTICE_CODES else ()
 
 
@@ -209,41 +234,62 @@ def require_session(event):
     code = event.get('session')
     if not code:
         return
+    if code == 'Qualifying':
+        from config.post_quali import load_post_quali_results
+        if load_post_quali_results(event['round']):
+            return
     import fastf1
     from config.settings import FASTF1_CACHE_DIR, fastf1_round
     FASTF1_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     fastf1.Cache.enable_cache(str(FASTF1_CACHE_DIR), force_renew=True)
-    download = load_script('01_download_data.py').download_fastf1_session
-    output = FASTF1_RAW_DIR / f'year{CURRENT_SEASON}' / f'round{event["round"]}'
-    practice = expected_practice(event)
-    missing = [name for name in (practice or (code,))
-               if not download(CURRENT_SEASON, event['round'], name, output)]
-    if missing:
-        if not practice:
-            raise PendingData(f'{code} telemetry is not available yet')
-        recover_practice(event, missing)
     if code == 'Qualifying':
-        session = fastf1.get_session(CURRENT_SEASON, fastf1_round(event['round']), 'Qualifying')
-        session.load(laps=False, telemetry=False, weather=False, messages=False)
-        results = session.results
+        from fastf1.exceptions import DataNotLoadedError
+        try:
+            session = fastf1.get_session(CURRENT_SEASON, fastf1_round(event['round']), 'Qualifying')
+            session.load(laps=False, telemetry=False, weather=False, messages=False)
+            results = session.results
+        except DataNotLoadedError as exc:
+            raise PendingData('Complete qualifying classification is not available yet') from exc
         if results is None or len(results) != 22 or results['Position'].isna().any() or set(results['Position'].astype(int)) != set(range(1, 23)):
             raise PendingData('Complete qualifying classification is not available yet')
+        return
+
+    download = load_script('01_download_data.py').download_fastf1_session
+    output = FASTF1_RAW_DIR / f'year{CURRENT_SEASON}' / f'round{event["round"]}'
+    missing = [name for name in expected_practice(event)
+               if not download(CURRENT_SEASON, event['round'], name, output)]
+    if missing:
+        recover_practice(event, missing)
+    if code == 'SQ' and not download(CURRENT_SEASON, event['round'], code, output):
+        raise PendingData('Sprint qualifying timing is not available yet')
+
+
+def validate_prediction(event, started):
+    metadata = read_json(PREDICTIONS_DIR / f'round{event["round"]}' / 'prediction_metadata.json', {})
+    if metadata.get('phase') != event['phase'] or metadata.get('round') != event['round']:
+        raise PendingData('Forecast phase does not match the completed session')
+    if instant(metadata['generated_at']) < started:
+        raise PendingData('The forecast was not generated by this run')
+    if event['phase'] == 'post_fp':
+        expected = sorted(expected_practice(event))
+        included = sorted(metadata.get('fp_sessions_included', []))
+        if included != expected:
+            raise PendingData(f'Practice coverage requires {", ".join(expected)}. '
+                              f'The model included {", ".join(included) or "no practice sessions"}')
+    if event.get('session') == 'SQ' and not metadata.get('sprint_grid_is_actual'):
+        raise PendingData('Sprint qualifying grid has not reached the forecast')
 
 
 def validate_forecast(event, started):
+    validate_prediction(event, started)
     payload = read_json(WEB_DATA_DIR / 'predictions.json', {})
-    metadata = read_json(PREDICTIONS_DIR / f'round{event["round"]}' / 'prediction_metadata.json', {})
-    if payload.get('round') != event['round'] or payload.get('phase') != event['phase'] or metadata.get('phase') != event['phase'] or metadata.get('round') != event['round']:
-        raise PendingData('Forecast phase does not match the completed session')
-    if (instant(metadata['generated_at']) < started or instant(payload['simulation_generated_at']) < started
+    if payload.get('round') != event['round'] or payload.get('phase') != event['phase']:
+        raise PendingData('Exported forecast phase does not match the completed session')
+    if (instant(payload['simulation_generated_at']) < started
             or len(payload.get('drivers', [])) != 22 or len(payload.get('constructors', [])) != 11
             or len({row['driver_id'] for row in payload['drivers']}) != 22
             or len({row['constructor_id'] for row in payload['constructors']}) != 11):
         raise ValueError('Fresh complete forecast was not generated')
-    if not set(expected_practice(event)).issubset(metadata.get('fp_sessions_included', [])):
-        raise PendingData('Complete practice telemetry has not reached the forecast')
-    if event.get('session') == 'SQ' and not metadata.get('sprint_grid_is_actual'):
-        raise PendingData('Sprint qualifying grid has not reached the forecast')
     if event['phase'] == 'post_quali' and not (payload.get('final_fix') or {}).get('qualifying_locked'):
         raise PendingData('Qualifying is not locked in the simulation')
     weather = read_json(WEB_DATA_DIR / 'weather.json', {})
@@ -252,14 +298,18 @@ def validate_forecast(event, started):
 
 
 def execute(event):
-    started = datetime.now(timezone.utc)
     if event['phase'] == 'post_race':
         auto_post_race.main(['--round', str(event['round'])])
     else:
+        from pipeline.run_weekend import run_phase
+        started = datetime.now(timezone.utc)
         require_session(event)
-        auto_post_race.run('weather_forecast.py', '--round', event['round'])
-        auto_post_race.run('run_weekend.py', '--phase', event['phase'], '--round', event['round'])
+        result = run_phase(event['phase'], event['round'], event['race'],
+                           after_prediction=lambda: validate_prediction(event, started))
+        if result:
+            raise RuntimeError(f'{event["phase"]} pipeline failed for round {event["round"]}')
         validate_forecast(event, started)
+        print('Verified website forecast at web/public/data/predictions.json', flush=True)
     if event.get('key'):
         state = read_json(STATE_PATH, {'season': CURRENT_SEASON, 'completed': {}})
         state.setdefault('completed', {})[event['key']] = {**event, 'completed_at': datetime.now(timezone.utc).isoformat()}

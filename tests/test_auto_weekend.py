@@ -158,13 +158,14 @@ def test_forecast_gate_requires_fresh_unique_complete_roster(tmp_path, monkeypat
 
 def test_new_practice_sq_qualifying_and_weather_evidence_is_required(tmp_path, monkeypatch):
     event, started, payload, metadata, save = setup_files(tmp_path, monkeypatch)
-    with pytest.raises(PendingData, match='practice'):
+    with pytest.raises(PendingData, match='Practice'):
         automatic.validate_forecast({**event, 'session': 'FP2'}, started)
     save(metadata={**metadata, 'fp_sessions_included': ['FP2']})
-    with pytest.raises(PendingData, match='practice'):
+    with pytest.raises(PendingData, match='Practice'):
         automatic.validate_forecast({**event, 'session': 'FP2'}, started)
     save(metadata={**metadata, 'fp_sessions_included': ['FP1', 'FP2']})
     automatic.validate_forecast({**event, 'session': 'FP2'}, started)
+    save()
     with pytest.raises(PendingData, match='Sprint'):
         automatic.validate_forecast({**event, 'session': 'SQ'}, started)
     save(metadata={**metadata, 'sprint_grid_is_actual': True})
@@ -185,10 +186,30 @@ def test_new_practice_sq_qualifying_and_weather_evidence_is_required(tmp_path, m
 
 def test_manual_selection_bypasses_delay_but_unknown_round_is_rejected(tmp_path, monkeypatch):
     setup_files(tmp_path, monkeypatch)
-    assert automatic.manual_event('post_quali', None)['round'] == 19
+    quali = session('Qualifying', 2)
+    monkeypatch.setattr(automatic, 'session_schedule', lambda: [quali, race_session()])
+    monkeypatch.setattr(automatic, 'load_control', lambda key: control(phase=3))
+    event = automatic.manual_event('post_quali', None, FINISH)
+    assert event['round'] == 19 and event['session'] == 'Qualifying'
+    assert automatic.instant(event['due_at']) > FINISH
     assert automatic.manual_event('post_race', 19)['manual']
     with pytest.raises(ValueError, match='Unknown'):
         automatic.manual_event('post_race', 4)
+
+
+def test_manual_practice_uses_latest_started_session_and_waits_for_its_finish(tmp_path, monkeypatch):
+    setup_files(tmp_path, monkeypatch)
+    fp2 = session('Practice 2', 2, START + timedelta(hours=4))
+    fp3 = session('Practice 3', 3, START + timedelta(days=1))
+    monkeypatch.setattr(automatic, 'session_schedule', lambda: [session(), fp2, fp3, race_session()])
+    fp2_finish = FINISH + timedelta(hours=4)
+    monkeypatch.setattr(automatic, 'load_control', lambda key: control(fp2_finish) if key == 2 else control())
+    with pytest.raises(PendingData, match='Practice 2'):
+        automatic.manual_event('post_fp', 19, fp2_finish - timedelta(minutes=5))
+    event = automatic.manual_event('post_fp', 19, fp2_finish)
+    assert event['session'] == 'FP2'
+    assert event['key'] == '2026:19:FP2'
+    assert event['meeting_key'] == 1296
 
 
 def test_manual_round_only_preserves_post_race_command_and_plan_is_read_only(monkeypatch):
@@ -200,18 +221,19 @@ def test_manual_round_only_preserves_post_race_command_and_plan_is_read_only(mon
 
 
 def test_failed_validation_never_marks_session_complete(tmp_path, monkeypatch):
+    from pipeline import run_weekend
     setup_files(tmp_path, monkeypatch)
     event = automatic.event_for(RACE, session(), FINISH)
     calls = []
     monkeypatch.setattr(automatic, 'require_session', lambda event: None)
-    monkeypatch.setattr(automatic.auto_post_race, 'run', lambda *args: calls.append(args))
+    monkeypatch.setattr(run_weekend, 'run_phase', lambda *args, **kwargs: calls.append(args) or 0)
     def pending(*args):
         raise PendingData('feed pending')
     monkeypatch.setattr(automatic, 'validate_forecast', pending)
     with pytest.raises(PendingData):
         automatic.execute(event)
     assert not automatic.STATE_PATH.exists()
-    assert calls[0] == ('weather_forecast.py', '--round', 19)
+    assert calls[0] == ('post_fp', 19, RACE['name'])
     monkeypatch.setattr(automatic, 'validate_forecast', lambda *args: None)
     automatic.execute(event)
     assert event['key'] in json.loads(automatic.STATE_PATH.read_text())['completed']

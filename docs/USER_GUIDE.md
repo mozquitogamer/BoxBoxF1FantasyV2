@@ -399,7 +399,7 @@ Below the main content on every page:
 
 ## General Tips
 
-1. **Run after FP3 for best predictions** — confidence jumps from ~65% to ~90% when FP telemetry is included
+1. **Check the forecast stage before locking your team.** A regular weekend can have separate FP1, FP2 and FP3 updates. FP3 is the final practice forecast when all three sessions run. On sprint weekends, use the FP1 forecast before sprint qualifying locks your team.
 2. **Don't ignore constructors** — pit stop points + qualifying bonus are easy points
 3. **Use the Multi-Week Planner when you have 3+ free transfers** — the value of planning ahead is highest when you have flexibility
 4. **Lock your best performers** in the Transfer Advisor to protect them from being swapped

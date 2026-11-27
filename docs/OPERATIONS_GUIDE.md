@@ -15,7 +15,7 @@ For *why* the system is designed the way it is (model architecture, feature engi
 3. [Phase Cheat Sheet](#3-phase-cheat-sheet)
 4. [Phase: pre_fp (initial / periodic retrain)](#4-phase-pre_fp)
 5. [Phase: pre_fp_predict (priors-only forecast)](#5-phase-pre_fp_predict)
-6. [Phase: post_fp (after FP3, primary forecast)](#6-phase-post_fp)
+6. [Post-practice forecasts](#6-phase-post_fp)
 7. [Phase: post_quali (after qualifying)](#7-phase-post_quali)
 8. [Phase: post_race (after the race)](#8-phase-post_race)
 9. [Sprint Weekend Differences](#9-sprint-weekend-differences)
@@ -33,7 +33,7 @@ For *why* the system is designed the way it is (model architecture, feature engi
 
 ### Environment
 
-- **Python 3.10+** (tested on 3.10–3.14; pinned via `requirements.txt`)
+- **Python 3.12** to match the GitHub publishing workflow
 - **Git** for source control + Vercel auto-deploy
 - ~5 GB free disk for raw data + FastF1 cache
 - Internet access (FastF1 fetches from formula1.com timing servers; Jolpica/OpenF1/Open-Meteo are HTTP APIs)
@@ -42,15 +42,15 @@ For *why* the system is designed the way it is (model architecture, feature engi
 git clone https://github.com/mozquitogamer/BoxBoxF1FantasyV2.git
 cd BoxBoxF1FantasyV2
 python -m venv .venv
-# Windows
-.venv\Scripts\activate
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
 # macOS/Linux
 source .venv/bin/activate
 
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-`requirements.txt` pins: `pandas>=2.2`, `numpy>=1.26`, `fastf1>=3.4`, `scikit-learn>=1.5`, `lightgbm>=4.3`, `pyarrow>=15`, `requests`, `tqdm`, `joblib`, `matplotlib`, `seaborn`. XGBoost is required (install separately if not pulled in by transitive deps): `pip install xgboost>=2.0`.
+`requirements.txt` includes XGBoost, FastF1 and the other dependencies. If PowerShell blocks activation, run `.\.venv\Scripts\python.exe -m pip install -r requirements.txt` and use `.\.venv\Scripts\python.exe` in place of `python` below.
 
 ### Working Directory
 
@@ -95,9 +95,9 @@ data/seed/
 
 ### Sprint Rounds
 
-**Sprint Rounds in 2026 (internal numbering): 2, 6, 7, 11, 14, 18.**
+**Sprint Rounds in 2026 (internal numbering): 2, 6, 7, 11, 14, 19.**
 
-That maps to: China, Miami, Canada, British, Belgian, Singapore. Defined in `config/settings.py::SPRINT_ROUNDS_2026`.
+China, Miami, Canada, Great Britain, the Netherlands and Singapore are defined in `config/settings.py::SPRINT_ROUNDS_2026`.
 
 ### Cancelled Rounds & Why That Matters
 
@@ -107,7 +107,7 @@ Both **FastF1 AND Jolpica/Ergast** omit cancelled races from their numbering. In
 
 The pipeline preserves internal numbering everywhere (file paths, log lines, CLI arguments). Translation to external API numbering happens at exactly the points where we hit FastF1 or Jolpica — via `config.settings.fastf1_round(internal_round, year)`. The helper is named `fastf1_round` for historical reasons but applies to both APIs.
 
-**You don't need to think about this in normal operation** — the wrappers handle it. But if you ever see "FastF1 silently loaded Monaco when I asked for round 6" or "Jolpica returned `Races: []`", the cause is almost always a missing `fastf1_round()` translation, not a data outage.
+Use internal round numbers in every command in this guide. The practice planner matches the OpenF1 meeting by the race's local date and uses its session keys. A `Races: []` response can also mean Jolpica has yet to publish the result.
 
 ### Full Calendar (Internal Numbering)
 
@@ -130,13 +130,14 @@ The pipeline preserves internal numbering everywhere (file paths, log lines, CLI
 | 15 | Italian GP (Monza) | No | |
 | 16 | Spanish GP (Madrid) | No | |
 | 17 | Azerbaijan GP (Baku) | No | |
-| 18 | Singapore GP | **Yes** | |
-| 19 | US GP (Austin) | No | |
-| 20 | Mexican GP | No | |
-| 21 | Brazilian GP (São Paulo) | No | |
-| 22 | Las Vegas GP | No | |
-| 23 | Qatar GP (Lusail) | No | |
-| 24 | Abu Dhabi GP (Yas Marina) | No | |
+| 18 | Bahrain GP in Malaysia (Sepang) | No | Added in October |
+| 19 | Singapore GP | **Yes** | |
+| 20 | US GP (Austin) | No | |
+| 21 | Mexican GP | No | |
+| 22 | Brazilian GP (São Paulo) | No | |
+| 23 | Las Vegas GP | No | |
+| 24 | Qatar GP (Lusail) | No | |
+| 25 | Abu Dhabi GP (Yas Marina) | No | |
 
 Cross-check authoritative source: `data/seed/races.json`.
 
@@ -150,21 +151,21 @@ The pipeline has five named phases driven by `pipeline/run_weekend.py`. Each one
 |-------|-------------|--------------|------------|--------|
 | `pre_fp` | Pre-season + every 6+ races | Download historical → retrain all models | — | New `models/trained/*.json` |
 | `pre_fp_predict` | Mon–Thu before a weekend (or whenever you want a forecast before FP1) | Priors-only predictions (no FP telemetry yet) | ~65–70% | `predictions_round{N}.json` |
-| `post_fp` | Friday/Saturday after FP1 (sprint) or FP3 (regular) | Adds FP telemetry features and re-predicts | ~85–95% | Updated `predictions_round{N}.json` + `fp_analysis.json` |
+| `post_fp` | After each completed practice session, or after sprint qualifying | Re-predicts using the confirmed practice sessions and the actual sprint grid when available | Varies with evidence | Live predictions, session archive and `fp_analysis.json` |
 | `post_quali` | After qualifying ends | Re-predicts race using actual quali grid | ~95% | Updated `predictions_round{N}.json` |
 | `post_race` | After the race | Computes actuals, accuracy, race deep dive, overtakes | — | `actual_round{N}.json`, `deep_dive_round{N}.json`, `pitstops_round{N}.json`, `post_race_round{N}.json` |
 
 ### One-Liner
 
 ```bash
-python pipeline/run_weekend.py --phase post_fp --round 7
-# Auto-detects round if --round omitted (uses next non-cancelled race in races.json)
-python pipeline/run_weekend.py --phase post_fp --dry-run    # Preview commands without running
+python pipeline/auto_weekend.py --phase post_fp --round 24 --plan
+python pipeline/run_weekend.py --phase post_fp --round 24
+python pipeline/run_weekend.py --phase post_fp --round 24 --dry-run
 ```
 
-### Phase Auto-Detection
+### Round Selection
 
-If you omit `--round`, the runner inspects `data/seed/races.json` and picks the first non-cancelled race whose date is ≥ today (with a 1-day grace after the race, so you can still run `post_race` Monday). This is convenient but can pick the wrong round if today's date drifts. **Always pass `--round` explicitly during a live race weekend.**
+Replace `24` with the active internal round from `data/seed/races.json`. If you omit `--round`, `run_weekend.py` uses the calendar with a one-day grace period after each race. Explicit prediction phases in `auto_weekend.py` use the live forecast's round when the round is omitted. Use an explicit round during the race weekend.
 
 ### Phase Compositions
 
@@ -179,12 +180,12 @@ python pipeline/run_weekend.py --phase post_race --round 7 --dry-run
 |---|---|
 | `pre_fp` | Download historical data, rebuild training rows, train models. |
 | `pre_fp_predict` | Refresh priors, predict and score, simulate, export, then refresh the horizon, V13 decision, and SEO pages. |
-| `post_fp` | Build FP features, predict and score, simulate, analyze FP, export, then refresh the horizon, V13 decision, and SEO pages. |
+| `post_fp` | Verify session timing, recover any missing completed practice, build FP features and refreshed weather, validate model inputs, simulate, analyze FP, refresh the horizon, export predictions and V13, then regenerate SEO pages. |
 | `post_quali` | Run the FP prediction chain with qualifying available, then refresh the horizon and SEO pages. |
 | `post_race` | Fetch results and session weather, analyze the race, collect overtakes and pit times, calculate actual points, export, then refresh the V13 manager and SEO pages. |
 
-Horizon, V13, and SEO steps are optional in the runner. A failure there warns
-without stopping the required prediction or export steps. Horizon projections
+Horizon and SEO steps are optional in the runner. V13 refresh is required for
+the pre-practice and post-practice forecast exports and for post-race settlement. Horizon projections
 cover the next five rounds; the transfer planner uses them when available.
 For a standalone horizon refresh:
 
@@ -242,47 +243,35 @@ What runs (see [Phase Compositions](#phase-compositions)):
 
 Driver cards will show ~65–70% confidence vs ~85–95% in `post_fp`. Use this for directional reads ("is VER expected to dominate Montreal?"), not for locked-in lineup decisions.
 
-### Publishing
-
-```bash
-git add web/public/data/ && git commit -m "Pre-FP predictions for R7 (Canada)" && git push
-```
+See the [manual publishing checklist](#manual-publishing-checklist) after a successful export.
 
 ---
 
 ## 6. Phase: `post_fp`
 
-**When:** After all FP sessions are complete and FastF1 timing data is available. Wait ~30 minutes after the final session ends.
-
-- **Regular weekend (Friday/Saturday):** After FP3 (Saturday morning).
-- **Sprint weekend (Friday only):** After FP1. Sprint Qualifying happens Friday afternoon — get this run published *before* SQ if you want chip/transfer guidance for the sprint deadline.
-
-**Purpose:** This is the **primary prediction update** for the weekend. FP telemetry adds the "how fast is the car *this weekend in current conditions*" signal that priors alone can't capture.
+Run after FP1 or FP2 for an interim forecast and after FP3 for the final regular-weekend practice forecast. On a sprint weekend, run after FP1 for the actionable forecast before the sprint qualifying lock. A later run can include the actual sprint grid. The [scheduled workflow](AUTOMATIC_POST_RACE.md) becomes eligible 35 minutes after the confirmed finish. A manual run can start as soon as the timing feed confirms the session and the inputs are available.
 
 ```bash
-python pipeline/run_weekend.py --phase post_fp --round 7
+python pipeline/auto_weekend.py --phase post_fp --round 24 --plan
+python pipeline/run_weekend.py --phase post_fp --round 24
 ```
 
-What runs:
-1. `01_download_data.py --mode current --round 7` — pulls FP1/FP2/FP3 (or FP1+SQ on sprint weekends) telemetry from FastF1.
-2. `02_build_laps.py --round 7` — cleans laps: removes in/out/SC/VSC laps, normalizes compounds, deletes invalidated laps. Saves `data/processed/laps/round{N}/all_laps_fp{1,2,3}.parquet`. **On sprint weekends, also saves `all_laps_sprint_qualifying.parquet`** which is consumed only by `10_fp_analysis.py` (Race Deep Dive page) — not by model feature extraction.
-3. `03_extract_features.py --round 7` — produces 40+ pace/consistency/degradation features per driver from FP laps only. Saves `data/processed/features/round{N}/features.parquet`.
-4. `06_run_predictions.py` — phase-aware: detects no actual quali yet → uses `race_model_fp.json` (trained on walk-forward predicted quali to match inference distribution).
-5. `07_calculate_fantasy.py` → `08_monte_carlo_fantasy.py` → `10_fp_analysis.py` → `08_export_website_json.py`.
+Replace `24` with the active internal round. The first command queries the timing feed and shows the selected session. The second runs the complete forecast locally.
 
-**Two FP-driven adjustments run inside step 4 (`06_run_predictions.py`)** — see Technical Deep Dive §7 for the full detail:
+1. OpenF1 identifies the meeting and confirms the finish of the latest started practice or sprint qualifying session. Exit code 75 means to retry when the finish or timing data is available.
+2. The runner tries FastF1 for every required practice session through that point and imports missing sessions from OpenF1. A confirmed late finish keeps valid laps after the scheduled end. [Practice lap policy](FP_DELETED_LAP_POLICY.md)
+3. The pipeline builds lap features and fresh weather, then checks the model phase and session coverage before fantasy scoring or simulation. Timed laps deleted for track limits remain pace evidence. Sprint qualifying lap times stay in practice analysis and its actual grid enters sprint inference.
+4. After simulation and export, the runner verifies 22 drivers, 11 constructors and fresh same-round weather. It records the completed session in `data/automation/weekend_state.json`.
+
+**Two FP-driven adjustments run inside `06_run_predictions.py`** — see Technical Deep Dive §7 for the full detail:
 - **FP-pace quali blend** — the predicted qualifying is blended toward this weekend's FP pace (a composite of best lap + best-3 + best-5 lap averages), because raw FP pace backtests as a *better* quali predictor than the model alone. Weight is track-scaled (0.6 normal → 0.80 at Monaco-level one-lap circuits). Tunables: `FP_QUALI_BLEND_TUNABLES` at the top of `06_run_predictions.py`.
 - **Phase-aware grid-anchoring** — pre-FP forecasts remain unanchored because their grid is priors-only. Once at least 10 drivers have usable current-weekend FP quali pace, hard-to-overtake circuits blend the predicted race finish toward that evidence-backed grid (0 below difficulty 6 → 0.85 at Monaco). Tunables: `GRID_ANCHOR_*` in `config/track_classifications.py`; the FP evidence threshold is `FP_QUALI_BLEND_TUNABLES["min_drivers_with_pace"]` in `06_run_predictions.py`.
 
 Both self-skip when no FP data is present, so `pre_fp_predict` and horizon projections are unaffected.
 
-### Lock Deadline — why `post_fp` is *the* run that matters
+### Before the Fantasy Lock
 
-F1 Fantasy locks at the start of qualifying (or sprint qualifying for sprint weekends). The deadline is **before qualifying**, so free practice is the only data available when managers pick teams — **`post_fp` is the actionable prediction, not a rough draft.** `post_quali` (below) is for post-deadline / retrospective interest only. Treat the `post_fp` push as the deliverable and **get it out before quali.** Vercel deploys ~30–60 seconds after `git push`.
-
-```bash
-git add web/public/data/ && git commit -m "Post-FP predictions for R7 (Canada)" && git push
-```
+F1 Fantasy locks at the start of qualifying, or sprint qualifying on sprint weekends. Publish the final actionable practice forecast before that deadline. Use the [manual publishing checklist](#manual-publishing-checklist) and verify `fp_sessions_included` includes FP1 through FP3 when all three have run.
 
 ---
 
@@ -298,7 +287,7 @@ git add web/public/data/ && git commit -m "Post-FP predictions for R7 (Canada)" 
 - `predicted_grid_position` / exported `predicted_grid` = final race start after penalties and the reference for positions gained/lost.
 
 ```bash
-python pipeline/run_weekend.py --phase post_quali --round 7
+python pipeline/run_weekend.py --phase post_quali --round 24
 ```
 
 The prediction and FP steps match `post_fp`; the export uses the `post_quali`
@@ -308,9 +297,9 @@ phase and V13 publishing is omitted. The intelligence is in `06_run_predictions.
 - It preserves that classification as `actual_quali_position`, applies `grid_penalties.json` separately, and writes the final start as `predicted_grid_position`.
 - `07_calculate_fantasy.py` banks qualifying points from the official classification, not the penalised grid.
 - `08_monte_carlo_fantasy.py` freezes both known values across all 10,000 simulations and samples only the race. Confirm `simulation_params.qualifying_locked` is `true`.
-- If not, behaves identically to `post_fp`.
+- The runner returns pending if the official phase or locked qualifying cannot be confirmed.
 
-You can run `post_quali` even if Jolpica hasn't published quali yet — FastF1 usually has it within ~30 minutes of session end.
+The guarded run requires the confirmed Q3 finish and a complete classification. It accepts the audited `data/seed/post_quali_results.json` entry when present, or a complete FastF1 classification. If FastF1 access is unavailable and there is no audited entry, wait for the needed source data.
 
 The website export exposes both points families:
 
@@ -328,21 +317,19 @@ switch = outgoing banked qualifying points + incoming projected_points_race
 
 Do not wire it to `expected_points_race`, `mc_race_pts_mean`, `basisPoints()`, or `optimizeBasis`; those are the Risk-adjusted/shared optimizer paths.
 
-```bash
-git add web/public/data/ && git commit -m "Post-quali predictions for R7 (Canada)" && git push
-```
+Use the [manual publishing checklist](#manual-publishing-checklist) after the export passes.
 
 ---
 
 ## 8. Phase: `post_race`
 
-**When:** After the race ends. Wait ~1 hour for FastF1 to finalize timing, ~3-5 hours for Jolpica/Ergast to publish results.
+**When:** After the official race classification, Fantasy totals and prices are complete. The scheduled run becomes eligible 24 hours after the confirmed race finish. A manual settlement can start as soon as the official inputs are ready.
 
-**Purpose:** Compute actual fantasy points for every driver/constructor, full race analysis, overtakes, pit stop times, and update accuracy dashboard.
+**Purpose:** Reconcile actual Fantasy points for all drivers and constructors, refresh the race analysis and advance the live forecast when the next round is available.
 
-### Pre-step: Update overtakes.csv
+### Official overtakes override
 
-Before running, manually copy official F1 Fantasy overtake/position counts into `data/seed/overtakes.csv`. F1 Fantasy's count sometimes differs from FastF1/OpenF1's auto-detected count, and the official number is what gets scored. **Exact format** (one row per driver per round):
+If the reconciliation exposes a known mismatch in detected overtakes, enter the official F1 Fantasy counts in `data/seed/overtakes.csv` for the affected round. The official override takes precedence in scoring. The format uses one row per driver per round.
 
 ```csv
 driver_id,round,overtakes_made,positions_gained,positions_lost,sprint_positions_gained,sprint_positions_lost,sprint_overtakes
@@ -365,25 +352,21 @@ This powers the per-cause reliability features and the MC's **cause-gated teamma
 ### Run the phase
 
 ```bash
-python pipeline/run_weekend.py --phase post_race --round 7
+python pipeline/auto_weekend.py --phase post_race --round 24
 ```
 
-The runner saves completed-session weather, analyzes race pace, then writes the
+Use the internal round for the completed race. The settlement wrapper validates
+official results and Fantasy data, then launches the race analysis. The runner saves completed-session weather, analyzes race pace, then writes the
 FastF1 overtake fallback before OpenF1's canonical overtake file. It formats
 pit-stop times **before** `11_actual_fantasy_points.py` calculates actual
 scores, so the first scoring run sees the final available inputs. The export
-then refreshes web JSON; optional V13 manager and SEO steps follow. The
+then refreshes web JSON and the required V13 manager. The SEO step is optional. The
 actual-points step reports when `overtakes.csv` overrides detected counts.
 Use the [dry run](#phase-compositions) for the exact current order.
 
-### Post-step: Update prices and official points
+### Official points and prices
 
-After F1 Fantasy publishes the new prices (usually Tuesday after the race) and official points (usually within 24 hours):
-
-1. **Edit `data/seed/fantasy_prices.json`** — add a `price_history` entry for round N+1 with the new prices, and update `drivers`/`constructors` blocks with current prices.
-2. **Edit `data/seed/official_fantasy_points.json`** — add a `rounds.{N}` entry with `drivers` (22 totals) and `constructors` (11 totals).
-3. **Edit `data/seed/dotd_winners.json`** — add `"{N}": "ABC"` mapping for the DOTD winner.
-4. Re-run `python pipeline/08_export_website_json.py --round N` to push these into the web data.
+Settlement syncs official prices, Fantasy totals and Driver of the Day before reconciliation. The price snapshot after round N is `price_history.N`. Retry the settlement command when an official feed is still pending. If an official correction requires a seed edit, verify it against the source and rerun settlement.
 
 ### Recalibrate Monte Carlo intervals
 
@@ -395,9 +378,7 @@ This compares MC predictions vs actuals across all completed rounds and updates 
 
 ### Publish
 
-```bash
-git add web/public/data/ data/seed/ && git commit -m "Post-race R7 + prices + official points" && git push
-```
+Use the [manual publishing checklist](#manual-publishing-checklist). Settlement can also update the next round's forecast, so confirm the settled archive and the live round separately.
 
 ### Jolpica/Ergast lag — what to do
 
@@ -582,8 +563,20 @@ Every pipeline script with every flag. `(orchestrated)` means it's normally call
 ```
 --phase {pre_fp,pre_fp_predict,post_fp,post_quali,post_race}   (required)
 --round N                                                       (auto-detected if omitted)
---dry-run                                                       (print steps, don't run)
+--dry-run                                                       (print steps without checking timing)
 ```
+
+### `pipeline/auto_weekend.py` — Session planner and verified settlement
+
+```
+--phase {auto,post_fp,post_quali,post_race}    (default: auto)
+--round N                                    (internal round)
+--plan, --dry-run                            (check live readiness without generating files)
+```
+
+Use `--phase post_fp --round N --plan` to check the selected session. Exit code 75
+means data is pending. See the [automatic workflow guide](AUTOMATIC_POST_RACE.md)
+for round defaults and GitHub dispatch.
 
 ### `pipeline/01_download_data.py` — Data downloader (orchestrated)
 
@@ -715,9 +708,12 @@ Reads `predictions.parquet`, applies F1 Fantasy 2026 scoring rules. Outputs `fan
 --simulations N     (default: 10000)
 --seed N            (default: 42)
 --force             (override the race-completed guard)
+--no-website-update (save simulation artifacts for the exporter)
 ```
 
-10K-iteration simulation with calibrated noise. Auto-loads `data/seed/mc_calibration.json` if present. Outputs `monte_carlo_fantasy.json` + `.parquet`. Race-completed-guarded like 06.
+The 10,000-iteration simulation reads the available calibration and writes
+`monte_carlo_fantasy.json` and `.parquet`. The phase runner passes
+`--no-website-update` so the public JSON is written by the export step.
 
 When every driver has `actual_quali_position`, the script logs `Post-quali mode: actual qualifying and starting grid fixed across sims`, sets `simulation_params.qualifying_locked=true`, and outputs race-only percentiles (`mc_race_pts_p5/p25/median/p75/p95`) alongside the total-score percentiles. Treat a missing/false lock after completed qualifying as a failed post-quali run; check the downloaded qualifying data before exporting.
 
@@ -725,6 +721,7 @@ When every driver has `actual_quali_position`, the script logs `Post-quali mode:
 
 ```
 --round N                              (required)
+--actuals-only                          (refresh actuals for the requested round)
 --phase {auto, pre_fp, post_fp, post_quali}   (default: auto — reads sidecar)
 --force                                (override the race-completed guard)
 --reconstructed                        (mark this export as a post-hoc reconstruction; sets reconstructed=true in JSON)
@@ -740,23 +737,18 @@ Bundles all parquets/JSONs into `web/public/data/*.json`. Auto-syncs official fa
 3. Data-state inference fallback (only when sidecar missing)
 
 **Per-round outputs:**
-- `predictions_round{N}_{phase}.json` — **phase-tagged archive**, always written. Records what we predicted at this specific phase (pre-FP, post-FP, post-quali). The accuracy tab uses these to show how the forecast improved as more data arrived.
-- `predictions_round{N}.json` — **canonical archive**. Race-completed-guarded: refuses to overwrite if the race has already happened and the archive exists, unless `--force` is passed. This is the "first honest forecast" snapshot.
+- `predictions_round{N}_{phase}.json` — write-once phase archive used to compare pre-FP, post-FP and post-quali forecasts.
+- `predictions_round{N}_post_fp_{fp1|fp2|fp3|sq}.json` — write-once archive for the selected practice or sprint qualifying session. A later run can refresh live predictions while preserving both archives.
+- `predictions_round{N}.json` — latest canonical forecast for the round, frozen once the race has happened.
 - Driver entries retain deterministic components as `projected_points_quali`, `projected_points_race`, and (on sprint weekends) `projected_points_sprint_race`, even after the `expected_points_*` display fields are replaced with MC means. Final Fix depends on this separation.
 - `data/audit/predictions_log.jsonl` — one-line audit entry appended.
 - `data/audit/snapshots/round{N}/{ISO}_{phase}.json` — full immutable snapshot.
 
-> **GOTCHA #1: `--round N` always rewrites `predictions.json` to round N's predictions.** The website's home page reads `predictions.json` to know which round is "current". If you re-export an old round, you'll clobber the current round's predictions on the front page.
->
-> **Workflow:** when re-exporting a previous round, always follow up with a re-export of the current round:
-> ```bash
-> python pipeline/08_export_website_json.py --round 6   # refresh old round's actuals
-> python pipeline/08_export_website_json.py --round 7   # restore current round to predictions.json
-> ```
+The homepage reads `predictions.json`. The exporter protects it from an older round. For a completed round's corrected actuals, use `python pipeline/08_export_website_json.py --round N --actuals-only`.
 
 > **GOTCHA #2 (FIXED, but read this anyway): Re-running predictions for a completed race used to pollute the accuracy archive.** Before the guards were added (May 2026), running `06_run_predictions.py`, `07_calculate_fantasy.py`, `08_monte_carlo_fantasy.py`, or `08_export_website_json.py` for an already-completed round would silently overwrite the archived prediction with a fresh "prediction" generated by a model that had already seen the race results in its training data. This produced artificially-perfect predictions (e.g. round 3 had MAE 0.50 and 22/22 quali matches — impossible without hindsight).
 >
-> All four scripts now refuse to overwrite outputs for past rounds unless `--force` is passed. The phase-tagged archive (`predictions_round{N}_{phase}.json`) is always written and is the source of truth — the canonical archive is preserved frozen.
+> The race-completed guards protect existing forecasts. Keep `--force` for an audited recovery with a known cutoff.
 >
 > **Recovery:** If you suspect old archives are polluted, run `python pipeline/recover_archives.py --rounds 1,2,3` to walk-forward retrain models with `--exclude-after 2026:{N}` and reconstruct honest pre-FP / post-FP archives tagged `reconstructed: true`.
 
@@ -1063,10 +1055,25 @@ GitHub
    ↓
 Vercel (auto-detects push, redeploys)
    ↓
-boxboxf1fantasy.com (live within ~30-60 seconds)
+boxboxf1fantasy.com (live after the deployment is ready)
 ```
 
-No build step. The Vercel project root is `web/`; its active config is `web/vercel.json`, and Vercel serves `web/public/` as-is. Static JSON in `web/public/data/` is loaded client-side by `app.js`.
+The Vercel project root is `web/` and its deployment configuration is
+`web/vercel.json`. The app loads static JSON from `web/public/data/`.
+
+### Manual publishing checklist
+
+1. Start from a clean, up-to-date checkout of `master`. After running the phase, confirm a zero exit code and review `git status --short`. For practice, compare `round`, `phase`, `fp_sessions_included` and `simulation_generated_at` in `web/public/data/predictions.json` against the intended update. Review any optional horizon or SEO warnings.
+2. Stage the generated public site and the corresponding audit, workflow state, weather history, evaluation and V13 records. Stage reviewed seed or model-row changes from a settlement if present. The raw feeds and local prediction intermediates are Git-ignored.
+
+   ```bash
+   git add -- web/public data/audit data/automation data/evaluation/prospective data/forecasts/weather data/v13
+   git diff --cached --stat
+   git commit -m "Publish verified weekend update"
+   git push origin HEAD:master
+   ```
+
+3. Check that Vercel marks that commit ready for production. Compare the live `/data/predictions.json` against the intended round, phase, session list and simulation timestamp. For a practice deployment, also open `/data/fp_analysis.json` and the round's picks page. A successful push alone confirms delivery to GitHub.
 
 ### What lives where
 
@@ -1156,7 +1163,11 @@ python -c "import fastf1; s = fastf1.get_session(2026, 5, 'Sprint Qualifying'); 
 ```
 
 ### "FP features found for 0 drivers" in `06_run_predictions.py`
-`data/processed/features/round{N}/features.parquet` is missing or empty. Re-run `02_build_laps.py` then `03_extract_features.py` for that round.
+`data/processed/features/round{N}/features.parquet` is missing or empty. Run the guarded `post_fp` phase for the active round so it can check completion and recover missing source data.
+
+### FastF1 fails or the practice run reports `PENDING`
+
+If FastF1 reports authentication errors or empty timing, look for the OpenF1 import of each required session. When either the completion record or the full backup input is unavailable, the command exits 75. Run `auto_weekend.py --phase post_fp --round N --plan` to identify the selected session and retry after the feed is complete. Use the phase runner once the feed is ready so it checks the model's session coverage before scoring and export.
 
 ### `models/trained/quali_model.json` not found
 Run `--phase pre_fp` to retrain. If you have a known-good prior version in git, you can also `git checkout HEAD~N -- models/trained/`.
@@ -1179,10 +1190,10 @@ If the model is genuinely misreading *this weekend's* form (e.g. a team clearly 
 OpenF1 sometimes lags. Re-run `13_fetch_openf1_overtakes.py --year 2026 --round N` later, or rely on FastF1-method counts from `12_count_overtakes.py`.
 
 ### `git push` rejected (non-fast-forward)
-Someone (or auto-tooling) pushed since you last pulled. Run:
-```bash
-git pull --rebase && git push
-```
+Fetch `origin/master` and check whether the new commit includes a later race
+or session forecast. If it does, regenerate only the update still needed from
+the new tip. Otherwise rebase, resolve any generated-file conflicts and
+recheck the forecast before pushing.
 
 ---
 
@@ -1191,38 +1202,28 @@ git pull --rebase && git push
 ### Pre-FP forecast (Mon-Thu before a race)
 ```bash
 python pipeline/run_weekend.py --phase pre_fp_predict --round N
-git add web/public/data/ && git commit -m "Pre-FP R{N}" && git push
 ```
 
-### Post-FP (primary update — Saturday morning regular weekends; Friday for sprint)
+### Post-FP after a confirmed session finish
 ```bash
+python pipeline/auto_weekend.py --phase post_fp --round N --plan
 python pipeline/run_weekend.py --phase post_fp --round N
-git add web/public/data/ && git commit -m "Post-FP R{N}" && git push
 ```
 
 ### Post-quali (after qualifying ends)
 ```bash
 # First record every confirmed grid drop in data/seed/grid_penalties.json.
 python pipeline/run_weekend.py --phase post_quali --round N
-# Confirm the MC log reports that qualifying + grid were fixed, then verify:
-node tests/smoke_app_js.js
-node tests/app_behavior_test.js
-git add web/public/data/ && git commit -m "Post-quali R{N}" && git push
 ```
 
 Before publishing, inspect `web/public/data/predictions.json`: `phase` must be `post_quali`, `final_fix.qualifying_locked` must be `true`, `final_fix.points_basis` must be `projected`, and penalised drivers must show the correct pair of `predicted_quali` and `predicted_grid`.
 
-### Post-race (Sunday evening + the morning after)
+### Post-race after official settlement data arrive
 ```bash
-# 1. First update data/seed/overtakes.csv with official F1 Fantasy counts
-python pipeline/run_weekend.py --phase post_race --round N
-# 2. Then update data/seed/fantasy_prices.json with new prices
-# 3. Then update data/seed/official_fantasy_points.json with official totals
-# 4. Then update data/seed/dotd_winners.json
-python pipeline/08_export_website_json.py --round N    # re-export with seed updates
-python pipeline/calibrate_confidence.py                # if 3+ rounds of actuals exist
-git add web/public/data/ data/seed/ && git commit -m "Post-race R{N}" && git push
+python pipeline/auto_weekend.py --phase post_race --round N
 ```
+
+Publish successful forecast or settlement outputs with the [manual publishing checklist](#manual-publishing-checklist).
 
 ### Retrain models (every ~6 races, judgement call)
 ```bash

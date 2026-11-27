@@ -4,6 +4,10 @@ import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
+from pipeline import auto_weekend
+from pipeline.sync_post_race_official import PendingData
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location(
@@ -135,3 +139,27 @@ def test_optional_failure_continues_with_warning_and_success_exit(monkeypatch, c
     output = capsys.readouterr().out
     assert "[WARN] predict_horizon.py" in output
     assert "1 optional warning(s)" in output
+
+
+def test_manual_post_practice_uses_the_same_guarded_executor(monkeypatch):
+    event = {"phase": "post_fp", "round": 24, "session": "FP2",
+             "finished_at": "2026-11-27T18:13:00+00:00"}
+    monkeypatch.setattr(auto_weekend, "manual_event", lambda phase, round_num: event)
+    seen = []
+    monkeypatch.setattr(auto_weekend, "execute", seen.append)
+    assert RUN_WEEKEND.main(["--phase", "post_fp", "--round", "24"]) == 0
+    assert seen == [event]
+
+
+def test_pending_practice_stops_before_scoring_and_returns_pending_exit(monkeypatch):
+    def pending(*args):
+        raise PendingData("missing practice session")
+
+    seen = []
+    monkeypatch.setattr(RUN_WEEKEND, "run_step", lambda script, *args, **kwargs: seen.append(script) or True)
+    with pytest.raises(PendingData):
+        RUN_WEEKEND.run_phase("post_fp", 24, "Qatar Grand Prix", after_prediction=pending)
+    assert seen[-1] == "06_run_predictions.py"
+
+    monkeypatch.setattr(auto_weekend, "manual_event", pending)
+    assert RUN_WEEKEND.main(["--phase", "post_fp", "--round", "24"]) == 75

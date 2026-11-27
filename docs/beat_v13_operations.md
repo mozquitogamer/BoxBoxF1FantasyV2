@@ -88,11 +88,10 @@ record without the Git-ignored `data/predictions/` directory.
 
 ### 1. Early thoughts
 
-Run the normal priors-only pipeline, then freeze the public early team:
+Run the priors-only pipeline. The forecast export also records the eligible V13 early team.
 
 ```text
 python pipeline/run_weekend.py --phase pre_fp_predict --round N
-python pipeline/publish_v13_decision.py --round N --phase pre_fp --refresh-live
 ```
 
 This snapshot is provisional. It can be discussed in videos and remains
@@ -100,14 +99,14 @@ visible after the post-FP final is published.
 
 ### 2. Post-FP final
 
-After the actionable practice sessions are complete, run the post-FP pipeline
-and freeze V13's official team:
+Run the guarded post-practice pipeline after the actionable session finishes.
+The export records the eligible V13 choice and refreshes the public manager.
 
 ```text
 python pipeline/run_weekend.py --phase post_fp --round N
-python pipeline/publish_v13_decision.py --round N --phase post_fp --refresh-live
 ```
 
+For session readiness, retries and deployment, use the [operations guide](OPERATIONS_GUIDE.md#6-phase-post_fp).
 The publisher refuses an archive whose generation timestamp is at or after the
 configured lock deadline. Each saved record is immutable. Every later pre-lock
 simulation must append a fresh decision when its forecast, held team, budget,
@@ -127,9 +126,9 @@ closing price snapshot are present and reconciled. Settlement then adds the
 round score to the public history, revalues the persistent team, carries the
 banked transfer state forward, and advances `next_round`.
 
-The settlement command is the remaining operations item before R14 finishes;
-it cannot be meaningfully exercised until R14 official scores and closing
-prices exist. Do not update V13's score manually in the public JSON.
+The verified post-race settlement refreshes V13 after official results and
+closing prices arrive. Update the official inputs and rerun settlement for
+a correction.
 
 Settlement must read the exact `price_history[N]` closing snapshot for round N,
 never the latest live-price loader. Seat-specific closing values belong in that
