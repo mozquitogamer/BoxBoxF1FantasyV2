@@ -110,22 +110,22 @@
       "round": 24,
       "race": "Qatar Grand Prix",
       "phase": "post_fp",
-      "status": "frozen_before_lock",
-      "published_at": "2026-11-27T19:24:38.170362+00:00",
-      "source_generated_at": "2026-11-27T19:24:27.325933+00:00",
-      "selection_context_sha256": "c39a93e0cd36d142df94c4380d3a422394c947d646d93d44bfc02aa6560a684a",
+      "status": "corrected_before_lock",
+      "published_at": "2026-11-28T16:39:29.895180+00:00",
+      "source_generated_at": "2026-11-28T16:39:25.872428+00:00",
+      "selection_context_sha256": "2e0c7a285c5b579ee96ff396116babc0922edd5f28f6f1e0f16aa80f92475875",
       "lock_deadline": "2026-11-28T18:00:00Z",
-      "archive": "web/public/data/predictions_round24_post_fp.json",
-      "archive_sha256": "93da32780b86ce64c937b7d2a3a9c66dcee53dce22f9a646f6e448d00ff4009f",
-      "previous_decision": "data/v13/decisions/round24_pre_fp.json",
-      "previous_decision_sha256": "995b9e782bf8cbe2edc300bba711797abf38d3afc8493b73d8408302356b44b3",
+      "archive": "web/public/data/predictions_round24_post_fp_refresh_6593870d52f7ee4e.json",
+      "archive_sha256": "6593870d52f7ee4e6ff3da0a9d9c5abdaf2bc51ad708f2fb21e2d23fe3d463ea",
+      "previous_decision": "data/v13/decisions/round24_post_fp.json",
+      "previous_decision_sha256": "3a2f9ec2691dd5ccaacde4e4379a4b481c0364529a3991c42ce42f4f47cc473f",
       "price_snapshot_after_round": 23,
       "drivers": [
         "VER",
         "ANT",
-        "ALO",
+        "PER",
         "BOR",
-        "PER"
+        "ALO"
       ],
       "constructors": [
         "red_bull",
@@ -134,11 +134,11 @@
       "captain": "VER",
       "second_boost": null,
       "chip": null,
-      "projected_points": 247.5,
-      "projected_points_gross": 247.5,
+      "projected_points": 250.5,
+      "projected_points_gross": 250.5,
       "points_basis": "net_after_transfers",
-      "projected_price_gain": 1.9,
-      "downside_risk": 60.3,
+      "projected_price_gain": 1.7,
+      "downside_risk": 58.6,
       "team_cost": 139.2,
       "transfers": 2,
       "transfer_penalty": 0,
@@ -167,10 +167,14 @@
         "price_gain_weight": 1.979,
         "negative_p5_weight": 0.75,
         "price_value_method": "horizon curve × price reliability × points realisation"
-      }
+      },
+      "revision": 2,
+      "correction_reason": "Automatic live forecast refresh: 2026-11-28T16:39:25.872428+00:00 (6593870d52f7ee4e; state 2e0c7a285c5b579e).",
+      "supersedes": "data/v13/decisions/round24_post_fp.json",
+      "supersedes_sha256": "3a2f9ec2691dd5ccaacde4e4379a4b481c0364529a3991c42ce42f4f47cc473f"
     }
   },
-  "generated_at": "2026-11-27T21:24:38.188126+02:00",
+  "generated_at": "2026-11-28T18:39:29.904219+02:00",
   "labels": {
     "constructors": {
       "alpine": "Alpine",
